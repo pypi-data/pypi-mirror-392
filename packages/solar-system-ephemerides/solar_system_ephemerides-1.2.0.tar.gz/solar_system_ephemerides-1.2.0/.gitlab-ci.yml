@@ -1,0 +1,47 @@
+stages:
+  - test
+  - release
+
+# test on Python 3.9
+python-3.9:
+  stage: test
+  image: containers.ligo.org/cwinpy/cwinpy-containers/cwinpyci-python39
+  script:
+    - python -m pip install .
+    - pytest
+
+# test on Python 3.10
+python-3.10:
+  stage: test
+  image: containers.ligo.org/cwinpy/cwinpy-containers/cwinpyci-python310
+  script:
+    - python -m pip install .
+    - pytest
+
+# test on Python 3.11
+python-3.11:
+  stage: test
+  image: containers.ligo.org/cwinpy/cwinpy-containers/cwinpyci-python311
+  script:
+    - python -m pip install .
+    - pytest
+
+  # test on Python 3.12
+python-3.12:
+  stage: test
+  image: containers.ligo.org/cwinpy/cwinpy-containers/cwinpyci-python312
+  script:
+    - python -m pip install .
+    - pytest
+
+# for new tags create a release and upload to PyPI
+deploy_release:
+  stage: release
+  image: python
+  before_script:
+    - python -m pip install build setuptools_scm[toml] twine
+  script:
+    - python -m build --sdist --wheel --outdir dist/ .
+    - python -m twine upload --repository-url https://upload.pypi.org/legacy/ dist/* -u __token__ -p ${PYPI_TOKEN}
+  only:
+    - tags
