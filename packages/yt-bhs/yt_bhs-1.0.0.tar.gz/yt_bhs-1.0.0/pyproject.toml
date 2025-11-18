@@ -1,0 +1,30 @@
+[build-system]
+requires = ['setuptools']
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = 'yt-bhs'
+version = '1.0.0'
+authors = [
+	{name = 'neuroin',email = 'vascularsource@gmail.com'},
+]
+description = 'A cmdline tool to download Youtube videos as songs through BlackHole playlists.'
+readme = 'README.md'
+license = 'Unlicense'
+license-files = ['LICENSE']
+requires-python = '>=3.11'
+classifiers = [
+	'Environment :: Console',
+	'Programming Language :: Python :: 3.11',
+	'Operating System :: OS Independent',
+]
+dependencies = [
+	'yt-dlp',
+	'Pillow',
+	'mutagen',
+	'colorama',
+]
+
+# Module folder cannot have hyphen(-) in it.
+[project.scripts]
+yt-bhs = "yt_bhs.cli:main"
