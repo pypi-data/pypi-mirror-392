@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "atlas-asset-websocket-client"
+version = "0.1.1"
+description = "Async helper for Atlas Command's asset websocket gateway."
+readme = "README.md"
+requires-python = ">=3.9,<3.13"
+license = "MIT"
+authors = [{name = "ATLAS Team"}]
+keywords = ["atlas", "command", "websocket", "asset"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: System :: Monitoring",
+    "Topic :: Software Development :: Libraries",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "pydantic>=1.10,<3",
+    "websockets>=10",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "mypy>=1.10.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/atlas/command"
+Repository = "https://github.com/atlas/command"
+Documentation = "https://github.com/atlas/command/wiki"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["atlas_asset_ws_client", "atlas_asset_ws_client.*"]
