@@ -1,0 +1,112 @@
+[build-system]
+requires = ['setuptools']
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = 'virtualenv-pyenv'
+description = 'A virtualenv Python discovery plugin for pyenv-installed interpreters'
+readme = 'README.md'
+license = 'MIT'
+license-files = ['LICENSE']
+authors = [
+    {name = 'Dmitry Meyer', email = 'me@undef.im'},
+]
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Intended Audience :: Developers',
+    'Topic :: Software Development :: Libraries',
+    'Topic :: Software Development :: Testing',
+    'Topic :: Utilities',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3.14',
+]
+keywords = ['virtualenv', 'pyenv']
+requires-python = '>= 3.9'
+dependencies = [
+    'virtualenv >= 20.29.0',
+    'pyenv-inspect >= 0.5, < 0.6',
+]
+dynamic = ['version']
+
+[project.urls]
+Homepage = 'https://github.com/un-def/virtualenv-pyenv'
+Repository = 'https://github.com/un-def/virtualenv-pyenv.git'
+Changelog = 'https://github.com/un-def/virtualenv-pyenv/releases'
+Issues = 'https://github.com/un-def/virtualenv-pyenv/issues'
+
+[dependency-groups]
+lint = [
+    'flake8',
+    'isort',
+]
+test = [
+    'pytest',
+    'pytest-mock',
+]
+dev = [
+    {include-group = 'lint'},
+    {include-group = 'test'},
+]
+
+
+[project.entry-points.'virtualenv.discovery']
+pyenv = '_virtualenv_pyenv.discovery:PyenvCompat'
+pyenv-compat = '_virtualenv_pyenv.discovery:PyenvCompat'
+pyenv-fallback = '_virtualenv_pyenv.discovery:PyenvFallback'
+pyenv-strict = '_virtualenv_pyenv.discovery:PyenvStrict'
+
+[tool.setuptools.dynamic]
+version = {attr = '_virtualenv_pyenv.__version__'}
+
+[tool.setuptools]
+zip-safe = true
+include-package-data = false
+
+[tool.isort]
+lines_after_imports = 2
+multi_line_output = 5
+include_trailing_comma = true
+use_parentheses = true
+known_first_party = ['_virtualenv_pyenv']
+known_third_party = ['virtualenv', 'pyenv_inspect']
+
+[tool.pytest.ini_options]
+minversion = '6.0'
+testpaths = ['tests']
+markers = ['discovery_class']
+
+[tool.tox]
+legacy_tox_ini = '''
+[tox]
+envlist =
+    py39
+    py310
+    py311
+    py312
+    py313
+    py314
+    flake8
+    isort
+isolated_build = true
+
+[testenv]
+deps =
+    pytest
+    pytest-mock
+commands = pytest {posargs}
+
+[testenv:flake8]
+skip_install = true
+deps = flake8
+commands = flake8 {posargs}
+
+[testenv:isort]
+skip_install = true
+deps = isort
+commands = isort {posargs:. -c}
+'''
