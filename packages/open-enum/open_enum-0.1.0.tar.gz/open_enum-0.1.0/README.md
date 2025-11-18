@@ -1,0 +1,125 @@
+# OpenEnum
+
+Enum implementation that accepts unknown values.
+
+## Rationale
+
+When parsing external data into Python data types, sometimes we deal with enumerated data types which have several documented possible values, but should be parsed with assumption that more possible values will be added over time.
+
+Code that reads such values should be written with **forward compatibility** in mind: handle all known values, but also include a fallback for any other values that can appear in the future. Options for doing this in Python include parsing as `str`, as `EnumType | str` or as `EnumType` with a `_missing_` method defined.
+
+This library attempts to provide a pattern for handling such values in a **type-safe manner that plays well with existing linters**.
+
+## Usage
+
+### Parsing possibly-unknown values
+
+Define an `OpenEnum` subclass with one member value of `None` that will be used as fallback:
+
+```python
+from open_enum import OpenEnum
+
+
+class Status(OpenEnum):
+    NEW = "new"
+    IN_PROGRESS = "in_progress"
+    DONE = "done"
+
+    UNKNOWN = None
+```
+
+Normal values work intuitively:
+
+```python
+new = Status.NEW
+done = Status.DONE
+assert Status("new") == new
+assert Status("new") != done
+```
+
+But unlike normal enum, you can also instantiate the type with unknown values:
+
+```python
+blocked = Status("blocked")
+cancelled = Status("cancelled")
+assert isinstance(blocked, Status)
+```
+
+These compare as different to each other:
+
+```python
+assert blocked != new
+assert blocked != cancelled
+```
+
+but still compare as equal if the underlying value matches:
+
+```python
+assert blocked == Status("blocked")
+```
+
+### Checking for unknown values using the `UNKNOWN` marker
+
+The `UNKNOWN` value defined on the enum type is a special **marker object**, not an actual enum member:
+
+```python
+assert not isinstance(Status.UNKNOWN, Status)
+```
+
+> [!NOTE]  
+> You'll never get `Status.UNKNOWN` from parsing; it's meant to be used explicitly.
+
+The unknown marker compares as equal to unknown values, but not to known values:
+
+```python
+assert Status.UNKNOWN == Status("blocked")
+assert Status.UNKNOWN == Status("cancelled")
+
+assert Status.UNKNOWN != Status("new")
+assert Status.UNKNOWN != Status("in_progress")
+```
+
+### Pattern matching
+
+All this allows you to do **exhaustive pattern matching** that your linter will validate for you:
+
+```python
+
+class Response:
+    status: Status
+    ...
+
+
+match response.status:
+    case Status.NEW:
+        print("new!")
+    case Status.IN_PROGRESS:
+        print("in progress...")
+    case Status.DONE:
+        print("nothing more to do")
+    case Status.UNKNOWN:
+        print("oh, encountered a status we don't know!")
+    case _:
+        assert_never(response.status)
+```
+
+Now if you go back to `class Status` and add enum members for `"blocked"` or `"cancelled"`, your type checker will ask you to add corresponding `case` arms in this `match` statement.
+
+> [!TIP]
+> The main advantage of this pattern over just using `case _` as fallback is that is that it **communicates the intention that every known value should have a `case` branch**. Thanks to `assert_never`, a type checker can actually check and enforce this!
+
+Importantly, as long as you include `assert_never`, the type checker should nudge you to include a case for `Status.UNKNOWN`:
+
+```python
+match response.status:
+    case Status.NEW:
+        print("new!")
+    case Status.IN_PROGRESS:
+        print("in progress...")
+    case Status.DONE:
+        print("nothing more to do")
+    case _:
+        assert_never(response.status)  # error: Type "Literal[Status.UNKNOWN]" is not assignable to type "Never"
+```
+
+This way as long as you remember about `assert_never()`, you'll have a helpful reminder to add handling of additional unknown values that can be added in the future, even if you already handled all values that are _currently_ documented.
