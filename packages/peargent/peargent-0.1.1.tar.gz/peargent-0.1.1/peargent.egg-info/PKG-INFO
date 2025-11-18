@@ -1,0 +1,117 @@
+Metadata-Version: 2.4
+Name: peargent
+Version: 0.1.1
+Summary: A modern Python framework for building intelligent AI agents with advanced tracing, history management, and seamless LLM integration
+Author-email: Quanta-Naut <quantanaut@peargent.online>
+License: MIT License
+        
+        Copyright (c) 2025 Tarun
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Project-URL: Homepage, https://github.com/Quanta-Naut/peargent
+Project-URL: Documentation, https://your-docs-url-here
+Project-URL: Bug Tracker, https://github.com/Quanta-Naut/peargent/issues
+Project-URL: Source Code, https://github.com/Quanta-Naut/peargent
+Keywords: ai,agents,llm,openai,anthropic,groq,tracing,telemetry,chatbot,agentic,automation
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: requests>=2.31
+Requires-Dist: python-dotenv>=1.0
+Requires-Dist: pydantic>=2.0
+Requires-Dist: tiktoken>=0.5.0
+Requires-Dist: sqlalchemy>=2.0.0
+Requires-Dist: jinja2>=3.0.0
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: black; extra == "dev"
+Requires-Dist: flake8; extra == "dev"
+Provides-Extra: postgresql
+Requires-Dist: psycopg2-binary>=2.9.0; extra == "postgresql"
+Dynamic: license-file
+
+<p align="center">
+  <img src=".github/assets/peargent.png" alt="Peargent Logo">
+</p>
+
+# Peargent
+
+[![PyPI version](https://badge.fury.io/py/peargent.svg)](https://badge.fury.io/py/peargent)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+A modern Python framework for building intelligent AI agents with advanced tracing, history management, and seamless LLM integration.
+
+## Features
+
+- **Advanced Tracing** - Track every action, decision, and API call with detailed telemetry and database persistence
+- **Smart History Management** - Built-in conversation history with intelligent context windowing and buffer management
+- **Multi-LLM Support** - Seamlessly switch between OpenAI, Anthropic, Groq, and more
+- **Type-Safe Tools** - Pydantic-powered tool system with automatic validation
+- **Agent Pools** - Run multiple agents concurrently with shared context
+- **Streaming Support** - Real-time streaming responses with event handling
+- **Cost Tracking** - Monitor token usage and costs across all LLM providers
+
+## Installation
+
+```bash
+pip install peargent
+```
+
+## Quick Start
+
+```python
+from peargent import create_agent
+from peargent.models import groq
+
+agent = create_agent(
+    name="assistant",
+    persona="You are a helpful AI assistant.",
+    model=groq("llama-3.3-70b-versatile")
+)
+
+result = agent.run("What is the capital of France?")
+print(result)
+```
+
+For more examples and detailed documentation, visit the [Documentation](your-docs-url-here).
+
+
+## License
+
+MIT License - see [LICENSE](LICENSE) file for details
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Author
+
+Created by [Quanta-Naut](https://github.com/Quanta-Naut)
+
