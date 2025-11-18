@@ -1,0 +1,118 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aa-timercog"
+dynamic = ["version"]
+description = "Discord bot command extension for aa-structuretimers"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "crazydisi", email = "crazydisiofficial@gmail.com"}
+]
+classifiers = [
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+]
+dependencies = [
+    "allianceauth>=4.0.0",
+    "allianceauth-discordbot>=3.0.0",
+    "aa-structuretimers>=1.0.0",
+    "py-cord>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=24.0.0",
+    "flake8>=7.0.0",
+    "isort>=5.13.0",
+    "pytest>=8.0.0",
+    "pytest-django>=4.7.0",
+    "pytest-cov>=4.1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/crazydisi/aa-timercog"
+Repository = "https://github.com/crazydisi/aa-timercog"
+Issues = "https://github.com/crazydisi/aa-timercog/issues"
+
+[tool.setuptools.dynamic]
+version = {attr = "timercog.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["timercog*"]
+exclude = ["tests*"]
+
+[tool.black]
+line-length = 100
+target-version = ['py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+  | migrations
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+skip_gitignore = true
+known_first_party = ["timercog"]
+known_third_party = [
+    "discord",
+    "django",
+    "structuretimers",
+    "eveuniverse",
+    "allianceauth"
+]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+testpaths = ["tests"]
+# Simplified: remove coverage from default runs
+# addopts = "--cov=timercog --cov-report=html --cov-report=term"
+pythonpath = ["."]
+
+[tool.coverage.run]
+source = ["timercog"]
+omit = [
+    "*/migrations/*",
+    "*/tests/*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
