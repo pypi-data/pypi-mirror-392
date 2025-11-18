@@ -1,0 +1,19 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    >
+
+  <browser:page
+      name="hcaptcha_form"
+      for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+      permission="zope.Public"
+      class=".form.HCaptchaForm"
+      />
+
+  <adapter
+      provides=".form.IHCaptchaForm"
+      for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+      factory=".form.HCaptcha"
+      />
+
+</configure>
