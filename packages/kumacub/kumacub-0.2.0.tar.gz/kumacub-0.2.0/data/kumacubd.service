@@ -1,0 +1,36 @@
+[Unit]
+Description=KumaCub - Run local checks and push results to Uptime Kuma
+Documentation=https://github.com/toadstule/kumacub
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+
+# Environment
+Environment="KUMACUB__CONFIG=/etc/kumacub/config.toml"
+Environment="PYTHONUNBUFFERED=1"
+
+# Security hardening (relaxed for system checks that need privileges)
+PrivateTmp=true
+ProtectKernelModules=true
+RestrictRealtime=true
+
+# Start the service
+ExecStart=/usr/bin/kumacubd
+ExecReload=/bin/kill -HUP $MAINPID
+
+# Restart policy
+Restart=on-failure
+RestartSec=10s
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30s
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=kumacubd
+
+[Install]
+WantedBy=multi-user.target
