@@ -1,0 +1,84 @@
+[project]
+name = "diffused"
+version = "1.0.1"
+description = "Generate images with diffusion models."
+requires-python = ">=3.9"
+dependencies = [
+    "accelerate>=1.5.0",
+    "diffusers>=0.32.0",
+    "torch>=2.6.0",
+    "transformers>=4.50.0",
+]
+authors = [
+    { name="Mark", email="mark@remarkablemark.org" },
+]
+maintainers = [
+    { name="Mark", email="mark@remarkablemark.org" },
+]
+readme = "README.md"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = [
+    "ai",
+    "artificial intelligence",
+    "cli",
+    "diffusers",
+    "diffusion",
+    "image-to-image",
+    "inpainting",
+    "machine learning",
+    "pytorch",
+    "stable diffusion",
+    "text-to-image",
+]
+
+[project.scripts]
+diffused = "diffused.cli:main"
+
+[project.entry-points."pipx.run"]
+diffused = "diffused.cli:main"
+
+[project.optional-dependencies]
+build = [
+    "build==1.3.0",
+    "pyinstaller==6.16.0",
+    "twine==6.2.0",
+]
+docs = [
+    "pdoc==15.0.4",
+]
+lint = [
+    "black==25.11.0",
+    "isort==6.1.0",
+    "pre-commit==4.3.0",
+    "ruff==0.14.5",
+]
+test = [
+    "coverage==7.10.7",
+    "pytest==8.4.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/ai-action/diffused"
+Documentation = "https://ai-action.github.io/diffused/"
+Repository = "https://github.com/ai-action/diffused"
+Issues = "https://github.com/ai-action/diffused/issues"
+Changelog = "https://github.com/ai-action/diffused/blob/master/CHANGELOG.md"
+
+[tool.black]
+fast = true
+
+[tool.coverage.run]
+omit = [
+    # omit pytorch-generated files in /tmp
+    "/tmp/*",
+]
