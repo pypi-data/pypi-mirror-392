@@ -1,0 +1,3196 @@
+Metadata-Version: 2.4
+Name: rlang-compiler
+Version: 0.2.2
+Summary: RLang to BoR compiler implementation
+Author: Kushagra Bhatnagar
+Maintainer: Kushagra Bhatnagar
+License: MIT License
+        
+        Copyright (c) 2025 Kushagra Bhatnagar
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+        
+Project-URL: Homepage, https://github.com/kushagrab21/Compiler_application
+Project-URL: Documentation, https://github.com/kushagrab21/Compiler_application
+Keywords: deterministic-compiler,bor,rlang,cryptographic-verification
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Compilers
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Provides-Extra: dev
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: ruff>=0.1.0; extra == "dev"
+Provides-Extra: test
+Requires-Dist: pytest>=7.0.0; extra == "test"
+Requires-Dist: pytest-cov>=4.0.0; extra == "test"
+Provides-Extra: bor-sdk
+Requires-Dist: bor-sdk>=1.0.0; extra == "bor-sdk"
+Dynamic: license-file
+
+# RLang Compiler — Deterministic Reasoning Pipeline with BoR Proof Generation
+
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![Determinism](https://img.shields.io/badge/determinism-verified-blue)
+![BoR Verification](https://img.shields.io/badge/BoR%20verification-ok-success)
+![Tests](https://img.shields.io/badge/tests-190%2B-green)
+
+A complete compiler implementation that translates RLang source code into executable reasoning pipelines with cryptographic proof generation compatible with the BoR (Blockchain of Reasoning) system. This project provides **bit-for-bit deterministic execution** suitable for trustless verification and cryptographic auditing.
+
+---
+
+## TL;DR — 10-Second Summary
+
+**RLang** is a domain-specific language for expressing deterministic reasoning pipelines—sequences of computational steps that produce verifiable, reproducible results. This repository contains a **complete compiler** that transforms RLang source code through lexing, parsing, type checking, and IR generation into [canonical JSON](#6-determinism-guarantees). The compiler includes a **deterministic runtime** that executes pipelines and generates **BoR (Blockchain of Reasoning) proof bundles** with cryptographic hashes (HMASTER, HRICH) that enable trustless verification. Execution is **bit-for-bit deterministic**, meaning identical inputs always produce identical outputs (see [Determinism Guarantees](#6-determinism-guarantees)). This README is intentionally long-form during early development to serve as a unified specification; documentation will be modularized as the project matures.
+
+---
+
+## RLang by Example — 5-Minute Guide
+
+This section introduces RLang through a few minimal runnable programs.
+
+**Example 1 — Basic Pipeline**
+
+```rlang
+fn inc(x: Int) -> Int;
+
+pipeline main(Int) -> Int {
+  inc
+}
+```
+
+Compile and run:
+
+```bash
+rlangc examples/basic.rlang --out out/basic.json
+./verify_bundle.sh
+```
+
+**Example 2 — Pipeline with Arguments**
+
+```rlang
+fn add(x: Int, y: Int) -> Int;
+
+pipeline calc(Int) -> Int {
+  add(10, __value)
+}
+```
+
+**Example 3 — Deterministic IF/ELSE**
+
+```rlang
+fn double(x: Int) -> Int;
+fn half(x: Int) -> Int;
+
+pipeline main(Int) -> Int {
+  if (__value > 10) {
+    double
+  } else {
+    half
+  }
+}
+```
+
+**Example 4 — Human-readable Proof Inspection**
+
+```python
+from rlang.bor import run_program_with_proof, RLangBoRCrypto
+
+source = """
+fn double(x: Int) -> Int;
+pipeline main(Int) -> Int { if (__value > 10) { double } }
+"""
+
+bundle = run_program_with_proof(source, 20, fn_registry={"double": lambda x: x*2})
+crypto = RLangBoRCrypto(bundle)
+rich = crypto.to_rich_bundle().rich
+
+print("HMASTER:", rich["primary"]["master"])
+print("HRICH:", rich["H_RICH"])
+print("Branches:", rich["primary"].get("branches", []))
+```
+
+**Example 5 — Determinism Verification**
+
+```python
+from rlang.bor import run_program_with_proof, RLangBoRCrypto
+import hashlib, json
+
+source = """
+fn double(x: Int) -> Int;
+pipeline main(Int) -> Int { if (__value > 10) { double } }
+"""
+
+def compute_hash():
+    bundle = run_program_with_proof(source, 20, fn_registry={"double": lambda x: x*2})
+    rich = RLangBoRCrypto(bundle).to_rich_bundle().rich
+    return hashlib.sha256(json.dumps(rich, sort_keys=True).encode()).hexdigest()
+
+# Verify determinism: same input produces identical hash
+assert compute_hash() == compute_hash()
+print("✓ Determinism verified: identical outputs for identical inputs")
+```
+
+---
+
+## Quick Start (Hello RLang)
+
+Here is the smallest possible RLang program using deterministic control flow:
+
+```rlang
+fn double(x: Int) -> Int;
+
+pipeline main(Int) -> Int {
+  if (__value > 10) {
+    double
+  }
+}
+```
+
+**Note**: The special identifier `__value` refers to the current pipeline input value. This allows conditions to depend on runtime values while maintaining determinism.
+
+Compile:
+
+```bash
+rlangc examples/hello.rlang --out out/hello.json
+```
+
+Generate a BoR proof:
+
+```bash
+./verify_bundle.sh
+```
+
+Verify it:
+
+```bash
+borp verify-bundle --bundle out/rich_proof_bundle.json
+```
+
+---
+
+## What This Repository Contains
+
+- **Complete Compiler Pipeline**: Lexer → Parser → AST → Symbol Resolver → Type Checker → IR Lowering → [Canonical JSON](#6-determinism-guarantees) emission
+- **Deterministic Runtime**: Pipeline execution engine with function registry support
+- **BoR Proof Generation**: Cryptographic proof bundle generation with HMASTER, HRICH, and eight subproof types (DIP, DP, PEP, PoPI, CCP, CMIP, PP, TRP)
+- **Verification Scripts**: `verify_bundle.sh` for proof generation and `next_tests.sh` for deterministic testing
+- **Comprehensive Test Suite**: 190+ tests covering lexer, parser, type checker, IR, emitter, CLI, control flow, and BoR integration
+- **CLI + Python API**: `rlangc` command-line tool and Python API for programmatic use
+- **Developer Workflows**: Documentation for extending the compiler with new features, types, IR nodes, and proof modules
+
+---
+
+## Why This Is a Single Long-Form Document (For Now)
+
+This README intentionally acts as a **unified specification** during early development. A single comprehensive document helps contributors understand the full system holistically—from language syntax through compiler phases to proof generation and verification. Once the compiler matures and stabilizes, documentation will be split into modular sections in a `/docs/` directory with separate files for language specification, compiler internals, API reference, and developer guides. For now, this long-form approach ensures all critical information is accessible in one place.
+
+---
+
+### Design Rationale (Why RLang Works This Way)
+
+RLang's architecture is driven by the requirement for cryptographic verifiability:
+
+* **Determinism is mandatory**: Proof generation requires bit-for-bit identical execution. Any non-determinism (randomness, time, I/O) would break cryptographic verification.
+
+* **Canonical JSON is required**: Deterministic serialization ensures that the same data structure always produces the same hash, enabling trustless verification across different systems (see [Determinism Guarantees](#6-determinism-guarantees)).
+
+* **Functions must be pure**: Side effects (mutations, I/O, randomness) would introduce non-determinism. Pure functions guarantee that `f(x)` always produces the same output for the same input.
+
+* **Control-flow must be deterministic**: Branch decisions must be based solely on input values and pure expressions. The `__value` identifier allows conditions to depend on runtime values while maintaining determinism.
+
+* **Branch traces belong inside TRP**: The TRP (Trace Record Proof) subproof is the cryptographically verified source of truth. `primary.branches` is a human-readable convenience copy that is not part of the hash chain, keeping the canonical proof minimal and stable.
+
+* **SHA256 hashing throughout**: All cryptographic hashes use SHA256 with canonical JSON inputs, ensuring cross-platform reproducibility and tamper detection (see [Determinism Guarantees](#6-determinism-guarantees)).
+
+* **No global state**: The compiler and runtime are stateless, ensuring that execution depends only on inputs and function implementations.
+
+* **Type safety before execution**: Static type checking prevents runtime errors and ensures that all operations are well-defined before execution begins.
+
+---
+
+## Table of Contents
+
+1. [Executive Summary](#1-executive-summary)
+   - What is RLang?
+   - What Does the Compiler Do?
+   - Why BoR Proof Generation Matters
+   - Deterministic Guarantees
+   - Intended Use Cases
+
+2. [High-Level Architecture](#2-high-level-architecture)
+   - Compiler Pipeline
+   - Proof Generation Pipeline
+   - Project Structure
+   - Key Architectural Principles
+
+3. [RLang: Language Definition](#3-rlang-language-definition)
+   - Syntax Overview
+   - Type System
+   - Functions and Pipelines
+   - Deterministic Semantics
+   - Complete Example Programs
+
+4. [Compiler Pipeline](#4-compiler-pipeline)
+   - Phase 1: Lexical Analysis (Lexer)
+   - Phase 2: Parsing
+   - Phase 3: Symbol Resolution
+   - Phase 4: Type Checking
+   - Phase 5: IR Lowering
+   - Phase 6: Primary IR Builder
+
+5. [Proof System Integration](#5-proof-system-integration)
+   - PipelineProofBundle
+   - Subproofs
+   - HMASTER vs HRICH
+   - Why Canonicalization is Necessary
+   - Deterministic Hashing Rules
+   - Proof Bundle Structure
+   - Verification Process
+
+6. [Determinism Guarantees](#6-determinism-guarantees)
+   - Exact Hashing Invariants
+   - Why Results are Bit-for-Bit Identical
+   - Cross-Machine Reproducibility
+   - SHA256 Comparison Workflow
+   - Tamper Detection Behavior
+   - Subproof Mismatch Behavior
+   - Determinism Verification
+
+7. [Developer Workflows](#7-developer-workflows)
+   - How to Add New DSL Features
+   - How to Add New Type Rules
+   - How to Add New IR Nodes
+   - How to Integrate New Proof Modules
+   - How to Add New Tests
+
+8. [Testing System](#8-testing-system)
+   - Test Suite Overview
+   - Lexer Tests
+   - Parser Tests
+   - Type Checker Tests
+   - IR Tests
+   - Emitter Tests
+   - CLI Tests
+   - BoR Integration Tests
+   - Deterministic Tests
+   - How to Write New Tests
+
+9. [CLI and API Usage](#9-cli-and-api-usage)
+   - Command-Line Interface (rlangc)
+   - Python API
+   - Verification Scripts
+
+10. [One-Command Execution Workflow](#10-one-command-execution-workflow)
+    - Quick Start
+    - What the Script Does
+    - Script Output
+    - Use Cases
+    - Customization
+
+11. [Design Principles of the Compiler](#11-design-principles-of-the-compiler)
+    - Purity
+    - Determinism
+    - Transparency
+    - Verifiability
+    - Canonicalization
+    - Hash-Oriented Architecture
+
+12. [Future Directions](#12-future-directions)
+    - Branching / Conditionals
+    - Modules + Imports
+    - Verified Connectors
+    - More BoR Subproof Types
+    - Visualizer Tooling
+    - REPL + Web Playground
+
+13. [Versioning and Release Strategy](#13-versioning-and-release-strategy)
+    - Release Roadmap
+    - Versioning Policy
+    - Backward Compatibility
+
+14. [Final Notes](#14-final-notes)
+    - Philosophy of Deterministic Reasoning
+    - Why BoR Matters
+    - Trustless Verification Use Cases
+    - Getting Started
+    - Contributing
+    - License
+    - Acknowledgments
+
+[Quick Reference](#quick-reference)
+
+---
+
+## 1. Executive Summary
+
+### What is RLang?
+
+RLang is a domain-specific language designed for expressing **deterministic reasoning pipelines**—sequences of computational steps that produce verifiable, reproducible results. Unlike general-purpose languages, RLang enforces determinism at the language level, making it impossible to write non-deterministic programs. This property is essential for cryptographic verification and trustless execution.
+
+### What Does the Compiler Do?
+
+The RLang compiler transforms source code through a multi-phase pipeline:
+
+1. **Lexical Analysis**: Tokenizes source code into a stream of tokens
+2. **Parsing**: Builds an Abstract Syntax Tree (AST) from tokens
+3. **Symbol Resolution**: Resolves identifiers to their declarations
+4. **Type Checking**: Validates type correctness and infers types
+5. **IR Generation**: Lowers AST to an Intermediate Representation
+6. **Canonical JSON Emission**: Produces deterministic, hashable JSON output
+
+The compiler then integrates with the [BoR proof system](#5-proof-system-integration) to generate cryptographic proof bundles that can be independently verified.
+
+### Why BoR Proof Generation Matters
+
+The BoR (Blockchain of Reasoning) proof system provides cryptographic guarantees about program execution:
+
+- **Integrity**: Any tampering with proof bundles is detectable
+- **Verifiability**: Proofs can be verified without re-executing the program
+- **Non-repudiation**: Cryptographic hashes provide unforgeable evidence
+- **Auditability**: Complete execution traces are cryptographically linked
+
+This enables use cases such as:
+- **Smart Contracts**: Verifiable computation on blockchains
+- **Audit Trails**: Cryptographic proof of data processing steps
+- **Trustless Systems**: Verification without trusting the executor
+- **Regulatory Compliance**: Immutable records of reasoning processes
+
+### Deterministic Guarantees
+
+The compiler guarantees **bit-for-bit deterministic execution**:
+
+- Identical inputs always produce identical outputs
+- Same source code + same input = same cryptographic hashes
+- Cross-machine reproducibility (same results on different hardware)
+- Canonical JSON ensures stable serialization
+
+This determinism is verified through automated testing: running the same program twice produces identical [SHA256 hashes](#6-determinism-guarantees).
+
+### Intended Use Cases
+
+- **Financial Calculations**: Deterministic pricing, risk calculations
+- **Legal Reasoning**: Verifiable application of rules
+- **Scientific Computing**: Reproducible research computations
+- **Blockchain Applications**: Smart contract execution verification
+- **Regulatory Reporting**: Auditable data transformation pipelines
+
+---
+
+**→ Next:** [Section 2: High-Level Architecture](#2-high-level-architecture) explores the complete system architecture, showing how all components connect.
+
+---
+
+## 2. High-Level Architecture
+
+The RLang compiler follows a traditional multi-pass compiler architecture, enhanced with proof generation capabilities:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        FRONTEND PHASES                           │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  RLang Source Code                                               │
+│         │                                                        │
+│         ▼                                                        │
+│  ┌──────────────┐                                               │
+│  │   Lexer      │ → Tokens (keywords, identifiers, operators)   │
+│  └──────────────┘                                               │
+│         │                                                        │
+│         ▼                                                        │
+│  ┌──────────────┐                                               │
+│  │   Parser     │ → Abstract Syntax Tree (AST)                   │
+│  └──────────────┘                                               │
+│         │                                                        │
+│         ▼                                                        │
+│  ┌──────────────┐                                               │
+│  │  Resolver    │ → Resolved AST + Symbol Table                 │
+│  └──────────────┘                                               │
+│         │                                                        │
+│         ▼                                                        │
+│  ┌──────────────┐                                               │
+│  │ Type Checker │ → Type-checked AST                            │
+│  └──────────────┘                                               │
+│         │                                                        │
+│         ▼                                                        │
+├─────────────────────────────────────────────────────────────────┤
+│                        IR GENERATION                            │
+├─────────────────────────────────────────────────────────────────┤
+│         │                                                        │
+│         ▼                                                        │
+│  ┌──────────────┐                                               │
+│  │   Lowering   │ → Intermediate Representation (IR)             │
+│  └──────────────┘                                               │
+│         │                                                        │
+│         ▼                                                        │
+│  ┌──────────────┐                                               │
+│  │ Primary IR   │ → PrimaryProgramIR                            │
+│  │   Builder    │   (canonical structure)                       │
+│  └──────────────┘                                               │
+│         │                                                        │
+│         ▼                                                        │
+│  ┌──────────────┐                                               │
+│  │   Emitter    │ → Canonical JSON                              │
+│  └──────────────┘                                               │
+│         │                                                        │
+├─────────────────────────────────────────────────────────────────┤
+│                    PROOF GENERATION                              │
+├─────────────────────────────────────────────────────────────────┤
+│         │                                                        │
+│         ▼                                                        │
+│  ┌──────────────────────┐                                       │
+│  │ Execution Engine     │ → Execute pipeline with input         │
+│  │ + Function Registry  │   (produces step-by-step results)     │
+│  └──────────────────────┘                                       │
+│         │                                                        │
+│         ▼                                                        │
+│  ┌──────────────────────┐                                       │
+│  │ PipelineProofBundle  │ → Raw proof bundle                    │
+│  │   Generator          │   (steps, inputs, outputs)            │
+│  └──────────────────────┘                                       │
+│         │                                                        │
+│         ▼                                                        │
+│  ┌──────────────────────┐                                       │
+│  │ RLangBoRCrypto       │ → Cryptographic hashing                │
+│  │   - Step hashes      │   (HMASTER computation)               │
+│  │   - Subproofs        │                                       │
+│  │   - HRICH            │                                       │
+│  └──────────────────────┘                                       │
+│         │                                                        │
+│         ▼                                                        │
+│  ┌──────────────────────┐                                       │
+│  │ RichProofBundle       │ → BoR-compatible rich bundle         │
+│  │   (H_RICH, primary,  │   (ready for verification)           │
+│  │    subproofs, ...)    │                                       │
+│  └──────────────────────┘                                       │
+│         │                                                        │
+│         ▼                                                        │
+│  ┌──────────────────────┐                                       │
+│  │ borp verify-bundle   │ → Verification result                  │
+│  │   (BoR CLI tool)     │   (H_RICH_match, subproof_hashes)    │
+│  └──────────────────────┘                                       │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Key Architectural Principles
+
+1. **Separation of Concerns**: Each phase has a single responsibility
+2. **Immutability**: AST and IR nodes are immutable dataclasses
+3. **Pure Functions**: Compiler phases are pure (no side effects)
+4. **Deterministic Output**: Every phase produces deterministic results
+5. **Canonical Serialization**: JSON output is always canonical (sorted keys)
+
+---
+
+**→ Next:** [Section 3: RLang Language Definition](#3-rlang-language-definition) provides the complete language specification with syntax, types, and examples.
+
+```
+┌─────────────────────────────────────────────────────────┐
+│              ARCHITECTURE → LANGUAGE                    │
+│                                                          │
+│  Now that we understand the architecture, let's          │
+│  explore the RLang language itself—its syntax,          │
+│  type system, and how programs are structured.          │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 3. RLang: Language Definition
+
+### Syntax Overview
+
+RLang uses a simple, declarative syntax focused on type definitions, function declarations, and pipeline composition.
+
+#### Type Definitions
+
+```rlang
+// Primitive types
+type UserId = Int;
+type Email = String;
+type Price = Float;
+type IsActive = Bool;
+
+// Type aliases enable domain modeling
+type AccountBalance = Float;
+type TransactionAmount = Float;
+```
+
+#### Function Declarations
+
+Functions are declared with their signatures but not implemented in RLang (implementations come from the runtime function registry):
+
+```rlang
+// Simple function
+fn increment(x: Int) -> Int;
+
+// Multi-parameter function
+fn add(x: Int, y: Int) -> Int;
+
+// String operations
+fn formatEmail(name: String, domain: String) -> String;
+
+// Type aliases in signatures
+fn getUserBalance(userId: UserId) -> AccountBalance;
+```
+
+#### Pipeline Definitions
+
+Pipelines compose functions into sequential execution chains:
+
+```rlang
+// Simple pipeline
+pipeline process(Int) -> Int {
+  increment -> double
+}
+
+// Pipeline with explicit arguments
+pipeline complex(Int) -> String {
+  add(10, 20) -> formatNumber -> toString
+}
+
+// Pipeline with type aliases
+pipeline accountFlow(UserId) -> AccountBalance {
+  getUserBalance -> applyInterest -> roundToTwoDecimals
+}
+```
+
+### Type System
+
+#### Primitive Types
+
+RLang supports five primitive types:
+
+| Type | Description | Example Values |
+|------|-------------|----------------|
+| `Int` | 64-bit signed integers | `42`, `-100`, `0` |
+| `Float` | 64-bit floating-point numbers | `3.14`, `0.5`, `.5` |
+| `String` | UTF-8 strings | `"hello"`, `"world"` |
+| `Bool` | Boolean values | `true`, `false` |
+| `Unit` | Unit type (void) | `()` |
+
+#### Type Aliases
+
+Type aliases provide semantic meaning and enable domain modeling:
+
+```rlang
+type UserId = Int;
+type Email = String;
+type Timestamp = Int;
+
+fn createUser(email: Email, createdAt: Timestamp) -> UserId;
+```
+
+#### Type Inference
+
+The compiler infers types for:
+- Pipeline step return types
+- Binary operation result types
+- Function call argument types
+
+#### Type Checking Rules
+
+1. **Function Calls**: Arguments must match function parameter types
+2. **Pipeline Composition**: Step output type must match next step input type
+3. **Binary Operations**: Operands must be numeric (Int or Float)
+4. **Pipeline I/O**: Input/output types must match declared pipeline signature
+
+### Functions and Pipelines
+
+#### Function Signatures
+
+Functions are pure mathematical mappings:
+- No side effects
+- Deterministic outputs
+- Referentially transparent
+
+#### Pipeline Semantics
+
+Pipelines execute steps sequentially:
+1. First step receives pipeline input
+2. Each subsequent step receives previous step's output
+3. Final step's output becomes pipeline output
+
+```rlang
+pipeline example(Int) -> Int {
+  step1 -> step2 -> step3
+}
+
+// Execution flow:
+// input → step1(input) → step2(result1) → step3(result2) → output
+```
+
+#### Explicit Arguments
+
+Steps can have explicit arguments that replace pipeline input:
+
+```rlang
+pipeline example(Int) -> Int {
+  add(10, 20) -> multiply(2)
+}
+
+// Execution:
+// add(10, 20) = 30
+// multiply(30, 2) = 60
+// Output: 60
+```
+
+### Deterministic Semantics
+
+RLang enforces determinism through:
+
+1. **No Randomness**: No random number generation
+2. **No I/O**: No file system or network access
+3. **No Time**: No time-dependent operations
+4. **Pure Functions**: All functions are pure
+5. **Fixed Evaluation Order**: Pipeline steps execute sequentially
+
+### Control Flow: if/else (v0.2)
+
+RLang v0.2 introduces **pure, deterministic control flow** via `if/else` expressions inside pipeline bodies. This enables conditional execution while maintaining strict determinism and cryptographic verifiability.
+
+#### Syntax
+
+```rlang
+pipeline main(Int) -> Int {
+  if (__value > 10) {
+    double
+  } else {
+    half
+  }
+}
+```
+
+#### Semantics
+
+The `if` expression is a **pipeline expression** that can appear directly in pipeline bodies:
+
+- **Condition**: A normal expression that must evaluate to `Bool` (e.g., comparisons like `>`, `<`, `==`, `!=`, or function calls returning `Bool`)
+  - The special identifier `__value` can be used to reference the current pipeline input value
+  - Example: `if (__value > 10)` checks if the pipeline input is greater than 10
+- **Then Block**: A pipeline fragment (list of steps) executed when the condition is `true`
+- **Else Block**: An optional pipeline fragment executed when the condition is `false`
+
+Both `then` and `else` blocks receive the same input type (the current pipeline value) and must produce the **same output type**.
+
+#### Type Rules
+
+1. **Condition Type**: The condition expression must evaluate to `Bool`
+2. **Branch Output Types**: Both `then` and `else` fragments must produce the same output type
+3. **Implicit Else**: If `else` is omitted, the else-branch is treated as an **implicit identity** (pass-through of the current value)
+
+#### Deterministic Behavior
+
+- Both branches are present in IR (`IRIf`); only one is executed at runtime based on the condition
+- The chosen branch does not affect type safety, only control flow
+- Branch decisions are deterministic: same input + same function registry → same branch path
+- Branch traces are recorded in proof bundles and cryptographically verifiable
+
+#### Example: If Without Else (Implicit Identity)
+
+```rlang
+fn double(x: Int) -> Int;
+
+pipeline main(Int) -> Int {
+  if (1 == 1) {
+    double
+  }
+}
+```
+
+If the condition evaluates to `false`, the pipeline behaves like a no-op at that point (the value passes through unchanged). This implicit identity ensures type safety: the output type matches the input type when no `else` branch is provided.
+
+#### Branch Verification (Canonical vs Human-Readable Views)
+
+Branch decisions in RLang are recorded in two places in the proof bundle:
+
+1. **Canonical, Cryptographically Verified Source of Truth**  
+
+   - Stored inside the **TRP subproof** (`subproofs["TRP"]`)  
+
+   - Hashed into `subproof_hashes["TRP"]`  
+
+   - Rolled into the top-level `H_RICH`  
+
+   - Any modification here is immediately detected by `borp verify-bundle`  
+
+   - This is the *authoritative* execution trace used for verification
+
+
+
+2. **Human-Readable Convenience Copy**  
+
+   - Stored in `primary.branches`  
+
+   - Provided for easier interpretation by tools and developers  
+
+   - NOT part of any cryptographic hash path  
+
+   - Modifying this field alone does **not** affect verification results  
+
+   - Consumers must treat this as a non-authoritative mirror of TRP
+
+
+
+**Important:**  
+
+Only the TRP subproof is part of the verified cryptographic circuit.  
+
+`primary.branches` is intentionally *not* included in the hash chain to
+
+keep the canonical proof minimal and stable.
+
+## Control-Flow Examples (v0.2)
+
+This section demonstrates all supported control-flow patterns in RLang v0.2, along with examples of determinism tests, multi-branch pipelines, and tamper-resistance.
+
+---
+
+### **1. Basic IF Expression**
+
+```rlang
+fn double(x: Int) -> Int;
+
+pipeline main(Int) -> Int {
+  if (__value > 10) {
+    double
+  }
+}
+```
+
+If the condition evaluates to false, the value passes through unchanged.
+
+---
+
+### **2. IF / ELSE Expression**
+
+```rlang
+fn inc(x: Int) -> Int;
+fn dec(x: Int) -> Int;
+
+pipeline main(Int) -> Int {
+  if (__value > 0) {
+    inc
+  } else {
+    dec
+  }
+}
+```
+
+Both branches must return the same type.
+
+---
+
+### **3. Multiple IFs (Top-Level, Chained)**
+
+Multiple top-level IF expressions are supported, as long as they are connected by `->`.
+
+```rlang
+fn inc(x: Int) -> Int;
+fn dec(x: Int) -> Int;
+fn double(x: Int) -> Int;
+fn half(x: Int) -> Int;
+
+pipeline main(Int) -> Int {
+  if (__value > 10) {
+    inc
+  } else {
+    dec
+  } ->
+  if (__value > 20) {
+    double
+  } else {
+    half
+  }
+}
+```
+
+Each IF introduces a new branch record in TRP.
+
+---
+
+### **4. Deep Pipeline + Conditional**
+
+Large pipelines remain deterministic:
+
+```rlang
+fn inc(x: Int) -> Int;
+fn dec(x: Int) -> Int;
+fn mul5(x: Int) -> Int;
+fn square(x: Int) -> Int;
+
+pipeline main(Int) -> Int {
+  inc ->
+  square ->
+  mul5 ->
+  dec ->
+  if (__value > 1000) {
+    inc
+  } else {
+    dec
+  } ->
+  mul5
+}
+```
+
+---
+
+### **5. Determinism Test (Python Snippet)**
+
+```python
+from rlang.bor import run_program_with_proof, RLangBoRCrypto
+
+import hashlib, json
+
+source = """
+
+fn double(x: Int) -> Int;
+pipeline main(Int) -> Int { if (__value > 10) { double } }
+
+"""
+
+def compute():
+    b = run_program_with_proof(source, 20, fn_registry={"double": lambda x: x*2})
+    rich = RLangBoRCrypto(b).to_rich_bundle().rich
+    return hashlib.sha256(json.dumps(rich, sort_keys=True).encode()).hexdigest()
+
+assert compute() == compute()
+```
+
+---
+
+### **6. Randomized Fuzz Testing**
+
+```python
+for x in range(100):
+    h1 = compute_hash(x)
+    h2 = compute_hash(x)
+    assert h1 == h2
+```
+
+RLang v0.2 passed 100/100 in fuzz tests (zero nondeterminism).
+
+---
+
+### **7. Branch Path Divergence Example**
+
+Different inputs produce different HRICH values:
+
+```
+HRICH(20) = <then-branch hash>
+HRICH(5)  = <else-branch hash>
+```
+
+---
+
+### **8. Tamper Resistance (TRP Subproof)**
+
+Tampering TRP subproof content:
+
+```python
+tampered["subproofs"]["TRP"]["tampered_flag"] = True
+```
+
+Produces:
+
+```
+[BoR RICH] MISMATCH
+"H_RICH_match": false
+"subproof_hashes_match": false
+```
+
+This confirms that the TRP subproof is cryptographically enforced, while
+`primary.branches` is only a human-readable mirror.
+
+---
+
+## Control-Flow Diagrams (v0.2)
+
+This section provides visual diagrams illustrating how RLang v0.2
+implements deterministic control flow, IR lowering, branch traces,
+TRP subproof construction, and HRICH computation.
+
+---
+
+### **1. High-Level Pipeline Execution Flow**
+
+```text
+RLang Source
+      │
+      ▼
++-------------+
+|   Parser    |
++-------------+
+      │
+      ▼
++-------------+
+|   Resolver  |
++-------------+
+      │
+      ▼
++-------------+
+| Type Checker|
++-------------+
+      │
+      ▼
++-------------+
+|   Lowering  |
+|  (IRIf etc) |
++-------------+
+      │
+      ▼
++------------------+
+| Execution Engine |
++------------------+
+      │
+      │  (step-by-step execution)
+      ▼
++------------------------+
+| PipelineProofBundle   |
+|  - steps              |
+|  - branches           |
++------------------------+
+      │
+      ▼
++------------------------+
+|   TRP Subproof         |
+|  (trace record proof)  |
++------------------------+
+      │
+      ▼
++------------------------+
+|    HMASTER + HRICH     |
++------------------------+
+```
+
+---
+
+### **2. IR Lowering of an IF Expression**
+
+```text
+RLang:
+---------
+if (__value > 10) {
+    double
+} else {
+    half
+}
+
+Lowered IR:
+---------
+
+IRIf(
+  condition = IRBinaryOp(
+      left=IRValue("__value"),
+      op=">",
+      right=IRLiteral(10)
+  ),
+  then_steps = [
+      IRStep(template_id="fn:double")
+  ],
+  else_steps = [
+      IRStep(template_id="fn:half")
+  ]
+)
+```
+
+---
+
+### **3. Pipeline With Multiple IFs (Chained)**
+
+```text
+pipeline main(Int) -> Int {
+  if (__value > 10) { inc } else { dec } ->
+  if (__value > 20) { double } else { half }
+}
+
+Flattened IR Execution Order:
+--------------------------------
+
+Step 0: IF #1
+  ├── then: inc
+  └── else: dec
+
+Step 1: IF #2
+  ├── then: double
+  └── else: half
+```
+
+Branch trace indices correspond to this flattened ordering:
+
+```
+branches = [
+  { index: 0, path: "then", condition_value: True },
+  { index: 1, path: "else", condition_value: False }
+]
+```
+
+---
+
+### **4. Branch Trace → TRP → HRICH Diagram**
+
+```text
+Execution Steps + Branch Decisions
+                 │
+                 ▼
+         +------------------+
+         |  TRP Subproof    |
+         |------------------|
+         | steps: [...]     |
+         | branches: [...]  |
+         +------------------+
+                 │
+                 ▼
+     SHA256(canonical(TRP))
+                 │
+                 ▼
+       subproof_hashes["TRP"]
+                 │
+                 ▼
+     HRICH = SHA256(sorted(subproof_hashes))
+```
+
+This shows how branch decisions become part of the cryptographically
+verified execution record.
+
+---
+
+### **5. Mermaid Diagram: Full Deterministic Flow**
+
+```mermaid
+flowchart TD
+
+A[RLang Source Code] --> B[Parser]
+B --> C[Resolver]
+C --> D[Type Checker]
+D --> E[IR Lowering <br/> IRIf, IRStep, IRBinaryOp]
+E --> F[Execution Engine]
+F --> G[PipelineProofBundle <br/> steps + branches]
+G --> H[TRP Subproof]
+H --> I[Subproof Hashes]
+I --> J[HRICH Hash]
+```
+
+---
+
+### **6. Mermaid Diagram: IF/ELSE Branching**
+
+```mermaid
+flowchart TD
+
+A[__value] --> B{ __value > 10? }
+B -->|true| C[then-block <br/> fn:double]
+B -->|false| D[else-block <br/> fn:half]
+C --> E[result]
+D --> E[result]
+```
+
+---
+
+### **7. Canonical Proof Structure Diagram**
+
+```text
+RichProofBundle
+├── H_RICH                      (top-level rich hash)
+├── primary
+│     ├── master                (HMASTER)
+│     ├── steps[]               (step hashes)
+│     ├── branches[]            (non-authoritative, readable mirror)
+│     └── entry_pipeline
+├── subproofs
+│     ├── DIP   { ... }
+│     ├── DP    { ... }
+│     ├── PEP   { ... }
+│     ├── PoPI  { ... }
+│     ├── CCP   { ... }
+│     ├── CMIP  { ... }
+│     ├── PP    { ... }
+│     └── TRP   { steps[], branches[] }   ← cryptographically binding
+└── subproof_hashes
+      └── TRP → hashed(TRP) → included in HRICH
+```
+
+This diagram clarifies the difference between `primary.branches` (debug
+view) and `subproofs["TRP"]` (verified source of truth).
+
+---
+
+## Additional Diagrams for Clarity (v0.2)
+
+The following diagrams illustrate deeper internal behavior of RLang v0.2,
+including IR graph structure, step execution ordering, value propagation,
+and complete proof-hash dependency flow.
+
+---
+
+### **8. IR Node Graph for a Pipeline with IF**
+
+This ASCII diagram shows the IR graph that is produced after lowering:
+
+```text
+                   +-------------------+
+                   |  IRPipeline(main) |
+                   +-------------------+
+                       │
+                       ▼
+              +------------------+
+              |  IRPipelineSteps |
+              +------------------+
+             /        |            \
+            /         |             \
+           ▼          ▼              ▼
+    +----------+   +----------+   +----------------+
+    | IRStep   |   | IRIf     |   | IRStep         |
+    | inc      |   | cond     |   | square         |
+    +----------+   | then..   |   +----------------+
+                   | else..   |
+                   +----------+
+
+IRIf structure:
+---------------
+IRIf(
+  condition = IRBinaryOp,
+  then_steps = [IRStep, IRStep, ...],
+  else_steps = [IRStep, IRStep, ...]
+)
+```
+
+---
+
+### **9. Step Execution Timeline**
+
+This shows how execution flows through pipeline steps:
+
+```text
+Pipeline Steps:
+  0: inc
+  1: double
+  2: add10
+  3: sub3
+  4: if (__value > 1000) { ... } else { ... }
+  5: dec
+  6: mul5
+
+Execution Timeline:
+-------------------
+Value0 --inc--> V1
+       --double--> V2
+       --add10--> V3
+       --sub3--> V4
+       --IF--> V5    (branch chosen deterministically)
+       --dec--> V6
+       --mul5--> V7
+```
+
+---
+
+### **10. Mermaid Diagram: TRP Internal Structure**
+
+```mermaid
+flowchart TD
+
+A[Pipeline Execution] --> B[Trace Recorder]
+
+B --> C[TRP Subproof]
+C --> C1((steps[]))
+C --> C2((branches[]))
+
+C --> D[Canonical JSON]
+D --> E[SHA256(TRP)]
+E --> F[subproof_hashes.TR P]
+
+F --> G[HRICH]
+```
+
+Explanation:
+
+* TRP contains **both** the step trace and branch trace.
+* Its canonical JSON serialization is hashed to produce `subproof_hashes["TRP"]`.
+* HRICH depends on this hash, making execution fully verifiable.
+
+---
+
+### **11. Complete Hash Dependency Map**
+
+This diagram shows *every dependency* that contributes to final HRICH:
+
+```text
+             +----------------+
+             |  Step 0 Output |
+             +----------------+
+                    |
+                    ▼
+            (hash of step 0)
+                    |
+                    ▼
+            (HMASTER component)
+                    |
+                    ▼
+           +-------------------+
+           |   HMASTER         |
+           +-------------------+
+                    |
+                    ▼
+    +-----------------------------------+
+    |  Subproof Generators (8 modules)  |
+    +-----------------------------------+
+       |       |      |      |      |
+       ▼       ▼      ▼      ▼      ▼
+   DIP hash  DP hash ...          TRP hash
+       \       |       \           /
+        \      |        \         /
+         \     |         \       /
+       +--------------------------------+
+       |     subproof_hashes (dict)     |
+       +--------------------------------+
+                    |
+                    ▼
+         HRICH = SHA256(sorted hashes)
+```
+
+This makes it explicit how tampering *any* subproof changes HRICH.
+
+---
+
+### **12. Mermaid Diagram: Value Propagation Through IF**
+
+```mermaid
+flowchart TD
+
+A0[input value] --> A1[inc]
+A1 --> A2[double]
+A2 --> A3{ __value > threshold ? }
+A3 -->|true| A4A[then: mul5]
+A3 -->|false| A4B[else: dec]
+A4A --> A5[result]
+A4B --> A5[result]
+```
+
+This diagram clarifies:
+
+* Exactly where control flow branches
+* How values are propagated
+* That both branches rejoin deterministically
+
+---
+
+### Complete Example Programs
+
+#### Example 1: Simple Calculation Pipeline
+
+```rlang
+fn add(x: Int, y: Int) -> Int;
+fn multiply(x: Int, y: Int) -> Int;
+
+pipeline calculate(Int) -> Int {
+  add(10, 20) -> multiply(2)
+}
+```
+
+#### Example 2: User Processing Pipeline
+
+```rlang
+type UserId = Int;
+type Email = String;
+type UserName = String;
+
+fn getUserEmail(id: UserId) -> Email;
+fn extractDomain(email: Email) -> String;
+fn formatUsername(domain: String) -> UserName;
+
+pipeline processUser(UserId) -> UserName {
+  getUserEmail -> extractDomain -> formatUsername
+}
+```
+
+#### Example 3: Financial Calculation
+
+```rlang
+type Amount = Float;
+type Rate = Float;
+type Years = Int;
+
+fn applyInterest(amount: Amount, rate: Rate) -> Amount;
+fn compound(amount: Amount, years: Years) -> Amount;
+
+pipeline calculateReturn(Amount) -> Amount {
+  applyInterest(0.05) -> compound(10)
+}
+```
+
+### Language Features
+
+- **Type System**: Primitive types (Int, String, Float, Bool, Unit) and type aliases
+- **Functions**: Declared with parameter and return types
+- **Pipelines**: Sequential execution chains with input/output types
+- **Binary Operations**: Addition (`+`), subtraction (`-`), multiplication (`*`), division (`/`)
+- **Comments**: Single-line comments with `#`
+- **Floats**: Supports both `0.5` and `.5` syntax
+
+---
+
+**→ Next:** [Section 4: Compiler Pipeline](#4-compiler-pipeline) dives deep into each compiler phase, from lexing through canonical JSON emission.
+
+```
+┌─────────────────────────────────────────────────────────┐
+│           LANGUAGE → COMPILER IMPLEMENTATION            │
+│                                                          │
+│  Understanding the language syntax, we now explore      │
+│  how the compiler transforms RLang source code         │
+│  through six distinct phases into executable IR.        │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 4. Compiler Pipeline
+
+The compiler transforms RLang source code through multiple phases, each with specific responsibilities and guarantees.
+
+### Phase 1: Lexical Analysis (Lexer)
+
+The lexer tokenizes source code into a stream of tokens.
+
+#### Token Types
+
+| Token Type | Examples | Description |
+|------------|----------|-------------|
+| `IDENTIFIER` | `foo`, `bar`, `getUser` | Variable and function names |
+| `KEYWORD` | `fn`, `pipeline`, `type` | Language keywords |
+| `INTEGER` | `42`, `-100`, `0` | Integer literals |
+| `FLOAT` | `3.14`, `0.5`, `.5` | Floating-point literals |
+| `STRING` | `"hello"`, `"world"` | String literals |
+| `OP_PLUS` | `+` | Addition operator |
+| `OP_MINUS` | `-` | Subtraction operator |
+| `OP_MULTIPLY` | `*` | Multiplication operator |
+| `OP_DIVIDE` | `/` | Division operator |
+| `LPAREN`, `RPAREN` | `(`, `)` | Parentheses |
+| `LBRACE`, `RBRACE` | `{`, `}` | Braces |
+| `ARROW` | `->` | Pipeline composition |
+| `SEMICOLON` | `;` | Statement terminator |
+| `NEWLINE` | `\n` | Line breaks |
+| `EOF` | End of file | End marker |
+
+#### Comment Handling
+
+Comments are completely skipped during tokenization:
+
+```rlang
+foo # This is a comment
+bar
+```
+
+Tokens produced: `IDENTIFIER(foo)`, `NEWLINE`, `IDENTIFIER(bar)`, `EOF`
+
+Comments do not affect token positions; the lexer maintains accurate line/column tracking.
+
+#### Float Parsing
+
+The lexer handles multiple float formats:
+
+- Standard: `3.14`, `0.5`
+- Leading decimal: `.5` → parsed as `0.5`
+- Trailing decimal: `5.` → parsed as `5.0`
+
+Float parsing uses deterministic algorithms ensuring identical inputs produce identical tokens.
+
+#### Token Position Tracking
+
+Each token includes:
+- `line`: 1-indexed line number
+- `col`: 1-indexed column number
+- `value`: Token value (for literals and identifiers)
+
+Position tracking enables precise error reporting.
+
+### Phase 2: Parsing
+
+The parser builds an Abstract Syntax Tree (AST) from tokens using recursive descent parsing.
+
+#### Grammar Overview
+
+```
+Module ::= Declaration*
+
+Declaration ::= TypeDecl | FnDecl | PipelineDecl
+
+TypeDecl ::= "type" IDENTIFIER "=" TypeExpr ";"
+FnDecl ::= "fn" IDENTIFIER "(" ParamList? ")" "->" TypeExpr ";"
+PipelineDecl ::= "pipeline" IDENTIFIER "(" TypeExpr ")" "->" TypeExpr "{" PipelineSteps "}"
+
+PipelineSteps ::= PipelineStep ("->" PipelineStep)*
+PipelineStep ::= IDENTIFIER ("(" ExprList? ")")?
+
+Expr ::= Term (("+" | "-") Term)*
+Term ::= Factor (("*" | "/") Factor)*
+Factor ::= INTEGER | FLOAT | STRING | IDENTIFIER | "(" Expr ")"
+```
+
+#### Operator Precedence
+
+Operators follow standard mathematical precedence:
+
+1. **Highest**: `*`, `/` (multiplication, division)
+2. **Lower**: `+`, `-` (addition, subtraction)
+3. **Lowest**: Function calls, identifiers
+
+```rlang
+1 + 2 * 3  // Parsed as: 1 + (2 * 3)
+```
+
+#### AST Node Types
+
+- `Module`: Root node containing all declarations
+- `TypeDecl`: Type alias declaration
+- `FnDecl`: Function declaration
+- `PipelineDecl`: Pipeline definition
+- `PipelineStep`: Individual step in a pipeline
+- `BinaryOp`: Binary operation expression
+- `Literal`: Integer, float, or string literal
+- `Identifier`: Variable or function reference
+
+All AST nodes are immutable dataclasses with position information.
+
+### Phase 3: Symbol Resolution
+
+The resolver builds a symbol table mapping identifiers to their declarations.
+
+#### Scope Rules
+
+- **Global Scope**: All declarations are in global scope
+- **No Shadowing**: Identifiers cannot be redeclared
+- **Forward References**: Functions and types can be referenced before declaration
+
+#### Symbol Table Structure
+
+```python
+SymbolTable:
+  - symbols: Dict[str, Symbol]
+  
+Symbol:
+  - name: str
+  - kind: SymbolKind (TYPE, FUNCTION, PIPELINE)
+  - type_expr: Optional[TypeExpr]  # For type aliases
+  - decl: AST node
+```
+
+#### Resolution Process
+
+1. First pass: Collect all declarations into symbol table
+2. Second pass: Resolve references in AST nodes
+3. Error reporting: Unresolved identifiers raise `ResolutionError`
+
+### Phase 4: Type Checking
+
+The type checker validates type correctness and infers types.
+
+#### Type Inference Rules
+
+1. **Literal Types**: `42` → `Int`, `3.14` → `Float`, `"hello"` → `String`
+2. **Function Return Types**: From function declaration
+3. **Binary Operations**: 
+   - `Int + Int` → `Int`
+   - `Float + Float` → `Float`
+   - `Int + Float` → `Float` (promotion)
+4. **Pipeline Steps**: Output type inferred from function return type
+
+#### Type Checking Rules
+
+1. **Function Calls**: Arguments must match parameter types
+2. **Pipeline Composition**: Step output must match next step input
+3. **Explicit Arguments**: Replace pipeline input (no type checking against pipeline input)
+4. **Type Aliases**: Resolved recursively to primitive types
+
+#### Type System Implementation
+
+- `RType`: Runtime type representation
+- `TypeExpr`: AST type expression
+- `rtype_from_type_expr()`: Converts AST types to runtime types
+- Recursive type alias resolution with cycle detection
+
+### Phase 5: IR Lowering
+
+The lowering phase converts the type-checked AST into an Intermediate Representation (IR).
+
+#### IR Design Goals
+
+1. **Execution-Ready**: IR can be directly executed
+2. **Canonical**: Same AST always produces same IR
+3. **Deterministic**: IR structure is deterministic
+4. **Hashable**: IR can be serialized to canonical JSON
+
+#### IR Node Types
+
+- `IRModule`: Root IR node
+- `IRFunction`: Function IR (signature only)
+- `IRPipeline`: Pipeline IR with steps
+- `IRStep`: Individual pipeline step
+- `IRExpr`: Expression IR (literals, function calls, binary ops)
+
+#### Lowering Process
+
+1. Convert type-checked AST nodes to IR nodes
+2. Preserve all semantic information
+3. Flatten nested structures
+4. Assign unique IDs to steps
+
+### Phase 6: Primary IR Builder
+
+The primary IR builder creates the final `PrimaryProgramIR` structure.
+
+#### PrimaryProgramIR Structure
+
+```python
+PrimaryProgramIR:
+  - version: str  # "v0"
+  - language: str  # "rlang"
+  - entry_pipeline: str  # Pipeline name
+  - functions: List[IRFunction]
+  - pipelines: List[IRPipeline]
+```
+
+#### Canonical JSON Emission
+
+The emitter produces canonical JSON:
+
+1. **Sorted Keys**: All object keys are sorted alphabetically
+2. **No Whitespace**: Compact JSON (no extra spaces)
+3. **Deterministic Order**: Arrays preserve order, objects sorted
+4. **Stable Format**: Same IR always produces same JSON
+
+Canonical JSON ensures:
+- Deterministic hashing
+- Cross-platform compatibility
+- Verifiable serialization
+
+---
+
+**→ Next:** [Section 5: Proof System Integration](#5-proof-system-integration) explains how the compiler generates cryptographic proof bundles compatible with BoR.
+
+```
+┌─────────────────────────────────────────────────────────┐
+│            COMPILER → PROOF GENERATION                  │
+│                                                          │
+│  After compilation produces IR, the system executes     │
+│  pipelines and generates cryptographic proof bundles    │
+│  with HMASTER, HRICH, and subproofs for verification.  │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 5. Proof System Integration
+
+The compiler integrates with the BoR (Blockchain of Reasoning) proof system to generate cryptographic proof bundles.
+
+### PipelineProofBundle
+
+A `PipelineProofBundle` contains the raw execution trace:
+
+```python
+PipelineProofBundle:
+  - version: str
+  - language: str
+  - entry_pipeline: str
+  - steps: List[StepExecution]
+  - branches: List[BranchExecutionRecord]  # New in v0.2
+  - input_value: Any
+  - output_value: Any
+```
+
+Each `StepExecution` contains:
+- `index`: Step index in pipeline
+- `template_id`: Function template identifier
+- `input`: Step input value
+- `output`: Step output value
+- `function_name`: Function name
+
+Each `BranchExecutionRecord` (new in v0.2) contains:
+- `index`: Index of the `if` node in the top-level pipeline steps list
+- `path`: `"then"` or `"else"` indicating which branch was taken
+- `condition_value`: The evaluated condition value (should be `Bool`)
+
+For programs without `if` expressions, `branches` is an empty list `[]`.
+
+### Subproofs
+
+The BoR system includes eight cryptographic subproof types:
+
+| Subproof | Full Name | Purpose |
+|----------|-----------|---------|
+| **DIP** | Data Integrity Proof | Ensures data integrity |
+| **DP** | Deterministic Proof | Verifies deterministic execution |
+| **PEP** | Program Execution Proof | Proves program execution |
+| **PoPI** | Proof of Pipeline Integrity | Verifies pipeline structure |
+| **CCP** | Cryptographic Computation Proof | Cryptographic computation verification |
+| **CMIP** | Cryptographic Memory Integrity Proof | Memory integrity verification |
+| **PP** | Program Proof | General program proof |
+| **TRP** | Trace Record Proof | Execution trace verification (includes both step trace and branch trace in v0.2) |
+
+Each subproof is a dictionary structure containing cryptographic evidence. Subproofs are computed deterministically from the HMASTER hash. In v0.2, the TRP (Trace Record Proof) subproof includes both step trace and branch trace (`branches` array), making the **entire control-flow path** cryptographically verifiable.
+
+### HMASTER vs HRICH
+
+#### HMASTER (Master Hash)
+
+HMASTER aggregates all step execution hashes:
+
+```
+HMASTER = SHA256(step_hash_0 | step_hash_1 | ... | step_hash_n)
+```
+
+Where each `step_hash_i` is computed from:
+- Step index
+- Template ID
+- Input value (canonical JSON)
+- Output value (canonical JSON)
+
+HMASTER provides:
+- **Execution Integrity**: Any step modification changes HMASTER
+- **Ordering Guarantee**: Step order is cryptographically bound
+- **Input/Output Binding**: Inputs and outputs are cryptographically linked
+
+#### HRICH (Rich Hash)
+
+HRICH is computed from subproof hashes:
+
+```
+HRICH = SHA256(sorted_subproof_hashes.join("|"))
+```
+
+Where `subproof_hashes` is a dictionary mapping subproof names to their hashes:
+- Each subproof is hashed using canonical JSON
+- Subproof hashes are sorted alphabetically
+- Combined with `|` separator
+- Final SHA256 produces HRICH
+
+HRICH provides:
+- **Subproof Integrity**: All subproofs are cryptographically bound
+- **Completeness**: Ensures all subproofs are present
+- **Verification**: Enables independent verification
+
+### Why Canonicalization is Necessary
+
+Canonical JSON serialization is essential for:
+
+1. **Deterministic Hashing**: Same data always produces same hash
+2. **Cross-Platform Compatibility**: Same results on different machines
+3. **Verification**: Independent verifiers can recompute hashes
+4. **Tamper Detection**: Any modification changes hashes
+
+Without canonicalization:
+- Same logical data could produce different hashes
+- Verification would be impossible
+- Determinism would be broken
+
+### Deterministic Hashing Rules
+
+All hashing follows strict rules:
+
+1. **Canonical JSON**: All data serialized with sorted keys, no whitespace
+2. **UTF-8 Encoding**: All strings encoded as UTF-8
+3. **Deterministic Order**: Arrays preserve order, objects sorted
+4. **Consistent Separators**: `|` for hash concatenation
+5. **SHA256**: All hashes use SHA256 algorithm
+
+These rules ensure:
+- Bit-for-bit reproducibility
+- Cross-platform compatibility
+- Independent verification
+
+### Proof Bundle Structure
+
+A complete rich proof bundle:
+
+```json
+{
+  "H_RICH": "ccc58c8d9b8035962c9e5a52127108e3cbc3c730e64304ffd36591881c00a7c0",
+  "primary": {
+    "master": "eb8798eee5172451ddc9fd74fbe18d075eb9fb07cdf02a5a7efbb005eb8a2e1e",
+    "steps": [
+      {
+        "index": 0,
+        "template_id": "t0",
+        "hash": "step_hash_0"
+      },
+      {
+        "index": 1,
+        "template_id": "t1",
+        "hash": "step_hash_1"
+      }
+    ],
+    "version": "v0",
+    "language": "rlang",
+    "entry_pipeline": "main"
+  },
+  "subproofs": {
+    "DIP": {"hash": "...", "verified": true},
+    "DP": {"hash": "...", "verified": true},
+    "PEP": {"ok": true, "exception": null},
+    "PoPI": {"hash": "...", "verified": true},
+    "CCP": {"hash": "...", "verified": true},
+    "CMIP": {"hash": "...", "verified": true},
+    "PP": {"hash": "...", "verified": true},
+    "TRP": {"hash": "...", "verified": true}
+  },
+  "subproof_hashes": {
+    "DIP": "hash_dip",
+    "DP": "hash_dp",
+    "PEP": "hash_pep",
+    "PoPI": "hash_popi",
+    "CCP": "hash_ccp",
+    "CMIP": "hash_cmip",
+    "PP": "hash_pp",
+    "TRP": "hash_trp"
+  }
+}
+```
+
+### Verification Process
+
+Proof bundles are verified using the `borp` CLI tool:
+
+```bash
+borp verify-bundle --bundle out/rich_proof_bundle.json
+```
+
+Verification checks:
+1. **H_RICH Match**: Recomputes HRICH and compares
+2. **Subproof Hashes Match**: Verifies each subproof hash
+3. **Structure Validity**: Ensures all required fields present
+4. **Type Correctness**: Validates data types
+
+Successful verification output:
+
+```json
+{
+  "checks": {
+    "H_RICH_match": true,
+    "subproof_hashes_match": true
+  },
+  "ok": true
+}
+```
+
+---
+
+**→ Next:** [Section 6: Determinism Guarantees](#6-determinism-guarantees) details how the system ensures bit-for-bit reproducible execution.
+
+```
+┌─────────────────────────────────────────────────────────┐
+│         PROOF SYSTEM → DETERMINISM VERIFICATION         │
+│                                                          │
+│  Proof generation enables verification, but the         │
+│  foundation is determinism—identical inputs must        │
+│  produce identical outputs, verified through SHA256.   │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 6. Determinism Guarantees
+
+The RLang compiler provides **bit-for-bit deterministic execution**, meaning identical inputs always produce identical outputs, down to the byte level.
+
+### Exact Hashing Invariants
+
+The following invariants are guaranteed:
+
+1. **Source Code Invariance**: Same source code → same IR → same canonical JSON
+2. **Input Invariance**: Same input value → same execution trace → same proof bundle
+3. **Hash Invariance**: Same proof bundle → same HMASTER → same HRICH
+4. **Serialization Invariance**: Same data → same canonical JSON → same hash
+
+### Why Results are Bit-for-Bit Identical
+
+Determinism is achieved through:
+
+1. **Pure Functions**: All functions are pure (no side effects)
+2. **No Randomness**: No random number generation
+3. **No I/O**: No file system or network access
+4. **Canonical Serialization**: Deterministic JSON formatting
+5. **Fixed Evaluation Order**: Pipeline steps execute sequentially
+6. **Deterministic Hashing**: SHA256 with canonical inputs
+7. **Deterministic Branch Decisions**: Conditions are evaluated by pure expressions with no randomness, time, or I/O—for the same input and same function registry, the same branch is always taken
+
+### Branch Decision Determinism
+
+Branch decisions in `if/else` expressions are deterministic because:
+
+- Conditions are evaluated by pure expressions, with no randomness, time, or I/O
+- For the same input and same function registry, the same branch is always taken
+- HRICH changes when the branch path changes for the same program and input
+- Branch metadata tampering is detected during verification
+
+Two runs of the same program with different branch paths (e.g., `then` vs `else`) will produce **different HRICH values**, and any tampering with branch metadata in the rich bundle is detected during verification.
+
+## Threat Model & Integrity Guarantees
+
+RLang v0.2 uses the BoR proof system to provide strong tamper evidence:
+
+### What *is* cryptographically verified
+
+The following fields are fully protected by deterministic hashing:
+
+- **HMASTER** (step-execution master hash)
+
+- **TRP subproof contents** (step trace + branch trace)
+
+- **All subproof hashes** in `subproof_hashes`
+
+- **HRICH** (rich proof hash derived from sorted subproof hashes)
+
+
+
+Tampering *any* of these fields results in:
+
+- `"H_RICH_match": false`  
+
+- `"subproof_hashes_match": false`  
+
+- Non-zero exit code from `borp verify-bundle`
+
+
+
+### What is *not* cryptographically authoritative
+
+The following fields are intentionally non-binding:
+
+- `primary.branches`  
+
+- Other convenience or descriptive metadata
+
+
+
+Modifying these fields does **not** change verification results and does
+
+not affect the cryptographic integrity of the execution trace.
+
+
+
+### Practical Guidance
+
+- Auditors and verifiers **must** read branch decisions from TRP, not from `primary.branches`
+
+- Developers may use `primary.branches` for debugging or visualization
+
+- Tools consuming RLang proof bundles should always trust TRP as the canonical trace
+
+### Cross-Machine Reproducibility
+
+The compiler produces identical results across:
+- Different operating systems (Linux, macOS, Windows)
+- Different Python versions (3.9+)
+- Different hardware architectures
+- Different execution environments
+
+This is verified through:
+- Automated testing on multiple platforms
+- SHA256 hash comparison
+- Canonical JSON comparison
+
+### SHA256 Comparison Workflow
+
+The `next_tests.sh` script verifies determinism:
+
+1. **First Run**: Generate proof bundle → save as `first.json`
+2. **Second Run**: Generate proof bundle → save as `second.json`
+3. **Comparison**: Compute SHA256 of both files
+4. **Verification**: Hashes must match exactly
+
+Example output:
+
+```
+=== SHA256 Comparison ===
+96c77dcff7d0870a183f13d974a05e7a9642bdc549b30d2b93ca3a730dc28bbe  out/first.json
+96c77dcff7d0870a183f13d974a05e7a9642bdc549b30d2b93ca3a730dc28bbe  out/second.json
+If these two SHA256 hashes match EXACTLY → Deterministic ✓
+```
+
+### Tamper Detection Behavior
+
+Any modification to a proof bundle is detected:
+
+```bash
+# Tamper test
+cp out/rich_proof_bundle.json out/tampered.json
+echo "x" >> out/tampered.json
+borp verify-bundle --bundle out/tampered.json
+```
+
+Result:
+```json
+{
+  "checks": {
+    "H_RICH_match": false,
+    "subproof_hashes_match": false
+  },
+  "ok": false
+}
+```
+
+Tamper detection works because:
+- Any byte change modifies the JSON structure
+- Modified JSON produces different HRICH
+- Verification recomputes HRICH and detects mismatch
+
+### Subproof Mismatch Behavior
+
+Subproof hash mismatches are detected:
+
+```python
+# Modify a subproof hash
+bundle["subproof_hashes"]["DIP"] = "corrupted"
+```
+
+Verification result:
+```json
+{
+  "checks": {
+    "H_RICH_match": false,
+    "subproof_hashes_match": false
+  },
+  "ok": false
+}
+```
+
+Subproof mismatch detection works because:
+- HRICH is computed from subproof hashes
+- Modified subproof hash changes HRICH
+- Verification recomputes HRICH and detects mismatch
+
+### Determinism Verification
+
+Determinism is verified through:
+
+1. **Automated Tests**: 190+ tests ensure deterministic behavior
+2. **Hash Comparison**: SHA256 comparison of proof bundles
+3. **Cross-Platform Testing**: Tests run on multiple platforms
+4. **Regression Testing**: Tests catch non-deterministic changes
+5. **Branch Trace Verification**: Branch decisions are cryptographically verifiable
+
+---
+
+**→ Next:** [Section 7: Developer Workflows](#7-developer-workflows) provides practical guides for extending the compiler.
+
+```
+┌─────────────────────────────────────────────────────────┐
+│        DETERMINISM → EXTENDING THE COMPILER             │
+│                                                          │
+│  Understanding how the system works, developers can     │
+│  extend it with new features, types, IR nodes, and      │
+│  proof modules following established patterns.          │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 7. Developer Workflows
+
+This section describes how to extend the RLang compiler with new features.
+
+### How to Add New DSL Features
+
+#### Step 1: Extend the Lexer
+
+Add new token types in `rlang/lexer/tokens.py`:
+
+```python
+class TokenType(Enum):
+    # ... existing tokens ...
+    NEW_KEYWORD = "NEW_KEYWORD"
+```
+
+Add tokenization logic in `rlang/lexer/tokenizer.py`:
+
+```python
+def _try_keyword(self) -> Optional[Token]:
+    # Add new keyword recognition
+    if self._peek() == "newkeyword":
+        # ... tokenization logic ...
+```
+
+#### Step 2: Extend the Parser
+
+Add AST node types in `rlang/parser/ast.py`:
+
+```python
+@dataclass(frozen=True)
+class NewFeatureDecl(Decl):
+    # ... fields ...
+```
+
+Add parsing logic in `rlang/parser/parser.py`:
+
+```python
+def _parse_new_feature(self) -> NewFeatureDecl:
+    # ... parsing logic ...
+```
+
+#### Step 3: Extend Symbol Resolution
+
+Add symbol kind in `rlang/semantic/symbols.py`:
+
+```python
+class SymbolKind(Enum):
+    # ... existing kinds ...
+    NEW_FEATURE = "new_feature"
+```
+
+Update resolver in `rlang/semantic/resolver.py`:
+
+```python
+def _resolve_new_feature(self, decl: NewFeatureDecl):
+    # ... resolution logic ...
+```
+
+#### Step 4: Extend Type Checking
+
+Add type checking logic in `rlang/types/type_checker.py`:
+
+```python
+def _check_new_feature(self, decl: NewFeatureDecl):
+    # ... type checking logic ...
+```
+
+#### Step 5: Extend IR Lowering
+
+Add IR node types in `rlang/ir/model.py`:
+
+```python
+@dataclass(frozen=True)
+class IRNewFeature(IRNode):
+    # ... fields ...
+```
+
+Add lowering logic in `rlang/lowering/lowering.py`:
+
+```python
+def _lower_new_feature(self, decl: NewFeatureDecl) -> IRNewFeature:
+    # ... lowering logic ...
+```
+
+#### Step 6: Add Tests
+
+Create tests in `tests/test_new_feature.py`:
+
+```python
+def test_new_feature_parsing():
+    # ... test cases ...
+```
+
+### How to Add New Type Rules
+
+#### Step 1: Define Type Representation
+
+Add type in `rlang/types/type_system.py`:
+
+```python
+def is_new_type(type_name: str) -> bool:
+    return type_name == "NewType"
+```
+
+#### Step 2: Add Type Inference
+
+Update type inference in `rlang/types/type_checker.py`:
+
+```python
+def _infer_new_type(self, expr: Expr) -> RType:
+    # ... inference logic ...
+```
+
+#### Step 3: Add Type Checking
+
+Add type checking rules:
+
+```python
+def _check_new_type_rule(self, expr: Expr, expected: RType):
+    # ... checking logic ...
+```
+
+#### Step 4: Add Tests
+
+Create tests for new type rules:
+
+```python
+def test_new_type_inference():
+    # ... test cases ...
+```
+
+### How to Add New IR Nodes
+
+#### Step 1: Define IR Node
+
+Add IR node in `rlang/ir/model.py`:
+
+```python
+@dataclass(frozen=True)
+class IRNewNode(IRNode):
+    field1: str
+    field2: int
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {"field1": self.field1, "field2": self.field2}
+```
+
+#### Step 2: Add Lowering
+
+Update lowering in `rlang/lowering/lowering.py`:
+
+```python
+def _lower_to_new_node(self, ast_node: ASTNode) -> IRNewNode:
+    # ... lowering logic ...
+```
+
+#### Step 3: Add JSON Serialization
+
+Ensure `to_dict()` produces canonical JSON:
+
+```python
+def to_dict(self) -> Dict[str, Any]:
+    return {
+        "field1": self.field1,  # Sorted keys
+        "field2": self.field2
+    }
+```
+
+#### Step 4: Add Tests
+
+Create tests for IR node:
+
+```python
+def test_new_node_serialization():
+    # ... test cases ...
+```
+
+### How to Integrate New Proof Modules
+
+#### Step 1: Define Proof Structure
+
+Add proof type in `rlang/bor/proofs.py`:
+
+```python
+@dataclass(frozen=True)
+class NewProofType:
+    # ... fields ...
+```
+
+#### Step 2: Add Cryptographic Hashing
+
+Update crypto in `rlang/bor/crypto.py`:
+
+```python
+def compute_new_proof(self, data: Any) -> NewProofType:
+    # ... hashing logic ...
+```
+
+#### Step 3: Add to Rich Bundle
+
+Update `to_rich_bundle()` to include new proof:
+
+```python
+def to_rich_bundle(self) -> RichProofBundle:
+    # ... include new proof ...
+```
+
+#### Step 4: Add Tests
+
+Create tests for new proof module:
+
+```python
+def test_new_proof_generation():
+    # ... test cases ...
+```
+
+### How to Add New Tests
+
+#### Test Structure
+
+Tests follow pytest conventions:
+
+```python
+def test_feature_name():
+    """Test description."""
+    # Arrange
+    source = "..."
+    
+    # Act
+    result = compile_source_to_json(source)
+    
+    # Assert
+    assert result == expected
+```
+
+#### Test Categories
+
+- **Unit Tests**: Test individual components
+- **Integration Tests**: Test component interactions
+- **End-to-End Tests**: Test full pipeline
+- **Determinism Tests**: Test deterministic behavior
+
+#### Running Tests
+
+```bash
+# Run all tests
+pytest -q --disable-warnings
+
+# Run specific test file
+pytest tests/test_feature.py -v
+
+# Run specific test
+pytest tests/test_feature.py::test_specific -v
+```
+
+---
+
+**→ Next:** [Section 8: Testing System](#8-testing-system) documents the comprehensive 190+ test suite ensuring correctness and determinism.
+
+```
+┌─────────────────────────────────────────────────────────┐
+│         EXTENSION → TESTING & VERIFICATION              │
+│                                                          │
+│  New features require tests. The testing system         │
+│  ensures correctness, determinism, and compatibility   │
+│  across all compiler phases and proof generation.       │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 8. Testing System
+
+The RLang compiler includes a comprehensive test suite with **190+ passing tests** covering all compiler phases, control flow, and proof generation.
+
+### Test Suite Overview
+
+| Category | Test Count | Coverage |
+|---------|------------|----------|
+| Lexer Tests | ~30 | Tokenization, comments, floats, strings |
+| Parser Tests | ~25 | AST construction, binary operations, pipelines |
+| Type Checker Tests | ~40 | Type inference, type aliases, pipeline wiring, control flow type checking |
+| IR Tests | ~20 | Lowering, primary IR construction |
+| Emitter Tests | ~15 | End-to-end compilation |
+| CLI Tests | ~10 | Command-line interface |
+| BoR Integration Tests | ~30 | Proof generation, crypto hashing, CLI compatibility, branch-aware proofs |
+| Determinism Tests | ~13 | SHA256 comparison, tamper detection |
+
+### Lexer Tests
+
+Tests cover:
+- **Token Recognition**: All token types correctly identified
+- **Comment Skipping**: Comments don't affect tokenization
+- **Float Parsing**: Various float formats (`.5`, `0.5`, `5.0`)
+- **String Handling**: Escape sequences, quotes
+- **Position Tracking**: Accurate line/column numbers
+- **Edge Cases**: Empty files, whitespace, newlines
+
+Example test:
+
+```python
+def test_float_edge_cases():
+    """Test edge cases for float parsing."""
+    tokens = tokenize("0.0 0.123 .5")
+    assert tokens[2] == Token(TokenType.FLOAT, "0.5", 1, 11)
+```
+
+### Parser Tests
+
+Tests cover:
+- **AST Construction**: Correct AST node creation
+- **Operator Precedence**: Mathematical precedence rules
+- **Pipeline Parsing**: Step composition, explicit arguments
+- **Error Handling**: Invalid syntax detection
+- **Edge Cases**: Empty pipelines, nested expressions
+
+Example test:
+
+```python
+def test_parse_binary_operations():
+    """Test parsing binary operations."""
+    source = "pipeline calc() { compute(1 + 2, 3 * 4) }"
+    module = parse(source)
+    # ... assertions ...
+```
+
+### Type Checker Tests
+
+Tests cover:
+- **Type Inference**: Correct type inference for expressions
+- **Type Aliases**: Type alias resolution
+- **Pipeline Wiring**: Step input/output type matching
+- **Error Detection**: Type mismatch detection
+- **Edge Cases**: Recursive types, complex pipelines
+
+Example test:
+
+```python
+def test_type_alias_resolution():
+    """Test type alias resolution."""
+    source = "type UserId = Int; fn getUser(id: UserId) -> String;"
+    # ... type checking ...
+```
+
+### IR Tests
+
+Tests cover:
+- **Lowering**: AST to IR conversion
+- **IR Structure**: Correct IR node creation
+- **Canonical JSON**: Deterministic serialization
+- **Edge Cases**: Complex pipelines, nested structures
+
+### Emitter Tests
+
+Tests cover:
+- **End-to-End Compilation**: Full pipeline from source to JSON
+- **Error Propagation**: Errors correctly propagated
+- **Determinism**: Same source produces same JSON
+- **Edge Cases**: Empty programs, complex programs
+
+### CLI Tests
+
+Tests cover:
+- **Command-Line Interface**: All CLI options
+- **Error Handling**: File errors, compilation errors
+- **Output Formatting**: Correct JSON output
+- **Edge Cases**: Missing files, invalid arguments
+
+### BoR Integration Tests
+
+Tests cover:
+- **Proof Generation**: Correct proof bundle creation
+- **Cryptographic Hashing**: HMASTER and HRICH computation
+- **CLI Compatibility**: `borp verify-bundle` compatibility
+- **Determinism**: Identical proofs across runs
+- **Tamper Detection**: Tampering detection
+
+### Deterministic Tests
+
+The `next_tests.sh` script runs deterministic tests:
+
+1. **First Run**: Generate proof bundle
+2. **Second Run**: Generate proof bundle again
+3. **SHA256 Comparison**: Compare hashes
+4. **Tamper Test**: Verify tamper detection
+5. **Subproof Mismatch Test**: Verify subproof integrity
+
+### How Each Category Works
+
+#### Unit Tests
+
+Test individual components in isolation:
+
+```python
+def test_lexer_tokenization():
+    tokens = tokenize("fn foo() -> Int;")
+    assert tokens[0].type == TokenType.KEYWORD
+    assert tokens[0].value == "fn"
+```
+
+#### Integration Tests
+
+Test component interactions:
+
+```python
+def test_parser_with_resolver():
+    source = "fn foo() -> Int; pipeline main() { foo }"
+    module = parse(source)
+    resolution = resolve_module(module)
+    # ... assertions ...
+```
+
+#### End-to-End Tests
+
+Test full pipeline:
+
+```python
+def test_end_to_end_compilation():
+    source = "fn inc(x: Int) -> Int; pipeline main(Int) -> Int { inc }"
+    result = compile_source_to_json(source)
+    # ... assertions ...
+```
+
+### How Deterministic Tests Run
+
+The `next_tests.sh` script:
+
+1. **Normalizes Directory**: Ensures consistent working directory
+2. **First Generation**: Runs `verify_bundle.sh` → saves `first.json`
+3. **Second Generation**: Runs `verify_bundle.sh` again → saves `second.json`
+4. **Hash Comparison**: Computes SHA256 of both files
+5. **Verification**: Confirms hashes match exactly
+6. **Tamper Test**: Modifies bundle and verifies detection
+7. **Subproof Test**: Modifies subproof and verifies detection
+
+### How to Write New Tests
+
+#### Test Template
+
+```python
+def test_feature_description():
+    """Test what the test verifies."""
+    # Arrange: Set up test data
+    source = "..."
+    expected = "..."
+    
+    # Act: Execute code under test
+    result = compile_source_to_json(source)
+    
+    # Assert: Verify results
+    assert result == expected
+```
+
+#### Best Practices
+
+1. **Descriptive Names**: Test names describe what they test
+2. **Isolated Tests**: Each test is independent
+3. **Clear Assertions**: Assertions are explicit
+4. **Edge Cases**: Test boundary conditions
+5. **Error Cases**: Test error handling
+
+#### Running New Tests
+
+```bash
+# Run new test file
+pytest tests/test_new_feature.py -v
+
+# Run specific test
+pytest tests/test_new_feature.py::test_specific -v
+
+# Run with coverage
+pytest tests/test_new_feature.py --cov=rlang
+```
+
+---
+
+**→ Next:** [Section 9: CLI and API Usage](#9-cli-and-api-usage) shows how to use the compiler via command-line and Python API.
+
+```
+┌─────────────────────────────────────────────────────────┐
+│            TESTING → USING THE COMPILER                 │
+│                                                          │
+│  With tests ensuring correctness, users can leverage    │
+│  the compiler through CLI tools and Python APIs         │
+│  for compilation and proof generation.                   │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 9. CLI and API Usage
+
+### Command-Line Interface (rlangc)
+
+The `rlangc` command-line tool provides a simple interface for compiling RLang source files.
+
+#### Basic Usage
+
+```bash
+# Compile to stdout
+rlangc program.rlang
+
+# Compile to file
+rlangc program.rlang --out output.json
+
+# Specify entry pipeline
+rlangc program.rlang --entry main --out output.json
+
+# Custom version and language
+rlangc program.rlang --version v1 --language rlang-v2 --out output.json
+```
+
+#### Command-Line Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `source` | Path to RLang source file (required) | - |
+| `--out` | Output file path (if omitted, prints to stdout) | stdout |
+| `--entry` | Explicit entry pipeline name | Auto-detected |
+| `--version` | Program IR version label | `v0` |
+| `--language` | Language label for IR | `rlang` |
+
+#### Error Handling
+
+The CLI provides clear error messages:
+
+```bash
+$ rlangc missing.rlang
+Error: cannot read file 'missing.rlang': [Errno 2] No such file or directory
+
+$ rlangc invalid.rlang
+ParseError: Expected ')' at line 3, column 13
+```
+
+### Python API
+
+#### Core Compiler API
+
+```python
+from rlang import compile_source_to_ir, compile_source_to_json
+
+# Compile to IR
+result = compile_source_to_ir(
+    source="fn inc(x: Int) -> Int; pipeline main(Int) -> Int { inc }",
+    version="v0",
+    language="rlang"
+)
+ir = result.program_ir
+
+# Compile to JSON
+json_str = compile_source_to_json(
+    source="fn inc(x: Int) -> Int; pipeline main(Int) -> Int { inc }"
+)
+```
+
+#### Proof Generation API
+
+```python
+from rlang.bor import RLangBoRCrypto, run_program_with_proof
+import json
+
+# Define RLang source
+src = """
+fn inc(x: Int) -> Int;
+fn double(x: Int) -> Int;
+pipeline main(Int) -> Int { inc -> double }
+"""
+
+# Generate proof bundle
+bundle = run_program_with_proof(
+    source=src,
+    input_value=10,
+    fn_registry={
+        "inc": lambda x: x + 1,
+        "double": lambda x: x * 2
+    }
+)
+
+# Convert to BoR rich bundle
+crypto = RLangBoRCrypto(bundle)
+rich_bundle = crypto.to_rich_bundle()
+
+# Save to file
+with open("proof.json", "w") as f:
+    json.dump(rich_bundle.rich, f, indent=2)
+```
+
+#### Advanced Usage
+
+```python
+# Custom function registry
+fn_registry = {
+    "add": lambda x, y: x + y,
+    "multiply": lambda x, y: x * y,
+    "format": lambda x: f"Result: {x}"
+}
+
+# Generate proof with custom functions
+bundle = run_program_with_proof(
+    source=source,
+    input_value=42,
+    fn_registry=fn_registry
+)
+
+# Access proof components
+print(f"HMASTER: {rich_bundle.rich['primary']['master']}")
+print(f"HRICH: {rich_bundle.rich['H_RICH']}")
+```
+
+### Verification Scripts
+
+#### verify_bundle.sh
+
+Generates and verifies proof bundles:
+
+```bash
+./verify_bundle.sh
+```
+
+This script:
+1. Compiles an RLang program
+2. Executes it with proof generation
+3. Converts to BoR rich bundle format
+4. Saves to `out/rich_proof_bundle.json`
+5. Verifies with `borp verify-bundle`
+6. Extracts and displays HMASTER and HRICH
+
+#### next_tests.sh
+
+Runs deterministic test suite:
+
+```bash
+./next_tests.sh
+```
+
+This script:
+1. Runs proof generation twice
+2. Compares SHA256 hashes
+3. Tests tamper detection
+4. Tests subproof mismatch detection
+
+---
+
+**→ Next:** [Section 10: One-Command Execution Workflow](#10-one-command-execution-workflow) demonstrates the single-command setup and verification.
+
+```
+┌─────────────────────────────────────────────────────────┐
+│         USAGE → ONE-COMMAND EXECUTION                   │
+│                                                          │
+│  The simplest way to get started: run_all.sh executes   │
+│  setup, testing, proof generation, and verification    │
+│  in a single command.                                   │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 10. One-Command Execution Workflow
+
+The `run_all.sh` script provides a single command to set up, test, and verify the entire compiler system.
+
+### Quick Start
+
+Run everything with a single command:
+
+```bash
+./run_all.sh
+```
+
+### What the Script Does
+
+The script executes the following steps in order:
+
+1. **Create Virtual Environment**: Sets up isolated Python environment
+2. **Install Package**: Installs RLang compiler in editable mode with dev dependencies
+3. **Run Test Suite**: Executes all 190+ tests
+4. **Generate Proof Bundles**: Runs `verify_bundle.sh` to generate and verify proofs
+5. **Run Deterministic Tests**: Executes `next_tests.sh` for determinism verification
+
+### Script Output
+
+The script produces comprehensive output:
+
+```
+=== Creating virtual environment ===
+...
+
+=== Installing package (editable mode) ===
+...
+
+=== Running test suite ===
+190+ passed in 0.55s
+
+=== Running proof generation and verification ===
+[BoR RICH] VERIFIED
+...
+
+=== Running deterministic test suite ===
+SHA256 Comparison: ✓
+Tamper Detection: ✓
+Subproof Mismatch: ✓
+
+=== DONE — FULL EXECUTION COMPLETE ===
+```
+
+### Use Cases
+
+- **Initial Setup**: First-time project setup
+- **CI/CD Integration**: Automated testing pipelines
+- **Verification**: Verify entire system after changes
+- **Documentation**: Demonstrate complete workflow
+
+### Customization
+
+The script can be customized for specific needs:
+
+```bash
+# Run only tests
+pytest -q --disable-warnings
+
+# Run only proof generation
+./verify_bundle.sh
+
+# Run only deterministic tests
+./next_tests.sh
+```
+
+---
+
+**→ Next:** [Section 11: Design Principles](#11-design-principles-of-the-compiler) explains the fundamental principles guiding compiler design.
+
+```
+┌─────────────────────────────────────────────────────────┐
+│         WORKFLOW → DESIGN PHILOSOPHY                    │
+│                                                          │
+│  Understanding how to use the system, we now explore    │
+│  the design principles that ensure purity,              │
+│  determinism, and verifiability.                        │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 11. Design Principles of the Compiler
+
+The RLang compiler is built on fundamental principles that ensure correctness, determinism, and verifiability.
+
+### Purity
+
+**Principle**: All compiler phases are pure functions.
+
+- **No Side Effects**: Compiler phases don't modify global state
+- **No I/O**: No file system or network access during compilation
+- **Referential Transparency**: Same inputs always produce same outputs
+- **Testability**: Pure functions are easy to test
+
+**Benefits**:
+- Predictable behavior
+- Easy to reason about
+- Parallelizable phases
+- Cacheable results
+
+### Determinism
+
+**Principle**: All outputs are bit-for-bit deterministic.
+
+- **Canonical Serialization**: JSON always uses sorted keys
+- **Fixed Algorithms**: No non-deterministic operations
+- **Stable Ordering**: Arrays preserve order, objects sorted
+- **Reproducible Hashes**: Same data always produces same hash
+
+**Benefits**:
+- Cross-platform compatibility
+- Verifiable results
+- Cryptographic guarantees
+- Debuggable execution
+
+### Transparency
+
+**Principle**: All transformations are explicit and traceable.
+
+- **Clear Phases**: Each phase has well-defined inputs/outputs
+- **Preserved Information**: No information loss during transformation
+- **Error Reporting**: Clear error messages with positions
+- **Documentation**: Every component is documented
+
+**Benefits**:
+- Understandable behavior
+- Easy debugging
+- Maintainable code
+- Educational value
+
+### Verifiability
+
+**Principle**: All results can be independently verified.
+
+- **Cryptographic Proofs**: Proof bundles enable independent verification
+- **Canonical Formats**: Standard formats enable verification
+- **Open Source**: Source code is available for inspection
+- **Test Coverage**: Comprehensive tests ensure correctness
+
+**Benefits**:
+- Trustless verification
+- Auditability
+- Security guarantees
+- Regulatory compliance
+
+### Canonicalization
+
+**Principle**: All serialized data uses canonical formats.
+
+- **Sorted Keys**: Object keys always sorted alphabetically
+- **No Whitespace**: Compact JSON (no extra spaces)
+- **UTF-8 Encoding**: Consistent string encoding
+- **Deterministic Order**: Arrays preserve order, objects sorted
+
+**Benefits**:
+- Deterministic hashing
+- Cross-platform compatibility
+- Verifiable serialization
+- Stable outputs
+
+### Hash-Oriented Architecture
+
+**Principle**: System designed around cryptographic hashing.
+
+- **Hash-First Design**: Hashes computed at every stage
+- **Integrity Guarantees**: Hashes provide integrity checks
+- **Verification**: Hashes enable independent verification
+- **Tamper Detection**: Hash mismatches detect modifications
+
+**Benefits**:
+- Security guarantees
+- Integrity verification
+- Non-repudiation
+- Audit trails
+
+---
+
+**→ Next:** [Section 12: Future Directions](#12-future-directions) outlines planned enhancements and roadmap.
+
+```
+┌─────────────────────────────────────────────────────────┐
+│         PRINCIPLES → FUTURE EVOLUTION                   │
+│                                                          │
+│  Built on solid principles, the compiler will evolve    │
+│  with new features: conditionals, modules, visualizers, │
+│  and enhanced proof capabilities.                        │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 12. Future Directions
+
+The RLang compiler is actively developed with several planned enhancements.
+
+### Extended Control Flow (Loops & Pattern Matching)
+
+RLang v0.2 already supports deterministic `if/else` inside pipelines, with type-checked branches and cryptographically verifiable branch traces. Future work extends this to:
+
+- **Bounded Loops**: `for` loops with explicit ranges, `map`/`filter` over fixed-size collections
+- **Pattern Matching**: Pattern matching and algebraic data types
+- **More Expressive Boolean/Guard Constructs**: Enhanced guard conditions and boolean logic
+- **While Loops**: Deterministic `while` loops with termination guarantees
+
+All while preserving strict determinism and verifiability.
+
+### Modules + Imports
+
+**Planned**: Add module system for code organization.
+
+```rlang
+// math.rlang
+module math {
+  fn add(x: Int, y: Int) -> Int;
+  fn multiply(x: Int, y: Int) -> Int;
+}
+
+// main.rlang
+import math;
+
+pipeline calc(Int) -> Int {
+  math.add(10, 20) -> math.multiply(2)
+}
+```
+
+**Challenges**:
+- Module resolution
+- Circular dependency detection
+- Namespace management
+
+### Verified Connectors
+
+**Planned**: Add verified connectors to external systems.
+
+```rlang
+connector database {
+  fn query(sql: String) -> Result;
+}
+
+pipeline process(Int) -> Result {
+  database.query("SELECT * FROM users WHERE id = ?")
+}
+```
+
+**Challenges**:
+- Deterministic execution
+- Proof generation for external calls
+- Security guarantees
+
+### More BoR Subproof Types
+
+**Planned**: Extend BoR subproof system.
+
+- **TTP**: Trusted Third Party Proof
+- **ZKP**: Zero-Knowledge Proof integration
+- **MPC**: Multi-Party Computation Proof
+
+**Challenges**:
+- Cryptographic complexity
+- Performance implications
+- Verification complexity
+
+### Visualizer Tooling
+
+**Planned**: Visual tools for pipeline inspection.
+
+- **Pipeline Visualizer**: Graph visualization of pipelines
+- **Execution Tracer**: Step-by-step execution visualization
+- **Proof Inspector**: Cryptographic proof visualization
+
+**Challenges**:
+- UI/UX design
+- Performance for large pipelines
+- Integration with compiler
+
+### REPL + Web Playground
+
+**Planned**: Interactive development environment.
+
+- **REPL**: Read-Eval-Print Loop for RLang
+- **Web Playground**: Browser-based RLang editor
+- **Live Verification**: Real-time proof generation
+
+**Challenges**:
+- Security considerations
+- Performance optimization
+- User experience
+
+---
+
+**→ Next:** [Section 13: Versioning and Release Strategy](#13-versioning-and-release-strategy) details the release roadmap and versioning policy.
+
+```
+┌─────────────────────────────────────────────────────────┐
+│         FUTURE → RELEASE PLANNING                       │
+│                                                          │
+│  Future features are organized into versioned releases  │
+│  with clear milestones: v0.2.0 (control flow),          │
+│  v0.3.0 (modules), v1.0.0 (stable DSL).                │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 13. Versioning and Release Strategy
+
+The RLang compiler follows semantic versioning with planned releases.
+
+### Release Roadmap
+
+#### v0.1.0: Fully Deterministic Core (Complete)
+
+**Status**: ✅ Released
+
+**Features**:
+- Complete compiler pipeline
+- BoR proof generation
+- Deterministic execution
+- 170+ tests
+- CLI tool and documentation
+
+**Stability**: Production-ready for deterministic use cases
+
+#### v0.2.0: Deterministic Control Flow (Current)
+
+**Status**: ✅ Implemented (branching in pipelines)
+
+**Features**:
+- `if/else` inside pipelines
+- Type-checked branches with matching output types
+- Canonical IR representation (`IRIf`)
+- Runtime execution with explicit branch traces
+- Branch-aware proof bundles (primary + TRP)
+- HRICH sensitivity to branch decisions
+- 190+ tests (including control flow tests)
+
+#### v0.3.0: Pipeline Modules
+
+**Planned Features**:
+- Module system
+- Import/export
+- Namespace management
+- Code organization
+
+**Target Date**: Q3 2026
+
+#### v1.0.0: Stable DSL
+
+**Planned Features**:
+- Complete language specification
+- Formal semantics
+- Performance optimizations
+- Production tooling
+
+**Target Date**: Q4 2026
+
+### Versioning Policy
+
+- **Major Version**: Breaking changes to language or API
+- **Minor Version**: New features, backward compatible
+- **Patch Version**: Bug fixes, backward compatible
+
+### Backward Compatibility
+
+- **v0.x**: May include breaking changes
+- **v1.0+**: Maintains backward compatibility
+- **Migration Guides**: Provided for breaking changes
+
+---
+
+**→ Next:** [Section 14: Final Notes](#14-final-notes) concludes with philosophy, use cases, and getting started guide.
+
+```
+┌─────────────────────────────────────────────────────────┐
+│         VERSIONING → PHILOSOPHY & CONCLUSION             │
+│                                                          │
+│  Understanding the roadmap, we conclude with the        │
+│  philosophy of deterministic reasoning, use cases,     │
+│  and practical guidance for getting started.            │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 14. Final Notes
+
+### Philosophy of Deterministic Reasoning
+
+RLang embodies a philosophy of **deterministic reasoning**: the belief that computational processes should be predictable, reproducible, and verifiable. This philosophy has profound implications:
+
+1. **Trust**: Deterministic systems can be trusted without trusting the executor
+2. **Auditability**: Every computation leaves a verifiable trail
+3. **Reproducibility**: Results can be independently verified
+4. **Transparency**: Computational processes are transparent and inspectable
+
+### Why BoR Matters
+
+The BoR (Blockchain of Reasoning) proof system provides cryptographic guarantees that enable:
+
+- **Trustless Verification**: Verify computations without trusting the executor
+- **Non-Repudiation**: Cryptographic proof of execution
+- **Regulatory Compliance**: Immutable audit trails
+- **Smart Contracts**: Verifiable computation on blockchains
+
+BoR transforms computation from a trusted process into a verifiable one.
+
+### Trustless Verification Use Cases
+
+RLang + BoR enables new use cases:
+
+1. **Financial Calculations**: Verifiable pricing, risk calculations
+2. **Legal Reasoning**: Cryptographic proof of rule application
+3. **Scientific Computing**: Reproducible research computations
+4. **Blockchain Applications**: Smart contract execution verification
+5. **Regulatory Reporting**: Auditable data transformation pipelines
+6. **Supply Chain**: Verifiable product tracking
+7. **Voting Systems**: Cryptographic proof of vote counting
+8. **Identity Verification**: Verifiable identity checks
+
+### Getting Started
+
+To get started with RLang:
+
+1. **Clone the Repository**: `git clone https://github.com/kushagrab21/Compiler_application`
+2. **Run Setup**: `./run_all.sh`
+3. **Read Documentation**: This README
+4. **Write Programs**: Create `.rlang` files
+5. **Generate Proofs**: Use `verify_bundle.sh`
+6. **Verify Proofs**: Use `borp verify-bundle`
+
+### Contributing
+
+Contributions are welcome! Areas for contribution:
+
+- **Language Features**: New DSL constructs (control flow with `if/else` is now implemented in v0.2)
+- **Proof Modules**: New BoR subproof types
+- **Tooling**: Development tools, visualizers
+- **Documentation**: Improvements, examples
+- **Testing**: Additional test cases
+- **Performance**: Optimizations
+
+### License
+
+MIT License
+
+Copyright (c) 2025 Kushagra Bhatnagar
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+### Acknowledgments
+
+- BoR (Blockchain of Reasoning) system
+- Python compiler community
+- Cryptographic verification research
+- Open source contributors
+
+---
+
+## Quick Reference
+
+### Installation
+
+```bash
+./run_all.sh
+```
+
+### Compilation
+
+```bash
+rlangc program.rlang --out output.json
+```
+
+### Proof Generation
+
+```bash
+./verify_bundle.sh
+```
+
+### Verification
+
+```bash
+borp verify-bundle --bundle out/rich_proof_bundle.json
+```
+
+### Testing
+
+```bash
+pytest -q --disable-warnings
+```
+
+### Determinism Verification
+
+```bash
+./next_tests.sh
+```
+
+---
+
+**Status**: ✅ **Compiler**: Fully functional (190+ tests passing)  
+✅ **Control Flow**: Deterministic `if/else` in pipelines with type-checked branches  
+✅ **Proof Generation**: Complete and deterministic, including branch-aware TRP subproofs  
+✅ **BoR Integration**: Verified with `borp verify-bundle`  
+✅ **Determinism**: Bit-for-bit reproducible including branch traces  
+✅ **Security**: Tamper detection working for both steps and branches  
+
+---
+
+*Last Updated: November 2025*
