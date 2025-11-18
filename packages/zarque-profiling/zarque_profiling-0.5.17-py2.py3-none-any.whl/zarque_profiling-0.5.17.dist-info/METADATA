@@ -1,0 +1,227 @@
+Metadata-Version: 2.4
+Name: zarque-profiling
+Version: 0.5.17
+Summary: Data profiling tools for Big Data
+Home-page: https://github.com/crescendo-medix/zarque-profiling
+Author: Crescendo Medix
+Author-email: g-ikeba@nifty.com
+License: MIT
+Keywords: big-data polars pandas data-profiling eda data-science data-analysis python jupyter ipython
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Topic :: Scientific/Engineering :: Information Analysis
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Framework :: IPython
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Requires-Python: >=3.7, <3.12
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: scipy<1.13,>=1.4.1
+Requires-Dist: pandas<2.3,>1.1
+Requires-Dist: matplotlib<3.9,>=3.7
+Requires-Dist: pydantic<2.7,>=1.8.1
+Requires-Dist: PyYAML<6.1,>=5.0.0
+Requires-Dist: jinja2<3.2,>=2.11.1
+Requires-Dist: visions[type_image_path]>=0.8.1
+Requires-Dist: numpy>=1.21
+Requires-Dist: polars>=1.24.0
+Requires-Dist: htmlmin==0.1.12
+Requires-Dist: phik<0.13,>=0.11.1
+Requires-Dist: requests<2.32,>=2.24.0
+Requires-Dist: tqdm<4.67,>=4.65
+Requires-Dist: seaborn<0.14,>=0.10.1
+Requires-Dist: multimethod>=2.0
+Requires-Dist: statsmodels<0.15,>=0.13.2
+Requires-Dist: typeguard<4.3,>=2.13.2
+Provides-Extra: notebook
+Requires-Dist: jupyter-client>=5.3.4; extra == "notebook"
+Requires-Dist: jupyter-core>=4.6.3; extra == "notebook"
+Requires-Dist: ipywidgets>=7.5.1; extra == "notebook"
+Provides-Extra: unicode
+Requires-Dist: tangled-up-in-unicode==0.2.0; extra == "unicode"
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: keywords
+Dynamic: license
+Dynamic: license-file
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+<!--
+[![PyPI version](https://badge.fury.io/py/zarque-profiling.svg)](https://badge.fury.io/py/zarque-profiling)
+![Python Versions](https://img.shields.io/pypi/pyversions/zarque-profiling.svg)
+![PyPI - Status](https://img.shields.io/pypi/status/zarque-profiling)
+![GitHub](https://img.shields.io/github/license/crescendo-medix/zarque-profiling)
+[![Downloads](https://static.pepy.tech/badge/zarque-profiling)](https://pepy.tech/project/zarque-profiling)
+[![Downloads](https://static.pepy.tech/badge/zarque-profiling/month)](https://pepy.tech/project/zarque-profiling)
+[![Downloads](https://static.pepy.tech/badge/zarque-profiling/week)](https://pepy.tech/project/zarque-profiling)
+-->
+
+<p align="center">
+<img src="https://user-images.githubusercontent.com/132550577/236653863-ccf98580-4a6f-46ba-abde-d3e20a87b354.png" alt="Zarque-profiling">
+</p>
+
+[![PyPI version](https://badge.fury.io/py/zarque-profiling.svg)](https://badge.fury.io/py/zarque-profiling)
+![Python Versions](https://img.shields.io/pypi/pyversions/zarque-profiling.svg)
+[![Downloads](https://static.pepy.tech/badge/zarque-profiling)](https://pepy.tech/project/zarque-profiling)
+![GitHub](https://img.shields.io/github/license/crescendo-medix/zarque-profiling)
+
+Zarque-profiling is a data profiling tool that is 3x faster than Pandas-profiling. Zarque-profiling offers a new option for your big data profiling needs. 
+
+### Features
+
+Zarque-profiling has the same features, analysis items, and output reports as Pandas-profiling, with the ability to perform minimal-profiling (minimal=True), maximal-profiling (minimal=False), and the ability to compare two reports.  
+
+>*Note:*    
+*For big data, it is not recommended to use maximal-profiling (minimal=False) because of the time required for the analysis process. Minimal-profiling (minimal=True) is set as the default.*  
+
+
+### Powered by Polars
+
+Zarque-profiling is based on pandas-profiling (ydata-profiling) and uses Polars instead of Pandas to speed up the analysis process.  
+
+###  Use cases
+
+- Profiling large datasets as a standalone package  
+  Profiling of large data sets that Pandas-profiling is too time consuming to handle.  
+  Data profiling when Polars is used for data analytics and data science.  
+- Seamless integration with existing packages  
+- EDA (Exploratory Data Analysis)  
+  Simple data analysis without writing code. (histograms, scatter plots, heat maps, text analysis)  
+- Comparing multiple version of the same dataset (profiling reports)  
+  Compare data before and after data wrangling.  
+  Compare training data with evaluation data by machine learning.  
+- Data preparation/Data migration solution business  
+  Estimation of man-hours required.  
+  Help to create data specification.  
+  Determine if dataset should be migrated or not.  
+
+
+***
+
+### Benchmark
+
+The figure below shows the benchmark results of data acquisition and analysis processing time for 1 million to 100 million rows in minimal profiling (minimal=True). This data is for reference only. Processing times vary depending on the performance of the PC used and the amount of memory.  
+
+<p align="center">
+<img src="https://user-images.githubusercontent.com/132550577/236175318-f7f34294-b7cd-48ab-b13b-acfc4cc3e442.png">
+</p>
+
+***
+
+### Installation
+
+You can install using the `pip` package manager.
+
+```sh
+pip install zarque-profiling
+```
+
+### How to use
+
+... *See Pandas-profiling for details on usage.*  
+
+Prepare Polars data-frame.
+
+```py
+import polars as pol
+# CSV file
+df = pol.read_csv("path/file_name.csv")
+# Parquet file
+df = pol.read_parquet("path/file_name.parquet")
+```
+
+Generate the standard profiling report.  
+
+```py
+from zarque_profiling import ProfileReport
+# Minimal-profiling
+ProfileReport(df, title="Zarque Profiling Report")
+# Maximal-profiling
+ProfileReport(df, minimal=False, title="Zarque Profiling Report")
+```
+
+Using inside Jupyter Lab.  
+
+```py
+report = ProfileReport(df)
+# Displaying the report as a set of widgets
+report.to_widgets()
+# Directly embedded in a cell
+report.to_notebook_iframe()
+```
+
+Exporting the report to a file.  
+
+```py
+# As a HTML file
+report.to_file("path/file_name.html")
+# As a JSON file
+report.to_file("path/file_name.json")
+```
+
+Compare 2 profiling reports.  
+
+```py
+from zarque_profiling import compare
+df1 = pol.read_csv("path/file_name.csv")
+df2 = pol.read_csv("path/file_name_corrected.csv")
+report1 = ProfileReport(df1, title="Original Data")
+report2 = ProfileReport(df2, title="Corrected Data")
+compare([report1, report2])
+```
+
+### Customize examples  
+
+>*For big data, the following code example takes long time for the analysis process.*
+
+Correlation Diagram (spearman, pearson, phi_k, cramers and kendall).  
+
+```py
+ProfileReport(
+    df,
+    minimal=False,
+    correlations={
+        "spearman": {"calculate": True, "warn_high_correlations": True, "threshold": 0.9},
+        "pearson" : {"calculate": True, "warn_high_correlations": True, "threshold": 0.9},
+        "phi_k"   : {"calculate": True, "warn_high_correlations": True, "threshold": 0.9},
+        "cramers" : {"calculate": True, "warn_high_correlations": True, "threshold": 0.9},
+        "kendall" : {"calculate": True, "warn_high_correlations": True, "threshold": 0.9},
+        "auto"    : {"calculate": False, "warn_high_correlations": False, "threshold": 0.9}
+    }
+)
+```
+
+Text analysis (length distribution, word distribution and character information).  
+
+```py
+ProfileReport(
+    df,
+    vars={"cat": {"length": True, "words": True, "characters": True}}
+)
+```
+
+Change matplotlib Font-family.  
+If Japanese column names are used, change the default font to a font that can display Japanese.
+>*The following code is an example of setting up an IPAex font (Japanese fonts).*
+
+```py
+ProfileReport(
+    df,
+    minimal=False,
+    font_family="IPAexGothic"
+)
+```
+
+### License
+
+- MIT license  
