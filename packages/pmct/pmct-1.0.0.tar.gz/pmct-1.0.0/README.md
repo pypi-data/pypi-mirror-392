@@ -1,0 +1,441 @@
+# PMCT: Python Module for Cointegration Tests with Two Endogenous Structural Breaks
+
+[![Python Version](https://img.shields.io/badge/python-3.7%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
+A Python package implementing three residual-based cointegration tests that account for two unknown regime shifts, following the methodology of Hatemi-J (2008).
+
+## Overview
+
+Testing for long-run relationships between time series variables while accounting for structural breaks is crucial in econometric analysis. This package provides a comprehensive implementation of cointegration tests with two endogenous structural breaks, where the timing of each break is determined endogenously through the testing procedure.
+
+### Key Features
+
+- **Three residual-based tests**: Modified ADF, Phillips Za, and Phillips Zt
+- **Endogenous break detection**: Automatically identifies the timing of two structural breaks
+- **Multiple model specifications**: Support for level shifts, trend breaks, and regime shifts
+- **Flexible lag selection**: Multiple criteria (AIC, BIC, downward-t, or pre-specified)
+- **Easy-to-use API**: Simple function calls with comprehensive output
+- **Pandas integration**: Works seamlessly with pandas DataFrames and Series
+
+## Installation
+
+### From PyPI (when available)
+
+```bash
+pip install pmct
+```
+
+### From Source
+
+```bash
+git clone https://github.com/merwanroudane/pmct.git
+cd pmct
+pip install -e .
+```
+
+### Requirements
+
+- Python >= 3.7
+- NumPy >= 1.19.0
+- Pandas >= 1.1.0
+
+## Quick Start
+
+```python
+import numpy as np
+from pmct import cointegration_test_2breaks
+
+# Load your data
+# y: dependent variable (n x 1)
+# x: independent variable(s) (n x k)
+
+# Run the cointegration test
+results = cointegration_test_2breaks(
+    y=y, 
+    x=x, 
+    model=4,        # Regime shift model (C/S)
+    max_lag=2,      # Maximum lag for ADF test
+    lag_selection=2 # Use AIC for lag selection
+)
+
+# Display results
+print(results)
+
+# Access specific results
+print(f"ADF statistic: {results.adf_statistic:.4f}")
+print(f"First break point: {results.adf_break1:.4f}")
+print(f"Second break point: {results.adf_break2:.4f}")
+```
+
+## Model Specifications
+
+The package supports three model specifications:
+
+### Model 2: Level Shift (C)
+```
+y_t = α_0 + α_1·D1_t + α_2·D2_t + β·x_t + u_t
+```
+
+### Model 3: Level Shift with Trend (C/T)
+```
+y_t = α_0 + α_1·D1_t + α_2·D2_t + γ·t + β·x_t + u_t
+```
+
+### Model 4: Regime Shift (C/S)
+```
+y_t = α_0 + α_1·D1_t + α_2·D2_t + β_0·x_t + β_1·D1_t·x_t + β_2·D2_t·x_t + u_t
+```
+
+Where:
+- `D1_t` and `D2_t` are dummy variables for structural breaks
+- `t` is a time trend
+- `α`, `β`, and `γ` are parameters to be estimated
+
+## Usage Examples
+
+### Example 1: Basic Usage
+
+```python
+import pandas as pd
+from pmct import cointegration_test_2breaks
+
+# Load data from CSV
+data = pd.read_csv('your_data.csv')
+y = data['dependent_var'].values.reshape(-1, 1)
+x = data['independent_var'].values.reshape(-1, 1)
+
+# Run test with default settings
+results = cointegration_test_2breaks(y, x)
+print(results.summary())
+```
+
+### Example 2: Multiple Independent Variables
+
+```python
+from pmct import cointegration_test_2breaks
+
+# Multiple independent variables
+y = data[['y']].values
+x = data[['x1', 'x2', 'x3']].values
+
+# Run test with BIC lag selection
+results = cointegration_test_2breaks(
+    y=y,
+    x=x,
+    model=4,
+    max_lag=4,
+    lag_selection=3  # BIC
+)
+
+# Access detailed results
+print(f"ADF test statistic: {results.adf_statistic:.4f}")
+print(f"Za test statistic: {results.za_statistic:.4f}")
+print(f"Zt test statistic: {results.zt_statistic:.4f}")
+```
+
+### Example 3: Using Helper Function for CSV Files
+
+```python
+from pmct import load_data_from_csv, cointegration_test_2breaks
+
+# Load data directly from CSV
+y, x = load_data_from_csv(
+    'data.csv',
+    y_col=0,      # First column is dependent variable
+    x_cols=[1, 2] # Columns 1 and 2 are independent variables
+)
+
+results = cointegration_test_2breaks(y, x, model=4)
+print(results)
+```
+
+### Example 4: Interpreting Break Points
+
+```python
+from pmct import cointegration_test_2breaks
+import pandas as pd
+
+# Assuming you have a date index
+dates = pd.date_range('2010-01-01', periods=len(y), freq='D')
+
+results = cointegration_test_2breaks(y, x)
+
+# Convert break points to actual dates
+n_obs = len(y)
+break1_idx = int(results.adf_break1 * n_obs)
+break2_idx = int(results.adf_break2 * n_obs)
+
+print(f"First structural break: {dates[break1_idx]}")
+print(f"Second structural break: {dates[break2_idx]}")
+```
+
+## API Reference
+
+### Main Function
+
+#### `cointegration_test_2breaks(y, x, model=4, max_lag=2, lag_selection=2, trim=0.15)`
+
+Conduct cointegration tests with two endogenous structural breaks.
+
+**Parameters:**
+
+- `y` : array-like, shape (n, 1)
+  - Dependent variable
+- `x` : array-like, shape (n, k)
+  - Independent variable(s)
+- `model` : int, default=4
+  - Model specification (2, 3, or 4)
+- `max_lag` : int, default=2
+  - Maximum lag order for ADF test
+- `lag_selection` : int, default=2
+  - Lag selection criterion:
+    - 1: Pre-specified (uses max_lag)
+    - 2: AIC (Akaike Information Criterion)
+    - 3: BIC (Bayesian Information Criterion)
+    - 4: Downward-t selection
+- `trim` : float, default=0.15
+  - Trimming percentage for break point search
+
+**Returns:**
+
+- `CointegrationResults` object containing:
+  - Test statistics (ADF, Za, Zt)
+  - Break points for each test
+  - Parameter estimates
+  - Standard errors
+  - t-statistics
+
+### CointegrationResults Class
+
+The results object provides:
+
+**Attributes:**
+- `adf_statistic`, `za_statistic`, `zt_statistic`: Test statistics
+- `adf_break1`, `adf_break2`: Break points (as fraction of sample)
+- `za_break1`, `za_break2`: Break points from Za test
+- `zt_break1`, `zt_break2`: Break points from Zt test
+- `coefficients`: Estimated parameters
+- `standard_errors`: Standard errors of parameters
+- `t_statistics`: t-statistics for parameters
+- `adf_lag`: Optimal lag length
+
+**Methods:**
+- `summary()`: Returns formatted summary string
+- `__str__()`: Prints formatted results
+
+## Critical Values
+
+To determine statistical significance, compare the test statistics with critical values from Hatemi-J (2008, Table 1, page 501). The critical values depend on:
+
+1. The number of independent variables (k)
+2. The significance level (1%, 5%, or 10%)
+3. The test being used (ADF, Za, or Zt)
+
+### Example Critical Values (k=1)
+
+| Test | 1% | 5% | 10% |
+|------|----|----|-----|
+| ADF* | -6.503 | -6.015 | -5.653 |
+| Za*  | -6.503 | -6.015 | -5.653 |
+| Zt*  | -90.794 | -76.003 | -52.232 |
+
+**Note:** For complete critical value tables, please refer to the original paper.
+
+## Methodology
+
+This package implements the methodology developed by Hatemi-J (2008), which extends the cointegration testing framework to account for two structural breaks. The key innovation is the endogenous determination of break points through a grid search procedure that minimizes the test statistics.
+
+### Testing Procedure
+
+1. **Grid Search**: The algorithm searches over all possible combinations of two break points within the specified trimming range.
+
+2. **For each combination**:
+   - Construct dummy variables
+   - Build the regression matrix according to the model specification
+   - Compute the three test statistics (ADF, Za, Zt)
+
+3. **Optimal breaks**: The break points that minimize each test statistic are selected as the optimal breaks.
+
+4. **Final estimation**: Parameters are estimated using the optimal break points.
+
+### Test Statistics
+
+**Modified ADF Test:**
+```
+ADF* = inf_{(τ1,τ2)∈T} ADF(τ1, τ2)
+```
+
+**Modified Phillips Tests:**
+```
+Za* = inf_{(τ1,τ2)∈T} Za(τ1, τ2)
+Zt* = inf_{(τ1,τ2)∈T} Zt(τ1, τ2)
+```
+
+Where τ1 and τ2 are the relative timing of the breaks, and T is the search space.
+
+## Practical Considerations
+
+### Sample Size
+
+The tests require sufficient observations to reliably detect structural breaks. A minimum of 100 observations is recommended, though more observations improve power.
+
+### Trimming
+
+The `trim` parameter (default 0.15) ensures breaks are not searched for too close to the sample endpoints. This is important for:
+- Maintaining adequate observations in each regime
+- Ensuring reliable parameter estimation
+- Avoiding spurious break detection
+
+### Lag Selection
+
+Proper lag selection is crucial for the ADF test:
+- **AIC** (lag_selection=2): Tends to select more lags, better for capturing dynamics
+- **BIC** (lag_selection=3): More parsimonious, penalizes additional lags more heavily
+- **Downward-t** (lag_selection=4): Sequential testing approach
+- **Pre-specified** (lag_selection=1): When you have prior knowledge about the appropriate lag length
+
+### Model Selection
+
+- **Model 2 (C)**: When you expect shifts in the intercept only
+- **Model 3 (C/T)**: When there's a deterministic trend in addition to level shifts
+- **Model 4 (C/S)**: When you expect the relationship between variables to change (regime shifts)
+
+Model 4 is the most flexible and is typically recommended as the default choice.
+
+## Real-World Application Example
+
+### Financial Market Integration Study
+
+```python
+import pandas as pd
+import numpy as np
+from pmct import cointegration_test_2breaks
+
+# Load financial data
+data = pd.read_csv('financial_data.csv', parse_dates=['Date'])
+data.set_index('Date', inplace=True)
+
+# Convert to log prices
+gold_log = np.log(data['Gold_Price'].values).reshape(-1, 1)
+stock_log = np.log(data['World_Stock_Index'].values).reshape(-1, 1)
+
+# Test for cointegration with structural breaks
+results = cointegration_test_2breaks(
+    y=gold_log,
+    x=stock_log,
+    model=4,  # Regime shift model
+    max_lag=4,
+    lag_selection=2  # AIC
+)
+
+# Display results
+print(results)
+
+# Interpret breaks
+n = len(gold_log)
+break1_idx = int(results.adf_break1 * n)
+break2_idx = int(results.adf_break2 * n)
+
+print(f"\nFirst structural break: {data.index[break1_idx]}")
+print(f"Second structural break: {data.index[break2_idx]}")
+
+# Compare with critical values
+if results.adf_statistic < -6.015:  # 5% critical value for k=1
+    print("\nReject null hypothesis: Evidence of cointegration with structural breaks")
+else:
+    print("\nFail to reject null hypothesis: No evidence of cointegration")
+```
+
+## Testing
+
+Run the test suite:
+
+```bash
+pytest tests/
+```
+
+Run with coverage:
+
+```bash
+pytest --cov=pmct tests/
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+### Development Setup
+
+```bash
+git clone https://github.com/merwanroudane/pmct.git
+cd pmct
+pip install -e ".[dev]"
+```
+
+## Citation
+
+If you use this package in your research, please cite:
+
+**Software:**
+```bibtex
+@software{pmct2024,
+  author = {Roudane, Merwan},
+  title = {PMCT: Python Module for Cointegration Tests with Two Endogenous Structural Breaks},
+  year = {2024},
+  url = {https://github.com/merwanroudane/pmct},
+  version = {1.0.0}
+}
+```
+
+**Methodology:**
+```bibtex
+@article{hatemi2008tests,
+  title={Tests for cointegration with two unknown regime shifts with an application to financial market integration},
+  author={Hatemi-J, Abdulnasser},
+  journal={Empirical Economics},
+  volume={35},
+  number={3},
+  pages={497--505},
+  year={2008},
+  publisher={Springer},
+  doi={10.1007/s00181-007-0175-9}
+}
+```
+
+## License
+
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- **Prof. Abdulnasser Hatemi-J** for developing the original methodology
+- **Dr. Alan Mustafa** for the initial Python/GAUSS implementation
+- Original paper: Hatemi-J, A. (2008). Tests for cointegration with two unknown regime shifts with an application to financial market integration. *Empirical Economics*, 35(3), 497-505.
+
+## References
+
+1. Hatemi-J, A. (2008). Tests for cointegration with two unknown regime shifts with an application to financial market integration. *Empirical Economics*, 35(3), 497-505. [https://doi.org/10.1007/s00181-007-0175-9](https://doi.org/10.1007/s00181-007-0175-9)
+
+2. Gregory, A. W., & Hansen, B. E. (1996). Residual-based tests for cointegration in models with regime shifts. *Journal of Econometrics*, 70(1), 99-126.
+
+3. Phillips, P. C., & Ouliaris, S. (1990). Asymptotic properties of residual based tests for cointegration. *Econometrica*, 58(1), 165-193.
+
+4. Dickey, D. A., & Fuller, W. A. (1979). Distribution of the estimators for autoregressive time series with a unit root. *Journal of the American Statistical Association*, 74(366a), 427-431.
+
+## Contact
+
+**Dr. Merwan Roudane**
+- Email: merwanroudane920@gmail.com
+- GitHub: [@merwanroudane](https://github.com/merwanroudane)
+
+## Support
+
+If you encounter any problems or have questions:
+1. Check the [documentation](https://github.com/merwanroudane/pmct#readme)
+2. Search [existing issues](https://github.com/merwanroudane/pmct/issues)
+3. Create a [new issue](https://github.com/merwanroudane/pmct/issues/new) if needed
+
+---
+
+**Note:** This package implements rigorous econometric tests. Ensure you understand the underlying methodology and assumptions before interpreting results for research or policy decisions.
