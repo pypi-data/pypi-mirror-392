@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+include = ["prompt_blender/*"]
+
+[project]
+name = "prompt-blender"
+version = "0.2.3"
+dependencies = [
+  "pyperclip>=1.9.0",
+  "pandas>=2.0.3",
+  "openai>=1.29.0",
+  "openpyxl>=3.1.2",
+  "wxPython>=4.2.1",
+  "groq>=0.11.0",
+  "docx2txt>=0.8",
+  "pypdf>=6.1.3",
+  "mem0ai>=0.1.94",
+  "dirtyjson>=1.0.8",
+  "pydantic>=2.11.3",
+  "dotenv>=0.9.9",
+  "psutil>=7.0.0",
+  "screeninfo>=0.8.1",
+  "XlsxWriter>=3.2.3",
+  "uuid7==0.1.0",
+]
+requires-python = ">=3.11"
+authors = [
+  {name = "Edans Sandes"},
+]
+description = "Tool designed to automate the generation, execution, and analysis of prompts for use in language learning models (LLMs). It simplifies the task of creating multiple prompts by automatically filling variables within a template, generating a Cartesian product of prompts, and analyzing the results returned by the model's API."
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = ["llm", "gpt", "prompt", "cross product", "automation", "no code"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python"
+]
+
+[project.optional-dependencies]
+browseruse = [
+  "browser-use==0.1.48",
+  "playwright>=1.51.0",
+  "langchain-openai>=0.3.14" # ou outras libs associadas
+]
+
+
+[project.urls]
+Repository = "https://github.com/edanssandes/prompt-blender"
+
+[project.scripts]
+prompt-blender = "prompt_blender:__main__.py"
