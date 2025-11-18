@@ -1,0 +1,44 @@
+[build-system]
+requires = [ "setuptools>=69", "wheel",]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "plumhound"
+version = "1.0.2"
+description = "BloodHoundAD reporting engine for Blue and Purple Teams"
+readme = "README.md"
+requires-python = ">=3.8"
+keywords = [ "bloodhound", "bloodhoundad", "plumhound", "active-directory", "activedirectory", "neo4j", "blue-team", "purple-team", "reporting", "security",]
+classifiers = [ "Development Status :: 5 - Production/Stable", "Environment :: Console", "Intended Audience :: Information Technology", "Intended Audience :: System Administrators", "License :: OSI Approved :: GNU General Public License v3 (GPLv3)", "Programming Language :: Python", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only", "Programming Language :: Python :: 3.8", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Topic :: Security", "Topic :: System :: Systems Administration", "Topic :: Utilities",]
+dynamic = [ "dependencies",]
+[[project.authors]]
+name = "PlumHound Team"
+
+[[project.authors]]
+name = "Kent Ickler"
+
+[[project.authors]]
+name = "Jordan Drysdale"
+
+[project.license]
+file = "LICENSE"
+
+[project.urls]
+Homepage = "https://github.com/PlumHound/PlumHound"
+Repository = "https://github.com/PlumHound/PlumHound"
+Issues = "https://github.com/PlumHound/PlumHound/issues"
+Documentation = "https://www.blackhillsinfosec.com/plumhound-reporting-engine-for-bloodhoundad/"
+
+[project.scripts]
+plumhound = "PlumHound:main"
+
+[tool.setuptools]
+include-package-data = true
+py-modules = [ "PlumHound",]
+
+[tool.setuptools.packages.find]
+where = [ ".",]
+include = [ "lib*", "modules*",]
+
+[tool.setuptools.dynamic.dependencies]
+file = [ "requirements.txt",]
