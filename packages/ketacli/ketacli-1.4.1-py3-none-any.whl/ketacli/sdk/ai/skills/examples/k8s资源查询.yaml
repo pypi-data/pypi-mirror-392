@@ -1,0 +1,18 @@
+name: k8s分析与问题排查
+summary: 分析 Kubernetes 资源状态、事件、指标，排查问题
+enabled: true
+triggers: [k8s资源查询, 查询k8s, k8s pods, k8s deployments, 查询pod, 查询deployment, k8s问题排查]
+permissions: [read_only]
+tools_whitelist: [execute_command, execute_script, create_and_execute_script]
+description: |
+  ## 使用说明
+  - 本技能通过kubectl命令行工具用于分析 Kubernetes 资源状态、事件、指标，排查问题。
+  - 支持查询 Pod、Deployment、Service、Node 等资源，按命名空间聚合。
+  - 可筛选资源状态（如 Running、Failed、Pending 等），按事件类型（如 Warning、Normal 等）过滤。
+  - 可查看资源事件、指标历史，分析问题根源。
+  ## 步骤
+  1. 确认本地kubectl命令行工具已安装并配置好。
+  2. 确认问题类型（如 Pod 异常、Service 连接失败等）。
+  3. 使用 kubectl 命令查询相关资源（如 `kubectl get pods`、`kubectl describe deployment` 等）。
+  4. 分析资源状态、事件、指标，定位问题根源。
+  5. 根据用户要求，可尝试解决问题（如重启 Pod、更新 Deployment 等）。

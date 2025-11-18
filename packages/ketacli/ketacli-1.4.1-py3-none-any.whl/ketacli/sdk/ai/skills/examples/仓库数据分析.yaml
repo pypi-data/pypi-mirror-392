@@ -1,0 +1,24 @@
+name: 仓库数据分析
+summary: 分析仓库中的数据，包括指标、日志、事件等
+enabled: true
+triggers: [仓库数据分析, 仓库数据, 数据分析]
+permissions: [read_only]
+tools_whitelist: [get_docs, search_data, display_chart_textual]
+description: |
+  ## 仓库数据分析步骤
+    1. 先确认指定仓库存在，可通过list_assets type=repo prefix=<名称关键字> 来查询仓库列表，确认仓库存在，并记录仓库类型。
+    2. 确认仓库类型后，根据仓库类型选择合适的数据分析方法：
+      - 若仓库类型为 `EVENT`或者`TRACES`根据如下步骤进行分析：
+        1. 通过get_docs _type=log_search_syntax 来查看日志搜索语法。
+        2. 先确认事件类型的仓库中是否包含需要分析的字段。通过get_repo_fields来获取仓库中的字段摘要，并根据摘要信息判断哪些字段可作为分析的维度。
+        3. 根据用户需求选择合适的字段作为分析的维度，构建日志搜索查询。
+        4. 使用工具 `search_data spl='<SPL查询>'` 执行查询，并根据结果调整过滤条件与时间窗口。
+        5. 对结果进行归纳，输出结论与建议。
+      - 若仓库类型为 `METRIC`根据如下步骤进行分析：
+        1. 通过get_docs _type=metric_search_syntax 来查看指标搜索语法。
+        2. 先确认指标类型的仓库中是否包含需要分析的指标。通过search_data spl='show metric names |where like(name, "%<指标名称关键字>%")' 来查询指标名称。
+        3. 根据用户需求选择合适的指标进行分析，构建指标搜索查询。
+        4. 使用工具 `search_data spl='<SPL查询>'` 执行查询，并根据结果调整过滤条件与时间窗口。
+        5. 对结果进行归纳，输出结论与建议。
+        6. 必要时，通过工具 `display_chart_textual` 可视化结果，例如：`display_chart_textual spl='<SPL查询>'`
+      
