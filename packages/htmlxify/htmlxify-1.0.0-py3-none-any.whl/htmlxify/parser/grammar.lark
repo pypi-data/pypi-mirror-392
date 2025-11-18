@@ -1,0 +1,70 @@
+
+// Start: One or more top-level elements
+start: element+
+
+// Element syntax: tag[.class][#id][(attrs)][{body}]
+element: tag_with_selectors attributes? body?
+
+// Tag with optional selectors
+tag_with_selectors: WORD class_sel* id_sel?
+
+// Class selector: .classname
+class_sel: "." WORD
+
+// ID selector: #idname
+id_sel: "#" WORD
+
+// ============================================================
+// ATTRIBUTES
+// ============================================================
+
+attributes: "(" attr_list ")"
+
+attr_list: attribute ("," attribute)*
+
+attribute: attr_key ":" attr_value
+
+attr_key: SPECIAL_ATTR | WORD
+
+attr_value: STRING | NUMBER | WORD
+
+// ============================================================
+// BODY (Content)
+// ============================================================
+
+body: "{" body_content "}"
+
+// body_content: Items can be full elements or text
+body_content: body_item*
+
+// body_item: Try element first (with at least attributes or body), then text
+body_item: full_element   -> body_element
+         | text_content   -> body_text
+
+// full_element: Has either attributes, body, or both (this disambiguates from plain text)
+full_element: WORD class_sel* id_sel? (attributes | body | attributes body)
+
+// text_content: Text chunks or plain words
+text_content: text_token+
+
+text_token: TEXT_CHUNK | WORD
+
+// ============================================================
+// TERMINALS
+// ============================================================
+
+COMMENT: "//" /[^\n]*/
+
+SPECIAL_ATTR.10: "⚡-call" | "⚡-data"
+
+STRING.9: /"[^"]*"/ | /'[^']*'/
+
+NUMBER.8: /-?\d+\.?\d*/
+
+WORD.7: /[a-zA-Z_][a-zA-Z0-9_-]*/
+
+TEXT_CHUNK.1: /[a-zA-Z0-9.!?;:'"&%$@*+=<>\/\[\]\\|~`\s\-–—,]+/
+
+%import common.WS
+%ignore WS
+%ignore COMMENT
