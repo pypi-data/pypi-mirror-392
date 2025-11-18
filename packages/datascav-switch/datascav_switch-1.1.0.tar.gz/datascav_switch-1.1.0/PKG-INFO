@@ -1,0 +1,141 @@
+Metadata-Version: 2.4
+Name: datascav-switch
+Version: 1.1.0
+Summary: Modules to convert different types of files using AI based validations and conversions.
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: annotated-types==0.7.0
+Requires-Dist: anyio==4.11.0
+Requires-Dist: asttokens==3.0.1
+Requires-Dist: autopep8==2.3.2
+Requires-Dist: certifi==2025.11.12
+Requires-Dist: charset-normalizer==3.4.4
+Requires-Dist: comm==0.2.3
+Requires-Dist: debugpy==1.8.17
+Requires-Dist: decorator==5.2.1
+Requires-Dist: distro==1.9.0
+Requires-Dist: executing==2.2.1
+Requires-Dist: greenlet==3.2.4
+Requires-Dist: h11==0.16.0
+Requires-Dist: httpcore==1.0.9
+Requires-Dist: httpx==0.28.1
+Requires-Dist: idna==3.11
+Requires-Dist: ipykernel==7.1.0
+Requires-Dist: ipython==9.7.0
+Requires-Dist: ipython-pygments-lexers==1.1.1
+Requires-Dist: isort==7.0.0
+Requires-Dist: jedi==0.19.2
+Requires-Dist: jiter==0.12.0
+Requires-Dist: jsonpatch==1.33
+Requires-Dist: jsonpointer==3.0.0
+Requires-Dist: jupyter-client==8.6.3
+Requires-Dist: jupyter-core==5.9.1
+Requires-Dist: langchain==1.0.7
+Requires-Dist: langchain-core==1.0.5
+Requires-Dist: langchain-openai==1.0.3
+Requires-Dist: langchain-text-splitters==1.0.0
+Requires-Dist: langgraph==1.0.3
+Requires-Dist: langgraph-checkpoint==3.0.1
+Requires-Dist: langgraph-prebuilt==1.0.4
+Requires-Dist: langgraph-sdk==0.2.9
+Requires-Dist: langsmith==0.4.43
+Requires-Dist: matplotlib-inline==0.2.1
+Requires-Dist: nest-asyncio==1.6.0
+Requires-Dist: openai==2.8.0
+Requires-Dist: orjson==3.11.4
+Requires-Dist: ormsgpack==1.12.0
+Requires-Dist: packaging==25.0
+Requires-Dist: parso==0.8.5
+Requires-Dist: pexpect==4.9.0
+Requires-Dist: pip==25.3
+Requires-Dist: platformdirs==4.5.0
+Requires-Dist: prompt-toolkit==3.0.52
+Requires-Dist: psutil==7.1.3
+Requires-Dist: ptyprocess==0.7.0
+Requires-Dist: pure-eval==0.2.3
+Requires-Dist: pycodestyle==2.14.0
+Requires-Dist: pydantic==2.12.4
+Requires-Dist: pydantic-core==2.41.5
+Requires-Dist: pygments==2.19.2
+Requires-Dist: pymupdf==1.26.6
+Requires-Dist: python-dateutil==2.9.0.post0
+Requires-Dist: python-dotenv==1.2.1
+Requires-Dist: pyyaml==6.0.3
+Requires-Dist: pyzmq==27.1.0
+Requires-Dist: regex==2025.11.3
+Requires-Dist: requests==2.32.5
+Requires-Dist: requests-toolbelt==1.0.0
+Requires-Dist: six==1.17.0
+Requires-Dist: sniffio==1.3.1
+Requires-Dist: sqlalchemy==2.0.44
+Requires-Dist: stack-data==0.6.3
+Requires-Dist: tenacity==9.1.2
+Requires-Dist: tiktoken==0.12.0
+Requires-Dist: tornado==6.5.2
+Requires-Dist: tqdm==4.67.1
+Requires-Dist: traitlets==5.14.3
+Requires-Dist: typing-extensions==4.15.0
+Requires-Dist: typing-inspection==0.4.2
+Requires-Dist: urllib3==2.5.0
+Requires-Dist: wcwidth==0.2.14
+Requires-Dist: xxhash==3.6.0
+Requires-Dist: zstandard==0.25.0
+Dynamic: license-file
+
+# datascav-switch
+
+[![Python](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
+[![LangChain](https://img.shields.io/badge/langchain-ecosystem-blueviolet)](https://github.com/langchain-ai/langchain)
+[![OpenAI](https://img.shields.io/badge/openai-required-important)](https://platform.openai.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+**datascav-switch** is a Python package for intelligent document format conversion, leveraging generative AI (OpenAI) and a scalable architecture. This project is part of a suite of tools for automation, data extraction, and transformation.
+
+---
+
+## Main Features
+
+- PDF to Markdown conversion with layout preservation
+- Support for multiple input formats (file, URL, base64, bytes)
+- Parallel processing and dynamic logging
+- Detailed token tracking
+- Native integration with [LangChain](https://github.com/langchain-ai/langchain) and tracing via LangSmith
+
+---
+
+## Installation
+
+```bash
+pip install datascav-switch
+```
+
+> **Requirements:**
+> - Python 3.12+
+> - OpenAI API key (`OPENAI_API_KEY`)
+
+---
+
+## Quick Start
+
+```python
+from scav_switch.converters.pdf import ScavToMarkdown
+scav = ScavToMarkdown(model='gpt-4.1', verbose=True)
+markdown = scav.dig('/path/to/file.pdf')
+print(markdown)
+```
+
+For complete examples and detailed documentation, see the [`docs/`](docs/) folder and the notebooks for each module.
+
+---
+
+## Documentation
+
+- Detailed documentation and usage examples are available in each [`docs/`](docs/) subfolder, including notebooks such as [`docs/conveters/pdf/ScavToMarkdown/ScavToMarkdown.ipynb`](docs/conveters/pdf/ScavToMarkdown/ScavToMarkdown.ipynb).
+- Also check the [official LangChain documentation](https://github.com/langchain-ai/langchain) for advanced integration.
+
+---
+
+## License
+
+MIT
