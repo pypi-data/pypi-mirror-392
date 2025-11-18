@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
+[tool.hatch.build.targets.wheel]
+artifacts = [
+  "*.py",
+]
+[tool.hatch.build.targets.sdist]
+exclude = [
+  "src/",
+  "out/",
+]
+[project]
+name = "textglue"
+version = "0.0.5"
+authors = [
+  { name="derekmc", email="derek7mc@gmail.com" },
+]
+description = "textglue - An simple static template system"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+
+[project.scripts]
+textglue = "textglue.textglue:main_cli"
+[project.urls]
+Homepage = "https://gitlab.com/derekmc/derekmc.gitlab.io/-/tree/main/projects/textglue"
+Issues = "https://gitlab.com/derekmc/derekmc.gitlab.io/-/tree/main/projects/textglue"
