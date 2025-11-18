@@ -1,0 +1,73 @@
+[build-system]
+{% if cookiecutter.packaging_provider == 'flit' -%}
+build-backend = "flit_core.buildapi"
+requires = ["flit_core >=3.2,<4"]
+{%- endif %}
+
+[project]
+authors = [{ name = "{{cookiecutter.author}}", email = "{{cookiecutter.author_email}}" }]
+dynamic = ["description", "version"]
+name = "{{cookiecutter.project_slug}}"
+readme = "README.rst"
+
+# Drop support for EOL Python versions
+# https://devguide.python.org/versions/
+requires-python = ">=3.10"
+
+dependencies = []
+
+
+[project.urls]
+Source = "{{cookiecutter.project_url}}"
+
+
+[project.optional-dependencies]
+dev = [
+{%- if ('disable_bh_dependencies' not in cookiecutter) or (not cookiecutter.disable_bh_dependencies) %}
+    "build_harness {{cookiecutter.build_harness_version}}",
+{%- endif %}
+]
+doc = [
+    "sphinx >=4.5.0, <5",
+    "sphinx_rtd_theme >=1.0, <2",
+]
+test = [
+    "pytest >=7.1.1, <8",
+    "pytest-cov >=3.0, <4",
+    "pytest-mock >=3.7.0, <4",
+]
+
+
+[tool.black]
+# Don't forget to sync this with isort, .flake8
+line-length = {{cookiecutter.line_length}}
+
+
+[tool.isort]
+# Don't forget to sync this with black, .flake8
+line_length = {{cookiecutter.line_length}}
+profile = "black"
+
+
+[tool.coverage.run]
+# branch and concurrency settings seem to be needed due to this problem:
+# pytest-cov internal error "Can't combine line data with arc data"
+# https://github.com/pytest-dev/pytest-cov/issues/243
+branch = true
+concurrency = ["multiprocessing"]
+omit = ["{{cookiecutter.project_slug}}/.venv/*"]
+source = ["{{cookiecutter.project_slug}}"]
+
+
+[tool.coverage.report]
+exclude_lines = [
+    "except ImportError",
+    "raise NotImplementedError",
+    "pass",
+    "ABCmeta",
+    "abstractmethod",
+    "warnings.warn",
+]
+fail_under = {{ cookiecutter.coverage_threshold }}
+precision = 0
+show_missing = true
