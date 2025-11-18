@@ -1,0 +1,91 @@
+[tool.poetry]
+name = "ipfabric_nornir"
+version = "1.0.5"
+description = "IP Fabric Offical Plugin for nornir"
+authors = [
+    "IP Fabric Solution Architecture <solution.architecture@ipfabric.io>"
+]
+license = "Apache-2.0"
+readme = "README.md"
+homepage = "https://gitlab.com/ip-fabric/integrations/ipfabric_nornir"
+repository = "https://gitlab.com/ip-fabric/integrations/ipfabric_nornir"
+keywords = ["ipfabric", "ip-fabric", "community-fabric"]
+packages = [{include = "ipfabric_nornir"}]
+
+[tool.poetry.urls]
+"IP Fabric" = "https://ipfabric.io/"
+"Changelog" = "https://gitlab.com/ip-fabric/integrations/ipfabric_nornir/-/blob/main/CHANGELOG.md"
+
+
+[tool.poetry.dependencies]
+python = "^3.8.1"
+ipfabric = ">=7.0.0,<8.0.0"
+nornir = "^3.4.1"
+nornir-netmiko = {version = "^1.0.0", optional = true}
+nornir-utils = {version = "^0.2.0", optional = true}
+nornir-napalm = {version = "^0.4.0", optional = true}
+tenacity = ">=8.0,<10.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0"
+pytest-cov = "^5.0"
+flake8 = "^7.0"
+black = "^24.0"
+setuptools = "^75.0"
+flake8-pyproject = "^1.2.3"
+
+[tool.poetry.extras]
+all = ["nornir-netmiko", "nornir-utils", "nornir_napalm"]
+examples = ["nornir-netmiko", "nornir-utils", "nornir_napalm"]
+netmiko = ["nornir-netmiko"]
+napalm = ["nornir_napalm"]
+
+[tool.poetry.plugins."nornir.plugins.inventory"]
+"IPFabricInventory" = "ipfabric_nornir.plugins.inventory.ipfabric:IPFabricInventory"
+
+[build-system]
+requires = ["poetry-core>=2.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+target-version = ['py312']
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+    | examples
+  )/
+  | settings.py     # This is where you define files that should not be stylized by black
+                     # the root of the project
+)
+'''
+
+[tool.pytest.ini_options]
+addopts = "--cov=ipfabric_nornir --cov-report term --cov-report xml:coverage.xml"
+testpaths = ["tests"]
+
+[tool.flake8]
+exlcude = [
+    '.git',
+    '.venv',
+    'dist',
+    'examples',
+    'docs',
+    'tests',
+    'internal_tools'
+]
+max-complexity = 10
+max-line-length = 127
+count = true
+statistics = true
