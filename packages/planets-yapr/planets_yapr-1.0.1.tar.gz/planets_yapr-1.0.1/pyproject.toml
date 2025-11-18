@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=62.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "planets-yapr"
+version = "1.0.1"
+authors = [
+    {name = "UltiNaruto"},
+]
+description = "An open source randomizer patcher for Metroid Planets."
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3.11"
+]
+dependencies = [
+    "pythonnet",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+]
+
+
+[project.urls]
+Repository = "https://github.com/UltiNaruto/YAPR"
+
+
+# Entry Points for PyInstaller
+[project.entry-points.pyinstaller40]
+hook-dirs = "planets_yapr.__pyinstaller:get_hook_dirs"
+
+
+[tool.setuptools]
+packages = ["planets_yapr", "planets_yapr.__pyinstaller"]
+
+[tool.setuptools.package-data]
+"*" = ["yapr/**"]
+"yapr_py.yapr" = ["**"]
+
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = [
+    "planets_yapr_tests",
+]
