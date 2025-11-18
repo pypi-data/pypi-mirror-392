@@ -1,0 +1,38 @@
+# Note on running admin tasks that would use `typer-invoke`:
+#   pip install typer-invoke
+#   inv some task
+#
+# Since this project *is* `typer-invoke`, we run it directly:
+#   python -m src.typer_invoke.invoke some task
+
+name: Tests
+
+on:
+  - pull_request
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Min and max versions supported
+        python-version: ['3.11', '3.14']
+    name: Python ${{ matrix.python-version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+
+      - name: Install requirements
+        run: |
+          pip install typer
+          python -m src.typer_invoke.invoke pip install dev
+
+      - name: Run tests
+        # Test folder(s) configured in `pyproject.toml`
+        run: python -m src.typer_invoke.invoke test unit

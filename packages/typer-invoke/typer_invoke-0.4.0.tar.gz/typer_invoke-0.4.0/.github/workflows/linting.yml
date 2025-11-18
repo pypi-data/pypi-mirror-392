@@ -1,0 +1,38 @@
+# Note on running admin tasks that would use `typer-invoke`:
+#   pip install typer-invoke
+#   inv some task
+#
+# Since this project *is* `typer-invoke`, we run it directly:
+#   python -m src.typer_invoke.invoke some task
+
+name: Linting
+# Linting tools use `pyproject.toml` and `setup.cfg` for config.
+
+on:
+  - pull_request
+
+jobs:
+  linting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install requirements
+        run: |
+          pip install typer
+          python -m src.typer_invoke.invoke pip install dev
+
+      - name: isort
+        run: isort .
+      - name: black
+        run: black .
+      - name: flake8
+        run: flake8 .
+      - name: mypy
+        run: mypy src && mypy admin
