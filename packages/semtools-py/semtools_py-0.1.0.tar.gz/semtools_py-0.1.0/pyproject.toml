@@ -1,0 +1,47 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "semtools-py"
+version = "0.1.0"
+description = "Semantic search and document parsing tools for the command line"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "model2vec",
+    "scipy",
+    "numpy",
+    "httpx",
+    "lancedb",
+    "click",
+    "aiofiles",
+]
+
+[project.scripts]
+parse = "semtools.cli:parse"
+search = "semtools.cli:search"
+workspace = "semtools.cli:workspace"
+
+[dependency-groups]
+dev = [
+    "pytest>=7.4.3,<8.0.0",
+    "pytest-mock>=3.15.1",
+    "pytest-asyncio>=0.23.8",
+    "requests>=2.32.5",
+    "arxiv>=2.3.0",
+    "beautifulsoup4>=4.14.2",
+    "tiktoken",
+    "google-generativeai",
+    "build",
+    "twine"
+]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/semtools"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
