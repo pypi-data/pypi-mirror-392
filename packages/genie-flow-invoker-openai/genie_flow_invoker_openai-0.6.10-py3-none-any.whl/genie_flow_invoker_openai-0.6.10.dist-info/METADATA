@@ -1,0 +1,130 @@
+Metadata-Version: 2.4
+Name: genie_flow_invoker_openai
+Version: 0.6.10
+Summary: Genie Flow Invoker OpenAI on Azure
+Maintainer-email: Willem van Asperen <willem.van.asperen@paconsulting.com>
+License-Expression: Apache-2.0
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Operating System :: OS Independent
+Classifier: Framework :: Pydantic
+Classifier: Topic :: Software Development :: Libraries :: Application Frameworks
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: Typing :: Typed
+Requires-Python: >=3.11.0
+Description-Content-Type: text/markdown
+License-File: NOTICES
+Requires-Dist: loguru~=0.7.2
+Requires-Dist: genie-flow-invoker
+Requires-Dist: openai~=1.55.3
+Requires-Dist: PyYAML~=6.0.2
+Requires-Dist: backoff~=2.2.1
+Dynamic: license-file
+
+# OpenAI Invokers
+This package contains invokers for different OpenAI compatible invocations.
+
+The following invokers are provided:
+
+## Native OpenAI interface
+This set of invokers implement the native OpenAI client. That client takes an endpoint and a
+model name, and call the API on that.
+
+`OpenAIChatInvoker`
+: An invoker that called the chat completion API. Input is a chat history and the response
+is the LLMs completion of that chat.
+
+`OpenAIChatJsonInvoker`
+: Similar to the `OpenAIChatInvoker`, this invoker calls the chat completion API, but here
+the parameter `json_object` is given as the response format. This should force the LLM to respond
+with a clean JSON object.
+
+`OpenAIImageInvoker`
+: An invoker to call the OpenAI image generation API. Input would be a JSON encoded object 
+of configuration parameters, output is a JSON encoded object containing the properties on 
+the generated image.
+
+### Parameters
+The native invokers expect the following parameters in the `meta.yaml`, or their representative
+environment variable.
+
+| parameter            | env variable               | default | description                                                          |
+|----------------------|----------------------------|---------|----------------------------------------------------------------------|
+| `api_key`            | `OPENAI_API_KEY`           |         | API key to use                                                       |
+| `base_url`           | `OPENAI_BASE_URL`          |         | base URL to address the API                                          |
+| `model`              | `OPENAI_MODEL`             |         | name of the model to use                                             |
+| `backoff_max_time`   | `OPENAI_BACKOFF_MAX_TIME`  | 61      | maximal seconds to wait between retries                              |
+| `backoff_max_tries`  | `OPENAI_MAX_BACKOFF_TRIES` | 15      | maximal number of retries                                            |
+| `generation`         |                            |         | NB: for image generator only! an object with the parameters to pass  |
+
+## OpenAI on Azure interface
+These invokers follow the same pattern as their native counterparts, with the difference that
+they create a client that talks to an OpenAI on Azure endpoint with slightly different configuration
+of the connection.
+
+`AzureOpenAIChatInvoker`: A chat completion invoker that uses an OpenAI on Azure client with
+the appropriate attributes.
+
+`AzureOpenAIChatJsonInvoker`: The chat completion invoker for OpenAI on Azure, that returns 
+a JSON encoded result object.
+
+`AzureOpenAIImageInvoker`: The OpenAI on Azure invoker to generate images.
+
+### Parameters
+| parameter           | env variable                      | default | description                                                         |
+|---------------------|-----------------------------------|---------|---------------------------------------------------------------------|
+| `api_key`           | `AZURE_OPENAI_API_KEY`            |         | API key to use                                                      |
+| `api_version`       | `AZURE_OPENAI_API_VERSION`        |         | version of the API to use                                           |
+| `endpoint`          | `AZURE_OPENAI_ENDPOINT`           |         | endpoint to address the API                                         |
+| `deployment_name`   | `AZURE_OPENAI_DEPLOYMENT_NAME`    |         | name of the deployment to use                                       |
+| `backoff_max_time`  | `AZURE_OPENAI_BACKOFF_MAX_TIME`   | 61      | maximal seconds to wait between retries                             |
+| `backoff_max_tries` | `AZURE_OPENAI_MAX_BACKOFF_TRIES`  | 15      | maximal number of retries                                           |
+| `generation`        |                                   |         | NB: for image generator only! an object with the parameters to pass |
+
+
+## Chat Completion
+The chat completion API is meant to take chat history into account. The dialogue that was had
+so far is sent as content parameter to this invoker. This is done by sending the content in 
+the form of a YAML encoded list of objects. See the following example:
+
+```yaml
+- role: assistant
+  content: Hey hello! I am a friendly chatbot and I am here to help. What can I help you with?
+- role: user
+  content: |
+    Can you please tell me how to make Apple Pie?
+    My grandmother always used to make these and I have never had a better one since she passed away.
+    So I guess I am looking for a traditional approach.
+    Please give me a bullet list of ingredients, in metric measures, followed by a step-by-step
+    approach to making it.
+```
+In this example it is clear that the order of the dialogue is important. Also, the use of the
+`|` character after `content` enables us to easily create a multi-line string.
+
+The role can be either "system", for a system prompt, or "assistant" or "user", depending on
+who made the uttering.
+
+When the content that is passed to the invoker cannot be parsed as a YAML encoded string, 
+a faux chat history is created, for which it is set that the `role` is "user" and the full
+content string that is passed is the `content` for that single chat object.
+
+When using a Jinja template, referring to `{{ chat_history }}` will in fact render a YAML representation
+of the dialogue so far.
+
+## Image parameters
+The `generation` parameters object should contain the following properties:
+
+| parameter | default   | description                                                   |
+|-----------|-----------|---------------------------------------------------------------|
+| `prompt`  |           | prompt to use to generate the model                           |
+| `size`    | 1024x1024 | the size of the generated image                               |
+| `quality` | standard  | the quality of the generated image, can be "standard" or "hd" |
+| `n`       | 1         | the number of images to generate in one invocation            |
+
+These parameters can be set in the `meta.yaml` for the image invoker. The content that gets
+passed to the invoker will be used as the `prompt` value. But, when the content that is sent
+to this invoker can be parsed as a JSON object, the values in these parameters can be overriden
+by setting them in that object.
