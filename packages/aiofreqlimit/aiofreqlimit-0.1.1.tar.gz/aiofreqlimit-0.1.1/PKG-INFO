@@ -1,0 +1,91 @@
+Metadata-Version: 2.3
+Name: aiofreqlimit
+Version: 0.1.1
+Summary: Frequency limit for asyncio
+Author: Gleb Chipiga
+License: MIT License
+         
+         Copyright (c) 2018-2024 Gleb Chipiga
+         
+         Permission is hereby granted, free of charge, to any person obtaining a copy
+         of this software and associated documentation files (the "Software"), to deal
+         in the Software without restriction, including without limitation the rights
+         to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+         copies of the Software, and to permit persons to whom the Software is
+         furnished to do so, subject to the following conditions:
+         
+         The above copyright notice and this permission notice shall be included in all
+         copies or substantial portions of the Software.
+         
+         THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+         IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+         FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+         AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+         LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+         OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+         SOFTWARE.
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Development Status :: 4 - Beta
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Topic :: Internet
+Classifier: Framework :: AsyncIO
+Requires-Python: >=3.11, <3.15
+Project-URL: Homepage, https://github.com/gleb-chipiga/aiofreqlimit
+Description-Content-Type: text/x-rst
+
+===========================================
+Frequency limit context manager for asyncio
+===========================================
+
+.. image:: https://badge.fury.io/py/aiofreqlimit.svg
+   :target: https://pypi.org/project/aiofreqlimit
+   :alt: Latest PyPI package version
+
+.. image:: https://img.shields.io/badge/license-MIT-blue.svg
+   :target: https://github.com/gleb-chipiga/aiofreqlimit/blob/master/LICENSE
+   :alt: License
+
+.. image:: https://img.shields.io/pypi/dm/aiofreqlimit
+   :target: https://pypistats.org/packages/aiofreqlimit
+   :alt: Downloads count
+
+Installation
+============
+aiofreqlimit requires Python 3.11 or greater and is available on PyPI. Use pip to install it:
+
+.. code-block:: bash
+
+    pip install aiofreqlimit
+
+Using aiofreqlimit
+==================
+Pass a value of any hashable type to `acquire` or do not specify any parameter:
+
+.. code-block:: python
+
+    import asyncio
+
+    from aiofreqlimit import FreqLimit
+
+    limit = FreqLimit(1 / 10)
+
+
+    async def job():
+        async with limit.acquire('some_key'):
+            await some_call()
+
+
+    async def main():
+        await asyncio.gather(job() for _ in range(100))
+
+
+    asyncio.run(main())
