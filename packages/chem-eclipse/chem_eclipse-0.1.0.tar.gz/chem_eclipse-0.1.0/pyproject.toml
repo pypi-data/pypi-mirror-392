@@ -1,0 +1,93 @@
+[project]
+name = "chem-eclipse"
+version = "0.1.0"
+authors = [
+  { name = "Liam Brydon-Brown", email = "lbry121@aucklanduni.ac.nz" },
+]
+description = "Code for the Paper 'Predicting Enzyme-Compound Interactions for Enzyme-Catalysed Reactions'"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "GPL-3.0-only"
+license-files = ["LICEN[CS]E*"]
+
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+]
+
+dependencies = [
+  "scikit-learn<1.5.0",
+  "xgboost~=3.0.5",
+  "rdkit~=2024.9.6",
+  "tqdm",
+  "matplotlib~=3.10.7",
+  "pandas~=2.3.3",
+  "iterative-stratification~=0.1.9",
+  "envipath-python",
+  "lightning~=2.5.5",
+  "tensorboard~=2.18.0",
+  "plotly",
+  "cairosvg~=2.8.2",
+  "kaleido~=1.1.0",
+]
+
+[project.optional-dependencies]
+cpu = [
+    "torch~=2.8.0"
+]
+cuda = [
+    "torch~=2.8.0",
+    "cupy-cuda12x~=13.5.1"
+]
+
+[tool.uv]
+conflicts = [
+  [
+    { extra = "cpu" },
+    { extra = "cuda" },
+  ],
+]
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cpu", extra = "cpu" },
+  { index = "pytorch-cu128", extra = "cuda" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+
+[project.urls]
+Homepage = "https://github.com/MyCreativityOutlet/chem-eclipse"
+Issues = "https://github.com/MyCreativityOutlet/chem-eclipse/issues"
+
+[build-system]
+requires = ["uv-build"]
+build-backend = "uv_build"
+
+[project.scripts]
+prepare_envipath_data = "chem_eclipse.utils:prepare_envipath_data"
+eclipse_train_main = "chem_eclipse.ECLIPSETrain:eclipse_train_main"
+eclipse_inference_main = "chem_eclipse.ECLIPSEInference:eclipse_inference_main"
+oob_inference = "chem_eclipse.ECLIPSEInference:oob_inference"
+product_main = "chem_eclipse.ProductPredictionTrain:product_main"
+recreate_tables_figures = "chem_eclipse.ModelAnalysis:recreate_tables_figures"
+
+[tool.uv.build-backend]
+source-exclude = [
+    "src/chem_eclipse/data/*",
+    "src/chem_eclipse/results/*",
+    "*.pkl",
+    ".github/",
+    "data/",
+    "results/",
+    "dist/"
+]
