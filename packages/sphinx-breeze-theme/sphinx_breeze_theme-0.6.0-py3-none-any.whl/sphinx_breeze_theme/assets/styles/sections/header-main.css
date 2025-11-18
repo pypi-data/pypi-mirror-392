@@ -1,0 +1,61 @@
+.bz-header-main {
+  position: relative;
+  display: flex;
+  z-index: 1001;
+  overflow-x: clip;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--bz-header-height);
+  color: var(--bz-header-color);
+  font-size: var(--bz-header-font-size);
+  font-family: var(--bz-header-font-family);
+  background-color: var(--bz-header-background-color);
+  padding-inline: calc(var(--bz-page-padding) + clamp(1rem, 0.826rem + 0.87vw, 1.5rem));
+
+  &:not(:has(+ .bz-header-tabs)) {
+    border-bottom: 1px solid var(--bz-header-border-color);
+    box-shadow:
+      0 1px 1px var(--bz-color-shadow),
+      0 2px 2px var(--bz-color-shadow),
+      0 4px 4px var(--bz-color-shadow),
+      0 8px 8px var(--bz-color-shadow);
+  }
+
+  > * {
+    display: flex;
+    align-items: center;
+    gap: clamp(1.2rem, 0.922rem + 1.391vw, 2rem);
+  }
+
+  @media (width > 52rem) {
+    position: sticky;
+    top: 0;
+  }
+}
+
+.bz-header-end > :not(:first-child)::before {
+  content: "";
+  top: 50%;
+  width: 1px;
+  height: 1em;
+  display: block;
+  position: absolute;
+  background-color: var(--bz-header-border-color);
+  margin-left: clamp(-1rem, -0.461rem + -0.696vw, -0.6rem);
+  transform: translateY(-50%);
+}
+
+.bz-header-end > .bz-dropdown::before {
+  margin-top: -0.25rem;
+}
+
+@media (width <= 36rem) {
+  .bz-header-main {
+    height: auto;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: var(--bz-header-background-color-variant);
+    border-bottom: 1px solid var(--bz-header-border-color);
+  }
+}
