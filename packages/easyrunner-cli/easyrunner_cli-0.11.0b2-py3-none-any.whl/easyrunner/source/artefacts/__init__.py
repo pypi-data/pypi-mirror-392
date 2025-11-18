@@ -1,0 +1,1 @@
+"""Package for storing build artefacts like template archives."""
