@@ -1,0 +1,450 @@
+Metadata-Version: 2.4
+Name: timem-ai
+Version: 0.1.1
+Summary: TiMEM Python SDK - Time-based Memory Management and Experience Learning toolkit | TiMEM Python SDK - 时间记忆管理与经验学习工具包
+Home-page: https://github.com/AIGility-Cloud-Innovation/timem-python
+Author: AIGility Cloud Innovation
+Author-email: AIGility Cloud Innovation <contact@aigility.com>
+Maintainer-email: AIGility Cloud Innovation <contact@aigility.com>
+License: MIT
+Project-URL: Homepage, https://github.com/AIGility-Cloud-Innovation/timem-python
+Project-URL: Documentation, https://timem-python.readthedocs.io
+Project-URL: Repository, https://github.com/AIGility-Cloud-Innovation/timem-python
+Project-URL: Issues, https://github.com/AIGility-Cloud-Innovation/timem-python/issues
+Project-URL: Changelog, https://github.com/AIGility-Cloud-Innovation/timem-python/blob/main/CHANGELOG.md
+Keywords: timem,memory,experience-learning,rule-engine,user-profile,ai,machine-learning
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: Topic :: Database :: Database Engines/Servers
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: httpx>=0.24.0
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: typing-extensions>=4.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.21.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: black>=22.0.0; extra == "dev"
+Requires-Dist: isort>=5.0.0; extra == "dev"
+Requires-Dist: flake8>=5.0.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Requires-Dist: pre-commit>=2.20.0; extra == "dev"
+Provides-Extra: docs
+Requires-Dist: sphinx>=5.0.0; extra == "docs"
+Requires-Dist: sphinx-rtd-theme>=1.0.0; extra == "docs"
+Requires-Dist: myst-parser>=0.18.0; extra == "docs"
+Dynamic: author
+Dynamic: home-page
+Dynamic: license-file
+Dynamic: requires-python
+
+# TiMEM Python SDK
+
+**Time-based Memory Management and Experience Learning Toolkit**
+
+TiMEM SDK 是一个强大的 Python 客户端库，用于与 TiMEM Engine API 交互，提供记忆管理、经验学习和用户画像计算等功能。
+
+## 特性
+
+- ✅ **经验学习引擎**：从反馈数据中智能学习生成规则（直接使用 LLM，无需聚类）
+- ✅ **规则召回**：基于上下文智能召回相关经验规则
+- ✅ **记忆管理**：支持 L1-L5 分层记忆的增删改查
+- ✅ **用户画像**：从 L5 级别记忆计算用户画像
+- ✅ **同步/异步支持**：完整的同步和异步 API 封装
+- ✅ **批量操作**：支持并发批量处理提升效率
+- ✅ **自动重试**：内置请求重试机制保证可靠性
+
+## 安装
+
+```bash
+pip install timem-python
+```
+
+或从源码安装：
+
+```bash
+git clone https://github.com/aigility/timem-python.git
+cd timem-python
+pip install -e .
+```
+
+## 快速开始
+
+### 同步客户端
+
+```python
+from timem import TiMEMClient
+
+# 初始化客户端
+client = TiMEMClient(
+    api_key="your-api-key",
+    base_url="http://localhost:8001"
+)
+
+# 1. 学习：从反馈生成经验规则（可选提供反馈案例）
+result = client.learn(
+    domain="aicv",
+    feedback_cases=[  # 可选：提供新的反馈案例
+        {
+            "case_id": "case_001",
+            "user_id": 12345,
+            "domain": "aicv",
+            "suggestion_type": "项目经验优化",
+            "feedback_action": "adopt",
+            "feedback_score": 5.0
+        }
+    ],
+    min_case_count=3,
+    min_adoption_rate=0.6,
+    strategy="adaptive"
+)
+print(f"Generated {result['data']['generated_rule_count']} rules")
+
+# 或者直接从系统中已有的反馈学习
+result = client.learn(domain="aicv", strategy="adaptive")
+
+# 2. 召回：根据上下文召回相关规则
+rules = client.recall(
+    context={
+        "job_title": "Python开发工程师",
+        "issue_type": "项目经验",
+        "section": "工作经历"
+    },
+    domain="aicv",
+    top_k=5
+)
+print(f"Recalled {len(rules['data']['rules'])} rules")
+
+# 3. 添加记忆
+memory = client.add_memory(
+    user_id=12345,
+    domain="aicv",
+    content={
+        "type": "interaction",
+        "action": "resume_analysis",
+        "context": {"job": "软件工程师"}
+    },
+    layer_type="L1",
+    tags=["resume", "analysis"]
+)
+
+# 4. 搜索记忆
+memories = client.search_memory(
+    user_id=12345,
+    domain="aicv",
+    tags=["resume"],
+    limit=10
+)
+
+# 5. 计算用户画像
+profile = client.compute_profile(
+    user_id=12345,
+    domain="aicv"
+)
+
+# 关闭客户端
+client.close()
+```
+
+### 异步客户端
+
+```python
+import asyncio
+from timem import AsyncTiMEMClient
+
+async def main():
+    # 使用上下文管理器自动管理连接
+    async with AsyncTiMEMClient(
+        api_key="your-api-key",
+        base_url="http://localhost:8001"
+    ) as client:
+        
+        # 1. 异步学习
+        result = await client.learn(
+            domain="aicv",
+            strategy="adaptive"
+        )
+        
+        # 2. 异步召回
+        rules = await client.recall(
+            context={"job_title": "数据科学家"},
+            domain="aicv"
+        )
+        
+        # 3. 批量学习（多个领域并发）
+        batch_results = await client.batch_learn(
+            domains=["aicv", "education", "consulting"]
+        )
+        
+        # 4. 批量添加记忆（并发）
+        memories = [
+            {
+                "user_id": 12345,
+                "domain": "aicv",
+                "content": {"action": "view_job", "job_id": 1}
+            },
+            {
+                "user_id": 12345,
+                "domain": "aicv",
+                "content": {"action": "apply_job", "job_id": 1}
+            }
+        ]
+        results = await client.batch_add_memories(memories)
+
+# 运行异步函数
+asyncio.run(main())
+```
+
+### 便捷函数
+
+```python
+import asyncio
+from timem import learn_async, recall_async
+
+# 快速异步学习
+async def quick_learn():
+    result = await learn_async(
+        api_key="your-api-key",
+        domain="aicv",
+        strategy="adaptive"
+    )
+    return result
+
+# 快速异步召回
+async def quick_recall():
+    rules = await recall_async(
+        api_key="your-api-key",
+        context={"job_title": "产品经理"},
+        domain="aicv"
+    )
+    return rules
+
+asyncio.run(quick_learn())
+asyncio.run(quick_recall())
+```
+
+## API 文档
+
+### 经验学习引擎
+
+#### learn()
+
+从反馈案例中学习生成经验规则（使用 LLM 直接分析，无需聚类）
+
+**参数：**
+- `domain` (str): 业务领域，默认 "general"
+- `feedback_cases` (List[Dict], optional): 可选的反馈案例列表，如果提供则先收集再学习
+- `min_case_count` (int): 最小案例数量，默认 3
+- `min_adoption_rate` (float): 最小采纳率阈值，默认 0.6
+- `min_confidence_score` (float): 最小置信度阈值，默认 0.5
+- `strategy` (str): 总结策略，可选 "single", "cluster", "adaptive"（推荐）
+
+**返回：** 学习结果包含生成的规则数量和规则ID列表
+
+**使用场景：**
+- 提供 feedback_cases：实时收集反馈并立即学习
+- 不提供 feedback_cases：从系统中已有的未处理反馈学习
+
+#### recall()
+
+根据上下文召回相关经验规则
+
+**参数：**
+- `context` (Dict): 上下文信息（如 job_title, issue_type, section）
+- `domain` (str): 业务领域
+- `top_k` (int): 返回前 K 条规则，默认 5
+- `min_confidence` (float): 最小置信度，默认 0.5
+
+**返回：** 召回的规则列表，包含相关性评分
+
+### 记忆管理
+
+#### add_memory()
+
+添加记忆到 TiMEM 系统
+
+**参数：**
+- `user_id` (int): 用户ID
+- `domain` (str): 业务领域
+- `content` (Dict): 记忆内容
+- `layer_type` (str): 记忆层级（L1-L5），默认 "L1"
+- `tags` (List[str], optional): 标签
+- `keywords` (List[str], optional): 关键词
+
+**返回：** 创建的记忆信息
+
+#### search_memory()
+
+搜索记忆
+
+**参数：**
+- `user_id` (int, optional): 用户ID过滤
+- `domain` (str, optional): 领域过滤
+- `layer_type` (str, optional): 层级过滤
+- `tags` (List[str], optional): 标签过滤
+- `keywords` (List[str], optional): 关键词过滤
+- `limit` (int): 返回数量，默认 20
+- `offset` (int): 分页偏移，默认 0
+
+**返回：** 搜索结果和记忆列表
+
+### 用户画像
+
+#### compute_profile()
+
+从 L5 级别记忆计算用户画像
+
+**参数：**
+- `user_id` (int): 用户ID
+- `domain` (str): 业务领域
+- `source_memory_ids` (List[str], optional): 指定记忆ID
+
+**返回：** 计算的画像信息
+
+#### get_profile()
+
+获取用户画像
+
+**参数：**
+- `user_id` (int): 用户ID
+- `domain` (str): 业务领域
+
+**返回：** 用户画像信息
+
+#### search_users()
+
+根据画像特征搜索用户
+
+**参数：**
+- `criteria` (Dict): 搜索条件（如偏好、行为模式）
+- `domain` (str, optional): 领域过滤
+- `limit` (int): 返回数量，默认 20
+
+**返回：** 匹配的用户列表
+
+## 异步批量操作
+
+### batch_learn()
+
+并发学习多个领域的反馈
+
+```python
+async with AsyncTiMEMClient(api_key="your-key") as client:
+    results = await client.batch_learn(
+        domains=["aicv", "education", "consulting"],
+        strategy="adaptive"
+    )
+```
+
+### batch_add_memories()
+
+并发添加多条记忆
+
+```python
+async with AsyncTiMEMClient(api_key="your-key") as client:
+    memories = [
+        {"user_id": 1, "domain": "aicv", "content": {...}},
+        {"user_id": 2, "domain": "aicv", "content": {...}}
+    ]
+    results = await client.batch_add_memories(memories)
+```
+
+## 异常处理
+
+```python
+from timem import TiMEMClient, TiMEMError, AuthenticationError, APIError, ValidationError
+
+try:
+    client = TiMEMClient(api_key="your-key")
+    result = client.learn(domain="aicv")
+except ValidationError as e:
+    print(f"验证错误: {e}")
+except AuthenticationError as e:
+    print(f"认证失败: {e}")
+except APIError as e:
+    print(f"API错误 [{e.status_code}]: {e}")
+except TiMEMError as e:
+    print(f"TiMEM错误: {e}")
+```
+
+## 配置选项
+
+```python
+client = TiMEMClient(
+    api_key="your-api-key",
+    base_url="http://localhost:8001",  # TiMEM Engine URL
+    timeout=60.0,                       # 请求超时（秒）
+)
+
+async_client = AsyncTiMEMClient(
+    api_key="your-api-key",
+    base_url="http://localhost:8001",
+    timeout=60.0,
+    max_retries=3,                      # 最大重试次数
+    retry_delay=1.0,                    # 重试延迟（秒）
+)
+```
+
+## 开发指南
+
+### 安装开发依赖
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+### 运行测试
+
+```bash
+pytest tests/
+```
+
+### 构建发布
+
+```bash
+python -m build
+python -m twine upload dist/*
+```
+
+## 架构说明
+
+TiMEM SDK 遵循以下设计原则：
+
+1. **简洁接口**：Learn 算子直接使用 LLM，无需手动聚类
+2. **智能召回**：基于标签和上下文的相关性评分
+3. **分层记忆**：支持 L1-L5 五层记忆管理
+4. **异步优先**：充分利用异步编程提升性能
+5. **容错设计**：自动重试和异常处理
+
+## 许可证
+
+MIT License
+
+## 联系我们
+
+- Email: contact@aigility.com
+- GitHub: https://github.com/aigility/timem-python
+- Documentation: https://docs.timem.aigility.com
+
+## 更新日志
+
+### v0.1.0 (2025-10-18)
+
+- ✨ 初始版本发布
+- ✨ 支持经验学习引擎（Learn/Recall）
+- ✨ 支持记忆管理（Add/Search/Update/Delete）
+- ✨ 支持用户画像计算
+- ✨ 完整的同步/异步 API
+- ✨ 批量操作支持
