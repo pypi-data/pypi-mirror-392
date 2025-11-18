@@ -1,0 +1,5476 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>pggui API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>pggui</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#!/usr/bin/env python
+
+#from __future__ import absolute_import
+#from __future__ import print_function
+
+import signal, os, time, sys, pickle, subprocess, random, warnings
+import math, copy
+
+import gi
+gi.require_version(&#34;Gtk&#34;, &#34;3.0&#34;)
+from gi.repository import Gtk
+from gi.repository import Gdk
+from gi.repository import GObject
+from gi.repository import Pango
+
+gi.require_version(&#39;PangoCairo&#39;, &#39;1.0&#39;)
+from gi.repository import PangoCairo
+
+realinc = os.path.realpath(os.path.dirname(__file__) + os.sep + &#34;../pycommon&#34;)
+sys.path.append(realinc)
+
+import pgutils
+import pgsimp
+
+IDXERR = &#34;Index is larger than the available number of controls.&#34;
+
+VERSION = &#34;1.3.5&#34;
+
+gui_testmode = 0
+
+def randcol():
+    return random.randint(0, 255)
+
+def randcolstr(start = 0, endd = 255):
+    rr =  random.randint(start, endd)
+    gg =  random.randint(start, endd)
+    bb =  random.randint(start, endd)
+    strx = &#34;#%02x%02x%02x&#34; % (rr, gg, bb)
+    return strx
+
+&#39;&#39;&#39;
+for a in (style.base, style.fg, style.bg,
+      style.light, style.dark, style.mid,
+      style.text, style.base, style.text_aa):
+for st in (gtk.STATE_NORMAL, gtk.STATE_INSENSITIVE,
+           gtk.STATE_PRELIGHT, gtk.STATE_SELECTED,
+           gtk.STATE_ACTIVE):
+    a[st] = gtk.gdk.Color(0, 34251, 0)
+&#39;&#39;&#39;
+
+def version():
+    return VERSION
+
+# ------------------------------------------------------------------------
+# Bemd some of the parameters for us
+
+class CairoHelper():
+
+    def __init__(self, cr):
+        self.cr = cr
+
+    def set_source_rgb(self, col):
+        self.cr.set_source_rgb(col[0], col[1], col[2])
+
+    def rectangle(self, rect):
+        self.cr.rectangle(rect[0], rect[1], rect[2], rect[3])
+
+    # --------------------------------------------------------------------
+    #   0 1           0+2
+    #   x,y     -      rr
+    #         -   -
+    #  midy -       -
+    #         -   -
+    #           -      bb
+    #          midx    1+3
+
+    def romb(self, rect):
+
+        #print(&#34;romb&#34;, rect[0], rect[1], rect[2], rect[3])
+        midx =  rect[0] + rect[2] // 2
+        midy =  rect[1] + rect[3] // 2
+
+        self.cr.move_to(rect[0], midy)
+        self.cr.line_to(midx, rect[1])
+        self.cr.line_to(rect[0]+rect[2], midy)
+        self.cr.line_to(midx, rect[1]+rect[3])
+        self.cr.line_to(rect[0], midy)
+
+    def circle(self, xx, yy, size):
+        self.cr.arc(xx, yy, size, 0,  2 * math.pi)
+
+    # --------------------------------------------------------------------
+    #   0 1+2    midx    1+2
+    #   x,y       -
+    #           -   -
+    #  x+hh   -       -  y+ww
+
+    def tri(self, rect):
+        #                xx       yy       ww       hh
+        #print(&#34;tri&#34;, rect[0], rect[1], rect[2], rect[3])
+        midx =  rect[0] + rect[2] // 2
+        self.cr.move_to(rect[0], rect[1] + rect[3])
+        self.cr.line_to(midx, rect[1])
+        self.cr.line_to(rect[0] + rect[2], rect[1] + rect[3])
+        self.cr.line_to(rect[0], rect[1] + rect[3])
+
+    # Inverse, down
+    # --------------------------------------------------------------------
+    #   0 1+2    midx    1+2
+    #   x,y   -   -   -
+    #           -   -
+    #  x+hh       -      y+ww
+
+    def tri2(self, rect):
+        #                xx       yy       ww       hh
+        #print(&#34;tri2&#34;, rect[0], rect[1], rect[2], rect[3])
+        midx =  rect[0] + rect[2] // 2
+        self.cr.move_to(rect[0], rect[1])
+        self.cr.line_to(midx, rect[1] + rect[3])
+        self.cr.line_to(rect[0] + rect[2], rect[1])
+        self.cr.line_to(rect[0], rect[1])
+
+class   TextTable(Gtk.Table):
+
+    &#39;&#39;&#39; YTable of text entries &#39;&#39;&#39;
+
+    def __init__(self, confarr, main = None, textwidth = 24):
+        GObject.GObject.__init__(self)
+        self.texts = []
+        #self.set_homogeneous(False)
+        self.main = main
+        row = 0
+        for aa, bb in confarr:
+            #print(&#34;aa&#34;, aa, &#34;bb&#34;, bb)
+            label = Gtk.Label()
+            label.set_text_with_mnemonic(aa)
+            tbox = Gtk.Entry()
+            label.set_mnemonic_widget(tbox)
+            tbox.set_width_chars (textwidth)
+            self.texts.append(tbox)
+            self.attach_defaults(label, 0, 1, row, row + 1)
+            self.attach_defaults(tbox,  1, 2, row, row + 1)
+            row += 1
+
+class   TextRow(Gtk.HBox):
+
+    def __init__(self, labelx, initval, main, align=20):
+
+        GObject.GObject.__init__(self)
+        #super().__init__(self)
+
+        self.set_homogeneous(False)
+        self.main = main
+        self.label = Gtk.Label()
+        self.label.set_text_with_mnemonic(labelx)
+        #self.label.set_xalign(1)
+
+        # Adjust for false character
+        lenx = len(labelx);
+        if &#34;_&#34; in labelx: lenx -= 1
+        #spp = int((align - lenx) * 1.8) # Space is smaller than avarage char
+        #self.pack_start(Spacer(spp), False, False, 0)
+
+        self.pack_start(Spacer(), False, False, 0)
+        self.pack_start(self.label, False, False, 0)
+        self.pack_start(Spacer(4), False, False, 0)
+        self.tbox = Gtk.Entry()
+        self.tbox.set_width_chars (8)
+        self.tbox.set_text(initval)
+        self.pack_start(self.tbox, False, False, 0)
+
+        self.label.set_mnemonic_widget(self.tbox)
+
+        self.tbox.connect(&#34;focus_out_event&#34;, self.edit_done)
+        self.tbox.connect(&#34;key-press-event&#34;, self.edit_key)
+        self.tbox.connect(&#34;key-release-event&#34;, self.edit_key_rel)
+
+    def edit_done(self, textbox, event):
+        #print(textbox.get_text())
+        pass
+
+    def edit_key_rel(self, textbox, event):
+        #print(textbox, event.string, event.keyval)
+        if event.string == &#34;\t&#34;:
+            #print(&#34;Tab&#34;)
+            return None
+
+        if event.string == &#34;\r&#34;:
+            #print(&#34;Newline&#34;, event.string)
+            # Switch to next control
+            &#39;&#39;&#39;
+            #ee = event.copy() #Gdk.Event(Gdk.EventType.KEY_PRESS)
+            #ee.keyval = Gdk.KEY_Tab
+            #ee.string = &#34;\t&#34;
+            #e.state = event.state
+            #super().emit(&#34;key-release-event&#34;, ee)
+            #super().foreach(self.callb)
+            &#39;&#39;&#39;
+            pass
+
+    def callb(self, arg1):
+        #print (&#34;callb arg1&#34;, arg1)
+        pass
+
+    def edit_key(self, textbox, event):
+        #print(textbox, event.string, event.keyval)
+        if event.string == &#34;\t&#34;:
+            #print(&#34;Tab&#34;)
+            pass
+        if event.string == &#34;\r&#34;:
+            #print(&#34;Newline&#34;)
+            # Switch to next control (any way you can)
+            arrx = (Gtk.DirectionType.TAB_FORWARD,  Gtk.DirectionType.RIGHT,
+            Gtk.DirectionType.LEFT, Gtk.DirectionType.UP)
+            for aa in arrx:
+                ret = self.main.child_focus(aa)
+                if ret:
+                    break
+
+    def get_text(self):
+        return self.tbox.get_text()
+
+    def set_text(self, txt):
+        return self.tbox.set_text(txt)
+
+
+class LabelButt(Gtk.EventBox):
+
+    &#39;&#39;&#39; Imitate button &#39;&#39;&#39;
+    def __init__(self, front, callb, toolt=&#34;&#34;):
+
+        GObject.GObject.__init__(self)
+
+        self.set_can_focus(True)
+        self.label = Gtk.Label.new_with_mnemonic(front)
+        self.label.set_mnemonic_widget(self)
+        #self.curve =  Gdk.Cursor(Gdk.CursorType.CROSSHAIR)
+        self.arrow =  Gdk.Cursor(Gdk.CursorType.ARROW)
+        self.hand =  Gdk.Cursor(Gdk.CursorType.HAND1)
+
+        #gdk_window = self.get_root_window()
+        #self.arrow = gdk_window.get_cursor()
+
+        if toolt:
+            self.label.set_tooltip_text(toolt)
+        self.label.set_single_line_mode(True)
+        self.add(self.label)
+
+        self.label.connect(&#34;event-after&#34;, self.eventx, front)
+        self.connect(&#34;mnemonic-activate&#34;, self.mnemonic, front)
+
+        if callb:
+            self.connect(&#34;button-press-event&#34;, callb, front)
+
+        self.set_above_child(True)
+        self.add_mnemonic_label(self.label)
+
+        #self.label.connect(&#34;motion-notify-event&#34;, self.area_motion)
+        self.connect(&#34;motion-notify-event&#34;, self.area_motion)
+        self.connect(&#34;enter-notify-event&#34;, self.area_enter)
+        self.connect(&#34;leave-notify-event&#34;, self.area_leave)
+
+    def eventx(self, *args):
+        print(&#34;eventx&#34;, *args)
+
+    def mnemonic(self, *arg):
+        print(&#34;Mnemonic&#34;, *arg)
+
+    def area_motion(self, arg1, arg2):
+        #print(&#34;LabelButt Motion&#34;)
+        pass
+
+    def area_enter(self, arg1, arg2):
+        #print(&#34;LabelButt enter&#34;)
+        gdk_window = self.get_root_window()
+        gdk_window.set_cursor(self.hand)
+
+    def area_leave(self, arg1, arg2):
+        #print(&#34;LabelButt leave&#34;)
+        gdk_window = self.get_root_window()
+        gdk_window.set_cursor(self.arrow)
+
+class Led(Gtk.DrawingArea):
+
+    def __init__(self, color, size = 20, border = 2):
+        GObject.GObject.__init__(self)
+        #self.size_allocate();
+        #self.size_request()
+        self.border = border
+        self.set_size_request(size + border, size + border)
+        self.connect(&#34;draw&#34;, self.draw)
+        self.color =  color
+        self.orgcolor =  color
+
+    def set_color(self, col):
+        self.color = col
+        self.queue_draw()
+
+    def draw(self, area, cr):
+        rect = self.get_allocation()
+        #print (&#34;draw&#34;, rect)
+
+        #cr.rectangle(0, 0, rect.width, rect.height);
+        #x = 0; y = 0; width = 10; height = 10
+        #cr.save()
+        #cr.translate(x + width / 2., y + height / 2.)
+        #cr.scale(width / 2., height / 2.)
+        #cr.restore()
+
+        ccc = pgutils.str2float(self.color)
+
+        cr.set_source_rgba(ccc[0] * 0.5, ccc[1] * 0.5, ccc[2] * 0.5)
+        cr.arc(rect.width/2, rect.height/2, rect.width / 2. * .85, 0., 2 * math.pi)
+        cr.fill()
+
+        cr.set_source_rgba(ccc[0] * 0.7, ccc[1] * 0.7, ccc[2] * 0.7)
+        cr.arc(rect.width/2, rect.height/2., rect.width/2., 0., 2 * math.pi)
+        cr.fill()
+
+        cr.set_source_rgba(ccc[0], ccc[1], ccc[2])
+        cr.arc(rect.width/2, rect.height/2, rect.width / 2. * .7, 0., 2 * math.pi)
+        cr.fill()
+
+        # Reflection on the r
+        cdx = 0.2
+        colx = [ min(1, ccc[0] + cdx), min(1, ccc[1] + cdx), min(1, ccc[2] + cdx), ]
+        cr.set_source_rgba(*colx)
+        cr.arc(rect.width/2+1, rect.height/2, rect.width / 2. * .3, 0., 2 * math.pi)
+        cr.fill()
+
+# ------------------------------------------------------------------------
+
+class MenuButt(Gtk.DrawingArea):
+
+    def __init__(self, menarr, callb, tooltip = &#34;Menu&#34;, size = 20, border = 2):
+        GObject.GObject.__init__(self)
+
+        #warnings.simplefilter(&#34;ignore&#34;)
+
+        self.border = border
+        self.callb = callb
+        self.menarr = menarr
+        self.set_size_request(size + border, size + border)
+        self.connect(&#34;draw&#34;, self.draw)
+        self.connect(&#34;button-press-event&#34;, self.area_button)
+        self.connect(&#34;key-press-event&#34;, self.area_key)
+        self.set_events(Gdk.EventMask.ALL_EVENTS_MASK)
+        self.set_tooltip_text(tooltip)
+        self.set_can_focus(True)
+        self.pointer = self.get_pointer()
+
+    def _create_menuitem(self, string, action, arg = None):
+        rclick_menu = Gtk.MenuItem(string)
+        rclick_menu.connect(&#34;activate&#34;, action, string, arg);
+        rclick_menu.show()
+        return rclick_menu
+
+        # Create the menubar and toolbar
+        #action_group = Gtk.ActionGroup(&#34;DocWindowActions&#34;)
+        #action_group.add_actions(entries)
+        #return action_group
+
+    def area_key(self, area, event):
+        pass
+        #print(&#34;keypress mb&#34;, event.type, event.string);
+
+    def _make_menu(self):
+        self.grab_focus()
+        self.menu3 = Gtk.Menu()
+        cnt = 0
+        for aa in self.menarr:
+            self.menu3.append(self._create_menuitem(aa, self.menu_fired, cnt))
+            cnt = cnt + 1
+
+    def area_rbutton(self, area, event):
+        #print(&#34;rmenu butt &#34;, event.type, event.button);
+        if  event.type == Gdk.EventType.BUTTON_RELEASE:
+            if event.button == 3:
+                #print( &#34;Left Click at x=&#34;, event.x, &#34;y=&#34;, event.y)
+                self._make_menu()
+                self.menu3.popup(None, None, None, None, event.button, event.time)
+
+    def area_button(self, area, event):
+        #print(&#34;menu butt &#34;, event.type, event.button);
+        if  event.type == Gdk.EventType.BUTTON_PRESS:
+            if event.button == 1:
+                #print( &#34;Left Click at x=&#34;, event.x, &#34;y=&#34;, event.y)
+                self._make_menu()
+                self.menu3.popup(None, None, None, None, event.button, event.time)
+
+    def menu_fired(self, menu, menutext, arg):
+        #print (&#34;menu item fired:&#34;, menutext, arg)
+        if self.callb:
+            self.callb(self, menutext, arg)
+
+    def _draw_line(self, cr, xx, yy, xx2, yy2):
+        cr.move_to(xx, yy)
+        cr.line_to(xx2, yy2)
+        cr.stroke()
+
+    def draw(self, area, cr):
+        rect = self.get_allocation()
+        #print (&#34;draw&#34;, rect)
+
+        if self.is_focus():
+            cr.set_line_width(3)
+        else:
+            cr.set_line_width(2)
+
+        self._draw_line(cr, self.border, rect.height/4,
+                                rect.width - self.border, rect.height/4);
+        self._draw_line(cr, self.border, 2*rect.height/4,
+                                rect.width - self.border, 2*rect.height/4);
+        self._draw_line(cr, self.border, 3*rect.height/4,
+                                rect.width - self.border, 3*rect.height/4);
+
+
+# ------------------------------------------------------------------------
+
+class WideButt(Gtk.Button):
+
+    def __init__(self, labelx, callme = None, space = 2):
+        #super().__init__(self)
+        GObject.GObject.__init__(self)
+        self.set_label(&#34; &#34; * space + labelx + &#34; &#34; * space)
+        self.set_use_underline (True)
+        if callme:
+            self.connect(&#34;clicked&#34;, callme)
+
+class FrameTextView(Gtk.Frame):
+
+    def __init__(self, callme = None):
+
+        GObject.GObject.__init__(self)
+        #super().__init__(self)
+
+        self.tview = Gtk.TextView()
+        #self.tview.set_buffer(Gtk.TextBuffer())
+
+        self.scroll = Gtk.ScrolledWindow()
+        self.scroll.set_size_request(100, 100)
+        self.scroll.add_with_viewport(self.tview)
+        #self.frame = Gtk.Frame()
+        self.add(self.scroll)
+
+        #self.set_size_request(150, 150)
+        ls = self.get_style_context()
+        fd = ls.get_font(Gtk.StateFlags.NORMAL)
+        #newfd = fd.to_string() + &#34; &#34; + str(fd.get_size() / Pango.SCALE + 4)
+        #print(&#34;newfd&#34;, newfd)
+        self.modify_font(Pango.FontDescription(&#34;Sans 13&#34;))
+
+    def append(self, strx):
+        buff = self.tview.get_buffer()
+        old = buff.get_text(buff.get_start_iter(), buff.get_end_iter(), False)
+        buff.set_text(old + strx)
+        pgutils.usleep(20)
+        #mainwin.statb2.scroll_to_iter(buff.get_end_iter(), 1.0, True, 0.1, 0.1)
+        sb = self.scroll.get_vscrollbar()
+        sb.set_value(2000000)
+
+class Label(Gtk.Label):
+    def __init__(self, textm = &#34;&#34;, widget = None, tooltip=None, font=None):
+        GObject.GObject.__init__(self)
+        self.set_text_with_mnemonic(textm)
+        if widget:
+            self.set_mnemonic_widget(widget)
+        if tooltip:
+            self.set_tooltip_text(tooltip)
+        if font:
+            self.override_font(Pango.FontDescription(font))
+
+class Logo(Gtk.VBox):
+
+    def __init__(self, labelx, tooltip=None, callme=None, font=&#34;Times 45&#34;):
+
+        GObject.GObject.__init__(self)
+
+        self.logolab = Gtk.Label(labelx)
+        self.logolab.set_has_window(True)
+        if tooltip:
+            self.logolab.set_tooltip_text(tooltip)
+
+        self.logolab.set_events( Gdk.EventMask.BUTTON_PRESS_MASK |
+                             Gdk.EventMask.BUTTON_RELEASE_MASK )
+
+        if callme:
+            self.logolab.connect(&#34;button-press-event&#34;, callme)
+
+        self.logolab.modify_font(Pango.FontDescription(font))
+
+        #self.pack_start(Spacer(), 0, 0, False)
+        self.pack_start(self.logolab, 0, 0, False)
+        #self.pack_start(Spacer(), 0, 0, False)
+
+    def forallcallb(self, arg1):
+        #print (&#34;arg1&#34;, arg1)
+        arg1.hide();
+
+    def hide(self):
+        self.forall(self.forallcallb)
+
+
+# ------------------------------------------------------------------------
+# This override covers / hides the complexity of the treeview and the
+# textlisbox did not have the needed detail
+
+class ListBox(Gtk.TreeView):
+
+    def __init__(self, callb = None, limit = -1, colname = &#39;&#39;):
+
+        self.limit = limit
+        self.treestore = Gtk.TreeStore(str)
+        Gtk.TreeView.__init__(self, self.treestore)
+
+        cell = Gtk.CellRendererText()
+        # create the TreeViewColumn to display the data
+        tvcolumn = Gtk.TreeViewColumn(colname)
+        # add the cell to the tvcolumn and allow it to expand
+        tvcolumn.pack_start(cell, True)
+
+        # set the cell &#34;text&#34; attribute to column 0 - retrieve text
+        tvcolumn.add_attribute(cell, &#39;text&#39;, 0)
+
+        # add tvcolumn to treeview
+        self.append_column(tvcolumn)
+        self.set_activate_on_single_click (True)
+
+        self.callb = callb
+        self.connect(&#34;row-activated&#34;,  self.tree_sel)
+
+    def tree_sel(self, xtree, xiter, xpath):
+        #print(&#34;tree_sel&#34;, xtree, xiter, xpath)
+        sel = xtree.get_selection()
+        xmodel, xiter = sel.get_selected()
+        if xiter:
+            xstr = xmodel.get_value(xiter, 0)
+            #print(&#34;Selected&#34;, xstr)
+            if self.callb:
+                self.callb(xstr)
+        pass
+
+    def set_callback(self, funcx):
+        self.callb = funcx
+
+    # Delete previous contents
+    def clear(self):
+        try:
+            while True:
+                root = self.treestore.get_iter_first()
+                if not root:
+                    break
+                try:
+                    self.treestore.remove(root)
+                except:
+                    print(&#34;except: treestore remove&#34;)
+
+        except:
+            print(&#34;update_tree&#34;, sys.exc_info())
+            pass
+
+    # Select Item. -1 for select none; Rase Valuerror for wrong index.
+    def select(self, idx):
+        ts = self.get_selection()
+        if idx == -1:
+            ts.unselect_all()
+            return
+        iter = self.treestore.get_iter_first()
+        for aa in range(idx):
+            iter = self.treestore.iter_next(iter)
+            if not iter:
+                break
+        if not iter:
+            pass
+            #raise ValueError(&#34;Invalid selection index.&#34;)
+        ts.select_iter(iter)
+
+    # Return the number of list items
+    def get_size(self):
+        cnt = 0
+        iter = self.treestore.get_iter_first()
+        if not iter:
+            return cnt
+        cnt = 1
+        while True:
+            iter = self.treestore.iter_next(iter)
+            if not iter:
+                break
+            cnt += 1
+        return cnt
+
+    def get_item(self, idx):
+        cnt = 0; res = &#34;&#34;
+        iter = self.treestore.get_iter_first()
+        if not iter:
+            return &#34;&#34;
+        cnt = 1
+        while True:
+            iter = self.treestore.iter_next(iter)
+            if not iter:
+                break
+            if cnt == idx:
+                res = self.treestore.get_value(iter, 0)
+                break
+            cnt += 1
+        return res
+
+    def append(self, strx):
+        if self.limit != -1:
+            # count them
+            cnt = self.get_size()
+            #print(&#34;limiting cnt=&#34;, cnt, &#34;limit=&#34;, self.limit)
+            for aa in range(cnt - self.limit):
+                iter = self.treestore.get_iter_first()
+                if not iter:
+                    break
+                try:
+                    self.treestore.remove(iter)
+                except:
+                    print(&#34;except: treestore remove lim&#34;)
+
+        last = self.treestore.append(None, [strx])
+        self.set_cursor_on_cell(self.treestore.get_path(last), None, None, False)
+
+    def get_text(self):
+        sel = self.get_selection()
+        xmodel, xiter = sel.get_selected()
+        if xiter:
+            return xmodel.get_value(xiter, 0)
+
+    # Get current IDX -1 for none
+    def get_curridx(self):
+        sel = self.get_selection()
+        xmodel, xiter = sel.get_selected()
+        if not xiter:
+            return -1
+
+        # Count back from match
+        cnt = 0
+        while True:
+            xiter = self.treestore.iter_previous(xiter)
+            if not xiter:
+                break
+            #print (&#34;xiter:&#34;, xiter)
+            cnt += 1
+        return cnt
+
+class Spinner(Gtk.SpinButton):
+
+    def __init__(self, startx = 0, endx = 100, defx = 0, cb=None):
+
+        GObject.GObject.__init__(self)
+        self.cb_func = cb
+
+        adj2 = Gtk.Adjustment(startx, startx, endx, 1.0, 5.0, 0.0)
+        self.set_adjustment(adj2)
+        self.set_value(defx)
+        self.set_wrap(True)
+        self.connect(&#34;value_changed&#34;, self.spinned)
+
+    def spinned(self, spin):
+        #print(&#34;spinned&#34;, spin)
+        if self.cb_func:
+            self.cb_func(self.get_value())
+
+# ------------------------------------------------------------------------
+# Highlite test items
+
+def set_testmode(flag):
+    global gui_testmode
+    gui_testmode = flag
+
+# ------------------------------------------------------------------------
+# An N pixel spacer. Defaults to 1 char height / width
+
+class Spacer(Gtk.Label):
+
+    def __init__(self, sp = 1, title=None, left=False, bottom=False, test=False):
+
+        GObject.GObject.__init__(self)
+
+        #sp *= 1000
+        #self.set_markup(&#34;&lt;span  size=\&#34;&#34; + str(sp) + &#34;\&#34;&gt; &lt;/span&gt;&#34;)
+        #self.set_text(&#34; &#34; * sp)
+
+        if title:
+            self.set_text(title)
+        else:
+            self.set_text(&#34; &#34; * sp)
+
+        if left:
+            self.set_xalign(0)
+
+        if bottom:
+            self.set_yalign(1)
+
+        if test or gui_testmode:
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse(&#34;#888888&#34;))
+
+        #self.set_property(&#34;angle&#34;, 15)
+        #attr = self.get_property(&#34;attributes&#34;)
+        #attr2 = Pango.AttrList()
+        #print (&#34;attr&#34;, dir(attr))
+        #attr.
+        #self.set_property(&#34;attributes&#34;, attr)
+        #self.set_property(&#34;label&#34;, &#34;wtf&#34;)
+        #self.set_property(&#34;background-set&#34;, True)
+
+# ------------------------------------------------------------------------
+# An N pixel horizontal spacer. Defaults to X pix  get_center
+
+class xSpacer(Gtk.HBox):
+
+    def __init__(self, sp = None):
+        GObject.GObject.__init__(self)
+        #self.pack_start()
+        if gui_testmode:
+            col = randcolstr(100, 200)
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse(col))
+        if sp == None:
+            sp = 6
+        self.set_size_request(sp, sp)
+
+# An N pixel vertical spacer. Defaults to X pix  get_center
+
+class ySpacer(Gtk.VBox):
+
+    def __init__(self, sp = None):
+        GObject.GObject.__init__(self)
+        #self.pack_start()
+        if gui_testmode:
+            col = randcolstr(100, 200)
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse(col))
+        if sp == None:
+            sp = 6
+        self.set_size_request(sp, sp)
+
+# ------------------------------------------------------------------------
+# Added convenience methods
+
+class   xVBox(Gtk.VBox):
+
+    def __init__(self, col = None):
+        GObject.GObject.__init__(self)
+        self.pad = 0
+        if gui_testmode:
+            if not col:
+                col = randcolstr(100, 200)
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse(col))
+
+    def set_padding(self, pad):
+        self.pad = pad
+
+    def pack(self, obj, expand = False, pad = 0):
+        if pad == 0:
+            pad = self.pad
+        self.pack_start(obj, expand, expand, pad)
+
+class   xHBox(Gtk.HBox):
+
+    def __init__(self, col = None):
+        GObject.GObject.__init__(self)
+        self.pad = 0
+        if gui_testmode:
+            if not col:
+                col = randcolstr(100, 200)
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse(col))
+
+    def set_padding(self, pad):
+        self.pad = pad
+
+    def pack(self, obj, expand = False, pad = 0):
+        if pad == 0:
+            pad = self.pad
+        self.pack_start(obj, expand, expand, pad)
+
+# ------------------------------------------------------------------------
+
+class   RadioGroup(Gtk.Frame):
+
+    def __init__(self, rad_arr, call_me = None, horiz = False):
+
+        GObject.GObject.__init__(self)
+        self.buttons = []
+        self.callme = call_me
+        if horiz:
+            vbox6 = Gtk.HBox();
+            vbox6.set_spacing(6);
+            vbox6.set_border_width(4)
+        else:
+            vbox6 = Gtk.VBox();
+            vbox6.set_spacing(4);
+            vbox6.set_border_width(6)
+
+
+
+        if gui_testmode:
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse(&#34;#778888&#34;))
+
+        self.radio = Gtk.RadioButton.new_with_mnemonic(None, &#34;None&#34;)
+
+        for aa in range(len(rad_arr)):
+            #rad2 = Gtk.RadioButton.new_from_widget(self.radio)
+            #rad2.set_label(rad_arr[aa])
+            rad2 = Gtk.RadioButton.new_with_mnemonic_from_widget(self.radio, rad_arr[aa])
+            self.buttons.append(rad2)
+            rad2.connect(&#34;toggled&#34;, self.radio_toggle, aa)
+            vbox6.pack_start(rad2, False, False, False)
+
+        self.add(vbox6)
+
+    def radio_toggle(self, button, idx):
+        #print(&#34;RadioGroup&#34;, button.get_active(), &#34;&#39;&#34; + str(idx) + &#34;&#39;&#34;)
+        if  button.get_active():
+            self.callme(button, self.buttons[idx].get_label())
+
+    def set_tooltip(self, idx, strx):
+        if idx &gt;= len(self.buttons):
+            raise ValueError(IDXERR)
+        self.buttons[idx].set_tooltip_text(strx)
+
+    def set_entry(self, idx, strx):
+        if idx &gt;= len(self.buttons):
+            raise ValueError(IDXERR)
+        self.buttons[idx].set_label(strx)
+
+    def set_sensitive(self, idx, valx):
+        if idx &gt;= len(self.buttons):
+            raise ValueError(IDXERR)
+        self.buttons[idx].set_sensitive(valx)
+
+    def get_size(self):
+        return len (self.buttons)
+
+    def set_check(self, idx, valx):
+        if idx &gt;= len(self.buttons):
+            raise ValueError(IDXERR)
+        self.buttons[idx].set_active(valx)
+        self.buttons[idx].toggled()
+
+    def get_check(self):
+        cnt = 0
+        for aa in (self.buttons):
+            if aa.get_active():
+                return cnt
+            cnt += 1
+        # Nothing selected ...
+        return -1
+
+    def get_text(self):
+        for aa in (self.buttons):
+            if aa.get_active():
+                return aa.get_label()
+        # Nothing selected ... empty str
+        return &#34;&#34;
+
+# Bug fix in Gtk
+
+class   SeparatorMenuItem(Gtk.SeparatorMenuItem):
+
+    def __init__(self):
+        Gtk.SeparatorMenuItem.__init__(self);
+        self.show()
+
+# ------------------------------------------------------------------------
+
+class coords():
+    pass
+
+class Menu():
+
+    def __init__(self, menarr, callb, event, submenu = False):
+
+        #GObject.GObject.__init__(self)
+
+        #warnings.simplefilter(&#34;ignore&#34;)
+
+        self.callb   = callb
+        self.menarr  = menarr
+        self.title   = menarr[0]
+        self.gtkmenu = Gtk.Menu()
+
+        # Remember initial location
+        self.event   = coords();
+        self.event.x = event.x;  self.event.y = event.y
+        #print(&#34;popup Menu at:&#34;, self.event.x, self.event.y)
+
+        cnt = 0
+        for aa in self.menarr:
+            #print(&#34;type aa&#34;, type(aa))
+            if type(aa) == str:
+                if aa == &#34;-&#34;:
+                    mmm = SeparatorMenuItem()
+                else:
+                    mmm = self._create_menuitem(aa, self.menu_fired, cnt)
+
+                if not submenu:
+                    self.gtkmenu.append(mmm)
+                    if cnt == 0:
+                        mmm.set_sensitive(False)
+                        self.gtkmenu.append(SeparatorMenuItem())
+                else:
+                    if cnt != 0:
+                        self.gtkmenu.append(mmm)
+
+            elif type(aa) == Menu:
+                mmm = self._create_menuitem(aa.title, self.dummy, cnt)
+                mmm.set_submenu(aa.gtkmenu)
+                self.gtkmenu.append(mmm)
+            else:
+                raise ValueError(&#34;Menu needs text or submenu&#34;)
+            cnt = cnt + 1
+
+        if not submenu:
+            self.gtkmenu.popup(None, None, None, None, event.button, event.time)
+
+    def dummy(self, menu, menutext, arg):
+        pass
+
+    def _create_menuitem(self, string, action, arg = None):
+        rclick_menu = Gtk.MenuItem(label=string)
+        rclick_menu.connect(&#34;activate&#34;, action, string, arg);
+        rclick_menu.show()
+        return rclick_menu
+
+    def menu_fired(self, menu, menutext, arg):
+        #print (&#34;menu item fired:&#34;, menutext, arg)
+        if self.callb:
+            self.callb(menutext, arg)
+        self.gtkmenu = None
+
+# ------------------------------------------------------------------------
+
+class Lights(Gtk.Frame):
+
+    def __init__(self, col_arr, size = 6, call_me = None):
+
+        GObject.GObject.__init__(self)
+        self.box_arr = []
+        vboxs = Gtk.VBox()
+        vboxs.set_spacing(4);
+        vboxs.set_border_width(4)
+
+        for aa in col_arr:
+            box = self.colbox(pgutils.str2float(aa), size)
+            vboxs.pack_start(box, False, False, False)
+            self.box_arr.append(box)
+
+        self.add(vboxs)
+
+    def set_color(self, idx, col):
+        if idx &gt;= len(self.box_arr):
+            raise ValueError(IDXERR)
+        self.box_arr[idx].modify_bg(Gtk.StateFlags.NORMAL, pgutils.str2col(col))
+
+    def set_colors(self, colarr):
+        for idx in range(len(self.box_arr)):
+            self.box_arr[idx].modify_bg(
+                        Gtk.StateFlags.NORMAL, pgutils.str2col(colarr[idx]))
+
+    def set_tooltip(self, idx, strx):
+        if idx &gt;= len(self.box_arr):
+            raise ValueError(IDXERR)
+        self.box_arr[idx].set_tooltip_text(strx)
+
+    def set_tooltips(self, strarr):
+        for idx in range(len(self.box_arr)):
+            self.box_arr[idx].set_tooltip_text(strarr[idx])
+
+    def get_size(self):
+        return len (self.box_arr)
+
+    def colbox(self, col, size):
+
+        lab1 = Gtk.Label(&#34;  &#34; * size + &#34;\n&#34; * (size // 3))
+        lab1.set_lines(size)
+        eventbox = Gtk.EventBox()
+        frame = Gtk.Frame()
+        frame.add(lab1)
+        eventbox.add(frame)
+        eventbox.color =  col  # Gtk.gdk.Color(col)
+        eventbox.modify_bg(Gtk.StateFlags.NORMAL, pgutils.float2col(eventbox.color))
+        return eventbox
+
+class ScrollListBox(Gtk.Frame):
+
+    def __init__(self, limit = -1, colname = &#39;&#39;, callme = None):
+        Gtk.Frame.__init__(self)
+        self.listbox = ListBox(limit, colname)
+        if callme:
+            self.listbox.set_callback(callme)
+        self.listbox.scroll = Gtk.ScrolledWindow()
+        self.listbox.scroll.add_with_viewport(self.listbox)
+        self.add(self.listbox.scroll)
+        self.autoscroll = True
+
+    # Propagate needed ops to list control
+
+    def append_end(self, strx):
+        #print(&#34;ser str append&#34;, strx)
+        self.listbox.append(strx)
+
+        if self.autoscroll:
+            pgutils.usleep(10)              # Wait for it to go to screen
+            sb = self.listbox.scroll.get_vscrollbar()
+            sb.set_value(2000000)
+        self.listbox.select(-1)
+
+    def clear(self):
+        self.listbox.clear()
+
+    def select(self, num):
+        self.listbox.select(num)
+
+# ------------------------------------------------------------------------
+
+class   ComboBox(Gtk.ComboBox):
+
+    def __init__(self, init_cont, callme = None):
+
+        self.callme = callme
+
+        self.store = Gtk.ListStore(str)
+        Gtk.ComboBox.__init__(self)
+        self.set_model(self.store)
+        cell = Gtk.CellRendererText()
+
+        cell.set_property(&#34;text&#34;, &#34;hello&#34;)
+        #cell.set_property(&#34;background&#34;, &#34;#ffff00&#34;)
+        #cell.set_property(&#34;background-set&#34;, True)
+        cell.set_padding(10, 0)
+
+        #cell.set_property(&#34;foreground&#34;, &#34;#ffff00&#34;)
+        #cell.set_property(&#34;foreground-set&#34;, True)
+        #print(&#34;background-set&#34;, cell.get_property(&#34;background-set&#34;))
+        #print(&#34;foreground-set&#34;, cell.get_property(&#34;foreground-set&#34;))
+        #print(&#34; list_properties&#34;, cell.list_properties())
+
+        self.pack_start(cell, True)
+        self.add_attribute(cell, &#39;text&#39;, 0)
+        self.set_entry_text_column(0)
+
+        for bb in init_cont:
+            self.store.append([bb])
+
+        self.connect(&#34;changed&#34;, self.combo_changed)
+
+    def combo_changed(self, combo):
+        name = &#34;&#34;
+        tree_iter = combo.get_active_iter()
+        try:
+            if tree_iter is not None:
+                model = combo.get_model()
+                name = model[tree_iter][0]
+                #print(&#34;Selected: name=%s&#34; % (name))
+            else:
+                entry = combo.get_child()
+                name = entry.get_text()
+                #print(&#34;Entered: %s&#34; % name)
+        except:
+            pass
+
+        if self.callme:
+            self.callme(name)
+
+        #print(&#34;Combo new selection / entry: &#39;%s&#39;&#34; % name)
+
+    def delall(self):
+         # Delete previous contents
+        try:
+            while True:
+                root = self.store.get_iter_first()
+                if not root:
+                    break
+                try:
+                    self.store.remove(root)
+                except:
+                    print(&#34;except: self.store remove&#34;)
+        except:
+            print(&#34;combo delall&#34;, sys.exc_info())
+            pass
+
+    # --------------------------------------------------------------------
+    def  sel_text(self, txt):
+
+        #print(&#34;Sel combo text&#34;)
+
+        model = self.get_model()
+        iter = model.get_iter_first()
+        if iter:
+            cnt = 0
+            while True:
+
+                #print(&#34;entry %d&#34; % cnt, model[iter][0], txt)
+                if  model[iter][0] == txt:
+                    #print(&#34;Found %d&#34; % cnt, model[iter][0])
+                    self.set_active_iter(iter)
+                    break
+
+                iter = model.iter_next(iter)
+                if not iter:
+                    break
+                cnt += 1
+
+    def     sel_first(self):
+        model = self.get_model()
+        iter = model.get_iter_first()
+        self.set_active_iter(iter)
+
+class Rectangle():
+
+    # Accept rect, array, integers
+    def __init__(self, *rrr):
+        #Gdk.Rectangle.__init__(self)
+        if len(rrr) == 4:
+            idx = 0
+            for aa in rrr:
+                bb = int(aa)
+                if idx == 0:
+                    self.x = bb
+                elif idx == 1:
+                    self.y = bb
+                elif idx == 2:
+                    #self.width = bb
+                    self.w = bb
+                elif idx == 3:
+                    #self.height = bb
+                    self.h = bb
+                else:
+                    raise ValueError
+                idx += 1
+        else:
+            for aaa in rrr:
+                self.x = aaa[0]; self.y =  aaa[1]
+                self.w =  aaa[2];
+                #self.width =  aaa[2];
+                self.h =  aaa[3]
+                #self.height =  aaa[3]
+                break
+            pass
+
+    # Make it smaller
+    def resize(self, ww, hh = 0):
+        if hh == 0:
+            hh = ww
+
+        #if ww + self.w &lt;= 0 or hh + self.h &lt;= 0:
+        #    raise (ValuError, &#34;Cannot have negative rect size&#34;)
+
+        self.x -= ww/2; self.w += ww
+        self.y -= hh/2; self.h += hh
+
+    def copy(self):
+        #print(&#34;rect to copy&#34;, str(self))
+        #print(&#34;rect to copy&#34;, dir(self))
+        nnn = Rectangle()                   # New Instance
+        &#39;&#39;&#39;
+        # Self
+        for aa in dir(self):
+            try:
+                #nnn.__setattr__(aa, self.__getattribute__(aa))
+                nnn.aa = self.__getattribute__(aa)
+                #print(&#34;cp:&#34;, aa, end = &#34;&#34;)
+                #if type(self.__getattribute__(aa)) == int:
+                #    print(&#34; -&gt; &#34;, self.__getattribute__(aa), end= &#34; &#34;)
+                #print(&#34; --- &#34;, end = &#34;&#34;)
+            except:
+                #print(sys.exc_info())
+                print(&#34;no&#34;, aa)
+                pass
+        &#39;&#39;&#39;
+
+        # Assign explictly
+        nnn.x = self.x + 0
+        nnn.y = self.y + 0
+        nnn.w = self.w + 0
+        nnn.h = self.h + 0
+
+        #nnn.width = self.width + 1
+        #nnn.height = self.height + 1
+
+        #print(&#34;rect out&#34;, str(nnn))
+        #print(&#34;rect out&#34;, dir(nnn))
+        return nnn
+
+    # Normalize; Put the rect in positive space
+
+    def norm(self, rect):
+        rect3 = rect.copy()
+        if rect3.h &lt; 0:
+            rect3.y -= abs(rect3.h)
+            rect3.h = abs(rect3.h)
+        if rect3.w &lt; 0:
+            rect3.x -= abs(rect3.w)
+            rect3.w = abs(rect3.w)
+        return rect3
+
+    # I was too lazy to write it; Crappy Gdk rect kicked me to it
+
+    # ==========    self
+    # =        =
+    # =    ----=----
+    # ====|======   |  rect2
+    #     |         |
+    #      ---------
+
+    def intersect(self, rect2):
+
+        rect3 = self.norm(rect2);   rect4 = self.norm(self)
+
+        urx = rect4.x + rect4.w;    lry = rect4.y + rect4.h
+        urx2 = rect3.x + rect3.w;   lry2 = rect3.y + rect3.h
+        inter = 0
+
+        # X intersect
+        if rect3.x &gt;= rect4.x and rect3.x &lt;= urx:
+            inter += 1;
+        # Y intersect
+        if rect3.y &gt;= rect4.y and rect3.y &lt;= lry:
+            inter += 1;
+
+        # X intersect rev
+        if rect4.x &gt;= rect3.x and rect4.x &lt;= urx2:
+            inter += 1;
+        # Y intersect rev
+        if rect4.y &gt;= rect3.y and rect4.y &lt;= lry2:
+            inter += 1;
+
+        #print(&#34;inter&#34;, inter, str(self), &#34;-&gt;&#34;, str(rect2))
+        return (inter &gt;= 2, self.x)
+
+    # I was too lazy to write it; Crappy Gdt rect kicked me to it
+    def contain(self, rect2):
+        #self.dump()
+        #rect2.dump()
+        inter = 0
+        # X intersect
+        if rect2.x &gt;= self.x and rect2.x + rect2.w &lt;= self.x + self.w:
+            inter += 1;
+        # Y intersect
+        if rect2.y &gt;= self.y and rect2.y + rect2.h &lt;= self.y + self.h:
+            inter += 1;
+        #print(&#34;inter&#34;, inter)
+        return (inter == 2, self.x)
+
+    # Convert index to values
+    def __getitem__(self, key):
+        if key == 0:
+            return self.x
+        elif key == 1:
+            return self.y
+        elif key == 2:
+            return self.w
+        elif key == 3:
+            return self.h
+        else:
+            raise IndexError;
+
+    def dump(self):
+        return (self.x, self.y, self.w, self.h)
+
+    &#39;&#39;&#39;
+    # This was killed in favour of self implemented Rectangle class
+    def __getattr__(self, attr):
+        if attr == &#34;w&#34;:
+            return self.width
+        elif attr == &#34;h&#34;:
+            return self.height
+        else:
+            return super(Gdk.Rectangle, self).__getattr__(attr)
+
+    def __setattr__(self, attr, val):
+        if attr == &#34;w&#34;:
+            self.width = val
+        elif attr == &#34;h&#34;:
+            self.height = val
+        else:
+            super(Gdk.Rectangle, self).__setattr__(attr, val)
+    &#39;&#39;&#39;
+
+    def __str__(self):
+        return &#34;R: x=%d y=%d w=%d h=%d&#34; % (self.x, self.y, self.w, self.h)
+
+# Right click button
+
+class RCLButt(Gtk.Button):
+
+    def __init__(self, labelx, callme = None, rcallme = None, space = 2, ttip = None):
+        #super().__init__(self)
+        GObject.GObject.__init__(self)
+        self.rcallme = rcallme
+        self.callme  = callme
+        self.set_label(&#34; &#34; * space + labelx + &#34; &#34; * space)
+        self.set_use_underline (True)
+
+        if ttip:
+            self.set_tooltip_text(ttip)
+
+        #col = Gdk.RGBA(); col.parse(&#34;#ccffcc&#34;)
+        #self.modify_bg(Gtk.StateFlags.NORMAL, Gdk.Color(1000, 10000, 1))
+        #style = self.get_style_context())
+
+        self.connect(&#34;clicked&#34;, self.clicked)
+        self.connect(&#34;button-press-event&#34;, self.pressed)
+        self.connect(&#34;button-release-event&#34;, self.pressed)
+        self.connect(&#34;draw&#34;, self.draw)
+
+    def draw(self, area, cr):
+        #print(&#34;button&#34;, area, cr)
+        rect = self.get_allocation()
+        col = (.2, .7, .7)
+        cr.set_source_rgb(col[0], col[1], col[2])
+        cr.rectangle(0, 0, rect.width, rect.height)
+        cr.fill()
+        layout = self.create_pango_layout(&#34;Button Here ... LONG&#34;)
+        xxx, yyy = layout.get_pixel_size()
+        xx = rect.width / 2 - xxx/2
+        yy = rect.height / 2 - yyy/2
+        cr.set_source_rgb(0, 0, 0)
+        cr.move_to(xx, yy)
+        PangoCairo.show_layout(cr, layout)
+        #return True
+
+    def  pressed(self, arg1, event):
+        #print(&#34;pressed&#34;, arg1, event)
+        if  event.type == Gdk.EventType.BUTTON_RELEASE:
+            if event.button == 1:
+                if self.callme:
+                    self.callme(self, arg1, event)
+
+            if event.button == 3:
+                if self.rcallme:
+                    self.rcallme(self, arg1, event)
+
+        else:
+            # Unknown button action
+            pass
+
+    def clicked(self, arg1):
+        pass
+        #print(&#34;clicked&#34;, arg1)
+        #if self.callme:
+        #    self.callme(arg1)
+
+
+# ------------------------------------------------------------------------
+# Show a regular message:
+
+def message(strx, parent = None, title = None, icon = Gtk.MessageType.INFO):
+
+    #dialog = Gtk.MessageDialog(parent, Gtk.DialogFlags.DESTROY_WITH_PARENT,
+    #    icon, Gtk.ButtonsType.CLOSE, strx)
+
+    dialog = Gtk.MessageDialog(title=title, buttons=Gtk.ButtonsType.CLOSE,
+                text=strx, destroy_with_parent=True, modal=True,)
+
+    if parent:
+        dialog.set_transient_for(parent)
+
+    if title:
+        dialog.set_title(title)
+    else:
+        dialog.set_title(&#34;Message&#34;)
+
+    # Close dialog on user response
+    dialog.connect(&#34;response&#34;, lambda d, r: d.destroy())
+    dialog.show_all()
+    return dialog.run()
+
+def yes_no(message, title = &#34;Question&#34;, parent=None, default=&#34;Yes&#34;):
+
+    dialog = Gtk.MessageDialog(title=title)
+
+    img = Gtk.Image.new_from_stock(Gtk.STOCK_DIALOG_QUESTION, Gtk.IconSize.DIALOG)
+    dialog.set_image(img)
+    dialog.set_markup(message)
+
+    if default == &#34;Yes&#34;:
+        dialog.set_default_response(Gtk.ResponseType.YES)
+        dialog.add_button(&#34;_Yes&#34;, Gtk.ResponseType.YES)
+        dialog.add_button(&#34;_No&#34;, Gtk.ResponseType.NO)
+    else:
+        dialog.set_default_response(Gtk.ResponseType.NO)
+        dialog.add_button(&#34;_No&#34;, Gtk.ResponseType.NO)
+        dialog.add_button(&#34;_Yes&#34;, Gtk.ResponseType.YES)
+
+    if parent:
+        dialog.set_transient_for(parent)
+
+    def _yn_key(win, event, cancel):
+        #print(&#34;_y_n key&#34;, event.keyval)
+        if event.keyval == Gdk.KEY_y or \
+            event.keyval == Gdk.KEY_Y:
+            win.response(Gtk.ResponseType.YES)
+        if event.keyval == Gdk.KEY_n or \
+            event.keyval == Gdk.KEY_N:
+            win.response(Gtk.ResponseType.NO)
+        #if cancel:
+        #    if event.keyval == Gdk.KEY_c or \
+        #        event.keyval == Gdk.KEY_C:
+        #        win.response(Gtk.ResponseType.CANCEL)
+
+    dialog.connect(&#34;key-press-event&#34;, _yn_key, 0)
+    # Fri 03.May.2024 destroyed return value
+    #dialog.connect(&#34;response&#34;, lambda d, r: d.destroy())
+    dialog.show_all()
+    response = dialog.run()
+    dialog.destroy()
+    #print(&#34;response&#34;, response, resp2str(response))
+
+    # Convert all other responses to default
+    if response == Gtk.ResponseType.REJECT or \
+          response == Gtk.ResponseType.CLOSE  or \
+             response == Gtk.ResponseType.DELETE_EVENT:
+        response = Gtk.ResponseType.NO
+
+        # Cancel means no
+        #if default == &#34;Yes&#34;:
+        #    response = Gtk.ResponseType.YES
+        #else:
+        #    response = Gtk.ResponseType.NO
+
+    return response
+
+# ------------------------------------------------------------------------
+
+def yes_no_cancel(message, title=&#34;Question&#34;, default=&#34;Yes&#34;):
+
+    dialog = Gtk.MessageDialog(title=title)
+
+    if default == &#34;Yes&#34;:
+        dialog.set_default_response(Gtk.ResponseType.YES)
+        dialog.add_button(&#34;_Yes&#34;, Gtk.ResponseType.YES)
+        dialog.add_button(&#34;_No&#34;, Gtk.ResponseType.NO)
+        dialog.add_button(&#34;_Cancel&#34;, Gtk.ResponseType.CANCEL)
+    elif default == &#34;No&#34;:
+        dialog.set_default_response(Gtk.ResponseType.NO)
+        dialog.add_button(&#34;_No&#34;, Gtk.ResponseType.NO)
+        dialog.add_button(&#34;_Yes&#34;, Gtk.ResponseType.YES)
+        dialog.add_button(&#34;_Cancel&#34;, Gtk.ResponseType.CANCEL)
+    else:
+        dialog.set_default_response(Gtk.ResponseType.CANCEL)
+        dialog.add_button(&#34;_Cancel&#34;, Gtk.ResponseType.CANCEL)
+        dialog.add_button(&#34;_Yes&#34;, Gtk.ResponseType.YES)
+        dialog.add_button(&#34;_No&#34;, Gtk.ResponseType.NO)
+
+    img = Gtk.Image.new_from_stock(Gtk.STOCK_DIALOG_QUESTION, Gtk.IconSize.DIALOG)
+    dialog.set_image(img)
+    dialog.set_markup(message)
+
+    def _yn_keyc(win, event):
+        #print(&#34;key:&#34;,  event)
+        if event.keyval == Gdk.KEY_y or \
+            event.keyval == Gdk.KEY_Y:
+            win.response(Gtk.ResponseType.YES)
+        if event.keyval == Gdk.KEY_n or \
+            event.keyval == Gdk.KEY_N:
+            win.response(Gtk.ResponseType.NO)
+        if event.keyval == Gdk.KEY_c or \
+            event.keyval == Gdk.KEY_C:
+            win.response(Gtk.ResponseType.CANCEL)
+
+    dialog.connect(&#34;key-press-event&#34;, _yn_keyc)
+    dialog.show_all()
+    response = dialog.run()
+
+    # Convert all other responses to cancel
+    if  response == Gtk.ResponseType.CANCEL or \
+            response == Gtk.ResponseType.REJECT or \
+                response == Gtk.ResponseType.CLOSE  or \
+                    response == Gtk.ResponseType.DELETE_EVENT:
+        response = Gtk.ResponseType.CANCEL
+
+    dialog.destroy()
+
+    #print(&#34;yes_no_cancel() result:&#34;, response);
+    return  response
+
+def resp2str(resp):
+
+    &#39;&#39;&#39; Translate response to string &#39;&#39;&#39;
+
+    strx = &#34;None&#34;
+    if  resp == Gtk.ResponseType.YES:
+        strx =  &#34;Yes&#34;
+    if  resp == Gtk.ResponseType.NO:
+        strx =  &#34;No&#34;
+    if  resp == Gtk.ResponseType.OK:
+        strx =  &#34;OK&#34;
+    if  resp == Gtk.ResponseType.CANCEL:
+        strx =  &#34;Cancel&#34;
+    if  resp == Gtk.ResponseType.NONE:
+        strx =  &#34;None&#34;
+    if  resp == Gtk.ResponseType.ACCEPT:
+        strx =  &#34;Accept&#34;
+    if resp == Gtk.ResponseType.REJECT:
+        strx =  &#34;Reject&#34;
+    if resp == Gtk.ResponseType.CLOSE:
+        strx =  &#34;CLlose&#34;
+    if resp == Gtk.ResponseType.DELETE_EVENT:
+        strx =  &#34;Delete Event&#34;
+    return strx
+
+# ------------------------------------------------------------------------
+# Highlite test items
+
+def set_gui_testmode(flag):
+    global gui_testmode
+    gui_testmode = flag
+
+if __name__ == &#39;__main__&#39;:
+    print(&#34;This file was not meant to run as the main module&#34;)
+
+# EOF</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="pggui.message"><code class="name flex">
+<span>def <span class="ident">message</span></span>(<span>strx, parent=None, title=None, icon=&lt;enum GTK_MESSAGE_INFO of type Gtk.MessageType&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def message(strx, parent = None, title = None, icon = Gtk.MessageType.INFO):
+
+    #dialog = Gtk.MessageDialog(parent, Gtk.DialogFlags.DESTROY_WITH_PARENT,
+    #    icon, Gtk.ButtonsType.CLOSE, strx)
+
+    dialog = Gtk.MessageDialog(title=title, buttons=Gtk.ButtonsType.CLOSE,
+                text=strx, destroy_with_parent=True, modal=True,)
+
+    if parent:
+        dialog.set_transient_for(parent)
+
+    if title:
+        dialog.set_title(title)
+    else:
+        dialog.set_title(&#34;Message&#34;)
+
+    # Close dialog on user response
+    dialog.connect(&#34;response&#34;, lambda d, r: d.destroy())
+    dialog.show_all()
+    return dialog.run()</code></pre>
+</details>
+</dd>
+<dt id="pggui.randcol"><code class="name flex">
+<span>def <span class="ident">randcol</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def randcol():
+    return random.randint(0, 255)</code></pre>
+</details>
+</dd>
+<dt id="pggui.randcolstr"><code class="name flex">
+<span>def <span class="ident">randcolstr</span></span>(<span>start=0, endd=255)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def randcolstr(start = 0, endd = 255):
+    rr =  random.randint(start, endd)
+    gg =  random.randint(start, endd)
+    bb =  random.randint(start, endd)
+    strx = &#34;#%02x%02x%02x&#34; % (rr, gg, bb)
+    return strx</code></pre>
+</details>
+</dd>
+<dt id="pggui.resp2str"><code class="name flex">
+<span>def <span class="ident">resp2str</span></span>(<span>resp)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Translate response to string</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def resp2str(resp):
+
+    &#39;&#39;&#39; Translate response to string &#39;&#39;&#39;
+
+    strx = &#34;None&#34;
+    if  resp == Gtk.ResponseType.YES:
+        strx =  &#34;Yes&#34;
+    if  resp == Gtk.ResponseType.NO:
+        strx =  &#34;No&#34;
+    if  resp == Gtk.ResponseType.OK:
+        strx =  &#34;OK&#34;
+    if  resp == Gtk.ResponseType.CANCEL:
+        strx =  &#34;Cancel&#34;
+    if  resp == Gtk.ResponseType.NONE:
+        strx =  &#34;None&#34;
+    if  resp == Gtk.ResponseType.ACCEPT:
+        strx =  &#34;Accept&#34;
+    if resp == Gtk.ResponseType.REJECT:
+        strx =  &#34;Reject&#34;
+    if resp == Gtk.ResponseType.CLOSE:
+        strx =  &#34;CLlose&#34;
+    if resp == Gtk.ResponseType.DELETE_EVENT:
+        strx =  &#34;Delete Event&#34;
+    return strx</code></pre>
+</details>
+</dd>
+<dt id="pggui.set_gui_testmode"><code class="name flex">
+<span>def <span class="ident">set_gui_testmode</span></span>(<span>flag)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_gui_testmode(flag):
+    global gui_testmode
+    gui_testmode = flag</code></pre>
+</details>
+</dd>
+<dt id="pggui.set_testmode"><code class="name flex">
+<span>def <span class="ident">set_testmode</span></span>(<span>flag)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_testmode(flag):
+    global gui_testmode
+    gui_testmode = flag</code></pre>
+</details>
+</dd>
+<dt id="pggui.version"><code class="name flex">
+<span>def <span class="ident">version</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def version():
+    return VERSION</code></pre>
+</details>
+</dd>
+<dt id="pggui.yes_no"><code class="name flex">
+<span>def <span class="ident">yes_no</span></span>(<span>message, title='Question', parent=None, default='Yes')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def yes_no(message, title = &#34;Question&#34;, parent=None, default=&#34;Yes&#34;):
+
+    dialog = Gtk.MessageDialog(title=title)
+
+    img = Gtk.Image.new_from_stock(Gtk.STOCK_DIALOG_QUESTION, Gtk.IconSize.DIALOG)
+    dialog.set_image(img)
+    dialog.set_markup(message)
+
+    if default == &#34;Yes&#34;:
+        dialog.set_default_response(Gtk.ResponseType.YES)
+        dialog.add_button(&#34;_Yes&#34;, Gtk.ResponseType.YES)
+        dialog.add_button(&#34;_No&#34;, Gtk.ResponseType.NO)
+    else:
+        dialog.set_default_response(Gtk.ResponseType.NO)
+        dialog.add_button(&#34;_No&#34;, Gtk.ResponseType.NO)
+        dialog.add_button(&#34;_Yes&#34;, Gtk.ResponseType.YES)
+
+    if parent:
+        dialog.set_transient_for(parent)
+
+    def _yn_key(win, event, cancel):
+        #print(&#34;_y_n key&#34;, event.keyval)
+        if event.keyval == Gdk.KEY_y or \
+            event.keyval == Gdk.KEY_Y:
+            win.response(Gtk.ResponseType.YES)
+        if event.keyval == Gdk.KEY_n or \
+            event.keyval == Gdk.KEY_N:
+            win.response(Gtk.ResponseType.NO)
+        #if cancel:
+        #    if event.keyval == Gdk.KEY_c or \
+        #        event.keyval == Gdk.KEY_C:
+        #        win.response(Gtk.ResponseType.CANCEL)
+
+    dialog.connect(&#34;key-press-event&#34;, _yn_key, 0)
+    # Fri 03.May.2024 destroyed return value
+    #dialog.connect(&#34;response&#34;, lambda d, r: d.destroy())
+    dialog.show_all()
+    response = dialog.run()
+    dialog.destroy()
+    #print(&#34;response&#34;, response, resp2str(response))
+
+    # Convert all other responses to default
+    if response == Gtk.ResponseType.REJECT or \
+          response == Gtk.ResponseType.CLOSE  or \
+             response == Gtk.ResponseType.DELETE_EVENT:
+        response = Gtk.ResponseType.NO
+
+        # Cancel means no
+        #if default == &#34;Yes&#34;:
+        #    response = Gtk.ResponseType.YES
+        #else:
+        #    response = Gtk.ResponseType.NO
+
+    return response</code></pre>
+</details>
+</dd>
+<dt id="pggui.yes_no_cancel"><code class="name flex">
+<span>def <span class="ident">yes_no_cancel</span></span>(<span>message, title='Question', default='Yes')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def yes_no_cancel(message, title=&#34;Question&#34;, default=&#34;Yes&#34;):
+
+    dialog = Gtk.MessageDialog(title=title)
+
+    if default == &#34;Yes&#34;:
+        dialog.set_default_response(Gtk.ResponseType.YES)
+        dialog.add_button(&#34;_Yes&#34;, Gtk.ResponseType.YES)
+        dialog.add_button(&#34;_No&#34;, Gtk.ResponseType.NO)
+        dialog.add_button(&#34;_Cancel&#34;, Gtk.ResponseType.CANCEL)
+    elif default == &#34;No&#34;:
+        dialog.set_default_response(Gtk.ResponseType.NO)
+        dialog.add_button(&#34;_No&#34;, Gtk.ResponseType.NO)
+        dialog.add_button(&#34;_Yes&#34;, Gtk.ResponseType.YES)
+        dialog.add_button(&#34;_Cancel&#34;, Gtk.ResponseType.CANCEL)
+    else:
+        dialog.set_default_response(Gtk.ResponseType.CANCEL)
+        dialog.add_button(&#34;_Cancel&#34;, Gtk.ResponseType.CANCEL)
+        dialog.add_button(&#34;_Yes&#34;, Gtk.ResponseType.YES)
+        dialog.add_button(&#34;_No&#34;, Gtk.ResponseType.NO)
+
+    img = Gtk.Image.new_from_stock(Gtk.STOCK_DIALOG_QUESTION, Gtk.IconSize.DIALOG)
+    dialog.set_image(img)
+    dialog.set_markup(message)
+
+    def _yn_keyc(win, event):
+        #print(&#34;key:&#34;,  event)
+        if event.keyval == Gdk.KEY_y or \
+            event.keyval == Gdk.KEY_Y:
+            win.response(Gtk.ResponseType.YES)
+        if event.keyval == Gdk.KEY_n or \
+            event.keyval == Gdk.KEY_N:
+            win.response(Gtk.ResponseType.NO)
+        if event.keyval == Gdk.KEY_c or \
+            event.keyval == Gdk.KEY_C:
+            win.response(Gtk.ResponseType.CANCEL)
+
+    dialog.connect(&#34;key-press-event&#34;, _yn_keyc)
+    dialog.show_all()
+    response = dialog.run()
+
+    # Convert all other responses to cancel
+    if  response == Gtk.ResponseType.CANCEL or \
+            response == Gtk.ResponseType.REJECT or \
+                response == Gtk.ResponseType.CLOSE  or \
+                    response == Gtk.ResponseType.DELETE_EVENT:
+        response = Gtk.ResponseType.CANCEL
+
+    dialog.destroy()
+
+    #print(&#34;yes_no_cancel() result:&#34;, response);
+    return  response</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="pggui.CairoHelper"><code class="flex name class">
+<span>class <span class="ident">CairoHelper</span></span>
+<span>(</span><span>cr)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CairoHelper():
+
+    def __init__(self, cr):
+        self.cr = cr
+
+    def set_source_rgb(self, col):
+        self.cr.set_source_rgb(col[0], col[1], col[2])
+
+    def rectangle(self, rect):
+        self.cr.rectangle(rect[0], rect[1], rect[2], rect[3])
+
+    # --------------------------------------------------------------------
+    #   0 1           0+2
+    #   x,y     -      rr
+    #         -   -
+    #  midy -       -
+    #         -   -
+    #           -      bb
+    #          midx    1+3
+
+    def romb(self, rect):
+
+        #print(&#34;romb&#34;, rect[0], rect[1], rect[2], rect[3])
+        midx =  rect[0] + rect[2] // 2
+        midy =  rect[1] + rect[3] // 2
+
+        self.cr.move_to(rect[0], midy)
+        self.cr.line_to(midx, rect[1])
+        self.cr.line_to(rect[0]+rect[2], midy)
+        self.cr.line_to(midx, rect[1]+rect[3])
+        self.cr.line_to(rect[0], midy)
+
+    def circle(self, xx, yy, size):
+        self.cr.arc(xx, yy, size, 0,  2 * math.pi)
+
+    # --------------------------------------------------------------------
+    #   0 1+2    midx    1+2
+    #   x,y       -
+    #           -   -
+    #  x+hh   -       -  y+ww
+
+    def tri(self, rect):
+        #                xx       yy       ww       hh
+        #print(&#34;tri&#34;, rect[0], rect[1], rect[2], rect[3])
+        midx =  rect[0] + rect[2] // 2
+        self.cr.move_to(rect[0], rect[1] + rect[3])
+        self.cr.line_to(midx, rect[1])
+        self.cr.line_to(rect[0] + rect[2], rect[1] + rect[3])
+        self.cr.line_to(rect[0], rect[1] + rect[3])
+
+    # Inverse, down
+    # --------------------------------------------------------------------
+    #   0 1+2    midx    1+2
+    #   x,y   -   -   -
+    #           -   -
+    #  x+hh       -      y+ww
+
+    def tri2(self, rect):
+        #                xx       yy       ww       hh
+        #print(&#34;tri2&#34;, rect[0], rect[1], rect[2], rect[3])
+        midx =  rect[0] + rect[2] // 2
+        self.cr.move_to(rect[0], rect[1])
+        self.cr.line_to(midx, rect[1] + rect[3])
+        self.cr.line_to(rect[0] + rect[2], rect[1])
+        self.cr.line_to(rect[0], rect[1])</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="pggui.CairoHelper.circle"><code class="name flex">
+<span>def <span class="ident">circle</span></span>(<span>self, xx, yy, size)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def circle(self, xx, yy, size):
+    self.cr.arc(xx, yy, size, 0,  2 * math.pi)</code></pre>
+</details>
+</dd>
+<dt id="pggui.CairoHelper.rectangle"><code class="name flex">
+<span>def <span class="ident">rectangle</span></span>(<span>self, rect)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def rectangle(self, rect):
+    self.cr.rectangle(rect[0], rect[1], rect[2], rect[3])</code></pre>
+</details>
+</dd>
+<dt id="pggui.CairoHelper.romb"><code class="name flex">
+<span>def <span class="ident">romb</span></span>(<span>self, rect)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def romb(self, rect):
+
+    #print(&#34;romb&#34;, rect[0], rect[1], rect[2], rect[3])
+    midx =  rect[0] + rect[2] // 2
+    midy =  rect[1] + rect[3] // 2
+
+    self.cr.move_to(rect[0], midy)
+    self.cr.line_to(midx, rect[1])
+    self.cr.line_to(rect[0]+rect[2], midy)
+    self.cr.line_to(midx, rect[1]+rect[3])
+    self.cr.line_to(rect[0], midy)</code></pre>
+</details>
+</dd>
+<dt id="pggui.CairoHelper.set_source_rgb"><code class="name flex">
+<span>def <span class="ident">set_source_rgb</span></span>(<span>self, col)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_source_rgb(self, col):
+    self.cr.set_source_rgb(col[0], col[1], col[2])</code></pre>
+</details>
+</dd>
+<dt id="pggui.CairoHelper.tri"><code class="name flex">
+<span>def <span class="ident">tri</span></span>(<span>self, rect)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def tri(self, rect):
+    #                xx       yy       ww       hh
+    #print(&#34;tri&#34;, rect[0], rect[1], rect[2], rect[3])
+    midx =  rect[0] + rect[2] // 2
+    self.cr.move_to(rect[0], rect[1] + rect[3])
+    self.cr.line_to(midx, rect[1])
+    self.cr.line_to(rect[0] + rect[2], rect[1] + rect[3])
+    self.cr.line_to(rect[0], rect[1] + rect[3])</code></pre>
+</details>
+</dd>
+<dt id="pggui.CairoHelper.tri2"><code class="name flex">
+<span>def <span class="ident">tri2</span></span>(<span>self, rect)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def tri2(self, rect):
+    #                xx       yy       ww       hh
+    #print(&#34;tri2&#34;, rect[0], rect[1], rect[2], rect[3])
+    midx =  rect[0] + rect[2] // 2
+    self.cr.move_to(rect[0], rect[1])
+    self.cr.line_to(midx, rect[1] + rect[3])
+    self.cr.line_to(rect[0] + rect[2], rect[1])
+    self.cr.line_to(rect[0], rect[1])</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pggui.ComboBox"><code class="flex name class">
+<span>class <span class="ident">ComboBox</span></span>
+<span>(</span><span>init_cont, callme=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>ComboBox(**properties)
+new() -&gt; Gtk.Widget
+new_with_area(area:Gtk.CellArea) -&gt; Gtk.Widget
+new_with_area_and_entry(area:Gtk.CellArea) -&gt; Gtk.Widget
+new_with_entry() -&gt; Gtk.Widget
+new_with_model(model:Gtk.TreeModel) -&gt; Gtk.Widget
+new_with_model_and_entry(model:Gtk.TreeModel) -&gt; Gtk.Widget
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class   ComboBox(Gtk.ComboBox):
+
+    def __init__(self, init_cont, callme = None):
+
+        self.callme = callme
+
+        self.store = Gtk.ListStore(str)
+        Gtk.ComboBox.__init__(self)
+        self.set_model(self.store)
+        cell = Gtk.CellRendererText()
+
+        cell.set_property(&#34;text&#34;, &#34;hello&#34;)
+        #cell.set_property(&#34;background&#34;, &#34;#ffff00&#34;)
+        #cell.set_property(&#34;background-set&#34;, True)
+        cell.set_padding(10, 0)
+
+        #cell.set_property(&#34;foreground&#34;, &#34;#ffff00&#34;)
+        #cell.set_property(&#34;foreground-set&#34;, True)
+        #print(&#34;background-set&#34;, cell.get_property(&#34;background-set&#34;))
+        #print(&#34;foreground-set&#34;, cell.get_property(&#34;foreground-set&#34;))
+        #print(&#34; list_properties&#34;, cell.list_properties())
+
+        self.pack_start(cell, True)
+        self.add_attribute(cell, &#39;text&#39;, 0)
+        self.set_entry_text_column(0)
+
+        for bb in init_cont:
+            self.store.append([bb])
+
+        self.connect(&#34;changed&#34;, self.combo_changed)
+
+    def combo_changed(self, combo):
+        name = &#34;&#34;
+        tree_iter = combo.get_active_iter()
+        try:
+            if tree_iter is not None:
+                model = combo.get_model()
+                name = model[tree_iter][0]
+                #print(&#34;Selected: name=%s&#34; % (name))
+            else:
+                entry = combo.get_child()
+                name = entry.get_text()
+                #print(&#34;Entered: %s&#34; % name)
+        except:
+            pass
+
+        if self.callme:
+            self.callme(name)
+
+        #print(&#34;Combo new selection / entry: &#39;%s&#39;&#34; % name)
+
+    def delall(self):
+         # Delete previous contents
+        try:
+            while True:
+                root = self.store.get_iter_first()
+                if not root:
+                    break
+                try:
+                    self.store.remove(root)
+                except:
+                    print(&#34;except: self.store remove&#34;)
+        except:
+            print(&#34;combo delall&#34;, sys.exc_info())
+            pass
+
+    # --------------------------------------------------------------------
+    def  sel_text(self, txt):
+
+        #print(&#34;Sel combo text&#34;)
+
+        model = self.get_model()
+        iter = model.get_iter_first()
+        if iter:
+            cnt = 0
+            while True:
+
+                #print(&#34;entry %d&#34; % cnt, model[iter][0], txt)
+                if  model[iter][0] == txt:
+                    #print(&#34;Found %d&#34; % cnt, model[iter][0])
+                    self.set_active_iter(iter)
+                    break
+
+                iter = model.iter_next(iter)
+                if not iter:
+                    break
+                cnt += 1
+
+    def     sel_first(self):
+        model = self.get_model()
+        iter = model.get_iter_first()
+        self.set_active_iter(iter)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.overrides.Gtk.ComboBox</li>
+<li>gi.repository.Gtk.ComboBox</li>
+<li>gi.repository.Gtk.Bin</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gi.repository.Gtk.CellEditable</li>
+<li>gi.repository.Gtk.CellLayout</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pggui.ComboBox.combo_changed"><code class="name flex">
+<span>def <span class="ident">combo_changed</span></span>(<span>self, combo)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def combo_changed(self, combo):
+    name = &#34;&#34;
+    tree_iter = combo.get_active_iter()
+    try:
+        if tree_iter is not None:
+            model = combo.get_model()
+            name = model[tree_iter][0]
+            #print(&#34;Selected: name=%s&#34; % (name))
+        else:
+            entry = combo.get_child()
+            name = entry.get_text()
+            #print(&#34;Entered: %s&#34; % name)
+    except:
+        pass
+
+    if self.callme:
+        self.callme(name)
+
+    #print(&#34;Combo new selection / entry: &#39;%s&#39;&#34; % name)</code></pre>
+</details>
+</dd>
+<dt id="pggui.ComboBox.delall"><code class="name flex">
+<span>def <span class="ident">delall</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def delall(self):
+     # Delete previous contents
+    try:
+        while True:
+            root = self.store.get_iter_first()
+            if not root:
+                break
+            try:
+                self.store.remove(root)
+            except:
+                print(&#34;except: self.store remove&#34;)
+    except:
+        print(&#34;combo delall&#34;, sys.exc_info())
+        pass</code></pre>
+</details>
+</dd>
+<dt id="pggui.ComboBox.sel_first"><code class="name flex">
+<span>def <span class="ident">sel_first</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def     sel_first(self):
+    model = self.get_model()
+    iter = model.get_iter_first()
+    self.set_active_iter(iter)</code></pre>
+</details>
+</dd>
+<dt id="pggui.ComboBox.sel_text"><code class="name flex">
+<span>def <span class="ident">sel_text</span></span>(<span>self, txt)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def  sel_text(self, txt):
+
+    #print(&#34;Sel combo text&#34;)
+
+    model = self.get_model()
+    iter = model.get_iter_first()
+    if iter:
+        cnt = 0
+        while True:
+
+            #print(&#34;entry %d&#34; % cnt, model[iter][0], txt)
+            if  model[iter][0] == txt:
+                #print(&#34;Found %d&#34; % cnt, model[iter][0])
+                self.set_active_iter(iter)
+                break
+
+            iter = model.iter_next(iter)
+            if not iter:
+                break
+            cnt += 1</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pggui.FrameTextView"><code class="flex name class">
+<span>class <span class="ident">FrameTextView</span></span>
+<span>(</span><span>callme=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>Frame(**properties)
+new(label:str=None) -&gt; Gtk.Widget
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FrameTextView(Gtk.Frame):
+
+    def __init__(self, callme = None):
+
+        GObject.GObject.__init__(self)
+        #super().__init__(self)
+
+        self.tview = Gtk.TextView()
+        #self.tview.set_buffer(Gtk.TextBuffer())
+
+        self.scroll = Gtk.ScrolledWindow()
+        self.scroll.set_size_request(100, 100)
+        self.scroll.add_with_viewport(self.tview)
+        #self.frame = Gtk.Frame()
+        self.add(self.scroll)
+
+        #self.set_size_request(150, 150)
+        ls = self.get_style_context()
+        fd = ls.get_font(Gtk.StateFlags.NORMAL)
+        #newfd = fd.to_string() + &#34; &#34; + str(fd.get_size() / Pango.SCALE + 4)
+        #print(&#34;newfd&#34;, newfd)
+        self.modify_font(Pango.FontDescription(&#34;Sans 13&#34;))
+
+    def append(self, strx):
+        buff = self.tview.get_buffer()
+        old = buff.get_text(buff.get_start_iter(), buff.get_end_iter(), False)
+        buff.set_text(old + strx)
+        pgutils.usleep(20)
+        #mainwin.statb2.scroll_to_iter(buff.get_end_iter(), 1.0, True, 0.1, 0.1)
+        sb = self.scroll.get_vscrollbar()
+        sb.set_value(2000000)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.Frame</li>
+<li>gi.repository.Gtk.Bin</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pggui.FrameTextView.append"><code class="name flex">
+<span>def <span class="ident">append</span></span>(<span>self, strx)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def append(self, strx):
+    buff = self.tview.get_buffer()
+    old = buff.get_text(buff.get_start_iter(), buff.get_end_iter(), False)
+    buff.set_text(old + strx)
+    pgutils.usleep(20)
+    #mainwin.statb2.scroll_to_iter(buff.get_end_iter(), 1.0, True, 0.1, 0.1)
+    sb = self.scroll.get_vscrollbar()
+    sb.set_value(2000000)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pggui.Label"><code class="flex name class">
+<span>class <span class="ident">Label</span></span>
+<span>(</span><span>textm='', widget=None, tooltip=None, font=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>Label(**properties)
+new(str:str=None) -&gt; Gtk.Widget
+new_with_mnemonic(str:str=None) -&gt; Gtk.Widget
+</code></pre>
+<p>Initializer for a GObject based classes with support for property
+sets through the use of explicit keyword arguments.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Label(Gtk.Label):
+    def __init__(self, textm = &#34;&#34;, widget = None, tooltip=None, font=None):
+        GObject.GObject.__init__(self)
+        self.set_text_with_mnemonic(textm)
+        if widget:
+            self.set_mnemonic_widget(widget)
+        if tooltip:
+            self.set_tooltip_text(tooltip)
+        if font:
+            self.override_font(Pango.FontDescription(font))</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.overrides.Gtk.Label</li>
+<li>gi.repository.Gtk.Label</li>
+<li>gi.repository.Gtk.Misc</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gobject.GInterface</li>
+</ul>
+</dd>
+<dt id="pggui.LabelButt"><code class="flex name class">
+<span>class <span class="ident">LabelButt</span></span>
+<span>(</span><span>front, callb, toolt='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Imitate button</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LabelButt(Gtk.EventBox):
+
+    &#39;&#39;&#39; Imitate button &#39;&#39;&#39;
+    def __init__(self, front, callb, toolt=&#34;&#34;):
+
+        GObject.GObject.__init__(self)
+
+        self.set_can_focus(True)
+        self.label = Gtk.Label.new_with_mnemonic(front)
+        self.label.set_mnemonic_widget(self)
+        #self.curve =  Gdk.Cursor(Gdk.CursorType.CROSSHAIR)
+        self.arrow =  Gdk.Cursor(Gdk.CursorType.ARROW)
+        self.hand =  Gdk.Cursor(Gdk.CursorType.HAND1)
+
+        #gdk_window = self.get_root_window()
+        #self.arrow = gdk_window.get_cursor()
+
+        if toolt:
+            self.label.set_tooltip_text(toolt)
+        self.label.set_single_line_mode(True)
+        self.add(self.label)
+
+        self.label.connect(&#34;event-after&#34;, self.eventx, front)
+        self.connect(&#34;mnemonic-activate&#34;, self.mnemonic, front)
+
+        if callb:
+            self.connect(&#34;button-press-event&#34;, callb, front)
+
+        self.set_above_child(True)
+        self.add_mnemonic_label(self.label)
+
+        #self.label.connect(&#34;motion-notify-event&#34;, self.area_motion)
+        self.connect(&#34;motion-notify-event&#34;, self.area_motion)
+        self.connect(&#34;enter-notify-event&#34;, self.area_enter)
+        self.connect(&#34;leave-notify-event&#34;, self.area_leave)
+
+    def eventx(self, *args):
+        print(&#34;eventx&#34;, *args)
+
+    def mnemonic(self, *arg):
+        print(&#34;Mnemonic&#34;, *arg)
+
+    def area_motion(self, arg1, arg2):
+        #print(&#34;LabelButt Motion&#34;)
+        pass
+
+    def area_enter(self, arg1, arg2):
+        #print(&#34;LabelButt enter&#34;)
+        gdk_window = self.get_root_window()
+        gdk_window.set_cursor(self.hand)
+
+    def area_leave(self, arg1, arg2):
+        #print(&#34;LabelButt leave&#34;)
+        gdk_window = self.get_root_window()
+        gdk_window.set_cursor(self.arrow)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.EventBox</li>
+<li>gi.repository.Gtk.Bin</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pggui.LabelButt.area_enter"><code class="name flex">
+<span>def <span class="ident">area_enter</span></span>(<span>self, arg1, arg2)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def area_enter(self, arg1, arg2):
+    #print(&#34;LabelButt enter&#34;)
+    gdk_window = self.get_root_window()
+    gdk_window.set_cursor(self.hand)</code></pre>
+</details>
+</dd>
+<dt id="pggui.LabelButt.area_leave"><code class="name flex">
+<span>def <span class="ident">area_leave</span></span>(<span>self, arg1, arg2)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def area_leave(self, arg1, arg2):
+    #print(&#34;LabelButt leave&#34;)
+    gdk_window = self.get_root_window()
+    gdk_window.set_cursor(self.arrow)</code></pre>
+</details>
+</dd>
+<dt id="pggui.LabelButt.area_motion"><code class="name flex">
+<span>def <span class="ident">area_motion</span></span>(<span>self, arg1, arg2)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def area_motion(self, arg1, arg2):
+    #print(&#34;LabelButt Motion&#34;)
+    pass</code></pre>
+</details>
+</dd>
+<dt id="pggui.LabelButt.eventx"><code class="name flex">
+<span>def <span class="ident">eventx</span></span>(<span>self, *args)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def eventx(self, *args):
+    print(&#34;eventx&#34;, *args)</code></pre>
+</details>
+</dd>
+<dt id="pggui.LabelButt.mnemonic"><code class="name flex">
+<span>def <span class="ident">mnemonic</span></span>(<span>self, *arg)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def mnemonic(self, *arg):
+    print(&#34;Mnemonic&#34;, *arg)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pggui.Led"><code class="flex name class">
+<span>class <span class="ident">Led</span></span>
+<span>(</span><span>color, size=20, border=2)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>DrawingArea(**properties)
+new() -&gt; Gtk.Widget
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Led(Gtk.DrawingArea):
+
+    def __init__(self, color, size = 20, border = 2):
+        GObject.GObject.__init__(self)
+        #self.size_allocate();
+        #self.size_request()
+        self.border = border
+        self.set_size_request(size + border, size + border)
+        self.connect(&#34;draw&#34;, self.draw)
+        self.color =  color
+        self.orgcolor =  color
+
+    def set_color(self, col):
+        self.color = col
+        self.queue_draw()
+
+    def draw(self, area, cr):
+        rect = self.get_allocation()
+        #print (&#34;draw&#34;, rect)
+
+        #cr.rectangle(0, 0, rect.width, rect.height);
+        #x = 0; y = 0; width = 10; height = 10
+        #cr.save()
+        #cr.translate(x + width / 2., y + height / 2.)
+        #cr.scale(width / 2., height / 2.)
+        #cr.restore()
+
+        ccc = pgutils.str2float(self.color)
+
+        cr.set_source_rgba(ccc[0] * 0.5, ccc[1] * 0.5, ccc[2] * 0.5)
+        cr.arc(rect.width/2, rect.height/2, rect.width / 2. * .85, 0., 2 * math.pi)
+        cr.fill()
+
+        cr.set_source_rgba(ccc[0] * 0.7, ccc[1] * 0.7, ccc[2] * 0.7)
+        cr.arc(rect.width/2, rect.height/2., rect.width/2., 0., 2 * math.pi)
+        cr.fill()
+
+        cr.set_source_rgba(ccc[0], ccc[1], ccc[2])
+        cr.arc(rect.width/2, rect.height/2, rect.width / 2. * .7, 0., 2 * math.pi)
+        cr.fill()
+
+        # Reflection on the r
+        cdx = 0.2
+        colx = [ min(1, ccc[0] + cdx), min(1, ccc[1] + cdx), min(1, ccc[2] + cdx), ]
+        cr.set_source_rgba(*colx)
+        cr.arc(rect.width/2+1, rect.height/2, rect.width / 2. * .3, 0., 2 * math.pi)
+        cr.fill()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.DrawingArea</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pggui.Led.draw"><code class="name flex">
+<span>def <span class="ident">draw</span></span>(<span>self, area, cr)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>draw(self, cr:cairo.Context)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def draw(self, area, cr):
+    rect = self.get_allocation()
+    #print (&#34;draw&#34;, rect)
+
+    #cr.rectangle(0, 0, rect.width, rect.height);
+    #x = 0; y = 0; width = 10; height = 10
+    #cr.save()
+    #cr.translate(x + width / 2., y + height / 2.)
+    #cr.scale(width / 2., height / 2.)
+    #cr.restore()
+
+    ccc = pgutils.str2float(self.color)
+
+    cr.set_source_rgba(ccc[0] * 0.5, ccc[1] * 0.5, ccc[2] * 0.5)
+    cr.arc(rect.width/2, rect.height/2, rect.width / 2. * .85, 0., 2 * math.pi)
+    cr.fill()
+
+    cr.set_source_rgba(ccc[0] * 0.7, ccc[1] * 0.7, ccc[2] * 0.7)
+    cr.arc(rect.width/2, rect.height/2., rect.width/2., 0., 2 * math.pi)
+    cr.fill()
+
+    cr.set_source_rgba(ccc[0], ccc[1], ccc[2])
+    cr.arc(rect.width/2, rect.height/2, rect.width / 2. * .7, 0., 2 * math.pi)
+    cr.fill()
+
+    # Reflection on the r
+    cdx = 0.2
+    colx = [ min(1, ccc[0] + cdx), min(1, ccc[1] + cdx), min(1, ccc[2] + cdx), ]
+    cr.set_source_rgba(*colx)
+    cr.arc(rect.width/2+1, rect.height/2, rect.width / 2. * .3, 0., 2 * math.pi)
+    cr.fill()</code></pre>
+</details>
+</dd>
+<dt id="pggui.Led.set_color"><code class="name flex">
+<span>def <span class="ident">set_color</span></span>(<span>self, col)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_color(self, col):
+    self.color = col
+    self.queue_draw()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pggui.Lights"><code class="flex name class">
+<span>class <span class="ident">Lights</span></span>
+<span>(</span><span>col_arr, size=6, call_me=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>Frame(**properties)
+new(label:str=None) -&gt; Gtk.Widget
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Lights(Gtk.Frame):
+
+    def __init__(self, col_arr, size = 6, call_me = None):
+
+        GObject.GObject.__init__(self)
+        self.box_arr = []
+        vboxs = Gtk.VBox()
+        vboxs.set_spacing(4);
+        vboxs.set_border_width(4)
+
+        for aa in col_arr:
+            box = self.colbox(pgutils.str2float(aa), size)
+            vboxs.pack_start(box, False, False, False)
+            self.box_arr.append(box)
+
+        self.add(vboxs)
+
+    def set_color(self, idx, col):
+        if idx &gt;= len(self.box_arr):
+            raise ValueError(IDXERR)
+        self.box_arr[idx].modify_bg(Gtk.StateFlags.NORMAL, pgutils.str2col(col))
+
+    def set_colors(self, colarr):
+        for idx in range(len(self.box_arr)):
+            self.box_arr[idx].modify_bg(
+                        Gtk.StateFlags.NORMAL, pgutils.str2col(colarr[idx]))
+
+    def set_tooltip(self, idx, strx):
+        if idx &gt;= len(self.box_arr):
+            raise ValueError(IDXERR)
+        self.box_arr[idx].set_tooltip_text(strx)
+
+    def set_tooltips(self, strarr):
+        for idx in range(len(self.box_arr)):
+            self.box_arr[idx].set_tooltip_text(strarr[idx])
+
+    def get_size(self):
+        return len (self.box_arr)
+
+    def colbox(self, col, size):
+
+        lab1 = Gtk.Label(&#34;  &#34; * size + &#34;\n&#34; * (size // 3))
+        lab1.set_lines(size)
+        eventbox = Gtk.EventBox()
+        frame = Gtk.Frame()
+        frame.add(lab1)
+        eventbox.add(frame)
+        eventbox.color =  col  # Gtk.gdk.Color(col)
+        eventbox.modify_bg(Gtk.StateFlags.NORMAL, pgutils.float2col(eventbox.color))
+        return eventbox</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.Frame</li>
+<li>gi.repository.Gtk.Bin</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pggui.Lights.colbox"><code class="name flex">
+<span>def <span class="ident">colbox</span></span>(<span>self, col, size)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def colbox(self, col, size):
+
+    lab1 = Gtk.Label(&#34;  &#34; * size + &#34;\n&#34; * (size // 3))
+    lab1.set_lines(size)
+    eventbox = Gtk.EventBox()
+    frame = Gtk.Frame()
+    frame.add(lab1)
+    eventbox.add(frame)
+    eventbox.color =  col  # Gtk.gdk.Color(col)
+    eventbox.modify_bg(Gtk.StateFlags.NORMAL, pgutils.float2col(eventbox.color))
+    return eventbox</code></pre>
+</details>
+</dd>
+<dt id="pggui.Lights.get_size"><code class="name flex">
+<span>def <span class="ident">get_size</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_size(self):
+    return len (self.box_arr)</code></pre>
+</details>
+</dd>
+<dt id="pggui.Lights.set_color"><code class="name flex">
+<span>def <span class="ident">set_color</span></span>(<span>self, idx, col)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_color(self, idx, col):
+    if idx &gt;= len(self.box_arr):
+        raise ValueError(IDXERR)
+    self.box_arr[idx].modify_bg(Gtk.StateFlags.NORMAL, pgutils.str2col(col))</code></pre>
+</details>
+</dd>
+<dt id="pggui.Lights.set_colors"><code class="name flex">
+<span>def <span class="ident">set_colors</span></span>(<span>self, colarr)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_colors(self, colarr):
+    for idx in range(len(self.box_arr)):
+        self.box_arr[idx].modify_bg(
+                    Gtk.StateFlags.NORMAL, pgutils.str2col(colarr[idx]))</code></pre>
+</details>
+</dd>
+<dt id="pggui.Lights.set_tooltip"><code class="name flex">
+<span>def <span class="ident">set_tooltip</span></span>(<span>self, idx, strx)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_tooltip(self, idx, strx):
+    if idx &gt;= len(self.box_arr):
+        raise ValueError(IDXERR)
+    self.box_arr[idx].set_tooltip_text(strx)</code></pre>
+</details>
+</dd>
+<dt id="pggui.Lights.set_tooltips"><code class="name flex">
+<span>def <span class="ident">set_tooltips</span></span>(<span>self, strarr)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_tooltips(self, strarr):
+    for idx in range(len(self.box_arr)):
+        self.box_arr[idx].set_tooltip_text(strarr[idx])</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pggui.ListBox"><code class="flex name class">
+<span>class <span class="ident">ListBox</span></span>
+<span>(</span><span>callb=None, limit=-1, colname='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>TreeView(**properties)
+new() -&gt; Gtk.Widget
+new_with_model(model:Gtk.TreeModel) -&gt; Gtk.Widget
+</code></pre>
+<p>Initializer for a GObject based classes with support for property
+sets through the use of explicit keyword arguments.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ListBox(Gtk.TreeView):
+
+    def __init__(self, callb = None, limit = -1, colname = &#39;&#39;):
+
+        self.limit = limit
+        self.treestore = Gtk.TreeStore(str)
+        Gtk.TreeView.__init__(self, self.treestore)
+
+        cell = Gtk.CellRendererText()
+        # create the TreeViewColumn to display the data
+        tvcolumn = Gtk.TreeViewColumn(colname)
+        # add the cell to the tvcolumn and allow it to expand
+        tvcolumn.pack_start(cell, True)
+
+        # set the cell &#34;text&#34; attribute to column 0 - retrieve text
+        tvcolumn.add_attribute(cell, &#39;text&#39;, 0)
+
+        # add tvcolumn to treeview
+        self.append_column(tvcolumn)
+        self.set_activate_on_single_click (True)
+
+        self.callb = callb
+        self.connect(&#34;row-activated&#34;,  self.tree_sel)
+
+    def tree_sel(self, xtree, xiter, xpath):
+        #print(&#34;tree_sel&#34;, xtree, xiter, xpath)
+        sel = xtree.get_selection()
+        xmodel, xiter = sel.get_selected()
+        if xiter:
+            xstr = xmodel.get_value(xiter, 0)
+            #print(&#34;Selected&#34;, xstr)
+            if self.callb:
+                self.callb(xstr)
+        pass
+
+    def set_callback(self, funcx):
+        self.callb = funcx
+
+    # Delete previous contents
+    def clear(self):
+        try:
+            while True:
+                root = self.treestore.get_iter_first()
+                if not root:
+                    break
+                try:
+                    self.treestore.remove(root)
+                except:
+                    print(&#34;except: treestore remove&#34;)
+
+        except:
+            print(&#34;update_tree&#34;, sys.exc_info())
+            pass
+
+    # Select Item. -1 for select none; Rase Valuerror for wrong index.
+    def select(self, idx):
+        ts = self.get_selection()
+        if idx == -1:
+            ts.unselect_all()
+            return
+        iter = self.treestore.get_iter_first()
+        for aa in range(idx):
+            iter = self.treestore.iter_next(iter)
+            if not iter:
+                break
+        if not iter:
+            pass
+            #raise ValueError(&#34;Invalid selection index.&#34;)
+        ts.select_iter(iter)
+
+    # Return the number of list items
+    def get_size(self):
+        cnt = 0
+        iter = self.treestore.get_iter_first()
+        if not iter:
+            return cnt
+        cnt = 1
+        while True:
+            iter = self.treestore.iter_next(iter)
+            if not iter:
+                break
+            cnt += 1
+        return cnt
+
+    def get_item(self, idx):
+        cnt = 0; res = &#34;&#34;
+        iter = self.treestore.get_iter_first()
+        if not iter:
+            return &#34;&#34;
+        cnt = 1
+        while True:
+            iter = self.treestore.iter_next(iter)
+            if not iter:
+                break
+            if cnt == idx:
+                res = self.treestore.get_value(iter, 0)
+                break
+            cnt += 1
+        return res
+
+    def append(self, strx):
+        if self.limit != -1:
+            # count them
+            cnt = self.get_size()
+            #print(&#34;limiting cnt=&#34;, cnt, &#34;limit=&#34;, self.limit)
+            for aa in range(cnt - self.limit):
+                iter = self.treestore.get_iter_first()
+                if not iter:
+                    break
+                try:
+                    self.treestore.remove(iter)
+                except:
+                    print(&#34;except: treestore remove lim&#34;)
+
+        last = self.treestore.append(None, [strx])
+        self.set_cursor_on_cell(self.treestore.get_path(last), None, None, False)
+
+    def get_text(self):
+        sel = self.get_selection()
+        xmodel, xiter = sel.get_selected()
+        if xiter:
+            return xmodel.get_value(xiter, 0)
+
+    # Get current IDX -1 for none
+    def get_curridx(self):
+        sel = self.get_selection()
+        xmodel, xiter = sel.get_selected()
+        if not xiter:
+            return -1
+
+        # Count back from match
+        cnt = 0
+        while True:
+            xiter = self.treestore.iter_previous(xiter)
+            if not xiter:
+                break
+            #print (&#34;xiter:&#34;, xiter)
+            cnt += 1
+        return cnt</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.overrides.Gtk.TreeView</li>
+<li>gi.repository.Gtk.TreeView</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gi.repository.Gtk.Scrollable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pggui.ListBox.append"><code class="name flex">
+<span>def <span class="ident">append</span></span>(<span>self, strx)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def append(self, strx):
+    if self.limit != -1:
+        # count them
+        cnt = self.get_size()
+        #print(&#34;limiting cnt=&#34;, cnt, &#34;limit=&#34;, self.limit)
+        for aa in range(cnt - self.limit):
+            iter = self.treestore.get_iter_first()
+            if not iter:
+                break
+            try:
+                self.treestore.remove(iter)
+            except:
+                print(&#34;except: treestore remove lim&#34;)
+
+    last = self.treestore.append(None, [strx])
+    self.set_cursor_on_cell(self.treestore.get_path(last), None, None, False)</code></pre>
+</details>
+</dd>
+<dt id="pggui.ListBox.clear"><code class="name flex">
+<span>def <span class="ident">clear</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def clear(self):
+    try:
+        while True:
+            root = self.treestore.get_iter_first()
+            if not root:
+                break
+            try:
+                self.treestore.remove(root)
+            except:
+                print(&#34;except: treestore remove&#34;)
+
+    except:
+        print(&#34;update_tree&#34;, sys.exc_info())
+        pass</code></pre>
+</details>
+</dd>
+<dt id="pggui.ListBox.get_curridx"><code class="name flex">
+<span>def <span class="ident">get_curridx</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_curridx(self):
+    sel = self.get_selection()
+    xmodel, xiter = sel.get_selected()
+    if not xiter:
+        return -1
+
+    # Count back from match
+    cnt = 0
+    while True:
+        xiter = self.treestore.iter_previous(xiter)
+        if not xiter:
+            break
+        #print (&#34;xiter:&#34;, xiter)
+        cnt += 1
+    return cnt</code></pre>
+</details>
+</dd>
+<dt id="pggui.ListBox.get_item"><code class="name flex">
+<span>def <span class="ident">get_item</span></span>(<span>self, idx)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_item(self, idx):
+    cnt = 0; res = &#34;&#34;
+    iter = self.treestore.get_iter_first()
+    if not iter:
+        return &#34;&#34;
+    cnt = 1
+    while True:
+        iter = self.treestore.iter_next(iter)
+        if not iter:
+            break
+        if cnt == idx:
+            res = self.treestore.get_value(iter, 0)
+            break
+        cnt += 1
+    return res</code></pre>
+</details>
+</dd>
+<dt id="pggui.ListBox.get_size"><code class="name flex">
+<span>def <span class="ident">get_size</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_size(self):
+    cnt = 0
+    iter = self.treestore.get_iter_first()
+    if not iter:
+        return cnt
+    cnt = 1
+    while True:
+        iter = self.treestore.iter_next(iter)
+        if not iter:
+            break
+        cnt += 1
+    return cnt</code></pre>
+</details>
+</dd>
+<dt id="pggui.ListBox.get_text"><code class="name flex">
+<span>def <span class="ident">get_text</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_text(self):
+    sel = self.get_selection()
+    xmodel, xiter = sel.get_selected()
+    if xiter:
+        return xmodel.get_value(xiter, 0)</code></pre>
+</details>
+</dd>
+<dt id="pggui.ListBox.select"><code class="name flex">
+<span>def <span class="ident">select</span></span>(<span>self, idx)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def select(self, idx):
+    ts = self.get_selection()
+    if idx == -1:
+        ts.unselect_all()
+        return
+    iter = self.treestore.get_iter_first()
+    for aa in range(idx):
+        iter = self.treestore.iter_next(iter)
+        if not iter:
+            break
+    if not iter:
+        pass
+        #raise ValueError(&#34;Invalid selection index.&#34;)
+    ts.select_iter(iter)</code></pre>
+</details>
+</dd>
+<dt id="pggui.ListBox.set_callback"><code class="name flex">
+<span>def <span class="ident">set_callback</span></span>(<span>self, funcx)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_callback(self, funcx):
+    self.callb = funcx</code></pre>
+</details>
+</dd>
+<dt id="pggui.ListBox.tree_sel"><code class="name flex">
+<span>def <span class="ident">tree_sel</span></span>(<span>self, xtree, xiter, xpath)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def tree_sel(self, xtree, xiter, xpath):
+    #print(&#34;tree_sel&#34;, xtree, xiter, xpath)
+    sel = xtree.get_selection()
+    xmodel, xiter = sel.get_selected()
+    if xiter:
+        xstr = xmodel.get_value(xiter, 0)
+        #print(&#34;Selected&#34;, xstr)
+        if self.callb:
+            self.callb(xstr)
+    pass</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pggui.Logo"><code class="flex name class">
+<span>class <span class="ident">Logo</span></span>
+<span>(</span><span>labelx, tooltip=None, callme=None, font='Times 45')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>VBox(**properties)
+new(homogeneous:bool, spacing:int) -&gt; Gtk.Widget
+</code></pre>
+<p>Initializer for a GObject based classes with support for property
+sets through the use of explicit keyword arguments.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Logo(Gtk.VBox):
+
+    def __init__(self, labelx, tooltip=None, callme=None, font=&#34;Times 45&#34;):
+
+        GObject.GObject.__init__(self)
+
+        self.logolab = Gtk.Label(labelx)
+        self.logolab.set_has_window(True)
+        if tooltip:
+            self.logolab.set_tooltip_text(tooltip)
+
+        self.logolab.set_events( Gdk.EventMask.BUTTON_PRESS_MASK |
+                             Gdk.EventMask.BUTTON_RELEASE_MASK )
+
+        if callme:
+            self.logolab.connect(&#34;button-press-event&#34;, callme)
+
+        self.logolab.modify_font(Pango.FontDescription(font))
+
+        #self.pack_start(Spacer(), 0, 0, False)
+        self.pack_start(self.logolab, 0, 0, False)
+        #self.pack_start(Spacer(), 0, 0, False)
+
+    def forallcallb(self, arg1):
+        #print (&#34;arg1&#34;, arg1)
+        arg1.hide();
+
+    def hide(self):
+        self.forall(self.forallcallb)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.VBox</li>
+<li>gi.overrides.Gtk.Box</li>
+<li>gi.repository.Gtk.Box</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gi.repository.Gtk.Orientable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pggui.Logo.forallcallb"><code class="name flex">
+<span>def <span class="ident">forallcallb</span></span>(<span>self, arg1)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forallcallb(self, arg1):
+    #print (&#34;arg1&#34;, arg1)
+    arg1.hide();</code></pre>
+</details>
+</dd>
+<dt id="pggui.Logo.hide"><code class="name flex">
+<span>def <span class="ident">hide</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>hide(self)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def hide(self):
+    self.forall(self.forallcallb)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pggui.Menu"><code class="flex name class">
+<span>class <span class="ident">Menu</span></span>
+<span>(</span><span>menarr, callb, event, submenu=False)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Menu():
+
+    def __init__(self, menarr, callb, event, submenu = False):
+
+        #GObject.GObject.__init__(self)
+
+        #warnings.simplefilter(&#34;ignore&#34;)
+
+        self.callb   = callb
+        self.menarr  = menarr
+        self.title   = menarr[0]
+        self.gtkmenu = Gtk.Menu()
+
+        # Remember initial location
+        self.event   = coords();
+        self.event.x = event.x;  self.event.y = event.y
+        #print(&#34;popup Menu at:&#34;, self.event.x, self.event.y)
+
+        cnt = 0
+        for aa in self.menarr:
+            #print(&#34;type aa&#34;, type(aa))
+            if type(aa) == str:
+                if aa == &#34;-&#34;:
+                    mmm = SeparatorMenuItem()
+                else:
+                    mmm = self._create_menuitem(aa, self.menu_fired, cnt)
+
+                if not submenu:
+                    self.gtkmenu.append(mmm)
+                    if cnt == 0:
+                        mmm.set_sensitive(False)
+                        self.gtkmenu.append(SeparatorMenuItem())
+                else:
+                    if cnt != 0:
+                        self.gtkmenu.append(mmm)
+
+            elif type(aa) == Menu:
+                mmm = self._create_menuitem(aa.title, self.dummy, cnt)
+                mmm.set_submenu(aa.gtkmenu)
+                self.gtkmenu.append(mmm)
+            else:
+                raise ValueError(&#34;Menu needs text or submenu&#34;)
+            cnt = cnt + 1
+
+        if not submenu:
+            self.gtkmenu.popup(None, None, None, None, event.button, event.time)
+
+    def dummy(self, menu, menutext, arg):
+        pass
+
+    def _create_menuitem(self, string, action, arg = None):
+        rclick_menu = Gtk.MenuItem(label=string)
+        rclick_menu.connect(&#34;activate&#34;, action, string, arg);
+        rclick_menu.show()
+        return rclick_menu
+
+    def menu_fired(self, menu, menutext, arg):
+        #print (&#34;menu item fired:&#34;, menutext, arg)
+        if self.callb:
+            self.callb(menutext, arg)
+        self.gtkmenu = None</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="pggui.Menu.dummy"><code class="name flex">
+<span>def <span class="ident">dummy</span></span>(<span>self, menu, menutext, arg)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def dummy(self, menu, menutext, arg):
+    pass</code></pre>
+</details>
+</dd>
+<dt id="pggui.Menu.menu_fired"><code class="name flex">
+<span>def <span class="ident">menu_fired</span></span>(<span>self, menu, menutext, arg)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def menu_fired(self, menu, menutext, arg):
+    #print (&#34;menu item fired:&#34;, menutext, arg)
+    if self.callb:
+        self.callb(menutext, arg)
+    self.gtkmenu = None</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pggui.MenuButt"><code class="flex name class">
+<span>class <span class="ident">MenuButt</span></span>
+<span>(</span><span>menarr, callb, tooltip='Menu', size=20, border=2)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>DrawingArea(**properties)
+new() -&gt; Gtk.Widget
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MenuButt(Gtk.DrawingArea):
+
+    def __init__(self, menarr, callb, tooltip = &#34;Menu&#34;, size = 20, border = 2):
+        GObject.GObject.__init__(self)
+
+        #warnings.simplefilter(&#34;ignore&#34;)
+
+        self.border = border
+        self.callb = callb
+        self.menarr = menarr
+        self.set_size_request(size + border, size + border)
+        self.connect(&#34;draw&#34;, self.draw)
+        self.connect(&#34;button-press-event&#34;, self.area_button)
+        self.connect(&#34;key-press-event&#34;, self.area_key)
+        self.set_events(Gdk.EventMask.ALL_EVENTS_MASK)
+        self.set_tooltip_text(tooltip)
+        self.set_can_focus(True)
+        self.pointer = self.get_pointer()
+
+    def _create_menuitem(self, string, action, arg = None):
+        rclick_menu = Gtk.MenuItem(string)
+        rclick_menu.connect(&#34;activate&#34;, action, string, arg);
+        rclick_menu.show()
+        return rclick_menu
+
+        # Create the menubar and toolbar
+        #action_group = Gtk.ActionGroup(&#34;DocWindowActions&#34;)
+        #action_group.add_actions(entries)
+        #return action_group
+
+    def area_key(self, area, event):
+        pass
+        #print(&#34;keypress mb&#34;, event.type, event.string);
+
+    def _make_menu(self):
+        self.grab_focus()
+        self.menu3 = Gtk.Menu()
+        cnt = 0
+        for aa in self.menarr:
+            self.menu3.append(self._create_menuitem(aa, self.menu_fired, cnt))
+            cnt = cnt + 1
+
+    def area_rbutton(self, area, event):
+        #print(&#34;rmenu butt &#34;, event.type, event.button);
+        if  event.type == Gdk.EventType.BUTTON_RELEASE:
+            if event.button == 3:
+                #print( &#34;Left Click at x=&#34;, event.x, &#34;y=&#34;, event.y)
+                self._make_menu()
+                self.menu3.popup(None, None, None, None, event.button, event.time)
+
+    def area_button(self, area, event):
+        #print(&#34;menu butt &#34;, event.type, event.button);
+        if  event.type == Gdk.EventType.BUTTON_PRESS:
+            if event.button == 1:
+                #print( &#34;Left Click at x=&#34;, event.x, &#34;y=&#34;, event.y)
+                self._make_menu()
+                self.menu3.popup(None, None, None, None, event.button, event.time)
+
+    def menu_fired(self, menu, menutext, arg):
+        #print (&#34;menu item fired:&#34;, menutext, arg)
+        if self.callb:
+            self.callb(self, menutext, arg)
+
+    def _draw_line(self, cr, xx, yy, xx2, yy2):
+        cr.move_to(xx, yy)
+        cr.line_to(xx2, yy2)
+        cr.stroke()
+
+    def draw(self, area, cr):
+        rect = self.get_allocation()
+        #print (&#34;draw&#34;, rect)
+
+        if self.is_focus():
+            cr.set_line_width(3)
+        else:
+            cr.set_line_width(2)
+
+        self._draw_line(cr, self.border, rect.height/4,
+                                rect.width - self.border, rect.height/4);
+        self._draw_line(cr, self.border, 2*rect.height/4,
+                                rect.width - self.border, 2*rect.height/4);
+        self._draw_line(cr, self.border, 3*rect.height/4,
+                                rect.width - self.border, 3*rect.height/4);</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.DrawingArea</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pggui.MenuButt.area_button"><code class="name flex">
+<span>def <span class="ident">area_button</span></span>(<span>self, area, event)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def area_button(self, area, event):
+    #print(&#34;menu butt &#34;, event.type, event.button);
+    if  event.type == Gdk.EventType.BUTTON_PRESS:
+        if event.button == 1:
+            #print( &#34;Left Click at x=&#34;, event.x, &#34;y=&#34;, event.y)
+            self._make_menu()
+            self.menu3.popup(None, None, None, None, event.button, event.time)</code></pre>
+</details>
+</dd>
+<dt id="pggui.MenuButt.area_key"><code class="name flex">
+<span>def <span class="ident">area_key</span></span>(<span>self, area, event)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def area_key(self, area, event):
+    pass
+    #print(&#34;keypress mb&#34;, event.type, event.string);</code></pre>
+</details>
+</dd>
+<dt id="pggui.MenuButt.area_rbutton"><code class="name flex">
+<span>def <span class="ident">area_rbutton</span></span>(<span>self, area, event)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def area_rbutton(self, area, event):
+    #print(&#34;rmenu butt &#34;, event.type, event.button);
+    if  event.type == Gdk.EventType.BUTTON_RELEASE:
+        if event.button == 3:
+            #print( &#34;Left Click at x=&#34;, event.x, &#34;y=&#34;, event.y)
+            self._make_menu()
+            self.menu3.popup(None, None, None, None, event.button, event.time)</code></pre>
+</details>
+</dd>
+<dt id="pggui.MenuButt.draw"><code class="name flex">
+<span>def <span class="ident">draw</span></span>(<span>self, area, cr)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>draw(self, cr:cairo.Context)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def draw(self, area, cr):
+    rect = self.get_allocation()
+    #print (&#34;draw&#34;, rect)
+
+    if self.is_focus():
+        cr.set_line_width(3)
+    else:
+        cr.set_line_width(2)
+
+    self._draw_line(cr, self.border, rect.height/4,
+                            rect.width - self.border, rect.height/4);
+    self._draw_line(cr, self.border, 2*rect.height/4,
+                            rect.width - self.border, 2*rect.height/4);
+    self._draw_line(cr, self.border, 3*rect.height/4,
+                            rect.width - self.border, 3*rect.height/4);</code></pre>
+</details>
+</dd>
+<dt id="pggui.MenuButt.menu_fired"><code class="name flex">
+<span>def <span class="ident">menu_fired</span></span>(<span>self, menu, menutext, arg)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def menu_fired(self, menu, menutext, arg):
+    #print (&#34;menu item fired:&#34;, menutext, arg)
+    if self.callb:
+        self.callb(self, menutext, arg)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pggui.RCLButt"><code class="flex name class">
+<span>class <span class="ident">RCLButt</span></span>
+<span>(</span><span>labelx, callme=None, rcallme=None, space=2, ttip=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>Button(**properties)
+new() -&gt; Gtk.Widget
+new_from_icon_name(icon_name:str=None, size:int) -&gt; Gtk.Widget
+new_from_stock(stock_id:str) -&gt; Gtk.Widget
+new_with_label(label:str) -&gt; Gtk.Widget
+new_with_mnemonic(label:str) -&gt; Gtk.Widget
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RCLButt(Gtk.Button):
+
+    def __init__(self, labelx, callme = None, rcallme = None, space = 2, ttip = None):
+        #super().__init__(self)
+        GObject.GObject.__init__(self)
+        self.rcallme = rcallme
+        self.callme  = callme
+        self.set_label(&#34; &#34; * space + labelx + &#34; &#34; * space)
+        self.set_use_underline (True)
+
+        if ttip:
+            self.set_tooltip_text(ttip)
+
+        #col = Gdk.RGBA(); col.parse(&#34;#ccffcc&#34;)
+        #self.modify_bg(Gtk.StateFlags.NORMAL, Gdk.Color(1000, 10000, 1))
+        #style = self.get_style_context())
+
+        self.connect(&#34;clicked&#34;, self.clicked)
+        self.connect(&#34;button-press-event&#34;, self.pressed)
+        self.connect(&#34;button-release-event&#34;, self.pressed)
+        self.connect(&#34;draw&#34;, self.draw)
+
+    def draw(self, area, cr):
+        #print(&#34;button&#34;, area, cr)
+        rect = self.get_allocation()
+        col = (.2, .7, .7)
+        cr.set_source_rgb(col[0], col[1], col[2])
+        cr.rectangle(0, 0, rect.width, rect.height)
+        cr.fill()
+        layout = self.create_pango_layout(&#34;Button Here ... LONG&#34;)
+        xxx, yyy = layout.get_pixel_size()
+        xx = rect.width / 2 - xxx/2
+        yy = rect.height / 2 - yyy/2
+        cr.set_source_rgb(0, 0, 0)
+        cr.move_to(xx, yy)
+        PangoCairo.show_layout(cr, layout)
+        #return True
+
+    def  pressed(self, arg1, event):
+        #print(&#34;pressed&#34;, arg1, event)
+        if  event.type == Gdk.EventType.BUTTON_RELEASE:
+            if event.button == 1:
+                if self.callme:
+                    self.callme(self, arg1, event)
+
+            if event.button == 3:
+                if self.rcallme:
+                    self.rcallme(self, arg1, event)
+
+        else:
+            # Unknown button action
+            pass
+
+    def clicked(self, arg1):
+        pass
+        #print(&#34;clicked&#34;, arg1)
+        #if self.callme:
+        #    self.callme(arg1)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.overrides.Gtk.Button</li>
+<li>gi.repository.Gtk.Button</li>
+<li>gi.repository.Gtk.Bin</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gi.repository.Gtk.Actionable</li>
+<li>gi.repository.Gtk.Activatable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pggui.RCLButt.clicked"><code class="name flex">
+<span>def <span class="ident">clicked</span></span>(<span>self, arg1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>clicked(self)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def clicked(self, arg1):
+    pass
+    #print(&#34;clicked&#34;, arg1)
+    #if self.callme:
+    #    self.callme(arg1)</code></pre>
+</details>
+</dd>
+<dt id="pggui.RCLButt.draw"><code class="name flex">
+<span>def <span class="ident">draw</span></span>(<span>self, area, cr)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>draw(self, cr:cairo.Context)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def draw(self, area, cr):
+    #print(&#34;button&#34;, area, cr)
+    rect = self.get_allocation()
+    col = (.2, .7, .7)
+    cr.set_source_rgb(col[0], col[1], col[2])
+    cr.rectangle(0, 0, rect.width, rect.height)
+    cr.fill()
+    layout = self.create_pango_layout(&#34;Button Here ... LONG&#34;)
+    xxx, yyy = layout.get_pixel_size()
+    xx = rect.width / 2 - xxx/2
+    yy = rect.height / 2 - yyy/2
+    cr.set_source_rgb(0, 0, 0)
+    cr.move_to(xx, yy)
+    PangoCairo.show_layout(cr, layout)
+    #return True</code></pre>
+</details>
+</dd>
+<dt id="pggui.RCLButt.pressed"><code class="name flex">
+<span>def <span class="ident">pressed</span></span>(<span>self, arg1, event)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>pressed(self)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def  pressed(self, arg1, event):
+    #print(&#34;pressed&#34;, arg1, event)
+    if  event.type == Gdk.EventType.BUTTON_RELEASE:
+        if event.button == 1:
+            if self.callme:
+                self.callme(self, arg1, event)
+
+        if event.button == 3:
+            if self.rcallme:
+                self.rcallme(self, arg1, event)
+
+    else:
+        # Unknown button action
+        pass</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pggui.RadioGroup"><code class="flex name class">
+<span>class <span class="ident">RadioGroup</span></span>
+<span>(</span><span>rad_arr, call_me=None, horiz=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>Frame(**properties)
+new(label:str=None) -&gt; Gtk.Widget
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class   RadioGroup(Gtk.Frame):
+
+    def __init__(self, rad_arr, call_me = None, horiz = False):
+
+        GObject.GObject.__init__(self)
+        self.buttons = []
+        self.callme = call_me
+        if horiz:
+            vbox6 = Gtk.HBox();
+            vbox6.set_spacing(6);
+            vbox6.set_border_width(4)
+        else:
+            vbox6 = Gtk.VBox();
+            vbox6.set_spacing(4);
+            vbox6.set_border_width(6)
+
+
+
+        if gui_testmode:
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse(&#34;#778888&#34;))
+
+        self.radio = Gtk.RadioButton.new_with_mnemonic(None, &#34;None&#34;)
+
+        for aa in range(len(rad_arr)):
+            #rad2 = Gtk.RadioButton.new_from_widget(self.radio)
+            #rad2.set_label(rad_arr[aa])
+            rad2 = Gtk.RadioButton.new_with_mnemonic_from_widget(self.radio, rad_arr[aa])
+            self.buttons.append(rad2)
+            rad2.connect(&#34;toggled&#34;, self.radio_toggle, aa)
+            vbox6.pack_start(rad2, False, False, False)
+
+        self.add(vbox6)
+
+    def radio_toggle(self, button, idx):
+        #print(&#34;RadioGroup&#34;, button.get_active(), &#34;&#39;&#34; + str(idx) + &#34;&#39;&#34;)
+        if  button.get_active():
+            self.callme(button, self.buttons[idx].get_label())
+
+    def set_tooltip(self, idx, strx):
+        if idx &gt;= len(self.buttons):
+            raise ValueError(IDXERR)
+        self.buttons[idx].set_tooltip_text(strx)
+
+    def set_entry(self, idx, strx):
+        if idx &gt;= len(self.buttons):
+            raise ValueError(IDXERR)
+        self.buttons[idx].set_label(strx)
+
+    def set_sensitive(self, idx, valx):
+        if idx &gt;= len(self.buttons):
+            raise ValueError(IDXERR)
+        self.buttons[idx].set_sensitive(valx)
+
+    def get_size(self):
+        return len (self.buttons)
+
+    def set_check(self, idx, valx):
+        if idx &gt;= len(self.buttons):
+            raise ValueError(IDXERR)
+        self.buttons[idx].set_active(valx)
+        self.buttons[idx].toggled()
+
+    def get_check(self):
+        cnt = 0
+        for aa in (self.buttons):
+            if aa.get_active():
+                return cnt
+            cnt += 1
+        # Nothing selected ...
+        return -1
+
+    def get_text(self):
+        for aa in (self.buttons):
+            if aa.get_active():
+                return aa.get_label()
+        # Nothing selected ... empty str
+        return &#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.Frame</li>
+<li>gi.repository.Gtk.Bin</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pggui.RadioGroup.get_check"><code class="name flex">
+<span>def <span class="ident">get_check</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_check(self):
+    cnt = 0
+    for aa in (self.buttons):
+        if aa.get_active():
+            return cnt
+        cnt += 1
+    # Nothing selected ...
+    return -1</code></pre>
+</details>
+</dd>
+<dt id="pggui.RadioGroup.get_size"><code class="name flex">
+<span>def <span class="ident">get_size</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_size(self):
+    return len (self.buttons)</code></pre>
+</details>
+</dd>
+<dt id="pggui.RadioGroup.get_text"><code class="name flex">
+<span>def <span class="ident">get_text</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_text(self):
+    for aa in (self.buttons):
+        if aa.get_active():
+            return aa.get_label()
+    # Nothing selected ... empty str
+    return &#34;&#34;</code></pre>
+</details>
+</dd>
+<dt id="pggui.RadioGroup.radio_toggle"><code class="name flex">
+<span>def <span class="ident">radio_toggle</span></span>(<span>self, button, idx)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def radio_toggle(self, button, idx):
+    #print(&#34;RadioGroup&#34;, button.get_active(), &#34;&#39;&#34; + str(idx) + &#34;&#39;&#34;)
+    if  button.get_active():
+        self.callme(button, self.buttons[idx].get_label())</code></pre>
+</details>
+</dd>
+<dt id="pggui.RadioGroup.set_check"><code class="name flex">
+<span>def <span class="ident">set_check</span></span>(<span>self, idx, valx)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_check(self, idx, valx):
+    if idx &gt;= len(self.buttons):
+        raise ValueError(IDXERR)
+    self.buttons[idx].set_active(valx)
+    self.buttons[idx].toggled()</code></pre>
+</details>
+</dd>
+<dt id="pggui.RadioGroup.set_entry"><code class="name flex">
+<span>def <span class="ident">set_entry</span></span>(<span>self, idx, strx)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_entry(self, idx, strx):
+    if idx &gt;= len(self.buttons):
+        raise ValueError(IDXERR)
+    self.buttons[idx].set_label(strx)</code></pre>
+</details>
+</dd>
+<dt id="pggui.RadioGroup.set_sensitive"><code class="name flex">
+<span>def <span class="ident">set_sensitive</span></span>(<span>self, idx, valx)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>set_sensitive(self, sensitive:bool)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_sensitive(self, idx, valx):
+    if idx &gt;= len(self.buttons):
+        raise ValueError(IDXERR)
+    self.buttons[idx].set_sensitive(valx)</code></pre>
+</details>
+</dd>
+<dt id="pggui.RadioGroup.set_tooltip"><code class="name flex">
+<span>def <span class="ident">set_tooltip</span></span>(<span>self, idx, strx)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_tooltip(self, idx, strx):
+    if idx &gt;= len(self.buttons):
+        raise ValueError(IDXERR)
+    self.buttons[idx].set_tooltip_text(strx)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pggui.Rectangle"><code class="flex name class">
+<span>class <span class="ident">Rectangle</span></span>
+<span>(</span><span>*rrr)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Rectangle():
+
+    # Accept rect, array, integers
+    def __init__(self, *rrr):
+        #Gdk.Rectangle.__init__(self)
+        if len(rrr) == 4:
+            idx = 0
+            for aa in rrr:
+                bb = int(aa)
+                if idx == 0:
+                    self.x = bb
+                elif idx == 1:
+                    self.y = bb
+                elif idx == 2:
+                    #self.width = bb
+                    self.w = bb
+                elif idx == 3:
+                    #self.height = bb
+                    self.h = bb
+                else:
+                    raise ValueError
+                idx += 1
+        else:
+            for aaa in rrr:
+                self.x = aaa[0]; self.y =  aaa[1]
+                self.w =  aaa[2];
+                #self.width =  aaa[2];
+                self.h =  aaa[3]
+                #self.height =  aaa[3]
+                break
+            pass
+
+    # Make it smaller
+    def resize(self, ww, hh = 0):
+        if hh == 0:
+            hh = ww
+
+        #if ww + self.w &lt;= 0 or hh + self.h &lt;= 0:
+        #    raise (ValuError, &#34;Cannot have negative rect size&#34;)
+
+        self.x -= ww/2; self.w += ww
+        self.y -= hh/2; self.h += hh
+
+    def copy(self):
+        #print(&#34;rect to copy&#34;, str(self))
+        #print(&#34;rect to copy&#34;, dir(self))
+        nnn = Rectangle()                   # New Instance
+        &#39;&#39;&#39;
+        # Self
+        for aa in dir(self):
+            try:
+                #nnn.__setattr__(aa, self.__getattribute__(aa))
+                nnn.aa = self.__getattribute__(aa)
+                #print(&#34;cp:&#34;, aa, end = &#34;&#34;)
+                #if type(self.__getattribute__(aa)) == int:
+                #    print(&#34; -&gt; &#34;, self.__getattribute__(aa), end= &#34; &#34;)
+                #print(&#34; --- &#34;, end = &#34;&#34;)
+            except:
+                #print(sys.exc_info())
+                print(&#34;no&#34;, aa)
+                pass
+        &#39;&#39;&#39;
+
+        # Assign explictly
+        nnn.x = self.x + 0
+        nnn.y = self.y + 0
+        nnn.w = self.w + 0
+        nnn.h = self.h + 0
+
+        #nnn.width = self.width + 1
+        #nnn.height = self.height + 1
+
+        #print(&#34;rect out&#34;, str(nnn))
+        #print(&#34;rect out&#34;, dir(nnn))
+        return nnn
+
+    # Normalize; Put the rect in positive space
+
+    def norm(self, rect):
+        rect3 = rect.copy()
+        if rect3.h &lt; 0:
+            rect3.y -= abs(rect3.h)
+            rect3.h = abs(rect3.h)
+        if rect3.w &lt; 0:
+            rect3.x -= abs(rect3.w)
+            rect3.w = abs(rect3.w)
+        return rect3
+
+    # I was too lazy to write it; Crappy Gdk rect kicked me to it
+
+    # ==========    self
+    # =        =
+    # =    ----=----
+    # ====|======   |  rect2
+    #     |         |
+    #      ---------
+
+    def intersect(self, rect2):
+
+        rect3 = self.norm(rect2);   rect4 = self.norm(self)
+
+        urx = rect4.x + rect4.w;    lry = rect4.y + rect4.h
+        urx2 = rect3.x + rect3.w;   lry2 = rect3.y + rect3.h
+        inter = 0
+
+        # X intersect
+        if rect3.x &gt;= rect4.x and rect3.x &lt;= urx:
+            inter += 1;
+        # Y intersect
+        if rect3.y &gt;= rect4.y and rect3.y &lt;= lry:
+            inter += 1;
+
+        # X intersect rev
+        if rect4.x &gt;= rect3.x and rect4.x &lt;= urx2:
+            inter += 1;
+        # Y intersect rev
+        if rect4.y &gt;= rect3.y and rect4.y &lt;= lry2:
+            inter += 1;
+
+        #print(&#34;inter&#34;, inter, str(self), &#34;-&gt;&#34;, str(rect2))
+        return (inter &gt;= 2, self.x)
+
+    # I was too lazy to write it; Crappy Gdt rect kicked me to it
+    def contain(self, rect2):
+        #self.dump()
+        #rect2.dump()
+        inter = 0
+        # X intersect
+        if rect2.x &gt;= self.x and rect2.x + rect2.w &lt;= self.x + self.w:
+            inter += 1;
+        # Y intersect
+        if rect2.y &gt;= self.y and rect2.y + rect2.h &lt;= self.y + self.h:
+            inter += 1;
+        #print(&#34;inter&#34;, inter)
+        return (inter == 2, self.x)
+
+    # Convert index to values
+    def __getitem__(self, key):
+        if key == 0:
+            return self.x
+        elif key == 1:
+            return self.y
+        elif key == 2:
+            return self.w
+        elif key == 3:
+            return self.h
+        else:
+            raise IndexError;
+
+    def dump(self):
+        return (self.x, self.y, self.w, self.h)
+
+    &#39;&#39;&#39;
+    # This was killed in favour of self implemented Rectangle class
+    def __getattr__(self, attr):
+        if attr == &#34;w&#34;:
+            return self.width
+        elif attr == &#34;h&#34;:
+            return self.height
+        else:
+            return super(Gdk.Rectangle, self).__getattr__(attr)
+
+    def __setattr__(self, attr, val):
+        if attr == &#34;w&#34;:
+            self.width = val
+        elif attr == &#34;h&#34;:
+            self.height = val
+        else:
+            super(Gdk.Rectangle, self).__setattr__(attr, val)
+    &#39;&#39;&#39;
+
+    def __str__(self):
+        return &#34;R: x=%d y=%d w=%d h=%d&#34; % (self.x, self.y, self.w, self.h)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="pggui.Rectangle.contain"><code class="name flex">
+<span>def <span class="ident">contain</span></span>(<span>self, rect2)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def contain(self, rect2):
+    #self.dump()
+    #rect2.dump()
+    inter = 0
+    # X intersect
+    if rect2.x &gt;= self.x and rect2.x + rect2.w &lt;= self.x + self.w:
+        inter += 1;
+    # Y intersect
+    if rect2.y &gt;= self.y and rect2.y + rect2.h &lt;= self.y + self.h:
+        inter += 1;
+    #print(&#34;inter&#34;, inter)
+    return (inter == 2, self.x)</code></pre>
+</details>
+</dd>
+<dt id="pggui.Rectangle.copy"><code class="name flex">
+<span>def <span class="ident">copy</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def copy(self):
+    #print(&#34;rect to copy&#34;, str(self))
+    #print(&#34;rect to copy&#34;, dir(self))
+    nnn = Rectangle()                   # New Instance
+    &#39;&#39;&#39;
+    # Self
+    for aa in dir(self):
+        try:
+            #nnn.__setattr__(aa, self.__getattribute__(aa))
+            nnn.aa = self.__getattribute__(aa)
+            #print(&#34;cp:&#34;, aa, end = &#34;&#34;)
+            #if type(self.__getattribute__(aa)) == int:
+            #    print(&#34; -&gt; &#34;, self.__getattribute__(aa), end= &#34; &#34;)
+            #print(&#34; --- &#34;, end = &#34;&#34;)
+        except:
+            #print(sys.exc_info())
+            print(&#34;no&#34;, aa)
+            pass
+    &#39;&#39;&#39;
+
+    # Assign explictly
+    nnn.x = self.x + 0
+    nnn.y = self.y + 0
+    nnn.w = self.w + 0
+    nnn.h = self.h + 0
+
+    #nnn.width = self.width + 1
+    #nnn.height = self.height + 1
+
+    #print(&#34;rect out&#34;, str(nnn))
+    #print(&#34;rect out&#34;, dir(nnn))
+    return nnn</code></pre>
+</details>
+</dd>
+<dt id="pggui.Rectangle.dump"><code class="name flex">
+<span>def <span class="ident">dump</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def dump(self):
+    return (self.x, self.y, self.w, self.h)</code></pre>
+</details>
+</dd>
+<dt id="pggui.Rectangle.intersect"><code class="name flex">
+<span>def <span class="ident">intersect</span></span>(<span>self, rect2)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def intersect(self, rect2):
+
+    rect3 = self.norm(rect2);   rect4 = self.norm(self)
+
+    urx = rect4.x + rect4.w;    lry = rect4.y + rect4.h
+    urx2 = rect3.x + rect3.w;   lry2 = rect3.y + rect3.h
+    inter = 0
+
+    # X intersect
+    if rect3.x &gt;= rect4.x and rect3.x &lt;= urx:
+        inter += 1;
+    # Y intersect
+    if rect3.y &gt;= rect4.y and rect3.y &lt;= lry:
+        inter += 1;
+
+    # X intersect rev
+    if rect4.x &gt;= rect3.x and rect4.x &lt;= urx2:
+        inter += 1;
+    # Y intersect rev
+    if rect4.y &gt;= rect3.y and rect4.y &lt;= lry2:
+        inter += 1;
+
+    #print(&#34;inter&#34;, inter, str(self), &#34;-&gt;&#34;, str(rect2))
+    return (inter &gt;= 2, self.x)</code></pre>
+</details>
+</dd>
+<dt id="pggui.Rectangle.norm"><code class="name flex">
+<span>def <span class="ident">norm</span></span>(<span>self, rect)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def norm(self, rect):
+    rect3 = rect.copy()
+    if rect3.h &lt; 0:
+        rect3.y -= abs(rect3.h)
+        rect3.h = abs(rect3.h)
+    if rect3.w &lt; 0:
+        rect3.x -= abs(rect3.w)
+        rect3.w = abs(rect3.w)
+    return rect3</code></pre>
+</details>
+</dd>
+<dt id="pggui.Rectangle.resize"><code class="name flex">
+<span>def <span class="ident">resize</span></span>(<span>self, ww, hh=0)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def resize(self, ww, hh = 0):
+    if hh == 0:
+        hh = ww
+
+    #if ww + self.w &lt;= 0 or hh + self.h &lt;= 0:
+    #    raise (ValuError, &#34;Cannot have negative rect size&#34;)
+
+    self.x -= ww/2; self.w += ww
+    self.y -= hh/2; self.h += hh</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pggui.ScrollListBox"><code class="flex name class">
+<span>class <span class="ident">ScrollListBox</span></span>
+<span>(</span><span>limit=-1, colname='', callme=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>Frame(**properties)
+new(label:str=None) -&gt; Gtk.Widget
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ScrollListBox(Gtk.Frame):
+
+    def __init__(self, limit = -1, colname = &#39;&#39;, callme = None):
+        Gtk.Frame.__init__(self)
+        self.listbox = ListBox(limit, colname)
+        if callme:
+            self.listbox.set_callback(callme)
+        self.listbox.scroll = Gtk.ScrolledWindow()
+        self.listbox.scroll.add_with_viewport(self.listbox)
+        self.add(self.listbox.scroll)
+        self.autoscroll = True
+
+    # Propagate needed ops to list control
+
+    def append_end(self, strx):
+        #print(&#34;ser str append&#34;, strx)
+        self.listbox.append(strx)
+
+        if self.autoscroll:
+            pgutils.usleep(10)              # Wait for it to go to screen
+            sb = self.listbox.scroll.get_vscrollbar()
+            sb.set_value(2000000)
+        self.listbox.select(-1)
+
+    def clear(self):
+        self.listbox.clear()
+
+    def select(self, num):
+        self.listbox.select(num)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.Frame</li>
+<li>gi.repository.Gtk.Bin</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pggui.ScrollListBox.append_end"><code class="name flex">
+<span>def <span class="ident">append_end</span></span>(<span>self, strx)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def append_end(self, strx):
+    #print(&#34;ser str append&#34;, strx)
+    self.listbox.append(strx)
+
+    if self.autoscroll:
+        pgutils.usleep(10)              # Wait for it to go to screen
+        sb = self.listbox.scroll.get_vscrollbar()
+        sb.set_value(2000000)
+    self.listbox.select(-1)</code></pre>
+</details>
+</dd>
+<dt id="pggui.ScrollListBox.clear"><code class="name flex">
+<span>def <span class="ident">clear</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def clear(self):
+    self.listbox.clear()</code></pre>
+</details>
+</dd>
+<dt id="pggui.ScrollListBox.select"><code class="name flex">
+<span>def <span class="ident">select</span></span>(<span>self, num)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def select(self, num):
+    self.listbox.select(num)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pggui.SeparatorMenuItem"><code class="flex name class">
+<span>class <span class="ident">SeparatorMenuItem</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>SeparatorMenuItem(**properties)
+new() -&gt; Gtk.Widget
+</code></pre>
+<p>Initializer for a GObject based classes with support for property
+sets through the use of explicit keyword arguments.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class   SeparatorMenuItem(Gtk.SeparatorMenuItem):
+
+    def __init__(self):
+        Gtk.SeparatorMenuItem.__init__(self);
+        self.show()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.SeparatorMenuItem</li>
+<li>gi.overrides.Gtk.MenuItem</li>
+<li>gi.repository.Gtk.MenuItem</li>
+<li>gi.repository.Gtk.Bin</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gi.repository.Gtk.Actionable</li>
+<li>gi.repository.Gtk.Activatable</li>
+<li>gobject.GInterface</li>
+</ul>
+</dd>
+<dt id="pggui.Spacer"><code class="flex name class">
+<span>class <span class="ident">Spacer</span></span>
+<span>(</span><span>sp=1, title=None, left=False, bottom=False, test=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>Label(**properties)
+new(str:str=None) -&gt; Gtk.Widget
+new_with_mnemonic(str:str=None) -&gt; Gtk.Widget
+</code></pre>
+<p>Initializer for a GObject based classes with support for property
+sets through the use of explicit keyword arguments.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Spacer(Gtk.Label):
+
+    def __init__(self, sp = 1, title=None, left=False, bottom=False, test=False):
+
+        GObject.GObject.__init__(self)
+
+        #sp *= 1000
+        #self.set_markup(&#34;&lt;span  size=\&#34;&#34; + str(sp) + &#34;\&#34;&gt; &lt;/span&gt;&#34;)
+        #self.set_text(&#34; &#34; * sp)
+
+        if title:
+            self.set_text(title)
+        else:
+            self.set_text(&#34; &#34; * sp)
+
+        if left:
+            self.set_xalign(0)
+
+        if bottom:
+            self.set_yalign(1)
+
+        if test or gui_testmode:
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse(&#34;#888888&#34;))
+
+        #self.set_property(&#34;angle&#34;, 15)
+        #attr = self.get_property(&#34;attributes&#34;)
+        #attr2 = Pango.AttrList()
+        #print (&#34;attr&#34;, dir(attr))
+        #attr.
+        #self.set_property(&#34;attributes&#34;, attr)
+        #self.set_property(&#34;label&#34;, &#34;wtf&#34;)
+        #self.set_property(&#34;background-set&#34;, True)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.overrides.Gtk.Label</li>
+<li>gi.repository.Gtk.Label</li>
+<li>gi.repository.Gtk.Misc</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gobject.GInterface</li>
+</ul>
+</dd>
+<dt id="pggui.Spinner"><code class="flex name class">
+<span>class <span class="ident">Spinner</span></span>
+<span>(</span><span>startx=0, endx=100, defx=0, cb=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>SpinButton(**properties)
+new(adjustment:Gtk.Adjustment=None, climb_rate:float, digits:int) -&gt; Gtk.Widget
+new_with_range(min:float, max:float, step:float) -&gt; Gtk.Widget
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Spinner(Gtk.SpinButton):
+
+    def __init__(self, startx = 0, endx = 100, defx = 0, cb=None):
+
+        GObject.GObject.__init__(self)
+        self.cb_func = cb
+
+        adj2 = Gtk.Adjustment(startx, startx, endx, 1.0, 5.0, 0.0)
+        self.set_adjustment(adj2)
+        self.set_value(defx)
+        self.set_wrap(True)
+        self.connect(&#34;value_changed&#34;, self.spinned)
+
+    def spinned(self, spin):
+        #print(&#34;spinned&#34;, spin)
+        if self.cb_func:
+            self.cb_func(self.get_value())</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.SpinButton</li>
+<li>gi.repository.Gtk.Entry</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gi.repository.Gtk.CellEditable</li>
+<li>gi.overrides.Gtk.Editable</li>
+<li>gi.repository.Gtk.Editable</li>
+<li>gi.repository.Gtk.Orientable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pggui.Spinner.spinned"><code class="name flex">
+<span>def <span class="ident">spinned</span></span>(<span>self, spin)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def spinned(self, spin):
+    #print(&#34;spinned&#34;, spin)
+    if self.cb_func:
+        self.cb_func(self.get_value())</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pggui.TextRow"><code class="flex name class">
+<span>class <span class="ident">TextRow</span></span>
+<span>(</span><span>labelx, initval, main, align=20)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>HBox(**properties)
+new(homogeneous:bool, spacing:int) -&gt; Gtk.Widget
+</code></pre>
+<p>Initializer for a GObject based classes with support for property
+sets through the use of explicit keyword arguments.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class   TextRow(Gtk.HBox):
+
+    def __init__(self, labelx, initval, main, align=20):
+
+        GObject.GObject.__init__(self)
+        #super().__init__(self)
+
+        self.set_homogeneous(False)
+        self.main = main
+        self.label = Gtk.Label()
+        self.label.set_text_with_mnemonic(labelx)
+        #self.label.set_xalign(1)
+
+        # Adjust for false character
+        lenx = len(labelx);
+        if &#34;_&#34; in labelx: lenx -= 1
+        #spp = int((align - lenx) * 1.8) # Space is smaller than avarage char
+        #self.pack_start(Spacer(spp), False, False, 0)
+
+        self.pack_start(Spacer(), False, False, 0)
+        self.pack_start(self.label, False, False, 0)
+        self.pack_start(Spacer(4), False, False, 0)
+        self.tbox = Gtk.Entry()
+        self.tbox.set_width_chars (8)
+        self.tbox.set_text(initval)
+        self.pack_start(self.tbox, False, False, 0)
+
+        self.label.set_mnemonic_widget(self.tbox)
+
+        self.tbox.connect(&#34;focus_out_event&#34;, self.edit_done)
+        self.tbox.connect(&#34;key-press-event&#34;, self.edit_key)
+        self.tbox.connect(&#34;key-release-event&#34;, self.edit_key_rel)
+
+    def edit_done(self, textbox, event):
+        #print(textbox.get_text())
+        pass
+
+    def edit_key_rel(self, textbox, event):
+        #print(textbox, event.string, event.keyval)
+        if event.string == &#34;\t&#34;:
+            #print(&#34;Tab&#34;)
+            return None
+
+        if event.string == &#34;\r&#34;:
+            #print(&#34;Newline&#34;, event.string)
+            # Switch to next control
+            &#39;&#39;&#39;
+            #ee = event.copy() #Gdk.Event(Gdk.EventType.KEY_PRESS)
+            #ee.keyval = Gdk.KEY_Tab
+            #ee.string = &#34;\t&#34;
+            #e.state = event.state
+            #super().emit(&#34;key-release-event&#34;, ee)
+            #super().foreach(self.callb)
+            &#39;&#39;&#39;
+            pass
+
+    def callb(self, arg1):
+        #print (&#34;callb arg1&#34;, arg1)
+        pass
+
+    def edit_key(self, textbox, event):
+        #print(textbox, event.string, event.keyval)
+        if event.string == &#34;\t&#34;:
+            #print(&#34;Tab&#34;)
+            pass
+        if event.string == &#34;\r&#34;:
+            #print(&#34;Newline&#34;)
+            # Switch to next control (any way you can)
+            arrx = (Gtk.DirectionType.TAB_FORWARD,  Gtk.DirectionType.RIGHT,
+            Gtk.DirectionType.LEFT, Gtk.DirectionType.UP)
+            for aa in arrx:
+                ret = self.main.child_focus(aa)
+                if ret:
+                    break
+
+    def get_text(self):
+        return self.tbox.get_text()
+
+    def set_text(self, txt):
+        return self.tbox.set_text(txt)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.HBox</li>
+<li>gi.overrides.Gtk.Box</li>
+<li>gi.repository.Gtk.Box</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gi.repository.Gtk.Orientable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pggui.TextRow.callb"><code class="name flex">
+<span>def <span class="ident">callb</span></span>(<span>self, arg1)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def callb(self, arg1):
+    #print (&#34;callb arg1&#34;, arg1)
+    pass</code></pre>
+</details>
+</dd>
+<dt id="pggui.TextRow.edit_done"><code class="name flex">
+<span>def <span class="ident">edit_done</span></span>(<span>self, textbox, event)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def edit_done(self, textbox, event):
+    #print(textbox.get_text())
+    pass</code></pre>
+</details>
+</dd>
+<dt id="pggui.TextRow.edit_key"><code class="name flex">
+<span>def <span class="ident">edit_key</span></span>(<span>self, textbox, event)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def edit_key(self, textbox, event):
+    #print(textbox, event.string, event.keyval)
+    if event.string == &#34;\t&#34;:
+        #print(&#34;Tab&#34;)
+        pass
+    if event.string == &#34;\r&#34;:
+        #print(&#34;Newline&#34;)
+        # Switch to next control (any way you can)
+        arrx = (Gtk.DirectionType.TAB_FORWARD,  Gtk.DirectionType.RIGHT,
+        Gtk.DirectionType.LEFT, Gtk.DirectionType.UP)
+        for aa in arrx:
+            ret = self.main.child_focus(aa)
+            if ret:
+                break</code></pre>
+</details>
+</dd>
+<dt id="pggui.TextRow.edit_key_rel"><code class="name flex">
+<span>def <span class="ident">edit_key_rel</span></span>(<span>self, textbox, event)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def edit_key_rel(self, textbox, event):
+    #print(textbox, event.string, event.keyval)
+    if event.string == &#34;\t&#34;:
+        #print(&#34;Tab&#34;)
+        return None
+
+    if event.string == &#34;\r&#34;:
+        #print(&#34;Newline&#34;, event.string)
+        # Switch to next control
+        &#39;&#39;&#39;
+        #ee = event.copy() #Gdk.Event(Gdk.EventType.KEY_PRESS)
+        #ee.keyval = Gdk.KEY_Tab
+        #ee.string = &#34;\t&#34;
+        #e.state = event.state
+        #super().emit(&#34;key-release-event&#34;, ee)
+        #super().foreach(self.callb)
+        &#39;&#39;&#39;
+        pass</code></pre>
+</details>
+</dd>
+<dt id="pggui.TextRow.get_text"><code class="name flex">
+<span>def <span class="ident">get_text</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_text(self):
+    return self.tbox.get_text()</code></pre>
+</details>
+</dd>
+<dt id="pggui.TextRow.set_text"><code class="name flex">
+<span>def <span class="ident">set_text</span></span>(<span>self, txt)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_text(self, txt):
+    return self.tbox.set_text(txt)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pggui.TextTable"><code class="flex name class">
+<span>class <span class="ident">TextTable</span></span>
+<span>(</span><span>confarr, main=None, textwidth=24)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>YTable of text entries </p>
+<p>Initializer for a GObject based classes with support for property
+sets through the use of explicit keyword arguments.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class   TextTable(Gtk.Table):
+
+    &#39;&#39;&#39; YTable of text entries &#39;&#39;&#39;
+
+    def __init__(self, confarr, main = None, textwidth = 24):
+        GObject.GObject.__init__(self)
+        self.texts = []
+        #self.set_homogeneous(False)
+        self.main = main
+        row = 0
+        for aa, bb in confarr:
+            #print(&#34;aa&#34;, aa, &#34;bb&#34;, bb)
+            label = Gtk.Label()
+            label.set_text_with_mnemonic(aa)
+            tbox = Gtk.Entry()
+            label.set_mnemonic_widget(tbox)
+            tbox.set_width_chars (textwidth)
+            self.texts.append(tbox)
+            self.attach_defaults(label, 0, 1, row, row + 1)
+            self.attach_defaults(tbox,  1, 2, row, row + 1)
+            row += 1</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.overrides.Gtk.Table</li>
+<li>gi.repository.Gtk.Table</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gobject.GInterface</li>
+</ul>
+</dd>
+<dt id="pggui.WideButt"><code class="flex name class">
+<span>class <span class="ident">WideButt</span></span>
+<span>(</span><span>labelx, callme=None, space=2)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>Button(**properties)
+new() -&gt; Gtk.Widget
+new_from_icon_name(icon_name:str=None, size:int) -&gt; Gtk.Widget
+new_from_stock(stock_id:str) -&gt; Gtk.Widget
+new_with_label(label:str) -&gt; Gtk.Widget
+new_with_mnemonic(label:str) -&gt; Gtk.Widget
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class WideButt(Gtk.Button):
+
+    def __init__(self, labelx, callme = None, space = 2):
+        #super().__init__(self)
+        GObject.GObject.__init__(self)
+        self.set_label(&#34; &#34; * space + labelx + &#34; &#34; * space)
+        self.set_use_underline (True)
+        if callme:
+            self.connect(&#34;clicked&#34;, callme)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.overrides.Gtk.Button</li>
+<li>gi.repository.Gtk.Button</li>
+<li>gi.repository.Gtk.Bin</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gi.repository.Gtk.Actionable</li>
+<li>gi.repository.Gtk.Activatable</li>
+<li>gobject.GInterface</li>
+</ul>
+</dd>
+<dt id="pggui.coords"><code class="flex name class">
+<span>class <span class="ident">coords</span></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class coords():
+    pass</code></pre>
+</details>
+</dd>
+<dt id="pggui.xHBox"><code class="flex name class">
+<span>class <span class="ident">xHBox</span></span>
+<span>(</span><span>col=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>HBox(**properties)
+new(homogeneous:bool, spacing:int) -&gt; Gtk.Widget
+</code></pre>
+<p>Initializer for a GObject based classes with support for property
+sets through the use of explicit keyword arguments.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class   xHBox(Gtk.HBox):
+
+    def __init__(self, col = None):
+        GObject.GObject.__init__(self)
+        self.pad = 0
+        if gui_testmode:
+            if not col:
+                col = randcolstr(100, 200)
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse(col))
+
+    def set_padding(self, pad):
+        self.pad = pad
+
+    def pack(self, obj, expand = False, pad = 0):
+        if pad == 0:
+            pad = self.pad
+        self.pack_start(obj, expand, expand, pad)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.HBox</li>
+<li>gi.overrides.Gtk.Box</li>
+<li>gi.repository.Gtk.Box</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gi.repository.Gtk.Orientable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pggui.xHBox.pack"><code class="name flex">
+<span>def <span class="ident">pack</span></span>(<span>self, obj, expand=False, pad=0)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pack(self, obj, expand = False, pad = 0):
+    if pad == 0:
+        pad = self.pad
+    self.pack_start(obj, expand, expand, pad)</code></pre>
+</details>
+</dd>
+<dt id="pggui.xHBox.set_padding"><code class="name flex">
+<span>def <span class="ident">set_padding</span></span>(<span>self, pad)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_padding(self, pad):
+    self.pad = pad</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pggui.xSpacer"><code class="flex name class">
+<span>class <span class="ident">xSpacer</span></span>
+<span>(</span><span>sp=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>HBox(**properties)
+new(homogeneous:bool, spacing:int) -&gt; Gtk.Widget
+</code></pre>
+<p>Initializer for a GObject based classes with support for property
+sets through the use of explicit keyword arguments.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class xSpacer(Gtk.HBox):
+
+    def __init__(self, sp = None):
+        GObject.GObject.__init__(self)
+        #self.pack_start()
+        if gui_testmode:
+            col = randcolstr(100, 200)
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse(col))
+        if sp == None:
+            sp = 6
+        self.set_size_request(sp, sp)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.HBox</li>
+<li>gi.overrides.Gtk.Box</li>
+<li>gi.repository.Gtk.Box</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gi.repository.Gtk.Orientable</li>
+<li>gobject.GInterface</li>
+</ul>
+</dd>
+<dt id="pggui.xVBox"><code class="flex name class">
+<span>class <span class="ident">xVBox</span></span>
+<span>(</span><span>col=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>VBox(**properties)
+new(homogeneous:bool, spacing:int) -&gt; Gtk.Widget
+</code></pre>
+<p>Initializer for a GObject based classes with support for property
+sets through the use of explicit keyword arguments.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class   xVBox(Gtk.VBox):
+
+    def __init__(self, col = None):
+        GObject.GObject.__init__(self)
+        self.pad = 0
+        if gui_testmode:
+            if not col:
+                col = randcolstr(100, 200)
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse(col))
+
+    def set_padding(self, pad):
+        self.pad = pad
+
+    def pack(self, obj, expand = False, pad = 0):
+        if pad == 0:
+            pad = self.pad
+        self.pack_start(obj, expand, expand, pad)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.VBox</li>
+<li>gi.overrides.Gtk.Box</li>
+<li>gi.repository.Gtk.Box</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gi.repository.Gtk.Orientable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pggui.xVBox.pack"><code class="name flex">
+<span>def <span class="ident">pack</span></span>(<span>self, obj, expand=False, pad=0)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pack(self, obj, expand = False, pad = 0):
+    if pad == 0:
+        pad = self.pad
+    self.pack_start(obj, expand, expand, pad)</code></pre>
+</details>
+</dd>
+<dt id="pggui.xVBox.set_padding"><code class="name flex">
+<span>def <span class="ident">set_padding</span></span>(<span>self, pad)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_padding(self, pad):
+    self.pad = pad</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pggui.ySpacer"><code class="flex name class">
+<span>class <span class="ident">ySpacer</span></span>
+<span>(</span><span>sp=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>VBox(**properties)
+new(homogeneous:bool, spacing:int) -&gt; Gtk.Widget
+</code></pre>
+<p>Initializer for a GObject based classes with support for property
+sets through the use of explicit keyword arguments.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ySpacer(Gtk.VBox):
+
+    def __init__(self, sp = None):
+        GObject.GObject.__init__(self)
+        #self.pack_start()
+        if gui_testmode:
+            col = randcolstr(100, 200)
+            self.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse(col))
+        if sp == None:
+            sp = 6
+        self.set_size_request(sp, sp)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.VBox</li>
+<li>gi.overrides.Gtk.Box</li>
+<li>gi.repository.Gtk.Box</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gi.repository.Gtk.Orientable</li>
+<li>gobject.GInterface</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="two-column">
+<li><code><a title="pggui.message" href="#pggui.message">message</a></code></li>
+<li><code><a title="pggui.randcol" href="#pggui.randcol">randcol</a></code></li>
+<li><code><a title="pggui.randcolstr" href="#pggui.randcolstr">randcolstr</a></code></li>
+<li><code><a title="pggui.resp2str" href="#pggui.resp2str">resp2str</a></code></li>
+<li><code><a title="pggui.set_gui_testmode" href="#pggui.set_gui_testmode">set_gui_testmode</a></code></li>
+<li><code><a title="pggui.set_testmode" href="#pggui.set_testmode">set_testmode</a></code></li>
+<li><code><a title="pggui.version" href="#pggui.version">version</a></code></li>
+<li><code><a title="pggui.yes_no" href="#pggui.yes_no">yes_no</a></code></li>
+<li><code><a title="pggui.yes_no_cancel" href="#pggui.yes_no_cancel">yes_no_cancel</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="pggui.CairoHelper" href="#pggui.CairoHelper">CairoHelper</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pggui.CairoHelper.circle" href="#pggui.CairoHelper.circle">circle</a></code></li>
+<li><code><a title="pggui.CairoHelper.rectangle" href="#pggui.CairoHelper.rectangle">rectangle</a></code></li>
+<li><code><a title="pggui.CairoHelper.romb" href="#pggui.CairoHelper.romb">romb</a></code></li>
+<li><code><a title="pggui.CairoHelper.set_source_rgb" href="#pggui.CairoHelper.set_source_rgb">set_source_rgb</a></code></li>
+<li><code><a title="pggui.CairoHelper.tri" href="#pggui.CairoHelper.tri">tri</a></code></li>
+<li><code><a title="pggui.CairoHelper.tri2" href="#pggui.CairoHelper.tri2">tri2</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pggui.ComboBox" href="#pggui.ComboBox">ComboBox</a></code></h4>
+<ul class="">
+<li><code><a title="pggui.ComboBox.combo_changed" href="#pggui.ComboBox.combo_changed">combo_changed</a></code></li>
+<li><code><a title="pggui.ComboBox.delall" href="#pggui.ComboBox.delall">delall</a></code></li>
+<li><code><a title="pggui.ComboBox.sel_first" href="#pggui.ComboBox.sel_first">sel_first</a></code></li>
+<li><code><a title="pggui.ComboBox.sel_text" href="#pggui.ComboBox.sel_text">sel_text</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pggui.FrameTextView" href="#pggui.FrameTextView">FrameTextView</a></code></h4>
+<ul class="">
+<li><code><a title="pggui.FrameTextView.append" href="#pggui.FrameTextView.append">append</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pggui.Label" href="#pggui.Label">Label</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pggui.LabelButt" href="#pggui.LabelButt">LabelButt</a></code></h4>
+<ul class="">
+<li><code><a title="pggui.LabelButt.area_enter" href="#pggui.LabelButt.area_enter">area_enter</a></code></li>
+<li><code><a title="pggui.LabelButt.area_leave" href="#pggui.LabelButt.area_leave">area_leave</a></code></li>
+<li><code><a title="pggui.LabelButt.area_motion" href="#pggui.LabelButt.area_motion">area_motion</a></code></li>
+<li><code><a title="pggui.LabelButt.eventx" href="#pggui.LabelButt.eventx">eventx</a></code></li>
+<li><code><a title="pggui.LabelButt.mnemonic" href="#pggui.LabelButt.mnemonic">mnemonic</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pggui.Led" href="#pggui.Led">Led</a></code></h4>
+<ul class="">
+<li><code><a title="pggui.Led.draw" href="#pggui.Led.draw">draw</a></code></li>
+<li><code><a title="pggui.Led.set_color" href="#pggui.Led.set_color">set_color</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pggui.Lights" href="#pggui.Lights">Lights</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pggui.Lights.colbox" href="#pggui.Lights.colbox">colbox</a></code></li>
+<li><code><a title="pggui.Lights.get_size" href="#pggui.Lights.get_size">get_size</a></code></li>
+<li><code><a title="pggui.Lights.set_color" href="#pggui.Lights.set_color">set_color</a></code></li>
+<li><code><a title="pggui.Lights.set_colors" href="#pggui.Lights.set_colors">set_colors</a></code></li>
+<li><code><a title="pggui.Lights.set_tooltip" href="#pggui.Lights.set_tooltip">set_tooltip</a></code></li>
+<li><code><a title="pggui.Lights.set_tooltips" href="#pggui.Lights.set_tooltips">set_tooltips</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pggui.ListBox" href="#pggui.ListBox">ListBox</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pggui.ListBox.append" href="#pggui.ListBox.append">append</a></code></li>
+<li><code><a title="pggui.ListBox.clear" href="#pggui.ListBox.clear">clear</a></code></li>
+<li><code><a title="pggui.ListBox.get_curridx" href="#pggui.ListBox.get_curridx">get_curridx</a></code></li>
+<li><code><a title="pggui.ListBox.get_item" href="#pggui.ListBox.get_item">get_item</a></code></li>
+<li><code><a title="pggui.ListBox.get_size" href="#pggui.ListBox.get_size">get_size</a></code></li>
+<li><code><a title="pggui.ListBox.get_text" href="#pggui.ListBox.get_text">get_text</a></code></li>
+<li><code><a title="pggui.ListBox.select" href="#pggui.ListBox.select">select</a></code></li>
+<li><code><a title="pggui.ListBox.set_callback" href="#pggui.ListBox.set_callback">set_callback</a></code></li>
+<li><code><a title="pggui.ListBox.tree_sel" href="#pggui.ListBox.tree_sel">tree_sel</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pggui.Logo" href="#pggui.Logo">Logo</a></code></h4>
+<ul class="">
+<li><code><a title="pggui.Logo.forallcallb" href="#pggui.Logo.forallcallb">forallcallb</a></code></li>
+<li><code><a title="pggui.Logo.hide" href="#pggui.Logo.hide">hide</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pggui.Menu" href="#pggui.Menu">Menu</a></code></h4>
+<ul class="">
+<li><code><a title="pggui.Menu.dummy" href="#pggui.Menu.dummy">dummy</a></code></li>
+<li><code><a title="pggui.Menu.menu_fired" href="#pggui.Menu.menu_fired">menu_fired</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pggui.MenuButt" href="#pggui.MenuButt">MenuButt</a></code></h4>
+<ul class="">
+<li><code><a title="pggui.MenuButt.area_button" href="#pggui.MenuButt.area_button">area_button</a></code></li>
+<li><code><a title="pggui.MenuButt.area_key" href="#pggui.MenuButt.area_key">area_key</a></code></li>
+<li><code><a title="pggui.MenuButt.area_rbutton" href="#pggui.MenuButt.area_rbutton">area_rbutton</a></code></li>
+<li><code><a title="pggui.MenuButt.draw" href="#pggui.MenuButt.draw">draw</a></code></li>
+<li><code><a title="pggui.MenuButt.menu_fired" href="#pggui.MenuButt.menu_fired">menu_fired</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pggui.RCLButt" href="#pggui.RCLButt">RCLButt</a></code></h4>
+<ul class="">
+<li><code><a title="pggui.RCLButt.clicked" href="#pggui.RCLButt.clicked">clicked</a></code></li>
+<li><code><a title="pggui.RCLButt.draw" href="#pggui.RCLButt.draw">draw</a></code></li>
+<li><code><a title="pggui.RCLButt.pressed" href="#pggui.RCLButt.pressed">pressed</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pggui.RadioGroup" href="#pggui.RadioGroup">RadioGroup</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pggui.RadioGroup.get_check" href="#pggui.RadioGroup.get_check">get_check</a></code></li>
+<li><code><a title="pggui.RadioGroup.get_size" href="#pggui.RadioGroup.get_size">get_size</a></code></li>
+<li><code><a title="pggui.RadioGroup.get_text" href="#pggui.RadioGroup.get_text">get_text</a></code></li>
+<li><code><a title="pggui.RadioGroup.radio_toggle" href="#pggui.RadioGroup.radio_toggle">radio_toggle</a></code></li>
+<li><code><a title="pggui.RadioGroup.set_check" href="#pggui.RadioGroup.set_check">set_check</a></code></li>
+<li><code><a title="pggui.RadioGroup.set_entry" href="#pggui.RadioGroup.set_entry">set_entry</a></code></li>
+<li><code><a title="pggui.RadioGroup.set_sensitive" href="#pggui.RadioGroup.set_sensitive">set_sensitive</a></code></li>
+<li><code><a title="pggui.RadioGroup.set_tooltip" href="#pggui.RadioGroup.set_tooltip">set_tooltip</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pggui.Rectangle" href="#pggui.Rectangle">Rectangle</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pggui.Rectangle.contain" href="#pggui.Rectangle.contain">contain</a></code></li>
+<li><code><a title="pggui.Rectangle.copy" href="#pggui.Rectangle.copy">copy</a></code></li>
+<li><code><a title="pggui.Rectangle.dump" href="#pggui.Rectangle.dump">dump</a></code></li>
+<li><code><a title="pggui.Rectangle.intersect" href="#pggui.Rectangle.intersect">intersect</a></code></li>
+<li><code><a title="pggui.Rectangle.norm" href="#pggui.Rectangle.norm">norm</a></code></li>
+<li><code><a title="pggui.Rectangle.resize" href="#pggui.Rectangle.resize">resize</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pggui.ScrollListBox" href="#pggui.ScrollListBox">ScrollListBox</a></code></h4>
+<ul class="">
+<li><code><a title="pggui.ScrollListBox.append_end" href="#pggui.ScrollListBox.append_end">append_end</a></code></li>
+<li><code><a title="pggui.ScrollListBox.clear" href="#pggui.ScrollListBox.clear">clear</a></code></li>
+<li><code><a title="pggui.ScrollListBox.select" href="#pggui.ScrollListBox.select">select</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pggui.SeparatorMenuItem" href="#pggui.SeparatorMenuItem">SeparatorMenuItem</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pggui.Spacer" href="#pggui.Spacer">Spacer</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pggui.Spinner" href="#pggui.Spinner">Spinner</a></code></h4>
+<ul class="">
+<li><code><a title="pggui.Spinner.spinned" href="#pggui.Spinner.spinned">spinned</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pggui.TextRow" href="#pggui.TextRow">TextRow</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pggui.TextRow.callb" href="#pggui.TextRow.callb">callb</a></code></li>
+<li><code><a title="pggui.TextRow.edit_done" href="#pggui.TextRow.edit_done">edit_done</a></code></li>
+<li><code><a title="pggui.TextRow.edit_key" href="#pggui.TextRow.edit_key">edit_key</a></code></li>
+<li><code><a title="pggui.TextRow.edit_key_rel" href="#pggui.TextRow.edit_key_rel">edit_key_rel</a></code></li>
+<li><code><a title="pggui.TextRow.get_text" href="#pggui.TextRow.get_text">get_text</a></code></li>
+<li><code><a title="pggui.TextRow.set_text" href="#pggui.TextRow.set_text">set_text</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pggui.TextTable" href="#pggui.TextTable">TextTable</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pggui.WideButt" href="#pggui.WideButt">WideButt</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pggui.coords" href="#pggui.coords">coords</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pggui.xHBox" href="#pggui.xHBox">xHBox</a></code></h4>
+<ul class="">
+<li><code><a title="pggui.xHBox.pack" href="#pggui.xHBox.pack">pack</a></code></li>
+<li><code><a title="pggui.xHBox.set_padding" href="#pggui.xHBox.set_padding">set_padding</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pggui.xSpacer" href="#pggui.xSpacer">xSpacer</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pggui.xVBox" href="#pggui.xVBox">xVBox</a></code></h4>
+<ul class="">
+<li><code><a title="pggui.xVBox.pack" href="#pggui.xVBox.pack">pack</a></code></li>
+<li><code><a title="pggui.xVBox.set_padding" href="#pggui.xVBox.set_padding">set_padding</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pggui.ySpacer" href="#pggui.ySpacer">ySpacer</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

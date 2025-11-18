@@ -1,0 +1,1054 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>pgsimp API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>pgsimp</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#!/usr/bin/python
+
+import  sys
+
+import gi
+gi.require_version(&#34;Gtk&#34;, &#34;3.0&#34;)
+from gi.repository import Gtk
+from gi.repository import Gdk
+from gi.repository import GObject
+from gi.repository import Pango
+
+&#39;&#39;&#39; Simplified controls &#39;&#39;&#39;
+
+gui_testmode = False
+
+import pgutils
+
+# ------------------------------------------------------------------------
+
+class   SimpleTree(Gtk.TreeView):
+
+    &#39;&#39;&#39; Simplified Tree control &#39;&#39;&#39;
+
+    def __init__(self, head = [], editx = [], skipedit = 0, xalign = 0.5):
+
+        Gtk.TreeView.__init__(self)
+
+        self.callb = None
+        self.chcallb = None
+        self.actcallb = None
+
+        # repair missing column
+        if len(head) == 0:
+            head.append(&#34;&#34;)
+
+        if len(editx) == 0:
+            editx.append(&#34;&#34;)
+
+        self.types = []
+        for aa in head:
+            self.types.append(str)
+
+        self.treestore = Gtk.TreeStore()
+        self.treestore.set_column_types(self.types)
+
+        cnt = 0
+        for aa in head:
+            # Create a CellRendererText to render the data
+            cell = Gtk.CellRendererText()
+            cell.set_property(&#34;alignment&#34;, Pango.Alignment.LEFT)
+            cell.set_property(&#34;align-set&#34;, True)
+            cell.set_property(&#34;xalign&#34;, xalign)
+
+            if cnt &gt; skipedit:
+                cell.set_property(&#34;editable&#34;, True)
+                cell.connect(&#34;edited&#34;, self.text_edited, cnt)
+
+            tvcolumn = Gtk.TreeViewColumn(aa)
+            tvcolumn.pack_start(cell, True)
+            tvcolumn.add_attribute(cell, &#39;text&#39;, cnt)
+            self.append_column(tvcolumn)
+            cnt += 1
+
+        self.set_model(self.treestore)
+        self.connect(&#34;cursor-changed&#34;, self.selection)
+        self.connect(&#34;row-activated&#34;, self.activate)
+
+    def activate(self, xtree, arg2, arg3):
+        #print(&#34;Activated&#34;, row, arg2, arg3)
+        sel = xtree.get_selection()
+        xmodel, xiter = sel.get_selected()
+        if xiter:
+            xstr = xmodel.get_value(xiter, 0)
+            #print(&#34;Activated str&#34;, xstr)
+            if self.actcallb:
+                self.actcallb(xstr)
+
+    def text_edited(self, widget, path, text, idx):
+        #print (&#34;edited&#34;, widget, path, text, idx)
+        self.treestore[path][idx] = text
+        args = []
+        for aa in self.treestore[path]:
+            args.append(aa)
+        if self.chcallb:
+            self.chcallb(args)
+
+    def selection(self, xtree):
+        #print(&#34;simple tree sel&#34;, xtree)
+        sel = xtree.get_selection()
+        xmodel, xiter = sel.get_selected()
+        if xiter:
+            self.args = []
+            for aa in range(len(self.types)):
+                xstr = xmodel.get_value(xiter, aa)
+                self.args.append(xstr)
+            #print(&#34;selection&#34;, self.args)
+            if self.callb:
+                self.callb(self.args)
+
+    def setcallb(self, callb):
+        self.callb = callb
+
+    def setCHcallb(self, callb):
+        self.chcallb = callb
+
+    def setActcallb(self, callb):
+        self.actcallb = callb
+
+    def append(self, args, parent = None):
+        #print(&#34;append&#34;, args)
+        piter = self.treestore.append(parent, args)
+        return piter
+
+    # TreeStore
+    def insert(self, parent, pos, args):
+        print(&#34;insert&#34;, parent, pos, args)
+        piter = self.treestore.insert(parent, pos, args)
+        return piter
+
+    def sel_first(self):
+        #print(&#34;sel first ...&#34;)
+        sel = self.get_selection()
+        xmodel, xiter = sel.get_selected()
+        iterx = self.treestore.get_iter_first()
+        sel.select_iter(iterx)
+        ppp = self.treestore.get_path(iterx)
+        self.set_cursor(ppp, self.get_column(0), False)
+        pgutils.usleep(5)
+        self.scroll_to_cell(ppp, None, 0, 0, 0 )
+
+    def sel_last(self):
+        #print(&#34;sel last ...&#34;)
+        sel = self.get_selection()
+        xmodel, xiter = sel.get_selected()
+        iterx = self.treestore.get_iter_first()
+        if not iterx:
+            return
+        while True:
+            iter2 = self.treestore.iter_next(iterx)
+            if not iter2:
+                break
+            iterx = iter2.copy()
+        sel.select_iter(iterx)
+        ppp = self.treestore.get_path(iterx)
+        self.set_cursor(ppp, self.get_column(0), False)
+        pgutils.usleep(5)
+        self.scroll_to_cell(ppp, None, True, 0., 0. )
+        #sel.select_path(self.treestore.get_path(iterx))
+
+    def find_item(self, item):
+
+        &#39;&#39;&#39; find if we already have an item like that &#39;&#39;&#39;
+
+        #print(&#34;find&#34;, item)
+        found = 0
+        iterx = self.treestore.get_iter_first()
+        if not iterx:
+            return found
+        while True:
+            value = self.treestore.get_value(iterx, 0)
+            #print(&#34;item:&#34;, value)
+            if item == value:
+                found = True
+                break
+            iter2 = self.treestore.iter_next(iterx)
+            if not iter2:
+                break
+            iterx = iter2.copy()
+        return found
+
+    def clear(self):
+        self.treestore.clear()
+
+# ------------------------------------------------------------------------
+
+class   SimpleEdit(Gtk.TextView):
+
+    &#39;&#39;&#39; Simplified Edit controol &#39;&#39;&#39;
+
+    def __init__(self, head = []):
+
+        Gtk.TextView.__init__(self)
+        self.buffer = Gtk.TextBuffer()
+        self.set_buffer(self.buffer)
+        self.set_editable(True)
+        self.connect(&#34;unmap&#34;, self.unmapx)
+        #self.connect(&#34;focus-out-event&#34;, self.focus_out)
+        self.connect(&#34;key-press-event&#34;, self.area_key)
+        self.modified = False
+        self.text = &#34;&#34;
+        self.savecb = None
+        self.single_line = False
+
+    def focus_out(self, win, arg):
+        #print(&#34;SimpleEdit focus_out&#34;)
+        self.check_saved()
+        #self.mefocus = False
+
+    def check_saved(self):
+        if not self.buffer.get_modified():
+            return
+        #print(&#34;Saving&#34;)
+        startt = self.buffer.get_start_iter()
+        endd = self.buffer.get_end_iter()
+        self.text = self.buffer.get_text(startt, endd, False)
+        if self.savecb:
+            self.savecb(self.text)
+
+    def focus_in(self, win, arg):
+        pass
+        #self.buffer.set_modified(False)
+        #self.mefocus = True
+        #print(&#34;SimpleEdit focus_in&#34;)
+
+    def unmapx(self, widget):
+        #print(&#34;SimpleEdit unmap&#34;, widget)
+        pass
+
+    def area_key(self, widget, event):
+        #print(&#34;SimpleEdit keypress&#34;, event.string)
+        #self.buffer.set_modified(True)
+
+        if self.single_line:
+            if event.string == &#34;\r&#34;:
+                #print(&#34;newline&#34;)
+                if self.savecb:
+                    try:
+                        self.savecb(self.get_text())
+                    except:
+                        print(&#34;Error simpledit callback&#34;)
+                return True
+
+    def append(self, strx):
+        self.check_saved()
+        iterx = self.buffer.get_end_iter()
+        self.buffer.insert(iterx, strx)
+        self.buffer.set_modified(False)
+
+    def clear(self):
+        self.check_saved()
+        startt = self.buffer.get_start_iter()
+        endd = self.buffer.get_end_iter()
+        self.buffer.delete(startt, endd)
+        self.buffer.set_modified(False)
+
+    def setsavecb(self, callb):
+        self.savecb = callb
+
+    def get_text(self):
+        startt = self.buffer.get_start_iter()
+        endd = self.buffer.get_end_iter()
+        return self.buffer.get_text(startt, endd, False)
+
+    def set_text(self, txt, eventx = False):
+        if eventx:
+            self.check_saved()
+        startt = self.buffer.get_start_iter()
+        endd = self.buffer.get_end_iter()
+        self.buffer.delete(startt, endd)
+        self.buffer.insert(startt, txt)
+        self.buffer.set_modified(True)
+
+
+# EOF</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="pgsimp.SimpleEdit"><code class="flex name class">
+<span>class <span class="ident">SimpleEdit</span></span>
+<span>(</span><span>head=[])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Simplified Edit controol</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class   SimpleEdit(Gtk.TextView):
+
+    &#39;&#39;&#39; Simplified Edit controol &#39;&#39;&#39;
+
+    def __init__(self, head = []):
+
+        Gtk.TextView.__init__(self)
+        self.buffer = Gtk.TextBuffer()
+        self.set_buffer(self.buffer)
+        self.set_editable(True)
+        self.connect(&#34;unmap&#34;, self.unmapx)
+        #self.connect(&#34;focus-out-event&#34;, self.focus_out)
+        self.connect(&#34;key-press-event&#34;, self.area_key)
+        self.modified = False
+        self.text = &#34;&#34;
+        self.savecb = None
+        self.single_line = False
+
+    def focus_out(self, win, arg):
+        #print(&#34;SimpleEdit focus_out&#34;)
+        self.check_saved()
+        #self.mefocus = False
+
+    def check_saved(self):
+        if not self.buffer.get_modified():
+            return
+        #print(&#34;Saving&#34;)
+        startt = self.buffer.get_start_iter()
+        endd = self.buffer.get_end_iter()
+        self.text = self.buffer.get_text(startt, endd, False)
+        if self.savecb:
+            self.savecb(self.text)
+
+    def focus_in(self, win, arg):
+        pass
+        #self.buffer.set_modified(False)
+        #self.mefocus = True
+        #print(&#34;SimpleEdit focus_in&#34;)
+
+    def unmapx(self, widget):
+        #print(&#34;SimpleEdit unmap&#34;, widget)
+        pass
+
+    def area_key(self, widget, event):
+        #print(&#34;SimpleEdit keypress&#34;, event.string)
+        #self.buffer.set_modified(True)
+
+        if self.single_line:
+            if event.string == &#34;\r&#34;:
+                #print(&#34;newline&#34;)
+                if self.savecb:
+                    try:
+                        self.savecb(self.get_text())
+                    except:
+                        print(&#34;Error simpledit callback&#34;)
+                return True
+
+    def append(self, strx):
+        self.check_saved()
+        iterx = self.buffer.get_end_iter()
+        self.buffer.insert(iterx, strx)
+        self.buffer.set_modified(False)
+
+    def clear(self):
+        self.check_saved()
+        startt = self.buffer.get_start_iter()
+        endd = self.buffer.get_end_iter()
+        self.buffer.delete(startt, endd)
+        self.buffer.set_modified(False)
+
+    def setsavecb(self, callb):
+        self.savecb = callb
+
+    def get_text(self):
+        startt = self.buffer.get_start_iter()
+        endd = self.buffer.get_end_iter()
+        return self.buffer.get_text(startt, endd, False)
+
+    def set_text(self, txt, eventx = False):
+        if eventx:
+            self.check_saved()
+        startt = self.buffer.get_start_iter()
+        endd = self.buffer.get_end_iter()
+        self.buffer.delete(startt, endd)
+        self.buffer.insert(startt, txt)
+        self.buffer.set_modified(True)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.TextView</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gi.repository.Gtk.Scrollable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pgsimp.SimpleEdit.append"><code class="name flex">
+<span>def <span class="ident">append</span></span>(<span>self, strx)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def append(self, strx):
+    self.check_saved()
+    iterx = self.buffer.get_end_iter()
+    self.buffer.insert(iterx, strx)
+    self.buffer.set_modified(False)</code></pre>
+</details>
+</dd>
+<dt id="pgsimp.SimpleEdit.area_key"><code class="name flex">
+<span>def <span class="ident">area_key</span></span>(<span>self, widget, event)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def area_key(self, widget, event):
+    #print(&#34;SimpleEdit keypress&#34;, event.string)
+    #self.buffer.set_modified(True)
+
+    if self.single_line:
+        if event.string == &#34;\r&#34;:
+            #print(&#34;newline&#34;)
+            if self.savecb:
+                try:
+                    self.savecb(self.get_text())
+                except:
+                    print(&#34;Error simpledit callback&#34;)
+            return True</code></pre>
+</details>
+</dd>
+<dt id="pgsimp.SimpleEdit.check_saved"><code class="name flex">
+<span>def <span class="ident">check_saved</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def check_saved(self):
+    if not self.buffer.get_modified():
+        return
+    #print(&#34;Saving&#34;)
+    startt = self.buffer.get_start_iter()
+    endd = self.buffer.get_end_iter()
+    self.text = self.buffer.get_text(startt, endd, False)
+    if self.savecb:
+        self.savecb(self.text)</code></pre>
+</details>
+</dd>
+<dt id="pgsimp.SimpleEdit.clear"><code class="name flex">
+<span>def <span class="ident">clear</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def clear(self):
+    self.check_saved()
+    startt = self.buffer.get_start_iter()
+    endd = self.buffer.get_end_iter()
+    self.buffer.delete(startt, endd)
+    self.buffer.set_modified(False)</code></pre>
+</details>
+</dd>
+<dt id="pgsimp.SimpleEdit.focus_in"><code class="name flex">
+<span>def <span class="ident">focus_in</span></span>(<span>self, win, arg)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def focus_in(self, win, arg):
+    pass
+    #self.buffer.set_modified(False)
+    #self.mefocus = True
+    #print(&#34;SimpleEdit focus_in&#34;)</code></pre>
+</details>
+</dd>
+<dt id="pgsimp.SimpleEdit.focus_out"><code class="name flex">
+<span>def <span class="ident">focus_out</span></span>(<span>self, win, arg)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def focus_out(self, win, arg):
+    #print(&#34;SimpleEdit focus_out&#34;)
+    self.check_saved()
+    #self.mefocus = False</code></pre>
+</details>
+</dd>
+<dt id="pgsimp.SimpleEdit.get_text"><code class="name flex">
+<span>def <span class="ident">get_text</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_text(self):
+    startt = self.buffer.get_start_iter()
+    endd = self.buffer.get_end_iter()
+    return self.buffer.get_text(startt, endd, False)</code></pre>
+</details>
+</dd>
+<dt id="pgsimp.SimpleEdit.set_text"><code class="name flex">
+<span>def <span class="ident">set_text</span></span>(<span>self, txt, eventx=False)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_text(self, txt, eventx = False):
+    if eventx:
+        self.check_saved()
+    startt = self.buffer.get_start_iter()
+    endd = self.buffer.get_end_iter()
+    self.buffer.delete(startt, endd)
+    self.buffer.insert(startt, txt)
+    self.buffer.set_modified(True)</code></pre>
+</details>
+</dd>
+<dt id="pgsimp.SimpleEdit.setsavecb"><code class="name flex">
+<span>def <span class="ident">setsavecb</span></span>(<span>self, callb)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def setsavecb(self, callb):
+    self.savecb = callb</code></pre>
+</details>
+</dd>
+<dt id="pgsimp.SimpleEdit.unmapx"><code class="name flex">
+<span>def <span class="ident">unmapx</span></span>(<span>self, widget)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unmapx(self, widget):
+    #print(&#34;SimpleEdit unmap&#34;, widget)
+    pass</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pgsimp.SimpleTree"><code class="flex name class">
+<span>class <span class="ident">SimpleTree</span></span>
+<span>(</span><span>head=[], editx=[], skipedit=0, xalign=0.5)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Simplified Tree control </p>
+<p>Initializer for a GObject based classes with support for property
+sets through the use of explicit keyword arguments.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class   SimpleTree(Gtk.TreeView):
+
+    &#39;&#39;&#39; Simplified Tree control &#39;&#39;&#39;
+
+    def __init__(self, head = [], editx = [], skipedit = 0, xalign = 0.5):
+
+        Gtk.TreeView.__init__(self)
+
+        self.callb = None
+        self.chcallb = None
+        self.actcallb = None
+
+        # repair missing column
+        if len(head) == 0:
+            head.append(&#34;&#34;)
+
+        if len(editx) == 0:
+            editx.append(&#34;&#34;)
+
+        self.types = []
+        for aa in head:
+            self.types.append(str)
+
+        self.treestore = Gtk.TreeStore()
+        self.treestore.set_column_types(self.types)
+
+        cnt = 0
+        for aa in head:
+            # Create a CellRendererText to render the data
+            cell = Gtk.CellRendererText()
+            cell.set_property(&#34;alignment&#34;, Pango.Alignment.LEFT)
+            cell.set_property(&#34;align-set&#34;, True)
+            cell.set_property(&#34;xalign&#34;, xalign)
+
+            if cnt &gt; skipedit:
+                cell.set_property(&#34;editable&#34;, True)
+                cell.connect(&#34;edited&#34;, self.text_edited, cnt)
+
+            tvcolumn = Gtk.TreeViewColumn(aa)
+            tvcolumn.pack_start(cell, True)
+            tvcolumn.add_attribute(cell, &#39;text&#39;, cnt)
+            self.append_column(tvcolumn)
+            cnt += 1
+
+        self.set_model(self.treestore)
+        self.connect(&#34;cursor-changed&#34;, self.selection)
+        self.connect(&#34;row-activated&#34;, self.activate)
+
+    def activate(self, xtree, arg2, arg3):
+        #print(&#34;Activated&#34;, row, arg2, arg3)
+        sel = xtree.get_selection()
+        xmodel, xiter = sel.get_selected()
+        if xiter:
+            xstr = xmodel.get_value(xiter, 0)
+            #print(&#34;Activated str&#34;, xstr)
+            if self.actcallb:
+                self.actcallb(xstr)
+
+    def text_edited(self, widget, path, text, idx):
+        #print (&#34;edited&#34;, widget, path, text, idx)
+        self.treestore[path][idx] = text
+        args = []
+        for aa in self.treestore[path]:
+            args.append(aa)
+        if self.chcallb:
+            self.chcallb(args)
+
+    def selection(self, xtree):
+        #print(&#34;simple tree sel&#34;, xtree)
+        sel = xtree.get_selection()
+        xmodel, xiter = sel.get_selected()
+        if xiter:
+            self.args = []
+            for aa in range(len(self.types)):
+                xstr = xmodel.get_value(xiter, aa)
+                self.args.append(xstr)
+            #print(&#34;selection&#34;, self.args)
+            if self.callb:
+                self.callb(self.args)
+
+    def setcallb(self, callb):
+        self.callb = callb
+
+    def setCHcallb(self, callb):
+        self.chcallb = callb
+
+    def setActcallb(self, callb):
+        self.actcallb = callb
+
+    def append(self, args, parent = None):
+        #print(&#34;append&#34;, args)
+        piter = self.treestore.append(parent, args)
+        return piter
+
+    # TreeStore
+    def insert(self, parent, pos, args):
+        print(&#34;insert&#34;, parent, pos, args)
+        piter = self.treestore.insert(parent, pos, args)
+        return piter
+
+    def sel_first(self):
+        #print(&#34;sel first ...&#34;)
+        sel = self.get_selection()
+        xmodel, xiter = sel.get_selected()
+        iterx = self.treestore.get_iter_first()
+        sel.select_iter(iterx)
+        ppp = self.treestore.get_path(iterx)
+        self.set_cursor(ppp, self.get_column(0), False)
+        pgutils.usleep(5)
+        self.scroll_to_cell(ppp, None, 0, 0, 0 )
+
+    def sel_last(self):
+        #print(&#34;sel last ...&#34;)
+        sel = self.get_selection()
+        xmodel, xiter = sel.get_selected()
+        iterx = self.treestore.get_iter_first()
+        if not iterx:
+            return
+        while True:
+            iter2 = self.treestore.iter_next(iterx)
+            if not iter2:
+                break
+            iterx = iter2.copy()
+        sel.select_iter(iterx)
+        ppp = self.treestore.get_path(iterx)
+        self.set_cursor(ppp, self.get_column(0), False)
+        pgutils.usleep(5)
+        self.scroll_to_cell(ppp, None, True, 0., 0. )
+        #sel.select_path(self.treestore.get_path(iterx))
+
+    def find_item(self, item):
+
+        &#39;&#39;&#39; find if we already have an item like that &#39;&#39;&#39;
+
+        #print(&#34;find&#34;, item)
+        found = 0
+        iterx = self.treestore.get_iter_first()
+        if not iterx:
+            return found
+        while True:
+            value = self.treestore.get_value(iterx, 0)
+            #print(&#34;item:&#34;, value)
+            if item == value:
+                found = True
+                break
+            iter2 = self.treestore.iter_next(iterx)
+            if not iter2:
+                break
+            iterx = iter2.copy()
+        return found
+
+    def clear(self):
+        self.treestore.clear()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.overrides.Gtk.TreeView</li>
+<li>gi.repository.Gtk.TreeView</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gi.repository.Gtk.Scrollable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pgsimp.SimpleTree.activate"><code class="name flex">
+<span>def <span class="ident">activate</span></span>(<span>self, xtree, arg2, arg3)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>activate(self) -&gt; bool</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def activate(self, xtree, arg2, arg3):
+    #print(&#34;Activated&#34;, row, arg2, arg3)
+    sel = xtree.get_selection()
+    xmodel, xiter = sel.get_selected()
+    if xiter:
+        xstr = xmodel.get_value(xiter, 0)
+        #print(&#34;Activated str&#34;, xstr)
+        if self.actcallb:
+            self.actcallb(xstr)</code></pre>
+</details>
+</dd>
+<dt id="pgsimp.SimpleTree.append"><code class="name flex">
+<span>def <span class="ident">append</span></span>(<span>self, args, parent=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def append(self, args, parent = None):
+    #print(&#34;append&#34;, args)
+    piter = self.treestore.append(parent, args)
+    return piter</code></pre>
+</details>
+</dd>
+<dt id="pgsimp.SimpleTree.clear"><code class="name flex">
+<span>def <span class="ident">clear</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def clear(self):
+    self.treestore.clear()</code></pre>
+</details>
+</dd>
+<dt id="pgsimp.SimpleTree.find_item"><code class="name flex">
+<span>def <span class="ident">find_item</span></span>(<span>self, item)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>find if we already have an item like that</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def find_item(self, item):
+
+    &#39;&#39;&#39; find if we already have an item like that &#39;&#39;&#39;
+
+    #print(&#34;find&#34;, item)
+    found = 0
+    iterx = self.treestore.get_iter_first()
+    if not iterx:
+        return found
+    while True:
+        value = self.treestore.get_value(iterx, 0)
+        #print(&#34;item:&#34;, value)
+        if item == value:
+            found = True
+            break
+        iter2 = self.treestore.iter_next(iterx)
+        if not iter2:
+            break
+        iterx = iter2.copy()
+    return found</code></pre>
+</details>
+</dd>
+<dt id="pgsimp.SimpleTree.insert"><code class="name flex">
+<span>def <span class="ident">insert</span></span>(<span>self, parent, pos, args)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def insert(self, parent, pos, args):
+    print(&#34;insert&#34;, parent, pos, args)
+    piter = self.treestore.insert(parent, pos, args)
+    return piter</code></pre>
+</details>
+</dd>
+<dt id="pgsimp.SimpleTree.sel_first"><code class="name flex">
+<span>def <span class="ident">sel_first</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sel_first(self):
+    #print(&#34;sel first ...&#34;)
+    sel = self.get_selection()
+    xmodel, xiter = sel.get_selected()
+    iterx = self.treestore.get_iter_first()
+    sel.select_iter(iterx)
+    ppp = self.treestore.get_path(iterx)
+    self.set_cursor(ppp, self.get_column(0), False)
+    pgutils.usleep(5)
+    self.scroll_to_cell(ppp, None, 0, 0, 0 )</code></pre>
+</details>
+</dd>
+<dt id="pgsimp.SimpleTree.sel_last"><code class="name flex">
+<span>def <span class="ident">sel_last</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sel_last(self):
+    #print(&#34;sel last ...&#34;)
+    sel = self.get_selection()
+    xmodel, xiter = sel.get_selected()
+    iterx = self.treestore.get_iter_first()
+    if not iterx:
+        return
+    while True:
+        iter2 = self.treestore.iter_next(iterx)
+        if not iter2:
+            break
+        iterx = iter2.copy()
+    sel.select_iter(iterx)
+    ppp = self.treestore.get_path(iterx)
+    self.set_cursor(ppp, self.get_column(0), False)
+    pgutils.usleep(5)
+    self.scroll_to_cell(ppp, None, True, 0., 0. )
+    #sel.select_path(self.treestore.get_path(iterx))</code></pre>
+</details>
+</dd>
+<dt id="pgsimp.SimpleTree.selection"><code class="name flex">
+<span>def <span class="ident">selection</span></span>(<span>self, xtree)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def selection(self, xtree):
+    #print(&#34;simple tree sel&#34;, xtree)
+    sel = xtree.get_selection()
+    xmodel, xiter = sel.get_selected()
+    if xiter:
+        self.args = []
+        for aa in range(len(self.types)):
+            xstr = xmodel.get_value(xiter, aa)
+            self.args.append(xstr)
+        #print(&#34;selection&#34;, self.args)
+        if self.callb:
+            self.callb(self.args)</code></pre>
+</details>
+</dd>
+<dt id="pgsimp.SimpleTree.setActcallb"><code class="name flex">
+<span>def <span class="ident">setActcallb</span></span>(<span>self, callb)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def setActcallb(self, callb):
+    self.actcallb = callb</code></pre>
+</details>
+</dd>
+<dt id="pgsimp.SimpleTree.setCHcallb"><code class="name flex">
+<span>def <span class="ident">setCHcallb</span></span>(<span>self, callb)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def setCHcallb(self, callb):
+    self.chcallb = callb</code></pre>
+</details>
+</dd>
+<dt id="pgsimp.SimpleTree.setcallb"><code class="name flex">
+<span>def <span class="ident">setcallb</span></span>(<span>self, callb)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def setcallb(self, callb):
+    self.callb = callb</code></pre>
+</details>
+</dd>
+<dt id="pgsimp.SimpleTree.text_edited"><code class="name flex">
+<span>def <span class="ident">text_edited</span></span>(<span>self, widget, path, text, idx)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def text_edited(self, widget, path, text, idx):
+    #print (&#34;edited&#34;, widget, path, text, idx)
+    self.treestore[path][idx] = text
+    args = []
+    for aa in self.treestore[path]:
+        args.append(aa)
+    if self.chcallb:
+        self.chcallb(args)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="pgsimp.SimpleEdit" href="#pgsimp.SimpleEdit">SimpleEdit</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pgsimp.SimpleEdit.append" href="#pgsimp.SimpleEdit.append">append</a></code></li>
+<li><code><a title="pgsimp.SimpleEdit.area_key" href="#pgsimp.SimpleEdit.area_key">area_key</a></code></li>
+<li><code><a title="pgsimp.SimpleEdit.check_saved" href="#pgsimp.SimpleEdit.check_saved">check_saved</a></code></li>
+<li><code><a title="pgsimp.SimpleEdit.clear" href="#pgsimp.SimpleEdit.clear">clear</a></code></li>
+<li><code><a title="pgsimp.SimpleEdit.focus_in" href="#pgsimp.SimpleEdit.focus_in">focus_in</a></code></li>
+<li><code><a title="pgsimp.SimpleEdit.focus_out" href="#pgsimp.SimpleEdit.focus_out">focus_out</a></code></li>
+<li><code><a title="pgsimp.SimpleEdit.get_text" href="#pgsimp.SimpleEdit.get_text">get_text</a></code></li>
+<li><code><a title="pgsimp.SimpleEdit.set_text" href="#pgsimp.SimpleEdit.set_text">set_text</a></code></li>
+<li><code><a title="pgsimp.SimpleEdit.setsavecb" href="#pgsimp.SimpleEdit.setsavecb">setsavecb</a></code></li>
+<li><code><a title="pgsimp.SimpleEdit.unmapx" href="#pgsimp.SimpleEdit.unmapx">unmapx</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pgsimp.SimpleTree" href="#pgsimp.SimpleTree">SimpleTree</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pgsimp.SimpleTree.activate" href="#pgsimp.SimpleTree.activate">activate</a></code></li>
+<li><code><a title="pgsimp.SimpleTree.append" href="#pgsimp.SimpleTree.append">append</a></code></li>
+<li><code><a title="pgsimp.SimpleTree.clear" href="#pgsimp.SimpleTree.clear">clear</a></code></li>
+<li><code><a title="pgsimp.SimpleTree.find_item" href="#pgsimp.SimpleTree.find_item">find_item</a></code></li>
+<li><code><a title="pgsimp.SimpleTree.insert" href="#pgsimp.SimpleTree.insert">insert</a></code></li>
+<li><code><a title="pgsimp.SimpleTree.sel_first" href="#pgsimp.SimpleTree.sel_first">sel_first</a></code></li>
+<li><code><a title="pgsimp.SimpleTree.sel_last" href="#pgsimp.SimpleTree.sel_last">sel_last</a></code></li>
+<li><code><a title="pgsimp.SimpleTree.selection" href="#pgsimp.SimpleTree.selection">selection</a></code></li>
+<li><code><a title="pgsimp.SimpleTree.setActcallb" href="#pgsimp.SimpleTree.setActcallb">setActcallb</a></code></li>
+<li><code><a title="pgsimp.SimpleTree.setCHcallb" href="#pgsimp.SimpleTree.setCHcallb">setCHcallb</a></code></li>
+<li><code><a title="pgsimp.SimpleTree.setcallb" href="#pgsimp.SimpleTree.setcallb">setcallb</a></code></li>
+<li><code><a title="pgsimp.SimpleTree.text_edited" href="#pgsimp.SimpleTree.text_edited">text_edited</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

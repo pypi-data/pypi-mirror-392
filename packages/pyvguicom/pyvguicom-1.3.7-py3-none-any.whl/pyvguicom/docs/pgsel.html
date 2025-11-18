@@ -1,0 +1,1539 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>pgsel API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>pgsel</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#!/usr/bin/python
+
+import  sys
+
+import gi
+gi.require_version(&#34;Gtk&#34;, &#34;3.0&#34;)
+from gi.repository import Gtk
+from gi.repository import Gdk
+from gi.repository import GObject
+from gi.repository import Pango
+
+&#39;&#39;&#39; Simplified controls &#39;&#39;&#39;
+
+gui_testmode = False
+
+import pgutils, pggui
+
+# ------------------------------------------------------------------------
+# Letter selection control
+
+class   LetterNumberSel(Gtk.VBox):
+
+    &#39;&#39;&#39; Letter Number selector &#39;&#39;&#39;
+
+    def __init__(self, callb = None, font=&#34;Mono 13&#34;, pad = &#34;&#34;):
+
+        Gtk.VBox.__init__(self)
+
+        self.set_can_focus(True)
+        self.set_focus_on_click(True)
+        self.set_can_default(True)
+
+        self.callb = callb
+
+        self.frame = Gtk.Frame()
+
+        hbox3a = Gtk.HBox()
+        hbox3a.pack_start(Gtk.Label(label=&#34; &#34;), 1, 1, 0)
+
+        strx = &#34;abcdefghijklmnopqrstuvwxyz&#34;
+        self.simsel =  internal_SimpleSel(strx, self.lettercb, font, pad)
+        #self.override_background_color(Gtk.StateFlags.FOCUSED, Gdk.RGBA(.9,.9,.9))
+
+        self.connect(&#34;key-press-event&#34;, self.simsel_key)
+        self.connect(&#34;key-release-event&#34;, self.simsel_key_rel)
+
+        hbox3a.pack_start(self.simsel, 0, 0, 0)
+        hbox3a.pack_start(Gtk.Label(label=&#34; &#34;), 1, 1, 0)
+
+        strn2 = &#34;&#34;
+        hbox3b = Gtk.HBox()
+        hbox3b.pack_start(Gtk.Label(label=&#34;  &#34;), 1, 1, 0)
+        strn = &#34;1234567890!@#$^*_-+&#34;
+        self.simsel2 = internal_SimpleSel(strn, self.lettercb, font, pad)
+        hbox3b.pack_start(self.simsel2, 0, 0, 0)
+
+        self.simall = internal_AllSel(&#34;All&#34;, self.lettercb, font, pad)
+        hbox3b.pack_start(self.simall, 0, 0, 0)
+        hbox3b.pack_start(Gtk.Label(label=&#34;  &#34;), 1, 1, 0)
+
+        self.simsel2.other = self.simsel
+        self.simsel.other = self.simsel2
+
+        self.simsel2.other2 = self.simall
+        self.simsel.other2  = self.simall
+
+        self.simall.other   = self.simsel
+        self.simall.other2  = self.simsel2
+
+        self.curr = self.simsel
+        # Commit changes
+        self.simsel.exec_index(True)
+
+        self.hand_cursor = Gdk.Cursor(Gdk.CursorType.HAND2)
+        self.simsel.connect(&#34;enter_notify_event&#34;, self.enter_label)
+        self.simsel.connect(&#34;leave_notify_event&#34;, self.leave_label)
+        self.simsel2.connect(&#34;enter_notify_event&#34;, self.enter_label)
+        self.simsel2.connect(&#34;leave_notify_event&#34;, self.leave_label)
+
+        self.connect(&#34;focus_in_event&#34;, self.focus_label)
+        self.connect(&#34;focus_out_event&#34;, self.focus_out_label)
+
+        vbox = Gtk.VBox()
+        vbox.pack_start(hbox3a, 0, 0, False)
+        #vbox.pack_start(pggui.ySpacer(), 0, 0, False)
+        vbox.pack_start(hbox3b, 0, 0, False)
+
+        self.frame = Gtk.Frame()
+        self.frame.set_shadow_type(Gtk.ShadowType.NONE)
+
+        self.frame.add(vbox)
+        self.pack_start(self.frame, 0, 0, False)
+
+    def focus_label(self, arg, arg2):
+        #print(&#34;focus in&#34;)
+        self.frame.set_shadow_type(Gtk.ShadowType.OUT)
+
+    def focus_out_label(self, arg, arg2):
+        #print(&#34;focus out&#34;)
+        self.frame.set_shadow_type(Gtk.ShadowType.NONE)
+
+    def simsel_key_rel(self, arg, event):
+        if event.keyval == Gdk.KEY_Return or event.keyval == Gdk.KEY_space:
+            return True
+
+    def simsel_key(self, arg, event):
+
+        #  print(event.keyval)
+
+        if event.keyval == Gdk.KEY_Left:
+            self.curr.idx -= 1
+            if self.curr.idx &lt; 0:
+                #print(&#34;Skip left&#34;)
+                if self.curr == self.simsel:
+                    self.curr = self.simall
+                    self.curr.idx = len(self.curr.textarr)-1
+                elif self.curr == self.simall:
+                    self.curr = self.simsel2
+                    self.curr.idx = len(self.curr.textarr)-1
+                else:
+                    self.curr = self.simsel
+                    self.curr.idx = len(self.curr.textarr)-1
+            self.curr.exec_index(True)
+            return True
+
+        if event.keyval == Gdk.KEY_Right:
+            self.curr.idx += 1
+            if self.curr.idx &gt;= len(self.curr.textarr):
+                #print(&#34;Skip right&#34;)
+                if self.curr == self.simsel:
+                    self.curr = self.simsel2
+                    self.curr.idx = 0
+                elif self.curr == self.simsel2:
+                    self.curr = self.simall
+                    self.curr.idx = 0
+                else:
+                    self.curr = self.simsel
+                    self.curr.idx = 0
+            self.curr.exec_index(True)
+            return True
+
+        if event.keyval == Gdk.KEY_Down:
+            if self.curr == self.simsel:
+                self.curr = self.simsel2
+                self.curr.exec_index(True)
+            else:
+                # Thu 02.May.2024 tab instead
+                self.emit(&#34;move-focus&#34;,  Gtk.DirectionType.TAB_FORWARD)
+            return True
+
+        if event.keyval == Gdk.KEY_Up:
+            if self.curr == self.simsel2:
+                self.curr = self.simsel
+                self.curr.exec_index(True)
+            else:
+                # Thu 02.May.2024 tab instead
+                self.emit(&#34;move-focus&#34;,  Gtk.DirectionType.TAB_BACKWARD)
+            return True
+
+        if event.keyval == Gdk.KEY_Home:
+            self.curr.idx = 0
+            self.curr.exec_index(True)
+            return True
+
+        if event.keyval == Gdk.KEY_End:
+            self.curr.idx = len(self.curr.textarr) - 1
+            self.curr.exec_index(True)
+            return True
+
+        if event.keyval == Gdk.KEY_Return or event.keyval == Gdk.KEY_space:
+            self.curr.exec_index(False)
+            return True
+
+        if event.keyval &gt;= Gdk.KEY_a and event.keyval &lt;= Gdk.KEY_z:
+            self.curr.idx = event.keyval - Gdk.KEY_a
+            self.curr.exec_index(True)
+            return True
+
+    def enter_label(self, arg, arg2):
+        #print(&#34;Enter&#34;)
+        self.get_window().set_cursor(self.hand_cursor)
+
+    def leave_label(self, arg, arg2):
+        #print(&#34;Leave&#34;)
+        self.get_window().set_cursor()
+
+    def  lettercb(self, letter):
+        #print(&#34;LetterSel::letterx:&#34;, letter)
+        if self.callb:
+            self.callb(letter)
+
+# Select character by index (do not call directly)
+
+class   internal_AllSel(Gtk.Label):
+
+    &#39;&#39;&#39; Internal class for selectors &#39;&#39;&#39;
+
+    def __init__(self, textx = &#34; &#34;, callb = None, font=&#34;Mono 13&#34;, pad = &#34;&#34;):
+
+        Gtk.Label.__init__(self, &#34;&#34;)
+
+        self.set_events(Gdk.EventMask.ALL_EVENTS_MASK )
+        self.connect(&#34;button-press-event&#34;, self.area_button)
+        self.modify_font(Pango.FontDescription(font))
+        self.set_has_window(True)
+        self.text = textx
+        #self.textarr = [&#34; &#34; + textx + &#34; &#34;, &#34;[&#34; + textx + &#34;]&#34;]
+        self.textarr = [textx]
+        self.org = &#34; &#34;  + textx + &#34; &#34;
+        self.callb = callb
+        self.lastsel = &#34;&#34;
+        self.lastidx = 0
+        self.other = None
+        self.other2 = None
+        self.pad = pad
+        self.newtext = pad
+        self.idx = -1
+        self.set_can_focus(True)
+        self.set_focus_on_click(True)
+        self.fill() #self.set_text(self.org)
+
+    def fill(self):
+        if self.idx == 0:
+            self.text = &#34;[&#34; + self.org[1:-1] + &#34;]&#34;
+        else:
+            self.text = &#34; &#34; + self.org[1:-1] + &#34; &#34;
+        self.set_text(self.text)
+
+    def area_button(self, but, event):
+
+        self.get_parent().get_parent().grab_focus()
+        #print(&#34;allbutt&#34;)
+        self.idx = 0
+        self.fill()
+        if 1: #not fromkey:
+            if self.callb:
+                self.callb(self.textarr[self.idx])
+
+    def exec_index(self, fromkey):
+
+        self.fill()
+
+        # Fill others, if allocated
+        if self.other:
+           self.other.idx = -1
+           self.other.fill()
+        if self.other2:
+           self.other2.idx = -1
+           self.other2.fill()
+
+        if not fromkey:
+            if self.callb:
+                self.callb(self.textarr[self.idx])
+
+class   internal_SimpleSel(Gtk.Label):
+
+    &#39;&#39;&#39; Internal class for selectors &#39;&#39;&#39;
+
+    def __init__(self, textx = &#34; &#34;, callb = None, font=&#34;Mono 13&#34;, pad = &#34;&#34;):
+
+        Gtk.Label.__init__(self, &#34;&#34;)
+
+        self.set_events(Gdk.EventMask.ALL_EVENTS_MASK )
+        self.connect(&#34;button-press-event&#34;, self.area_button)
+        self.modify_font(Pango.FontDescription(font))
+        self.set_has_window(True)
+
+        self.callb = callb
+
+        self.lastsel = &#34;&#34;
+        self.lastidx = 0
+        self.other = None
+        self.other2 = None
+        self.pad = pad
+        self.newtext = pad
+        self.idx = 0
+        self.set_can_focus(True)
+        self.set_focus_on_click(True)
+
+        self.textarr = []
+        for aa in textx:
+            self.textarr.append(aa)
+
+        self.fill()
+
+    def area_button(self, but, event):
+
+        self.get_parent().get_parent().grab_focus()
+        www = self.get_allocation().width
+        pitch = float(www) / len(self.textarr)
+        #print(&#34;pitch&#34;, pitch, &#34;www&#34;, www, &#34;len&#34;,
+        #    len(self.textarr), &#34;event.x&#34;, event.x)
+
+        # Map point to position
+        self.idx = int(event.x / pitch)
+        #print(&#34;idxx:&#34;, idxx, self.idx)
+        self.exec_index(False)
+
+    def _fill2(self, xarr, xidx, padx):
+        &#39;&#39;&#39; Internal &#39;&#39;&#39;
+        cnt = 0
+        newtext = &#34;&#34;
+        for aa in xarr:
+            if cnt == xidx:
+                newtext +=  self.pad + &#34;&lt;span weight=&#39;bold&#39; &#34; \
+                            &#34;underline=&#39;double&#39;&gt;&#34; + aa.upper() + &#34;&lt;/span&gt;&#34;
+            else:
+                newtext += self.pad + aa
+            cnt += 1
+        newtext += self.pad
+        return newtext
+
+    def fill(self):
+        self.newtext = self._fill2(self.textarr, self.idx, self.pad)
+        self.set_markup(self.newtext)
+
+    def exec_index(self, fromkey):
+
+        if self.idx &lt; 0:
+            self.idx = 0
+        if self.idx &gt; len(self.textarr) - 1:
+            self.idx = len(self.textarr) - 1
+        #print(&#34;index:&#34;, self.idx)
+        self.fill()
+
+        # Fill others, if allocated
+        if self.other:
+           self.other.idx = -1
+           self.other.fill()
+        if self.other2:
+           self.other2.idx = -1
+           self.other2.fill()
+
+        if not fromkey:
+            if self.callb:
+                self.callb(self.textarr[self.idx])
+
+class   NumberSel(Gtk.Label):
+
+    &#39;&#39;&#39; Number selector. Give a proportional answer from mouse position &#39;&#39;&#39;
+
+    def __init__(self, text = &#34; &#34;, callb = None, font=&#34;Mono 13&#34;):
+        self.text = text
+        self.callb = callb
+        self.axx = self.text.find(&#34;[All]&#34;)
+        Gtk.Label.__init__(self, text)
+        self.set_has_window(True)
+        self.set_events(Gdk.EventMask.ALL_EVENTS_MASK )
+        self.connect(&#34;button-press-event&#34;, self.area_button)
+        self.override_font(Pango.FontDescription(font))
+        self.lastsel = 0
+
+    def area_button(self, but, event):
+
+        #print(&#34;sss =&#34;, self.get_allocation().width)
+        #print(&#34;click&#34;, event.x, event.y)
+
+        prop = event.x / float(self.get_allocation().width)
+        idx = int(prop * len(self.text))
+
+        # Navigate to IDX
+        if self.text[idx] == &#34; &#34;:
+            idx += 1
+        else:
+            if self.text[idx-1] != &#34; &#34;:
+                idx -= 1
+        if idx &gt;= len(self.text):
+            return
+        if idx &lt; 0:
+            idx = 0
+        try:
+            # See of it is all
+            if self.axx &gt;= 0:
+                if idx &gt; self.axx:
+                    #print(&#34;all&#34;, idx, self.text[idx-5:idx+7])
+                    self.lastsel =  &#34;All&#34;
+                    self.newtext = self.text[:self.axx] + self.text[self.axx:].upper()
+                    self.set_text(self.newtext)
+                else:
+                    self.newtext = self.text[:self.axx] + self.text[self.axx:].lower()
+                    self.set_text(self.newtext)
+
+            else:
+                self.lastsel =  self.text[idx:idx+2]
+                #print(&#34;lastsel&#34;, self.lastsel)
+                self.newtext = self.text[:idx] + self.text[idx].upper() + self.text[idx+1:]
+                self.set_text(self.newtext)
+
+            if self.callb:
+                self.callb(self.lastsel)
+
+        except:
+            print(sys.exc_info())
+
+class   HourSel(Gtk.VBox):
+
+    &#39;&#39;&#39; Hour selector &#39;&#39;&#39;
+
+    def __init__(self, callb = None):
+
+        Gtk.VBox.__init__(self)
+        self.callb = callb
+
+        strx = &#34; 8 10 12 14 16 &#34;
+        hbox3a = Gtk.HBox()
+        hbox3a.pack_start(Gtk.Label(label=&#34; &#34;), 1, 1, 0)
+        self.simsel = NumberSel(strx, self.lettercb)
+        hbox3a.pack_start(self.simsel, 0, 0, 0)
+        hbox3a.pack_start(Gtk.Label(label=&#34; &#34;), 1, 1, 0)
+
+        self.pack_start(hbox3a, 0, 0, False)
+
+    def  lettercb(self, letter):
+        #print(&#34;LetterSel::letterx:&#34;, letter)
+        if self.callb:
+            self.callb(letter)
+
+class   MinSel(Gtk.VBox):
+
+    &#39;&#39;&#39; Minute selector &#39;&#39;&#39;
+
+    def __init__(self, callb = None):
+
+        Gtk.VBox.__init__(self)
+        self.callb = callb
+
+        strx = &#34; 0 10 20 30 40 50 &#34;
+        hbox3a = Gtk.HBox()
+        hbox3a.pack_start(Gtk.Label(label=&#34; &#34;), 1, 1, 0)
+        self.simsel = NumberSel(strx, self.lettercb)
+        hbox3a.pack_start(self.simsel, 0, 0, 0)
+        hbox3a.pack_start(Gtk.Label(label=&#34; &#34;), 1, 1, 0)
+
+        self.pack_start(hbox3a, 0, 0, False)
+
+    def  lettercb(self, letter):
+        #print(&#34;LetterSel::letterx:&#34;, letter)
+        if self.callb:
+            self.callb(letter)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="pgsel.HourSel"><code class="flex name class">
+<span>class <span class="ident">HourSel</span></span>
+<span>(</span><span>callb=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Hour selector </p>
+<p>Initializer for a GObject based classes with support for property
+sets through the use of explicit keyword arguments.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class   HourSel(Gtk.VBox):
+
+    &#39;&#39;&#39; Hour selector &#39;&#39;&#39;
+
+    def __init__(self, callb = None):
+
+        Gtk.VBox.__init__(self)
+        self.callb = callb
+
+        strx = &#34; 8 10 12 14 16 &#34;
+        hbox3a = Gtk.HBox()
+        hbox3a.pack_start(Gtk.Label(label=&#34; &#34;), 1, 1, 0)
+        self.simsel = NumberSel(strx, self.lettercb)
+        hbox3a.pack_start(self.simsel, 0, 0, 0)
+        hbox3a.pack_start(Gtk.Label(label=&#34; &#34;), 1, 1, 0)
+
+        self.pack_start(hbox3a, 0, 0, False)
+
+    def  lettercb(self, letter):
+        #print(&#34;LetterSel::letterx:&#34;, letter)
+        if self.callb:
+            self.callb(letter)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.VBox</li>
+<li>gi.overrides.Gtk.Box</li>
+<li>gi.repository.Gtk.Box</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gi.repository.Gtk.Orientable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pgsel.HourSel.lettercb"><code class="name flex">
+<span>def <span class="ident">lettercb</span></span>(<span>self, letter)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def  lettercb(self, letter):
+    #print(&#34;LetterSel::letterx:&#34;, letter)
+    if self.callb:
+        self.callb(letter)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pgsel.LetterNumberSel"><code class="flex name class">
+<span>class <span class="ident">LetterNumberSel</span></span>
+<span>(</span><span>callb=None, font='Mono 13', pad='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Letter Number selector </p>
+<p>Initializer for a GObject based classes with support for property
+sets through the use of explicit keyword arguments.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class   LetterNumberSel(Gtk.VBox):
+
+    &#39;&#39;&#39; Letter Number selector &#39;&#39;&#39;
+
+    def __init__(self, callb = None, font=&#34;Mono 13&#34;, pad = &#34;&#34;):
+
+        Gtk.VBox.__init__(self)
+
+        self.set_can_focus(True)
+        self.set_focus_on_click(True)
+        self.set_can_default(True)
+
+        self.callb = callb
+
+        self.frame = Gtk.Frame()
+
+        hbox3a = Gtk.HBox()
+        hbox3a.pack_start(Gtk.Label(label=&#34; &#34;), 1, 1, 0)
+
+        strx = &#34;abcdefghijklmnopqrstuvwxyz&#34;
+        self.simsel =  internal_SimpleSel(strx, self.lettercb, font, pad)
+        #self.override_background_color(Gtk.StateFlags.FOCUSED, Gdk.RGBA(.9,.9,.9))
+
+        self.connect(&#34;key-press-event&#34;, self.simsel_key)
+        self.connect(&#34;key-release-event&#34;, self.simsel_key_rel)
+
+        hbox3a.pack_start(self.simsel, 0, 0, 0)
+        hbox3a.pack_start(Gtk.Label(label=&#34; &#34;), 1, 1, 0)
+
+        strn2 = &#34;&#34;
+        hbox3b = Gtk.HBox()
+        hbox3b.pack_start(Gtk.Label(label=&#34;  &#34;), 1, 1, 0)
+        strn = &#34;1234567890!@#$^*_-+&#34;
+        self.simsel2 = internal_SimpleSel(strn, self.lettercb, font, pad)
+        hbox3b.pack_start(self.simsel2, 0, 0, 0)
+
+        self.simall = internal_AllSel(&#34;All&#34;, self.lettercb, font, pad)
+        hbox3b.pack_start(self.simall, 0, 0, 0)
+        hbox3b.pack_start(Gtk.Label(label=&#34;  &#34;), 1, 1, 0)
+
+        self.simsel2.other = self.simsel
+        self.simsel.other = self.simsel2
+
+        self.simsel2.other2 = self.simall
+        self.simsel.other2  = self.simall
+
+        self.simall.other   = self.simsel
+        self.simall.other2  = self.simsel2
+
+        self.curr = self.simsel
+        # Commit changes
+        self.simsel.exec_index(True)
+
+        self.hand_cursor = Gdk.Cursor(Gdk.CursorType.HAND2)
+        self.simsel.connect(&#34;enter_notify_event&#34;, self.enter_label)
+        self.simsel.connect(&#34;leave_notify_event&#34;, self.leave_label)
+        self.simsel2.connect(&#34;enter_notify_event&#34;, self.enter_label)
+        self.simsel2.connect(&#34;leave_notify_event&#34;, self.leave_label)
+
+        self.connect(&#34;focus_in_event&#34;, self.focus_label)
+        self.connect(&#34;focus_out_event&#34;, self.focus_out_label)
+
+        vbox = Gtk.VBox()
+        vbox.pack_start(hbox3a, 0, 0, False)
+        #vbox.pack_start(pggui.ySpacer(), 0, 0, False)
+        vbox.pack_start(hbox3b, 0, 0, False)
+
+        self.frame = Gtk.Frame()
+        self.frame.set_shadow_type(Gtk.ShadowType.NONE)
+
+        self.frame.add(vbox)
+        self.pack_start(self.frame, 0, 0, False)
+
+    def focus_label(self, arg, arg2):
+        #print(&#34;focus in&#34;)
+        self.frame.set_shadow_type(Gtk.ShadowType.OUT)
+
+    def focus_out_label(self, arg, arg2):
+        #print(&#34;focus out&#34;)
+        self.frame.set_shadow_type(Gtk.ShadowType.NONE)
+
+    def simsel_key_rel(self, arg, event):
+        if event.keyval == Gdk.KEY_Return or event.keyval == Gdk.KEY_space:
+            return True
+
+    def simsel_key(self, arg, event):
+
+        #  print(event.keyval)
+
+        if event.keyval == Gdk.KEY_Left:
+            self.curr.idx -= 1
+            if self.curr.idx &lt; 0:
+                #print(&#34;Skip left&#34;)
+                if self.curr == self.simsel:
+                    self.curr = self.simall
+                    self.curr.idx = len(self.curr.textarr)-1
+                elif self.curr == self.simall:
+                    self.curr = self.simsel2
+                    self.curr.idx = len(self.curr.textarr)-1
+                else:
+                    self.curr = self.simsel
+                    self.curr.idx = len(self.curr.textarr)-1
+            self.curr.exec_index(True)
+            return True
+
+        if event.keyval == Gdk.KEY_Right:
+            self.curr.idx += 1
+            if self.curr.idx &gt;= len(self.curr.textarr):
+                #print(&#34;Skip right&#34;)
+                if self.curr == self.simsel:
+                    self.curr = self.simsel2
+                    self.curr.idx = 0
+                elif self.curr == self.simsel2:
+                    self.curr = self.simall
+                    self.curr.idx = 0
+                else:
+                    self.curr = self.simsel
+                    self.curr.idx = 0
+            self.curr.exec_index(True)
+            return True
+
+        if event.keyval == Gdk.KEY_Down:
+            if self.curr == self.simsel:
+                self.curr = self.simsel2
+                self.curr.exec_index(True)
+            else:
+                # Thu 02.May.2024 tab instead
+                self.emit(&#34;move-focus&#34;,  Gtk.DirectionType.TAB_FORWARD)
+            return True
+
+        if event.keyval == Gdk.KEY_Up:
+            if self.curr == self.simsel2:
+                self.curr = self.simsel
+                self.curr.exec_index(True)
+            else:
+                # Thu 02.May.2024 tab instead
+                self.emit(&#34;move-focus&#34;,  Gtk.DirectionType.TAB_BACKWARD)
+            return True
+
+        if event.keyval == Gdk.KEY_Home:
+            self.curr.idx = 0
+            self.curr.exec_index(True)
+            return True
+
+        if event.keyval == Gdk.KEY_End:
+            self.curr.idx = len(self.curr.textarr) - 1
+            self.curr.exec_index(True)
+            return True
+
+        if event.keyval == Gdk.KEY_Return or event.keyval == Gdk.KEY_space:
+            self.curr.exec_index(False)
+            return True
+
+        if event.keyval &gt;= Gdk.KEY_a and event.keyval &lt;= Gdk.KEY_z:
+            self.curr.idx = event.keyval - Gdk.KEY_a
+            self.curr.exec_index(True)
+            return True
+
+    def enter_label(self, arg, arg2):
+        #print(&#34;Enter&#34;)
+        self.get_window().set_cursor(self.hand_cursor)
+
+    def leave_label(self, arg, arg2):
+        #print(&#34;Leave&#34;)
+        self.get_window().set_cursor()
+
+    def  lettercb(self, letter):
+        #print(&#34;LetterSel::letterx:&#34;, letter)
+        if self.callb:
+            self.callb(letter)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.VBox</li>
+<li>gi.overrides.Gtk.Box</li>
+<li>gi.repository.Gtk.Box</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gi.repository.Gtk.Orientable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pgsel.LetterNumberSel.enter_label"><code class="name flex">
+<span>def <span class="ident">enter_label</span></span>(<span>self, arg, arg2)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def enter_label(self, arg, arg2):
+    #print(&#34;Enter&#34;)
+    self.get_window().set_cursor(self.hand_cursor)</code></pre>
+</details>
+</dd>
+<dt id="pgsel.LetterNumberSel.focus_label"><code class="name flex">
+<span>def <span class="ident">focus_label</span></span>(<span>self, arg, arg2)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def focus_label(self, arg, arg2):
+    #print(&#34;focus in&#34;)
+    self.frame.set_shadow_type(Gtk.ShadowType.OUT)</code></pre>
+</details>
+</dd>
+<dt id="pgsel.LetterNumberSel.focus_out_label"><code class="name flex">
+<span>def <span class="ident">focus_out_label</span></span>(<span>self, arg, arg2)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def focus_out_label(self, arg, arg2):
+    #print(&#34;focus out&#34;)
+    self.frame.set_shadow_type(Gtk.ShadowType.NONE)</code></pre>
+</details>
+</dd>
+<dt id="pgsel.LetterNumberSel.leave_label"><code class="name flex">
+<span>def <span class="ident">leave_label</span></span>(<span>self, arg, arg2)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def leave_label(self, arg, arg2):
+    #print(&#34;Leave&#34;)
+    self.get_window().set_cursor()</code></pre>
+</details>
+</dd>
+<dt id="pgsel.LetterNumberSel.lettercb"><code class="name flex">
+<span>def <span class="ident">lettercb</span></span>(<span>self, letter)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def  lettercb(self, letter):
+    #print(&#34;LetterSel::letterx:&#34;, letter)
+    if self.callb:
+        self.callb(letter)</code></pre>
+</details>
+</dd>
+<dt id="pgsel.LetterNumberSel.simsel_key"><code class="name flex">
+<span>def <span class="ident">simsel_key</span></span>(<span>self, arg, event)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def simsel_key(self, arg, event):
+
+    #  print(event.keyval)
+
+    if event.keyval == Gdk.KEY_Left:
+        self.curr.idx -= 1
+        if self.curr.idx &lt; 0:
+            #print(&#34;Skip left&#34;)
+            if self.curr == self.simsel:
+                self.curr = self.simall
+                self.curr.idx = len(self.curr.textarr)-1
+            elif self.curr == self.simall:
+                self.curr = self.simsel2
+                self.curr.idx = len(self.curr.textarr)-1
+            else:
+                self.curr = self.simsel
+                self.curr.idx = len(self.curr.textarr)-1
+        self.curr.exec_index(True)
+        return True
+
+    if event.keyval == Gdk.KEY_Right:
+        self.curr.idx += 1
+        if self.curr.idx &gt;= len(self.curr.textarr):
+            #print(&#34;Skip right&#34;)
+            if self.curr == self.simsel:
+                self.curr = self.simsel2
+                self.curr.idx = 0
+            elif self.curr == self.simsel2:
+                self.curr = self.simall
+                self.curr.idx = 0
+            else:
+                self.curr = self.simsel
+                self.curr.idx = 0
+        self.curr.exec_index(True)
+        return True
+
+    if event.keyval == Gdk.KEY_Down:
+        if self.curr == self.simsel:
+            self.curr = self.simsel2
+            self.curr.exec_index(True)
+        else:
+            # Thu 02.May.2024 tab instead
+            self.emit(&#34;move-focus&#34;,  Gtk.DirectionType.TAB_FORWARD)
+        return True
+
+    if event.keyval == Gdk.KEY_Up:
+        if self.curr == self.simsel2:
+            self.curr = self.simsel
+            self.curr.exec_index(True)
+        else:
+            # Thu 02.May.2024 tab instead
+            self.emit(&#34;move-focus&#34;,  Gtk.DirectionType.TAB_BACKWARD)
+        return True
+
+    if event.keyval == Gdk.KEY_Home:
+        self.curr.idx = 0
+        self.curr.exec_index(True)
+        return True
+
+    if event.keyval == Gdk.KEY_End:
+        self.curr.idx = len(self.curr.textarr) - 1
+        self.curr.exec_index(True)
+        return True
+
+    if event.keyval == Gdk.KEY_Return or event.keyval == Gdk.KEY_space:
+        self.curr.exec_index(False)
+        return True
+
+    if event.keyval &gt;= Gdk.KEY_a and event.keyval &lt;= Gdk.KEY_z:
+        self.curr.idx = event.keyval - Gdk.KEY_a
+        self.curr.exec_index(True)
+        return True</code></pre>
+</details>
+</dd>
+<dt id="pgsel.LetterNumberSel.simsel_key_rel"><code class="name flex">
+<span>def <span class="ident">simsel_key_rel</span></span>(<span>self, arg, event)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def simsel_key_rel(self, arg, event):
+    if event.keyval == Gdk.KEY_Return or event.keyval == Gdk.KEY_space:
+        return True</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pgsel.MinSel"><code class="flex name class">
+<span>class <span class="ident">MinSel</span></span>
+<span>(</span><span>callb=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Minute selector </p>
+<p>Initializer for a GObject based classes with support for property
+sets through the use of explicit keyword arguments.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class   MinSel(Gtk.VBox):
+
+    &#39;&#39;&#39; Minute selector &#39;&#39;&#39;
+
+    def __init__(self, callb = None):
+
+        Gtk.VBox.__init__(self)
+        self.callb = callb
+
+        strx = &#34; 0 10 20 30 40 50 &#34;
+        hbox3a = Gtk.HBox()
+        hbox3a.pack_start(Gtk.Label(label=&#34; &#34;), 1, 1, 0)
+        self.simsel = NumberSel(strx, self.lettercb)
+        hbox3a.pack_start(self.simsel, 0, 0, 0)
+        hbox3a.pack_start(Gtk.Label(label=&#34; &#34;), 1, 1, 0)
+
+        self.pack_start(hbox3a, 0, 0, False)
+
+    def  lettercb(self, letter):
+        #print(&#34;LetterSel::letterx:&#34;, letter)
+        if self.callb:
+            self.callb(letter)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.VBox</li>
+<li>gi.overrides.Gtk.Box</li>
+<li>gi.repository.Gtk.Box</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gi.repository.Gtk.Orientable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pgsel.MinSel.lettercb"><code class="name flex">
+<span>def <span class="ident">lettercb</span></span>(<span>self, letter)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def  lettercb(self, letter):
+    #print(&#34;LetterSel::letterx:&#34;, letter)
+    if self.callb:
+        self.callb(letter)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pgsel.NumberSel"><code class="flex name class">
+<span>class <span class="ident">NumberSel</span></span>
+<span>(</span><span>text=' ', callb=None, font='Mono 13')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Number selector. Give a proportional answer from mouse position </p>
+<p>Initializer for a GObject based classes with support for property
+sets through the use of explicit keyword arguments.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class   NumberSel(Gtk.Label):
+
+    &#39;&#39;&#39; Number selector. Give a proportional answer from mouse position &#39;&#39;&#39;
+
+    def __init__(self, text = &#34; &#34;, callb = None, font=&#34;Mono 13&#34;):
+        self.text = text
+        self.callb = callb
+        self.axx = self.text.find(&#34;[All]&#34;)
+        Gtk.Label.__init__(self, text)
+        self.set_has_window(True)
+        self.set_events(Gdk.EventMask.ALL_EVENTS_MASK )
+        self.connect(&#34;button-press-event&#34;, self.area_button)
+        self.override_font(Pango.FontDescription(font))
+        self.lastsel = 0
+
+    def area_button(self, but, event):
+
+        #print(&#34;sss =&#34;, self.get_allocation().width)
+        #print(&#34;click&#34;, event.x, event.y)
+
+        prop = event.x / float(self.get_allocation().width)
+        idx = int(prop * len(self.text))
+
+        # Navigate to IDX
+        if self.text[idx] == &#34; &#34;:
+            idx += 1
+        else:
+            if self.text[idx-1] != &#34; &#34;:
+                idx -= 1
+        if idx &gt;= len(self.text):
+            return
+        if idx &lt; 0:
+            idx = 0
+        try:
+            # See of it is all
+            if self.axx &gt;= 0:
+                if idx &gt; self.axx:
+                    #print(&#34;all&#34;, idx, self.text[idx-5:idx+7])
+                    self.lastsel =  &#34;All&#34;
+                    self.newtext = self.text[:self.axx] + self.text[self.axx:].upper()
+                    self.set_text(self.newtext)
+                else:
+                    self.newtext = self.text[:self.axx] + self.text[self.axx:].lower()
+                    self.set_text(self.newtext)
+
+            else:
+                self.lastsel =  self.text[idx:idx+2]
+                #print(&#34;lastsel&#34;, self.lastsel)
+                self.newtext = self.text[:idx] + self.text[idx].upper() + self.text[idx+1:]
+                self.set_text(self.newtext)
+
+            if self.callb:
+                self.callb(self.lastsel)
+
+        except:
+            print(sys.exc_info())</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.overrides.Gtk.Label</li>
+<li>gi.repository.Gtk.Label</li>
+<li>gi.repository.Gtk.Misc</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pgsel.NumberSel.area_button"><code class="name flex">
+<span>def <span class="ident">area_button</span></span>(<span>self, but, event)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def area_button(self, but, event):
+
+    #print(&#34;sss =&#34;, self.get_allocation().width)
+    #print(&#34;click&#34;, event.x, event.y)
+
+    prop = event.x / float(self.get_allocation().width)
+    idx = int(prop * len(self.text))
+
+    # Navigate to IDX
+    if self.text[idx] == &#34; &#34;:
+        idx += 1
+    else:
+        if self.text[idx-1] != &#34; &#34;:
+            idx -= 1
+    if idx &gt;= len(self.text):
+        return
+    if idx &lt; 0:
+        idx = 0
+    try:
+        # See of it is all
+        if self.axx &gt;= 0:
+            if idx &gt; self.axx:
+                #print(&#34;all&#34;, idx, self.text[idx-5:idx+7])
+                self.lastsel =  &#34;All&#34;
+                self.newtext = self.text[:self.axx] + self.text[self.axx:].upper()
+                self.set_text(self.newtext)
+            else:
+                self.newtext = self.text[:self.axx] + self.text[self.axx:].lower()
+                self.set_text(self.newtext)
+
+        else:
+            self.lastsel =  self.text[idx:idx+2]
+            #print(&#34;lastsel&#34;, self.lastsel)
+            self.newtext = self.text[:idx] + self.text[idx].upper() + self.text[idx+1:]
+            self.set_text(self.newtext)
+
+        if self.callb:
+            self.callb(self.lastsel)
+
+    except:
+        print(sys.exc_info())</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pgsel.internal_AllSel"><code class="flex name class">
+<span>class <span class="ident">internal_AllSel</span></span>
+<span>(</span><span>textx=' ', callb=None, font='Mono 13', pad='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Internal class for selectors </p>
+<p>Initializer for a GObject based classes with support for property
+sets through the use of explicit keyword arguments.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class   internal_AllSel(Gtk.Label):
+
+    &#39;&#39;&#39; Internal class for selectors &#39;&#39;&#39;
+
+    def __init__(self, textx = &#34; &#34;, callb = None, font=&#34;Mono 13&#34;, pad = &#34;&#34;):
+
+        Gtk.Label.__init__(self, &#34;&#34;)
+
+        self.set_events(Gdk.EventMask.ALL_EVENTS_MASK )
+        self.connect(&#34;button-press-event&#34;, self.area_button)
+        self.modify_font(Pango.FontDescription(font))
+        self.set_has_window(True)
+        self.text = textx
+        #self.textarr = [&#34; &#34; + textx + &#34; &#34;, &#34;[&#34; + textx + &#34;]&#34;]
+        self.textarr = [textx]
+        self.org = &#34; &#34;  + textx + &#34; &#34;
+        self.callb = callb
+        self.lastsel = &#34;&#34;
+        self.lastidx = 0
+        self.other = None
+        self.other2 = None
+        self.pad = pad
+        self.newtext = pad
+        self.idx = -1
+        self.set_can_focus(True)
+        self.set_focus_on_click(True)
+        self.fill() #self.set_text(self.org)
+
+    def fill(self):
+        if self.idx == 0:
+            self.text = &#34;[&#34; + self.org[1:-1] + &#34;]&#34;
+        else:
+            self.text = &#34; &#34; + self.org[1:-1] + &#34; &#34;
+        self.set_text(self.text)
+
+    def area_button(self, but, event):
+
+        self.get_parent().get_parent().grab_focus()
+        #print(&#34;allbutt&#34;)
+        self.idx = 0
+        self.fill()
+        if 1: #not fromkey:
+            if self.callb:
+                self.callb(self.textarr[self.idx])
+
+    def exec_index(self, fromkey):
+
+        self.fill()
+
+        # Fill others, if allocated
+        if self.other:
+           self.other.idx = -1
+           self.other.fill()
+        if self.other2:
+           self.other2.idx = -1
+           self.other2.fill()
+
+        if not fromkey:
+            if self.callb:
+                self.callb(self.textarr[self.idx])</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.overrides.Gtk.Label</li>
+<li>gi.repository.Gtk.Label</li>
+<li>gi.repository.Gtk.Misc</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pgsel.internal_AllSel.area_button"><code class="name flex">
+<span>def <span class="ident">area_button</span></span>(<span>self, but, event)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def area_button(self, but, event):
+
+    self.get_parent().get_parent().grab_focus()
+    #print(&#34;allbutt&#34;)
+    self.idx = 0
+    self.fill()
+    if 1: #not fromkey:
+        if self.callb:
+            self.callb(self.textarr[self.idx])</code></pre>
+</details>
+</dd>
+<dt id="pgsel.internal_AllSel.exec_index"><code class="name flex">
+<span>def <span class="ident">exec_index</span></span>(<span>self, fromkey)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def exec_index(self, fromkey):
+
+    self.fill()
+
+    # Fill others, if allocated
+    if self.other:
+       self.other.idx = -1
+       self.other.fill()
+    if self.other2:
+       self.other2.idx = -1
+       self.other2.fill()
+
+    if not fromkey:
+        if self.callb:
+            self.callb(self.textarr[self.idx])</code></pre>
+</details>
+</dd>
+<dt id="pgsel.internal_AllSel.fill"><code class="name flex">
+<span>def <span class="ident">fill</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fill(self):
+    if self.idx == 0:
+        self.text = &#34;[&#34; + self.org[1:-1] + &#34;]&#34;
+    else:
+        self.text = &#34; &#34; + self.org[1:-1] + &#34; &#34;
+    self.set_text(self.text)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pgsel.internal_SimpleSel"><code class="flex name class">
+<span>class <span class="ident">internal_SimpleSel</span></span>
+<span>(</span><span>textx=' ', callb=None, font='Mono 13', pad='')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Internal class for selectors </p>
+<p>Initializer for a GObject based classes with support for property
+sets through the use of explicit keyword arguments.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class   internal_SimpleSel(Gtk.Label):
+
+    &#39;&#39;&#39; Internal class for selectors &#39;&#39;&#39;
+
+    def __init__(self, textx = &#34; &#34;, callb = None, font=&#34;Mono 13&#34;, pad = &#34;&#34;):
+
+        Gtk.Label.__init__(self, &#34;&#34;)
+
+        self.set_events(Gdk.EventMask.ALL_EVENTS_MASK )
+        self.connect(&#34;button-press-event&#34;, self.area_button)
+        self.modify_font(Pango.FontDescription(font))
+        self.set_has_window(True)
+
+        self.callb = callb
+
+        self.lastsel = &#34;&#34;
+        self.lastidx = 0
+        self.other = None
+        self.other2 = None
+        self.pad = pad
+        self.newtext = pad
+        self.idx = 0
+        self.set_can_focus(True)
+        self.set_focus_on_click(True)
+
+        self.textarr = []
+        for aa in textx:
+            self.textarr.append(aa)
+
+        self.fill()
+
+    def area_button(self, but, event):
+
+        self.get_parent().get_parent().grab_focus()
+        www = self.get_allocation().width
+        pitch = float(www) / len(self.textarr)
+        #print(&#34;pitch&#34;, pitch, &#34;www&#34;, www, &#34;len&#34;,
+        #    len(self.textarr), &#34;event.x&#34;, event.x)
+
+        # Map point to position
+        self.idx = int(event.x / pitch)
+        #print(&#34;idxx:&#34;, idxx, self.idx)
+        self.exec_index(False)
+
+    def _fill2(self, xarr, xidx, padx):
+        &#39;&#39;&#39; Internal &#39;&#39;&#39;
+        cnt = 0
+        newtext = &#34;&#34;
+        for aa in xarr:
+            if cnt == xidx:
+                newtext +=  self.pad + &#34;&lt;span weight=&#39;bold&#39; &#34; \
+                            &#34;underline=&#39;double&#39;&gt;&#34; + aa.upper() + &#34;&lt;/span&gt;&#34;
+            else:
+                newtext += self.pad + aa
+            cnt += 1
+        newtext += self.pad
+        return newtext
+
+    def fill(self):
+        self.newtext = self._fill2(self.textarr, self.idx, self.pad)
+        self.set_markup(self.newtext)
+
+    def exec_index(self, fromkey):
+
+        if self.idx &lt; 0:
+            self.idx = 0
+        if self.idx &gt; len(self.textarr) - 1:
+            self.idx = len(self.textarr) - 1
+        #print(&#34;index:&#34;, self.idx)
+        self.fill()
+
+        # Fill others, if allocated
+        if self.other:
+           self.other.idx = -1
+           self.other.fill()
+        if self.other2:
+           self.other2.idx = -1
+           self.other2.fill()
+
+        if not fromkey:
+            if self.callb:
+                self.callb(self.textarr[self.idx])</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.overrides.Gtk.Label</li>
+<li>gi.repository.Gtk.Label</li>
+<li>gi.repository.Gtk.Misc</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pgsel.internal_SimpleSel.area_button"><code class="name flex">
+<span>def <span class="ident">area_button</span></span>(<span>self, but, event)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def area_button(self, but, event):
+
+    self.get_parent().get_parent().grab_focus()
+    www = self.get_allocation().width
+    pitch = float(www) / len(self.textarr)
+    #print(&#34;pitch&#34;, pitch, &#34;www&#34;, www, &#34;len&#34;,
+    #    len(self.textarr), &#34;event.x&#34;, event.x)
+
+    # Map point to position
+    self.idx = int(event.x / pitch)
+    #print(&#34;idxx:&#34;, idxx, self.idx)
+    self.exec_index(False)</code></pre>
+</details>
+</dd>
+<dt id="pgsel.internal_SimpleSel.exec_index"><code class="name flex">
+<span>def <span class="ident">exec_index</span></span>(<span>self, fromkey)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def exec_index(self, fromkey):
+
+    if self.idx &lt; 0:
+        self.idx = 0
+    if self.idx &gt; len(self.textarr) - 1:
+        self.idx = len(self.textarr) - 1
+    #print(&#34;index:&#34;, self.idx)
+    self.fill()
+
+    # Fill others, if allocated
+    if self.other:
+       self.other.idx = -1
+       self.other.fill()
+    if self.other2:
+       self.other2.idx = -1
+       self.other2.fill()
+
+    if not fromkey:
+        if self.callb:
+            self.callb(self.textarr[self.idx])</code></pre>
+</details>
+</dd>
+<dt id="pgsel.internal_SimpleSel.fill"><code class="name flex">
+<span>def <span class="ident">fill</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def fill(self):
+    self.newtext = self._fill2(self.textarr, self.idx, self.pad)
+    self.set_markup(self.newtext)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="pgsel.HourSel" href="#pgsel.HourSel">HourSel</a></code></h4>
+<ul class="">
+<li><code><a title="pgsel.HourSel.lettercb" href="#pgsel.HourSel.lettercb">lettercb</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pgsel.LetterNumberSel" href="#pgsel.LetterNumberSel">LetterNumberSel</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pgsel.LetterNumberSel.enter_label" href="#pgsel.LetterNumberSel.enter_label">enter_label</a></code></li>
+<li><code><a title="pgsel.LetterNumberSel.focus_label" href="#pgsel.LetterNumberSel.focus_label">focus_label</a></code></li>
+<li><code><a title="pgsel.LetterNumberSel.focus_out_label" href="#pgsel.LetterNumberSel.focus_out_label">focus_out_label</a></code></li>
+<li><code><a title="pgsel.LetterNumberSel.leave_label" href="#pgsel.LetterNumberSel.leave_label">leave_label</a></code></li>
+<li><code><a title="pgsel.LetterNumberSel.lettercb" href="#pgsel.LetterNumberSel.lettercb">lettercb</a></code></li>
+<li><code><a title="pgsel.LetterNumberSel.simsel_key" href="#pgsel.LetterNumberSel.simsel_key">simsel_key</a></code></li>
+<li><code><a title="pgsel.LetterNumberSel.simsel_key_rel" href="#pgsel.LetterNumberSel.simsel_key_rel">simsel_key_rel</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pgsel.MinSel" href="#pgsel.MinSel">MinSel</a></code></h4>
+<ul class="">
+<li><code><a title="pgsel.MinSel.lettercb" href="#pgsel.MinSel.lettercb">lettercb</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pgsel.NumberSel" href="#pgsel.NumberSel">NumberSel</a></code></h4>
+<ul class="">
+<li><code><a title="pgsel.NumberSel.area_button" href="#pgsel.NumberSel.area_button">area_button</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pgsel.internal_AllSel" href="#pgsel.internal_AllSel">internal_AllSel</a></code></h4>
+<ul class="">
+<li><code><a title="pgsel.internal_AllSel.area_button" href="#pgsel.internal_AllSel.area_button">area_button</a></code></li>
+<li><code><a title="pgsel.internal_AllSel.exec_index" href="#pgsel.internal_AllSel.exec_index">exec_index</a></code></li>
+<li><code><a title="pgsel.internal_AllSel.fill" href="#pgsel.internal_AllSel.fill">fill</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pgsel.internal_SimpleSel" href="#pgsel.internal_SimpleSel">internal_SimpleSel</a></code></h4>
+<ul class="">
+<li><code><a title="pgsel.internal_SimpleSel.area_button" href="#pgsel.internal_SimpleSel.area_button">area_button</a></code></li>
+<li><code><a title="pgsel.internal_SimpleSel.exec_index" href="#pgsel.internal_SimpleSel.exec_index">exec_index</a></code></li>
+<li><code><a title="pgsel.internal_SimpleSel.fill" href="#pgsel.internal_SimpleSel.fill">fill</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
