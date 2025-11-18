@@ -1,0 +1,86 @@
+[build-system]
+requires = [
+    "hatchling",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "oq"
+version = "0.0.3"
+description = "Objects Quickly - AI tools at your finger tips"
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = []
+authors = [
+    { name = "Thor Whalen" },
+]
+dependencies = [
+    "config2py>=0.1.44",
+    "guide>=0.0.8",
+]
+
+[project.license]
+text = "mit"
+
+[project.urls]
+Homepage = "https://github.com/thorwhalen/oq"
+Repository = "https://github.com/thorwhalen/oq"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.1.0",
+]
+docs = [
+    "sphinx>=6.0",
+    "sphinx-rtd-theme>=1.0",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+exclude = [
+    "**/*.ipynb",
+    ".git",
+    ".venv",
+    "build",
+    "dist",
+    "tests",
+    "examples",
+    "scrap",
+]
+
+[tool.ruff.lint]
+select = [
+    "D100",
+]
+ignore = [
+    "D203",
+    "E501",
+    "B905",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "D",
+]
+"examples/*" = [
+    "D",
+]
+"scrap/*" = [
+    "D",
+]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = [
+    "tests",
+]
+doctest_optionflags = [
+    "NORMALIZE_WHITESPACE",
+    "ELLIPSIS",
+]
