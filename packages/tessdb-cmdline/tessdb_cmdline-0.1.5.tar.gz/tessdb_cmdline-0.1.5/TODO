@@ -1,0 +1,67 @@
+TAREAS URGENTES
+===============
+* template de generación de registro de fotometro
+* command line de carga en masa por lotes
+* probar a meter 700.000 entradas a ver cuanto tarda
+
+* LECTURAS, CASOS DE PRUEBA
+
+- Comprobar si funciona el async_lru_cache con un caso de prueba y activando las trazas SQL
+
+* API de Authorise? ¿se está usando este flag?
+
+* incorporar firmware de zptess (¿testa realmente en tessdb?)
+
+COMO COMPROBAR EJECUTABLES CON PYTEST
+=====================================
+import pytest
+from yourpackage.yourcli import main
+
+def test_cli_basic(capsys):
+    args = ['--version']
+    main(args)
+    captured = capsys.readouterr()
+    assert "yourtool version" in captured.out
+
+import pytest
+import subprocess
+
+def test_cli_process():
+    result = subprocess.run(
+        ['yourcli', '--help'], capture_output=True, text=True
+    )
+    assert "usage:" in result.stdout
+    assert result.returncode == 0
+
+
+
+# Dynamic versions using uv/hatching
+====================================
+
+[build-system]
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+# El directorio scripts esta a project lecel y es para incluir mis scripts adicionales
+[tool.hatch.build.targets.wheel]
+packages = ["src/tess"]
+only-include = ["src/mypackage", "scripts"]
+
+
+[tool.hatch.build.targets.wheel.sources]
+"src" = ""
+"scripts" = "mypackage/scripts"
+
+[tool.uv-dynamic-versioning]
+fallback-version = "0.1.0"
+
+
+
+import importlib.metadata
+try:
+    __version__ = importlib.metadata.version(__name__)
+except importlib.metadata.PackageNotFoundError:
+    __version__ = "0.0.0"
