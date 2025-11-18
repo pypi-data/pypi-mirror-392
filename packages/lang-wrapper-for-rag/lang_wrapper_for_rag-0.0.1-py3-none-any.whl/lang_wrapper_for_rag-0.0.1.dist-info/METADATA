@@ -1,0 +1,86 @@
+Metadata-Version: 2.4
+Name: lang-wrapper-for-rag
+Version: 0.0.1
+Summary: A modern and secure RAG chatbot using FastAPI and LangChain.
+Author: Your Name
+Author-email: you@example.com
+Requires-Python: >=3.10,<4.0
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Requires-Dist: chromadb (>=0.5.0,<0.6.0)
+Requires-Dist: faker (>=38.0.0,<39.0.0)
+Requires-Dist: fastapi (>=0.111.0,<0.112.0)
+Requires-Dist: langchain (>=0.2.0,<0.3.0)
+Requires-Dist: langchain-experimental (>=0.0.60,<0.0.61)
+Requires-Dist: langchain-openai (>=0.1.7,<0.2.0)
+Requires-Dist: presidio-analyzer (>=2.2.35,<3.0.0)
+Requires-Dist: presidio-anonymizer (>=2.2.35,<3.0.0)
+Requires-Dist: pydantic (>=2.7.0,<3.0.0)
+Requires-Dist: pypdf (>=4.2.0,<5.0.0)
+Requires-Dist: slowapi (>=0.1.9,<0.2.0)
+Requires-Dist: spacy (>=3.0.0,<4.0.0)
+Requires-Dist: tiktoken (>=0.7.0,<0.8.0)
+Requires-Dist: uvicorn[standard] (>=0.30.0,<0.31.0)
+Description-Content-Type: text/markdown
+
+# python-mini-chatbot-rag
+preparing for interview
+pip install poetry
+poetry init
+Rendben, ez egy fontos pontosítás\! A Poetry egy sokkal strukturáltabb `pyproject.toml` fájlt használ.
+
+Ebben az esetben a `pyproject.toml` fájlod a `[tool.poetry]` szekciót fogja használni a függőségek definiálására, nem az általános `[project]` szekciót.
+
+Íme a `pyproject.toml` fájl, ahogyan az egy Poetry projekt esetében kinézne.
+
+-----
+
+## Módosított `pyproject.toml` (Poetry-hez)
+
+-----
+
+## 🚀 Futtatási útmutató (Poetry-vel)
+
+1.  **Hozd létre a `pyproject.toml` fájlt:** Mentsd el a fenti TOML tartalmat.
+
+2.  **Mentsd el a kódot:** Mentsd a Python kódot `app.py` néven.
+
+3.  **Függőségek telepítése (Poetry):**
+
+    ```bash
+    # Ez létrehozza a venv-et (ha kell) és telepíti az összes függőséget
+    poetry install
+    ```
+
+    *Megjegyzés: Ha a `[tool.poetry.group.dev.dependencies]`-t is hozzáadtad, a `poetry install` alapból telepíti azt is. Ha nem, akkor a `poetry install --with dev` parancs teszi ezt meg.*
+
+4.  **Töltsd le a Spacy modellt (Kritikus lépés\!):**
+    Ezt a Poetry-n *kívül* vagy a Poetry környezetén *belül* is megteheted. A legegyszerűbb:
+
+    ```bash
+    poetry run python -m spacy download en_core_web_lg
+    ```
+
+5.  **Készítsd elő a dokumentumokat:**
+    Helyezd a `hr_policies.pdf` fájlodat egy `docs` mappába (`docs/hr_policies.pdf`).
+
+6.  **Indítsd el a szervert:**
+
+    ```bash
+    poetry run uvicorn app:app --reload
+    ```
+
+docker build -t rag-chatbot .
+
+docker run -d -p 8000:8000 --name chatbot rag-chatbot
+
+# Egyszeri beállítás: add hozzá a TestPyPI-t a Poetry-hez
+poetry config repositories.testpypi https://test.pypi.org/legacy/
+
+# Publikálás (kérni fogja a TestPyPI tokenedet)
+poetry publish --repository testpypi
+
