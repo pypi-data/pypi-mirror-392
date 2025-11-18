@@ -1,0 +1,24 @@
+"""File readers for rheological data formats.
+
+This module provides readers for various instrument data formats:
+- TA Instruments TRIOS (.txt)
+- CSV/TSV files
+- Excel files (.xlsx, .xls)
+- Anton Paar files
+- Auto-detection wrapper
+"""
+
+from rheojax.io.readers.anton_paar import load_anton_paar
+from rheojax.io.readers.auto import auto_load
+from rheojax.io.readers.csv_reader import load_csv
+from rheojax.io.readers.excel_reader import load_excel
+from rheojax.io.readers.trios import load_trios, load_trios_chunked
+
+__all__ = [
+    "load_trios",
+    "load_trios_chunked",
+    "load_csv",
+    "load_excel",
+    "load_anton_paar",
+    "auto_load",
+]
