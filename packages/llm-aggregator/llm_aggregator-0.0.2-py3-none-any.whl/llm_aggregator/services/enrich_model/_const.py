@@ -1,0 +1,35 @@
+from __future__ import annotations
+
+ENRICH_SYSTEM_PROMPT = ("You are a strict JSON generator that analyzes a list of models and returns "
+      "concise metadata.\n"
+      "Only respond with a single JSON object, no markdown, no extra text.\n"
+)
+
+ENRICH_USER_PROMPT = (
+        "Given the following JSON array 'models', generate detailed metadata for each LLM model.\n"
+        "\n"
+        "Return EXACTLY this JSON structure and nothing else:\n"
+        "{\n"
+        "  \"enriched\": [\n"
+        "    {\n"
+        "      \"id\": \"<exact modelid from input>\",\n"
+        "      \"port\": <port from input>,\n"
+        "      \"summary\": \"<very short description of this specific model>\",\n"
+        "      \"types\": [\"llm\" | \"vlm\" | \"embedder\" | \"reranker\" | \"tts\" | \"asr\" | \"diarize\" | \"cv\" | \"image_gen\"],\n"
+        "      \"model_family\": <Gemma, Qwen, Llama, Mistral, etc.>,\n"
+        "      \"context_size\": <your best guess>,\n"
+        "      \"quant\": <quantization of the LL model>,\n"
+        "      \"param\": <internal weights and values>,\n"
+        "    },\n"
+        "    ... one entry per input model, in the same order ...\n"
+        "  ]\n"
+        "}\n"
+        "Rules:\n"
+        "- Include EVERY input model exactly once.\n"
+        "- Use ONLY the allowed type tokens.\n"
+        "- Keep summaries concise.\n"
+        "- Never add extra top-level keys.\n"
+        "- Never wrap your answer in markdown.\n"
+        "\n"
+        "Input 'models' follow (JSON array):"
+    )

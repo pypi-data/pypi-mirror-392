@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>Large Language Models</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2em; }
+    header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1em;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.8em;
+    }
+    #headerRight {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.5em;
+    }
+    #ramBox {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      border-style: solid;
+      border-width: 1px;
+      border-color: LightGray;
+    }
+    #ramLabel {
+      font-size: 0.75em;
+      color: #666;
+      margin-bottom: 0.2em;
+    }
+    #statsData {
+      width: 150px;
+      height: 35px;
+    }
+    #clearBtn {
+      font-size: 0.75em;
+      padding: 0px 8px 0px 0px;
+      cursor: pointer;
+    }
+    #updated { font-size: 0.8em; color: #666; margin-bottom: 1em; }
+    table { border-collapse: collapse; width: 100%; margin-top: 0.5em; }
+    th, td { border-bottom: 1px solid #ddd; padding: 6px 8px; font-size: 0.9em; }
+    th { background: #f0f0f0; text-align: left; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<header>
+  <h1>LLM Catalog</h1>
+  <div id="headerRight">
+    <button id="clearBtn">🧹 Recreate Info</button>
+    <div id="ramBox">
+      <div id="ramLabel">RAM load %</div>
+      <canvas id="statsData"></canvas>
+    </div>
+  </div>
+</header>
+
+<div id="updated">Loading…</div>
+<table id="tbl" style="display:none">
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Port</th>
+      <th>Types</th>
+      <th>Family</th>
+      <th>Context</th>
+      <th>Quant</th>
+      <th>Param</th>
+      <th>Summary</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<!-- FastAPI fills this with the proper API base URL -->
+<script id="apiBaseScript" data-api-base=""></script>
+
+<!-- Main logic bundle -->
+<script src="/static/main.js"></script>
+</body>
+</html>
