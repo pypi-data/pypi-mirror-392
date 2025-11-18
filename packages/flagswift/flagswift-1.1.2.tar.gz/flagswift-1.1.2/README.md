@@ -1,0 +1,344 @@
+# FlagSwift Python SDK
+
+Official Python client for [FlagSwift](https://flagswift.com) feature flags.
+
+## Installation
+
+```bash
+pip install flagswift
+```
+
+## Quick Start
+
+```python
+from flagswift import FlagSwift
+
+# Initialize the client
+flags = FlagSwift(api_key='sk_live_your_api_key_here')
+
+# Check if a feature is enabled
+if flags.is_enabled('new-feature'):
+    # Use new feature
+    print("New feature is enabled!")
+else:
+    # Use old feature
+    print("Using old feature")
+```
+
+## Usage Examples
+
+### Basic Feature Flag Check
+
+```python
+from flagswift import FlagSwift
+
+flags = FlagSwift(
+    api_key='sk_live_your_api_key_here',
+    environment='production'
+)
+
+# Simple check
+if flags.is_enabled('dark-mode'):
+    enable_dark_mode()
+```
+
+### User Targeting
+
+```python
+# Check flag for specific user
+user_id = 'user-123'
+
+if flags.is_enabled('beta-feature', user_id=user_id):
+    show_beta_feature()
+else:
+    show_standard_feature()
+```
+
+### Multiple User Identifiers
+
+```python
+# Check flag with multiple identifiers (email, user_id, etc.)
+identifiers = ['user@example.com', 'user-123']
+
+if flags.is_enabled('premium-feature', user_id=identifiers):
+    show_premium_feature()
+```
+
+### Django Integration
+
+```python
+# settings.py
+from flagswift import FlagSwift
+
+FLAGSWIFT = FlagSwift(
+    api_key='sk_live_your_api_key_here',
+    environment='production'
+)
+
+# views.py
+from django.conf import settings
+
+def my_view(request):
+    user_id = str(request.user.id)
+
+    if settings.FLAGSWIFT.is_enabled('new-dashboard', user_id=user_id):
+        return render(request, 'new_dashboard.html')
+    else:
+        return render(request, 'old_dashboard.html')
+```
+
+### FastAPI Integration
+
+```python
+from fastapi import FastAPI, Depends
+from flagswift import FlagSwift
+
+app = FastAPI()
+
+# Initialize FlagSwift
+flags = FlagSwift(
+    api_key='sk_live_your_api_key_here',
+    environment='production'
+)
+
+@app.get("/feature")
+async def get_feature(user_id: str):
+    if flags.is_enabled('new-api', user_id=user_id):
+        return {"version": "v2", "features": ["new", "improved"]}
+    else:
+        return {"version": "v1", "features": ["standard"]}
+```
+
+### Flask Integration
+
+```python
+from flask import Flask, request
+from flagswift import FlagSwift
+
+app = Flask(__name__)
+
+flags = FlagSwift(
+    api_key='sk_live_your_api_key_here',
+    environment='production'
+)
+
+@app.route('/api/data')
+def get_data():
+    user_id = request.headers.get('X-User-ID')
+
+    if flags.is_enabled('new-algorithm', user_id=user_id):
+        return use_new_algorithm()
+    else:
+        return use_old_algorithm()
+```
+
+## Advanced Features
+
+### Configuration Object
+
+```python
+from flagswift import FlagSwift, FlagSwiftConfig
+
+config = FlagSwiftConfig(
+    api_key='sk_live_your_api_key_here',
+    environment='staging',
+    base_url='https://flagswift.com',
+    timeout=10,
+    cache_timeout=300,  # 5 minutes
+    max_retries=3,
+    failsafe_fallbacks={
+        'critical-feature': True,  # Always enabled if API fails
+        'experimental-feature': False  # Always disabled if API fails
+    },
+    global_identifier='system-service-id'  # Default user for all checks
+)
+
+flags = FlagSwift.from_config(config)
+```
+
+### Kill Switch
+
+Immediately disable features in production:
+
+```python
+# Activate kill switch (disables flags immediately)
+flags.activate_kill_switch(
+    flags=['problematic-feature'],
+    environments=['production']
+)
+
+# Deactivate kill switch (restores previous state)
+flags.deactivate_kill_switch(
+    flags=['problematic-feature'],
+    environments=['production']
+)
+
+# Check kill switch status
+if flags.is_kill_switch_enabled():
+    print("Kill switch is active!")
+```
+
+### Refresh Flags
+
+```python
+# Force refresh from server
+flags.refresh()
+
+# Refresh with specific user context
+flags.refresh(user_id='user-123')
+```
+
+### Get All Flags
+
+```python
+# Get all flags and their states
+all_flags = flags.get_all_flags()
+print(all_flags)
+# {'feature-1': True, 'feature-2': False, ...}
+```
+
+### Get Flag Configuration
+
+```python
+# Get detailed flag configuration
+config = flags.get_flag_config('my-feature')
+print(config)
+# {
+#   'enabled': True,
+#   'rolloutPercentage': 50,
+#   'targeting': {'enabled': True, 'users': ['user-1', 'user-2']}
+# }
+```
+
+### SDK Status
+
+```python
+# Get SDK status
+status = flags.get_status()
+print(status)
+# {
+#   'initialized': True,
+#   'flag_count': 10,
+#   'environment': 'production',
+#   'kill_switch_active': False,
+#   'cache_valid': True
+# }
+```
+
+## ML Model A/B Testing Example
+
+```python
+from flagswift import FlagSwift
+
+flags = FlagSwift(api_key='sk_live_your_key')
+
+def predict(data, user_id):
+    if flags.is_enabled('new-ml-model', user_id=user_id):
+        # Use new model
+        return new_model.predict(data)
+    else:
+        # Use stable model
+        return stable_model.predict(data)
+```
+
+## Error Handling
+
+```python
+from flagswift import FlagSwift, FlagSwiftError, AuthenticationError, NetworkError
+
+try:
+    flags = FlagSwift(api_key='sk_live_your_key')
+    flags.initialize()
+
+except AuthenticationError:
+    print("Invalid API key")
+except NetworkError:
+    print("Network error - using fallback values")
+except FlagSwiftError as e:
+    print(f"FlagSwift error: {e}")
+```
+
+## Best Practices
+
+### 1. Initialize Once
+
+```python
+# ✅ Good: Initialize once at application startup
+flags = FlagSwift(api_key='sk_live_your_key')
+
+# ❌ Bad: Don't create new instances for each check
+def check_feature():
+    flags = FlagSwift(api_key='sk_live_your_key')  # Don't do this!
+    return flags.is_enabled('feature')
+```
+
+### 2. Use Failsafe Fallbacks
+
+```python
+# Always provide fallbacks for critical features
+flags = FlagSwift(
+    api_key='sk_live_your_key',
+    failsafe_fallbacks={
+        'payment-processing': True,  # Critical: always enabled
+        'experimental-ui': False      # Experimental: always disabled
+    }
+)
+```
+
+### 3. Cache Strategy
+
+```python
+# For high-traffic APIs, use longer cache
+flags = FlagSwift(
+    api_key='sk_live_your_key',
+    cache_timeout=600  # 10 minutes
+)
+
+# For real-time updates, use shorter cache or manual refresh
+flags = FlagSwift(
+    api_key='sk_live_your_key',
+    cache_timeout=30  # 30 seconds
+)
+```
+
+## Configuration Options
+
+| Option                  | Type     | Default                   | Description                   |
+| ----------------------- | -------- | ------------------------- | ----------------------------- |
+| `api_key`               | str      | Required                  | Your FlagSwift server API key |
+| `environment`           | str      | `'production'`            | Environment name              |
+| `base_url`              | str      | `'https://flagswift.com'` | FlagSwift API URL             |
+| `timeout`               | int      | `5`                       | Request timeout (seconds)     |
+| `cache_timeout`         | int      | `300`                     | Cache validity (seconds)      |
+| `max_retries`           | int      | `3`                       | Maximum retry attempts        |
+| `failsafe_fallbacks`    | dict     | `{}`                      | Default values when API fails |
+| `kill_switch_fallbacks` | dict     | `{}`                      | Values during kill switch     |
+| `global_identifier`     | str/list | `None`                    | Default user identifier       |
+
+## API Reference
+
+### FlagSwift Class
+
+#### Methods
+
+- `is_enabled(flag_name, user_id=None)` - Check if flag is enabled
+- `get_all_flags()` - Get all flags
+- `get_flag_config(flag_name)` - Get flag configuration
+- `refresh(user_id=None)` - Force refresh from server
+- `activate_kill_switch(flags, environments=None)` - Activate kill switch
+- `deactivate_kill_switch(flags, environments=None)` - Deactivate kill switch
+- `is_kill_switch_enabled()` - Check kill switch status
+- `get_status()` - Get SDK status
+
+## Testing with Postman
+
+You can test your FlagSwift integration using the same backend server from your Node.js example. The Python SDK makes the same API calls to `/api/flags/server`.
+
+## Support
+
+- 📧 Email: info@flagswift.com
+- 📚 Docs: https://flagswift.com/docs
+
+## License
+
+MIT License - see LICENSE file for details
