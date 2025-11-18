@@ -1,0 +1,221 @@
+Metadata-Version: 2.4
+Name: Pretty2D
+Version: 1.2
+Summary: A lightweight library for pretty-printing 2D tabular data with customizable borders.
+Author: Ali Ahmad
+License: MIT License
+        
+        Copyright (c) 2025 Absolute16
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+Project-URL: Homepage, https://github.com/Absolute 16/Pretty2D
+Project-URL: Documentation, https://github.com/Absolute/Pretty2D#readme
+Project-URL: Source, https://github.com/Absolute16/Pretty2D
+Project-URL: Issues, https://github.com/Absolute16/Pretty2D/issues
+Keywords: table,pretty print,2d,formatting,cli,ascii-table
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: license-file
+
+# Pretty2D
+
+A lightweight and easy-to-use Python library for **pretty-printing 2D tabular data** with multiple border styles, including default ASCII, tabular Unicode, rounded, double-line, and borderless modes.
+
+Perfect for CLIs, logs, debugging, table previews, and formatted console output.
+
+---
+
+## 🔧 Installation
+
+```bash
+pip install Pretty2D
+```
+
+---
+
+## 🚀 Quick Start
+
+```python
+from pretty2d import formatter, border
+
+data = [
+    ["Name", "Age", "City"],
+    ["Alice", "23", "London"],
+    ["Bob", "31", "Paris"],
+]
+
+print(formatter.format(data, True, border.Border.TABULAR))
+```
+
+---
+
+## 🖼 Output Examples
+
+### **Default Border**
+
+```
++-------+-----+--------+
+| Name  | Age | City   |
++-------+-----+--------+
+| Alice | 23  | London |
+| Bob   | 31  | Paris  |
++-------+-----+--------+
+```
+
+### **Tabular**
+
+```
+┌───────┬─────┬────────┐
+│ Name  │ Age │ City   │
+├───────┼─────┼────────┤
+│ Alice │ 23  │ London │
+│ Bob   │ 31  │ Paris  │
+└───────┴─────┴────────┘
+```
+
+### **Rounded**
+
+```
+╭───────┬─────┬────────╮
+│ Name  │ Age │ City   │
+├───────┼─────┼────────┤
+│ Alice │ 23  │ London │
+│ Bob   │ 31  │ Paris  │
+╰───────┴─────┴────────╯
+```
+
+### **Double Borders**
+
+```
+╔═══════╦═════╦════════╗
+║ Name  ║ Age ║ City   ║
+╠═══════╬═════╬════════╣
+║ Alice ║ 23  ║ London ║
+║ Bob   ║ 31  ║ Paris  ║
+╚═══════╩═════╩════════╝
+```
+
+### **No Border**
+
+```
+| Name  | Age | City   |
+| Alice | 23  | London |
+| Bob   | 31  | Paris  |
+```
+
+> **Note:** `NO_BORDER` cannot be used with headers.
+
+---
+
+## 📦 Border Options
+
+```python
+class Border(Enum):
+    DEFAULT = 1
+    TABULAR = 2
+    TABULAR_ROUNDED = 3
+    TABULAR_DOUBLE = 4
+    NO_BORDER = 5
+```
+
+---
+
+## 🧠 How It Works
+
+The main function you call is:
+
+```python
+format(data: list[list[str]], hasHeader: bool, border: Border)
+```
+
+### ✔ Auto-aligns columns  
+### ✔ Detects max width for each column  
+### ✔ Supports uneven row lengths  
+### ✔ Handles header separators  
+### ✔ Multiple border styles  
+
+Example:
+
+```python
+from pretty2d import format, Border
+
+data = [
+    ["Product", "Price"],
+    ["Keyboard", "$49"],
+    ["Mouse", "$19"],
+]
+
+print(format(data, hasHeader=True, border=Border.DEFAULT))
+```
+
+---
+
+## ❗ Exceptions
+
+| Condition | Raises |
+|----------|--------|
+| Using `NO_BORDER` with `hasHeader=True` | `TypeError` |
+
+---
+
+## 📚 API Reference
+
+### **format(data, hasHeader, border)**
+
+Formats a 2D list of strings into a pretty-printed table.
+
+**Parameters:**
+- `data` — list of rows, each row a list of strings  
+- `hasHeader` — whether the first row is a header  
+- `border` — a value from the `Border` enum  
+
+**Returns:**  
+A formatted string.
+
+---
+
+## 📁 Project Structure
+
+```
+pretty2d/
+ ├── __init__.py
+ ├── formatter.py
+ └── border.py
+```
+
+---
+
+## 🔓 License
+
+This project is licensed under the MIT License.  
+See the `LICENSE` file for details.
+
+---
+
+## ⭐ Contribute
+
+Feel free to open issues or pull requests on GitHub!
+
+---
+
+Enjoy clean ASCII/Unicode tables with **Pretty2D** 🎉
