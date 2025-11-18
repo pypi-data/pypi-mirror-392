@@ -1,0 +1,613 @@
+sources:
+- name: my_local_source
+  resource_type: source
+  description: ''
+  tags: null
+  uuid: d25fdf04-4c5a-40b9-958d-8f7205c59b61
+  schema: ''
+  database: ''
+  table:
+    name: players
+    description: Captures detailed personal, biographical, and career information
+      about individual athletes, including their names, positions, physical attributes,
+      educational background, and key dates.
+    tags: []
+    details:
+      path: 2025-11-14_14-11-57/modified_input/players.csv
+      type: csv
+    columns:
+    - name: playerid
+      type: alphanumeric
+      category: dimension
+      description: Uniquely identifies each individual within the roster of participants.
+      tags:
+      - Player Identifier
+      - Athlete Master Data
+      - Roster Management
+      profiling_metrics:
+        count: 5062
+        null_count: 0
+        distinct_count: 5062
+        sample_data:
+        - mooreja01
+        - gibsoda01
+        - hollabi01
+        - evansbo01
+        - drishjo01
+        - cummite01
+        - ankerja01
+        - davisch01
+        - huntele01
+        - jamesmi01
+    - name: usefirst
+      type: close_ended_text
+      category: dimension
+      description: Indicates the given name used by a player in official records or
+        communications.
+      tags:
+      - Player Identification
+      - Roster Management
+      - Personal Information
+      profiling_metrics:
+        count: 5062
+        null_count: 831
+        distinct_count: 1223
+        sample_data:
+        - Cole
+        - Bryon
+        - Bryce
+        - Stewart
+        - Julyan
+        - Quinn
+        - Primoz
+        - Bruno
+        - Mike
+        - Doxie
+    - name: firstname
+      type: close_ended_text
+      category: dimension
+      description: Indicates the given name of an individual listed as a player.
+      tags:
+      - Player Identity
+      - Roster Management
+      - Personal Information
+      profiling_metrics:
+        count: 5062
+        null_count: 24
+        distinct_count: 1270
+        sample_data:
+        - Yinka
+        - Penny
+        - Rolando
+        - Mustafadeen
+        - Antawn
+        - Ibrahim
+        - Ronnie
+        - Clem
+        - Qyntel
+        - Nathan
+    - name: middlename
+      type: close_ended_text
+      category: dimension
+      description: Indicates the second personal name recorded for an individual listed
+        in the player registry.
+      tags:
+      - Player Identity Management
+      - Personal Information
+      - Roster Recordkeeping
+      profiling_metrics:
+        count: 5062
+        null_count: 1816
+        distinct_count: 914
+        sample_data:
+        - Emmanuel
+        - Reginald
+        - Burnell
+        - Dominique
+        - Ronnell
+        - Lenard
+        - Andres
+        - Stanley
+        - Adalphus
+        - Melvin
+    - name: lastname
+      type: close_ended_text
+      category: dimension
+      description: Identifies the family name of an individual listed as a player.
+      tags:
+      - Player Identity
+      - Roster Management
+      - Team Personnel
+      profiling_metrics:
+        count: 5062
+        null_count: 0
+        distinct_count: 3072
+        sample_data:
+        - Humphries
+        - Catlett
+        - Ketner
+        - Kozlicki
+        - Herman
+        - Burns
+        - Gilder
+        - Hawkins
+        - Ogg
+        - Ellison
+    - name: namegiven
+      type: close_ended_text
+      category: dimension
+      description: Identifies the first name officially assigned to an individual
+        player.
+      tags:
+      - Player Personal Identification
+      - Roster Management
+      - Athlete Profile Data
+      profiling_metrics:
+        count: 5062
+        null_count: 5052
+        distinct_count: 9
+        sample_data:
+        - Thomas
+        - Jim
+        - Mike
+        - Robert
+        - Ed
+        - nameGiven
+        - Dave
+        - Mort
+        - Willie
+    - name: fullgivenname
+      type: close_ended_text
+      category: dimension
+      description: Provides the complete first and middle names of an individual as
+        officially recorded.
+      tags:
+      - Player Identity
+      - Personal Information
+      - Roster Management
+      profiling_metrics:
+        count: 5062
+        null_count: 5035
+        distinct_count: 27
+        sample_data:
+        - Clifton Nathaniel
+        - fullGivenName
+        - Chris Wayne Jackson
+        - Donald A. Smith
+        - Hashim Thabit Manka
+        - Brian Carson Williams
+        - Ferdinand Lewis Alcindor, Jr.
+        - Walter Jones
+        - Maybyner Rodney Hilario
+        - Ronald Charles Sobieszczyk
+    - name: namesuffix
+      type: close_ended_text
+      category: dimension
+      description: Identifies a generational or familial designation used in a person's
+        full name for recordkeeping and distinction purposes.
+      tags:
+      - Player Identity Resolution
+      - Family Lineage Tracking
+      - Roster Name Standardization
+      profiling_metrics:
+        count: 5062
+        null_count: 4738
+        distinct_count: 6
+        sample_data:
+        - II
+        - Sr.
+        - IV
+        - Jr.
+        - III
+        - nameSuffix
+    - name: namenick
+      type: close_ended_text
+      category: dimension
+      description: Indicates the familiar or informal name commonly used to refer
+        to a player.
+      tags:
+      - Player Nickname
+      - Identity Enrichment
+      - Fan Engagement
+      profiling_metrics:
+        count: 5062
+        null_count: 2354
+        distinct_count: 1314
+        sample_data:
+        - Walt, Wally
+        - Ced
+        - Ham
+        - X, X-Man
+        - Cat Man
+        - Flip, Ron
+        - Marty
+        - Rudy
+        - Sweetmar
+        - Dutch
+    - name: pos
+      type: close_ended_text
+      category: dimension
+      description: Identifies the on-court role assigned to an individual within a
+        team lineup.
+      tags:
+      - Player Position
+      - Team Lineup Strategy
+      - Role Classification
+      profiling_metrics:
+        count: 5062
+        null_count: 182
+        distinct_count: 14
+        sample_data:
+        - G-F-C
+        - G-F
+        - F-G-C
+        - F-G
+        - F-C-G
+        - C
+        - F-C
+        - C-F-G
+        - ' G'
+        - F
+    - name: firstseason
+      type: integer
+      category: dimension
+      description: Indicates the year when an individual began participating in the
+        league as a professional player.
+      tags:
+      - Player Career Start
+      - Season Participation
+      - Player Tenure
+      profiling_metrics:
+        count: 5062
+        null_count: 15
+        distinct_count: 2
+        sample_data:
+        - '1951.0'
+        - '0.0'
+    - name: lastseason
+      type: integer
+      category: measure
+      description: Indicates the most recent season in which the individual participated.
+      tags:
+      - Player Career Timeline
+      - Season Participation
+      - Historical Player Data
+      profiling_metrics:
+        count: 5062
+        null_count: 15
+        distinct_count: 2
+        sample_data:
+        - '0.0'
+        - '1951.0'
+    - name: height
+      type: float
+      category: measure
+      description: Indicates the physical measurement from head to foot for each player
+        listed in the roster.
+      tags:
+      - Player Physical Attributes
+      - Talent Scouting
+      - Roster Analytics
+      profiling_metrics:
+        count: 5062
+        null_count: 13
+        distinct_count: 44
+        sample_data:
+        - '80.0'
+        - '63.0'
+        - '87.0'
+        - '72.5'
+        - '73.5'
+        - '82.0'
+        - '67.0'
+        - '70.0'
+        - '71.0'
+        - '76.5'
+    - name: weight
+      type: integer
+      category: measure
+      description: Indicates the physical mass of an individual listed on the roster.
+      tags:
+      - Player Physical Attributes
+      - Roster Analytics
+      - Health And Performance Assessment
+      profiling_metrics:
+        count: 5062
+        null_count: 14
+        distinct_count: 140
+        sample_data:
+        - '290.0'
+        - '200.0'
+        - '219.0'
+        - '252.0'
+        - '308.0'
+        - '185.0'
+        - '181.0'
+        - '169.0'
+        - '0.0'
+        - '192.0'
+    - name: college
+      type: close_ended_text
+      category: dimension
+      description: Identifies the educational institution where an individual completed
+        their collegiate studies before joining the organization.
+      tags:
+      - Player Education Background
+      - College Affiliation
+      - Talent Pipeline Source
+      profiling_metrics:
+        count: 5062
+        null_count: 178
+        distinct_count: 687
+        sample_data:
+        - Cornell
+        - Hartford
+        - Davidson
+        - Austin Peay
+        - 'Florida  '
+        - Benedict
+        - Tampa
+        - St. Mary's
+        - Drury (MO)
+        - Southwestern (KS)
+    - name: collegeother
+      type: close_ended_text
+      category: dimension
+      description: Indicates the educational institution attended by the individual
+        outside of commonly listed colleges.
+      tags:
+      - Player Education Background
+      - Non-Major College Affiliation
+      - Talent Scouting Source
+      profiling_metrics:
+        count: 5062
+        null_count: 4208
+        distinct_count: 625
+        sample_data:
+        - Pratt Institute
+        - SE Iowa CC/DodgeCityCC/IndCC
+        - LIU???
+        - Washington
+        - Long Beach CC / North Texas State
+        - College of Pacific
+        - Draughon's Business College
+        - NE Missouri State
+        - San Francisco  CC
+        - Pasaadena CC
+    - name: birthdate
+      type: date & time
+      category: dimension
+      description: Indicates the calendar date on which a player was born.
+      tags:
+      - Player Demographics
+      - Age Eligibility
+      - Career Lifecycle
+      profiling_metrics:
+        count: 5062
+        null_count: 11
+        distinct_count: 4141
+        sample_data:
+        - '1988-11-21'
+        - '1927-08-20'
+        - '1957-12-06'
+        - '1941-06-24'
+        - '1970-07-14'
+        - '1979-04-18'
+        - '1982-02-20'
+        - '1921-07-07'
+        - '1951-01-19'
+        - '1966-07-11'
+    - name: birthcity
+      type: close_ended_text
+      category: dimension
+      description: Indicates the city where an individual was born.
+      tags:
+      - Player Demographics
+      - Geographic Analysis
+      - Talent Origin Tracking
+      profiling_metrics:
+        count: 5062
+        null_count: 1174
+        distinct_count: 1460
+        sample_data:
+        - Parsons
+        - Joliet
+        - Rustavi
+        - Satu-Mare
+        - Duluth
+        - Chester
+        - Flint
+        - Hoke
+        - Smithville
+        - Dale
+    - name: birthstate
+      type: close_ended_text
+      category: dimension
+      description: Indicates the region or administrative area where an individual
+        was born.
+      tags:
+      - Player Demographics
+      - Geographic Analysis
+      - Talent Sourcing
+      profiling_metrics:
+        count: 5062
+        null_count: 1454
+        distinct_count: 61
+        sample_data:
+        - WI
+        - BC
+        - UT
+        - QU
+        - MD
+        - (Fr Guiana)
+        - ID
+        - MAN
+        - OR
+        - SP
+    - name: birthcountry
+      type: close_ended_text
+      category: dimension
+      description: Indicates the country where a player was born for identification
+        and record-keeping purposes.
+      tags:
+      - Player Nationality
+      - Demographic Analysis
+      - International Representation
+      profiling_metrics:
+        count: 5062
+        null_count: 1160
+        distinct_count: 81
+        sample_data:
+        - ROM
+        - VEN
+        - SUI
+        - VIN
+        - SLO
+        - SEN
+        - CUB
+        - HOL
+        - MEX
+        - DEN
+    - name: highschool
+      type: close_ended_text
+      category: dimension
+      description: Identifies the secondary school attended by an individual prior
+        to joining the organization.
+      tags:
+      - Player Education Background
+      - Talent Scouting Source
+      - Amateur Career Pathway
+      profiling_metrics:
+        count: 5062
+        null_count: 773
+        distinct_count: 2562
+        sample_data:
+        - Nazareth Regional
+        - William Chrisman
+        - Mansfield
+        - Bishop Ward
+        - Loyola Academy
+        - Kathleen Senior
+        - San Dieguito Academy
+        - Borah
+        - Sto-Rox
+        - Linden McKinley
+    - name: hscity
+      type: close_ended_text
+      category: dimension
+      description: Indicates the city where the individual attended high school.
+      tags:
+      - High School Location
+      - Player Demographics
+      - Talent Scouting
+      profiling_metrics:
+        count: 5062
+        null_count: 765
+        distinct_count: 1616
+        sample_data:
+        - Teachey
+        - Mt. Carmel
+        - Belle Glade
+        - Linden
+        - Tripp
+        - Gardendale
+        - Westport
+        - Shallotte
+        - Dearborn
+        - New Haven
+    - name: hsstate
+      type: close_ended_text
+      category: dimension
+      description: Indicates the U.S. state or states where the player attended high
+        school.
+      tags:
+      - High School Location
+      - Player Demographics
+      - Recruitment Region
+      profiling_metrics:
+        count: 5062
+        null_count: 834
+        distinct_count: 188
+        sample_data:
+        - LA / TX
+        - NC / VA
+        - IL
+        - MI/TN
+        - 'CO '
+        - SC / IL
+        - WV / DC
+        - MO / NC
+        - MS
+        - OK
+    - name: hscountry
+      type: close_ended_text
+      category: dimension
+      description: Identifies the nation where a player's high school is located.
+      tags:
+      - High School Country
+      - Player Demographics
+      - International Recruitment
+      profiling_metrics:
+        count: 5062
+        null_count: 765
+        distinct_count: 52
+        sample_data:
+        - CAN /USA
+        - SRB
+        - SLV
+        - NZL
+        - VEN
+        - FRA
+        - USa
+        - TCH
+        - LTU
+        - YUG/USA
+    - name: deathdate
+      type: date & time
+      category: dimension
+      description: Indicates the date on which a player passed away.
+      tags:
+      - Player Lifecycle Management
+      - Historical Roster Analysis
+      - Legacy and Memorial Records
+      profiling_metrics:
+        count: 5062
+        null_count: 0
+        distinct_count: 928
+        sample_data:
+        - '2003-01-13'
+        - '1976-03-21'
+        - '2009-07-01'
+        - '2006-01-21'
+        - '2001-01-26'
+        - '2007-04-21'
+        - '2004-12-29'
+        - '2008-04-29'
+        - '2011-11-07'
+        - '2008-11-09'
+    - name: race
+      type: close_ended_text
+      category: dimension
+      description: Indicates the demographic classification of each individual listed
+        in the roster.
+      tags:
+      - Player Demographics
+      - Diversity Reporting
+      - Equal Opportunity Analysis
+      profiling_metrics:
+        count: 5062
+        null_count: 159
+        distinct_count: 5
+        sample_data:
+        - O
+        - W
+        - r
+        - '1'
+        - B
+    profiling_metrics:
+      count: 5062
+    key:
+      columns:
+      - playerid
+      distinct_count: 5062
+    source_last_modified: 1763109787.1065328
