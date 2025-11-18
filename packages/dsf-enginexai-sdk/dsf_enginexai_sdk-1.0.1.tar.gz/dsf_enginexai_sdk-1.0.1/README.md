@@ -1,0 +1,352 @@
+# DSF EngineXAI SDK
+
+An **enterprise-grade explainable AI scoring system** that combines traditional risk models with LLM-powered insights in a single, auditable formula.
+
+---
+
+## 🚀 Why DSF EngineXAI?
+
+Traditional scoring systems are either:
+- **Too rigid** (hard-coded rules that can't adapt)
+- **Too opaque** (blackbox ML models that regulators reject)
+
+EngineXAI solves both: a **configurable, transparent scoring engine** that integrates LLM outputs as direct inputs while maintaining full mathematical auditability.
+
+---
+
+## 🧠 Core Innovation: LLM as Direct Input
+
+The breakthrough feature: **inject LLM scores directly into the formula** without losing transparency.
+
+```python
+config = {
+    "llm_risk_assessment": {
+        "type": "direct_value",  # ✅ LLM output goes here
+        "weight": 2.5,
+        "criticality": 3.0
+    },
+    "credit_score": {
+        "type": "similarity",  # Traditional scoring
+        "default": 700,
+        "weight": 2.0,
+        "criticality": 2.0
+    }
+}
+
+applicant = {
+    "llm_risk_assessment": 0.73,  # From your LLM
+    "credit_score": 680
+}
+```
+
+**Result:** LLM insights + traditional data in one auditable score.
+
+---
+
+## ⚙️ Installation
+
+```bash
+pip install dsf-enginexai-sdk
+```
+
+⚠️ **Requires SDK ≥ 1.0.9**
+
+---
+
+## 🧩 Quick Start
+
+### Community Edition (Free)
+
+```python
+from dsf_enginexai_sdk import CreditScoreClient
+
+config = {
+    "monthly_income": {"type": "similarity", "default": 3000, "weight": 1.8, "criticality": 2.0},
+    "debt_to_income": {"type": "similarity", "default": 0.3, "weight": 2.5, "criticality": 3.0}
+}
+
+applicant = {"monthly_income": 2800, "debt_to_income": 0.42}
+
+with CreditScoreClient(api_key="dsf_api_prod_XXXXX", tier="community") as client:
+    result = client.evaluate(applicant, config)
+    print(f"Decision: {result['decision']}")
+    print(f"Score: {result['score']:.4f}")
+```
+
+### Professional Edition (With LLM Integration + Traces)
+
+```python
+from dsf_enginexai_sdk import CreditScoreClient
+
+client = CreditScoreClient(
+    api_key="dsf_api_prod_XXXXX",
+    tier="professional",
+    license_key="PRO-2026-12-31-XXXX-XXXX"
+)
+
+# Config with LLM field
+config = {
+    "llm_risk_score": {
+        "type": "direct_value",  # ✅ Takes LLM output directly
+        "weight": 3.0,
+        "criticality": 3.5
+    },
+    "employment_stability": {
+        "type": "similarity",
+        "default": 24,
+        "weight": 1.5,
+        "criticality": 2.0
+    }
+}
+
+applicant = {
+    "llm_risk_score": 0.68,  # Your LLM produced this
+    "employment_stability": 18
+}
+
+result = client.evaluate(applicant, config, enable_trace=True)
+print(f"Score: {result['score']:.4f}")
+print(f"Traces: {result['explanation_trace']}")
+
+client.close()
+```
+
+---
+
+## 🤖 LLM Integration Patterns
+
+### Pattern 1: External LLM Pre-Processing
+
+```python
+# 1. Call your LLM
+import anthropic
+
+claude = anthropic.Anthropic(api_key="sk-ant-...")
+prompt = f"Analyze credit risk for: {applicant_description}. Return score 0-1 as JSON."
+llm_response = claude.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=200,
+    messages=[{"role": "user", "content": prompt}]
+)
+
+llm_score = json.loads(llm_response.content[0].text)["score"]
+
+# 2. Inject into EngineXAI
+applicant = {
+    "llm_risk_assessment": llm_score,
+    "credit_score": 720
+}
+
+result = client.evaluate(applicant, config)
+```
+
+### Pattern 2: LLM + Reasoning (Optional)
+
+```python
+applicant = {
+    "llm_risk_score": 0.73,
+    "llm_risk_score_reasoning": "Strong credit history but unstable employment"  # Optional
+}
+
+# Reasoning appears in traces (Pro/Enterprise only)
+```
+
+---
+
+## 🔍 Explainability Traces
+
+**Available for Professional and Enterprise tiers.**
+
+```python
+result = client.evaluate(applicant, config, enable_trace=True)
+trace = result["explanation_trace"]
+```
+
+**Trace with LLM:**
+
+```python
+[
+  {
+    "feature": "llm_risk_score",
+    "similarity": 0.73,
+    "contribution_pct": 35.2,
+    "reasoning": "Strong history, unstable employment"  # If provided
+  },
+  {
+    "feature": "credit_score", 
+    "similarity": 0.89,
+    "contribution_pct": 28.5
+  }
+]
+```
+
+**Key insight:** You see exactly how much the LLM contributed (35.2%) vs traditional features.
+
+---
+
+## 📊 Tier Comparison
+
+|       Feature              | Community | Professional | Enterprise |
+|----------------------------|-----------|--------------|------------|
+| LLM Direct Input           |    ✅     |      ✅      |    ✅      |
+| Max Batch Size             |     1     |     100      |    500     |
+| Explainability Traces      |    ❌     |      ✅      |    ✅      |
+| Adaptive Weighting         |    ❌     |      ❌      |    ✅      |
+| Adaptive Penalty           |    ❌     |      ✅      |    ✅      |
+| Storage                    |  memory   |    redis     |   redis    |
+
+---
+
+## 🧬 Advanced Features
+
+### Adaptive Penalty (Pro/Enterprise)
+
+```python
+result = client.evaluate_batch(
+    applicants, 
+    config,
+    penalty_config={
+        'base': 0.02,
+        'adaptive': True,
+        'severity_weight': 0.05
+    }
+)
+```
+
+```
+
+**How it works:**
+- `base`: Fixed penalty applied to all scores
+- `adaptive`: When `True`, increases penalty for missing critical fields (criticality > 2.5)
+- `severity_weight`: Additional penalty per missing critical field
+
+**Example:** If 3 critical fields are missing: `penalty = 0.02 + (3 × 0.05) = 0.17` (17%)
+```
+
+## ⚖️ Default Similarity vs. Optimization
+
+The engine uses an advanced symmetric similarity formula `1 - |v-r| / max(|v|, |r|)` by default.
+
+**Scope:** This is the best **generic and universal** solution for most numerical data, ensuring traceability and scalability.
+
+**Optimization Limit:** For variables with extremely atypical data distributions, or when absolute statistical precision is required, a generic formula may not be sufficient.
+
+### 📌 Best Practice (Getting Optimal Results)
+
+If you want to apply custom similarity or statistical risk calculations (e.g., a *Machine Learning* model with complex curves), bypass the default formula and **use Multi-Input Mode**:
+
+1. Calculate the final score (0-1) using your own model/logic
+2. Inject the result into the API using `"type": "direct_value"`
+
+This way, you combine the **maximum precision** of your proprietary logic with the **maximum transparency** of our audit engine.
+
+**Example:**
+
+```python
+# Your custom ML model
+fraud_score = my_fraud_model.predict_proba(features)[0][1]  # 0.0-1.0
+
+# Inject directly
+config = {
+    "fraud_risk": {
+        "type": "direct_value",  # ✅ Bypass similarity calculation
+        "weight": 3.0,
+        "criticality": 4.0
+    }
+}
+
+applicant = {"fraud_risk": fraud_score}
+```
+
+---
+
+## 🎯 Use Cases
+
+### Alternative Lending (Thin-File + LLM)
+
+```python
+config = {
+    "llm_income_verification": {"type": "direct_value", "weight": 2.5, "criticality": 3.0},
+    "utility_payment_history": {"type": "similarity", "default": 1.0, "weight": 2.0, "criticality": 2.5},
+    "employment_months": {"type": "similarity", "default": 24, "weight": 1.5, "criticality": 1.5}
+}
+```
+
+### Traditional + AI Enhancement
+
+```python
+config = {
+    "credit_score": {"type": "similarity", "default": 700, "weight": 2.5, "criticality": 3.0},
+    "debt_to_income": {"type": "similarity", "default": 0.35, "weight": 2.0, "criticality": 2.0},
+    "llm_contextual_risk": {"type": "direct_value", "weight": 2.0, "criticality": 2.5}
+}
+```
+
+### Hybrid Model Example
+
+```python
+config = {
+    "fico_score": {"type": "similarity", "default": 720, "weight": 2.0, "criticality": 2.0},
+    "fraud_model_output": {"type": "direct_value", "weight": 2.5, "criticality": 3.0},
+    "llm_employment_analysis": {"type": "direct_value", "weight": 1.8, "criticality": 2.5}
+}
+
+applicant = {
+    "fico_score": 680,
+    "fraud_model_output": 0.12,  # Your fraud model
+    "llm_employment_analysis": 0.85  # Claude analyzed employment history
+}
+```
+
+---
+
+## 🧮 Migration from Static Rules
+
+### Before (Blackbox ML)
+
+```python
+# Opaque model
+risk_score = ml_model.predict(features)
+# ❌ Can't explain why
+```
+
+### After (Explainable + LLM)
+
+```python
+config = {
+    "ml_model_output": {"type": "direct_value", "weight": 2.0, "criticality": 2.5},
+    "credit_score": {"type": "similarity", "default": 720, "weight": 2.0, "criticality": 2.0}
+}
+
+result = client.evaluate(applicant, config, enable_trace=True)
+# ✅ Full audit trail: "ML contributed 42%, FICO contributed 38%"
+```
+
+---
+
+## 📞 Support
+
+**Licensing:** contacto@dsfuptech.cloud  
+**Professional License:** `PRO-YYYY-MM-DD-XXXX-XXXX`  
+**Enterprise License:** `ENT-YYYY-MM-DD-XXXX-XXXX`
+
+---
+
+## 🔒 IP Protection
+
+The scoring formula is protected by:
+- Private backend execution (Vercel serverless)
+- Hidden adaptive optimization logic
+- Proprietary normalization algorithms
+- Non-disclosed adjustment factors
+
+Clients see inputs/outputs, not the internal processing engine.
+
+---
+
+## License
+
+Community Edition is free for evaluation. Professional and Enterprise tiers require commercial licensing.
+
+© 2025 DSF UpTech. Created by Jaime Alexander Jimenez.  
+Powered by EngineXAI Adaptive Formula technology.
