@@ -1,0 +1,76 @@
+Metadata-Version: 2.4
+Name: pybubble
+Version: 0.1.1
+Summary: A Python package for running sandboxed code.
+License-File: LICENSE
+Requires-Python: >=3.12
+Provides-Extra: test
+Requires-Dist: pytest-asyncio>=0.25.2; extra == 'test'
+Requires-Dist: pytest>=8.0; extra == 'test'
+Description-Content-Type: text/markdown
+
+# pybubble
+
+A simple wrapper around `bwrap` to create sandbox environments for executing code. It works without Docker or other daemon-based container runtimes, using shared read-only root filesystems for quick (1-2ms) setup times.
+
+While these environments are sandboxed and provide protection from accidental modification of your host system by overzealous LLMs, **pybubble is not an acceptable substitute for virtualization when running untrusted code**. If you are giving untrusted people access to this, either directly or via an LLM frontend, consider using more production-ready sandboxing or virtualization tools with pybubble just isolating environment state.
+
+Feel free to submit bug reports and pull requests via GitHub, but note that Arcee is not committing to long-term maintenence of this software. This is just a small library I built in my spare time and thought everyone else would find useful.
+
+Due to relying on Linux kernel features to operate, pybubble is not compatible with macOS or Windows.
+
+## Setup
+
+Install `bwrap`. On Ubuntu, do:
+
+```bash
+sudo apt-get install bubblewrap
+```
+
+Then, add `pybubble` to your project.
+
+```bash
+uv add pybubble
+```
+
+## Root filesystem archives
+
+If all you need is basic Python code execution, consider using the provided root filesystem archive under our GitHub release. It comes preinstalled with:
+
+- Python
+- uv
+- bash
+- ripgrep
+- cURL & wget
+- numpy
+- pandas
+- httpx & requests
+- pillow
+- ImageMagick
+
+If you need more tools or want to run a leaner environment, follow [this guide](docs/build-rootfs.md) to build one yourself.
+
+## Run code
+
+Create a sandbox by doing:
+
+```python
+from pybubble import Sandbox
+import asyncio
+
+async def main():
+    s = Sandbox("path/to/rootfs.tgz")
+
+    stdout, stderr = await s.run("ping -c 1 google.com", allow_network=True)
+
+    print(stdout.decode("utf-8")) # ping output
+
+    stdout, stderr = await s.run_python("print('hello, world')", timeout=5.0)
+
+    print(stdout.decode("utf-8")) # "hello, world"
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+To learn more about the features available in `Sandbox`, see [this page](docs/sandbox.md).
