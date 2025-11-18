@@ -1,0 +1,141 @@
+Metadata-Version: 2.4
+Name: flask-supercache
+Version: 1.0.0
+Summary: A 3-tier caching system for Flask with zero external dependencies
+Home-page: https://github.com/wallmarkets/flask-supercache
+Author: wallmarkets Team
+Author-email: team@wallmarkets.store
+Project-URL: Bug Reports, https://github.com/wallmarkets/flask-supercache/issues
+Project-URL: Source, https://github.com/wallmarkets/flask-supercache
+Project-URL: Documentation, https://github.com/wallmarkets/flask-supercache#readme
+Keywords: flask cache caching redis lru ttl performance
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Framework :: Flask
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Internet :: WWW/HTTP :: Dynamic Content
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: Flask>=2.0.0
+Requires-Dist: flask-caching>=1.10.0
+Provides-Extra: redis
+Requires-Dist: redis>=3.5.0; extra == "redis"
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=3.0.0; extra == "dev"
+Requires-Dist: black>=22.0.0; extra == "dev"
+Requires-Dist: flake8>=4.0.0; extra == "dev"
+Requires-Dist: mypy>=0.950; extra == "dev"
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: keywords
+Dynamic: license-file
+Dynamic: project-url
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+# Flask-SuperCache
+
+3-tier caching for Flask applications. Adds TTL support to Python's LRU cache.
+
+## What it does
+
+- **LRU cache with TTL**: Combines `functools.lru_cache` with time-based expiration
+- **3-tier fallback**: Redis → Filesystem → In-memory
+- **No external dependencies required**: Works with just Python standard library
+
+Built while working on [wallmarkets](https://wallmarkets.store).
+
+## Installation
+
+```bash
+pip install flask-supercache
+```
+
+## Usage
+
+### Basic LRU cache with TTL
+
+```python
+from flask_supercache import cached_query
+
+@cached_query(maxsize=1000, ttl_seconds=300)
+def get_user_by_id(user_id):
+    return User.query.get(user_id)
+
+# First call - hits database
+user = get_user_by_id(123)
+
+# Second call - from cache
+user = get_user_by_id(123)
+
+# After 5 minutes - cache expires, hits database again
+```
+
+### Flask-Caching integration
+
+```python
+from flask import Flask
+from flask_supercache import setup_cache
+
+app = Flask(__name__)
+app.config['CACHE_REDIS_URL'] = 'redis://localhost:6379/0'
+
+cache = setup_cache(app)  # Auto-selects Redis or filesystem
+```
+
+## How TTL on LRU works
+
+Standard `functools.lru_cache` doesn't support TTL. We add it using time-bucketing:
+
+```python
+# Cache key includes current time bucket
+time_bucket = int(time.time() // ttl_seconds)
+cache_key = (args, kwargs, time_bucket)
+
+# When time_bucket changes, it's a cache miss
+# Old entries get evicted by LRU automatically
+```
+
+No background threads, no timers. O(1) lookup.
+
+## Cache statistics
+
+```python
+info = get_user_by_id.cache_info()
+print(f"Hits: {info.hits}, Misses: {info.misses}")
+print(f"Hit rate: {info.hits / (info.hits + info.misses) * 100:.1f}%")
+```
+
+## Configuration
+
+```python
+app.config['CACHE_REDIS_URL'] = 'redis://localhost:6379/0'
+app.config['CACHE_DEFAULT_TIMEOUT'] = 300
+app.config['CACHE_DIR'] = '/tmp/flask_cache'
+```
+
+## License
+
+MIT
+
+## Contributing
+
+Pull requests welcome. Please add tests.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
