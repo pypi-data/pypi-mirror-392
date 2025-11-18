@@ -1,0 +1,16 @@
+from enum import Enum
+
+
+class CopyRisksFromLibraryRequestPublicDtoRiskGroupsItem(str, Enum):
+    AI_DEVELOPMENT = "AI_DEVELOPMENT"
+    AI_USE = "AI_USE"
+    CLOUD_ENVIRONMENT = "CLOUD_ENVIRONMENT"
+    DEVICE_DELIVERY = "DEVICE_DELIVERY"
+    PHYSICAL_SITE = "PHYSICAL_SITE"
+    REGULATORY_REQUIREMENTS = "REGULATORY_REQUIREMENTS"
+    SOFTWARE_DEVELOPMENT = "SOFTWARE_DEVELOPMENT"
+    UNSECURE_DEVICES = "UNSECURE_DEVICES"
+    WIZARD_CORE = "WIZARD_CORE"
+
+    def __str__(self) -> str:
+        return str(self.value)

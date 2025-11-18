@@ -1,0 +1,12 @@
+from enum import Enum
+
+
+class DevicePublicControllerGetDeviceDocumentsType(str, Enum):
+    ANTIVIRUS_EVIDENCE = "ANTIVIRUS_EVIDENCE"
+    AUTO_UPDATES_EVIDENCE = "AUTO_UPDATES_EVIDENCE"
+    HARD_DRIVE_ENCRYPTION_EVIDENCE = "HARD_DRIVE_ENCRYPTION_EVIDENCE"
+    LOCK_SCREEN_EVIDENCE = "LOCK_SCREEN_EVIDENCE"
+    PASSWORD_MANAGER_EVIDENCE = "PASSWORD_MANAGER_EVIDENCE"
+
+    def __str__(self) -> str:
+        return str(self.value)
