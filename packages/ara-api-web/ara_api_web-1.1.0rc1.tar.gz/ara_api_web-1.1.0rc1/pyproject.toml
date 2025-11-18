@@ -1,0 +1,42 @@
+[project]
+name = "ara-api-web"
+version = "1.1.0rc1"
+description = "Web interface for ARA API"
+authors = [{name = "Alexander Kleimenov", email = "nequamy@gmail.com"}]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.121.2",
+    "uvicorn[standard]>=0.38.0",
+]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development",
+    'Topic :: Scientific/Engineering',
+    'Operating System :: Unix',
+    'Operating System :: MacOS',
+    'Operating System :: Microsoft :: Windows',
+]
+keywords = ["robotics", "drones", "API", "ARA"]
+
+[project.scripts]
+ara-api-web = "ara_api_web.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+include = [
+    "ara_api_web/**/*.py",
+    "ara_api_web/static/**/*",
+]
