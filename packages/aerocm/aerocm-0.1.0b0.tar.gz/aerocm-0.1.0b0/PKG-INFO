@@ -1,0 +1,85 @@
+Metadata-Version: 2.4
+Name: aerocm
+Version: 0.1.0b0
+Summary: AeroCM: standardised climate models dedicated to aviation
+License: GPL-3.0-only
+License-File: COPYING
+Author: Thomas PLANES
+Author-email: thomas.planes@isae-supaero.fr
+Requires-Python: >=3.10,<3.12
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Provides-Extra: publications
+Requires-Dist: cartopy (==0.25.0) ; extra == "publications"
+Requires-Dist: fair (==2.2.2)
+Requires-Dist: geographiclib (==2.1) ; extra == "publications"
+Requires-Dist: ipympl (==0.9.7)
+Requires-Dist: jupyterlab (==4.4.9)
+Requires-Dist: netCDF4 (==1.7.2) ; extra == "publications"
+Requires-Dist: numpy (==2.2.6)
+Requires-Dist: openpyxl (==3.1.5) ; extra == "publications"
+Requires-Dist: pandas (==2.3.3)
+Requires-Dist: salib (==1.5.1) ; extra == "publications"
+Requires-Dist: scikit-learn (==1.7.2) ; extra == "publications"
+Requires-Dist: scipy (==1.15.3) ; extra == "publications"
+Requires-Dist: seaborn (==0.13.2) ; extra == "publications"
+Requires-Dist: xarray (==2025.6.1)
+Description-Content-Type: text/markdown
+
+# AeroCM
+
+AeroCM is a package storing several climate models dedicated to aviation. It currently includes analytical (IPCC), metric-based (GWP*, LWE) and reduced-complexity (FaIR) models. The models have been standardised (species, species settings...) for allowing a generic use and comparisons. The models can be used in order to either directly assess the climate impacts induced by emission scenarios, or calculate aviation climate metrics (e.g. GWP, GTP, ATR).
+
+AeroCM is licensed under the [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) license.
+
+
+Installation
+------------------
+
+The use of the Python Package Index ([PyPI](https://pypi.org/)) is the simplest method for installing AeroCM.
+
+**Prerequisite**: AeroMAPS needs at least Python 3.10.0.
+
+You can install the latest version with this command:
+
+``` {.bash}
+pip install --upgrade aerocm
+```
+
+If you also want to run the Jupyter notebooks developed for the reference paper, use the following command:
+
+``` {.bash}
+pip install --upgrade aerocm[publications]
+```
+
+
+Development
+------------------
+
+As a developer, the use of poetry is recommended.
+
+You can install the required packages with this command:
+
+``` {.bash}
+poetry install
+```
+
+If you also want to run the Jupyter notebooks developed for the reference paper, use the following command:
+
+``` {.bash}
+poetry install -E publications
+```
+
+The use of requirements files is also possible.
+
+
+Citation
+--------
+
+If you use AeroCM in your work, please cite the following reference.
+
+Planès, T., Pollet, F., Perini, M. (2025).
+Aviation climate metrics: calculations and applications based on an open-source framework for standardised climate models.
+Preprint.
