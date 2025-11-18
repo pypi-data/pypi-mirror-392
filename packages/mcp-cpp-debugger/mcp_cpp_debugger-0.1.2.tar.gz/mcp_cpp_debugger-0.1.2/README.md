@@ -1,0 +1,80 @@
+# MCP Debugger
+
+基于MCP协议的C++调试器，为AI大模型提供调试C++程序的能力。
+
+## 快速开始
+
+### 1. 安装依赖
+
+**安装 uv 包管理器：**
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+**安装项目依赖：**
+```bash
+uv sync
+uv tool install mcp-cpp-debugger@latest
+```
+
+### 3. 配置MCP客户端
+
+在MCP客户端（Claude CLI / Cursor / VS Code Copilot / Visual Studio）中添加配置。
+
+支持两种传输方式：
+
+#### 方式一：stdio（推荐）
+
+客户端自动启动和管理调试器进程，通过标准输入输出通信。
+
+**配置示例：**
+```json
+{
+  "mcpServers": {
+    "mcp-cpp-debugger": {
+      "command": "uvx mcp-cpp-debugger",
+      "args": ["--transport", "stdio"]
+    }
+  }
+}
+```
+
+**优点：**
+- ✅ 自动管理进程生命周期
+- ✅ 无需手动启动服务器
+- ✅ 无端口冲突问题
+
+---
+
+#### 方式二：streamable-http
+
+手动启动服务器进程，客户端通过 HTTP 连接。
+
+**第一步：启动服务器**
+```bash
+mcp-cpp-debugger --transport http --port 8999
+# 或使用简写
+mcp-cpp-debugger -p 8999
+```
+
+**第二步：配置客户端**
+```json
+{
+  "mcpServers": {
+    "mcp-cpp-debugger": {
+      "url": "http://localhost:8999/mcp"
+    }
+  }
+}
+```
+
+**优点：**
+- ✅ 可查看服务器日志
+- ✅ 适合开发调试
+- ✅ 支持多客户端连接
+
+**注意：** 默认端口为 8999，可通过 `--port` 或 `-p` 参数修改。
+
+### 4. 开始调试
+
+在对话中直接向AI描述调试需求，AI将自动调用调试器完成操作。
