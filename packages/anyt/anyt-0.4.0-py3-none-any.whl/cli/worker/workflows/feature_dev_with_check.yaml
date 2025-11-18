@@ -1,0 +1,614 @@
+# Feature Development with Quality Control
+# Advanced workflow with pre-flight checks, quality gates, and automatic task creation
+name: Feature Development with Quality Control
+description: |
+  Comprehensive feature development workflow with:
+  - Pre-flight quality checks (make check)
+  - Automatic quality setup task creation
+  - Git cleanliness verification
+  - Dependency management for blocking issues
+  - Post-implementation quality validation
+
+# Trigger: Tasks with "feature" label
+"on":
+  task_created:
+    labels: ["feature"]
+  task_updated:
+    status: ["todo"]
+    labels: ["feature"]
+
+jobs:
+  feature_with_quality:
+    name: Feature Development with Quality Control
+    runs-on: local
+    timeout-minutes: 90
+
+    steps:
+      # ============================================
+      # PHASE 1: PRE-FLIGHT CHECKS
+      # ============================================
+
+      # Step 1: Check if make check exists
+      - name: Check for make check command
+        id: check_make_check
+        run: |
+          if make -n check 2>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "✓ make check command exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "✗ make check command does not exist"
+          fi
+        continue-on-error: true
+
+      # Step 2: If make check doesn't exist, check individual commands
+      - name: Check individual quality commands
+        id: check_quality_cmds
+        if: ${{ steps.check_make_check.outputs.exists == 'false' }}
+        run: |
+          MISSING_CMDS=""
+          EXISTING_CMDS=""
+
+          # Check make lint
+          if make -n lint 2>/dev/null; then
+            EXISTING_CMDS="${EXISTING_CMDS}- make lint\n"
+          else
+            MISSING_CMDS="${MISSING_CMDS}- make lint\n"
+          fi
+
+          # Check make typecheck
+          if make -n typecheck 2>/dev/null; then
+            EXISTING_CMDS="${EXISTING_CMDS}- make typecheck\n"
+          else
+            MISSING_CMDS="${MISSING_CMDS}- make typecheck\n"
+          fi
+
+          # Check make test
+          if make -n test 2>/dev/null; then
+            EXISTING_CMDS="${EXISTING_CMDS}- make test\n"
+          else
+            MISSING_CMDS="${MISSING_CMDS}- make test\n"
+          fi
+
+          echo "missing_cmds=$MISSING_CMDS" >> $GITHUB_OUTPUT
+          echo "existing_cmds=$EXISTING_CMDS" >> $GITHUB_OUTPUT
+
+          if [ -n "$MISSING_CMDS" ]; then
+            echo "needs_setup=true" >> $GITHUB_OUTPUT
+            echo "✗ Some quality commands are missing"
+          else
+            echo "needs_setup=false" >> $GITHUB_OUTPUT
+            echo "✓ All quality commands exist"
+          fi
+
+      # Step 3: Create quality setup task if needed
+      - name: Create quality control setup task
+        id: create_setup_task
+        if: ${{ steps.check_quality_cmds.outputs.needs_setup == 'true' }}
+        run: |
+          # Get current workspace and project
+          WORKSPACE_ID=$(cat .anyt/anyt.json | grep -o '"workspace_id": *"[^"]*"' | cut -d'"' -f4)
+          PROJECT_ID=$(cat .anyt/anyt.json | grep -o '"current_project_id": *[0-9]*' | cut -d':' -f2 | tr -d ' ,')
+
+          # Create setup task using CLI
+          SETUP_TASK=$(uv run anyt task create \
+            "Setup Quality Control: make check, lint, typecheck, test" \
+            --project-id "$PROJECT_ID" \
+            --priority high \
+            --label setup \
+            --label quality-control \
+            --description "Setup quality control commands in Makefile:
+
+          **Missing commands:**
+          ${{ steps.check_quality_cmds.outputs.missing_cmds }}
+
+          **Existing commands:**
+          ${{ steps.check_quality_cmds.outputs.existing_cmds }}
+
+          **Required commands:**
+          - \`make lint\` - Run linting (e.g., ruff, eslint)
+          - \`make typecheck\` - Run type checking (e.g., mypy, pyright, tsc)
+          - \`make test\` - Run test suite
+          - \`make check\` - Run all quality checks (lint + typecheck + test)
+
+          **Implementation:**
+          1. Update Makefile with missing targets
+          2. Configure linting tools
+          3. Setup type checkers
+          4. Ensure test framework is configured
+          5. Create \`make check\` that runs all checks
+
+          **Example Makefile targets:**
+          \`\`\`makefile
+          .PHONY: lint typecheck test check
+
+          lint:
+          	ruff check src/ tests/
+
+          typecheck:
+          	mypy src/ && pyright src/
+
+          test:
+          	pytest tests/ -v
+
+          check: lint typecheck test
+          	@echo 'All quality checks passed!'
+          \`\`\`" \
+            --json)
+
+          # Extract task identifier
+          SETUP_TASK_ID=$(echo "$SETUP_TASK" | grep -o '"identifier": *"[^"]*"' | cut -d'"' -f4)
+          echo "task_id=$SETUP_TASK_ID" >> $GITHUB_OUTPUT
+          echo "✓ Created setup task: $SETUP_TASK_ID"
+
+      # Step 4: Add dependency if setup task was created
+      - name: Block current task on setup task
+        if: ${{ steps.create_setup_task.outputs.task_id != '' }}
+        run: |
+          SETUP_TASK_ID="${{ steps.create_setup_task.outputs.task_id }}"
+          CURRENT_TASK_ID="${{ task.identifier }}"
+
+          # Add dependency: current task depends on setup task
+          uv run anyt task add-dependency "$CURRENT_TASK_ID" "$SETUP_TASK_ID"
+
+          echo "✓ Task $CURRENT_TASK_ID now depends on $SETUP_TASK_ID"
+
+      # Step 5: Update current task and exit if blocked
+      - name: Update task - blocked on setup
+        if: ${{ steps.create_setup_task.outputs.task_id != '' }}
+        uses: anyt/task-update@v1
+        with:
+          status: blocked
+          note: |
+            🚫 **Task Blocked - Quality Control Setup Required**
+
+            This task cannot proceed until quality control infrastructure is set up.
+
+            **Blocking Task:** ${{ steps.create_setup_task.outputs.task_id }}
+            **Reason:** Missing quality control commands
+
+            **Missing Commands:**
+            ${{ steps.check_quality_cmds.outputs.missing_cmds }}
+
+            **Action Required:**
+            1. Complete setup task: ${{ steps.create_setup_task.outputs.task_id }}
+            2. This task will automatically resume once dependency is resolved
+
+      # Step 6: Exit if we created a setup task
+      - name: Exit if blocked on setup
+        if: ${{ steps.create_setup_task.outputs.task_id != '' }}
+        run: |
+          echo "Task is blocked on quality control setup. Exiting workflow."
+          exit 1
+
+      # Step 7: Check if master branch is clean
+      - name: Check master branch cleanliness
+        id: check_master
+        run: |
+          # Checkout master
+          git checkout main 2>/dev/null || git checkout master 2>/dev/null || {
+            echo "clean=false" >> $GITHUB_OUTPUT
+            echo "error=Cannot checkout main/master branch" >> $GITHUB_OUTPUT
+            exit 0
+          }
+
+          # Check for uncommitted changes
+          if ! git diff-index --quiet HEAD --; then
+            echo "clean=false" >> $GITHUB_OUTPUT
+            echo "reason=Uncommitted changes in working directory" >> $GITHUB_OUTPUT
+
+            # Get list of modified files
+            MODIFIED_FILES=$(git status --short)
+            echo "modified_files<<EOF" >> $GITHUB_OUTPUT
+            echo "$MODIFIED_FILES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+
+            echo "✗ Master branch is not clean"
+          else
+            echo "clean=true" >> $GITHUB_OUTPUT
+            echo "✓ Master branch is clean"
+          fi
+
+      # Step 8: Create cleanup task if master is dirty
+      - name: Create master cleanup task
+        id: create_cleanup_task
+        if: ${{ steps.check_master.outputs.clean == 'false' }}
+        run: |
+          # Get current workspace and project
+          WORKSPACE_ID=$(cat .anyt/anyt.json | grep -o '"workspace_id": *"[^"]*"' | cut -d'"' -f4)
+          PROJECT_ID=$(cat .anyt/anyt.json | grep -o '"current_project_id": *[0-9]*' | cut -d':' -f2 | tr -d ' ,')
+
+          # Create cleanup task
+          CLEANUP_TASK=$(uv run anyt task create \
+            "Fix: Clean up uncommitted changes in master branch" \
+            --project-id "$PROJECT_ID" \
+            --priority high \
+            --label bug \
+            --label cleanup \
+            --description "Master/main branch has uncommitted changes that need to be resolved.
+
+          **Reason:** ${{ steps.check_master.outputs.reason }}
+
+          **Modified Files:**
+          \`\`\`
+          ${{ steps.check_master.outputs.modified_files }}
+          \`\`\`
+
+          **Action Required:**
+          1. Review the uncommitted changes
+          2. Either:
+             - Commit the changes if they are intentional
+             - Stash the changes if temporary
+             - Discard the changes if not needed
+          3. Ensure master branch is in a clean state
+
+          **Commands to fix:**
+          \`\`\`bash
+          # Option 1: Commit changes
+          git add .
+          git commit -m 'fix: clean up uncommitted changes'
+
+          # Option 2: Stash changes
+          git stash
+
+          # Option 3: Discard changes (careful!)
+          git reset --hard HEAD
+          \`\`\`" \
+            --json)
+
+          # Extract task identifier
+          CLEANUP_TASK_ID=$(echo "$CLEANUP_TASK" | grep -o '"identifier": *"[^"]*"' | cut -d'"' -f4)
+          echo "task_id=$CLEANUP_TASK_ID" >> $GITHUB_OUTPUT
+          echo "✓ Created cleanup task: $CLEANUP_TASK_ID"
+
+      # Step 9: Add dependency on cleanup task
+      - name: Block current task on cleanup
+        if: ${{ steps.create_cleanup_task.outputs.task_id != '' }}
+        run: |
+          CLEANUP_TASK_ID="${{ steps.create_cleanup_task.outputs.task_id }}"
+          CURRENT_TASK_ID="${{ task.identifier }}"
+
+          # Add dependency
+          uv run anyt task add-dependency "$CURRENT_TASK_ID" "$CLEANUP_TASK_ID"
+
+          echo "✓ Task $CURRENT_TASK_ID now depends on $CLEANUP_TASK_ID"
+
+      # Step 10: Update task and exit if blocked on cleanup
+      - name: Update task - blocked on cleanup
+        if: ${{ steps.create_cleanup_task.outputs.task_id != '' }}
+        uses: anyt/task-update@v1
+        with:
+          status: blocked
+          note: |
+            🚫 **Task Blocked - Master Branch Not Clean**
+
+            This task cannot proceed until master branch is cleaned up.
+
+            **Blocking Task:** ${{ steps.create_cleanup_task.outputs.task_id }}
+            **Reason:** ${{ steps.check_master.outputs.reason }}
+
+            **Modified Files:**
+            ```
+            ${{ steps.check_master.outputs.modified_files }}
+            ```
+
+            **Action Required:**
+            1. Complete cleanup task: ${{ steps.create_cleanup_task.outputs.task_id }}
+            2. This task will automatically resume once dependency is resolved
+
+      # Step 11: Exit if blocked on cleanup
+      - name: Exit if blocked on cleanup
+        if: ${{ steps.create_cleanup_task.outputs.task_id != '' }}
+        run: |
+          echo "Task is blocked on master cleanup. Exiting workflow."
+          exit 1
+
+      # ============================================
+      # PHASE 2: PRE-IMPLEMENTATION QUALITY CHECK
+      # ============================================
+
+      # Step 12: Run quality checks on master (before starting work)
+      - name: Run pre-implementation quality checks
+        id: pre_quality_check
+        run: |
+          echo "Running quality checks on master branch..."
+
+          # Run make check if it exists, otherwise run individual commands
+          if make -n check 2>/dev/null; then
+            make check
+          else
+            # Run available commands
+            make lint || true
+            make typecheck || true
+            make test || true
+          fi
+
+          EXIT_CODE=$?
+          echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "✓ Pre-implementation quality checks passed"
+            echo "passed=true" >> $GITHUB_OUTPUT
+          else
+            echo "✗ Pre-implementation quality checks failed"
+            echo "passed=false" >> $GITHUB_OUTPUT
+          fi
+        continue-on-error: true
+
+      # Step 13: Create fix task if quality checks failed
+      - name: Create quality fix task
+        id: create_fix_task
+        if: ${{ steps.pre_quality_check.outputs.passed == 'false' }}
+        run: |
+          WORKSPACE_ID=$(cat .anyt/anyt.json | grep -o '"workspace_id": *"[^"]*"' | cut -d'"' -f4)
+          PROJECT_ID=$(cat .anyt/anyt.json | grep -o '"current_project_id": *[0-9]*' | cut -d':' -f2 | tr -d ' ,')
+
+          # Create fix task
+          FIX_TASK=$(uv run anyt task create \
+            "Fix: Quality check failures in master branch" \
+            --project-id "$PROJECT_ID" \
+            --priority urgent \
+            --label bug \
+            --label quality \
+            --description "Quality checks are failing on master branch. This must be fixed before new features can be developed.
+
+          **Failed Check:** make check (exit code: ${{ steps.pre_quality_check.outputs.exit_code }})
+
+          **Action Required:**
+          1. Run quality checks locally: \`make check\`
+          2. Fix any linting errors: \`make lint\`
+          3. Fix any type errors: \`make typecheck\`
+          4. Fix any failing tests: \`make test\`
+          5. Commit fixes to master
+          6. Verify all checks pass
+
+          **Debugging:**
+          \`\`\`bash
+          # Run checks individually to identify issues
+          make lint
+          make typecheck
+          make test
+
+          # Fix and verify
+          make check
+          \`\`\`
+
+          **Note:** Other feature development tasks are blocked until this is resolved." \
+            --json)
+
+          FIX_TASK_ID=$(echo "$FIX_TASK" | grep -o '"identifier": *"[^"]*"' | cut -d'"' -f4)
+          echo "task_id=$FIX_TASK_ID" >> $GITHUB_OUTPUT
+          echo "✓ Created fix task: $FIX_TASK_ID"
+
+      # Step 14: Block current task on fix
+      - name: Block current task on quality fix
+        if: ${{ steps.create_fix_task.outputs.task_id != '' }}
+        run: |
+          FIX_TASK_ID="${{ steps.create_fix_task.outputs.task_id }}"
+          CURRENT_TASK_ID="${{ task.identifier }}"
+
+          uv run anyt task add-dependency "$CURRENT_TASK_ID" "$FIX_TASK_ID"
+          echo "✓ Task $CURRENT_TASK_ID now depends on $FIX_TASK_ID"
+
+      # Step 15: Update task and exit if blocked on quality
+      - name: Update task - blocked on quality
+        if: ${{ steps.create_fix_task.outputs.task_id != '' }}
+        uses: anyt/task-update@v1
+        with:
+          status: blocked
+          note: |
+            🚫 **Task Blocked - Master Branch Quality Checks Failing**
+
+            Cannot start feature development while master branch has quality issues.
+
+            **Blocking Task:** ${{ steps.create_fix_task.outputs.task_id }}
+            **Failed Check:** make check (exit code: ${{ steps.pre_quality_check.outputs.exit_code }})
+
+            **Action Required:**
+            1. Fix quality issues in task: ${{ steps.create_fix_task.outputs.task_id }}
+            2. This task will automatically resume once dependency is resolved
+
+      # Step 16: Exit if blocked on quality
+      - name: Exit if blocked on quality
+        if: ${{ steps.create_fix_task.outputs.task_id != '' }}
+        run: |
+          echo "Task is blocked on quality fixes. Exiting workflow."
+          exit 1
+
+      # ============================================
+      # PHASE 3: FEATURE IMPLEMENTATION
+      # ============================================
+
+      # Step 17: All pre-flight checks passed - post success note
+      - name: Pre-flight checks passed
+        uses: anyt/task-update@v1
+        with:
+          note: |
+            ✅ **Pre-flight Checks Passed**
+
+            All quality gates passed. Starting feature implementation.
+
+            - ✓ Quality commands available
+            - ✓ Master branch is clean
+            - ✓ Quality checks passing
+
+      # Step 18: Create feature branch
+      - name: Create feature branch
+        uses: anyt/checkout@v1
+        with:
+          branch: "feature/${{ task.identifier }}"
+          create: true
+
+      # Step 19: Cache dependencies
+      - name: Cache dependencies
+        uses: anyt/cache@v1
+        with:
+          path: |
+            ~/.cache/uv
+            ~/.cache/pnpm
+            node_modules
+          key: deps-${{ hashFiles('**/requirements.txt', '**/package.json') }}
+          restore-keys: |
+            deps-
+
+      # Step 20: Analyze task
+      - name: Analyze task requirements
+        uses: anyt/claude-prompt@v1
+        id: analysis
+        with:
+          model: claude-haiku-4-5-20251001
+          prompt: |
+            Analyze this feature development task:
+
+            Task: ${{ task.identifier }}
+            Title: ${{ task.title }}
+            Description: ${{ task.description }}
+
+            Provide:
+            1. Technical approach
+            2. Files to modify/create
+            3. Potential risks
+            4. Testing strategy
+            5. Quality considerations
+          output: plan
+
+      # Step 21: Post analysis
+      - name: Post analysis to task
+        uses: anyt/task-update@v1
+        with:
+          note: |
+            ## 🔍 Implementation Plan
+
+            ${{ steps.analysis.outputs.plan }}
+          timestamp: true
+
+      # Step 22: Implement feature
+      - name: Implement feature
+        uses: anyt/claude-code@v1
+        id: implementation
+        with:
+          model: claude-haiku-4-5-20251001
+          prompt: |
+            Implement the following feature:
+
+            ${{ task.description }}
+
+            Implementation plan:
+            ${{ steps.analysis.outputs.plan }}
+
+            Follow the project's coding standards and ensure high quality.
+          stream: true
+          dangerously-skip-permissions: true
+
+      # ============================================
+      # PHASE 4: POST-IMPLEMENTATION QUALITY CHECK
+      # ============================================
+
+      # Step 23: Run post-implementation quality checks
+      - name: Run post-implementation quality checks
+        id: post_quality_check
+        run: |
+          echo "Running quality checks on implemented changes..."
+
+          # Run make check
+          if make -n check 2>/dev/null; then
+            make check
+          else
+            make lint && make typecheck && make test
+          fi
+
+          EXIT_CODE=$?
+          echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "✓ Post-implementation quality checks passed"
+            echo "passed=true" >> $GITHUB_OUTPUT
+          else
+            echo "✗ Post-implementation quality checks failed"
+            echo "passed=false" >> $GITHUB_OUTPUT
+          fi
+
+      # Step 24: Fail if quality checks didn't pass
+      - name: Fail on quality check failure
+        if: ${{ steps.post_quality_check.outputs.passed == 'false' }}
+        run: |
+          echo "❌ Quality checks failed. Implementation does not meet quality standards."
+          exit 1
+
+      # Step 25: Post quality check results
+      - name: Post quality check results
+        uses: anyt/task-update@v1
+        with:
+          note: |
+            ✅ **Quality Checks Passed**
+
+            All post-implementation quality checks passed successfully.
+
+            - ✓ Linting passed
+            - ✓ Type checking passed
+            - ✓ Tests passed
+
+            Code is ready for commit.
+          timestamp: true
+
+      # Step 26: Commit changes
+      - name: Commit changes
+        uses: anyt/git-commit@v1
+        id: commit
+        with:
+          message: |
+            feat: ${{ task.title }}
+
+            Task: ${{ task.identifier }}
+
+            ${{ steps.analysis.outputs.plan }}
+
+            🤖 Generated with Claude Code
+            Co-Authored-By: Claude <noreply@anthropic.com>
+          add: all
+
+      # Step 27: Mark complete
+      - name: Mark task complete
+        uses: anyt/task-update@v1
+        with:
+          status: done
+          note: |
+            ✅ **Feature Completed Successfully**
+
+            Implementation completed with all quality gates passed.
+
+            **Branch:** feature/${{ task.identifier }}
+            **Commit:** ${{ steps.commit.outputs.commit_hash }}
+
+            **Quality Assurance:**
+            - ✓ Pre-flight checks passed
+            - ✓ Implementation completed
+            - ✓ Post-implementation quality checks passed
+
+            **Next Steps:**
+            - Review the changes
+            - Create pull request
+            - Merge to main after review
+
+    # ============================================
+    # FAILURE HANDLING
+    # ============================================
+    on-failure:
+      - name: Add detailed error note
+        uses: anyt/task-update@v1
+        with:
+          note: |
+            ❌ **Workflow Failed**
+
+            **Failed Step:** ${{ failure.step }}
+            **Error:** ${{ failure.message }}
+
+            **Context:**
+            - Pre-flight checks may have been skipped
+            - Quality issues may exist in implementation
+            - Review logs for detailed error information
+
+            **Action Required:**
+            1. Review the error above
+            2. Fix the underlying issue
+            3. Retry the task or complete manually

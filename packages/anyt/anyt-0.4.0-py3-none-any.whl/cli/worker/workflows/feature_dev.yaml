@@ -1,0 +1,186 @@
+# Feature Development with PR Creation
+# Streamlined workflow: implement feature + create PR (no quality gates)
+name: Feature Development with PR
+description: |
+  Automated feature development workflow:
+  - Creates feature branch
+  - Implements feature with Claude Code
+  - Commits changes
+  - Pushes to remote
+  - Creates pull request
+  - Updates task with PR link
+
+# Trigger: Tasks with "feature" label
+"on":
+  task_created:
+    labels: ["feature"]
+  task_updated:
+    status: ["todo"]
+    labels: ["feature"]
+
+jobs:
+  feature_development:
+    name: Feature Development with PR
+    runs-on: local
+    timeout-minutes: 60
+
+    steps:
+      # Step 1: Create feature branch
+      - name: Create feature branch
+        id: branch
+        run: |
+          # Create branch name from task identifier
+          BRANCH_NAME="feature/${{ task.identifier }}-$(echo '${{ task.title }}' | sed 's/[^a-zA-Z0-9]/-/g' | tr '[:upper:]' '[:lower:]' | cut -c1-50)"
+          git checkout -b "$BRANCH_NAME" 2>/dev/null || git checkout "$BRANCH_NAME"
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "✓ Created branch: $BRANCH_NAME"
+
+      # Step 2: Cache dependencies
+      - name: Cache dependencies
+        uses: anyt/cache@v1
+        with:
+          path: |
+            ~/.cache/uv
+            ~/.cache/pnpm
+            node_modules
+          key: deps-${{ hashFiles('**/requirements.txt', '**/package.json') }}
+          restore-keys: |
+            deps-
+
+      # Step 3: Analyze task with Claude
+      - name: Analyze task requirements
+        uses: anyt/claude-prompt@v1
+        id: analysis
+        with:
+          model: claude-haiku-4-5-20251001
+          prompt: |
+            Analyze this feature development task:
+
+            Task: ${{ task.identifier }}
+            Title: ${{ task.title }}
+            Description: ${{ task.description }}
+
+            Provide:
+            1. Technical approach
+            2. Files to modify/create
+            3. Implementation steps
+            4. Testing considerations
+          output: plan
+
+      # Step 4: Post analysis to task
+      - name: Post analysis to task
+        uses: anyt/task-update@v1
+        with:
+          note: |
+            ## 🔍 Implementation Plan
+
+            ${{ steps.analysis.outputs.plan }}
+          timestamp: true
+
+      # Step 5: Implement feature with Claude Code
+      - name: Implement feature
+        uses: anyt/claude-code@v1
+        id: implementation
+        with:
+          model: claude-haiku-4-5-20251001
+          prompt: |
+            Implement the following feature:
+
+            ${{ task.description }}
+
+            Implementation plan:
+            ${{ steps.analysis.outputs.plan }}
+
+            Follow the project's coding standards and best practices.
+          stream: true
+          dangerously-skip-permissions: true
+
+      # Step 6: Commit changes
+      - name: Commit changes
+        uses: anyt/git-commit@v1
+        id: commit
+        with:
+          message: |
+            feat: ${{ task.title }}
+
+            Task: ${{ task.identifier }}
+
+            ${{ steps.analysis.outputs.plan }}
+
+            🤖 Generated with Claude Code
+            Co-Authored-By: Claude <noreply@anthropic.com>
+          add: all
+
+      # Step 7: Push to remote
+      - name: Push branch to remote
+        run: |
+          git push -u origin ${{ steps.branch.outputs.branch_name }}
+          echo "✓ Pushed to remote"
+
+      # Step 8: Create pull request using GitHub CLI
+      - name: Create pull request
+        uses: anyt/github-pr-create@v1
+        id: pr
+        with:
+          title: "${{ task.title }}"
+          body: |
+            ## Summary
+
+            Implements: ${{ task.identifier }} - ${{ task.title }}
+
+            ## Description
+
+            ${{ task.description }}
+
+            ## Implementation Plan
+
+            ${{ steps.analysis.outputs.plan }}
+
+            ## Changes
+
+            Commit: ${{ steps.commit.outputs.commit_hash }}
+
+            ---
+
+            🤖 Generated with Claude Code
+            Co-Authored-By: Claude <noreply@anthropic.com>
+
+            Closes: ${{ task.identifier }}
+          base: main
+          labels: "automated,feature"
+          draft: false
+
+      # Step 9: Update task with success
+      - name: Mark task complete
+        uses: anyt/task-update@v1
+        with:
+          status: done
+          note: |
+            ✅ **Feature Completed Successfully**
+
+            Implementation completed and pull request created.
+
+            **Pull Request:** ${{ steps.pr.outputs.pr_url }}
+            **Branch:** ${{ steps.branch.outputs.branch_name }}
+            **Commit:** ${{ steps.commit.outputs.commit_hash }}
+
+            **Next Steps:**
+            1. Review the pull request
+            2. Request review from team members
+            3. Merge when approved
+
+    # Handle failures
+    on-failure:
+      - name: Add error note
+        uses: anyt/task-update@v1
+        with:
+          note: |
+            ❌ **Feature Development Failed**
+
+            **Failed Step:** ${{ failure.step }}
+            **Error:** ${{ failure.message }}
+
+            **Branch:** ${{ steps.branch.outputs.branch_name || 'N/A' }}
+            **Commit:** ${{ steps.commit.outputs.commit_hash || 'N/A' }}
+
+            Please investigate and complete manually.
