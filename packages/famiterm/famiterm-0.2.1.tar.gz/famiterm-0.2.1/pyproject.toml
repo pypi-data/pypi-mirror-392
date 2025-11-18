@@ -1,0 +1,61 @@
+[build-system]
+requires = [
+    "setuptools>=61.0",
+    "wheel",
+    "Cython>=3.2.1",
+    "numpy>=2.0,<3",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "famiterm"
+version = "0.2.1"
+description = "A NES emulator running in the terminal"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "GPL-3.0-only"
+authors = [
+    {name = "Vincent Michel", email = "vxgmichel@gmail.com"}
+]
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "numpy>=2.0,<3.0",
+    "gambaterm>=0.13.0",
+]
+
+[project.optional-dependencies]
+controller-support = ["pygame>=1.9.5,<2.0.0"]
+
+[project.scripts]
+famiterm = "famiterm:main"
+famiterm-ssh = "famiterm.ssh:main"
+
+[project.urls]
+Homepage = "https://github.com/vxgmichel/famiterm"
+
+[tool.setuptools]
+packages = ["famiterm"]
+
+[tool.setuptools.package-data]
+famiterm = ["py.typed"]
+
+[tool.mypy]
+strict = true
+
+
+[tool.cibuildwheel]
+build = "cp*-win_amd64 cp*-manylinux_x86_64 cp*-macosx_x86_64 cp*-macosx_arm64"
+skip = ["cp38-*", "cp3??t-*"]
+test-command = "famiterm --help"
+
+[tool.cibuildwheel.linux]
+before-all = "yum install -y libsamplerate portaudio openssh-clients"
