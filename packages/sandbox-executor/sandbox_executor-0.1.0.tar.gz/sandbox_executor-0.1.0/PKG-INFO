@@ -1,0 +1,789 @@
+Metadata-Version: 2.4
+Name: sandbox-executor
+Version: 0.1.0
+Summary: A secure Python code execution sandbox
+Author-email: dinhhungitsoft <dinhhungitsoft@gmail.com>
+License:                                  Apache License
+                                   Version 2.0, January 2004
+                                http://www.apache.org/licenses/
+        
+           TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+        
+           1. Definitions.
+        
+              "License" shall mean the terms and conditions for use, reproduction,
+              and distribution as defined by Sections 1 through 9 of this document.
+        
+              "Licensor" shall mean the copyright owner or entity authorized by
+              the copyright owner that is granting the License.
+        
+              "Legal Entity" shall mean the union of the acting entity and all
+              other entities that control, are controlled by, or are under common
+              control with that entity. For the purposes of this definition,
+              "control" means (i) the power, direct or indirect, to cause the
+              direction or management of such entity, whether by contract or
+              otherwise, or (ii) ownership of fifty percent (50%) or more of the
+              outstanding shares, or (iii) beneficial ownership of such entity.
+        
+              "You" (or "Your") shall mean an individual or Legal Entity
+              exercising permissions granted by this License.
+        
+              "Source" form shall mean the preferred form for making modifications,
+              including but not limited to software source code, documentation
+              source, and configuration files.
+        
+              "Object" form shall mean any form resulting from mechanical
+              transformation or translation of a Source form, including but
+              not limited to compiled object code, generated documentation,
+              and conversions to other media types.
+        
+              "Work" shall mean the work of authorship, whether in Source or
+              Object form, made available under the License, as indicated by a
+              copyright notice that is included in or attached to the work
+              (an example is provided in the Appendix below).
+        
+              "Derivative Works" shall mean any work, whether in Source or Object
+              form, that is based on (or derived from) the Work and for which the
+              editorial revisions, annotations, elaborations, or other modifications
+              represent, as a whole, an original work of authorship. For the purposes
+              of this License, Derivative Works shall not include works that remain
+              separable from, or merely link (or bind by name) to the interfaces of,
+              the Work and Derivative Works thereof.
+        
+              "Contribution" shall mean any work of authorship, including
+              the original version of the Work and any modifications or additions
+              to that Work or Derivative Works thereof, that is intentionally
+              submitted to Licensor for inclusion in the Work by the copyright owner
+              or by an individual or Legal Entity authorized to submit on behalf of
+              the copyright owner. For the purposes of this definition, "submitted"
+              means any form of electronic, verbal, or written communication sent
+              to the Licensor or its representatives, including but not limited to
+              communication on electronic mailing lists, source code control systems,
+              and issue tracking systems that are managed by, or on behalf of, the
+              Licensor for the purpose of discussing and improving the Work, but
+              excluding communication that is conspicuously marked or otherwise
+              designated in writing by the copyright owner as "Not a Contribution."
+        
+              "Contributor" shall mean Licensor and any individual or Legal Entity
+              on behalf of whom a Contribution has been received by Licensor and
+              subsequently incorporated within the Work.
+        
+           2. Grant of Copyright License. Subject to the terms and conditions of
+              this License, each Contributor hereby grants to You a perpetual,
+              worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+              copyright license to reproduce, prepare Derivative Works of,
+              publicly display, publicly perform, sublicense, and distribute the
+              Work and such Derivative Works in Source or Object form.
+        
+           3. Grant of Patent License. Subject to the terms and conditions of
+              this License, each Contributor hereby grants to You a perpetual,
+              worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+              (except as stated in this section) patent license to make, have made,
+              use, offer to sell, sell, import, and otherwise transfer the Work,
+              where such license applies only to those patent claims licensable
+              by such Contributor that are necessarily infringed by their
+              Contribution(s) alone or by combination of their Contribution(s)
+              with the Work to which such Contribution(s) was submitted. If You
+              institute patent litigation against any entity (including a
+              cross-claim or counterclaim in a lawsuit) alleging that the Work
+              or a Contribution incorporated within the Work constitutes direct
+              or contributory patent infringement, then any patent licenses
+              granted to You under this License for that Work shall terminate
+              as of the date such litigation is filed.
+        
+           4. Redistribution. You may reproduce and distribute copies of the
+              Work or Derivative Works thereof in any medium, with or without
+              modifications, and in Source or Object form, provided that You
+              meet the following conditions:
+        
+              (a) You must give any other recipients of the Work or
+                  Derivative Works a copy of this License; and
+        
+              (b) You must cause any modified files to carry prominent notices
+                  stating that You changed the files; and
+        
+              (c) You must retain, in the Source form of any Derivative Works
+                  that You distribute, all copyright, patent, trademark, and
+                  attribution notices from the Source form of the Work,
+                  excluding those notices that do not pertain to any part of
+                  the Derivative Works; and
+        
+              (d) If the Work includes a "NOTICE" text file as part of its
+                  distribution, then any Derivative Works that You distribute must
+                  include a readable copy of the attribution notices contained
+                  within such NOTICE file, excluding those notices that do not
+                  pertain to any part of the Derivative Works, in at least one
+                  of the following places: within a NOTICE text file distributed
+                  as part of the Derivative Works; within the Source form or
+                  documentation, if provided along with the Derivative Works; or,
+                  within a display generated by the Derivative Works, if and
+                  wherever such third-party notices normally appear. The contents
+                  of the NOTICE file are for informational purposes only and
+                  do not modify the License. You may add Your own attribution
+                  notices within Derivative Works that You distribute, alongside
+                  or as an addendum to the NOTICE text from the Work, provided
+                  that such additional attribution notices cannot be construed
+                  as modifying the License.
+        
+              You may add Your own copyright statement to Your modifications and
+              may provide additional or different license terms and conditions
+              for use, reproduction, or distribution of Your modifications, or
+              for any such Derivative Works as a whole, provided Your use,
+              reproduction, and distribution of the Work otherwise complies with
+              the conditions stated in this License.
+        
+           5. Submission of Contributions. Unless You explicitly state otherwise,
+              any Contribution intentionally submitted for inclusion in the Work
+              by You to the Licensor shall be under the terms and conditions of
+              this License, without any additional terms or conditions.
+              Notwithstanding the above, nothing herein shall supersede or modify
+              the terms of any separate license agreement you may have executed
+              with Licensor regarding such Contributions.
+        
+           6. Trademarks. This License does not grant permission to use the trade
+              names, trademarks, service marks, or product names of the Licensor,
+              except as required for reasonable and customary use in describing the
+              origin of the Work and reproducing the content of the NOTICE file.
+        
+           7. Disclaimer of Warranty. Unless required by applicable law or
+              agreed to in writing, Licensor provides the Work (and each
+              Contributor provides its Contributions) on an "AS IS" BASIS,
+              WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+              implied, including, without limitation, any warranties or conditions
+              of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+              PARTICULAR PURPOSE. You are solely responsible for determining the
+              appropriateness of using or redistributing the Work and assume any
+              risks associated with Your exercise of permissions under this License.
+        
+           8. Limitation of Liability. In no event and under no legal theory,
+              whether in tort (including negligence), contract, or otherwise,
+              unless required by applicable law (such as deliberate and grossly
+              negligent acts) or agreed to in writing, shall any Contributor be
+              liable to You for damages, including any direct, indirect, special,
+              incidental, or consequential damages of any character arising as a
+              result of this License or out of the use or inability to use the
+              Work (including but not limited to damages for loss of goodwill,
+              work stoppage, computer failure or malfunction, or any and all
+              other commercial damages or losses), even if such Contributor
+              has been advised of the possibility of such damages.
+        
+           9. Accepting Warranty or Additional Liability. While redistributing
+              the Work or Derivative Works thereof, You may choose to offer,
+              and charge a fee for, acceptance of support, warranty, indemnity,
+              or other liability obligations and/or rights consistent with this
+              License. However, in accepting such obligations, You may act only
+              on Your own behalf and on Your sole responsibility, not on behalf
+              of any other Contributor, and only if You agree to indemnify,
+              defend, and hold each Contributor harmless for any liability
+              incurred by, or claims asserted against, such Contributor by reason
+              of your accepting any such warranty or additional liability.
+        
+           END OF TERMS AND CONDITIONS
+        
+           APPENDIX: How to apply the Apache License to your work.
+        
+              To apply the Apache License to your work, attach the following
+              boilerplate notice, with the fields enclosed by brackets "[]"
+              replaced with your own identifying information. (Don't include
+              the brackets!)  The text should be enclosed in the appropriate
+              comment syntax for the file format. We also recommend that a
+              file or class name and description of purpose be included on the
+              same "printed page" as the copyright notice for easier
+              identification within third-party archives.
+        
+           Copyright [yyyy] [name of copyright owner]
+        
+           Licensed under the Apache License, Version 2.0 (the "License");
+           you may not use this file except in compliance with the License.
+           You may obtain a copy of the License at
+        
+               http://www.apache.org/licenses/LICENSE-2.0
+        
+           Unless required by applicable law or agreed to in writing, software
+           distributed under the License is distributed on an "AS IS" BASIS,
+           WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+           See the License for the specific language governing permissions and
+           limitations under the License.
+        
+Project-URL: Homepage, https://github.com/dinhhungitsoft/secure-python-sandbox
+Project-URL: Repository, https://github.com/dinhhungitsoft/secure-python-sandbox
+Project-URL: Issues, https://github.com/dinhhungitsoft/secure-python-sandbox/issues
+Keywords: sandbox,code-execution,security,python
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Security
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: requests>=2.31.0
+Provides-Extra: remote
+Requires-Dist: requests>=2.31.0; extra == "remote"
+Provides-Extra: api
+Requires-Dist: fastapi>=0.104.0; extra == "api"
+Requires-Dist: uvicorn[standard]>=0.24.0; extra == "api"
+Requires-Dist: python-multipart>=0.0.6; extra == "api"
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.21.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: flake8>=6.0.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Provides-Extra: all
+Requires-Dist: sandbox-executor[api,dev,remote]; extra == "all"
+Dynamic: license-file
+
+# 🔒 Python Sandbox Executor
+
+A secure Python code execution library with **dual-mode architecture**: run code locally for fast development or connect to a remote API server for production workloads. Perfect for AI agents, code playgrounds, and educational platforms.
+
+## ✨ Key Features
+
+- 🏠 **Local Execution**: Direct subprocess execution for fast iteration and debugging
+- 🌐 **Remote Execution**: HTTP client for connecting to sandbox API servers
+- 🔄 **Unified Interface**: Same API works for both local and remote modes
+- 🤖 **AI Agent Ready**: Easy integration with LangChain, AutoGen, and custom agents
+- **Multi-layered Security**: AST validation, resource limits, network control
+- 📁 **File I/O Support**: Upload input files and retrieve output files
+- ⚡ **Platform Agnostic**: Works on Linux, Windows, macOS, Docker, Kubernetes, and serverless
+
+## 🚀 Quick Start
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/dinhhungitsoft/secure-python-sandbox.git
+cd secure-python-sandbox
+
+# Install the package (includes local + remote client)
+pip install -e .
+
+# Optional: Install with API server support
+pip install -e ".[api]"
+```
+
+## 💡 Usage Modes
+
+### Mode 1: Local Execution (Development)
+
+**Best for**: Development, debugging, fast iteration, local AI agents
+
+**How it works**: Executes code directly on your machine using subprocess isolation
+
+**Installation**:
+```bash
+pip install -e .
+```
+
+**Example**:
+```python
+from sandbox_executor import SandboxClient
+
+# Create client without server_url = local execution
+client = SandboxClient()
+
+code = """
+def fibonacci(n):
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+
+result = [fibonacci(i) for i in range(10)]
+print("Fibonacci:", result)
+"""
+
+result = client.execute(code)
+print(result.stdout)
+# Output: Fibonacci: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+```
+
+**Advantages**:
+- ⚡ **Fastest**: No network overhead
+- 🐛 **Easy debugging**: Direct execution with full error messages
+- 🔧 **Simple setup**: No server required
+- 💻 **Offline capable**: Works without internet
+
+**Use cases**:
+- Local development and testing
+- AI agent prototyping
+- Educational tools
+- Code snippets execution
+- Quick scripts and automation
+
+---
+
+### Mode 2: Remote Execution (Production)
+
+**Best for**: Production, scaling, untrusted code, multi-tenant systems
+
+**How it works**: Sends code to a remote API server via HTTP requests
+
+**Installation**:
+```bash
+# Install package with remote support (already included in core)
+pip install -e .
+
+# Set up API server
+pip install -e ".[api]"
+docker-compose up -d  # Start the sandbox API server
+```
+
+**Example**:
+```python
+from sandbox_executor import SandboxClient
+
+# Create client with server_url = remote execution
+client = SandboxClient(
+    server_url="http://localhost:8000",
+    timeout=30
+)
+
+code = """
+import math
+
+radius = 5
+area = math.pi * radius ** 2
+print(f"Circle area: {area:.2f}")
+"""
+
+result = client.execute(code)
+print(result.stdout)
+# Output: Circle area: 78.54
+```
+
+**Advantages**:
+- 🔒 **Enhanced security**: Code runs in isolated containers
+- 📈 **Scalable**: Handle multiple concurrent executions
+- 🌐 **Distributed**: Execute code on powerful remote machines
+- 🛡️ **Better isolation**: Full container-level isolation
+
+**Use cases**:
+- Production AI agents
+- Multi-tenant code execution platforms
+- Online code playgrounds
+- Serverless functions
+- Educational platforms with many users
+
+---
+
+## 🎯 Comparison: Local vs Remote
+
+| Feature | Local Execution | Remote Execution |
+|---------|----------------|------------------|
+| **Speed** | ⚡ Fastest (no network) | 🌐 Network latency |
+| **Setup** | ✅ Zero config | ⚙️ Needs API server |
+| **Security** | 🛡️ Process isolation | 🔒 Container isolation |
+| **Scalability** | 💻 Single machine | 📈 Distributed |
+| **Use Case** | 🐛 Development | 🚀 Production |
+| **Internet** | ❌ Not required | ✅ Required |
+
+## Configuration
+
+### Local Mode Configuration
+
+```python
+from sandbox_executor import SandboxClient, ClientConfig, ExecutionMode
+
+config = ClientConfig(
+    server_url=None,  # None = local execution
+    mode=ExecutionMode.SECURE,
+    timeout=60,
+    allow_network=False,
+    max_memory_mb=256
+)
+
+client = SandboxClient.from_config(config)
+```
+
+### Remote Mode Configuration
+
+```python
+from sandbox_executor import SandboxClient, ClientConfig
+
+config = ClientConfig(
+    server_url="http://your-api-server.com",
+    timeout=30,
+    api_timeout=60,  # HTTP request timeout
+    api_key="your-secret-key"  # Optional authentication
+)
+
+client = SandboxClient.from_config(config)
+```
+
+### Environment Variables
+
+Create a `.env` file:
+```bash
+SANDBOX_MODE=secure
+SANDBOX_TIMEOUT=30
+SANDBOX_ALLOW_NETWORK=false
+SANDBOX_MAX_MEMORY_MB=128
+```
+
+Load automatically:
+```python
+client = SandboxClient.from_env()
+```
+
+## Advanced Examples
+
+### Working with Files
+
+```python
+from sandbox_executor import SandboxClient
+
+client = SandboxClient()
+
+# Provide input files
+input_files = {
+    "data.csv": b"id,value\n1,100\n2,200\n3,300\n"
+}
+
+code = """
+import csv
+
+# Read CSV
+with open('data.csv', 'r') as f:
+    reader = csv.DictReader(f)
+    data = list(reader)
+
+# Calculate total
+total = sum(int(row['value']) for row in data)
+print(f"Total: {total}")
+
+# Write output
+with open('result.txt', 'w') as f:
+    f.write(f"Sum: {total}\\n")
+"""
+
+result = client.execute(code, input_files=input_files)
+print(result.stdout)  # Total: 600
+
+# Get output file
+output = result.get_file_content('result.txt')
+print(output.decode())  # Sum: 600
+```
+
+### AI Agent Integration
+
+```python
+from sandbox_executor import SandboxClient
+
+class PythonExecutorTool:
+    """Tool for AI agents to execute Python code"""
+    
+    name = "python_executor"
+    description = "Execute Python code safely in a sandbox"
+    
+    def __init__(self, use_remote=False):
+        # Switch between local and remote based on environment
+        server_url = "http://api.example.com" if use_remote else None
+        self.client = SandboxClient(server_url=server_url)
+    
+    def run(self, code: str) -> str:
+        """Execute code and return output"""
+        result = self.client.execute(code)
+        return result.stdout if result.success else f"Error: {result.stderr}"
+
+# For development (local)
+tool = PythonExecutorTool(use_remote=False)
+
+# For production (remote)
+tool = PythonExecutorTool(use_remote=True)
+```
+
+### Error Handling
+
+```python
+from sandbox_executor import SandboxClient, SandboxException
+
+client = SandboxClient()
+
+code = "print(1/0)"  # Will raise ZeroDivisionError
+
+try:
+    result = client.execute(code)
+    if not result.success:
+        print(f"Execution failed with code {result.return_code}")
+        print(f"Error: {result.stderr}")
+except SandboxException as e:
+    print(f"Sandbox error: {e}")
+```
+
+## 🐳 Running the API Server (Remote Mode)
+
+### Using Docker Compose (Recommended)
+
+```bash
+# Start the server
+docker-compose up -d
+
+# Check logs
+docker-compose logs -f
+
+# Stop the server
+docker-compose down
+```
+
+### Using Docker
+
+```bash
+# Build image
+docker build -t python-sandbox .
+
+# Run container
+docker run -d -p 8000:8000 \
+  -e EXECUTION_MODE=secure \
+  -e SANDBOX_TIMEOUT=30 \
+  python-sandbox
+```
+
+### Manual Setup
+
+```bash
+# Install with API dependencies
+pip install -e ".[api]"
+
+# Run server
+uvicorn src.main:app --host 0.0.0.0 --port 8000
+```
+
+### API Documentation
+
+Once the server is running, visit:
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+
+### API Endpoints
+
+#### `GET /` - Health Check
+```bash
+curl http://localhost:8000/
+```
+
+#### `POST /execute` - Execute Code
+```bash
+curl -X POST http://localhost:8000/execute \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "print(\"Hello, World!\")",
+    "timeout": 30,
+    "allow_network": false
+  }'
+```
+
+## 🏗️ Architecture
+
+### Security Layers
+
+```
+┌─────────────────────────────────────┐
+│   1. AST Validation                 │  Compile-time filtering
+├─────────────────────────────────────┤
+│   2. Import Restrictions            │  Module whitelist/blacklist
+├─────────────────────────────────────┤
+│   3. Resource Limits                │  CPU, Memory, Processes
+├─────────────────────────────────────┤
+│   4. Filesystem Isolation           │  Temporary directory sandbox
+├─────────────────────────────────────┤
+│   5. Network Blocking               │  Socket monkey-patching
+├─────────────────────────────────────┤
+│   6. Execution Timeout              │  Hard timeout enforcement
+└─────────────────────────────────────┘
+```
+
+### Execution Modes
+
+**Secure Mode (Default)**:
+- AST validation and restricted imports
+- Resource limits (CPU, memory, processes)
+- Filesystem isolation with temporary directories
+- Network blocking (configurable)
+- Execution timeout enforcement
+
+**Simple Mode**:
+- Basic subprocess isolation
+- Timeout and output limits
+- Suitable for trusted code
+
+## 📚 Examples
+
+See the [`examples/`](./examples/) directory for complete examples:
+
+- **`basic_usage.py`** - Basic execution patterns
+- **`client_usage.py`** - Local vs Remote client usage  
+- **`agent_integration.py`** - AI agent integration examples
+- **`with_files.py`** - Working with input/output files
+- **`security_tests.py`** - Security feature demonstrations
+
+Run examples:
+```bash
+python examples/basic_usage.py
+python examples/client_usage.py
+python examples/agent_integration.py
+```
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+Configure the sandbox behavior using environment variables (in `.env`):
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SANDBOX_MODE` | `secure` | Execution mode: `secure` or `simple` |
+| `SANDBOX_TIMEOUT` | `30` | Default execution timeout (seconds) |
+| `SANDBOX_ALLOW_NETWORK` | `false` | Allow network access by default |
+| `SANDBOX_MAX_MEMORY_MB` | `128` | Maximum memory usage (MB) |
+
+### Security Configuration
+
+The secure executor includes configurable whitelists and blacklists:
+
+**Safe Modules** (allowed by default):
+- `math`, `random`, `datetime`, `json`, `base64`, `hashlib`
+- `collections`, `itertools`, `functools`, `re`, `string`
+- `decimal`, `fractions`, `statistics`, `uuid`, `secrets`
+
+**Blocked Modules** (always restricted):
+- `os`, `sys`, `subprocess`, `multiprocessing`, `threading`
+- `socket`, `urllib`, `requests`, `http`, `ftplib`, `smtplib`
+- `importlib`, `eval`, `exec`, `compile`
+
+## 🛡️ Security Considerations
+
+### What's Protected
+
+✅ **Import restrictions**: Dangerous modules are blocked  
+✅ **Resource limits**: CPU, memory, and process limits enforced  
+✅ **Filesystem isolation**: Code runs in temporary directories  
+✅ **Network blocking**: Optional socket-level blocking  
+✅ **Timeout enforcement**: Hard timeout prevents infinite loops  
+✅ **AST validation**: Compile-time code analysis
+
+### What's NOT Protected
+
+⚠️ **DoS attacks**: Malicious code can still consume allowed resources  
+⚠️ **Side-channel attacks**: Timing and cache attacks are possible  
+⚠️ **Data exfiltration**: If network is enabled, data can be sent out  
+⚠️ **Cryptographic operations**: CPU-intensive operations within limits  
+
+### Best Practices
+
+1. **Always use secure mode** in production
+2. **Keep network access disabled** unless required
+3. **Set appropriate resource limits** based on your use case
+4. **Monitor resource usage** and adjust limits accordingly
+5. **Run in containers** for additional isolation
+6. **Keep dependencies updated** for security patches
+7. **Validate user input** before sending to the sandbox
+8. **Implement rate limiting** to prevent abuse
+
+## 🧪 Testing
+
+```bash
+# Install dev dependencies
+pip install -e ".[dev]"
+
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=src --cov-report=html
+
+# Run specific test file
+pytest tests/test_sandbox_executor.py
+```
+
+See [`tests/README.md`](./tests/README.md) for detailed testing documentation.
+
+## 🔧 Development
+
+### Project Structure
+
+```
+python_sandbox/
+├── src/
+│   ├── main.py                          # FastAPI application (API server)
+│   ├── executor_factory.py              # Legacy factory pattern
+│   └── sandbox_executor/                # Main package
+│       ├── __init__.py                  # Package exports
+│       ├── client.py                    # Unified client (local/remote)
+│       ├── executor.py                  # Local executor
+│       ├── config.py                    # Configuration classes
+│       ├── exceptions.py                # Custom exceptions
+│       └── executors/                   # Backend implementations
+│           ├── sandbox_executor.py      # Simple mode
+│           └── secure_sandbox_executor.py  # Secure mode
+├── examples/                            # Usage examples
+│   ├── basic_usage.py                   # Basic patterns
+│   ├── client_usage.py                  # Local vs Remote
+│   ├── agent_integration.py             # AI agent examples
+│   └── ...
+├── tests/                               # Test suite
+├── docker-compose.yml                   # Docker Compose config
+├── Dockerfile                           # Docker image
+└── pyproject.toml                       # Package configuration
+```
+
+## 🚢 Deployment
+
+### Local Development
+```bash
+pip install -e .
+python examples/basic_usage.py
+```
+
+### API Server (Docker)
+```bash
+docker-compose up -d
+```
+
+## Documentation
+- **[examples/](./examples/)** - Code examples
+
+### Cloud Platforms
+
+The sandbox is compatible with:
+- **AWS Fargate**: Deploy as ECS task
+- **Azure Container Apps**: Deploy as container app
+- **Google Cloud Run**: Deploy as Cloud Run service
+- **Heroku**: Deploy as Docker container
+- **DigitalOcean App Platform**: Deploy as Docker app
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📞 Support
+
+- **GitHub Issues**: [Report bugs or request features](https://github.com/dinhhungitsoft/secure-python-sandbox/issues)
+- **Examples**: Check the [examples/](./examples/) directory
+- **API Docs**: Visit http://localhost:8000/docs when running the server
+
+## ⭐ Star History
+
+If you find this project useful, please give it a star! ⭐
+
+---
+
+**Made with ❤️ for the Python & AI community**
+
+**⚠️ Security Note**: While this sandbox provides multiple layers of security, no sandbox is 100% foolproof. Always run in isolated environments and implement additional security measures for production use with untrusted code.
