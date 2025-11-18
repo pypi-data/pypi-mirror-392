@@ -1,0 +1,1 @@
+::: objectory.abstract_factory
