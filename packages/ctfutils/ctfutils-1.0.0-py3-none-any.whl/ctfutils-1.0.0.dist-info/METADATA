@@ -1,0 +1,303 @@
+Metadata-Version: 2.4
+Name: ctfutils
+Version: 1.0.0
+Summary: A comprehensive functional toolkit for CTF (Capture The Flag) competitions - 87 pure functions for crypto, stego, forensics, and more
+Home-page: https://github.com/Oxidizerhack/ctfutils
+Author: Oxidizerhack
+Author-email: Oxidizerhack <jhonnyantoquispe@gmail.com>
+Maintainer-email: Oxidizerhack <jhonnyantoquispe@gmail.com>
+License: MIT
+Project-URL: Homepage, https://github.com/Oxidizerhack/PGR2_Practica7
+Project-URL: Repository, https://github.com/Oxidizerhack/PGR2_Practica7
+Project-URL: Issues, https://github.com/Oxidizerhack/PGR2_Practica7/issues
+Keywords: ctf,cybersecurity,crypto,steganography,forensics,functional-programming,cryptography,hacking,security-tools
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Education
+Classifier: Intended Audience :: Information Technology
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Security :: Cryptography
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Typing :: Typed
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE (MIT)
+Requires-Dist: Pillow>=8.0.0
+Requires-Dist: cryptography>=3.0.0
+Requires-Dist: requests>=2.25.0
+Provides-Extra: dev
+Requires-Dist: pytest>=6.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=2.0.0; extra == "dev"
+Requires-Dist: black>=21.0.0; extra == "dev"
+Requires-Dist: flake8>=3.8.0; extra == "dev"
+Dynamic: license-file
+
+# 🔐 CTFUtils
+> *Tu arsenal definitivo para dominar CTFs*
+
+<div align="center">
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
+[![Version](https://img.shields.io/badge/Version-1.0.0-blue.svg)](#)
+[![CTF Ready](https://img.shields.io/badge/CTF-Ready-red.svg)](#)
+[![Functional](https://img.shields.io/badge/Style-Functional-purple.svg)](#)
+
+*¿Cansado de googlear herramientas CTF? ¡CTFUtils tiene todo lo que necesitas!*
+
+[🚀 Instalación](#-instalación-rápida) • 
+[⚡ Inicio Rápido](#-inicio-rápido) • 
+[🎯 Ejemplos](#-ejemplos) • 
+[📚 Documentación](#-documentación)
+
+</div>
+
+---
+
+## 🎯 ¿Por qué CTFUtils?
+
+**Antes:** "¿Dónde está mi script de Caesar cipher? ¿Cómo se hace LSB steganography otra vez?"
+
+**Después:** 
+```python
+from ctfutils.crypto import caesar_brute_force
+caesar_brute_force("WKLV LV HQFUBSWHG")  # ¡Boom! 💥
+```
+
+✅ **4 módulos completos** - Crypto, Forensics, Stego, Misc  
+✅ **87 funciones puras** - Programación funcional moderna  
+✅ **Ejemplos reales** - Casos de CTFs auténticos  
+✅ **API simple** - Sin clases, solo funciones directas
+
+## 🚀 Instalación Rápida
+
+```bash
+# Clona el repo
+git clone https://github.com/Oxidizerhack/ctfutils.git
+cd ctfutils
+
+# Instala y listo
+pip install -e .
+```
+
+## ⚡ Inicio Rápido
+
+```python
+# Crypto: Rompe Caesar en una línea
+from ctfutils.crypto import caesar_brute_force
+caesar_brute_force("KHOOR ZRUOG")  # Encuentra "HELLO WORLD"
+
+# Stego: Oculta mensajes como un ninja
+from ctfutils.stego import zero_width_encode
+hidden = zero_width_encode("FLAG{hidden}")
+
+# Forensics: Analiza archivos sospechosos
+from ctfutils.forensics import get_file_signature
+get_file_signature("mystery.bin")  # "PNG Image"
+
+# Misc: Convierte todo a todo
+from ctfutils.misc import decimal_to_binary
+decimal_to_binary(1337)  # "10100111001"
+```
+## �️ Arsenal Completo
+
+| 🔐 **Crypto** | 🔍 **Forensics** | 🖼️ **Stego** | 🔧 **Misc** |
+|---------------|------------------|---------------|--------------|
+| Caesar Cipher | File Analysis | Text Hiding | Base Conversion |
+| Vigenère Cipher | Memory Dumps | Image LSB | String Manipulation |
+| Hash Cracking | Network Logs | Zero-Width | Encoding/Decoding |
+| Modern Crypto | Binary Analysis | Audio Stego | Math Utils |
+
+<details>
+<summary>🎯 <strong>Ver todas las funciones</strong></summary>
+
+### 🔐 Crypto (`ctfutils.crypto`) - 18 funciones
+- **Cifrado Clásico**: `caesar_encrypt`, `caesar_decrypt`, `caesar_brute_force`, `vigenere_encrypt`, `vigenere_decrypt`
+- **Codificación Moderna**: `base64_encode`, `base64_decode`, `is_base64`, `xor_encrypt`, `xor_decrypt_hex`, `xor_brute_force_single_byte`
+- **Hashing**: `md5_hash`, `sha1_hash`, `sha256_hash`, `sha512_hash`, `identify_hash`, `verify_hash`, `hash_all_types`
+
+### 🔍 Forensics (`ctfutils.forensics`) - 15 funciones
+- **Análisis de Archivos**: `extract_strings`, `get_file_signature`, `extract_metadata`, `find_hidden_files`, `create_hex_dump`
+- **Análisis de Red**: `parse_pcap_basic`, `extract_http_requests`, `extract_urls`, `extract_ip_addresses`, `extract_email_addresses`, `analyze_log_file`
+- **Análisis de Memoria**: `find_patterns`, `extract_processes`, `find_registry_keys`, `extract_urls_from_memory`, `search_memory_strings`
+
+### 🖼️ Stego (`ctfutils.stego`) - 12 funciones
+- **Texto**: `hide_text_whitespace`, `extract_text_whitespace`, `zero_width_encode`, `zero_width_decode`, `hide_in_text_zero_width`, `extract_from_text_zero_width`
+- **Imagen**: `hide_text_lsb`, `extract_text_lsb`, `analyze_image`
+- **Audio**: `hide_text_audio`, `extract_text_audio`, `analyze_audio_spectrum`
+
+### 🔧 Misc (`ctfutils.misc`) - 42 funciones
+- **Encodings**: `hex_encode`, `hex_decode`, `binary_encode`, `binary_decode`, `base32_encode`, `base32_decode`, `url_encode`, `url_decode`, `morse_encode`, `morse_decode`, `rot_encode`, `atbash_encode`
+- **Conversores**: `decimal_to_binary`, `binary_to_decimal`, `decimal_to_hex`, `hex_to_decimal`, `ascii_to_hex`, `hex_to_ascii`, `text_to_ascii_values`, `ascii_values_to_text`
+- **String Utils**: `reverse_string`, `swap_case`, `remove_whitespace`, `chunk_string`, `interleave_strings`, `extract_numbers`, `extract_letters`, `char_frequency`
+- **Math Utils**: `calculate_entropy`, `find_common_factors`, `gcd`, `lcm`, `is_prime`, `prime_factors`
+- **Validación**: `validate_input`, `safe_divide`, `hamming_distance`, `levenshtein_distance`
+- **Wordlists**: `generate_wordlist`, `bruteforce_pattern`
+
+**Total: 87 funciones puras** 🚀
+</details>
+
+## 🎯 Ejemplos
+
+### 🔓 Caesar Cipher Brute Force
+```python
+from ctfutils.crypto import caesar_brute_force
+
+# Mensaje interceptado en CTF
+encrypted = "WKLV LV D VHFUHW PHVVDJH"
+
+# Rompe el cipher automáticamente 
+solutions = caesar_brute_force(encrypted)
+
+# Encuentra "THIS IS A SECRET MESSAGE"
+print(solutions[3])  # ¡Boom! 💥
+```
+
+### 🕵️ Análisis Forense Express
+```python
+from ctfutils.forensics import get_file_signature, extract_strings
+
+# Archivo sospechoso
+file_type = get_file_signature("mystery.bin")  # "PNG Image"
+strings = extract_strings("mystery.bin", min_length=6)  # ["hidden_flag"]
+```
+
+### 🥷 Esteganografía Ninja
+```python
+from ctfutils.stego import zero_width_encode, zero_width_decode
+
+# Oculta un flag en caracteres invisibles
+hidden = zero_width_encode("FLAG{invisible}")
+
+# Nadie sospecha nada... 😏
+print(len(hidden))  # Solo caracteres zero-width
+
+# Extrae el flag
+flag = zero_width_decode(hidden)  # "FLAG{invisible}"
+```
+
+## 🧪 Testing
+
+Todas las funciones probadas y funcionando:
+
+```bash
+# Prueba completa de todas las funciones
+python test_completo.py
+
+# Corre los tests unitarios
+python -m pytest tests/ -v
+
+# Ver cobertura
+python -m pytest tests/ --cov=ctfutils
+```
+
+<details>
+<summary>📊 <strong>Ver resultados de tests</strong></summary>
+
+```
+📦 MÓDULO CRYPTO
+✅ Caesar: 'HELLO' → 'KHOOR'
+✅ Vigenere: 'SECRET' + KEY → 'CIABIR'
+✅ Base64: 'test' → 'dGVzdA=='
+✅ MD5: 'password' → '5f4dcc3b5aa765d6...'
+
+📦 MÓDULO STEGO
+✅ Whitespace Stego: Oculto 'SECRET'
+✅ Zero-Width: 'HI' → 8 caracteres invisibles
+
+📦 MÓDULO MISC
+✅ Hex Encode: 'CTF' → '435446'
+✅ Dec to Bin: 42 → '00101010'
+✅ Entropy: 'aaabbc' → 1.4591
+
+📦 MÓDULO FORENSICS
+✅ Extract URLs: ['https://example.com']
+✅ Extract IPs: ['192.168.1.100']
+
+======================== ✅ ALL TESTS PASSED ========================
+```
+
+</details>
+
+## 📚 Documentación
+
+- **[Ejemplos Prácticos](docs/examples/)** - Casos reales de CTF
+- **[API Reference](ctfutils/)** - Documentación completa
+- **[Guías de Uso](docs/)** - Tutoriales paso a paso
+
+## 🤝 Contribuir
+
+¿Encontraste un bug? ¿Tienes una idea genial?
+
+```bash
+# Fork, clone, código, commit, push, PR
+git clone https://github.com/Oxidizerhack/Pgr2_Practica7.git
+cd ctfutils
+# Haz tu magia ✨
+git commit -m "feat: nueva herramienta épica"
+```
+
+
+<div align="center">
+
+**Construido con ❤️ para la comunidad CTF**
+
+[📧 Contacto](gmail:jhonnyantoquispe@gmail.com) • 
+[🐛 Issues](https://github.com/Oxidizerhack/ctfutils/issues) • 
+[💡 Features](https://github.com/Oxidizerhack/ctfutils/discussions)
+
+*Licencia MIT - Úsalo, modifícalo, compártelo*
+
+</div>
+
+---
+
+## 📦 Instalación desde PyPI
+
+Una vez que la librería esté publicada en PyPI, podrás instalarla fácilmente:
+
+### 🚀 Instalación Simple
+```bash
+# Instalar desde PyPI
+pip install ctfutils
+```
+
+### 🔧 Instalación con Dependencias de Desarrollo  
+```bash
+# Para contribuidores y desarrolladores
+pip install ctfutils[dev]
+```
+
+### 🐍 Uso después de la instalación
+```python
+# Importar funciones directamente
+from ctfutils.crypto import caesar_brute_force, base64_decode
+from ctfutils.stego import zero_width_encode
+from ctfutils.forensics import extract_strings
+from ctfutils.misc import hex_encode, calculate_entropy
+
+# ¡Listo para usar en tus CTFs!
+result = caesar_brute_force("ENCRYPTED_TEXT")
+entropy = calculate_entropy("suspicious_data")
+```
+
+### 📋 Comandos de Publicación (para maintainers)
+```bash
+# 1. Generar distribución
+python -m build
+
+# 2. Verificar paquete
+python -m twine check dist/*
+
+# 3. Subir a PyPI
+python -m twine upload dist/*
+
+# 4. Verificar instalación
+pip install ctfutils
+```
