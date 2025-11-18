@@ -1,0 +1,95 @@
+Metadata-Version: 2.4
+Name: aa-top
+Version: 1.1.0
+Summary: Alliance Auth Resource Monitor
+Keywords: allianceauth,eveonline
+Author-email: Joel Falknau <joel.falknau@gmail.com>
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Celery
+Classifier: Framework :: Django
+Classifier: Framework :: Django :: 4.2
+Classifier: Framework :: Django :: 5.2
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Internet :: WWW/HTTP :: Dynamic Content
+License-File: LICENSE
+Requires-Dist: allianceauth>=4.6.4,<6
+Requires-Dist: psutil
+Project-URL: Homepage, https://gitlab.com/tactical-supremacy/aa-top
+Project-URL: Source, https://gitlab.com/tactical-supremacy/aa-top
+Project-URL: Tracker, https://gitlab.com/tactical-supremacy/aa-top/-/issues
+
+# AA "Top"
+
+System Utilization and AA Statistics plugin for [Alliance Auth](https://gitlab.com/allianceauth/allianceauth/).
+
+Inspired by <https://zkillboard.com/ztop/> by Squizz Caphinator
+
+## Features
+
+Resource Monitor
+Celery Jobs in Queue
+
+Diff of last update
+
+## Planned Features
+
+## Installation
+
+### Step 2 - Install app
+
+```shell
+pip install aa-top
+```
+
+### Step 3 - Configure Auth settings
+
+Configure your Auth settings (`local.py`) as follows:
+
+- Add `'top'` to `INSTALLED_APPS`
+- Add below lines to your settings file:
+
+```python
+## Settings for AA-Top
+# Update aatop.txt
+CELERYBEAT_SCHEDULE['top_update_aa_top_txt'] = {
+    'task': 'top.tasks.update_aa_top_txt',
+    'schedule': crontab(minute='*'),
+}
+```
+
+### Step 4 - Maintain Alliance Auth
+
+- Run migrations `python manage.py migrate`
+- Gather your staticfiles `python manage.py collectstatic`
+- Restart your project `supervisorctl restart myauth:`
+
+- Add file permissions `setfacl -m u:allianceserver:rw /var/www/myauth/static/top/aatop.txt`
+
+## Permissions
+
+| Perm         | Admin Site | Perm                                 | Description |
+| ------------ | ---------- | ------------------------------------ | ----------- |
+| basic_access | nill       | Can access the web view for this app | -           |
+
+## Settings
+
+| Name | Description | Default |
+| ---- | ----------- | ------- |
+
+## Contributing
+
+Make sure you have signed the [License Agreement](https://developers.eveonline.com/resource/license-agreement) by logging in at <https://developers.eveonline.com> before submitting any pull requests. All bug fixes or features must not include extra superfluous formatting changes.
+
