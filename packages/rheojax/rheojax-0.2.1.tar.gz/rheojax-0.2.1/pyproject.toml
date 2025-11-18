@@ -1,0 +1,263 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rheojax"
+version = "0.2.1"
+description = "Unified rheological analysis framework with JAX acceleration"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Wei Chen", email = "wchen@anl.gov"},
+]
+maintainers = [
+    {name = "Wei Chen", email = "wchen@anl.gov"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Physics",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.12"
+
+# ============================================================================
+# GPU ACCELERATION (20-100x speedup for large datasets)
+# ============================================================================
+# Default: CPU-only JAX (works on ALL platforms: Linux, macOS, Windows)
+#
+# For GPU acceleration (Linux + CUDA 12.1-12.9 ONLY):
+#
+#   Quick install (from repository):
+#     make install-jax-gpu
+#
+#   Manual install:
+#     pip uninstall -y jax jaxlib
+#     pip install jax[cuda12-local]==0.8.0 jaxlib==0.8.0
+#
+#   Platform support:
+#     ✅ Linux + NVIDIA GPU + CUDA 12.1-12.9: Full GPU acceleration
+#     ❌ macOS: CPU-only (Apple Silicon/Intel, no NVIDIA GPU support)
+#     ❌ Windows: CPU-only (CUDA support experimental/unstable)
+#
+#   Requirements:
+#     - System CUDA 12.1-12.9 pre-installed (not bundled)
+#     - NVIDIA driver >= 525
+#     - Linux x86_64 or aarch64
+#
+# See README.md for detailed GPU installation guide
+# ============================================================================
+dependencies = [
+    # Core scientific computing
+    "numpy>=2.0.0,<3.0.0",
+    "scipy>=1.16.0,<2.0.0",
+    "pandas>=2.0.0,<3.0.0",
+    "matplotlib>=3.10.0,<4.0.0",
+
+    # GPU-accelerated optimization (CRITICAL: must be imported before JAX)
+    # NLSQ v0.2.1+ uses float32 by default with automatic precision fallback
+    # RheoJAX explicitly enables float64 via jax.config.update("jax_enable_x64", True)
+    "nlsq>=0.2.1",
+
+    # JAX ecosystem (CPU-only - works on all platforms)
+    # GPU users: see installation instructions above
+    "jax==0.8.0",     # JAX 0.8.0 CPU-only - exact version required
+    "jaxlib==0.8.0",  # jaxlib 0.8.0 CPU-only - must match JAX version exactly
+
+    # Probabilistic programming
+    "numpyro>=0.19.0,<1.0.0",
+
+    # Bayesian visualization and diagnostics
+    "arviz>=0.22.0,<1.0.0",
+]
+
+[project.optional-dependencies]
+# Core dependencies that may not be on PyPI yet
+core = [
+    "piblin-jax>=0.0.3",  # JAX-first rewrite of piblin for data interoperability
+]
+dev = [
+    "pytest>=9.0.0",
+    "pytest-cov>=7.0.0",
+    "pytest-xdist>=3.8.0",
+    "hypothesis>=6.145.0",
+    "black>=25.11.0",
+    "ruff>=0.14.5",
+    "mypy>=1.18.2",
+    "pre-commit>=4.3.0",
+    "ipython>=9.6.0",
+    "jupyter>=1.1.0",
+    "sphinx>=8.2.0",
+    "sphinx-rtd-theme>=3.0.0",
+    "sphinx-autodoc-typehints>=3.5.0",
+]
+ml = [
+    "scikit-learn>=1.7.0",
+]
+io = [
+    "h5py>=3.15.0",
+    "openpyxl>=3.1.0",
+    "xlrd>=2.0.0",
+]
+# NOTE: No gpu extra - GPU installation must be done manually to avoid conflicts.
+# See GPU ACCELERATION section above for installation instructions.
+# Use: make install-jax-gpu (from repository) or manual pip commands.
+all = [
+    "rheojax[core,dev,ml,io]",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/imewei/rheojax"
+"Bug Tracker" = "https://github.com/imewei/rheojax/issues"
+"Documentation" = "https://rheojax.readthedocs.io"
+"Source Code" = "https://github.com/imewei/rheojax"
+
+[tool.setuptools.packages.find]
+include = ["rheojax", "rheojax.*"]
+exclude = ["tests*", "docs*", "examples*"]
+
+[tool.setuptools.package-data]
+"rheojax" = ["py.typed", "*.json", "*.yaml"]
+
+[tool.pytest.ini_options]
+minversion = "8.4"
+testpaths = ["tests"]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--cov=rheojax",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+]
+markers = [
+    # Test tier markers (for tiered CI strategy)
+    "smoke: critical unit tests only (< 2 min target, ~100 tests)",
+    "unit: unit tests (default tier for most tests)",
+    "integration: integration tests across modules",
+    "validation: validation against legacy packages (pyrheo, hermes-rheo)",
+    "benchmark: performance benchmarks",
+
+    # Execution characteristics
+    "slow: marks tests as slow (> 30 seconds each, deselect with '-m \"not slow\"')",
+    "gpu: marks tests that require GPU",
+
+    # Notebook tests
+    "notebook_smoke: quick notebook smoke tests",
+    "notebook_comprehensive: comprehensive notebook validation (slow)",
+
+    # I/O tests
+    "io: file I/O tests",
+]
+filterwarnings = [
+    # Expected warnings from tests
+    "ignore:FigureCanvasAgg is non-interactive:UserWarning",
+    "ignore:More than 20 figures have been opened:RuntimeWarning",
+    "ignore:There are not enough devices to run parallel chains:UserWarning",
+    "ignore:Out-of-support values provided to log prob method:UserWarning",
+    "ignore:Could not automatically detect test mode:UserWarning",
+    "ignore:Failed to process.*File not found:UserWarning",
+    "ignore:Data has no positive values.*cannot be log-scaled:UserWarning",
+    "ignore:x-axis is not monotonic:UserWarning",
+    # Suppress pytest collection warnings for non-test classes
+    "ignore:cannot collect test class.*TestModeEnum.*:pytest.PytestCollectionWarning",
+    # Suppress warnings from dependencies
+    "ignore:invalid value encountered:RuntimeWarning:scipy",
+    "ignore:invalid value encountered:RuntimeWarning:nlsq",
+    "ignore:GPU acceleration is only available on Linux with CUDA 12\\+:UserWarning:piblin_jax",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.git
+  | \.eggs
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | venv
+)/
+'''
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501",  # line too long
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*" = ["B", "C", "E", "F", "W"]
+"rheojax/__init__.py" = ["E402"]  # models import must come after version setup
+"rheojax/models/*.py" = ["E402"]  # safe_import_jax() must precede JAX imports
+"rheojax/utils/mittag_leffler.py" = ["E402"]  # safe_import_jax() must precede JAX imports
+"rheojax/transforms/*.py" = ["E402"]  # safe_import_jax() may precede other imports
+"rheojax/utils/initialization/*.py" = ["E402"]  # initialization modules
+"examples/**/*.ipynb" = ["B", "E", "F", "W"]  # Example notebooks have looser style requirements
+"docs/source/conf.py" = ["F401"]  # Sphinx config checks imports for availability
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = false  # Allow Any returns for JAX arrays
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_any_generics = false
+ignore_missing_imports = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = ["rheojax.models.*", "rheojax.utils.mittag_leffler"]
+disable_error_code = ["name-defined", "no-any-return"]
