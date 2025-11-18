@@ -1,0 +1,28 @@
+# NVRChannel
+Network video recorder for iot_devices compatible apps.
+Requires GStreamer to be installed on the system.
+
+Split into a separate lib due to the large model file.
+
+
+## Changes
+
+### 0.2.0
+
+Due to changes in the AI world and availability of hardware vision acceleration,
+along with things like 3D radars for interactive applications, I do not
+consider the AI and multiregion features in the previous version all that relevant, and the level of complexity is more than I have time to maintain
+while also pursuing other projects.
+
+* Remove AI features
+* Remove motion detection regions
+* BREAKING: Config keys renamed
+* Compatibility with new iot_devices API
+
+### 0.1.7 
+* setup.py file include fix
+
+### 0.1.6
+
+* Use cv2.dnn because tflite keeps breaking on python version updates.
+* Switch to MobileNetSSD
