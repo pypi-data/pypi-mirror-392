@@ -1,0 +1,167 @@
+Metadata-Version: 2.4
+Name: auto_booster
+Version: 0.1.4
+Summary: CLI utility for training boosting models with automated preprocessing.
+Author-email: Harshad <harsh.patil317.hp@gmail.com>
+Maintainer-email: Harshad <harsh.patil317.hp@gmail.com>
+License: MIT License
+        
+        Copyright (c) 2024 Harshad
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Project-URL: Homepage, https://github.com/hpu4454/Auto_boost
+Project-URL: Bug Tracker, https://github.com/hpu4454/Auto_boost/issues
+Keywords: automl,gradient-boosting,kaggle,machine-learning,cli
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pandas>=1.3
+Requires-Dist: numpy>=1.21
+Requires-Dist: scikit-learn>=1.0
+Provides-Extra: lightgbm
+Requires-Dist: lightgbm>=3.3; extra == "lightgbm"
+Provides-Extra: xgboost
+Requires-Dist: xgboost>=1.7; extra == "xgboost"
+Provides-Extra: catboost
+Requires-Dist: catboost>=1.0; extra == "catboost"
+Dynamic: license-file
+
+# Auto Boost
+
+Auto Boost is a small command-line helper that mirrors the original `Auto_boost.ipynb`
+Kaggle workflow. It handles missing values, categorical encoding, cross-validated
+training, and submission generation for gradient-boosting models (LightGBM,
+XGBoost, or CatBoost) without needing to run a notebook.
+
+## Installation
+
+### From PyPI (recommended)
+
+```bash
+python -m pip install --upgrade auto_boost
+# or include extras:
+python -m pip install "auto_boost[lightgbm]"
+```
+
+### From source
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install ".[lightgbm,xgboost]"  # select any boosters you need
+```
+
+Base dependencies are `pandas`, `numpy`, and `scikit-learn`. Install at least one
+booster extra (`lightgbm`, `xgboost`, `catboost`) depending on what you plan to run.
+
+## Quickstart
+
+```bash
+auto-boost \
+  --train train.csv \
+  --test test.csv \
+  --target Transported \
+  --model-type classification \
+  --metric accuracy \
+  --booster lgbm \
+  --folds 10 \
+  --random-state 10 \
+  --id-col PassengerId \
+  --prediction-col Transported \
+  --output submission.csv
+```
+
+Key flags:
+
+- `--train` / `--test`: paths to CSV files.
+- `--target`: column in train.csv you want to predict.
+- `--model-type`: `classification`, `regression`, or `auto` to infer from the target column.
+- `--booster`: choose between `lgbm`, `xgb`, `catboost`.
+- `--metric`: auto-detected if omitted (`accuracy` for classification, `rmse` for regression).
+- `--output`: optional CSV to save predictions (includes ID column when `--id-col` is supplied).
+
+Run `auto-boost --help` (or `auto_boost --help`) for the full reference. The legacy
+`python auto_boost.py` shim has been removed in favor of the installable entrypoints.
+
+## Works With Any Tabular Dataset
+
+- Automatic task detection when `--model-type auto` is supplied, so you can point the CLI at a CSV without pre-labeling it as classification vs regression.
+- Smarter preprocessing that imputes instead of dropping high-cardinality categorical features and scales numerics when requested.
+- Built-in label encoding for non-numeric targets (including booleans and strings), ensuring LightGBM/XGBoost/CatBoost work regardless of how the classes are represented.
+
+## Development & Packaging
+
+For local development install in editable mode:
+
+```bash
+python -m pip install --upgrade pip build twine
+python -m pip install -e ".[lightgbm]"
+```
+
+To produce distributable artifacts (wheel + sdist):
+
+```bash
+python -m pip install build
+python -m build
+ls dist/
+```
+
+The files under `dist/` can be uploaded with `twine upload dist/*` when
+publishing to PyPI. Generated folders such as `dist/`, `*.egg-info`, and
+`__pycache__` are ignored via `.gitignore`.
+
+### Releasing to TestPyPI / PyPI
+
+Following the official [Packaging Python Projects](https://packaging.python.org/en/latest/tutorials/packaging-projects/#uploading-your-project-to-pypi) guide:
+
+```bash
+# Build fresh artifacts
+rm -rf dist/
+python -m build
+
+# Upload to TestPyPI first
+python -m twine upload --repository testpypi dist/*
+
+# Verify install from TestPyPI (optional)
+python -m pip install --index-url https://test.pypi.org/simple/ \
+  --extra-index-url https://pypi.org/simple auto_boost
+
+# When satisfied, push to PyPI for public install via:
+# python -m pip install auto_boost
+python -m twine upload dist/*
+```
+
+Bump `auto_boost.__version__` before every upload to avoid version conflicts.
+
+## About the Notebook
+
+The original `Auto_boost.ipynb` is retained for reference, but the script fixes
+several issues (missing class instantiation, incorrect feature-importance labels,
+buggy categorical handling) and is the recommended entry point for automation.
