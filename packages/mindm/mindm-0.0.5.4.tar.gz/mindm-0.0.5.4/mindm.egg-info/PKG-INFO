@@ -1,0 +1,203 @@
+Metadata-Version: 2.4
+Name: mindm
+Version: 0.0.5.4
+Summary: Python library for interacting with local installed MindManager(tm) on Windows and MacOS platform.
+Author: Robert Zaufall
+License: MIT
+Project-URL: Homepage, https://github.com/robertZaufall/mindm
+Project-URL: Issues, https://github.com/robertZaufall/mindm/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: MacOS :: MacOS X
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pywin32; platform_system == "Windows"
+Requires-Dist: appscript; sys_platform == "darwin"
+Requires-Dist: regex
+Requires-Dist: html2text
+Requires-Dist: markdown
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0; extra == "dev"
+Requires-Dist: black; extra == "dev"
+Requires-Dist: flake8; extra == "dev"
+Requires-Dist: gitingest; extra == "dev"
+Provides-Extra: docs
+Requires-Dist: furo; extra == "docs"
+Requires-Dist: sphinx; extra == "docs"
+Requires-Dist: sphinx-pyproject; extra == "docs"
+Requires-Dist: sphinx.ext.autodoc; extra == "docs"
+Requires-Dist: sphinx.ext.napoleon; extra == "docs"
+Requires-Dist: sphinx.ext.autosummary; extra == "docs"
+Requires-Dist: gitingest; extra == "docs"
+Dynamic: license-file
+
+# mindm
+
+Python library for interacting with locally installed MindManager™ on Windows and macOS platforms.
+
+[![PyPI version](https://img.shields.io/pypi/v/mindm.svg)](https://pypi.org/project/mindm/)
+[![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://robertzaufall.github.io/mindm/)
+
+## Features
+
+- Direct automation hooks for MindManager via platform-specific connectors in `mindm/`
+- High-level document model, serialization helpers, and exporters in `mindmap/`
+- YAML, JSON, and Mermaid serialization/deserialization helpers for round-tripping maps
+- Sphinx documentation plus runnable snippets under `examples/`
+
+## Project Layout
+
+```
+mindm/
+├── mindm/        # Platform connectors (MindManager COM, AppleScript, etc.)
+├── mindmap/      # MindmapDocument model + serialization helpers
+├── docs/         # Sphinx documentation (make docs → docs/_build/html)
+├── examples/     # Usage snippets / sanity scripts
+```
+
+## Installation
+
+### PyPI
+
+```bash
+pip install mindm
+```
+
+### Local development
+
+```bash
+git clone https://github.com/robertZaufall/mindm
+cd mindm
+pip install -e ".[dev]"
+```
+
+## Getting Started
+
+### Low-level example
+
+Example for iterating over all topics in a mindmap and changing the topic text to uppercase:  
+  
+```python
+import mindm.mindmanager
+
+def iterate_topics(topic):
+    text = m.get_text_from_topic(topic)
+    m.set_text_to_topic(topic, text.upper())
+
+    subtopics = m.get_subtopics_from_topic(topic)
+    for subtopic in subtopics:
+        iterate_topics(subtopic)
+
+m = mindm.mindmanager.Mindmanager()
+central_topic = m.get_central_topic()
+iterate_topics(central_topic)
+```
+
+### High-level examples
+  
+Example for loading a mindmap from an open mindmap document and cloning it to a new document:  
+  
+```python
+import mindmap.mindmap as mm
+
+document = mm.MindmapDocument()
+document.get_mindmap()
+document.create_mindmap()
+```
+  
+Example for serializing a mindmap to YAML format:  
+  
+```python
+import yaml
+import mindmap.mindmap as mm
+import mindmap.serialization as mms
+
+document = mm.MindmapDocument()
+document.get_mindmap()
+
+guid_mapping = {}
+mms.build_mapping(document.mindmap, guid_mapping)
+
+yaml_data = mms.serialize_object(document.mindmap, guid_mapping)
+print(yaml.dump(yaml_data, sort_keys=False))
+```
+  
+Example for serializing / deserializing a mindmap to / from Mermaid format including all attributes:  
+  
+```python
+import json
+import mindmap.mindmap as mm
+import mindmap.serialization as mms
+
+document = mm.MindmapDocument()
+document.get_mindmap()
+
+guid_mapping = {}
+mms.build_mapping(document.mindmap, guid_mapping)
+
+serialized = mms.serialize_mindmap(document.mindmap, guid_mapping, id_only=False)
+print(serialized)
+
+deserialized = mms.deserialize_mermaid_full(serialized, guid_mapping)
+print(json.dumps(mms.serialize_object_simple(deserialized), indent=1))
+
+document_new = mm.MindmapDocument()
+document_new.mindmap = deserialized
+document_new.create_mindmap()
+```
+
+Example for serializing / deserializing a simplified Mermaid mindmap (text and indentation only):  
+  
+```python
+import mindmap.mindmap as mm
+import mindmap.serialization as mms
+
+document = mm.MindmapDocument()
+document.get_mindmap()
+
+simple_mermaid = mms.serialize_mindmap_simple(document.mindmap)
+print(simple_mermaid)
+
+simple_root = mms.deserialize_mermaid_simple(simple_mermaid)
+```
+
+Example for deserializing a simplified Mermaid mindmap (text and indentation only):  
+  
+```python
+import mindmap.serialization as mms
+
+mermaid = """
+mindmap
+  Creating an AI startup
+    Vision & Strategy
+      Mission and Value
+        Problem statement
+        Value proposition
+        Long term goals
+"""
+
+mindmap_root = mms.deserialize_mermaid_simple(mermaid)
+```
+
+## Platform Specific Functionality
+
+| Platform | Supported                                                                 | Not Supported                                  |
+| -------- | ------------------------------------------------------------------------- | ---------------------------------------------- |
+| Windows  | topics, subtopics, notes, icons, images, tags, external/topic links, relationships, RTF | floating topics, callouts, colors, lines, boundaries |
+| macOS    | topics, subtopics, notes, relationships                                   | icons, images, tags, links, RTF, floating topics, callouts, colors, lines, boundaries |
+
+## Development Workflow
+
+- `pip install -e ".[dev]"` to get linting, testing, and docs dependencies
+- `make build` (or `python -m build`) to create wheels and sdists in `dist/`
+- `make docs` to rebuild the HTML documentation under `docs/_build/html`
+- `pytest` for unit/integration coverage (add tests in `tests/` or `examples/`)
+- `python examples/test.py` for a live smoke run against a connected MindManager instance
+
+See `make help` for additional automation such as version bumps (`make update-version`) or GitHub releases.
+
+## Documentation
+
+Generated docs publish to GitHub Pages: [https://robertzaufall.github.io/mindm/](https://robertzaufall.github.io/mindm/).  
+Run `make docs` locally to validate new API additions before contributing changes.
