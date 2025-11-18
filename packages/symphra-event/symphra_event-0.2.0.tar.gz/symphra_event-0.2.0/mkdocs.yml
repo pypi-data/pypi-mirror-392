@@ -1,0 +1,197 @@
+# MkDocs 配置 - Symphra-Event 文档
+site_name: Symphra-Event
+site_description: 高性能、类型安全的 Python 事件库
+site_url: https://symphra-event.readthedocs.io/
+repo_name: symphra/symphra-event
+repo_url: https://git.getaix.tech/symphra/symphra-event
+edit_uri: edit/main/docs/
+
+# 版权信息
+copyright: Copyright &copy; 2025 Symphra | symphra@getaix.tech
+
+# 主题配置
+theme:
+  name: material
+  custom_dir: docs/overrides
+
+  # 语言设置
+  language: zh
+
+  # 图标和favicon
+  icon:
+    repo: fontawesome/brands/git-alt
+  favicon: assets/favicon.png
+
+  # 字体配置
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+  # 配色方案
+  palette:
+    # 浅色模式
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: 切换到深色模式
+
+    # 深色模式
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: 切换到浅色模式
+
+  # 功能特性
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - content.code.annotate
+    - content.code.copy
+    - content.tabs.link
+    - content.tooltips
+    - announce.dismiss
+    - header.autohide
+    - content.code.select
+
+# 插件配置
+plugins:
+  - search:
+      lang: zh
+
+# Markdown 扩展
+markdown_extensions:
+  # Python Markdown 扩展
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+      title: 页面导航
+
+  # PyMdown 扩展
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      options:
+        custom_icons:
+          - material/.icons
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: symphra
+      repo: symphra-event
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.snippets:
+      check_paths: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+  - pymdownx.blocks.caption
+
+# 额外CSS和JavaScript
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/extra.js
+
+# 导航结构
+nav:
+  - 首页:
+      - 介绍: index.md
+      - 安装: installation.md
+      - 快速开始: quickstart.md
+
+  - 用户指南:
+      - 基础用法: user-guide/basic-usage.md
+      - 优先级系统: user-guide/priority.md
+      - 异步支持: user-guide/async.md
+      - 条件过滤: user-guide/condition.md
+      - 一次性监听: user-guide/once.md
+      - 命名空间: user-guide/namespace.md
+      - 错误处理: user-guide/error-handling.md
+
+  - 实用工具:
+      - 常见问题: faq.md
+      - 故障排查: troubleshooting.md
+      - 性能优化: performance-guide.md
+      - 应用场景: use-cases.md
+      - 库对比: comparison.md
+
+  - API 参考:
+      - 核心 API: api/index.md
+      - 核心类:
+          - EventEmitter: api/core/emitter.md
+          - AsyncEventEmitter: api/core/async-emitter.md
+          - EventBus: api/core/bus.md
+      - 类型定义: api/types.md
+      - 异常处理: api/exceptions.md
+
+  - 高级功能:
+      - 架构设计: advanced/architecture.md
+      - 中间件系统: advanced/middleware.md
+      - 性能优化: advanced/performance.md
+
+  - 创新特性:
+      - 批量处理: innovations/batch.md
+      - 零拷贝传输: innovations/zero-copy.md
+      - 依赖分析: innovations/dependency.md
+      - 时间旅行调试: innovations/time-travel.md
+
+  - 开发指南:
+      - 贡献指南: development/contributing.md
+      - 测试指南: development/testing.md
+      - 发布流程: development/release.md
+
+# 额外变量
+extra:
+  version:
+    provider: mike
+  social:
+    - icon: fontawesome/brands/github
+      link: https://git.getaix.tech/symphra/symphra-event
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/symphra-event/
+  generator: false
+
+# 严格模式（暂时禁用，直到所有文档文件创建完成）
+strict: false
+
+# 验证配置
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
