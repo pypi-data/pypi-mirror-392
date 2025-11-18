@@ -1,0 +1,37 @@
+[project]
+name = "iflow-mcp_mcp-caiyun-weather"
+version = "0.1.0"
+description = "Caiyun Weather MCP Server"
+readme = "README.md"
+maintainers = [
+    { name = "adamwen", email = "adamwen829@gmail.com" },
+    { name = "tssujt", email = "xujiawei@caiyunapp.com" },
+    { name = "caiyunapp", email = "oss@caiyunapp.com" },
+]
+authors = [
+    { name = "adamwen", email = "adamwen829@gmail.com" },
+    { name = "tssujt", email = "xujiawei@caiyunapp.com" },
+    { name = "caiyunapp", email = "oss@caiyunapp.com" },
+]
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.28.1",
+    "mcp[cli]>=1.5.0",
+    "pydantic>=2.10.6",
+]
+license = { file = "LICENSE" }
+keywords = ["MCP", "Weather"]
+
+[project.urls]
+Homepage = "https://github.com/caiyunapp/mcp-caiyun-weather"
+Issues = "https://github.com/caiyunapp/mcp-caiyun-weather/issues"
+
+[project.scripts]
+mcp-caiyun-weather = "mcp_caiyun_weather:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcp_caiyun_weather"]
