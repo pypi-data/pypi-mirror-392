@@ -1,0 +1,56 @@
+import _pyscript
+
+from time import monotonic as _monotonic, sleep as _sleep
+
+_singletons = _pyscript.cache.singletons
+
+_singletons['clock-module.lastTick'] = 0.0
+_singletons['clock-module.timeElapsed'] = 0.0
+_singletons['clock-module.rawTime'] = 0.0
+_singletons['clock-module.framesPerSecond'] = 0.0
+
+@_pyscript.utils.decorators.singleton
+@_pyscript.utils.decorators.immutable
+@_pyscript.utils.decorators.uninherited
+class Clock {
+
+    __slots__ = ()
+
+    func tick(self, framerate) {
+        currentTime = _monotonic()
+        lastTick = _singletons['clock-module.lastTick']
+        elapsedTime = currentTime - lastTick
+
+        if (framerate > 0) {
+            minFrameTime = 1 / framerate
+            if (elapsedTime < minFrameTime)
+                _sleep(minFrameTime - elapsedTime)
+        }
+
+        currentTime = _monotonic()
+
+        _singletons['clock-module.framesPerSecond'] = (
+            currentTime == lastTick ?
+            0.0 : 1 / (currentTime - lastTick)
+        )
+
+        _singletons['clock-module.timeElapsed'] = timeElapsed = currentTime - lastTick
+        _singletons['clock-module.rawTime'] = elapsedTime
+        _singletons['clock-module.lastTick'] = currentTime
+
+        return timeElapsed
+    }
+
+    func get_time(self)
+        return _singletons['clock-module.timeElapsed']
+
+    func get_rawtime(self)
+        return _singletons['clock-module.rawTime']
+
+    func get_fps(self)
+        return _singletons['clock-module.framesPerSecond']
+
+    getTime = get_time
+    getRawTime = get_rawtime
+    getFPS = get_fps
+}
