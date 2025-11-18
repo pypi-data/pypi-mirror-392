@@ -1,0 +1,191 @@
+# ImgVisFeat
+
+| Category    | Badges                                                                                                                                                                                                                                                                                                                     |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Project     | [![PyPI version](https://badge.fury.io/py/imvf.svg)](https://pypi.org/project/imvf/) [![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://chatflip.github.io/ImgVisFeat/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) |
+| Package     | [![Python Versions](https://img.shields.io/pypi/pyversions/imvf.svg)](https://pypi.org/project/imvf/)                                                                                                                                                                                                                      |
+| Development | [![Run lints and tests](https://github.com/chatflip/ImgVisFeat/actions/workflows/lints_tests.yml/badge.svg)](https://github.com/chatflip/ImgVisFeat/actions/workflows/lints_tests.yml) [![Codecov](https://codecov.io/gh/chatflip/ImgVisFeat/branch/main/graph/badge.svg)](https://codecov.io/gh/chatflip/ImgVisFeat)     |
+| Community   | [![GitHub issues](https://img.shields.io/github/issues/chatflip/ImgVisFeat.svg)](https://github.com/chatflip/ImgVisFeat/issues) [![GitHub stars](https://img.shields.io/github/stars/chatflip/ImgVisFeat.svg)](https://github.com/chatflip/ImgVisFeat/stargazers)                                                          |
+
+ImgVisFeat is a Python library for image visualization and feature extraction, providing a comprehensive set of tools for analyzing and visualizing various image features.
+
+## Features
+
+ImgVisFeat provides the following visualization and feature extraction capabilities:
+
+- **Color Channel Visualization**: Extract and visualize individual RGB color channels
+- **Gradient Visualization**: Compute and visualize image gradients in X, Y, and combined XY directions
+  - ColorGradientVisualizer: For color images
+  - GrayGradientVisualizer: For grayscale images
+- **HoG (Histogram of Oriented Gradients)**: Visualize feature descriptors for object detection
+- **LBP (Local Binary Patterns)**: Extract texture descriptors for texture classification
+- **Keypoint Detection**: Detect and visualize keypoints using SIFT, AKAZE, or ORB algorithms
+- **Power Spectrum Analysis**: Analyze frequency domain characteristics of images
+- **CLI Tool**: Command-line interface for quick visualizations
+
+## Requirements
+
+- Python >= 3.10
+
+## Installation
+
+### Install from PyPI
+
+```bash
+# Using pip
+pip install imvf
+
+# Using uv (faster alternative)
+uv add imvf
+```
+
+### Development Installation
+
+For development, we recommend using [uv](https://docs.astral.sh/uv/):
+
+```bash
+git clone https://github.com/chatflip/ImgVisFeat.git
+cd ImgVisFeat
+make install
+
+# Install pre-commit hooks
+pre-commit install
+```
+
+## Development
+
+This project uses `make` commands for common development tasks:
+
+```bash
+# Show available commands
+make help
+
+# Run tests
+make test
+
+# Generate HTML coverage report and open in browser
+make coverage
+
+# Format code
+make format
+
+# Run linting
+make lint
+
+# Serve documentation with live reload
+make servedocs
+```
+
+For more details on development workflows, see [CLAUDE.md](CLAUDE.md).
+
+### Verify Installation
+
+```python
+import imvf
+print(imvf.__version__)
+```
+
+## Quick Start
+
+### Using the All-in-One Visualizer
+
+The `Visualizer` class provides a convenient way to apply all visualization methods at once:
+
+```python
+import imvf
+
+# Create visualizer instance
+visualizer = imvf.Visualizer()
+
+# Visualize all features and save results to a directory named after the image
+visualizer.visualize("path/to/image.jpg")
+```
+
+This will display all visualizations in OpenCV windows and save the results to a directory named `path/to/image/`.
+
+### Using Individual Visualizers
+
+You can also use individual visualizers for specific analyses:
+
+```python
+import cv2
+import imvf
+
+# Load image
+image = cv2.imread("path/to/image.jpg")
+
+# Color channel visualization
+color_channel = imvf.ColorChannelVisualizer()
+result = color_channel(image)
+cv2.imshow("Blue Channel", result.blue)
+cv2.imshow("Green Channel", result.green)
+cv2.imshow("Red Channel", result.red)
+
+# Gradient visualization (for color images)
+gradient = imvf.ColorGradientVisualizer()
+result = gradient(image)
+cv2.imshow("Gradient X", result.gradient_x)
+cv2.imshow("Gradient Y", result.gradient_y)
+cv2.imshow("Gradient XY", result.gradient_xy)
+
+# HoG visualization
+hog = imvf.HoGVisualizer()
+result = hog(image)
+cv2.imshow("HoG", result.hog)
+
+# Keypoint detection
+keypoint = imvf.KeypointVisualizer(algorithm="SIFT")  # or "AKAZE", "ORB"
+result = keypoint(image)
+cv2.imshow("Keypoints", result.keypoint)
+cv2.imshow("Rich Keypoints", result.rich_keypoint)
+```
+
+### Using the CLI
+
+ImgVisFeat provides a command-line interface for quick visualizations. The CLI uses subcommands for each visualization method:
+
+```bash
+# Visualize all features
+imvf all path/to/image.jpg
+
+# Visualize specific features
+imvf hog path/to/image.jpg
+imvf keypoint path/to/image.jpg
+imvf gradient path/to/image.jpg
+
+# Get help
+imvf --help
+
+# Get help for a specific subcommand
+imvf hog --help
+```
+
+Available subcommands:
+
+- `all`: All visualization methods
+- `color-channel`: Color channel visualization
+- `gradient`: Gradient visualization
+- `hog`: HoG (Histogram of Oriented Gradients) visualization
+- `lbp`: LBP (Local Binary Patterns) visualization
+- `keypoint`: Keypoint detection and visualization
+- `power-spectrum`: Power spectrum analysis
+
+## Documentation
+
+For full documentation, including API reference and tutorials, please visit our [documentation site](https://chatflip.github.io/ImgVisFeat/).
+
+## Project Status
+
+ImgVisFeat is a personal project created for learning and experimentation. While it's open-source and you're welcome to use and learn from it, please note that it may not be actively maintained or updated regularly.
+
+## Feedback and Questions
+
+This is a practice repository, but I'm always eager to learn. If you have any questions about the project or suggestions for improvement, feel free to [open an issue](https://github.com/chatflip/ImgVisFeat/issues) for discussion. Please understand that responses may not be immediate.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Author
+
+[chatflip](https://github.com/chatflip)
