@@ -1,0 +1,812 @@
+Metadata-Version: 2.4
+Name: wowool-entity-graph
+Version: 3.1.5
+Summary: Wowool Entity Graph
+Home-page: https://www.wowool.com/
+Author: Wowool
+Author-email: info@wowool.com
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Dynamic: author
+Dynamic: author-email
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: requires-python
+Dynamic: summary
+
+# Finding relations between entities
+
+The entity graph app produces links between entities, each link representing a relation between two entities found in the document.
+
+For example, the following can be used to find relations between a `Person` and `Company`:
+
+<sample data-uuid="entity_graph_introduction"></sample>
+
+This would produce the following output:
+
+```json
+[
+  {
+    "from": { "label": "Person", "name": "John Smith" },
+    "relation": { "label": "VP", "name": "work" },
+    "to": { "label": "Company", "name": "IKEA" }
+  },
+  {
+    "from": { "label": "Person", "name": "John Smith" },
+    "relation": { "label": "VP", "name": "visit" },
+    "to": { "label": "Company", "name": "Jysk" }
+  },
+  {
+    "from": { "label": "Person", "name": "Bella Johansson" },
+    "relation": { "label": "VP", "name": "be also work" },
+    "to": { "label": "Company", "name": "Jysk" }
+  }
+]
+```
+
+and when plotted would result in a graph such as the following:
+
+<div class="flex justify-center items-center mt-4">
+    <div class="max-w-96">
+        <img src="documentation/apps/entity-graph.png" />
+    </div>
+</div>
+
+<note>You can directly generate cypher syntax from this by adding the [Cypher app](https://www.wowool.com/docs/apps/cypher) at the end of your pipeline.</note>
+
+## Options
+
+The options are defined as:
+
+```typescript
+interface EntityGraphOptions {
+  links?: Link[];
+  nodes?: Record<str, Node>;
+  themes?: DataNode;
+  topics?: DataNode;
+}
+```
+
+with:
+
+| Property | Description                                                                                           |
+| -------- | ----------------------------------------------------------------------------------------------------- |
+| `links`  | Links between nodes                                                                                   |
+| `nodes`  | Node definitions that can be referred to in the links, where each key is an ID that can be referenced |
+| `themes` | Themes (categories) that link to a node                                                               |
+| `topics` | Topics that link to a node                                                                            |
+
+<note>All properties are optional, but at least one of the following is required to produce a result: `links`, `themes`, or `topics`.</note>
+
+### Links
+
+A link describes the nodes that will be linked to each other and their relation. It is defined as:
+
+```typescript
+interface Link {
+  from: NodeId | Node;
+  relation: NodeId | Node;
+  to: NodeId | Node;
+  scope?: string;
+  action?: string;
+}
+```
+
+with:
+
+| Property   | Description                                                   |
+| ---------- | ------------------------------------------------------------- |
+| `from`     | Describes what will be stored in the `from` node              |
+| `relation` | Describes what will be stored in the `relation` node          |
+| `to`       | Describes what will be stored in the `to` node                |
+| `scope`    | A `uri` of the scope that will be used when creating the link |
+| `action`   | Which action to take when creating a link                     |
+
+#### NodeId
+
+```typescript
+type NodeID = string;
+```
+
+A `NodeId` is a string used to identify a node. The lookup process will first the value as a node reference in the `nodes` definition, then it will check if it's a known URI (or entity) from the processing pipeline (like `Person` in the sample above). Finally, if the string is not found in neither of the above, it will be interpreted as a label, i.e. a literal string. To summarize, the string can be interpreted as a:
+
+- _Node reference_: a reference to a key within the `nodes` definition
+- _URI_: A URI of an entity, such as `Person` or `Company`
+- _Label_: A literal label
+
+### Nodes
+
+A node describes what will be captured during the document analysis.
+
+```typescript
+interface Node {
+  name?: string;
+  label?: string;
+  attributes?: Record<string, string>;
+  default?: Record<string, string>;
+  store?: string;
+}
+```
+
+<note>Name and label are both optional, but at least one of them should be specified. If only a name is used then the label will be generated using the name.</note>
+
+with:
+
+| Property     | Description                                                                                                             |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `name`       | URI of the entity that will be captured, e.g. `Company` or `Person`. The value (`John Doe`) will be used in the results |
+| `label`      | Literal string to be used as the node's label, useful for customizations, e.g. `Employee`, `Person1`                    |
+| `attributes` | Attributes to add to the nodes, e.g. `"gender"`                                                                         |
+| `store`      | Store the URI into memory so it can be used when creating link with entities outside the sentence scope                 |
+| `default`    | This is a fallback dictionary in case we still want the node to be created, even in case the `name` was not found       |
+
+<note> The `default` option can only be used in the 'to' node, as the 'from' node cannot be optional.<note>
+
+An example of the definition of the node **Person** would be:
+
+```json
+{
+  "name": "Person",
+  "label": "MyPerson",
+  "attributes": { "my_gender": "Person.gender" }
+}
+```
+
+This would yield in the output:
+
+```json
+{
+  "name": "John Smith",
+  "label": "MyPerson",
+  "my_gender": ["male"]
+}
+```
+
+#### Attributes
+
+This option specifies which attributes to add to the results of the given node. The key will be the label and the value is the content of this attribute.
+
+Example of a node where we add the sector attribute from the entity `Company` to the results.
+
+<sample data-uuid="entity_graph_attributes"></sample>
+
+#### Store
+
+This option indicates when to store uri values when processing the document, and it is used to create links that are outside the scope of a sentence.
+
+```typescript
+enum Store {
+  sentence = "sentence",
+  last_seen = "last_seen",
+  first_seen = "first_seen",
+}
+```
+
+with:
+
+| Property     | Description                                                                   |
+| ------------ | ----------------------------------------------------------------------------- |
+| `sentence`   | Default value. Only the values in the current sentence                        |
+| `last_seen`  | Actualize the value of the variable each time we find it during analysis      |
+| `first_seen` | Store the value only once, which will be the first time we find the given uri |
+
+The elements in `Store` are like _mementos_: things you have seen and want to remember at a later stage. It is used as a means to link to items that have previously been encountered in the document, but are not present in the sentence that is currently being processed.
+Put differently: it's a list of entities, where each store corresponds to an entity and contains the last or first thing you have seen of that uri type.
+
+See [Booking Reference](#booking-reference)
+
+#### Default
+
+This option specifies a `default` dictionary in case we still want the node to be created, even in case the `to` node was not found.
+
+For example in the following configuration the entity Object is optional, it does not need to be present, as sentences might or might not have objects.
+
+```json
+{
+  "nodes": {
+    "_object_": {
+      "name": "Object",
+      "optional": { "default": "NoObject", "name": "no_object" }
+    }
+  },
+  "links": [
+    {
+      "from": "Subject",
+      "to": "_object_",
+      "relation": "VerbPhrase"
+    }
+  ]
+}
+```
+
+This would yield:
+
+```json
+{
+  "from": { "label": "Subject", "name": "John Smith" },
+  "to": { "label": "NoObject", "name": "no_object" },
+  "relation": { "label": "VerbPhrase", "name": "die" }
+}
+```
+
+### Actions
+
+This will trigger some actions when we have found a valid link. At this stage we only support `link_attribute`
+
+```typescript
+enum Action {
+  link_attribute = "link_attribute",
+}
+```
+
+with:
+
+| Value            | Description                                                                                                    |
+| ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| `link_attribute` | add a attribute with the label of the `relation` node and the value of the `to` node to the `from` node entity |
+
+<note>Note that the attribute value pair will only be seen in the analysis.</note>
+
+### Scopes
+
+One of the properties in a link node is a **scope**. Scopes ensure we are not matching outside the given URI that defines the scope of matching.
+
+If no scope is provided, you will link the 'to' entity to all the 'from' entities that appear in the same sentence.
+Sometimes we do not want to do that, because we want to be more specific in the kind of relation that the entities have.
+
+See [Scopes](#scopes)
+
+### DataNode
+
+A data node is used to create multiple nodes from a list of information like the topics and the themes.
+
+It is defined as:
+
+```typescript
+interface DataNode {
+  to: NodeId | Node;
+  count?: number;
+}
+```
+
+| Property | Description                                           |
+| -------- | ----------------------------------------------------- |
+| `to`     | Name of the node to which the data should be attached |
+| `count`  | Only take the top `count` elements from the data node |
+
+<note>If we have 5 topics but we want to link only the first 2 more relevant values, then we set the count to 2.</note>
+
+### Topics
+
+Topics are the most important noun groups in your document. They provide with a short insight on what your document is about and a relevancy estimation of how prominent the topic is in the document. This property is a `DataNode`
+
+```json
+{
+  "nodes": {
+    "_doc_": { "label": "Document", "name": "document.id" }
+  },
+  "topics": {
+    "to": "_doc_"
+  }
+}
+```
+
+<note>Linking the topics to a document requires the [Topics application](https://www.wowool.com/docs/apps/topics) in your pipeline.<note>
+
+### Themes
+
+Themes are the most important the categories of the document, based on linguistic clues. They provide with a short insight on what your document is about and a relevancy estimation of how prominent the theme is in the document. This property is a `DataNode`
+
+```json
+{
+  "nodes": {
+    "_doc_": { "label": "Document", "name": "document.id" }
+  },
+  "tremes": {
+    "to": "_doc_"
+  }
+}
+```
+
+<note>Linking the themes to a document requires the [Themes application](https://www.wowool.com/docs/apps/themes) in your pipeline.</note>
+
+## Results
+
+### EntityGraphResults
+
+The `EntityGraphResults` schema is defined as a array of links.
+
+```typescript
+interface EntityGraphLink[] {
+    from : EntityGraphItem;
+    relation : EntityGraphItem;
+    to : EntityGraphItem;
+}
+```
+
+with:
+
+| Property   | Description                    |
+| ---------- | ------------------------------ |
+| `from`     | Content of the _from_ node     |
+| `relation` | Content of the _relation_ node |
+| `to`       | Content of the _to_ node       |
+
+### EntityGraphItem
+
+```typescript
+type EntityGraphItem = Record<string, string | string[]>;
+```
+
+The fields `label` and `name` are always present. Additional fields can be included if specified in the attributes. Note that the values of the requested attributes are represented as a list of strings to accommodate multiple values.
+
+## Examples
+
+### Entities
+
+Linking companies to names of people using a relation called **Person2Company**:
+
+- `Person` and `Company` are known entities produced by the entity domain
+- **Person2Company** will be a label as it is unknown as an entity at the time of processing
+
+```json
+{
+  "links": [
+    {
+      "from": "Person",
+      "relation": "Person2Company",
+      "to": "Company"
+    }
+  ]
+}
+```
+
+<sample data-uuid="entity_graph_simple"></sample>
+
+### Booking reference
+
+In this example, we leverage the `first_seen` `store` option to track a booking reference within a document. The goal is to capture the initial **BookingReference** number and associate it with the `Person` entities present in the document.
+
+```json
+{
+  "nodes": {
+    "_booking_nr_": { "name": "BookingReference", "store": "first_seen" }
+  },
+  "links": [
+    {
+      "from": "Person",
+      "to": "_booking_nr_",
+      "relation": "PersonBookingReference"
+    }
+  ]
+}
+```
+
+<sample data-uuid="entity_graph_store_first_seen"></sample>
+
+### Scopes
+
+We use the [Snippet app](https://www.wowool.com/docs/apps/snippet) to define rules for a 'work' relation between a `Person` and the shortest match to a `Company` and assign it to **ScopePersonCompany**, preventing incorrect links.
+The sample below returns only one link: `John Smith` -> `Ikea`. Without a defined scope, two links would be returned: `John Smith` -> `Ikea` and `John Smith` -> `Jysk`.
+
+<sample data-uuid="entity_graph_with_scope"></sample>
+# Finding relations between entities
+
+The entity graph app produces links between entities, each link representing a relation between two entities found in the document.
+
+For example, the following can be used to find relations between a `Person` and `Company`:
+
+<sample data-uuid="entity_graph_introduction"></sample>
+
+This would produce the following output:
+
+```json
+[
+  {
+    "from": { "label": "Person", "name": "John Smith" },
+    "relation": { "label": "VP", "name": "work" },
+    "to": { "label": "Company", "name": "IKEA" }
+  },
+  {
+    "from": { "label": "Person", "name": "John Smith" },
+    "relation": { "label": "VP", "name": "visit" },
+    "to": { "label": "Company", "name": "Jysk" }
+  },
+  {
+    "from": { "label": "Person", "name": "Bella Johansson" },
+    "relation": { "label": "VP", "name": "be also work" },
+    "to": { "label": "Company", "name": "Jysk" }
+  }
+]
+```
+
+and when plotted would result in a graph such as the following:
+
+<div class="flex justify-center items-center mt-4">
+    <div class="max-w-96">
+        <img src="documentation/apps/entity-graph.png" />
+    </div>
+</div>
+
+<note>You can directly generate cypher syntax from this by adding the [Cypher app](https://www.wowool.com/docs/apps/cypher) at the end of your pipeline.</note>
+
+## Options
+
+The options are defined as:
+
+```typescript
+interface EntityGraphOptions {
+  links?: Link[];
+  nodes?: Record<str, Node>;
+  themes?: DataNode;
+  topics?: DataNode;
+}
+```
+
+with:
+
+| Property | Description                                                                                           |
+| -------- | ----------------------------------------------------------------------------------------------------- |
+| `links`  | Links between nodes                                                                                   |
+| `nodes`  | Node definitions that can be referred to in the links, where each key is an ID that can be referenced |
+| `themes` | Themes (categories) that link to a node                                                               |
+| `topics` | Topics that link to a node                                                                            |
+
+<note>All properties are optional, but at least one of the following is required to produce a result: `links`, `themes`, or `topics`.</note>
+
+### Links
+
+A link describes the nodes that will be linked to each other and their relation. It is defined as:
+
+```typescript
+interface Link {
+  from: NodeId | Node;
+  relation: NodeId | Node;
+  to: NodeId | Node;
+  scope?: string;
+  action?: string;
+}
+```
+
+with:
+
+| Property   | Description                                                   |
+| ---------- | ------------------------------------------------------------- |
+| `from`     | Describes what will be stored in the `from` node              |
+| `relation` | Describes what will be stored in the `relation` node          |
+| `to`       | Describes what will be stored in the `to` node                |
+| `scope`    | A `uri` of the scope that will be used when creating the link |
+| `action`   | Which action to take when creating a link                     |
+
+#### NodeId
+
+```typescript
+type NodeID = string;
+```
+
+A `NodeId` is a string used to identify a node. The lookup process will first the value as a node reference in the `nodes` definition, then it will check if it's a known URI (or entity) from the processing pipeline (like `Person` in the sample above). Finally, if the string is not found in neither of the above, it will be interpreted as a label, i.e. a literal string. To summarize, the string can be interpreted as a:
+
+- _Node reference_: a reference to a key within the `nodes` definition
+- _URI_: A URI of an entity, such as `Person` or `Company`
+- _Label_: A literal label
+
+### Nodes
+
+A node describes what will be captured during the document analysis.
+
+```typescript
+interface Node {
+  name?: string;
+  label?: string;
+  attributes?: Record<string, string>;
+  default?: Record<string, string>;
+  store?: string;
+}
+```
+
+<note>Name and label are both optional, but at least one of them should be specified. If only a name is used then the label will be generated using the name.</note>
+
+with:
+
+| Property     | Description                                                                                                             |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `name`       | URI of the entity that will be captured, e.g. `Company` or `Person`. The value (`John Doe`) will be used in the results |
+| `label`      | Literal string to be used as the node's label, useful for customizations, e.g. `Employee`, `Person1`                    |
+| `attributes` | Attributes to add to the nodes, e.g. `"gender"`                                                                         |
+| `store`      | Store the URI into memory so it can be used when creating link with entities outside the sentence scope                 |
+| `default`    | This is a fallback dictionary in case we still want the node to be created, even in case the `name` was not found       |
+
+<note> The `default` option can only be used in the 'to' node, as the 'from' node cannot be optional.<note>
+
+An example of the definition of the node **Person** would be:
+
+```json
+{
+  "name": "Person",
+  "label": "MyPerson",
+  "attributes": { "my_gender": "Person.gender" }
+}
+```
+
+This would yield in the output:
+
+```json
+{
+  "name": "John Smith",
+  "label": "MyPerson",
+  "my_gender": ["male"]
+}
+```
+
+#### Attributes
+
+This option specifies which attributes to add to the results of the given node. The key will be the label and the value is the content of this attribute.
+
+Example of a node where we add the sector attribute from the entity `Company` to the results.
+
+<sample data-uuid="entity_graph_attributes"></sample>
+
+#### Store
+
+This option indicates when to store uri values when processing the document, and it is used to create links that are outside the scope of a sentence.
+
+```typescript
+enum Store {
+  sentence = "sentence",
+  last_seen = "last_seen",
+  first_seen = "first_seen",
+}
+```
+
+with:
+
+| Property     | Description                                                                   |
+| ------------ | ----------------------------------------------------------------------------- |
+| `sentence`   | Default value. Only the values in the current sentence                        |
+| `last_seen`  | Actualize the value of the variable each time we find it during analysis      |
+| `first_seen` | Store the value only once, which will be the first time we find the given uri |
+
+The elements in `Store` are like _mementos_: things you have seen and want to remember at a later stage. It is used as a means to link to items that have previously been encountered in the document, but are not present in the sentence that is currently being processed.
+Put differently: it's a list of entities, where each store corresponds to an entity and contains the last or first thing you have seen of that uri type.
+
+See [Booking Reference](#booking-reference)
+
+#### Default
+
+This option specifies a `default` dictionary in case we still want the node to be created, even in case the `to` node was not found.
+
+For example in the following configuration the entity Object is optional, it does not need to be present, as sentences might or might not have objects.
+
+```json
+{
+  "nodes": {
+    "_object_": {
+      "name": "Object",
+      "optional": { "default": "NoObject", "name": "no_object" }
+    }
+  },
+  "links": [
+    {
+      "from": "Subject",
+      "to": "_object_",
+      "relation": "VerbPhrase"
+    }
+  ]
+}
+```
+
+This would yield:
+
+```json
+{
+  "from": { "label": "Subject", "name": "John Smith" },
+  "to": { "label": "NoObject", "name": "no_object" },
+  "relation": { "label": "VerbPhrase", "name": "die" }
+}
+```
+
+### Actions
+
+This will trigger some actions when we have found a valid link. At this stage we only support `link_attribute`
+
+```typescript
+enum Action {
+  link_attribute = "link_attribute",
+}
+```
+
+with:
+
+| Value            | Description                                                                                                    |
+| ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| `link_attribute` | add a attribute with the label of the `relation` node and the value of the `to` node to the `from` node entity |
+
+<note>Note that the attribute value pair will only be seen in the analysis.</note>
+
+### Scopes
+
+One of the properties in a link node is a **scope**. Scopes ensure we are not matching outside the given URI that defines the scope of matching.
+
+If no scope is provided, you will link the 'to' entity to all the 'from' entities that appear in the same sentence.
+Sometimes we do not want to do that, because we want to be more specific in the kind of relation that the entities have.
+
+See [Scopes](#scopes)
+
+### DataNode
+
+A data node is used to create multiple nodes from a list of information like the topics and the themes.
+
+It is defined as:
+
+```typescript
+interface DataNode {
+  to: NodeId | Node;
+  count?: number;
+}
+```
+
+| Property | Description                                           |
+| -------- | ----------------------------------------------------- |
+| `to`     | Name of the node to which the data should be attached |
+| `count`  | Only take the top `count` elements from the data node |
+
+<note>If we have 5 topics but we want to link only the first 2 more relevant values, then we set the count to 2.</note>
+
+### Topics
+
+Topics are the most important noun groups in your document. They provide with a short insight on what your document is about and a relevancy estimation of how prominent the topic is in the document. This property is a `DataNode`
+
+```json
+{
+  "nodes": {
+    "_doc_": { "label": "Document", "name": "document.id" }
+  },
+  "topics": {
+    "to": "_doc_"
+  }
+}
+```
+
+<note>Linking the topics to a document requires the [Topics application](https://www.wowool.com/docs/apps/topics) in your pipeline.<note>
+
+### Themes
+
+Themes are the most important the categories of the document, based on linguistic clues. They provide with a short insight on what your document is about and a relevancy estimation of how prominent the theme is in the document. This property is a `DataNode`
+
+```json
+{
+  "nodes": {
+    "_doc_": { "label": "Document", "name": "document.id" }
+  },
+  "tremes": {
+    "to": "_doc_"
+  }
+}
+```
+
+<note>Linking the themes to a document requires the [Themes application](https://www.wowool.com/docs/apps/themes) in your pipeline.</note>
+
+## Results
+
+### EntityGraphResults
+
+The `EntityGraphResults` schema is defined as a array of links.
+
+```typescript
+interface EntityGraphLink[] {
+    from : EntityGraphItem;
+    relation : EntityGraphItem;
+    to : EntityGraphItem;
+}
+```
+
+with:
+
+| Property   | Description                    |
+| ---------- | ------------------------------ |
+| `from`     | Content of the _from_ node     |
+| `relation` | Content of the _relation_ node |
+| `to`       | Content of the _to_ node       |
+
+### EntityGraphItem
+
+```typescript
+type EntityGraphItem = Record<string, string | string[]>;
+```
+
+The fields `label` and `name` are always present. Additional fields can be included if specified in the attributes. Note that the values of the requested attributes are represented as a list of strings to accommodate multiple values.
+
+# API
+
+## Examples
+
+### Pipeline
+ 
+This script demonstrates how to use the Wowool SDK to extract entities and build an entity graph from English text.
+
+
+```python
+from wowool.sdk import Pipeline
+from wowool.utility.diagnostics import print_diagnostics
+import json
+
+text = "John Smith works for Ikea, he visited Jysk in Sweden. Bella Johansson is also working for Jysk."
+pipeline = Pipeline(
+    [
+        "english",
+        "syntax",
+        "entity",
+        {
+            "name": "entity-graph.app",
+            "options": {
+                "links": [
+                    {
+                        "from": "Person",
+                        "to": "Company",
+                        "relation": "VP",
+                    }
+                ]
+            },
+        },
+    ]
+)
+doc = pipeline(text)
+if doc.results("wowool_entity_graph"):
+    print(json.dumps(doc.results("wowool_entity_graph"), indent=2))
+else:
+    print_diagnostics(doc)
+
+```
+
+### Entity Graph
+ 
+This script demonstrates how to use the Wowool SDK to extract entities and build an entity graph from English text.
+
+
+```python
+from wowool.sdk import Pipeline
+from wowool.entity_graph import EntityGraph
+from wowool.utility.diagnostics import print_diagnostics
+import json
+
+text = "John Smith works for Ikea, he visited Jysk in Sweden. Bella Johansson is also working for Jysk."
+pipeline = Pipeline("english,entity")
+# defines a relationship: from "Person" to "Company" with the relation "VP".
+grapher = EntityGraph(
+    links=[
+        {
+            "from": "Person",
+            "to": "Company",
+            "relation": "VP",
+        }
+    ]
+)
+doc = pipeline(text)
+doc = grapher(doc)
+
+if doc.entity_graph:
+    for link in doc.entity_graph:
+        print(f"Link: {link.from_} -> ({link.relation}) ->  {link.to}")
+    # print(json.dumps(doc.entity_graph, indent=2))
+else:
+    print_diagnostics(doc)
+
+```
+
+
+
+## License
+
+In both cases you will need to acquirer a license file at https://www.wowool.com
+
+### Non-Commercial
+
+    This library is licensed under the GNU AGPLv3 for non-commercial use.  
+    For commercial use, a separate license must be purchased.  
+
+### Commercial license Terms
+
+    1. Grants the right to use this library in proprietary software.  
+    2. Requires a valid license key  
+    3. Redistribution in SaaS requires a commercial license.  
