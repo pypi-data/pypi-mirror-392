@@ -1,0 +1,26 @@
+[project]
+name = "xxjson"
+description = "Simple wrapper around yyjson"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
+dynamic = [ "version" ]
+
+[build-system]
+requires = [ "setuptools>=80", "setuptools-scm[simple]>=8"]
+build-backend = "setuptools.build_meta"
+#requires = ["meson-python>=0.15", "meson", "ninja"]
+#build-backend = "mesonpy"
+
+[tool.setuptools]
+ext-modules = [
+    {name = "xxjson.cxxjson", sources = ["xxjson/module.c", "xxjson/convert.c", "xxjson/yyjson.c"], include-dirs = ["xxjson"]}
+]
+packages = [ "xxjson" ]
+
+
+[tool.uv]
+package = true
+#no-build-isolation = true
+cache-keys = [{ file = "pyproject.toml" }, { file = "requirements.txt" }, { git = { commit = true } }, { file = "xxjson/*.c"}]
+#extra-build-dependencies = { xxjson = ["meson", "ninja", "mesonpy" ] }
