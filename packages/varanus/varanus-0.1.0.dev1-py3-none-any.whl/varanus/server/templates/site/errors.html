@@ -1,0 +1,30 @@
+{% extends "site/base.html" %}
+
+{% load i18n %}
+
+{% block page %}
+<table class="table table-bordered">
+    <thead class="table-header">
+        <tr>
+            <th>{% trans "Context" %}</th>
+            <th>{% trans "Kind" %}</th>
+            <th>{% trans "Message" %}</th>
+            <th>{% trans "Module" %}</th>
+            <th>{% trans "Timestamp" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for e in results %}
+            <tr>
+                <td>
+                    <a href="{{ e.get_absolute_url }}" data-bs-toggle="offcanvas" data-bs-target="#inspector" hx-get="{{ e.get_absolute_url }}" hx-target="#inspector-content">{{ e.context }}</a>
+                </td>
+                <td>{{ e.kind }}</td>
+                <td>{{ e.message }}</td>
+                <td>{{ e.module }}</td>
+                <td>{{ e.timestamp }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock page %}

@@ -1,0 +1,44 @@
+{% load i18n %}
+
+<table class="table table-sm">
+    <tbody>
+        <tr>
+            <th>{% trans "Host" %}</th>
+            <td>{{ object.host }}</td>
+        </tr>
+        <tr>
+            <th>{% trans "Node" %}</th>
+            <td>{{ object.node }}</td>
+        </tr>
+        <tr>
+            <th>{% trans "Request" %}</th>
+            <td>{{ object.method }} {{ object.path }}</td>
+        </tr>
+        <tr>
+            <th>{% trans "Status" %}</th>
+            <td>{{ object.http_status }}</td>
+        </tr>
+        <tr>
+            <th>{% trans "IP" %}</th>
+            <td>{{ object.ip }}</td>
+        </tr>
+        <tr>
+            <th>{% trans "User" %}</th>
+            <td>{{ object.user }}</td>
+        </tr>
+    </tbody>
+</table>
+
+{% if object.headers %}
+<h5>{% trans "Headers" %}</h5>
+<table class="table table-sm">
+    <tbody>
+        {% for name, value in object.headers.items %}
+            <tr>
+                <th>{{ name }}</th>
+                <td>{{ value }}</th>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
