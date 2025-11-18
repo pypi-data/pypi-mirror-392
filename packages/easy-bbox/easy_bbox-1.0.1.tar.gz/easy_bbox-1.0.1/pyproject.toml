@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "easy-bbox"
+version = "1.0.1"
+authors = [
+    { name="Alex-experiments" },
+]
+description = "A lightweight and easy bounding box manipulation library with Pascal VOC, COCO, and YOLO format conversions."
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.9"
+keywords = ["bounding-box", "bbox", "computer-vision", "image-processing", "object-detection", "yolo", "coco", "pascal-voc", "IoU"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering :: Image Processing",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12"
+]
+dependencies = [
+    "pydantic>=2.0.0",
+]
+
+[project.urls]
+Repository = "https://github.com/Alex-experiments/easy-bbox"
+Documentation = "https://alex-experiments.github.io/easy-bbox"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["easy_bbox*"]
+
+[tool.setuptools.package-data]
+easy_bbox = ["py.typed"]
+
+[project.optional-dependencies]
+dev = [
+    "sphinx>=7.4.7",
+    "pytest>=7.0",
+    "pytest-cov",
+    "coverage",
+    "ruff",
+    "mypy",
+    "pre-commit",
+    "twine",
+]
