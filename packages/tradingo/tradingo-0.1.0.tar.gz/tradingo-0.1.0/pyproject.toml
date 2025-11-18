@@ -1,0 +1,92 @@
+[project]
+name = "tradingo"
+dynamic = ["version"]
+authors = [
+  { name="Rory McStay", email="rory@rorymcstay.com" },
+]
+requires-python = ">= 3.11"
+description = "Instrument price store"
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+  "numpy",
+  "numba",
+  "pandas",
+  "pandera",
+  "arcticdb",
+  "PyYAML",
+  "yfinance",
+  "pandas_market_calendars",
+  "trading_ig",
+  "riskfolio-lib",
+  "tenacity",
+  "pycountry",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3.5",
+  "pytest-benchmark",
+  "black",
+  "isort",
+  "ruff>=0.11.5",
+  "mypy>=1.15.0",
+]
+research = [
+  "dtale",
+  "jupyter",
+]
+
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"tradingo.templates" = ["*.yaml"]
+
+[build-system]
+requires = [
+  "cython",
+  "numpy",
+  "setuptools>=64",
+  "setuptools_scm>=8",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+
+[project.scripts]
+tradingo-cli = "tradingo.cli:main"
+
+[tool.setuptools_scm]
+
+[tool.isort]
+profile = "black"
+
+[[tool.mypy.overrides]]
+module = [
+  "pandas",
+  "pandas.*",
+  "arcticdb",
+  "arcticdb.*",
+  "arcticdb_ext",
+  "arcticdb_ext.*",
+  "dateutil",
+  "dateutil.*", 
+  "sklearn.*",
+  "yfinance",
+  "riskfolio",
+  "yaml",
+  "setuptools",
+  "numba",
+  "pandas_market_calendars",
+  "trading_ig.*",
+  "tradingo",
+  "tradingo.*",
+  "Cython.*",
+  "dash",
+]
+ignore_missing_imports = true
