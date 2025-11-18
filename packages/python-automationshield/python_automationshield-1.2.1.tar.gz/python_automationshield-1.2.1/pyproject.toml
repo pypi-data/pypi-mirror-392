@@ -1,0 +1,37 @@
+[tool.poetry]
+name = "python-automationshield"
+version = "1.2.1"
+description = "A Python interface to AutomationShield's Arduino shields"
+authors = ["Bert Van den Abbeele"]
+license = "MIT"
+readme = "README.md"
+repository = "https://gitlab.com/mrtreasurer/python-automationshield"
+documentation = "https://python-automationshield.readthedocs.io"
+packages = [
+    { include = "automationshield", from = "src"}
+]
+include = [
+    {path = "src/automationshield/arduino/out/*", format =  ["sdist", "wheel"]}
+]
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+matplotlib = ">=3.8.2"
+numpy = ">=1.26.3"
+pyserial = ">=3.5"
+multiprocess = ">=0.70.16"
+scipy = {version = ">=1.14.1", optional = true}
+
+[tool.poetry.dev-dependencies]
+
+[tool.poetry.group.dev.dependencies]
+myst-nb = ">=1.0.0"
+sphinx-copybutton = ">=0.5.2"
+furo = ">=2024.04.27"
+
+[tool.poetry.extras]
+scipy = ["scipy"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
