@@ -1,0 +1,242 @@
+Tremors
+#######
+
+Tremors is a library for logging while collecting metrics. Tremors loggers are
+drop-in replacements for standard loggers. But Tremors loggers have metrics
+collectors that run when messages are logged. The loggers are also context
+managers. The library maintains a hierarchy of nested contexts, where all
+logs and metrics are grouped together. You can create a new hierarchy at
+anytime to group related logs.
+
+Installation
+************
+
+.. code-block:: shell
+
+   pip install tremors
+
+Usage
+*****
+
+A function can be wrapped in a logger context with the ``logged`` decorator. If
+you call the function without a logger argument, one will automatically be
+injected into it.
+
+.. code-block:: python
+
+    import logging
+
+    import tremors
+    from tremors import collector
+
+
+    @tremors.logged
+    def fn(*, logger: tremors.Logger = tremors.from_logged) -> None:
+        logger.info("hello")
+
+
+    logging.basicConfig(
+        format="Tremors > %(levelname)s:%(name)s:%(message)s",
+        level=logging.INFO,
+    )
+    fn()
+
+The context automatically logs ``entered``, and ``exited`` messages before,
+and after each function call. The logger uses the configured standard root
+logger by default to log the messages.
+
+.. code-block:: shell
+
+    Tremors > INFO:root:entered: fn
+    Tremors > INFO:root:hello
+    Tremors > INFO:root:exited: fn
+
+You may specify a standard logger by name for the Tremors logger to use as
+its underlying logger.
+
+.. code-block:: python
+
+    @tremors.logged(logger_name=__name__)
+    def fn(*, logger: tremors.Logger = tremors.from_logged) -> None:
+        logger.info("hello")
+
+
+    fn()
+
+The messages are logged by the specified underlying logger. Based on our
+standard logging configuration, the messages propagate from the underlying
+logger to the standard root logger, which emits them.
+
+.. code-block:: shell
+
+    Tremors > INFO:__main__:entered: fn
+    Tremors > INFO:__main__:hello
+    Tremors > INFO:__main__:exited: fn
+
+Next let's use a collector to measure the elapsed time since the function
+started each time a message is logged. When a message is logged, the logger
+runs the collector, and adds its updated state to the message's LogRecord. We
+use a standard logging filter to inspect and modify the record before it is
+emitted. We format the collector state, then add the formatted state to the
+``elapsed`` custom attribute of the record. Finally, we configure the root
+logger's formatter to incorporate the elapsed attribute.
+
+.. note::
+
+    The elapsed collector bundle included with Tremors has a factory for
+    creating a collector. It also has a formatter that we use in ``flt``
+    to extract the state from the record, and format it. In ``flt`` we
+    make a copy of the record, then modify and return the copy, instead of
+    modifying the original record, so as not to have side effects on other
+    loggers that may process the messasge. We also make sure to attach
+    ``flt`` to the root logger's handler, and not to the logger itself;
+    messages that originate from descendant loggers will not go through
+    logger filters when they are propagated, but they will go through handler
+    filters before they are emitted.
+
+.. code-block:: python
+
+    import copy
+    import time
+
+
+    def flt(record: logging.LogRecord) -> logging.LogRecord:
+        record = copy.copy(record)
+        elapsed = collector.elapsed.formatter(record)
+        record.elapsed = f"{elapsed} " if elapsed else ""
+        return record
+
+
+    @tremors.logged(collector.elapsed.factory())
+    def fn(*, logger: tremors.Logger = tremors.from_logged) -> None:
+        logger.info("sleeping for 1s...")
+        time.sleep(1)
+
+
+    logging.basicConfig(
+        format="%(elapsed)s%(levelname)s:%(name)s:%(message)s",
+        level=logging.INFO,
+        force=True,
+    )
+    logging.root.handlers[0].addFilter(flt)
+    fn()
+
+The messages contain elapsed information, according to the formatter
+configuration, that is sourced from the record's elapsed custom attribute.
+
+.. code-block:: shell
+
+    0.000 INFO:root:entered: fn
+    0.000 INFO:root:sleeping for 1s...
+    1.000 INFO:root:exited: fn
+
+A Logger can have any number of collectors. Here, in addition to the elapsed
+collector from the previous example, we add a counter collector. A collector
+has a level, and will only run if the message is being logged at that level or
+higher. Our counter level is ``ERROR``. We can also control which custom record
+attribute has the formatted collector state via the collector's name. This is
+useful if you have multiple of the same collector on a single logger. Here,
+we name the counter ``errors``, so ``record.errors`` will contain a formatted
+string with the running total number of errors that have been logged by a
+single function call. Finally, we an control the format of the counter state
+via the ``fmt`` argument of the counter's formatter.
+
+.. code-block:: python
+
+    def flt(record: logging.LogRecord) -> logging.LogRecord:
+        record = copy.copy(record)
+        errors = collector.counter.formatter(
+            record, name="errors", fmt="errors={counter}"
+        )
+        record.errors = f"{errors} " if errors else ""
+        elapsed = collector.elapsed.formatter(record)
+        record.elapsed = f"{elapsed} " if elapsed else ""
+        return record
+
+
+    @tremors.logged(
+        collector.counter.factory(name="errors", level=logging.ERROR),
+        collector.elapsed.factory(),
+    )
+    def fn(*, logger: tremors.Logger = tremors.from_logged) -> None:
+        logger.info("hello")
+        time.sleep(1)
+        logger.error("uh-ho!")
+
+
+    logging.basicConfig(
+        format="%(elapsed)s%(errors)s%(levelname)s:%(name)s:%(message)s",
+        level=logging.INFO,
+        force=True,
+    )
+    logging.root.handlers[0].addFilter(flt)
+    fn()
+
+The messages contain information from both collectors.
+
+.. code-block:: shell
+
+    0.000 errors=0 INFO:root:entered: fn
+    0.000 errors=0 INFO:root:hello
+    1.001 errors=1 ERROR:root:uh-ho!
+    1.001 errors=1 INFO:root:exited: fn
+
+In the previous example, a new counter collector was used each time the
+function is called. Let's reuse the same collector to keep a tally of errors
+across *all* calls to the function.
+
+.. code-block:: python
+
+    fn_errors = collector.counter.factory(name="errors", level=logging.ERROR)
+
+
+    @tremors.logged(fn_errors)
+    def fn(*, logger: tremors.Logger = tremors.from_logged) -> None:
+        logger.error("uh-ho!")
+
+
+    fn()
+    fn()
+
+The error count doesn't reset in the second function call.
+
+.. code-block:: shell
+
+    errors=0 INFO:root:entered: fn
+    errors=1 ERROR:root:uh-ho!
+    errors=1 INFO:root:exited: fn
+    errors=1 INFO:root:entered: fn
+    errors=2 ERROR:root:uh-ho!
+    errors=2 INFO:root:exited: fn
+
+Another way we can tally the count across all function calls is to pass the
+same logger with each call.
+
+.. code-block:: python
+
+    def fn(*, logger: tremors.Logger) -> None:
+        logger.error("uh-ho!")
+
+
+    with tremors.Logger(
+        collector.counter.factory(name="errors", level=logging.ERROR),
+        name="context",
+    ) as logger:
+        fn(logger=logger)
+        fn(logger=logger)
+
+We only get entering and exiting messages for the context block. But the
+single logger used in both function calls maintains its state between calls.
+
+.. code-block:: shell
+
+    errors=0 INFO:root:entered: context
+    errors=1 ERROR:root:uh-ho!
+    errors=2 ERROR:root:uh-ho!
+    errors=2 INFO:root:exited: context
+
+See the `collector module`_ in the full `documentation`_ for how you can
+define your own collectors, and bundles.
+
+.. _documentation: https://tremors.readthedocs.io/en/latest
+.. _collector module: https://tremors.readthedocs.io/en/latest/#module-tremors.collector
