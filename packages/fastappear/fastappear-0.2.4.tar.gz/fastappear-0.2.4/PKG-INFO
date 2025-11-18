@@ -1,0 +1,145 @@
+Metadata-Version: 2.4
+Name: fastappear
+Version: 0.2.4
+Summary: Add your description here
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: asyncpg>=0.30.0
+Requires-Dist: fastapi[standard]>=0.121.2
+Requires-Dist: gunicorn>=23.0.0
+Requires-Dist: httpx>=0.28.1
+Requires-Dist: passlib[bcrypt]>=1.7.4
+Requires-Dist: pydantic[email]>=2.12.4
+Requires-Dist: pydantic-settings>=2.12.0
+Requires-Dist: pyjwt>=2.10.1
+Requires-Dist: pytest>=9.0.1
+Requires-Dist: pytest-asyncio>=1.3.0
+Requires-Dist: pytest-cov>=7.0.0
+Requires-Dist: python-dotenv>=1.2.1
+Requires-Dist: python-multipart>=0.0.20
+Requires-Dist: sqlalchemy>=2.0.44
+Requires-Dist: sqlmodel>=0.0.27
+Requires-Dist: uvicorn[standard]>=0.38.0
+Requires-Dist: importlib>=1.0.4
+Requires-Dist: aiosqlite>=0.21.0
+Dynamic: license-file
+
+# fastAppear
+
+fastAppear is a small FastAPI project that provides a starting template for building REST APIs with async SQLModel + SQLAlchemy, JWT-based authentication, and a clean project layout.
+
+This repository includes:
+- FastAPI application with a simple lifespan handler and middleware
+- Async database helper utilities using SQLAlchemy async engine + SQLModel
+- Simple logger with colored console output
+- Sample auth endpoints (placeholders), a health endpoint, and a documented OpenAPI UI
+
+---
+
+## Table of Contents
+- Features
+- Getting started
+	- Prerequisites
+	- Installation
+	- Environment variables (.env)
+- Running the app
+- Testing
+- Project structure
+- Contributing
+- License
+
+---
+
+## Features
+- FastAPI app with startup/shutdown lifecycle handling
+- Async DB setup (SQLAlchemy async + SQLModel)
+- JWT configuration via environment variables
+- CORS middleware and request timing middleware
+- Ready-to-extend router placeholders for auth
+
+## Getting started
+
+### Prerequisites
+- Python 3.11 or newer
+- (Optional) Poetry for dependency management or use pip with a virtualenv
+
+### Installation (recommended: Poetry)
+```zsh
+uv sync
+```
+
+### Environment variables (.env)
+Copy the example `.env` file and fill values for your environment. Example variables used by the app:
+
+- DB_URI (required): Database connection string, e.g. `postgresql://user:pass@localhost:5432/fastappear_db` or `sqlite+aiosqlite:///./dev.db`
+- ROOT_PATH (optional): App root path — used if deploying behind a reverse proxy
+- LOGGING_LEVEL: `DEBUG`/`INFO`/`WARNING`/`ERROR`/`CRITICAL`
+- JWT_SECRET_KEY (required): A secure secret for JWT signing.
+- JWT_ALGORITHM: default `HS512`
+- JWT_ACCESS_TOKEN_EXPIRE_MINUTES: default `720`
+- JWT_REFRESH_TOKEN_EXPIRE_DAYS: default `7`
+
+Tip: You can generate a secure secret via Python `secrets.token_urlsafe(64)`:
+```zsh
+python -c "import secrets; print(secrets.token_urlsafe(64))"
+```
+
+---
+
+## Running the app
+There are two common ways to run the app locally.
+
+```zsh
+gunicorn -k uvicorn.workers.UvicornWorker -c gunicorn_conf.py src.main:app
+```
+
+Open the following URLs:
+- API docs: http://127.0.0.1:8000/docs
+- Health: http://127.0.0.1:8000/
+
+---
+
+## Testing
+Run the tests with pytest:
+```zsh
+pytest -q
+```
+
+Note: The repository includes `pytest` and `pytest-asyncio`. If you plan to test DB integration, configure a test DB and pass DB_URI in your environment.
+
+---
+
+## Project structure
+Key files and folders:
+- `src/main.py` — FastAPI app entry point (lifespan, middleware, router configuration)
+- `src/config.py` — Pydantic-based settings and `.env` config
+- `src/utils/db.py` — Async DB engine, session factory, and init helpers
+- `src/utils/logger.py` — Configured logger with colored output
+- `src/static_values/` — (optional) constant/value definitions used across the app
+- `test/` — tests for the project
+
+---
+
+## Contributing
+Contributions are welcome. A few suggestions:
+- Open a GitHub issue if you'd like to propose a significant change
+- For small fixes or features, submit a PR against `main`
+- Implement features in small, reviewable changes and include tests
+
+Developer tips:
+- The `scripts/` directory contains helper scripts to scaffold modules and tests.
+- The `dev_docs/commands.md` file has commands and run/debug tips for development.
+
+---
+
+## Notes & TODOs
+- The repository contains placeholders for auth routers and a placeholder `create_default_admin_if_missing` function. Replace these with your production logic and migrations as needed.
+- For any production deployment, avoid storing secrets in `.env` files and use a secrets manager instead (AWS Secrets Manager, Hashicorp Vault, etc.).
+
+---
+
+## License
+This project uses the repository's `LICENSE` file — follow the project's license for any reuse.
+
+---
