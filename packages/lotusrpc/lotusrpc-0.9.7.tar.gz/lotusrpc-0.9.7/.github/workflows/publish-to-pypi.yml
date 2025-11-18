@@ -1,0 +1,152 @@
+name: Publish LotusRPC 🌼 to PyPI and TestPyPI
+
+on: push # yamllint disable-line rule:truthy
+
+jobs:
+  build:
+    name: Build LotusRPC 🌼 distribution 📦
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+      - name: Install pypa/build
+        run: python3 -m pip install build --user
+      - name: Build a binary wheel and a source tarball
+        run: python3 -m build
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@v5
+        with:
+          name: python-package-distributions
+          path: dist/
+
+  release-notes:
+    name: Build and commit release notes
+    if: startsWith(github.ref, 'refs/tags/') # only build release notes on tag pushes
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+          ref: main
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install Python requirements
+        run: pip install -r requirements/dev.txt
+      - name: Install LotusRPC
+        # needed for towncrier to retrieve the version
+        run: pip install .
+      - name: Build release notes
+        run: towncrier build --yes
+      - name: Collect release notes artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: release-notes
+          path: CHANGES.md
+      - name: Push release notes
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: Release notes
+          branch: main
+          file_pattern: "CHANGES.md changes/*"
+
+  publish-to-pypi:
+    name: Publish LotusRPC 🌼 to PyPI
+    if: startsWith(github.ref, 'refs/tags/') # only publish to PyPI on tag pushes
+    needs:
+      - build
+      - release-notes
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/lotusrpc
+    permissions:
+      id-token: write # IMPORTANT: mandatory for trusted publishing
+
+    steps:
+      - name: Download all the dists
+        uses: actions/download-artifact@v6
+        with:
+          name: python-package-distributions
+          path: dist/
+      - name: Publish distribution 📦 to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    name: Sign LotusRPC 🌼 with Sigstore and upload them to GitHub Release
+    needs:
+      - publish-to-pypi
+      - release-notes
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # IMPORTANT: mandatory for making GitHub Releases
+      id-token: write # IMPORTANT: mandatory for sigstore
+
+    steps:
+      - name: Download all the dists
+        uses: actions/download-artifact@v6
+        with:
+          name: python-package-distributions
+          path: dist/
+      - name: Download release notes
+        uses: actions/download-artifact@v6
+        with:
+          name: release-notes
+          path: CHANGES.md
+      - name: Sign the dists with Sigstore
+        uses: sigstore/gh-action-sigstore-python@v3.1.0
+        with:
+          inputs: >-
+            ./dist/*.tar.gz
+            ./dist/*.whl
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create
+          "$GITHUB_REF_NAME"
+          --repo "$GITHUB_REPOSITORY"
+          --notes ""
+      - name: Upload artifact signatures to GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: gh release upload "$GITHUB_REF_NAME" dist/** CHANGES.md --repo "$GITHUB_REPOSITORY"
+
+  publish-to-testpypi:
+    name: Publish LotusRPC 🌼 to TestPyPI
+    if: github.ref == 'refs/heads/main'
+    needs:
+      - build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/lotusrpc
+
+    permissions:
+      id-token: write # IMPORTANT: mandatory for trusted publishing
+
+    steps:
+      - name: Download all the dists
+        uses: actions/download-artifact@v6
+        with:
+          name: python-package-distributions
+          path: dist/
+      - name: Publish distribution 📦 to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
+          repository-url: https://test.pypi.org/legacy/

@@ -1,0 +1,49 @@
+name: Reviewdog
+on: [pull_request] # yamllint disable-line rule:truthy
+jobs:
+  Reviewdog:
+    name: Reviewdog
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Install requirements
+        run: |
+          pip install -r requirements/dev.txt
+          pip install -r requirements/package.txt
+      - name: towncrier
+        uses: tzijnge/action-towncrier@0.9.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          fail_level: any
+      - name: MyPy
+        uses: tsuyoshicho/action-mypy@v5
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          level: error
+          fail_on_error: true
+      - name: PyLint
+        uses: dciborow/action-pylint@0.1.0
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          level: error
+          glob_pattern: src
+          fail_on_error: true
+      - name: yamllint
+        uses: reviewdog/action-yamllint@v1.21.0
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          fail_level: any
+      - name: markdownlint
+        uses: reviewdog/action-markdownlint@v0.26.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          fail_level: any
+          markdownlint_flags: ". -i external -i changes -i examples/stm32_nucleo_l496/**/License.md"
