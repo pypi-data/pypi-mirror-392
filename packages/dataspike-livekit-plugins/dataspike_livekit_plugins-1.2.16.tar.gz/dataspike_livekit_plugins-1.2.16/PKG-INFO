@@ -1,0 +1,60 @@
+Metadata-Version: 2.4
+Name: dataspike-livekit-plugins
+Version: 1.2.16
+Summary: Dataspike deepfake detection plugin for LiveKit Agents
+Project-URL: Documentation, https://docs.dataspike.io
+Project-URL: Website, https://dataspike.io/
+Project-URL: Source, https://github.com/dataspike-io/agents
+Author-email: LiveKit <hello@livekit.io>
+License-Expression: Apache-2.0
+Keywords: dataspike,livekit,realtime,video,webrtc
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Multimedia :: Video
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Requires-Python: >=3.9.0
+Requires-Dist: betterproto==2.0.0b6
+Requires-Dist: livekit-agents>=1.2.15
+Requires-Dist: protobuf>=3.20.0
+Description-Content-Type: text/markdown
+
+# Dataspike Deepfake Detection Plugin for LiveKit Agents
+
+This plugin integrates [Dataspike](https://dataspike.io/) with LiveKit Agents to provide **real-time deepfake detection**.  
+It enables detection of synthetic or manipulated media during live or recorded video streams.
+
+## Installation
+
+```bash
+pip install dataspike-livekit-plugins
+```
+
+## Prerequisites
+
+You’ll need a **Dataspike API key**. Set it as an environment variable before running your agent:
+
+```bash
+export DATASPIKE_API_KEY="your_api_key_here"
+```
+
+## Usage Example
+
+```python
+from livekit.plugins import dataspike
+from livekit.agents import AgentSession, Agent
+
+async def entrypoint(ctx):
+    await ctx.connect()
+    session = AgentSession(...)
+    detector = dataspike.DataspikeDetector()
+    await detector.start(session, room=ctx.room)
+    await session.start(agent=Agent(instructions="Talk to me!"), room=ctx.room)
+```
+ 
+## Links
+
+- [Dataspike API](https://docs.dataspike.io/api)
+- [LiveKit Agents SDK](https://github.com/livekit/agents)
