@@ -1,0 +1,69 @@
+Metadata-Version: 2.4
+Name: dataerai
+Version: 0.1.0
+Summary: Portal CLI and API
+Home-page: https://github.com/dataerai/datafed
+Author: Dataerai, LLC
+Author-email: info@dataerai.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Description-Content-Type: text/markdown
+Requires-Dist: protobuf>=5.27.1
+Requires-Dist: pyzmq>=16
+Requires-Dist: wget>=3
+Requires-Dist: requests>=2
+Requires-Dist: click>=7
+Requires-Dist: prompt_toolkit>=2
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: requires-dist
+Dynamic: summary
+
+# Description
+
+Dataerai is a federated scientific data management system developed by Oak Ridge
+National Laboratories to facilitate FAIR data practices within supported
+experimental, compute, and analytics environments. The Dataerai Python package
+provides both a command-line-interface (CLI) and a programming API for
+interacting with Dataerai services.
+
+# Developers
+
+For running dataerai directly from the source folder located in the Dataerai
+GitHub repository, without running a pip install of the package. Activate the
+python env. This might be installed at /opt/dataerai/dependencies/python/bin if
+you used Dataerai's provided dependency install scripts with the default
+location.
+
+```
+source /opt/dataerai/dependencies/python/bin/activate
+```
+
+Run the following from the root of the Dataerai repo. The generate_dataerai 
+script will generate default settings. the ENABLE_PYTHON_CLIENT is to make
+sure you actually build the python client. Many other default flags may be
+turned on, you can disable them if needed.
+
+The build target will "pydataerai" is needed for compiling the protobuf files
+to python, you will need protobuf to be installed.
+
+NOTE - You will need to rerun this command any times changes are made to the
+.proto files.
+
+```
+./scripts/generate_dataerai.sh
+/opt/dataerai/dependencies/bin/cmake -S. -B build -DENABLE_PYTHON_CLIENT=ON
+/opt/dataerai/dependencies/bin/cmake --build build --target pydataerai
+```
+
+Move into the python/dataerai_pkg folder and then you can execute the python
+cli tool directly with.
+
+```
+PYTHON_PATH=. ./scripts/dataerai
+```
