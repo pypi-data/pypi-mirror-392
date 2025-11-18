@@ -1,0 +1,104 @@
+# yf_simple_fetcher
+
+A simple Python library to fetch historical stock data from Yahoo Finance (`yfinance`) with flexible intervals and clean, ready-to-use DataFrames.
+
+---
+
+## Features
+
+* Fetch **ready-to-use data** for any stock by default.
+* Supports **custom intervals** like 1min, 15min, hourly, daily.
+* Automatically handles `yfinance` MultiIndex issues.
+* Returns clean `pandas.DataFrame` with datetime index and simple column names.
+* Easy to extend with custom intervals or periods.
+
+---
+
+## Installation
+
+```bash
+pip install yf-simple-fetcher
+```
+
+---
+
+## Usage
+
+### Basic Usage (1-year hourly data)
+
+```python
+from yf_simple_fetcher import get_data
+
+# 1-year hourly data
+df_hourly = get_data("AAPL", "hourly")
+print(df_hourly.head())
+```
+
+### Custom Intervals
+
+```python
+# 2-year daily data
+df_daily = get_data("AAPL", "daily")
+
+# Last month, 15-minute data
+df_15min = get_data("AAPL", "15min")
+
+# Last week, 1-minute data
+df_1min = get_data("AAPL", "1min")
+```
+
+### Available Presets
+
+By default, the library includes:
+
+```python
+interval_periods = {
+    "hourly": {"interval": "1h", "start": datetime.now() - timedelta(days=365), "end": datetime.now()},
+    "daily": {"interval": "1d", "start": datetime.now() - timedelta(days=730), "end": datetime.now()},
+    "15min": {"interval": "15m", "start": datetime.now() - timedelta(days=30), "end": datetime.now()},
+}
+```
+
+You can **add your own presets** easily by updating the `interval_periods` dictionary.
+
+---
+
+## Example Output
+
+```
+                       Open      High       Low     Close     Volume
+2024-01-10 14:00    147.23    148.12    146.80    147.90    4556123
+2024-01-10 15:00    147.90    148.55    147.44    148.30    3894411
+...
+```
+
+---
+
+## Installation for Development (optional)
+
+If you want to edit or extend the library locally:
+
+```bash
+git clone https://github.com/devwithmpho/yf_simple_fetcher.git
+cd yf_simple_fetcher
+pip install -e .
+```
+
+---
+
+## Dependencies
+
+* [yfinance](https://pypi.org/project/yfinance/)
+* [pandas](https://pypi.org/project/pandas/)
+
+---
+
+## License
+
+MIT License. See [LICENSE](LICENSE) for details.
+
+---
+
+## Author
+
+Mpho
