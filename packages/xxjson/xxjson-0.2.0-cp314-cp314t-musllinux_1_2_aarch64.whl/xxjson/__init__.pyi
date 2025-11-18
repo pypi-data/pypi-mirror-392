@@ -1,0 +1,6 @@
+from typing import Any
+from collections.abc import Buffer, Mapping
+
+def loads(buf: Buffer) -> dict[str, Any]: ...
+
+def dumps(obj: Mapping[str, Any]) -> bytes: ...
