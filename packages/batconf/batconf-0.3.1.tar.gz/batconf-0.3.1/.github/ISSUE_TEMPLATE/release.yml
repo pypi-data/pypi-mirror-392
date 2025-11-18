@@ -1,0 +1,27 @@
+name: Release Ticket
+description: Template for release tickets
+title: "Release: VERSION_NUMBER"
+labels: ["Release"]
+
+
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version Number
+      description: "The version to be released (format: vX.X.X)"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: release-tasks
+    attributes:
+      label: ToDo
+      options:
+        - label: Update dev release guide to include publishing release notes
+        - label: Update version
+        - label: Change release notes date from TBD to today's date
+        - label: Tag the commit for version
+        - label: Add a new commit to update version to VERSION_NUMBER-dev
+        - label: check out VERSION_NUMBER, build and publish to PyPi
+        - label: add to [github releases](https://github.com/lundybernard/batconf/releases)

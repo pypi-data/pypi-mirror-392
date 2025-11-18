@@ -1,0 +1,103 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "batconf"
+version = "0.3.1"
+description = "Application configuration tool from the BAT project"
+authors = [
+    {name = 'Lundy Bernard', email = 'lundy.bernard@gmail.com'},
+    {name = 'Lauren Moore', email = 'donotreply@no.com'},
+]
+license = {file = 'LICENSE'}
+readme = "README.md"
+requires-python = '>=3.10'
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Intended Audience :: Developers',
+    'Programming Language :: Python :: 3',
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: Free Threading",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    'Operating System :: OS Independent',
+    'Operating System :: POSIX :: Linux',
+    'Operating System :: MacOS',
+    'Operating System :: Microsoft :: Windows',
+]
+
+[project.urls]
+documentation = "https://batconf.readthedocs.io/en/latest/"
+repository = "https://github.com/lundybernard/batconf/"
+issues = 'https://github.com/lundybernard/batconf/issues'
+changelog = 'https://batconf.readthedocs.io/en/latest/changelog.html'
+
+
+[project.optional-dependencies]
+# optional extras for users:
+yaml = ['pyyaml']
+toml = ['toml ; python_version <= "3.10"']
+
+[dependency-groups]
+# optional dev dependencies:
+dev = [
+    "coverage",
+    "flake8",
+    "mypy",
+    "nbconvert",
+    "pytest",
+    "pytest-cov",
+    "types-PyYAML",
+]
+
+build = [
+    'hatch',
+    'twine',
+]
+
+# optional documentation dependencies
+docs = [
+    'myst_parser',
+    'sphinx',
+    'sphinx_autodoc_typehints',
+    'sphinxext-opengraph',
+    'sphinx_design',
+    'sphinx-rtd-theme',
+    'matplotlib',  # for social preview cards
+    'diagrams',
+]
+
+
+# === Testing === #
+[tool.pytest.ini_options]
+log_level = "INFO"
+addopts = "--cov=batconf --cov-report=term --cov-report=xml"
+python_classes = '*Tests'
+python_files = ["*_test.py", "*_pytest.py", "test_*.py"]
+
+[tool.coverage.report]
+fail_under = 100
+skip_covered = true
+show_missing = true
+skip_empty = true
+
+
+# === Formatting === #
+[tool.flake8]
+max-line-length = "79"
+max-complexity = 10
+
+[tool.ruff]
+line-length = 79
+[tool.ruff.format]
+quote-style = 'single'
+[tool.ruff.lint]
+ignore = ['F401']
+
+# === Type Checking === #
+[tool.mypy]
+exclude = "runcli.py"
