@@ -1,0 +1,52 @@
+[project]
+name = "rname"
+version = "1.0.0-beta.2"
+description = "Get random first/last name"
+readme = "README.md"
+authors = [
+    { name = "Adam Walkiewicz", email = "aj.walkiewicz@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "jsonschema>=4.25.1",
+]
+
+keywords = ["python", "rand", "name", "randname"]
+classifiers = [
+  # How mature is this project?
+  #   3 - Alpha
+  #   4 - Beta
+  #   5 - Production/Stable
+  "Development Status :: 4 - Beta",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+]
+
+[project.urls]
+Documentation = "https://ajwalkiewicz.github.io/randname"
+Repository = "https://github.com/ajwalkiewicz/randname"
+Issues = "https://github.com/ajwalkiewicz/randname/issues"
+
+[build-system]
+requires = ["uv_build>=0.9.7,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "randname"
+module-root = "src"
+
+
+[dependency-groups]
+dev = [
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.6.23",
+    "mkdocstrings[python]>=0.30.1",
+    "mypy>=1.18.2",
+    "pytest>=9.0.0",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.14.4",
+    "types-jsonschema>=4.25.1.20251009",
+]
