@@ -1,0 +1,35 @@
+[project]
+name = "biotrackr"
+version = "0.1.0"
+description = "This package is used to get updates on bio-related papers and softwares."
+authors = [
+    { name = "Matteo Miotto", email = "miotsdata@gmail.com" },
+]
+dependencies = [
+    "pyyaml>=6.0.3",
+    "requests>=2.32.5",
+    "Jinja2>=3.1.6",
+    "platformdirs>=4.5.0",
+    "sqlalchemy>=2.0.44",
+]
+requires-python = ">=3.10"
+readme = "README.md"
+
+[project.license]
+text = "MIT"
+
+[project.scripts]
+biotrackr = "biotrackr.cli:main"
+
+[build-system]
+requires = [
+    "pdm-backend",
+]
+build-backend = "pdm.backend"
+
+[tool.pdm]
+distribution = true
+include = [
+    "src/biotrackr/templates/**",
+    "src/biotrackr/config/**",
+]
