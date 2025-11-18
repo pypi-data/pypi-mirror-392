@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriftLock Dashboard - Flamehaven Doc-Sanity</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>🎯 DriftLock Dashboard</h1>
+        <p class="subtitle">Flamehaven-Doc-Sanity v1.3.0+ | S-GRADE Certified</p>
+    </header>
+
+    <main class="container">
+        <!-- Current Status Panel -->
+        <section class="panel status-panel">
+            <h2>📊 Current Status</h2>
+            <div class="status-grid">
+                <div class="metric-card" id="jsd-card">
+                    <div class="metric-label">JSD Score</div>
+                    <div class="metric-value" id="jsd-score">--</div>
+                    <div class="metric-subtitle">Jensen-Shannon Divergence</div>
+                </div>
+                <div class="metric-card" id="severity-card">
+                    <div class="metric-label">Severity</div>
+                    <div class="metric-value" id="severity">--</div>
+                    <div class="metric-subtitle">Drift Classification</div>
+                </div>
+                <div class="metric-card" id="dimensions-card">
+                    <div class="metric-label">Affected Dimensions</div>
+                    <div class="metric-value" id="affected-count">--</div>
+                    <div class="metric-subtitle" id="dimension-list">--</div>
+                </div>
+            </div>
+            <div class="recommendation" id="recommendation">
+                ⏳ Awaiting configuration check...
+            </div>
+        </section>
+
+        <!-- Configuration Tester -->
+        <section class="panel">
+            <h2>🔧 Configuration Tester</h2>
+            <form id="config-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="integrity">Integrity</label>
+                        <input type="number" id="integrity" step="0.01" min="0" max="1" value="0.90" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="governance">Governance</label>
+                        <input type="number" id="governance" step="0.01" min="0" max="1" value="0.90" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reliability">Reliability</label>
+                        <input type="number" id="reliability" step="0.01" min="0" max="1" value="0.88" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="maintainability">Maintainability</label>
+                        <input type="number" id="maintainability" step="0.01" min="0" max="1" value="0.90" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="security">Security</label>
+                        <input type="number" id="security" step="0.01" min="0" max="1" value="0.88" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">🔍 Check for Drift</button>
+                <button type="button" id="load-baseline" class="btn-secondary">📋 Load Baseline</button>
+            </form>
+        </section>
+
+        <!-- Threshold Configuration -->
+        <section class="panel">
+            <h2>⚙️ Thresholds</h2>
+            <div class="threshold-grid" id="threshold-display">
+                <div class="threshold-item">
+                    <span class="threshold-label none">None</span>
+                    <span class="threshold-value" id="threshold-none">--</span>
+                </div>
+                <div class="threshold-item">
+                    <span class="threshold-label minor">Minor</span>
+                    <span class="threshold-value" id="threshold-minor">--</span>
+                </div>
+                <div class="threshold-item">
+                    <span class="threshold-label moderate">Moderate</span>
+                    <span class="threshold-value" id="threshold-moderate">--</span>
+                </div>
+                <div class="threshold-item">
+                    <span class="threshold-label severe">Severe</span>
+                    <span class="threshold-value" id="threshold-severe">--</span>
+                </div>
+                <div class="threshold-item">
+                    <span class="threshold-label critical">Critical</span>
+                    <span class="threshold-value">≥ Severe</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Historical Trends -->
+        <section class="panel">
+            <h2>📈 Historical Trends</h2>
+            <div class="chart-controls">
+                <button id="clear-history" class="btn-danger">🗑️ Clear History</button>
+            </div>
+            <canvas id="drift-chart"></canvas>
+            <div class="history-stats">
+                <span id="history-count">0 checks recorded</span>
+            </div>
+        </section>
+
+        <!-- Baseline Information -->
+        <section class="panel">
+            <h2>📋 Golden Baseline</h2>
+            <div id="baseline-info" class="baseline-grid">
+                <p class="loading">Loading baseline configuration...</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Flamehaven-Doc-Sanity Dashboard | Architecture Purity: Ω = 0.9500 | Status: PRODUCTION-READY</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

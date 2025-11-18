@@ -1,0 +1,29 @@
+# Golden Baseline Configuration for Drift Detection
+# This defines the target state for the Flamehaven-Doc-Sanity system
+
+golden_baseline:
+  version: "1.2.0"
+
+  # Architecture purity dimensions
+  dimensions:
+    integrity: 0.90
+    governance: 0.90
+    reliability: 0.88
+    maintainability: 0.90
+    security: 0.88
+
+  # Jensen-Shannon Divergence tolerance
+  # Alert if JSD exceeds this threshold
+  jsd_tolerance: 0.04
+
+  # Failure threshold (beyond this, block deployment)
+  jsd_failure_threshold: 0.08
+
+  # Minimum architecture purity score
+  min_architecture_purity: 0.9500
+
+  # SR9 semantic resonance minimum
+  sr9_minimum: 0.93
+
+  # Maximum divergence index
+  di2_maximum: 0.05
