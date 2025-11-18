@@ -1,0 +1,36 @@
+[project]
+name = "briefconf"
+version = "0.1.4"
+description = "A lightweight configuration base class for small to medium-sized Python projects."
+readme = "README.md"
+authors = [
+    { name = "AhFei", email = "vgamebox@outlook.com" }
+]
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = { text = "MIT" }
+dependencies = [
+    "ruamel-yaml>=0.18.14",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "ruff>=0.12.3",
+    "twine>=6.1.0",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["A", "B", "C", "E", "F", "G", "I", "ASYNC", "INT", "SLF", "ARG", "T20"]
+ignore = ["ARG001", "ARG002", "F401", "UP045", "SIM910"]
+extend-select = ["SIM", "PERF", "UP", "PT"]
