@@ -1,0 +1,25 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: bucketstore
+  namespace: default
+spec:
+  type: bindings.aws.s3
+  version: v1
+  metadata:
+  - name: bucket
+    value: "podcast-adf258"
+  - name: region
+    value: "us-east-1"
+  - name: accessKey
+    secretKeyRef:
+      name: deepbrief-secrets
+      key: AWS_ACCESS_KEY_ID
+  - name: secretKey
+    secretKeyRef:
+      name: deepbrief-secrets
+      key: AWS_SECRET_ACCESS_KEY
+  - name: forcePathStyle
+    value: "false"
+  - name: disableSSL
+    value: "false"

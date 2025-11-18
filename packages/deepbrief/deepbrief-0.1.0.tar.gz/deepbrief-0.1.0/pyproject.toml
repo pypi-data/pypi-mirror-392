@@ -1,0 +1,108 @@
+[build-system]
+requires = ["setuptools>=68", "setuptools_scm[toml]>=8", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "deepbrief"
+dynamic = ["version"]
+description = "A workflow-driven system for converting PDF documents into structured narrative and audio briefings."
+readme = "README.md"
+license = { text = "Apache-2.0" }
+authors = [
+  { name = "Roberto Rodriguez", email = "9653181+Cyb3rWard0g@users.noreply.github.com" }
+]
+requires-python = ">=3.13"
+
+dependencies = [
+  "dapr>=1.16,<1.17",
+  "dapr-ext-workflow>=1.16,<1.17",
+  "dapr-agents>=0.10,<0.11",
+  "fastapi>=0.121,<0.122",
+  "pypdf>=6.2,<7.0",
+  "pyyaml>=6.0,<7.0",
+  "arxiv>=2.3,<3.0",
+  "elevenlabs>=2.22,<3.0",
+  "pydub>=0.25,<0.26",
+  "python-dotenv>=1.0,<2.0",
+  "audioop-lts>=0.2,<0.3",
+  "uvicorn[standard]>=0.38,<0.39",
+  "docling>=2.61,<3.0",
+]
+
+classifiers = [
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.13",
+]
+[project.scripts]
+deepbrief = "deepbrief:main"
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.4,<9.0",
+  "pytest-asyncio>=0.23,<0.24",
+  "ruff>=0.6,<0.7",
+  "black>=24.10,<25.0",
+  "mypy>=1.11,<1.12",
+  "pytest-cov>=5.0,<6.0",
+]
+release = [
+  "build>=1.2,<2.0",
+  "twine>=5.0,<6.0",
+  "packaging>=24.1,<25.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/Cyb3rWard0g/deepbrief"
+Issues = "https://github.com/Cyb3rWard0g/deepbrief/issues"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools_scm]
+version_scheme = "guess-next-dev"
+local_scheme = "node-and-date"
+write_to = "src/deepbrief/_version.py"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-ra"
+pythonpath = ["src"]
+norecursedirs = ["repos", ".venv"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src", "tests"]
+extend-exclude = [".venv", ".tox", "build", "dist", "__pycache__", ".eggs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = []
+preview = true
+
+[tool.ruff.lint.isort]
+known-first-party = ["deepbrief"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/deepbrief/_version.py" = ["ALL"]
+
+[tool.black]
+target-version = ["py311", "py312", "py313"]
+line-length = 100
+exclude = '''
+/(
+  \.venv
+ | \.tox
+ | build
+ | dist
+ | __pycache__
+ | \.eggs
+ | src/deepbrief/_version\.py
+)/
+'''

@@ -1,0 +1,18 @@
+### Start Research Podcast Workflow
+POST http://localhost:8080/workflows/research-podcast
+Content-Type: application/json
+
+{
+  "podcast_name": "AI Security Voice",
+  "host_name": "Test Host",
+  "participants": [],
+  "dialogue_max_rounds": 4,
+  "output_directory": "output",
+  "audio_model": "eleven_flash_v2_5"
+}
+
+### Check Workflow State
+GET http://localhost:8080/workflows/<instance_id>
+
+### Wait for Completion (30 minutes timeout)
+GET http://localhost:8080/workflows/<instance_id>/wait?timeout=1800

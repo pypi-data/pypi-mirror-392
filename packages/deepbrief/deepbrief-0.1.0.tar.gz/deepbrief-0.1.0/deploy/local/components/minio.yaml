@@ -1,0 +1,22 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: bucketstore
+spec:
+  type: bindings.aws.s3
+  version: v1
+  metadata:
+  - name: bucket
+    value: "podcast"
+  - name: region
+    value: "us-east-1"
+  - name: endpoint
+    value: "http://localhost:9000"
+  - name: accessKey
+    value: "miniokey"
+  - name: secretKey
+    value: "miniosecret"
+  - name: forcePathStyle
+    value: "true"
+  - name: disableSSL
+    value: "true"

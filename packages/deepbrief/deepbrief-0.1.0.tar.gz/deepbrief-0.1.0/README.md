@@ -1,0 +1,186 @@
+# DeepBrief — AI-Native Narrative Intelligence Engine
+
+DeepBrief is an LLM-powered workflow that transforms research papers and security documents into narrative briefings, podcast-style episodes, and spoken summaries. It powers the [AI Security Voice podcast](https://open.spotify.com/show/7wq09WmVmtj3sq6lkg0eS8?si=OnuJqxfOQmSOcxM1R-JTIQ), which leverages [Cyb3rWard0g's](https://x.com/Cyb3rWard0g) cloned voice from [Eleven Labs](https://elevenlabs.io/), and generalizes to any intelligence or research team that wants conversational, hands-free debriefs.
+
+## What
+
+DeepBrief ingests PDFs, orchestrates LLM prompts, document conversion, and audio synthesis to produce:
+
+- Cybersecurity briefings for SOC and CTI teams
+- Long-form document → narrative summaries
+- PDF → podcast pipelines
+- Voice-driven security updates and weekly intelligence summaries
+- Offline, personalized “intelligence podcasts”
+
+The goal is to help security analysts and researchers consume complex material conversationally and contextually, without staring at a screen.
+
+## ✨ Key Capabilities
+
+- 🔍 **Research Paper Retrieval** – Pulls current papers from sources such as arXiv and extracts canonical metadata.
+- 🧠 **LLM-Based Relevance Classification** – Uses workflow-driven labeling to detect cybersecurity, AI-security, autonomous systems, and applied LLM security research.
+- 📝 **Narrative Transcript Generation** – Converts papers into structured dialogue-style transcripts tuned for listening.
+- 🎙️ **Audio Generation** – Streams transcripts through ElevenLabs (or other TTS engines) to create polished podcast episodes.
+- 🕸️ **Workflow-Orchestrated Processing** – Built on Dapr Workflows with fan-out/fan-in stages for chunked transcript creation, batch audio rendering, and multi-phase episode assembly.
+- 🔬 **Extensible Components** – Swap LLM providers, plug in new data sources, connect to internal knowledge bases, or customize prompt templates and narrative styles.
+
+## Installation
+
+DeepBrief uses [uv](https://docs.astral.sh/uv/) as the preferred package manager.
+
+1. **Install uv**
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+2. **Create (or reuse) a virtual environment**
+
+```bash
+uv venv
+source .venv/bin/activate
+```
+
+3. **Install DeepBrief in editable mode**
+
+```bash
+uv pip install -e .
+```
+
+## 🔧 Environment Setup
+
+DeepBrief automatically loads `.env` at startup. Create one at the project root:
+
+```
+OPENAI_API_KEY="your-key"
+OPENAI_API_MODEL="gpt-4o-mini"
+OPENAI_API_BASE_URL="https://api.openai.com/v1"
+
+ELEVENLABS_API_KEY="your-key"
+```
+
+## 🔌 System Requirements
+
+- **FFmpeg** for audio tooling
+
+```bash
+brew install ffmpeg
+```
+
+- **Dapr CLI** (DeepBrief relies on Dapr Workflow Runtime)
+
+```bash
+brew install dapr/tap/dapr-cli
+dapr init
+```
+
+Verify the setup:
+
+```bash
+dapr -v
+docker ps
+```
+
+## 🧩 Running DeepBrief (Dapr + uv)
+
+DeepBrief runs as a packaged module. To run the local FastAPI+Dapr workflow you should always launch it under Dapr so the workflow runtime can coordinate activities. Example `dapr.yaml`:
+
+```yaml
+version: 1
+common:
+  resourcesPath: ./components
+  logLevel: info
+
+apps:
+  - appId: deepbrief
+    appPort: 8080
+    appDirPath: .
+    command: ["uv", "run", "-m", "deepbrief"]
+    maxBodySize: 256Mi
+```
+
+or launch with:
+
+```bash
+dapr run \
+  --app-id researchpodcast \
+  --app-port 8080 \
+  --resources-path deploy/local/components \
+  --max-body-size 256 \
+  -- uv run -m deepbrief
+```
+
+## 🚀 API Endpoints
+
+DeepBrief exposes a FastAPI service for workflow control:
+
+| Method | Endpoint                               | Description                                             |
+| ------ | -------------------------------------- | ------------------------------------------------------- |
+| POST   | `/workflows/research-podcast`          | Start a research-paper → podcast workflow               |
+| GET    | `/workflows/{instance_id}`             | Fetch workflow status                                   |
+| GET    | `/workflows/{instance_id}/wait`        | Block until a workflow completes                        |
+| POST   | `/workflows/{instance_id}/terminate`   | Terminate a workflow instance (optional recursive stop) |
+
+
+## 📦 Release Process
+
+To publish a new release to PyPI:
+
+1. **Install dev dependencies**
+
+```bash
+uv pip install -e ".[dev]"
+```
+
+2. **Ensure tests pass**
+
+```bash
+uv run pytest tests/
+```
+
+3. **Push mainline first, then tag**
+
+```bash
+git checkout main
+git pull --ff-only
+git merge <feature-branch>
+git push origin main
+```
+
+4. **Tag and push the release**
+
+```bash
+git tag -a v0.1.0 -m "Release 0.1.0"
+git push origin v0.1.0
+git checkout v0.1.0
+```
+
+5. **Clean old artifacts**
+
+```bash
+rm -rf dist build src/*.egg-info
+```
+
+6. **Upgrade build tooling**
+
+```bash
+uv pip install --upgrade build twine packaging setuptools wheel setuptools_scm
+```
+
+7. **Build and verify**
+
+```bash
+uv run python -m build
+uv run twine check dist/*
+```
+
+8. **Publish to PyPI**
+
+```bash
+uv run twine upload dist/*
+```
+
+**Notes**
+
+- Twine ≥ 6 and packaging ≥ 24.2 are required for modern metadata support.
+- Always build from the release tag (`git checkout vX.Y.Z`) so `setuptools_scm` resolves the exact version. Detached HEAD mode is expected; return to your branch later with `git switch -`.
+- CI pipelines should fetch tags (`git fetch --tags --force --prune` and `git fetch --unshallow || true`).

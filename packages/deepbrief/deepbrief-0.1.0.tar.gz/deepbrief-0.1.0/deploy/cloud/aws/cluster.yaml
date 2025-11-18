@@ -1,0 +1,37 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  # Name of the EKS cluster (must be unique within region/account)
+  name: aisv-dev
+  # AWS region where cluster will be created
+  region: us-east-1
+  # Kubernetes version for the cluster control plane
+  version: "1.32"
+
+iam:
+  # Enable IAM OIDC provider for the cluster → needed for IRSA (IAM Roles for Service Accounts)
+  withOIDC: true
+
+managedNodeGroups:
+  - name: mng-default          # identifier for this managed node group
+    desiredCapacity: 2        # target number of nodes
+    minSize: 1                # minimum number of nodes
+    maxSize: 5                # maximum number of nodes
+    instanceType: t3.xlarge   # EC2 instance type for the nodes
+    privateNetworking: true   # nodes will be launched in private subnets (no direct public IP)
+
+addons:
+  # These are the managed add-ons for the cluster — default networking/storage and Kubernetes system components
+  - name: vpc-cni
+    # Attach an existing AWS managed IAM policy for the add-on service account
+    attachPolicyARNs:
+      - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+  - name: coredns
+    version: latest            # use the latest available version of this add-on
+  - name: kube-proxy
+    version: latest
+  - name: aws-ebs-csi-driver
+    # Use well-known policy to attach controller IAM permissions for EBS CSI driver
+    wellKnownPolicies:
+      ebsCSIController: true
