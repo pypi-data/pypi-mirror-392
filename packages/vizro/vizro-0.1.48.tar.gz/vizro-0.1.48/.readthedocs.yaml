@@ -1,0 +1,20 @@
+# Read the Docs configuration file for MkDocs projects
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+
+# Required
+version: 2
+
+# Set the version of Python and other tools you might need
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.12"
+  commands:
+    # Remove the `click` installation constraint once the
+    # https://github.com/pypa/hatch/issues/2050 is resolved.
+    - pip install hatch "click<8.3.0"
+    - cd vizro-core/ && hatch run docs:pip tree
+    - cd vizro-core/ && hatch run docs:build
+    - cd vizro-core/ && hatch run docs:logo-check
+    - mkdir --parents $READTHEDOCS_OUTPUT
+    - mv vizro-core/site/ $READTHEDOCS_OUTPUT/html
