@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mawo-core"
+version = "0.1.1"
+description = "Unified API for Russian NLP - combines razdel, pymorphy3, slovnet, natasha"
+readme = "README.md"
+authors = [
+    {name = "MAWO Team", email = "info@mawo.ru"}
+]
+license = "MIT"
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Text Processing :: Linguistic",
+]
+keywords = ["nlp", "russian", "morphology", "ner", "tokenization", "unified-api"]
+
+dependencies = [
+    "mawo-pymorphy3>=1.0.4",
+    "mawo-razdel>=1.0.6",
+    "mawo-grammar>=0.2.0",
+]
+
+[project.optional-dependencies]
+all = [
+    "mawo-slovnet>=1.0.7",
+    "mawo-natasha>=1.0.3",
+]
+dev = [
+    "pytest>=9.0.0",
+    "pytest-cov>=7.0.0",
+    "black>=25.11.0",
+    "ruff>=0.14.4",
+    "mypy>=1.18.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/mawo-ru/mawo-core"
+Repository = "https://github.com/mawo-ru/mawo-core"
+Issues = "https://github.com/mawo-ru/mawo-core/issues"
+
+[tool.setuptools.packages.find]
+include = ["mawo*"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312", "py313"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = ["mawo_razdel", "mawo_pymorphy3", "mawo_slovnet", "mawo_natasha"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "--cov=mawo --cov-report=term-missing --cov-report=html"
