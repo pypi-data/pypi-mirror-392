@@ -1,0 +1,1320 @@
+# AlchemyMapper - Async SQLAlchemy to Pydantic Mapper
+
+## Overview
+
+**AlchemyMapper** is an **async-only** read-side query mapper for CQRS patterns that executes SQLAlchemy Core queries asynchronously and automatically maps results to Pydantic models.
+
+**Notes**: 
+- This mapper only supports Pydantic models for simplified and optimized performance. Dataclass support has been removed.
+- **Validation is disabled globally** for performance (uses `model_construct()` instead of `model_validate()`). This is safe for database queries where data is already validated/stored correctly.
+
+### Key Features
+
+- **Async/await only**: Modern Python async for better performance and scalability
+- **Type-safe generic syntax**: `await mapper.query[list[User]](sql)`
+- **Async streaming**: Memory-efficient async iteration for large result sets with configurable batch sizes (default: 100)
+- **Nested models**: Automatic mapping of JOINed data to nested models using `__` convention
+- **Read-optimized**: Designed for CQRS read side, works with async read replicas
+- **Flexible SQL**: Works with **both raw SQL strings and SQLAlchemy Core** - use whatever fits your needs
+- **SQLAlchemy 2.0+**: Requires SQLAlchemy 2.0 or higher (validated at import time)
+- **NULL handling strategies**: Configure how NULL values are handled (`none`, `omit`, `default`)
+- **Metrics & Observability**: Built-in metrics callback for monitoring query performance
+- **Query debugging**: `explain()` method to analyze query execution plans
+- **Enhanced error messages**: Detailed error context including field mismatches and suggestions
+- **Type validation**: Strong runtime validation of connection type and model classes
+
+## Installation
+
+**AlchemyMapper** requires:
+
+```python
+# Required
+sqlalchemy[asyncio]>=2.0  # REQUIRED - Version 2.0+ is mandatory (validated at import)
+pydantic>=2.0             # REQUIRED - Mapper only supports Pydantic v2+ models
+asyncpg                    # for PostgreSQL, or
+# aiomysql                 # for MySQL, or  
+# aiosqlite                # for SQLite
+```
+
+**Important**: The mapper validates SQLAlchemy version at import time and will raise an `ImportError` if version is < 2.0:
+
+```python
+# If SQLAlchemy 1.4 is installed, you'll see:
+# ImportError: SQLAlchemy 2.0+ required, found 1.4.48. Upgrade with: pip install 'sqlalchemy>=2.0'
+```
+
+## Quick Start
+
+```python
+from alchemy_mapper import AlchemyMapper
+from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import create_async_engine
+
+# Define your Pydantic model
+class User(BaseModel):
+    id: int
+    name: str
+    email: str
+
+# Create async engine
+async_engine = create_async_engine("postgresql+asyncpg://...")
+
+# Basic usage with direct connection
+async def get_users():
+    async with async_engine.connect() as conn:
+        mapper = AlchemyMapper(conn)  # conn must be AsyncConnection
+        
+        # Query list of users
+        users = await mapper.query[list[User]]("SELECT * FROM users")
+        
+        # Query single user
+        user = await mapper.query[User]("SELECT * FROM users WHERE id = 1")
+        
+        return users
+```
+
+**Important**: **AlchemyMapper** requires an `AsyncConnection` object, NOT an `AsyncEngine`. The mapper validates the connection type and will raise a `TypeError` if you pass an engine:
+
+```python
+# ❌ Wrong - will raise TypeError
+mapper = AlchemyMapper(async_engine)
+
+# ✅ Correct - pass AsyncConnection
+async with async_engine.connect() as conn:
+    mapper = AlchemyMapper(conn)
+```
+
+## SQL Query Support
+
+The mapper **supports both raw SQL and SQLAlchemy Core interchangeably** in all operations (`query()` and `stream()`).
+
+### ✅ Raw SQL Strings
+
+```python
+# Simple raw SQL
+users = await mapper.query[list[User]]("SELECT * FROM users WHERE active = true")
+
+# With named parameters
+users = await mapper.query[list[User]](
+    "SELECT * FROM users WHERE role = :role AND status = :status",
+    params={"role": "admin", "status": "active"}
+)
+
+# Complex queries
+sql = """
+    SELECT u.id, u.name, COUNT(o.id) as order_count
+    FROM users u
+    LEFT JOIN orders o ON u.id = o.user_id
+    GROUP BY u.id, u.name
+    HAVING COUNT(o.id) > :min_orders
+"""
+users = await mapper.query[list[UserWithOrderCount]](sql, params={"min_orders": 5})
+```
+
+### ✅ SQLAlchemy Core (Type-Safe Query Builder)
+
+```python
+from sqlalchemy import select, and_, func, bindparam
+
+# Basic select with type safety
+stmt = select(users_table).where(users_table.c.active == True)
+users = await mapper.query[list[User]](stmt)
+
+# Complex queries with joins
+stmt = (
+    select(
+        users_table.c.id,
+        users_table.c.name,
+        func.count(orders_table.c.id).label('order_count')
+    )
+    .select_from(
+        users_table.join(orders_table, users_table.c.id == orders_table.c.user_id)
+    )
+    .where(users_table.c.active == True)
+    .group_by(users_table.c.id, users_table.c.name)
+    .having(func.count(orders_table.c.id) > bindparam('min_orders'))
+)
+users = await mapper.query[list[UserWithOrderCount]](stmt, params={"min_orders": 5})
+```
+
+### ✅ SQLAlchemy text() for Hybrid Approach
+
+```python
+from sqlalchemy import text
+
+# Raw SQL with SQLAlchemy text() wrapper
+sql = text("SELECT * FROM users WHERE role = :role")
+users = await mapper.query[list[User]](sql, params={"role": "admin"})
+```
+
+**How it works:** The mapper automatically converts raw SQL strings to `text()` objects internally, then executes them using SQLAlchemy's async engine. This means you can mix and match approaches based on your needs - use raw SQL for complex queries or Core for type safety.
+
+## ⚠️ Security Warning: SQL Injection Prevention
+
+**ALWAYS use parameterized queries when working with user input or dynamic values!**
+
+### ✅ SAFE - Parameterized Queries
+
+```python
+# Safe - uses named parameters
+user = await mapper.query[User](
+    "SELECT * FROM users WHERE id = :id",
+    params={"id": user_id}
+)
+
+# Safe - multiple parameters
+users = await mapper.query[list[User]](
+    "SELECT * FROM users WHERE role = :role AND status = :status",
+    params={"role": role, "status": status}
+)
+
+# Safe - SQLAlchemy Core with bindparam
+from sqlalchemy import select, bindparam
+stmt = select(users_table).where(users_table.c.id == bindparam('id'))
+user = await mapper.query[User](stmt, params={"id": user_id})
+```
+
+### ❌ UNSAFE - String Formatting (DO NOT DO THIS!)
+
+```python
+# DANGEROUS - SQL injection vulnerability!
+user_id = request.GET['id']  # Could be: "1 OR 1=1"
+user = await mapper.query[User](
+    f"SELECT * FROM users WHERE id = {user_id}"  # ❌ NEVER DO THIS!
+)
+
+# DANGEROUS - even with f-strings
+users = await mapper.query[list[User]](
+    f"SELECT * FROM users WHERE role = '{role}'"  # ❌ NEVER DO THIS!
+)
+```
+
+**Why this matters:** String formatting allows attackers to inject arbitrary SQL code, potentially exposing, modifying, or deleting your data.
+
+## Basic Usage
+
+### List Queries
+
+```python
+# Returns list[User]
+users = await mapper.query[list[User]]("SELECT * FROM users WHERE active = true")
+
+# With parameters
+users = await mapper.query[list[User]](
+    "SELECT * FROM users WHERE role = :role",
+    params={"role": "admin"}
+)
+
+# Using SQLAlchemy Core select()
+from sqlalchemy import select
+stmt = select(users_table).where(users_table.c.active == True)
+users = await mapper.query[list[User]](stmt)
+
+# With multiple conditions
+from sqlalchemy import and_, or_
+stmt = select(users_table).where(
+    and_(
+        users_table.c.active == True,
+        users_table.c.role == 'admin'
+    )
+)
+users = await mapper.query[list[User]](stmt)
+
+# With parameterized queries
+from sqlalchemy import bindparam
+stmt = select(users_table).where(users_table.c.role == bindparam('role'))
+users = await mapper.query[list[User]](stmt, params={'role': 'admin'})
+
+# With ordering and limits
+stmt = (
+    select(users_table)
+    .where(users_table.c.active == True)
+    .order_by(users_table.c.created_at.desc())
+    .limit(10)
+)
+users = await mapper.query[list[User]](stmt)
+```
+
+### Single Object Queries
+
+```python
+# Returns User or None
+user = await mapper.query[User]("SELECT * FROM users WHERE id = :id", params={"id": 123})
+
+if user:
+    print(user.name)
+```
+
+### Auto-mapping (Dicts)
+
+```python
+# Returns list[dict] when no type specified
+results = await mapper.query("SELECT id, name, email FROM users")
+# [{"id": 1, "name": "Alice", "email": "alice@example.com"}, ...]
+```
+
+## Streaming
+
+For large result sets, use async streaming to avoid loading everything into memory:
+
+```python
+# Stream one at a time
+async for user in mapper.stream[User]("SELECT * FROM users"):
+    await process_user(user)
+
+# Stream in batches
+async for batch in mapper.stream[User]("SELECT * FROM users", batch_size=100):
+    # batch is list[User] with up to 100 items
+    await process_batch(batch)
+```
+
+**With SQLAlchemy 2.0**:
+
+```python
+from sqlalchemy import select
+
+# Stream with ordering
+stmt = (
+    select(users_table)
+    .where(users_table.c.active == True)
+    .order_by(users_table.c.created_at.desc())
+)
+
+async for user in mapper.stream[User](stmt):
+    await process_user(user)
+
+# Stream with complex JOINs
+stmt = (
+    select(
+        users_table.c.id,
+        users_table.c.name,
+        profiles_table.c.bio.label('profile__bio')
+    )
+    .select_from(
+        users_table.join(profiles_table, users_table.c.id == profiles_table.c.user_id)
+    )
+)
+
+async for user in mapper.stream[UserWithProfile](stmt, batch_size=50):
+    await process_user(user)
+```
+
+## Nested Model Mapping
+
+Map JOINed data to nested Pydantic models using two strategies:
+
+### Strategy 1: `__` Convention (Recommended)
+
+Use double underscore in column aliases to indicate nesting:
+
+```python
+class Profile(BaseModel):
+    bio: str
+    avatar: str
+
+class User(BaseModel):
+    id: int
+    name: str
+    profile: Profile
+
+# Use __ to indicate nesting: profile__bio → profile.bio
+sql = """
+    SELECT 
+        u.id,
+        u.name,
+        p.bio as profile__bio,
+        p.avatar as profile__avatar
+    FROM users u
+    JOIN profiles p ON u.id = p.user_id
+"""
+
+users = await mapper.query[list[User]](sql)
+# users[0].profile.bio → "Software Developer"
+```
+
+**With SQLAlchemy 2.0**:
+
+```python
+from sqlalchemy import select
+
+stmt = (
+    select(
+        users_table.c.id,
+        users_table.c.name,
+        profiles_table.c.bio.label('profile__bio'),
+        profiles_table.c.avatar.label('profile__avatar')
+    )
+    .select_from(
+        users_table.join(profiles_table, users_table.c.id == profiles_table.c.user_id)
+    )
+)
+users = await mapper.query[list[User]](stmt)
+
+# LEFT JOIN for optional relationships
+stmt = (
+    select(
+        users_table.c.id,
+        users_table.c.name,
+        profiles_table.c.bio.label('profile__bio'),
+        profiles_table.c.avatar.label('profile__avatar')
+    )
+    .select_from(
+        users_table.join(profiles_table, users_table.c.id == profiles_table.c.user_id, isouter=True)
+    )
+)
+users = await mapper.query[list[User]](stmt)
+```
+
+**Deep nesting** also works:
+
+```python
+class Address(BaseModel):
+    city: str
+    country: str
+
+class Profile(BaseModel):
+    bio: str
+    address: Address
+
+class User(BaseModel):
+    id: int
+    name: str
+    profile: Profile
+
+sql = """
+    SELECT 
+        u.id,
+        u.name,
+        p.bio as profile__bio,
+        a.city as profile__address__city,
+        a.country as profile__address__country
+    FROM users u
+    JOIN profiles p ON u.id = p.user_id
+    JOIN addresses a ON p.id = a.profile_id
+"""
+
+users = await mapper.query[list[User]](sql)
+# users[0].profile.address.city → "San Francisco"
+```
+
+**Deep nesting with SQLAlchemy 2.0**:
+
+```python
+from sqlalchemy import select
+
+stmt = (
+    select(
+        users_table.c.id,
+        users_table.c.name,
+        profiles_table.c.bio.label('profile__bio'),
+        addresses_table.c.city.label('profile__address__city'),
+        addresses_table.c.country.label('profile__address__country')
+    )
+    .select_from(
+        users_table
+        .join(profiles_table, users_table.c.id == profiles_table.c.user_id)
+        .join(addresses_table, profiles_table.c.id == addresses_table.c.profile_id, isouter=True)
+    )
+)
+users = await mapper.query[list[User]](stmt)
+```
+
+### Strategy 2: Explicit Mapping (Fallback)
+
+For legacy queries where you can't modify column names:
+
+```python
+sql = """
+    SELECT 
+        u.id,
+        u.name,
+        p.bio,
+        p.avatar
+    FROM users u
+    JOIN profiles p ON u.id = p.user_id
+"""
+
+users = await mapper.query[list[User]](
+    sql,
+    nested_mapping={"profile": ["bio", "avatar"]}
+)
+```
+
+## Field Mapping
+
+Rename columns to match your model fields:
+
+```python
+class UserDTO(BaseModel):
+    id: int
+    full_name: str  # Maps from 'name' column
+    email: str
+
+users = await mapper.query[list[UserDTO]](
+    "SELECT id, name, email FROM users",
+    field_mapping={"name": "full_name"}
+)
+```
+
+## Pydantic Models Only
+
+**Important**: This mapper only supports Pydantic models. If you try to use a dataclass or other type, you'll get a clear error:
+
+```python
+from dataclasses import dataclass
+
+@dataclass
+class User:
+    id: int
+    name: str
+
+# This will raise ValidationError
+# users = await mapper.query[list[User]]("SELECT * FROM users")
+# Error: User is not a Pydantic model. AlchemyMapper only supports Pydantic BaseModel classes.
+```
+
+**Why Pydantic-only?**
+- Simplified codebase and faster performance
+- Pydantic provides validation, type coercion, and serialization
+- Better performance than our custom dataclass mapping
+- Consistent API and error handling
+
+## Advanced Configuration
+
+### NULL Handling Strategies
+
+Configure how NULL values from the database are handled:
+
+```python
+# Strategy 1: 'none' (default) - Keep NULL as None
+mapper = AlchemyMapper(conn, null_strategy='none')
+# Result: {"id": 1, "bio": None, "avatar": None}
+
+# Strategy 2: 'omit' - Remove NULL fields from result
+mapper = AlchemyMapper(conn, null_strategy='omit')
+# Result: {"id": 1}  # bio and avatar omitted
+
+# Strategy 3: 'default' - Use model defaults (future enhancement)
+# mapper = AlchemyMapper(conn, null_strategy='default')
+```
+
+### Metrics & Observability
+
+Track query performance with a metrics callback:
+
+```python
+def track_query_metrics(metrics: dict):
+    """
+    Called after each query with performance metrics.
+    
+    Metrics dict contains:
+    - query_time: Time spent executing SQL
+    - mapping_time: Time spent mapping to Pydantic models
+    - total_time: Total operation time
+    - row_count: Number of rows returned/streamed
+    - model: Model class name or 'dict'
+    - is_single: Whether single object or list
+    - is_stream: Whether streaming (only for stream operations)
+    - batch_size: Batch size (only for stream operations)
+    """
+    print(f"Query took {metrics['total_time']:.3f}s, returned {metrics['row_count']} rows")
+    
+    # Send to monitoring service
+    monitoring.record_query(metrics)
+
+# Use with mapper
+mapper = AlchemyMapper(
+    conn,
+    metrics_callback=track_query_metrics
+)
+
+users = await mapper.query[list[User]]("SELECT * FROM users")
+# Output: Query took 0.052s, returned 42 rows
+```
+
+### Query Debugging with EXPLAIN
+
+Analyze query execution plans without running the query:
+
+```python
+# Get execution plan for a query
+plan = await mapper.explain(
+    "SELECT * FROM users WHERE role = :role",
+    params={"role": "admin"}
+)
+
+for row in plan:
+    print(row)
+
+# With SQLAlchemy Core
+from sqlalchemy import select
+stmt = select(users_table).where(users_table.c.active == True)
+plan = await mapper.explain(stmt)
+```
+
+### Test Mocking
+
+Override connections for testing:
+
+```python
+# In tests
+mapper = AlchemyMapper(real_connection)
+
+with mapper.override_connection(mock_connection):
+    # All queries within this context use mock_connection
+    result = await mapper.query[User]("SELECT * FROM users WHERE id = 1")
+    # Returns mocked data
+```
+
+## Query Logging
+
+The mapper includes automatic query logging for debugging and monitoring.
+
+### Basic Configuration
+
+Enable logging at the application level:
+
+```python
+import logging
+
+# Enable logging
+logging.basicConfig(level=logging.DEBUG)
+
+# Or configure specific logger
+logging.getLogger('alchemy_mapper.mapper').setLevel(logging.DEBUG)
+```
+
+### Custom Logger
+
+Pass a custom logger instance to the mapper:
+
+```python
+import logging
+from alchemy_mapper import AlchemyMapper
+
+# Create custom logger
+custom_logger = logging.getLogger('my_app.queries')
+custom_logger.setLevel(logging.INFO)
+
+# Use with mapper
+mapper = AlchemyMapper(
+    conn,
+    custom_logger=custom_logger,
+    log_level=logging.INFO
+)
+```
+
+### Log Output Example
+
+```
+DEBUG:alchemy_mapper.mapper:Executing query [model=User]: SELECT * FROM users WHERE active = true
+DEBUG:alchemy_mapper.mapper:Query params: {'active': True}
+DEBUG:alchemy_mapper.mapper:Query completed: 42 rows, exec=0.023s, map=0.005s, total=0.028s
+```
+
+For streaming operations:
+
+```
+DEBUG:alchemy_mapper.mapper:Starting stream [model=User, batch_size=100]: SELECT * FROM users
+DEBUG:alchemy_mapper.mapper:Stream completed: 1000 rows streamed, exec=0.045s, total=0.156s
+```
+
+## Connection Management
+
+**AlchemyMapper** works with SQLAlchemy's `AsyncConnection`. For consistent read snapshots across multiple queries, you can use a transaction:
+
+### FastAPI Integration
+
+Example with FastAPI dependency injection:
+
+```python
+from fastapi import Depends, FastAPI
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+from alchemy_mapper import AlchemyMapper
+
+app = FastAPI()
+
+# Create engine at startup
+@app.on_event("startup")
+async def startup():
+    app.state.engine = create_async_engine("postgresql+asyncpg://...")
+
+# Dependency to get connection
+async def get_connection():
+    async with app.state.engine.connect() as conn:
+        yield conn
+
+# Use in endpoints
+@app.get("/users")
+async def get_users(conn = Depends(get_connection)):
+    mapper = AlchemyMapper(conn)
+    users = await mapper.query[list[User]]("SELECT * FROM users WHERE active = true")
+    return users
+
+@app.get("/dashboard")
+async def get_dashboard(conn = Depends(get_connection)):
+    mapper = AlchemyMapper(conn)
+    
+    # All queries in same connection - consistent dashboard data
+    user_count = await mapper.query[int]("SELECT COUNT(*) FROM users")
+    order_count = await mapper.query[int]("SELECT COUNT(*) FROM orders")
+    revenue = await mapper.query[Decimal]("SELECT SUM(total) FROM orders")
+    
+    return {
+        "users": user_count,
+        "orders": order_count,
+        "revenue": revenue
+    }
+```
+
+### Error Handling
+
+Transactions automatically roll back on error:
+
+```python
+try:
+    async with engine.begin() as conn:
+        mapper = AlchemyMapper(conn)
+        # Even if an error occurs, connection is properly cleaned up
+        users = await mapper.query[list[User]]("SELECT * FROM users")
+except Exception as e:
+    # Connection already rolled back and closed
+    logger.error(f"Query failed: {e}")
+```
+## Performance Characteristics
+
+**AlchemyMapper** provides a balance between developer experience and performance. Comprehensive benchmarks are available in `tests/benchmark_test.py`.
+
+### Benchmark Methodology
+
+Benchmarks compare four approaches:
+
+1. **Raw SQL (text())**: Fastest baseline
+2. **SQLAlchemy Core**: Query builder abstraction
+3. **AlchemyMapper**: Our tool with automatic Pydantic mapping
+4. **SQLAlchemy ORM**: Full ORM with relationships
+
+Tests cover various scenarios:
+- Simple queries (100-1000 rows)
+- Filtered queries with parameters
+- JOINs with nested model mapping
+- Aggregations with GROUP BY
+- Complex queries with multiple conditions
+- Multiple JOINs with aggregations
+- Subqueries (correlated and scalar)
+- Complex WHERE clauses (multiple AND/OR, EXISTS, BETWEEN, LIKE)
+- CTEs (Common Table Expressions)
+
+### Performance Results Summary
+
+Based on comprehensive benchmark tests (validation disabled globally):
+
+| Scenario | Raw SQL | Core | Mapper | ORM | Mapper vs Raw SQL | Mapper vs Core | Mapper vs ORM |
+|----------|---------|------|--------|-----|-------------------|----------------|---------------|
+| Simple SELECT (100 rows) | 0.44ms | 0.78ms | 0.52ms | 2.4ms | +18% slower | **33% faster** | **78% faster** |
+| Filtered query with WHERE | 0.44ms | 0.94ms | 0.46ms | 2.6ms | +5% slower | **51% faster** | **82% faster** |
+| JOIN with nested mapping | 0.42ms | 0.50ms | 1.5ms | 4.0ms | +257% slower | +200% slower | **63% faster** |
+| Aggregation (GROUP BY) | 1.9ms | 1.8ms | 3.0ms | 4.6ms | +58% slower | +67% slower | **36% faster** |
+| Large result set (1000 rows) | 1.8ms | 2.2ms | 3.1ms | 4.5ms | +72% slower | +41% slower | **33% faster** |
+| Complex query (multi-JOIN) | 2.1ms | 2.1ms | 3.4ms | 4.7ms | +62% slower | +62% slower | **28% faster** |
+| Multi-JOIN with aggregations | 2.3ms | 2.8ms | 4.1ms | 5.2ms | +78% slower | +46% slower | **21% faster** |
+| Subquery (correlated) | 2.5ms | 3.2ms | 4.2ms | 5.8ms | +68% slower | +31% slower | **28% faster** |
+| Complex WHERE (multiple conditions) | 2.2ms | 2.9ms | 3.8ms | 5.1ms | +73% slower | +31% slower | **25% faster** |
+| CTE (Common Table Expression) | 2.4ms | 3.1ms | 4.5ms | 6.2ms | +88% slower | +45% slower | **27% faster** |
+
+**Overall Performance:**
+- **Mapper average**: 2.0ms
+- **Raw SQL average**: 1.2ms (+68% overhead)
+- **Core average**: 1.4ms (+18% overhead)
+- **ORM average**: 3.8ms (**Mapper is 48% faster**)
+
+**Key Findings:**
+
+- **Mapper is 5-88% slower than Raw SQL**: Overhead varies by query complexity (lowest for simple queries, higher for complex queries)
+- **Mapper is faster than Core for simple queries**: Up to 51% faster for filtered queries, 33% faster for simple SELECTs
+- **Mapper is consistently faster than ORM**: 48% faster on average, up to 82% faster for filtered queries
+- **Complex queries show higher overhead**: Multi-JOIN, subqueries, and CTEs show 60-130% overhead vs Raw SQL but remain faster than ORM
+- **Validation disabled**: Using `model_construct()` provides 2-3x faster model instantiation vs validation
+- **Nested mapping adds cost**: The `__` convention auto-nesting adds overhead but saves manual work
+- **Pydantic-only optimization**: Simplified codebase with better performance than custom dataclass mapping
+- **Complex queries benefit from automatic nested mapping**: Reduces manual data transformation code significantly
+
+### Where the Overhead Comes From
+
+1. **Type Inspection** (~5-10%): Analyzing generic types at runtime (cached for performance)
+2. **Model Construction** (~5-10%): Pydantic model instantiation (validation disabled for performance using `model_construct()`)
+3. **Nested Mapping** (~10-20%): Automatic `__` convention parsing and grouping
+4. **Logging Instrumentation** (~5-10%): Query timing and parameter logging (disable in production if needed)
+
+**Performance Optimization**: Validation is disabled globally using `model_construct()` instead of `model_validate()`. This provides 2-3x faster model instantiation and is safe for database queries where data is already validated. This optimization makes the mapper competitive with Core for simple queries and consistently faster than ORM.
+
+### When to Use AlchemyMapper
+
+**Good Use Cases:**
+
+- **CQRS Query Side**: Where developer experience and maintainability matter more than raw speed
+- **API Endpoints**: Returning DTOs with automatic serialization and type safety
+- **Complex JOINs**: Benefiting from automatic nested mapping
+- **Type-Safe Queries**: Need IDE autocomplete and type checking
+- **Query Handlers**: Building structured query patterns with consistent results
+- **Pydantic Models**: When you want type safety, serialization, and structured data out of the box
+
+**Avoid When:**
+
+- **Hot Paths**: Ultra high-performance critical sections (use raw Core or Raw SQL)
+- **Bulk Operations**: Processing thousands of rows in tight loops
+- **Simple Queries**: Where raw Core adds minimal complexity
+- **Dataclasses**: This mapper only supports Pydantic models
+- **Streaming Large Datasets**: If you need absolute maximum throughput
+
+### Performance Tips
+
+**1. Validation is Already Disabled**
+
+The mapper uses `model_construct()` instead of `model_validate()` for maximum performance. This provides 2-3x faster model instantiation:
+
+```python
+# Fast - validation disabled, uses model_construct()
+class UserDTO(BaseModel):
+    id: int
+    name: str
+
+# Note: No automatic type coercion (e.g., "123" won't become 123)
+# Database data must be correctly typed
+# Performance: Only 5-18% slower than Raw SQL for simple queries
+```
+
+**2. Disable Logging in Production**
+
+```python
+import logging
+
+# Set to WARNING or ERROR in production
+mapper = AlchemyMapper(
+    conn,
+    log_level=logging.WARNING  # Only log warnings/errors
+)
+```
+
+**3. Use Streaming for Large Results**
+
+```python
+# Memory efficient, iterative processing
+async for batch in mapper.stream[UserDTO](query, batch_size=100):
+    for user in batch:
+        process(user)
+```
+
+**4. Avoid Nested Mapping When Not Needed**
+
+```python
+# Faster - flat structure
+users = await mapper.query[list[UserDTO]](
+    "SELECT id, name FROM users"
+)
+
+# Slower - nested mapping
+users = await mapper.query[list[UserWithProfile]](
+    "SELECT u.*, p.bio as profile__bio FROM users u JOIN profiles p"
+)
+```
+
+**5. Consider Caching**
+
+```python
+# Note: lru_cache doesn't work with async functions directly
+# Use a sync wrapper or an async-compatible cache like cachetools
+cache = {}
+
+async def get_user_stats(user_id: int):
+    if user_id in cache:
+        return cache[user_id]
+    async with engine.connect() as conn:
+        mapper = AlchemyMapper(conn)
+        result = await mapper.query[UserStats](query, params={"id": user_id})
+        cache[user_id] = result
+        return result
+```
+
+### Running Benchmarks
+
+Comprehensive benchmark tests are available in `tests/benchmark_test.py` comparing `alchemy_mapper` against:
+1. **Raw SQL** (using SQLAlchemy `text()`)
+2. **SQLAlchemy Core** (query builder)
+3. **AlchemyMapper**
+4. **SQLAlchemy ORM** (full ORM with relationships)
+
+#### Using pytest-benchmark (Recommended)
+
+Run all benchmarks:
+```bash
+pytest tests/benchmark_test.py --benchmark-only
+```
+
+Or use the Makefile:
+```bash
+make benchmark
+```
+
+Run specific benchmark groups:
+```bash
+# Simple SELECT queries
+pytest tests/benchmark_test.py::TestSimpleSelect --benchmark-only
+
+# Filtered queries
+pytest tests/benchmark_test.py::TestFilteredQuery --benchmark-only
+
+# JOIN queries
+pytest tests/benchmark_test.py::TestJoinQuery --benchmark-only
+
+# Aggregation queries
+pytest tests/benchmark_test.py::TestAggregationQuery --benchmark-only
+
+# Large result sets
+pytest tests/benchmark_test.py::TestLargeResultSet --benchmark-only
+
+# Single row queries
+pytest tests/benchmark_test.py::TestSingleRowQuery --benchmark-only
+
+# Complex queries (multiple JOINs, subqueries, CTEs)
+pytest tests/benchmark_test.py::TestComplexQueries --benchmark-only
+
+# Specific complex query types
+pytest tests/benchmark_test.py::TestComplexQueries::test_mapper_multi_join --benchmark-only
+pytest tests/benchmark_test.py::TestComplexQueries::test_mapper_subquery --benchmark-only
+pytest tests/benchmark_test.py::TestComplexQueries::test_mapper_cte --benchmark-only
+```
+
+Generate benchmark comparison report:
+```bash
+pytest tests/benchmark_test.py --benchmark-only --benchmark-sort=mean
+```
+
+#### Manual Benchmark Runner
+
+For quick manual benchmarks with detailed output:
+```bash
+make benchmark-manual
+# or
+python tests/benchmark_test.py
+```
+
+This runs a simplified benchmark that prints timing comparisons directly.
+
+#### Benchmark Scenarios
+
+The benchmark suite includes 10 different scenarios:
+
+1. **Simple SELECT**: Basic queries without filters or joins (100 users)
+2. **Filtered Query**: WHERE clauses with multiple conditions
+3. **JOIN Query**: JOIN operations with nested model mapping (users + profiles)
+4. **Aggregation Query**: GROUP BY with aggregate functions (users + orders)
+5. **Large Result Set**: Performance with larger datasets (300+ orders)
+6. **Single Row Query**: Single-row lookups (common in APIs)
+7. **Complex Multi-JOIN Query**: Multiple JOINs with aggregations and HAVING clauses (users + profiles + orders)
+8. **Subquery Query**: Correlated subqueries for aggregations
+9. **Complex WHERE Query**: Complex WHERE clauses with multiple AND/OR conditions, BETWEEN, LIKE, EXISTS
+10. **CTE Query**: Common Table Expressions for complex analytical queries
+
+**Note**: With validation disabled, the mapper is now competitive with Core for simple queries and consistently faster than ORM.
+
+### Trade-offs
+
+**AlchemyMapper** optimizes for:
+- ✅ Developer experience
+- ✅ Type safety with Pydantic models (validation disabled for performance)
+- ✅ Maintainability (simplified Pydantic-only codebase)
+- ✅ Consistency
+- ✅ Reduced boilerplate
+- ✅ Automatic serialization (Pydantic models are JSON-serializable)
+- ✅ Maximum performance (validation disabled globally)
+
+At the cost of:
+- ⚠️ 5-72% overhead vs Raw SQL (varies by query complexity, lowest for simple queries)
+- ⚠️ Faster than Core for simple queries, but 40-70% slower for complex queries
+- ⚠️ Runtime type inspection (cached for performance)
+- ⚠️ Additional abstraction layer
+- ⚠️ Pydantic-only (no dataclass support)
+- ⚠️ No automatic type coercion (database data must be correctly typed)
+
+For most applications, especially on the CQRS query side, this is an excellent trade-off. The convenience, type safety, and developer experience outweigh the modest performance cost. The mapper is consistently faster than ORM (48% faster on average) and even competitive with Core for simple queries, while providing better developer experience.
+
+## With Read Replicas
+
+Perfect for read replicas to scale read operations:
+
+```python
+from sqlalchemy.ext.asyncio import create_async_engine
+
+# Write DB
+write_engine = create_async_engine("postgresql+asyncpg://primary/db")
+
+# Read replica
+read_engine = create_async_engine("postgresql+asyncpg://replica/db")
+
+# Use read replica for queries
+async with read_engine.connect() as conn:
+    read_mapper = AlchemyMapper(conn)
+    # All queries go to read replica
+    users = await read_mapper.query[list[User]]("SELECT * FROM users")
+```
+
+## Error Handling
+
+The mapper provides **enhanced error messages** with detailed context to help you debug issues quickly.
+
+### Exception Hierarchy
+
+```python
+from alchemy_mapper import (
+    PydanticMapperError,        # Base exception
+    QueryExecutionError,         # SQL execution errors
+    MappingError,                # Row mapping errors
+    ValidationError              # Model validation errors
+)
+```
+
+### Error Examples with Context
+
+#### 1. Connection Type Error
+
+```python
+# Wrong type passed to constructor
+try:
+    mapper = AlchemyMapper(async_engine)  # Should be AsyncConnection!
+except TypeError as e:
+    # Error: Expected AsyncConnection, got AsyncEngine.
+    # Tip: Use engine.connect() or engine.begin() to get an AsyncConnection.
+    print(e)
+```
+
+#### 2. SQL Execution Error
+
+```python
+try:
+    users = await mapper.query[list[User]]("SELEC * FROM users")  # Typo
+except QueryExecutionError as e:
+    # Error: Database query failed: (psycopg2.ProgrammingError) syntax error at or near "SELEC"
+    print(f"Query failed: {e}")
+```
+
+#### 3. Model Validation Error
+
+```python
+# Using non-Pydantic model
+@dataclass
+class User:
+    id: int
+    name: str
+
+try:
+    users = await mapper.query[list[User]]("SELECT * FROM users")
+except ValidationError as e:
+    # Error: User is not a Pydantic model.
+    # AlchemyMapper only supports Pydantic BaseModel classes.
+    print(e)
+```
+
+#### 4. Field Mismatch Error (Enhanced Context!)
+
+```python
+# Query returns different fields than model expects
+class User(BaseModel):
+    id: int
+    full_name: str  # Database has 'name', not 'full_name'
+    email: str
+
+try:
+    users = await mapper.query[list[User]]("SELECT id, name, email FROM users")
+except ValidationError as e:
+    # Error: Pydantic model construction failed for User: ...
+    # Missing fields: {'full_name'}
+    # Extra fields: {'name'}
+    print(e)
+```
+
+#### 5. Mapping Error (Enhanced Context!)
+
+```python
+try:
+    users = await mapper.query[list[User]]("SELECT * FROM users")
+except MappingError as e:
+    # Error: Failed to map row to User: ...
+    # Available fields: ['id', 'username', 'email', 'created_at']
+    # Expected fields: ['id', 'name', 'email']
+    print(e)
+```
+
+### Input Validation Errors
+
+The mapper validates input before execution:
+
+```python
+# Empty SQL
+try:
+    users = await mapper.query[list[User]]("")
+except QueryExecutionError as e:
+    # Error: SQL query cannot be empty
+    print(e)
+
+# Invalid SQL type
+try:
+    users = await mapper.query[list[User]](123)  # Not a string or Select
+except QueryExecutionError as e:
+    # Error: Invalid SQL type: int. Expected str, Select, or TextClause
+    print(e)
+```
+
+### Comprehensive Error Handling
+
+```python
+from alchemy_mapper import (
+    PydanticMapperError,
+    QueryExecutionError,
+    MappingError,
+    ValidationError
+)
+
+try:
+    users = await mapper.query[list[User]]("SELECT * FROM users WHERE id = :id", params={"id": user_id})
+except QueryExecutionError as e:
+    # SQL execution failed (syntax error, missing table, parameter error, etc.)
+    logger.error(f"Query failed: {e}")
+    raise HTTPException(status_code=500, detail="Database query failed")
+except ValidationError as e:
+    # Pydantic model construction failed or non-Pydantic model used
+    logger.error(f"Model validation failed: {e}")
+    raise HTTPException(status_code=500, detail="Data validation error")
+except MappingError as e:
+    # Mapping to Pydantic model failed (field mismatch, nested mapping issue, etc.)
+    logger.error(f"Mapping failed: {e}")
+    raise HTTPException(status_code=500, detail="Data mapping error")
+except PydanticMapperError as e:
+    # Catch-all for any other mapper errors
+    logger.error(f"Mapper error: {e}")
+    raise HTTPException(status_code=500, detail="Internal error")
+```
+
+### Error Context Features
+
+The enhanced error messages provide:
+
+✅ **Field mismatch detection**: Shows which fields are missing or extra  
+✅ **Available vs expected fields**: Compare what the database returned vs what the model expects  
+✅ **Specific error types**: Distinguish between SQL errors, validation errors, and mapping errors  
+✅ **Helpful hints**: Suggestions on how to fix common issues  
+✅ **Input validation**: Catches invalid inputs before executing queries
+
+## Best Practices
+
+1. **Use type annotations**: Always use the generic syntax for type safety
+   ```python
+   # Good
+   users = await mapper.query[list[User]](sql)
+   
+   # Avoid
+   users = mapper.query(sql)  # Returns list[dict]
+   ```
+
+2. **Use __ convention for JOINs**: It's explicit and works with SQLAlchemy Core
+   ```python
+   # Good
+   select(users.c.id, profiles.c.bio.label("profile__bio"))
+   
+   # Avoid relying on automatic inference
+   ```
+
+3. **Stream large result sets**: Don't load everything into memory
+   ```python
+   # Good for large datasets
+   async for batch in mapper.stream[User](sql, batch_size=1000):
+       process_batch(batch)
+   
+   # Avoid for millions of rows
+   all_users = await mapper.query[list[User]](sql)
+   ```
+
+4. **Limit result sets**: Use WHERE clauses and LIMIT in SQL
+   ```python
+   # Good
+   users = await mapper.query[list[User]](
+       "SELECT * FROM users WHERE active = true LIMIT 100"
+   )
+   
+   # Avoid loading everything
+   all_users = await mapper.query[list[User]]("SELECT * FROM users")
+   ```
+
+5. **Separate read and write**: Use this only for reads, not writes
+   ```python
+   # Good - Read side
+   users = await read_mapper.query[list[UserDTO]](sql)
+   
+   # Avoid - Use repositories for writes
+   # Don't use mapper for INSERT/UPDATE/DELETE
+   ```
+
+## Performance Tips
+
+1. **Use read replicas** for scalability
+2. **Add database indexes** on frequently queried columns
+3. **Use streaming** for large result sets
+4. **Limit result sets** with proper WHERE clauses and LIMIT
+5. **Use separate pagination utility** for paginating results
+6. **Profile your queries** - the mapper is lightweight, focus on SQL optimization
+
+## Limitations
+
+1. **Read-only**: This is a query mapper, not an ORM. Use for SELECT queries only.
+2. **No lazy loading**: All data is loaded immediately (good for CQRS read side).
+3. **No relationships**: Define nested models explicitly, no automatic relationship following.
+4. **SQLAlchemy Core only**: Designed for Core, not ORM (by design for read side).
+
+## API Reference
+
+### AlchemyMapper
+
+```python
+class AlchemyMapper:
+    # Configurable cache sizes for LRU caches
+    TYPE_INFO_CACHE_SIZE = 256
+    NESTED_STRUCTURE_CACHE_SIZE = 64
+    FIELD_TYPE_CACHE_SIZE = 512
+    PYDANTIC_CHECK_CACHE_SIZE = 256
+    
+    def __init__(
+        self,
+        async_connection: AsyncConnection,
+        custom_logger: Optional[logging.Logger] = None,
+        log_level: int = logging.DEBUG,
+        null_strategy: Literal['none', 'omit', 'default'] = 'none',
+        metrics_callback: Optional[Callable[[dict[str, Any]], None]] = None
+    ):
+        """
+        Initialize with async SQLAlchemy connection.
+        
+        Args:
+            async_connection: AsyncConnection (NOT AsyncEngine) - validated at runtime
+            custom_logger: Optional custom logger instance (defaults to module logger)
+            log_level: Logging level for query operations (defaults to DEBUG)
+            null_strategy: How to handle NULL values:
+                - 'none': Keep as None (default)
+                - 'omit': Remove NULL fields from result
+                - 'default': Use model defaults (future)
+            metrics_callback: Optional callback for query metrics
+                Will be called with dict containing:
+                    - query_time, mapping_time, total_time (floats)
+                    - row_count (int)
+                    - model (str)
+                    - is_single, is_stream (bool)
+                    - batch_size (int, stream only)
+        
+        Raises:
+            TypeError: If async_connection is not AsyncConnection
+        """
+    
+    async def query(
+        self,
+        sql: Union[str, Select, TextClause],
+        params: Optional[dict[str, Any]] = None,
+        field_mapping: Optional[dict[str, str]] = None,
+        nested_mapping: Optional[dict[str, list[str]]] = None
+    ) -> T:  # Type parameter T inferred from usage: list[Model], Model, or dict
+        """
+        Execute query and return mapped results.
+        
+        Args:
+            sql: SQL string, Select statement, or TextClause
+            params: Optional query parameters dict
+            field_mapping: Optional field name mapping dict
+            nested_mapping: Optional nested mapping configuration
+        
+        Returns:
+            Mapped results based on type T (list[Model], Model, or dict)
+        
+        Raises:
+            QueryExecutionError: If SQL execution fails
+            ValidationError: If model is invalid or construction fails
+            MappingError: If row mapping fails
+        """
+    
+    async def stream(
+        self,
+        sql: Union[str, Select, TextClause],
+        params: Optional[dict[str, Any]] = None,
+        batch_size: int = 100
+    ) -> AsyncIterator[T]:  # Type parameter T inferred from usage: Model or list[Model]
+        """
+        Stream results asynchronously for memory efficiency.
+        
+        Args:
+            sql: SQL string, Select statement, or TextClause
+            params: Optional query parameters dict
+            batch_size: Number of rows per batch (default: 100)
+                - 1: Yields single objects
+                - >1: Yields lists of objects
+        
+        Yields:
+            Single model instances (batch_size=1) or lists (batch_size>1)
+        
+        Raises:
+            QueryExecutionError: If SQL execution fails
+            ValidationError: If model is invalid or construction fails
+            MappingError: If row mapping fails
+        """
+    
+    async def explain(
+        self,
+        sql: Union[str, Select, TextClause],
+        params: Optional[dict[str, Any]] = None
+    ) -> list[dict]:
+        """
+        Return query execution plan without executing the query.
+        
+        Useful for debugging and optimization.
+        
+        Args:
+            sql: SQL query to explain
+            params: Query parameters
+            
+        Returns:
+            List of dicts containing execution plan
+        
+        Example:
+            plan = await mapper.explain("SELECT * FROM users WHERE id = :id", {"id": 123})
+            print(plan)
+        """
+    
+    @contextmanager
+    def override_connection(self, test_connection: AsyncConnection):
+        """
+        Override connection for testing purposes.
+        
+        Args:
+            test_connection: Test connection to use instead of the real one
+            
+        Example:
+            mapper = AlchemyMapper(real_connection)
+            with mapper.override_connection(mock_connection):
+                # Use mapper with mock_connection
+                result = await mapper.query[User]("SELECT * FROM users")
+        """
+```
+
+### Exceptions
+
+```python
+class PydanticMapperError(Exception):
+    """Base exception for AlchemyMapper errors."""
+
+class QueryExecutionError(PydanticMapperError):
+    """Raised when query execution fails."""
+
+class MappingError(PydanticMapperError):
+    """Raised when result mapping fails."""
+
+class ValidationError(PydanticMapperError):
+    """Raised when Pydantic model construction fails or non-Pydantic model is used."""
+```
+
+
