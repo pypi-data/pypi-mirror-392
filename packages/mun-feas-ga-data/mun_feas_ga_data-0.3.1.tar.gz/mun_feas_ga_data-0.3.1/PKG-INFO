@@ -1,0 +1,160 @@
+Metadata-Version: 2.3
+Name: mun-feas-ga-data
+Version: 0.3.1
+Summary: Graduate Attribute (GA) data tools for Memorial's Faculty of Engineering and Applied Science
+Author: Jonathan Anderson
+Author-email: jonathan.anderson@mun.ca
+Requires-Python: >=3.10
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Requires-Dist: click (>=8.3.0,<9.0.0)
+Requires-Dist: openpyxl (>=3.1.5,<4.0.0)
+Requires-Dist: pandas (>=2.3.3,<3.0.0)
+Requires-Dist: seaborn (>=0.13.2,<0.14.0)
+Description-Content-Type: text/markdown
+
+# GAD: GA Data tool
+
+## Install
+
+To install from [PyPI](pypi.org), run `pip install mun-feas-ga-data`.
+
+
+## Validate GA data
+
+To check that GA data contained in ATsheet or FEAMS format matches aligns with a
+curriculum map, use the `validate` command:
+
+```sh
+$ gad validate ga-data/ --curriculum-map ENEL-curriculum.xlsx
+ECE 4300 (Spring 2024–25) contains 81 results
+1 warning(s):
+ - contains 3 unnamed columns
+
+ECE 4500 (Spring 2024–25) contains 62 results
+ECE 4800 (Spring 2024–25) contains 39 results
+1 warning(s):
+ - contains 27 unnamed columns
+```
+
+You can, additionally, identify assessment tools that do not appear in the curriculum
+map using the `-u` / `--unmapped-tools` option:
+
+```sh
+$ gad validate --unmapped-tools ga-data/ --curriculum-map ENEL-curriculum.xlsx
+ECE 4300 (Spring 2024–25) contains 81 results
+2 warning(s):
+ - contains 3 unnamed columns
+ - 3 unmapped tools: Final exam – design questions, Assignment – evaluate and compare designs, Design labs
+
+ECE 4500 (Spring 2024–25) contains 62 results
+1 warning(s):
+ - 5 unmapped tools: Assignments, Labs – debugging sections, Design assignment and exam questions, Labs, Labs — info sources
+
+ECE 4800 (Spring 2024–25) contains 39 results
+2 warning(s):
+ - contains 27 unnamed columns
+ - 5 unmapped tools: Course grade , Labs – gather info, Labs – synthesize info, Assignments,  labs - communication
+```
+
+
+## Summarize indicators and assessment tools
+
+To summarize all of the indicators that have been mapped to GAs in a particular
+curriculum map, use the `indicator list` command with an argument of the curriculum map
+file:
+
+```sh
+$ gad indicator list ENEL-curriculum.xlsx
+GA 1: A knowledge base for engineering
+KB:1	Demonstrate competence in mathematics
+KB:2	Demonstrate competence in natural sciences
+KB:3	Demonstrate competence in the principles of analog circuits
+KB:4	Demonstrate competence in the principles of software development
+KB:5	Demonstrate competences in the principles of digital logic and systems
+KB:6	Demonstrate competence in the principles of signals and communications
+KB:7	Demonstrate completence in the principles of electromagnetism
+KB:8	Demonstrate competence in the principles of power and machines
+
+GA 2: Problem analysis
+PA:1	Formulate problem statements
+PA:2	Analyze and solve engineering problems
+[...]
+```
+
+To summarize all of the assessment tools that have been mapped to all of the indicators,
+use the `indicator map` command:
+
+```sh
+$ gad indicator map ENEL-curriculum.xlsx
+GA 1: A knowledge base for engineering
+KB:1	Demonstrate competence in mathematics
+ I: MATH 1001 Course grade
+ I: MATH 2050 Course grade
+ D: ECE 5100 Course grade
+ D: ENGI 4430 Course grade
+ A: No assessment tools
+
+KB:2	Demonstrate competence in natural sciences
+ I: CHEM 1050 Course grade
+ [...]
+```
+
+To obtain statistics about these indicators, add the `--stat` flag:
+
+```sh
+$ gad indicator map --stat ENEL-curriculum.xlsx
+GA 1: A knowledge base for engineering
+KB:1         2       2       0
+KB:2         3       0       0
+KB:3         1       3       0
+KB:4         1       1       0
+KB:5         1       1       0
+KB:6         1       2       0
+KB:7         1       1       0
+KB:8         1       1       0
+
+GA 2: Problem analysis
+PA:1         0       1       0
+PA:2         2       7       1
+
+[...]
+```
+
+
+## Plot data
+
+### Per-course assessment tool results
+
+To plot the assessment tool results contained in a directory of result files, use the `plot` command:
+
+```sh
+$ gad plot tools ga-data-dir/ --curiculum-map ENEL-curriculum.xlsx --output-dir plots-ENEL/
+```
+
+You can also specify the output format (PDF, PNG, SVG, etc.) using the `-f`/`--format`
+argument.
+
+
+## Interoperate with FEAMS
+
+To convert GA data (in ATsheets, FEAMS or both) into a unified directory ready for
+[FEAMS](https://gitlab.com/MemorialU/Engineering/continuousimprovement/feams) ingestion,
+use the `feamsify` command:
+
+```sh
+$ gad feamsify ga-data/ --curriculum-map ENEL-map.xlsx --output FEAMS-ENEL/
+```
+
+* `ga-data/`: a directory containing ATsheets and/or FEAMS data files
+* `ENEL-map.xlsx`: curriculum map for an Engineering program (here, Electrical)
+* `FEAMS-ENEL/`: the directory to write FEAMS-formatted files into for FEAMS parsing
+
+
+## Work on GAD
+
+To hack on GAD, install [Python](https://www.python.org/downloads) and [Poetry](https://python-poetry.org/docs/#installation), check out this repository and then run `poetry install`. By default, this will install GAD in editable mode: make changes to the code and they will be immediately reflected when you next run `gad`.
+
