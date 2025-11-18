@@ -1,0 +1,569 @@
+Metadata-Version: 2.4
+Name: chora-manifest
+Version: 0.1.1
+Summary: MCP server service discovery - Read-only Python library for querying MCP server capabilities
+Author-email: Liminal Commons <team@liminalcommons.org>
+License: MIT
+Project-URL: Homepage, https://github.com/yourusername/manifest
+Project-URL: Documentation, https://manifest.readthedocs.io
+Project-URL: Repository, https://github.com/yourusername/manifest
+Project-URL: Issues, https://github.com/yourusername/manifest/issues
+Project-URL: Changelog, https://github.com/yourusername/manifest/blob/main/CHANGELOG.md
+Keywords: mcp,model-context-protocol,service-discovery,capability-catalog,manifest
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Typing :: Typed
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: pydantic<3.0.0,>=2.0.0
+Requires-Dist: pydantic-settings<3.0.0,>=2.0.0
+Requires-Dist: pyyaml<7.0.0,>=6.0.0
+Provides-Extra: dev
+Requires-Dist: pytest<9.0.0,>=8.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio<1.0.0,>=0.23.0; extra == "dev"
+Requires-Dist: pytest-cov<5.0.0,>=4.1.0; extra == "dev"
+Requires-Dist: pytest-timeout<3.0.0,>=2.2.0; extra == "dev"
+Requires-Dist: pytest-xdist<4.0.0,>=3.5.0; extra == "dev"
+Requires-Dist: pytest-httpx<1.0.0,>=0.30.0; extra == "dev"
+Requires-Dist: httpx<1.0.0,>=0.27.0; extra == "dev"
+Requires-Dist: ruff<1.0.0,>=0.3.0; extra == "dev"
+Requires-Dist: mypy<2.0.0,>=1.9.0; extra == "dev"
+Requires-Dist: pre-commit<4.0.0,>=3.6.0; extra == "dev"
+Requires-Dist: mkdocs<2.0.0,>=1.5.0; extra == "dev"
+Requires-Dist: mkdocs-material<10.0.0,>=9.5.0; extra == "dev"
+Requires-Dist: mkdocstrings[python]<1.0.0,>=0.24.0; extra == "dev"
+Provides-Extra: docker
+Requires-Dist: gunicorn<22.0.0,>=21.2.0; extra == "docker"
+
+# chora-manifest
+
+**MCP Server Service Discovery and Capability Catalog**
+
+[![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Code Style](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
+
+---
+
+## Overview
+
+**chora-manifest** is a Python library for querying MCP (Model Context Protocol) server capabilities from a centralized registry. It provides a simple, async API for service discovery, enabling applications to find and inspect available MCP servers programmatically.
+
+**Version 0.1.0** is a focused, read-only implementation perfect for:
+- Discovering available MCP servers in your ecosystem
+- Querying server capabilities and tools
+- Filtering servers by category (integration, database, productivity, infrastructure)
+- Building service catalogs and dashboards
+
+---
+
+## Features
+
+### v0.1.0 Capabilities
+
+- ✅ **Load Registry**: Read MCP server definitions from YAML
+- ✅ **List Capabilities**: Get all registered MCP servers
+- ✅ **Get by ID**: Retrieve specific server by identifier
+- ✅ **Filter by Category**: Find servers by type (integration, database, etc.)
+- ✅ **Search**: Query by name or description (case-insensitive)
+- ✅ **Count Operations**: Get totals overall or by category
+- ✅ **Type Safety**: Full Pydantic validation throughout
+- ✅ **Async API**: Built with async/await for modern Python
+- ✅ **100% Test Coverage**: Comprehensive test suite (51 tests)
+
+### What's NOT in v0.1.0
+
+The following features are planned for future versions:
+
+- ❌ Write operations (add/update/remove servers)
+- ❌ CLI interface
+- ❌ REST API
+- ❌ MCP server interface
+- ❌ GitHub discovery/import
+- ❌ Health monitoring
+- ❌ Maturity levels
+
+---
+
+## Installation
+
+### From PyPI
+
+```bash
+pip install chora-manifest
+```
+
+### From Source
+
+```bash
+git clone https://github.com/yourusername/chora-manifest.git
+cd chora-manifest
+pip install -e .
+```
+
+---
+
+## Quick Start
+
+### Basic Usage
+
+```python
+import asyncio
+from manifest import create_manifest_service
+
+async def main():
+    # Create service (uses ecosystem-manifest/registry.yaml by default)
+    service = create_manifest_service()
+
+    # Initialize (loads registry)
+    await service.initialize()
+
+    # List all capabilities
+    capabilities = await service.list_capabilities()
+    print(f"Found {len(capabilities)} MCP servers")
+
+    # Get specific server
+    github = await service.get_capability("github")
+    if github:
+        print(f"GitHub server: {github.description}")
+        print(f"Tools: {len(github.tools)}")
+
+    # Filter by category
+    databases = await service.filter_by_category("database")
+    print(f"Database servers: {len(databases)}")
+
+    # Search
+    results = await service.search("integration")
+    print(f"Integration-related servers: {len(results)}")
+
+asyncio.run(main())
+```
+
+### Custom Registry Path
+
+```python
+from pathlib import Path
+from manifest import create_manifest_service
+
+service = create_manifest_service(
+    registry_path=Path("my-registry.yaml")
+)
+await service.initialize()
+```
+
+---
+
+## API Reference
+
+### Factory Function
+
+#### `create_manifest_service(registry_path=None)`
+
+Create a ManifestService instance.
+
+**Parameters**:
+- `registry_path` (Path | str | None): Path to registry YAML. Defaults to `ecosystem-manifest/registry.yaml`
+
+**Returns**: `ManifestService` (not yet initialized)
+
+**Example**:
+```python
+service = create_manifest_service()
+await service.initialize()
+```
+
+---
+
+### ManifestService
+
+Async service for querying MCP server capabilities.
+
+#### `async initialize()`
+
+Load registry from file. Must be called before using query methods.
+
+**Raises**:
+- `FileNotFoundError`: If registry file doesn't exist
+- `yaml.YAMLError`: If YAML is malformed
+
+---
+
+#### `async list_capabilities() -> list[Capability]`
+
+List all registered MCP server capabilities.
+
+**Returns**: List of all Capability objects
+
+**Example**:
+```python
+capabilities = await service.list_capabilities()
+for cap in capabilities:
+    print(f"{cap.name}: {cap.description}")
+```
+
+---
+
+#### `async get_capability(id: str) -> Capability | None`
+
+Get capability by ID.
+
+**Parameters**:
+- `id` (str): Capability identifier (e.g., "github", "slack")
+
+**Returns**: Capability if found, None otherwise
+
+**Example**:
+```python
+github = await service.get_capability("github")
+if github:
+    print(f"Version: {github.version}")
+```
+
+---
+
+#### `async filter_by_category(category: Category) -> list[Capability]`
+
+Filter capabilities by category.
+
+**Parameters**:
+- `category` (Category): Category enum value
+
+**Returns**: List of capabilities in the category
+
+**Example**:
+```python
+from manifest import Category
+
+databases = await service.filter_by_category(Category.DATABASE)
+```
+
+---
+
+#### `async search(query: str) -> list[Capability]`
+
+Search capabilities by name or description (case-insensitive).
+
+**Parameters**:
+- `query` (str): Search string
+
+**Returns**: List of matching capabilities
+
+**Example**:
+```python
+results = await service.search("database")
+```
+
+---
+
+#### `async count_total() -> int`
+
+Count total registered capabilities.
+
+**Returns**: Total count
+
+---
+
+#### `async count_by_category(category: Category) -> int`
+
+Count capabilities in a specific category.
+
+**Parameters**:
+- `category` (Category): Category enum value
+
+**Returns**: Count in category
+
+---
+
+### Data Models
+
+#### `Category` (Enum)
+
+MCP server categories:
+- `Category.INTEGRATION` - Integration servers (GitHub, Slack, etc.)
+- `Category.DATABASE` - Database servers (PostgreSQL, MySQL, etc.)
+- `Category.PRODUCTIVITY` - Productivity tools (Jira, Notion, etc.)
+- `Category.INFRASTRUCTURE` - Infrastructure tools (Docker, Kubernetes, etc.)
+
+#### `Capability` (Pydantic Model)
+
+Represents an MCP server capability.
+
+**Fields**:
+- `id` (str): Unique identifier
+- `name` (str): Human-readable name
+- `description` (str): Brief description
+- `version` (str): Semantic version (e.g., "1.0.0")
+- `docker_image` (str): Docker image reference
+- `tools` (list[dict]): List of tool definitions
+- `category` (Category): Server category
+- `tags` (list[str]): Searchable tags (default: [])
+- `repository` (str | None): Source repository URL (optional)
+
+**Example**:
+```python
+from manifest import Capability, Category
+
+capability = Capability(
+    id="my-server",
+    name="My Server",
+    description="Custom MCP server",
+    version="1.0.0",
+    docker_image="my-server:1.0.0",
+    tools=[{"name": "my_tool", "description": "Does something"}],
+    category=Category.INTEGRATION,
+    tags=["custom"],
+    repository="https://github.com/example/my-server"
+)
+```
+
+---
+
+## Registry Format
+
+The registry is a YAML file with the following structure:
+
+```yaml
+version: "1.0.0"
+updated: "2025-11-15T00:00:00Z"
+servers:
+  - server:
+      name: github
+      description: GitHub integration MCP server
+      version: 1.0.0
+      repository: https://github.com/modelcontextprotocol/servers/tree/main/src/github
+      transport: stdio
+    tools:
+      - name: create_or_update_file
+        description: Create or update a file in a repository
+        input_schema:
+          type: object
+          properties:
+            path:
+              type: string
+            content:
+              type: string
+    metadata:
+      tags:
+        - integration
+        - version-control
+        - git
+```
+
+The service automatically converts the `servers` format to `Capability` objects.
+
+---
+
+## Examples
+
+### Example 1: List All Servers
+
+```python
+import asyncio
+from manifest import create_manifest_service
+
+async def main():
+    service = create_manifest_service()
+    await service.initialize()
+
+    capabilities = await service.list_capabilities()
+
+    print(f"MCP Server Catalog ({len(capabilities)} servers)\n")
+    print("-" * 60)
+
+    for cap in capabilities:
+        print(f"\n{cap.name} (v{cap.version})")
+        print(f"  {cap.description}")
+        print(f"  Category: {cap.category}")
+        print(f"  Tools: {len(cap.tools)}")
+        if cap.repository:
+            print(f"  Repo: {cap.repository}")
+
+asyncio.run(main())
+```
+
+### Example 2: Filter by Category
+
+```python
+from manifest import create_manifest_service, Category
+
+async def show_category_stats():
+    service = create_manifest_service()
+    await service.initialize()
+
+    categories = [
+        Category.INTEGRATION,
+        Category.DATABASE,
+        Category.PRODUCTIVITY,
+        Category.INFRASTRUCTURE
+    ]
+
+    print("Server Distribution by Category\n")
+
+    for category in categories:
+        count = await service.count_by_category(category)
+        servers = await service.filter_by_category(category)
+        names = [s.name for s in servers]
+
+        print(f"{category.value.upper()}: {count}")
+        if names:
+            print(f"  → {', '.join(names)}")
+
+    total = await service.count_total()
+    print(f"\nTotal: {total} servers")
+```
+
+### Example 3: Search and Inspect
+
+```python
+from manifest import create_manifest_service
+
+async def search_and_inspect(query: str):
+    service = create_manifest_service()
+    await service.initialize()
+
+    results = await service.search(query)
+
+    print(f"Search results for '{query}': {len(results)} found\n")
+
+    for cap in results:
+        print(f"{cap.name}")
+        print(f"  Description: {cap.description}")
+        print(f"  Category: {cap.category}")
+        print(f"  Available tools:")
+        for tool in cap.tools:
+            print(f"    - {tool['name']}: {tool['description']}")
+        print()
+```
+
+---
+
+## Development
+
+### Setup
+
+```bash
+# Clone repository
+git clone https://github.com/yourusername/chora-manifest.git
+cd chora-manifest
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install development dependencies
+pip install -e ".[dev]"
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=manifest --cov-report=html
+
+# Run specific test file
+pytest tests/test_service.py
+
+# Run with verbose output
+pytest -v
+```
+
+### Code Quality
+
+```bash
+# Lint with ruff
+ruff check .
+
+# Format with ruff
+ruff format .
+
+# Type check with mypy
+mypy manifest
+```
+
+---
+
+## Testing
+
+chora-manifest v0.1.0 has comprehensive test coverage:
+
+- **51 tests** across 4 test modules
+- **100% coverage** on core implementation files
+- **TDD methodology**: All tests written before implementation
+- **Fixtures**: Reusable test data in `conftest.py`
+
+**Test modules**:
+- `test_models.py`: Pydantic model validation (9 tests)
+- `test_loader.py`: YAML loading and parsing (10 tests)
+- `test_service.py`: Service query methods (21 tests)
+- `test_factory.py`: Factory function and API (11 tests)
+
+---
+
+## Roadmap
+
+### v0.2.0 (Planned)
+- Write operations (add/update/remove servers)
+- GitHub discovery and import
+- Health monitoring and status checks
+
+### v0.3.0 (Planned)
+- CLI interface
+- REST API
+- Maturity level support
+
+### v1.0.0 (Future)
+- MCP server interface
+- Advanced querying and filtering
+- Performance optimizations
+
+---
+
+## Contributing
+
+Contributions welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Ensure all tests pass (`pytest`)
+5. Run code quality checks (`ruff check`, `mypy manifest`)
+6. Submit a pull request
+
+---
+
+## License
+
+This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
+
+---
+
+## Acknowledgments
+
+- Built with [Pydantic](https://docs.pydantic.dev/) for data validation
+- Powered by [PyYAML](https://pyyaml.org/) for registry parsing
+- Part of the **chora ecosystem** for MCP server management
+
+---
+
+## Links
+
+- **GitHub**: https://github.com/yourusername/chora-manifest
+- **Issues**: https://github.com/yourusername/chora-manifest/issues
+- **Changelog**: [CHANGELOG.md](CHANGELOG.md)
+- **PyPI**: https://pypi.org/project/chora-manifest/
+
+---
+
+**Version**: 0.1.0
+**Status**: Stable
+**Python**: 3.11+
+**License**: MIT
