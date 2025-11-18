@@ -1,0 +1,233 @@
+Metadata-Version: 2.4
+Name: ticca
+Version: 0.2.0
+Summary: Terminal Injected Coding CLI Assistant
+Project-URL: repository, https://github.com/janfeddersen-wq/ticca
+Project-URL: HomePage, https://github.com/janfeddersen-wq/ticca
+Author: Michael Pfaffenberger
+License: MIT
+License-File: LICENSE
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Software Development :: Code Generators
+Requires-Python: <3.14,>=3.11
+Requires-Dist: bs4>=0.0.2
+Requires-Dist: camoufox>=0.4.11
+Requires-Dist: chromadb>=0.5.0
+Requires-Dist: dbos>=2.0.0
+Requires-Dist: fastapi>=0.110.0
+Requires-Dist: gac>=0.1.0
+Requires-Dist: httpx-limiter>=0.3.0
+Requires-Dist: httpx[http2]>=0.24.1
+Requires-Dist: json-repair>=0.46.2
+Requires-Dist: logfire>=0.7.1
+Requires-Dist: openai>=1.99.1
+Requires-Dist: pathspec>=0.11.0
+Requires-Dist: pillow>=10.0.0
+Requires-Dist: playwright>=1.40.0
+Requires-Dist: prompt-toolkit>=3.0.52
+Requires-Dist: pydantic-ai==1.0.5
+Requires-Dist: pydantic>=2.4.0
+Requires-Dist: pyfiglet>=0.8.post1
+Requires-Dist: pyjwt>=2.8.0
+Requires-Dist: pytest-cov>=6.1.1
+Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: rapidfuzz>=3.13.0
+Requires-Dist: rich>=13.4.2
+Requires-Dist: ripgrep==14.1.0
+Requires-Dist: ruff>=0.11.11
+Requires-Dist: sentence-transformers>=2.2.0
+Requires-Dist: tenacity>=8.2.0
+Requires-Dist: termcolor>=3.1.0
+Requires-Dist: textual-dev>=1.7.0
+Requires-Dist: textual[syntax]>=5.0.0
+Requires-Dist: uvicorn>=0.29.0
+Description-Content-Type: text/markdown
+
+# Ticca: Terminal Injected Coding CLI Assistant ⚡
+
+A powerful AI-powered coding assistant that runs entirely in your terminal. Ticca combines specialized agents, browser automation, and advanced tooling to help you write, test, and deploy code faster.
+
+## ✨ Key Features
+
+- **🤖 Multi-Agent System**: Specialized agents for different programming languages, security auditing, QA, and planning
+- **🌐 Browser Automation**: Full Playwright-based control for web scraping, testing, and automation
+- **📊 AI Model Flexibility**: Support for OpenAI GPT-5, Claude 4.x, Cerebras, and custom model endpoints
+- **🖥️ Dual Interface**: Both interactive TUI (Textual) and simple CLI modes
+- **🔧 Rich Tooling**: File operations, shell commands, code search with ripgrep, and agent collaboration
+- **📝 Session Persistence**: Autosave/restore conversations with hybrid storage
+- **🔌 Plugin Architecture**: Extensible system with OAuth integrations and custom commands
+
+## 🚀 Quick Start
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/janfeddersen-wq/ticca.git
+cd ticca
+
+# Install dependencies (recommended)
+uv sync
+
+# Or traditional installation
+pip install -e .
+```
+
+### Basic Usage
+
+```bash
+# Start with TUI interface (recommended)
+uv run ticca
+
+# Or use the launcher script
+./start.sh
+
+# Quick CLI mode
+uv run ticca --no-tui
+```
+
+## 🎯 Core Capabilities
+
+### Agent System
+```bash
+# Switch between specialized agents
+/agent code-reviewer
+/agent security-auditor 
+/agent python-programmer
+/agent planning
+
+# Available agents:
+# - Code-Puppy (default)
+# - Code Reviewer
+# - Security Auditor
+# - Python Programmer
+# - Planning Agent
+```
+
+### Browser Automation
+```bash
+# Browser setup
+/browser_initialize
+/browser_navigate https://github.com
+
+# Interact with elements
+/browser_find_by_text "Repository"
+/browser_click
+/browser_screenshot_analyze
+```
+
+### File Operations
+```bash
+# Code search and analysis
+/list_files --recursive
+/grep "TODO" --directory src/
+/read_file main.py
+/edit_file
+```
+
+### Agent Collaboration
+```bash
+# Delegate to specialists
+/invoke_agent security-auditor "Review authentication code"
+/list_agents
+```
+
+## 🔧 Configuration
+
+Ticca stores configuration in `~/.ticca/`:
+
+```bash
+# Set your preferences
+/set owner_name "Your Name"
+/model gpt-5
+
+# Available models include:
+# - OpenAI: gpt-5, gpt-5-codex-api
+# - Anthropic: claude-4-0-sonnet, claude-4-5-sonnet, claude-4-1-opus
+# - Cerebras: Multiple GLM and Qwen variants
+# - Custom: Synthetic API endpoints
+```
+
+## 🔌 Extensions
+
+### MCP Server Support
+```bash
+# Model Context Protocol integration
+/mcp install <server-name>
+/mcp start <server-name>
+/mcp status
+/mcp logs
+```
+
+### OAuth Plugins
+```bash
+# Claude Code integration
+/claude-code-auth
+/claude-code-status
+```
+
+## 📊 Session Management
+
+```bash
+# Save and resume work
+/session save my-project
+/session restore my-project
+
+# Autosave is enabled by default
+# Sessions stored in ~/.ticca/autosaves/
+```
+
+## 🛠️ Development
+
+```bash
+# Install development dependencies
+uv sync --group dev
+
+# Run tests
+pytest
+
+# Code formatting
+ruff format
+ruff check --fix
+
+# Git hooks
+lefthook install
+```
+
+## 🎯 Use Cases
+
+### API Development
+```
+/agent python-programmer
+Create a FastAPI application with authentication and CRUD operations
+```
+
+### Web Testing
+```
+/browser_initialize
+/browser_navigate https://myapp.com
+/browser_find_by_label "Username"
+/browser_set_text test@example.com
+/browser_click_by_text "Login"
+```
+
+### Code Review
+```
+/invoke-agent security-auditor
+Review this code for vulnerabilities:
+
+[paste code or upload file]
+```
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+**Ticca** - Your loyal coding companion in the terminal! 🐶✨
