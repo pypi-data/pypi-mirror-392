@@ -1,0 +1,215 @@
+# a2a-client-172ai
+
+Official Python client library for 172.ai A2A (Agent-to-Agent) communication system.
+
+## Installation
+
+```bash
+pip install a2a-client-172ai
+```
+
+**Import as:**
+```python
+from a2a_client import A2AClient
+```
+
+## Quick Start
+
+```python
+from a2a_client import A2AClient
+
+client = A2AClient(
+    api_key='sk_your_api_key',
+    agent_id='test-runner-v1',
+    agent_type='testing'
+)
+
+# Setup test environment
+test_container = client.create_container({
+    'name': f'test-env-{int(time.time())}',
+    'dockerfile': '''
+FROM node:18-alpine
+WORKDIR /app
+COPY . .
+RUN npm install
+RUN npm install -g jest cypress
+CMD ["npm", "run", "test:all"]
+    ''',
+    'tags': ['testing', 'e2e']
+})
+
+# Build and run tests
+build_result = client.build_container(test_container['id'])
+print(f'Test build initiated: {build_result["buildLogId"]}')
+```
+
+## Configuration
+
+### Required Parameters
+
+- `api_key`: API key with A2A scope from 172.ai dashboard
+- `agent_id`: Unique identifier for your agent instance
+- `agent_type`: One of:
+  - `code-analysis` - Code quality and security analysis
+  - `testing` - Automated testing and QA
+  - `deployment` - CI/CD and orchestration
+  - `monitoring` - Observability and metrics
+  - `security` - Vulnerability scanning
+  - `documentation` - Technical documentation
+  - `integration` - API management
+  - `generic` - General purpose
+
+### Optional Parameters
+
+- `base_url`: API base URL (default: 'https://api.172.ai')
+- `timeout`: Request timeout in seconds (default: 30)
+
+## API Methods
+
+### Authentication
+
+```python
+# Test authentication
+client.authenticate()
+
+# Get platform capabilities
+capabilities = client.get_capabilities()
+
+# Health check
+health = client.health_check()
+```
+
+### Container Operations
+
+```python
+# List containers
+containers = client.list_containers(limit=10)
+
+# Get container
+container = client.get_container(container_id)
+
+# Create container
+new_container = client.create_container({
+    'name': 'my-container',
+    'dockerfile': 'FROM alpine:latest',
+    'tags': ['test'],
+    'isPrivate': True
+})
+
+# Build container
+build = client.build_container(container_id)
+
+# Update container
+client.update_container(container_id, {'name': 'new-name'})
+
+# Delete container
+client.delete_container(container_id)
+```
+
+### Build Operations
+
+```python
+# Get build status
+status = client.get_build_status(container_id, build_log_id)
+
+# Get build logs
+logs = client.get_build_logs(container_id, build_log_id)
+
+# List builds
+builds = client.list_builds(container_id)
+```
+
+### Container Execution
+
+```python
+# Get cost estimate
+estimate = client.get_execution_cost_estimate(container_id, 1)
+
+# Start execution
+execution = client.start_execution(container_id, duration_days=1)
+
+# Get execution status
+status = client.get_execution_status(container_id)
+
+# Stop execution
+client.stop_execution(container_id)
+
+# Get execution history
+history = client.get_execution_history(container_id)
+
+# List all executions
+executions = client.list_executions()
+```
+
+### File Operations
+
+```python
+import base64
+
+# Upload file
+client.upload_file(
+    container_id,
+    'config.yml',
+    base64.b64encode(b'config: value').decode('utf-8'),
+    'application/x-yaml'
+)
+
+# List files
+files = client.list_files(container_id, '/app')
+
+# Get file content
+content = client.get_file(container_id, 'config.yml')
+```
+
+### Container Fix Operations (AI-Powered)
+
+```python
+# Analyze container build failures
+analysis = client.analyze_container_failure(container_id)
+print(f'Issues found: {analysis["issues"]}')
+
+# Execute full fix workflow (analyze + apply + rebuild)
+fix_result = client.execute_container_fix(
+    container_id,
+    auto_apply=True,      # Auto-apply AI-generated fixes
+    analyze_only=False
+)
+print(f'Fix applied: {fix_result["success"]}')
+
+# Apply a specific fix
+client.apply_container_fix(container_id, fix_id)
+
+# Get fix history
+history = client.get_container_fix_history(container_id)
+
+# Get specific fix attempt details
+attempt = client.get_container_fix_attempt(container_id, fix_id)
+```
+
+### Container Improvements Operations (AI-Powered)
+
+```python
+# Get AI improvement suggestions
+suggestions = client.suggest_container_improvements(container_id)
+print(f'Suggested improvements: {suggestions}')
+
+# Apply an improvement
+apply_result = client.apply_container_improvement(
+    container_id,
+    modification_id
+)
+
+# Check improvement status
+status = client.get_improvement_status(container_id, modification_id)
+
+# List all applied improvements
+improvements = client.list_applied_improvements(container_id)
+```
+
+## Examples
+
+See the [examples directory](./examples) for complete SDLC workflow examples.
+
+## License
+
+MIT
