@@ -1,0 +1,135 @@
+import asyncio
+import logging
+from collections.abc import Iterable, Mapping
+from ipaddress import IPv4Address, IPv4Network
+from secrets import compare_digest, token_urlsafe
+from typing import Final, TypedDict, Unpack
+
+import msgspec.json
+from aiohttp import ClientSession
+from aiohttp.typedefs import Middleware
+from aiohttp.web import (
+    Application,
+    HTTPInternalServerError,
+    HTTPNotFound,
+    Request,
+    Response,
+    StreamResponse,
+)
+from aiohttp.web_urldispatcher import UrlDispatcher
+from typing_extensions import override  # Python 3.11 compatibility
+from yarl import URL
+
+from .api_types import InputFile, Update
+from .bot import Bot, HandlerTableProtocol
+from .storage import StorageProtocol
+
+NETWORKS: Final[tuple[IPv4Network, ...]] = (
+    IPv4Network("149.154.160.0/20"),
+    IPv4Network("91.108.4.0/22"),
+)
+
+bot_logger: Final[logging.Logger] = logging.getLogger("aiotgbot.bot")
+
+
+class ApplicationKwargs(TypedDict, total=False):
+    logger: logging.Logger
+    router: UrlDispatcher
+    middlewares: Iterable[Middleware]
+    handler_args: Mapping[str, object]
+    client_max_size: int
+    loop: asyncio.AbstractEventLoop
+
+
+class ListenBot(Bot):
+    _certificate: InputFile | None
+    _ip_address: str | None
+    _webhook_token: str | None
+    _application: Application
+    _stopped: bool
+
+    def __init__(
+        self,
+        url: str | URL,
+        token: str,
+        handler_table: "HandlerTableProtocol",
+        storage: StorageProtocol,
+        certificate: InputFile | None = None,
+        ip_address: str | None = None,
+        check_address: bool = False,
+        address_header: str | None = None,
+        client_session: ClientSession | None = None,
+        **application_args: Unpack[ApplicationKwargs],
+    ) -> None:
+        super().__init__(
+            token,
+            handler_table,
+            storage,
+            client_session,
+        )
+        self._url: URL = URL(url) if isinstance(url, str) else url
+        self._certificate = certificate
+        self._ip_address = ip_address
+        self._webhook_token = None
+        self._check_address: Final[bool] = check_address
+        self._address_header: Final[str | None] = address_header
+        self._application = Application(**application_args)
+        _ = self._application.router.add_post("/{token}", self._handler)  # noqa: RUF027
+
+    @property
+    def application(self) -> Application:
+        return self._application
+
+    def _address_is_allowed(self, request: Request) -> bool:
+        if self._address_header is not None:
+            address = IPv4Address(request.headers[self._address_header])
+        else:
+            address = IPv4Address(request.remote)
+        return any(address in network for network in NETWORKS)
+
+    async def _handler(self, request: Request) -> StreamResponse:
+        if not self._started:
+            raise HTTPInternalServerError()
+        assert self._scheduler is not None
+        assert self._webhook_token is not None
+        if self._check_address and not self._address_is_allowed(request):
+            raise HTTPNotFound()
+        if not compare_digest(self._webhook_token, request.match_info["token"]):
+            raise HTTPNotFound()
+        update_data = await request.read()
+        update = msgspec.json.decode(update_data, type=Update)
+        _ = await self._scheduler.spawn(self._handle_update(update))
+        return Response()
+
+    @override
+    async def start(self) -> None:
+        if self._started:
+            raise RuntimeError("Polling already started")
+        await self._start()
+        assert self._me is not None
+        loop = asyncio.get_running_loop()
+        self._webhook_token = await loop.run_in_executor(None, token_urlsafe)
+        assert isinstance(self._webhook_token, str)
+        url = str(self._url / self._webhook_token)
+        _ = await self.set_webhook(url, self._certificate, self._ip_address)
+        bot_logger.info(
+            "Bot %s (%s) start listen",
+            self._me.first_name,
+            self._me.username,
+        )
+
+    @override
+    async def stop(self) -> None:
+        if not self._started:
+            raise RuntimeError("Polling not started")
+        if self._stopped:
+            raise RuntimeError("Polling already stopped")
+        assert self._me is not None
+        self._stopped = True
+        _ = await self.delete_webhook()
+        await self._cleanup()
+        bot_logger.info(
+            "Bot %s (%s) stop listen",
+            self._me.first_name,
+            self._me.username,
+        )
