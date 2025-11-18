@@ -1,0 +1,140 @@
+Metadata-Version: 2.4
+Name: wayne-graphics
+Version: 1.1.1
+Summary: CMU-style graphics wrapper using tkinter
+Author: Wayne
+License: MIT
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENCE
+Dynamic: author
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: license
+Dynamic: license-file
+Dynamic: requires-python
+Dynamic: summary
+
+
+
+---
+
+ Wayne Graphics
+
+A lightweight Python graphics library built to speedrun AP CSP assignments and simplify event-driven programming.
+
+Created by Wayne, a high school TA and PyPI developer from Martin County, Florida.
+
+---
+
+ Installation
+
+`bash
+pip install wayne-graphics
+`
+
+---
+
+ Quick Start
+
+`python
+from wayne_graphics.core import WayneGraphics
+from wayne_graphics.shapes import drawRect, drawCircle, drawText
+from wayne_graphics.events import onMousePress, onKeyPress
+
+Create a window
+app = WayneGraphics(width=600, height=400, title="Wayne Demo")
+
+Draw shapes
+drawRect(app.canvas, 50, 50, 100, 60, color="blue")
+drawCircle(app.canvas, 300, 200, 40, color="red")
+drawText(app.canvas, 150, 300, "Hello Wayne!", font=("Courier", 16), color="green")
+
+Handle mouse click
+def handle_click(x, y):
+    print(f"Mouse clicked at ({x}, {y})")
+
+onMousePress(app.canvas, handle_click)
+
+Handle key press
+def handle_key(char):
+    print(f"Key pressed: {char}")
+
+onKeyPress(app.root, handle_key)
+
+Run the app
+app.run()
+`
+
+---
+
+ Modules
+
+core.py
+ WayneGraphics: Main window class with built-in canvas and event loop
+ onMousePress(func): Binds left-click handler
+ onKeyPress(func): Binds keypress handler
+ run(): Starts the GUI loop
+
+shapes.py
+ drawRect(canvas, x, y, width, height, color)
+drawCircle(canvas, x, y, radius, color)
+ drawText(canvas, x, y, text, font, color)
+
+events.py
+ Mouse Events:
+   onMousePress, onMouseRelease, onMouseDrag, onMouseMove
+   onMouseEnter, onMouseLeave, onRightClick, onMiddleClick, onScroll
+ Keyboard Events:
+   onKeyPress, onKeyRelease
+ Animation:
+   onStep(root, func, delay)
+ Custom Binding:
+   bind(canvasorroot, event, func)
+
+---
+
+ Why Wayne Graphics?
+
+ Minimal boilerplate â€” perfect for beginners and AP CSP students
+ Fast setup â€” one-line install, instant canvas
+ Event-driven â€” intuitive mouse and keyboard handling
+ Modular design â€” clean separation of core, shapes, and events
+ Classroom-tested â€” used in real AP CSP assignments
+
+---
+
+ Educational Use
+
+Wayne Graphics was built to help students focus on logic and creativity, not boilerplate. Itâ€™s ideal for:
+ AP Computer Science Principles
+ Python graphics projects
+ Teaching event-driven programming
+ Rapid prototyping
+
+---
+
+ Contributing
+
+Pull requests are welcome! If youâ€™d like to add new shapes, events, or features, feel free to fork and submit.
+
+---
+
+ License
+
+MIT License â€” free to use, modify, and distribute.
+
+---
+
+ Credits
+
+Built by Wayne, a 17-year-old TA and PyPI developer from Martin County High School.  
+Inspired by the need to speedrun AP CSP assignments with style.
+
+---
+
+
