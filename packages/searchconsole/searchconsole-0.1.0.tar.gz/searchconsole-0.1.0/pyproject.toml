@@ -1,0 +1,84 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "searchconsole"
+description = "A wrapper for the Google Search Console API."
+authors = [
+  {name = "Josh Carty", email = "carty.josh@gmail.com"},
+]
+version = "0.1.0"
+license = {text = "MIT"}
+dependencies = [
+    "google-api-python-client>=1.7.3",
+    "google-auth>=1.5.0",
+    "google-auth-oauthlib>=0.2.0",
+    "python-dateutil>=2.7.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "tox>=4.0.0",
+    "tox-uv>=1.29.0",
+    "python-dotenv>=0.21.1",
+    "coverage>=7.0.0",
+    "ruff>=0.1.0",
+]
+test = [
+    "python-dotenv>=0.21.1",
+    "coverage>=7.0.0",
+    "ruff>=0.1.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.tox]
+env_list = ["py38", "py39", "py310", "py311", "py312", "py313"]
+skip_missing_interpreters = true
+
+[tool.tox.env_run_base]
+description = "Run unit tests and doctests"
+extras = ["test"]
+pass_env = [
+    "SEARCHCONSOLE_CLIENT_CONFIG",
+    "SEARCHCONSOLE_CREDENTIALS",
+    "SEARCHCONSOLE_WEBPROPERTY_URI",
+    "SEARCHCONSOLE_SERVICE_ACCOUNT",
+]
+commands = [
+    ["python", "-m", "unittest", "tests"],
+]
+
+[tool.tox.env.lint]
+description = "Run code quality checks with ruff"
+extras = ["test"]
+commands = [
+    ["ruff", "check", "src/searchconsole", "tests.py"],
+    ["ruff", "format", "--check", "src/searchconsole", "tests.py"],
+]
+
+[tool.tox.env.format]
+description = "Format code with ruff"
+extras = ["test"]
+commands = [
+    ["ruff", "format", "src/searchconsole", "tests.py"],
+    ["ruff", "check", "--fix", "src/searchconsole", "tests.py"],
+]
+
+[tool.tox.env.coverage]
+description = "Run tests with coverage reporting"
+extras = ["test"]
+commands = [
+    ["coverage", "run", "-m", "unittest", "tests"],
+    ["coverage", "report", "-m"],
+    ["coverage", "html"],
+]
+
+[tool.ruff]
+line-length = 88
+exclude = [".tox", "*.egg", "build", "__pycache__"]
+
+[tool.ruff.lint]
+extend-ignore = []
