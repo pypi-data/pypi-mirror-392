@@ -1,0 +1,58 @@
+Metadata-Version: 2.4
+Name: tdxlite
+Version: 1.0.0
+Summary: A lightweight TDX protocol parser and client library
+Project-URL: Homepage, https://github.com/jett2025ab/tdxlite
+Project-URL: Repository, https://github.com/jett2025ab/tdxlite
+Project-URL: Documentation, https://github.com/jett2025ab/tdxlite#readme
+Author-email: jett2025ab <jett2025ab@outlook.com>
+License-Expression: MIT
+License-File: LICENSE.txt
+Keywords: finance,quant,tdx,trading
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: <3.13,>=3.10
+Requires-Dist: bitstring
+Provides-Extra: test
+Requires-Dist: pytest; extra == 'test'
+Requires-Dist: pytest-cov; extra == 'test'
+Description-Content-Type: text/markdown
+
+# tdxlite
+
+[![PyPI - Version](https://img.shields.io/pypi/v/tdxlite.svg)](https://pypi.org/project/tdxlite)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/tdxlite.svg)](https://pypi.org/project/tdxlite)
+
+-----
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Introduction](#start)
+- [License](#license)
+
+## Installation
+
+```console
+pip install tdxlite
+```
+
+## Introduction
+
+### 示例1：获取北交所成分股
+
+```python
+from tdxlite.client import TdxClient
+
+with TdxClient() as client:
+    stock_list = client.get_stock_list_bj()
+    print(stock_list)
+    print(len(stock_list))
+```
+
+## License
+
+`tdxlite` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
