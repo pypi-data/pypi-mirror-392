@@ -1,0 +1,82 @@
+# symlink-editor
+
+A TUI (text based user interface) written in Python with [prompt-toolkit](https://python-prompt-toolkit.readthedocs.io/en/stable/) to edit symlinks.
+
+Features:
+
+- The color of the frame indicates whether the target exists or not.
+- The color of the path indicates which part of the path is broken.
+- The cursor is placed at the beginning of the broken part of the path.
+- Tab completion and completion menu showing all existing files and directories at the cursor position.
+
+
+## Installation
+
+This program is distributed via [PyPI](https://pypi.org/) so you can easily install it with [pipx](https://pipx.pypa.io/latest/):
+
+```
+$ pipx install symlink-editor
+```
+
+
+## Usage in a terminal
+
+```
+$ symlink-editor path/to/symlink
+```
+
+
+## Integration in other terminal applications
+
+If you want to integrate this program into [yazi](https://yazi-rs.github.io/), [ranger](https://ranger.github.io/) or other terminal applications I recommend to use the `--window` flag.
+With that all feedback such as error messages or updated link will be displayed in a prompt toolkit window instead of printed to stdout so that they won't be overwritten by the other application before you can read them.
+You can dismiss the window by pressing Enter, Ctrl+C or Q.
+
+Note that the `--window` flag can only take effect after all command line arguments have been parsed.
+That means that it does not apply to error messages from incorrect command line arguments and the output of `--help` and `--version`.
+
+For yazi you can add the following to ~/.config/yazi/keymap.toml:
+
+```
+[[manager.prepend_keymap]]
+on = [ "e", "l" ]
+run = 'shell --block "symlink-editor --window \"$0\""'
+desc = "edit symlink"
+```
+
+
+## License
+
+This is free software.
+It is licensed under the BSD Zero Clause License.
+You can freely use, modify, and distribute it.
+See [LICENSE](./LICENSE).
+
+
+## Running the tests
+
+I am using [mypy](https://www.mypy-lang.org/) for static type checking and [pytest](https://docs.pytest.org/en/latest/) for dynamic testing.
+[tox](https://tox.wiki/en/latest/) creates a virtual environment and installs all dependencies for you.
+You can install tox with [pipx](https://pypa.github.io/pipx/) (`pipx install tox`).
+
+```bash
+$ tox
+```
+
+In order to make tox work without an internet connection install [devpi](https://devpi.net/docs/devpi/devpi/stable/%2Bd/index.html):
+
+```bash
+$ pipx install devpi-server
+$ devpi-init
+$ devpi-gen-config
+$ su
+# cp gen-config/devpi.service /etc/systemd/system/
+# systemctl start devpi.service
+# systemctl enable devpi.service
+```
+
+and add the following line to your bashrc:
+
+```bash
+export PIP_INDEX_URL=http://localhost:3141/root/pypi/+simple/
+```
