@@ -1,0 +1,197 @@
+GENERAL ORACLE APEX EXAM TEMPLATE – SQL, PL/SQL, REGEX, WINDOW FUNCTIONS, MODEL CLAUSE, AUTHENTICATION, AUTHORIZATION
+===============================================================================================================
+
+This file is a complete GENERALIZED template you can reuse for ANY Oracle APEX exam question (forms, reports, charts, triggers, validations, model clause, window functions).
+
+--------------------------------------------------------------------------------------------------------------
+1. DATABASE SCHEMA (GENERALIZED – WORKS FOR ANY APPLICATION)
+--------------------------------------------------------------------------------------------------------------
+
+-- PARENTS TABLE
+CREATE TABLE PARENTS (
+    PARENT_ID NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    NAME VARCHAR2(100) NOT NULL,
+    AGE NUMBER CHECK (AGE BETWEEN 18 AND 80),
+    GENDER VARCHAR2(10) CHECK (GENDER IN ('Male','Female','Other')),
+    MOBILE VARCHAR2(15),
+    NUM_CHILDREN NUMBER CHECK (NUM_CHILDREN >= 0),
+    CREATED_AT DATE DEFAULT SYSDATE
+);
+
+-- CHILDREN TABLE
+CREATE TABLE CHILDREN (
+    CHILD_ID NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    PARENT_ID NUMBER REFERENCES PARENTS(PARENT_ID),
+    NAME VARCHAR2(100) NOT NULL,
+    AGE NUMBER CHECK (AGE BETWEEN 1 AND 12),
+    FAV_CATEGORY VARCHAR2(50),
+    CREATED_AT DATE DEFAULT SYSDATE
+);
+
+-- MATERIAL TABLE
+CREATE TABLE MATERIALS (
+    MATERIAL_ID NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    NAME VARCHAR2(100),
+    TEXTURE VARCHAR2(30),
+    COLOR VARCHAR2(30),
+    SOURCE VARCHAR2(50),
+    SAFETY_CERT VARCHAR2(50),
+    CREATED_AT DATE DEFAULT SYSDATE
+);
+
+--------------------------------------------------------------------------------------------------------------
+2. CONSTRAINTS (REGEX + CHECK)
+--------------------------------------------------------------------------------------------------------------
+
+ALTER TABLE PARENTS ADD CONSTRAINT CHK_PARENT_MOBILE
+CHECK (REGEXP_LIKE(MOBILE, '^[0-9]{10}$'));
+
+ALTER TABLE CHILDREN ADD CONSTRAINT CHK_CHILD_NAME
+CHECK (REGEXP_LIKE(NAME, '^[A-Za-z ]+$'));
+
+ALTER TABLE MATERIALS ADD CONSTRAINT CHK_SOURCE
+CHECK (SOURCE IN ('Organic','Recycled','Wood','Fabric'));
+
+--------------------------------------------------------------------------------------------------------------
+3. TRIGGER (GENERAL EXAM TRIGGER)
+--------------------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE TRIGGER TRG_CHILD_AUDIT
+AFTER INSERT ON CHILDREN
+FOR EACH ROW
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Child Registered: ' || :NEW.NAME || ', Age: ' || :NEW.AGE);
+END;
+/
+
+--------------------------------------------------------------------------------------------------------------
+4. WINDOW FUNCTIONS (USE IN APEX REPORT)
+--------------------------------------------------------------------------------------------------------------
+
+-- Rank parents by number of children
+SELECT NAME, NUM_CHILDREN,
+       RANK() OVER (ORDER BY NUM_CHILDREN DESC) AS FAMILY_RANK
+FROM PARENTS;
+
+-- Running total of number of children
+SELECT PARENT_ID, NAME,
+       SUM(NUM_CHILDREN) OVER (ORDER BY PARENT_ID) AS RUNNING_SUM
+FROM PARENTS;
+
+--------------------------------------------------------------------------------------------------------------
+5. MODEL CLAUSE (GENERAL TEMPLATE)
+--------------------------------------------------------------------------------------------------------------
+
+-- Forecast future usage (can be applied to any numeric table)
+SELECT MATERIAL_ID, NAME, USAGE_YEAR, USAGE_QTY
+FROM MATERIAL_USAGE
+MODEL
+    DIMENSION BY (MATERIAL_ID, USAGE_YEAR)
+    MEASURES (USAGE_QTY)
+    RULES (
+        USAGE_QTY[ANY, FOR USAGE_YEAR FROM 2025 TO 2028 INCREMENT 1] =
+        USAGE_QTY[CV(), CV()-1] * 1.10
+    );
+
+--------------------------------------------------------------------------------------------------------------
+6. REGEX EXPRESSIONS (USE IN APEX VALIDATIONS)
+--------------------------------------------------------------------------------------------------------------
+
+Name (only alphabets):
+^[A-Za-z ]+$
+
+Mobile number (10 digits):
+^[0-9]{10}$
+
+Date DD-MM-YYYY:
+^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-[0-9]{4}$
+
+Email:
+^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$
+
+--------------------------------------------------------------------------------------------------------------
+7. FORMS + REPORTS (APEX PAGE CREATION STEPS)
+--------------------------------------------------------------------------------------------------------------
+
+Create 2 Forms + Reports:
+1. Parent Details Form + Report
+2. Child/Toddler Details Form + Report
+3. Material Details Form + Report
+
+Steps:
+App Builder → Create Page → Form → Form with Report
+Select table (Parents/Children/Materials)
+Add validations using REGEX
+Add LOV for Gender, Source, Category etc.
+
+--------------------------------------------------------------------------------------------------------------
+8. CHARTS (3 GENERAL CHARTS)
+--------------------------------------------------------------------------------------------------------------
+
+Chart 1: Children per Parent
+SQL:
+SELECT NAME, NUM_CHILDREN FROM PARENTS;
+
+Chart 2: Materials by Source
+SELECT SOURCE, COUNT(*) FROM MATERIALS GROUP BY SOURCE;
+
+Chart 3: Children Category Distribution
+SELECT FAV_CATEGORY, COUNT(*) FROM CHILDREN GROUP BY FAV_CATEGORY;
+
+--------------------------------------------------------------------------------------------------------------
+9. AUTHENTICATION (GENERAL)
+--------------------------------------------------------------------------------------------------------------
+
+Shared Components → Authentication Schemes → Create
+Choose:
+✓ Application Express Accounts (easy exam option)
+or
+✓ Custom authentication via PL/SQL (optional)
+
+PL/SQL custom example:
+RETURN :P101_USERNAME = 'admin' AND :P101_PASSWORD = 'admin123';
+
+--------------------------------------------------------------------------------------------------------------
+10. AUTHORIZATION (GENERAL)
+--------------------------------------------------------------------------------------------------------------
+
+Create new Authorization Scheme:
+Name: Admin Only
+Condition:
+RETURN UPPER(:APP_USER) = 'ADMIN';
+
+Apply to pages:
+Page → Security → Authorization → Admin Only
+
+--------------------------------------------------------------------------------------------------------------
+11. SAMPLE INSERT DATA
+--------------------------------------------------------------------------------------------------------------
+
+INSERT INTO PARENTS (NAME, AGE, GENDER, MOBILE, NUM_CHILDREN)
+VALUES ('Ravi Kumar', 34, 'Male', '9876543210', 2);
+
+INSERT INTO CHILDREN (PARENT_ID, NAME, AGE, FAV_CATEGORY)
+VALUES (1, 'Aarav', 4, 'Animals');
+
+INSERT INTO MATERIALS (NAME, TEXTURE, COLOR, SOURCE, SAFETY_CERT)
+VALUES ('Organic Wood', 'Smooth', 'Brown', 'Organic', 'ISO-SAFE');
+
+--------------------------------------------------------------------------------------------------------------
+12. HOW TO USE THIS TEMPLATE FOR ANY EXAM QUESTION
+--------------------------------------------------------------------------------------------------------------
+
+Replace table names according to exam.
+Replace attributes according to domain.
+Forms, reports, charts, validations, triggers, window functions stay SAME.
+
+This template works for:
+✓ Toys  
+✓ Hospitals  
+✓ Students  
+✓ Banking  
+✓ Orders  
+✓ Anything
+
+--------------------------------------------------------------------------------------------------------------
+END OF FILE
+--------------------------------------------------------------------------------------------------------------
