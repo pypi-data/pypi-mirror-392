@@ -1,0 +1,18 @@
+from enum import Enum
+
+
+class PersonnelPublicControllerListPersonnelEmploymentStatusesItem(str, Enum):
+    ALL_CURRENT_PERSONNEL = "ALL_CURRENT_PERSONNEL"
+    ALL_FORMER_PERSONNEL = "ALL_FORMER_PERSONNEL"
+    ALL_PERSONNEL = "ALL_PERSONNEL"
+    CURRENT_CONTRACTOR = "CURRENT_CONTRACTOR"
+    CURRENT_EMPLOYEE = "CURRENT_EMPLOYEE"
+    FORMER_CONTRACTOR = "FORMER_CONTRACTOR"
+    FORMER_EMPLOYEE = "FORMER_EMPLOYEE"
+    FUTURE_HIRE = "FUTURE_HIRE"
+    OUT_OF_SCOPE = "OUT_OF_SCOPE"
+    SERVICE_ACCOUNT = "SERVICE_ACCOUNT"
+    UNKNOWN = "UNKNOWN"
+
+    def __str__(self) -> str:
+        return str(self.value)
