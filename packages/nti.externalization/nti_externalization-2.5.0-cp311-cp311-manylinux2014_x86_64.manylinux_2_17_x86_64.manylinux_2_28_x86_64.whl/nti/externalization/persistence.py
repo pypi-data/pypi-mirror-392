@@ -1,0 +1,327 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Classes and functions for dealing with persistence (and pickling) in an external
+context.
+
+.. note::
+    Importing this module monkey-patches the class `persistent.wref.WeakRef`
+    to directly implement ``toExternalObject()`` and ``toExternalOID()``.
+    It's not clear why we don't simply register class adapters for those things,
+    but we don't.
+
+"""
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+# stdlib imports
+from collections.abc import Sequence
+izip = zip
+
+import warnings
+
+try:
+    from persistent import UPTODATE
+    from persistent import CHANGED
+    from persistent import Persistent
+    from persistent.list import PersistentList
+    from persistent.mapping import PersistentMapping
+    from persistent.wref import WeakRef as PWeakRef
+except ModuleNotFoundError as ex:
+    assert ex.name == 'persistent'
+    UPTODATE = None
+    CHANGED = 'Fake Changed'
+    class Persistent:
+        """Mock"""
+    PersistentList = list
+    PersistentMapping = dict
+    from weakref import ref
+    class PWeakRef(ref):
+        __slots__ = ()
+
+from zope import interface
+
+from nti.externalization.datastructures import ExternalizableDictionaryMixin
+from nti.externalization.externalization import toExternalObject
+from nti.externalization.interfaces import IInternalObjectExternalizer
+from nti.externalization.oids import toExternalOID
+from nti.externalization.proxy import removeAllProxies
+
+
+# disable: accessing protected members
+# pylint: disable=W0212
+
+__all__ = [
+    'getPersistentState',
+    'setPersistentStateChanged',
+    'PersistentExternalizableDictionary',
+    'PersistentExternalizableList',
+    'PersistentExternalizableWeakList',
+    'NoPickle',
+]
+
+def getPersistentState(obj):
+    """
+    For a :class:`persistent.Persistent` object, returns one of the
+    constants from the persistent module for its state:
+    :const:`persistent.CHANGED` and :const:`persistent.UPTODATE` being the most useful.
+
+    If the object is not Persistent and doesn't implement a ``getPersistentState`` method,
+    this method will be pessimistic and assume the object has
+    been :const:`persistent.CHANGED`.
+    """
+    # Certain types of proxies are also Persistent and maintain a state separate from
+    # their wrapped object, notably zope.container.contained.ContainedProxy, as used
+    # in certain containers (such usage is generally deprecated now).
+    # To meet our pessimistic requirement, we will report changed if either the proxy
+    # or the wrapped object does
+
+    try:
+        # Trust the changed value ahead of the state value,
+        # because it is settable from python but the state
+        # is more implicit.
+        return CHANGED if obj._p_changed else UPTODATE
+    except AttributeError:
+        pass
+
+    try:
+        if obj._p_state == UPTODATE and obj._p_jar is None:
+            # In keeping with the pessimistic theme, if it claims to be uptodate, but has never
+            # been saved, we consider that the same as changed
+            return CHANGED
+    except AttributeError:
+        pass
+
+    unwrapped = removeAllProxies(obj)
+    if unwrapped is not obj:
+        return getPersistentState(unwrapped)
+
+    try:
+        return obj._p_state
+    except AttributeError:
+        try:
+            return obj.getPersistentState()
+        except AttributeError:
+            return CHANGED
+
+
+def setPersistentStateChanged(obj):
+    """
+    Explicitly marks a persistent object as changed.
+    """
+    try:
+        obj._p_changed = True
+    except AttributeError:
+        pass
+
+
+def _weakRef_toExternalObject(self):
+    val = self()
+    return toExternalObject(val) if val is not None else None
+
+PWeakRef.toExternalObject = _weakRef_toExternalObject
+interface.classImplements(PWeakRef, IInternalObjectExternalizer)
+
+
+def _weakRef_toExternalOID(self):
+    val = self()
+    return toExternalOID(val) if val is not None else None
+PWeakRef.toExternalOID = _weakRef_toExternalOID
+
+
+class PersistentExternalizableDictionary(PersistentMapping, # pylint:disable=too-many-ancestors
+                                         ExternalizableDictionaryMixin):
+    """
+    Dictionary mixin that provides :meth:`toExternalDictionary` to
+    return a new dictionary with each value in the dict having been
+    externalized with :func:`~.toExternalObject`.
+
+    .. versionchanged:: 1.0
+        No longer extends :class:`nti.zodb.persistentproperty.PersistentPropertyHolder`.
+        If you have subclasses that use writable properties and which should
+        bypass the normal attribute setter implementation, please
+        mixin this superclass (first) yourself.
+    """
+
+    def toExternalDictionary(self, *args, **kwargs):
+        result = super().toExternalDictionary(self,
+                                              *args,
+                                              **kwargs)
+        for key, value in self.items():
+            result[key] = toExternalObject(value, *args, **kwargs)
+        return result
+
+
+class PersistentExternalizableList(PersistentList): # pylint:disable=too-many-ancestors
+    """
+    List mixin that provides :meth:`toExternalList` to return a new list
+    with each element in the sequence having been externalized with
+    :func:`~.toExternalObject`.
+
+
+    .. versionchanged:: 1.0
+        No longer extends :class:`nti.zodb.persistentproperty.PersistentPropertyHolder`.
+        If you have subclasses that use writable properties and which should
+        bypass the normal attribute setter implementation, please
+        mixin this superclass (first) yourself.
+    """
+
+    def toExternalList(self):
+        result = [toExternalObject(x) for x in self if x is not None]
+        return result
+
+    def values(self):
+        """
+        For compatibility with :mod:`zope.generations.utility`, this
+        object defines a `values` method which does nothing but return
+        itself. That makes these objects transparent and suitable for
+        migrations.
+        """
+        return self
+
+
+class PersistentExternalizableWeakList(PersistentExternalizableList): # pylint:disable=too-many-ancestors
+    """
+    Stores :class:`persistent.Persistent` objects as weak references,
+    invisibly to the user. Any weak references added to the list will
+    be treated the same.
+
+    Weak references are resolved on access; if the referrant has been
+    deleted, then that access will return ``None``.
+
+    .. versionchanged:: 1.0
+        No longer extends :class:`nti.zodb.persistentproperty.PersistentPropertyHolder`.
+        If you have subclasses that use writable properties and which should
+        bypass the normal attribute setter implementation, please
+        mixin this superclass (first) yourself.
+    """
+
+    def __init__(self, initlist=None):
+        if initlist is not None:
+            initlist = [self.__wrap(x) for x in initlist]
+        super().__init__(initlist or ())
+
+    def __getitem__(self, i):
+        return super().__getitem__(i)()
+
+    # NOTE: __iter__ is implemented with __getitem__ so we don't reimplement
+    # (unless we're subclassing stdlib list)
+    # However, __eq__ isn't, it wants to directly compare lists
+    def __eq__(self, other):
+        # If we just compare lists, weak refs will fail badly
+        # if they're compared with non-weak refs
+        if not isinstance(other, Sequence):
+            return False
+
+        if len(self) != len(other):
+            return False
+
+        return all(obj1 == obj2 for obj1, obj2 in izip(self, other))
+
+    if PersistentList is list:
+        def __iter__(self):
+            for i in super().__iter__():
+                yield i()
+
+        def __mul__(self, n):
+            # Returns a plain list object.
+            plain = super().__mul__(n)
+            return self.__class__(plain)
+
+
+    __hash__ = None
+
+    def __wrap(self, obj):
+        return obj if isinstance(obj, PWeakRef) else PWeakRef(obj)
+
+    def remove(self, item):
+        super().remove(self.__wrap(PWeakRef(item)))
+
+    def __setitem__(self, i, item):
+        super().__setitem__(i, self.__wrap(PWeakRef(item)))
+
+    # Unfortunately, these are not implemented in terms of the primitives, so
+    # we need to overide each one. They can throw exceptions, so we're careful
+    # not to prematurely update lastMod
+
+    def __iadd__(self, other):
+        # We must wrap each element in a weak ref
+        # Note that the builtin list only accepts other lists,
+        # but the UserList from which we are descended accepts
+        # any iterable.
+        result = super().__iadd__(
+            [self.__wrap(PWeakRef(o)) for o in other])
+        return result
+
+    def __imul__(self, n):
+        result = super().__imul__(n)
+        return result
+
+    def append(self, item):
+        super().append(self.__wrap(PWeakRef(item)))
+
+    def insert(self, i, item):
+        super().insert(i, self.__wrap(PWeakRef(item)))
+
+    def pop(self, i=-1):
+        rtn = super().pop(i)
+        return rtn()
+
+    def extend(self, other):
+        for x in other:
+            self.append(x)
+
+    def count(self, item):
+        return super().count(self.__wrap(PWeakRef(item)))
+
+    def index(self, item, *args):
+        return super().index(self.__wrap(PWeakRef(item)), *args)
+
+
+def NoPickle(cls):
+    """
+    A class decorator that prevents an object from being pickled.
+    Useful for ensuring certain objects do not get pickled and thus
+    avoiding ZODB backward compatibility concerns.
+
+    .. warning::
+       Subclasses of such decorated classes are
+       also not capable of being pickled, without
+       appropriate overrides of ``__reduce_ex__`` and
+       ``__getstate__``. A "working" subclass, but only
+       for ZODB, looks like this::
+
+            @NoPickle
+            class Root(object):
+                pass
+
+            class CanPickle(Persistent, Root):
+                pass
+
+    .. warning::
+       This decorator emits a warning when it is used
+       directly on a ``Persistent`` subclass, as that rather
+       defeats the point (but it is still allowed for
+       backwards compatibility).
+    """
+
+    msg = "Not allowed to pickle %s" % cls
+
+    def __reduce_ex__(self, protocol=0):
+        raise TypeError(msg)
+
+    for meth in '__reduce_ex__', '__reduce__', '__getstate__':
+        if vars(cls).get(meth) is not None:
+            warnings.warn(RuntimeWarning("Using @NoPickle an a class that implements " + meth),
+                          stacklevel=2)
+        setattr(cls, meth, __reduce_ex__)
+
+    if issubclass(cls, Persistent):
+        warnings.warn(RuntimeWarning("Using @NoPickle an a Persistent subclass"),
+                      stacklevel=2)
+
+
+
+    return cls
