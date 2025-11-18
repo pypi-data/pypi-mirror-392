@@ -1,0 +1,179 @@
+Metadata-Version: 2.4
+Name: unsplash-lite-dataset-api
+Version: 0.1.0
+Summary: Utilities for building and querying an Unsplash-style OpenSearch index
+Author: Baneet
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: python-dotenv>=1.0
+Requires-Dist: psycopg2-binary>=2.9
+Requires-Dist: opensearch-py>=2.4
+Requires-Dist: requests-aws4auth>=1.2
+Requires-Dist: nltk>=3.8
+Provides-Extra: dev
+Requires-Dist: pytest>=7.4; extra == "dev"
+
+# unsplash-lite-dataset-api
+
+Utilities for exporting Unsplash-style photo metadata from Postgres into an OpenSearch index and querying it programmatically.
+
+## Features
+
+- Environment-driven configuration helpers for Postgres and OpenSearch clients.
+- Document extraction utilities that assemble rich photo documents ready for indexing.
+- Index management helpers with synonym-aware analyzers and bulk ingestion support.
+- Query helpers for end-user search flows, including color filters and keyword boosting.
+- A CLI (`files-unsplash-index`) for end-to-end ingestion using your configured environments.
+- Optional tools for generating large synonym lists from the NLTK WordNet corpus.
+
+## Installation
+
+```bash
+pip install .
+```
+
+The package requires Python 3.9 or later. Installing in editable mode during development is also supported:
+
+```bash
+pip install -e .[dev]
+```
+
+The `[dev]` extra installs `pytest` for running the included tests.
+
+## Configuration
+
+Set the following environment variables (a `.env` file is supported automatically):
+
+- `PG_HOST`, `PG_PORT`, `PG_DB`, `PG_USER`, `PG_PASSWORD`
+- `OPENSEARCH_HOST`, `OPENSEARCH_PORT`, `OPENSEARCH_USE_SSL`, `OPENSEARCH_VERIFY_CERTS`, `OPENSEARCH_REGION`
+- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, optional `AWS_SESSION_TOKEN`
+- Optional: `OPENSEARCH_CONNECT_TIMEOUT`
+
+## Command-line usage
+
+The `unsplash-lite-dataset-api` CLI provides subcommands for all major operations.
+
+### Indexing
+
+Generate (or supply) a synonyms file and run the indexer:
+
+```bash
+unsplash-lite-dataset-api index \
+  --synonyms-path ./synonyms.txt \
+  --index-name unsplash_photos \
+  --batch-size 500
+```
+
+### Searching
+
+Search the index:
+
+```bash
+unsplash-lite-dataset-api search \
+  --index-name unsplash_photos \
+  --query-text "blue ocean sunset" \
+  --size 10
+```
+
+### Extracting documents
+
+Extract photo documents from Postgres:
+
+```bash
+unsplash-lite-dataset-api extract --output photos.json
+```
+
+### Generating synonyms
+
+Generate a synonyms file from WordNet:
+
+```bash
+unsplash-lite-dataset-api synonyms --output ./synonyms.txt --include-hyponyms
+```
+
+### Index management
+
+Create an empty index:
+
+```bash
+unsplash-lite-dataset-api create-index --synonyms-path ./synonyms.txt
+```
+
+Delete an index:
+
+```bash
+unsplash-lite-dataset-api delete-index --index-name unsplash_photos
+```
+
+For backwards compatibility, you can still run:
+
+```bash
+python -m main_index
+```
+
+which now delegates to the CLI's `index` command using `synonyms.txt` located next to the script.
+
+## Library usage
+
+```python
+from unsplash_lite_dataset_api import (
+    load_postgres_config,
+    load_opensearch_config,
+    create_pg_connection,
+    create_opensearch_client,
+    generate_documents,
+    load_synonyms_from_file,
+    build_index,
+)
+
+pg_cfg = load_postgres_config()
+os_cfg = load_opensearch_config()
+
+with create_pg_connection(pg_cfg) as pg_conn:
+    os_client = create_opensearch_client(os_cfg)
+    synonyms = load_synonyms_from_file("./synonyms.txt")
+    build_index(
+        client=os_client,
+        conn=pg_conn,
+        index_name="unsplash_photos",
+        synonyms=synonyms,
+    )
+```
+
+For searching:
+
+```python
+from unsplash_lite_dataset_api import create_opensearch_client, load_opensearch_config, search_images
+
+client = create_opensearch_client(load_opensearch_config())
+results = search_images(
+    client,
+    index_name="unsplash_photos",
+    query_text="blue ocean sunset",
+    size=10,
+)
+```
+
+## Synonym generation
+
+Use the WordNet helpers to build a synonyms file when you do not already have one:
+
+```python
+from pathlib import Path
+from unsplash_lite_dataset_api import generate_wordnet_synonyms_file
+
+target = Path("./synonyms.txt")
+generate_wordnet_synonyms_file(target)
+```
+
+Ensure the NLTK `wordnet` and `omw-1.4` corpora are installed locally. If they are missing, the helper raises a detailed `WordnetInitializationError` describing how to fix the environment.
+
+## Testing
+
+Run the unit tests with:
+
+```bash
+pytest
+```
+
+The tests cover the search query builder and synonym loader utilities.
