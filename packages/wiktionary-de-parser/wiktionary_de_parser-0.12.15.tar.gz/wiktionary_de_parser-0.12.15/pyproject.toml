@@ -1,0 +1,53 @@
+[tool.poetry]
+name = "wiktionary-de-parser"
+version = "0.12.15"
+description = "Extracts data from German Wiktionary dump files."
+authors = ["Gregor Weichbrodt <gregorweichbrodt@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/gambolputty/wiktionary-de-parser"
+repository = "https://github.com/gambolputty/wiktionary-de-parser"
+keywords = ["wiktionary", "xml", "parser", "data-extraction", "german", "nlp"]
+classifiers = [
+    "Programming Language :: Python :: 3.7",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Natural Language :: German",
+    "Topic :: Text Processing :: Markup :: XML"
+]
+include = [
+    "CHANGELOG.md",
+    "LICENSE.txt",
+]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/gambolputty/wiktionary-de-parser/issues"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+lxml = "^5.1.0"
+mwparserfromhell = "^0.6.6"
+pydantic = "^2.6.0"
+requests = "^2.31.0"
+tqdm = "^4.66.1"
+wikitextparser = "^0.56.2"
+ruff = "^0.14.5"
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.0"
+ipywidgets = "^8.1.5"
+pytest = "^7.1.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+extend-exclude = [".vscode"]
+line-length = 80
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "W"]
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 150
