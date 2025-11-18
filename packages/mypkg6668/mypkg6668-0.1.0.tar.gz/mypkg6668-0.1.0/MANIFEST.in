@@ -1,0 +1,15 @@
+# 包含必要文件
+include README.md
+include LICENSE
+
+# 包含初始化文件（用户可见）
+include mypkg6668/__init__.py
+
+# 只包含 autoweave 的二进制文件（隐藏源码）
+include mypkg6668/autoweave.*.pyd
+include mypkg6668/autoweave.*.so
+
+# 排除 autoweave.py 源码和其他缓存
+exclude mypkg6668/autoweave.py
+global-exclude *.pyc
+global-exclude __pycache__
