@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "swinburne-smartrack"
+version = "0.0.9"
+authors = [
+  { name="Jason But", email="jbut@swin.edu.au" },
+]
+description = "Tools to manage devices via Swinburne Cisco SmartRack"
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+dependencies = ["logging", "paramiko", "pyparsing", "pythondialog", "requests", "rich", "tomli_w", "tomlkit"]
+
+[project.scripts]
+smartrack_config = "swinburne_smartrack.apps:smartrack_config"
+smartrack_clean = "swinburne_smartrack.apps:smartrack_clean"
+skills_validate_config = "swinburne_smartrack.apps:skills_validate_config"
+skills_collect = "swinburne_smartrack.apps:skills_collect"
+
+[project.urls]
+Homepage = "https://github.com/jason-but/swinburne-smartrack"
+Issues = "https://github.com/jason-but/swinburne-smartrack/issues"
