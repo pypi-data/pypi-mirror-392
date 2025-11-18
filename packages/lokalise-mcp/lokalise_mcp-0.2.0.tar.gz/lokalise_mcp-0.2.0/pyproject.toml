@@ -1,0 +1,64 @@
+[project]
+name = "lokalise-mcp"
+version = "0.2.0"
+description = "MCP server for syncing translation keys to Lokalise with AI-powered translations"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Sijan", email = "sijan@example.com"}
+]
+keywords = [
+    "lokalise",
+    "translation",
+    "i18n",
+    "mcp",
+    "ai",
+    "claude",
+    "localization"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Internationalization",
+    "Topic :: Software Development :: Localization",
+]
+dependencies = [
+    "fastmcp>=2.0.0",
+    "anthropic>=0.39.0",
+    "python-lokalise-api>=3.0.0",
+    "gitpython>=3.1.43",
+    "python-dotenv>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/lokalise-mcp"
+Documentation = "https://github.com/yourusername/lokalise-mcp#readme"
+Repository = "https://github.com/yourusername/lokalise-mcp"
+Issues = "https://github.com/yourusername/lokalise-mcp/issues"
+
+[project.scripts]
+lokalise-mcp = "lokalise_mcp.__main__:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "black>=24.0.0",
+    "ruff>=0.1.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.black]
+line-length = 100
+
+[tool.ruff]
+line-length = 100
