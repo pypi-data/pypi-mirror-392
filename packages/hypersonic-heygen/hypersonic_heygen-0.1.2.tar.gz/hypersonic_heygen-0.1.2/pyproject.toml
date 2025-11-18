@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=69", "wheel", "build"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hypersonic-heygen"
+version = "0.1.2"
+description = "CLI to scaffold a HeyGen-ready Jupyter notebook (Hypersonic_HeyGen project)."
+authors = [
+  { name = "Unni Ambady", email = "ambady1960@hotmail.com" }
+]
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+keywords = ["HeyGen", "avatar", "notebook", "ipynb", "generator"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+
+# no runtime deps – CLI just copies a bundled template notebook.
+
+[project.urls]
+Homepage = "https://example.com/hypersonic-heygen"
+Repository = "https://example.com/hypersonic-heygen/repo"
+Issues = "https://example.com/hypersonic-heygen/issues"
+
+[project.scripts]
+# This gives you the `hayg` command:
+hayg = "hypersonic_heygen.hayg:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+hypersonic_heygen = ["templates/*.ipynb"]
