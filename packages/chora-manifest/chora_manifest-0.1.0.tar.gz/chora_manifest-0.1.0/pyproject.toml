@@ -1,0 +1,289 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chora-manifest"
+version = "0.1.0"
+description = "Manifest - Multi-interface capability server (CLI/REST/MCP)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"},
+]
+keywords = [
+    "manifest",
+    "capability-server",
+    "multi-interface",
+    "cli",
+    "rest-api",
+    "mcp",
+    "model-context-protocol",
+    "chora-base",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+
+dependencies = [
+    # Core dependencies
+    "pydantic>=2.0.0,<3.0.0",
+    "pydantic-settings>=2.0.0,<3.0.0",
+
+    # CLI dependencies
+    "click>=8.1.0,<9.0.0",
+    "rich>=13.0.0,<14.0.0",  # For rich CLI output
+    "pyyaml>=6.0.0,<7.0.0",  # For YAML output format
+
+    # REST API dependencies
+    "fastapi>=0.110.0,<1.0.0",
+    "uvicorn[standard]>=0.27.0,<1.0.0",
+
+    # MCP dependencies
+    "mcp>=1.0.0,<2.0.0",  # Model Context Protocol SDK
+
+    # Registry dependencies (optional)
+    "httpx>=0.27.0,<1.0.0",  # For HTTP-based service discovery
+
+    # Bootstrap dependencies (optional)
+    "networkx>=3.0,<4.0",  # For dependency graph operations
+    "aiohttp (>=3.13.2,<4.0.0)",
+
+]
+
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest>=8.0.0,<9.0.0",
+    "pytest-asyncio>=0.23.0,<1.0.0",
+    "pytest-cov>=4.1.0,<5.0.0",
+    "pytest-timeout>=2.2.0,<3.0.0",
+    "pytest-xdist>=3.5.0,<4.0.0",  # Parallel test execution
+    "pytest-httpx>=0.30.0,<1.0.0",  # HTTP mocking for tests
+    "httpx>=0.27.0,<1.0.0",  # For REST API testing
+
+    # Linting and formatting
+    "ruff>=0.3.0,<1.0.0",
+    "mypy>=1.9.0,<2.0.0",
+
+    # Pre-commit hooks
+    "pre-commit>=3.6.0,<4.0.0",
+
+    # Documentation
+    "mkdocs>=1.5.0,<2.0.0",
+    "mkdocs-material>=9.5.0,<10.0.0",
+    "mkdocstrings[python]>=0.24.0,<1.0.0",
+]
+
+docker = [
+    "gunicorn>=21.2.0,<22.0.0",  # Production WSGI server
+]
+
+[project.scripts]
+manifest = "manifest.interfaces.cli:cli"
+chora-mcp = "manifest.interfaces.mcp:main"
+
+[project.urls]
+Homepage = "https://github.com/yourusername/manifest"
+Documentation = "https://manifest.readthedocs.io"
+Repository = "https://github.com/yourusername/manifest"
+Issues = "https://github.com/yourusername/manifest/issues"
+Changelog = "https://github.com/yourusername/manifest/blob/main/CHANGELOG.md"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["manifest*"]
+
+[tool.setuptools.package-data]
+manifest = ["py.typed"]
+
+# ============================================================================
+# Testing Configuration
+# ============================================================================
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+# Coverage settings
+addopts = [
+    "--cov=manifest",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--cov-fail-under=85",  # Require 85% coverage
+    "--strict-markers",
+    "--strict-config",
+    "--verbose",
+]
+
+# Test markers
+markers = [
+    "unit: Unit tests (fast, isolated)",
+    "integration: Integration tests (slower, multiple components)",
+    "e2e: End-to-end tests (slowest, full system)",
+    "slow: Slow tests (skip with -m 'not slow')",
+]
+
+# Timeout for tests
+timeout = 60
+
+# Parallel execution
+# Run with: pytest -n auto
+# Requires pytest-xdist
+
+# ============================================================================
+# Coverage Configuration
+# ============================================================================
+
+[tool.coverage.run]
+source = ["manifest"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+]
+branch = true
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "def __str__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+    "@abc.abstractmethod",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+# ============================================================================
+# Ruff Configuration (Linting + Formatting)
+# ============================================================================
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+indent-width = 4
+
+# Exclude generated files, caches, virtual environments
+exclude = [
+    ".git",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "htmlcov",
+]
+
+[tool.ruff.lint]
+# Enable rule sets:
+# E/W: pycodestyle errors/warnings
+# F: Pyflakes
+# I: isort (import sorting)
+# N: pep8-naming
+# UP: pyupgrade (modern Python idioms)
+# B: flake8-bugbear (common bugs)
+# C4: flake8-comprehensions
+# SIM: flake8-simplify
+# TID: flake8-tidy-imports
+# RUF: Ruff-specific rules
+select = ["E", "W", "F", "I", "N", "UP", "B", "C4", "SIM", "TID", "RUF"]
+
+# Ignore specific rules:
+# E501: Line too long (handled by formatter)
+# N805: First argument of a method should be named `self` (false positives)
+ignore = ["E501", "N805"]
+
+# Allow autofix for all enabled rules
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+# Ignore import violations in __init__.py files
+"__init__.py" = ["F401", "F403"]
+# Ignore complexity in tests
+"tests/**/*.py" = ["C901"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["manifest"]
+force-single-line = false
+lines-after-imports = 2
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+# ============================================================================
+# Mypy Configuration (Type Checking)
+# ============================================================================
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+disallow_untyped_defs = true
+disallow_any_unimported = false
+disallow_any_generics = true
+disallow_subclassing_any = true
+check_untyped_defs = true
+no_implicit_optional = true
+show_error_codes = true
+show_error_context = true
+pretty = true
+
+# Per-module options
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_any_generics = false
+
+[[tool.mypy.overrides]]
+module = [
+    "click.*",
+    "rich.*",
+    "uvicorn.*",
+    "mcp.*",
+]
+ignore_missing_imports = true
+
+# ============================================================================
+# Pre-commit Configuration
+# ============================================================================
+
+# To install: pre-commit install
+# To run manually: pre-commit run --all-files
+# See: .pre-commit-config.yaml for hook definitions
