@@ -1,0 +1,911 @@
+"""MCP Capability Generator for Osprey Framework.
+
+Generates complete, working Osprey capabilities from MCP servers.
+Everything in one file: capability class, guides, context class, error handling.
+"""
+
+import asyncio
+import json
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, Field
+
+from osprey.models.completion import get_chat_completion
+from osprey.utils.config import get_model_config
+
+# Try MCP client (optional - can work in simulated mode)
+try:
+    from mcp import ClientSession
+    from mcp.client.sse import sse_client
+    MCP_AVAILABLE = True
+except ImportError:
+    MCP_AVAILABLE = False
+
+
+# =============================================================================
+# Pydantic Models for LLM Analysis
+# =============================================================================
+
+class ClassifierExampleRaw(BaseModel):
+    """Raw classifier example from LLM."""
+    query: str = Field(description="User query example")
+    reason: str = Field(description="Why this should/shouldn't activate")
+
+
+class ClassifierAnalysis(BaseModel):
+    """LLM analysis for classifier guide generation."""
+    activation_criteria: str = Field(description="When to activate")
+    keywords: List[str] = Field(description="Key indicators")
+    positive_examples: List[ClassifierExampleRaw] = Field(description="Should activate")
+    negative_examples: List[ClassifierExampleRaw] = Field(description="Should not activate")
+    edge_cases: List[str] = Field(description="Tricky scenarios")
+
+
+class ToolPattern(BaseModel):
+    """Tool usage pattern from LLM."""
+    tool_name: str = Field(description="Tool name")
+    typical_scenario: str = Field(description="When to use this tool")
+
+
+class ExampleStepRaw(BaseModel):
+    """Raw example step from LLM."""
+    context_key: str = Field(description="Descriptive identifier for this step (e.g., 'current_weather_sf', 'alerts_boston')")
+    tool_name: str = Field(default="", description="Tool to invoke (can be empty for high-level planning)")
+    task_objective: str = Field(description="What user wants to accomplish")
+    scenario: str = Field(description="Real-world scenario description")
+
+
+class OrchestratorAnalysis(BaseModel):
+    """LLM analysis for orchestrator guide generation."""
+    when_to_use: str = Field(description="General guidance")
+    tool_usage_patterns: List[ToolPattern] = Field(description="Tool patterns")
+    example_steps: List[ExampleStepRaw] = Field(description="Example steps")
+    common_sequences: List[str] = Field(description="Common patterns")
+    important_notes: List[str] = Field(description="Important reminders")
+
+
+# =============================================================================
+# Simulated Tools (for testing without MCP server)
+# =============================================================================
+
+SIMULATED_TOOLS = [
+    {
+        "name": "get_current_weather",
+        "description": "Get current weather conditions for a location. If location is not provided, defaults to San Francisco.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string",
+                    "default": "San Francisco",
+                    "description": "City name or coordinates (defaults to San Francisco if not provided)"
+                },
+                "units": {
+                    "type": "string",
+                    "enum": ["celsius", "fahrenheit"],
+                    "default": "celsius",
+                    "description": "Temperature units"
+                }
+            },
+            "required": []
+        }
+    },
+    {
+        "name": "get_forecast",
+        "description": "Get weather forecast for upcoming days. If location is not provided, defaults to San Francisco.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string",
+                    "default": "San Francisco",
+                    "description": "City name or coordinates (defaults to San Francisco if not provided)"
+                },
+                "days": {
+                    "type": "integer",
+                    "default": 5,
+                    "minimum": 1,
+                    "maximum": 7,
+                    "description": "Number of forecast days (1-7)"
+                },
+                "units": {
+                    "type": "string",
+                    "enum": ["celsius", "fahrenheit"],
+                    "default": "celsius",
+                    "description": "Temperature units"
+                }
+            },
+            "required": []
+        }
+    },
+    {
+        "name": "get_weather_alerts",
+        "description": "Get active weather alerts and warnings for a location. If location is not provided, defaults to San Francisco.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string",
+                    "default": "San Francisco",
+                    "description": "City name or coordinates (defaults to San Francisco if not provided)"
+                },
+                "severity": {
+                    "type": "string",
+                    "enum": ["all", "severe", "moderate", "minor"],
+                    "default": "all",
+                    "description": "Filter by alert severity level"
+                }
+            },
+            "required": []
+        }
+    },
+]
+
+
+# =============================================================================
+# MCP Capability Generator
+# =============================================================================
+
+class MCPCapabilityGenerator:
+    """Generate complete MCP capability from MCP server tools."""
+
+    def __init__(
+        self,
+        capability_name: str,
+        server_name: str,
+        verbose: bool = False,
+        provider: Optional[str] = None,
+        model_id: Optional[str] = None
+    ):
+        """Initialize generator.
+
+        Args:
+            capability_name: Name for the generated capability (e.g., 'slack_mcp')
+            server_name: Human-readable server name (e.g., 'Slack')
+            verbose: Whether to print progress messages
+            provider: Optional LLM provider override
+            model_id: Optional model ID override
+        """
+        self.capability_name = capability_name
+        self.server_name = server_name
+        self.verbose = verbose
+        self.tools: List[Dict[str, Any]] = []
+        self.mcp_url: Optional[str] = None
+        self.provider = provider
+        self.model_id = model_id
+
+    async def discover_tools(self, mcp_url: Optional[str] = None, simulated: bool = False) -> List[Dict[str, Any]]:
+        """Discover tools from MCP server or use simulated tools.
+
+        Args:
+            mcp_url: MCP server URL (e.g., 'http://localhost:3001')
+            simulated: If True, use simulated weather tools instead of connecting to server
+
+        Returns:
+            List of tool dictionaries with name, description, and inputSchema
+
+        Raises:
+            RuntimeError: If MCP client not installed or server unreachable
+        """
+        if simulated:
+            if self.verbose:
+                print("Using simulated tools (no MCP server needed)")
+            self.tools = SIMULATED_TOOLS
+            self.mcp_url = "http://localhost:3001"  # Placeholder
+        else:
+            if not MCP_AVAILABLE:
+                raise RuntimeError(
+                    "MCP client not installed. Use simulated mode or install: "
+                    "pip install mcp"
+                )
+
+            if self.verbose:
+                print(f"Connecting to MCP server: {mcp_url}")
+
+            self.mcp_url = mcp_url
+
+            # FastMCP SSE endpoint is at /sse
+            sse_url = mcp_url if mcp_url.endswith('/sse') else f"{mcp_url}/sse"
+
+            try:
+                # Use native MCP client to get tools in standardized format
+                async with sse_client(sse_url) as (read, write):
+                    async with ClientSession(read, write) as session:
+                        # Initialize the session
+                        await session.initialize()
+
+                        # List tools using standard MCP protocol
+                        tools_result = await session.list_tools()
+
+                        # Convert from MCP's Pydantic models to dicts for JSON serialization
+                        self.tools = []
+                        for tool in tools_result.tools:
+                            tool_dict = {
+                                "name": tool.name,
+                                "description": tool.description or "",
+                                "inputSchema": tool.inputSchema if hasattr(tool, 'inputSchema') else {}
+                            }
+                            self.tools.append(tool_dict)
+
+                if self.verbose:
+                    print(f"✓ Discovered {len(self.tools)} tools")
+
+            except (ConnectionError, ConnectionRefusedError, TimeoutError, OSError) as e:
+                # Connection-specific errors - likely server not running
+                error_msg = (
+                    f"\n❌ Cannot connect to MCP server at {sse_url}\n\n"
+                    f"The MCP server appears to be down or not responding.\n"
+                    f"Please ensure the MCP server is running before generating capabilities.\n\n"
+                    f"To use simulated mode instead (no server needed), add --simulated flag.\n\n"
+                    f"Error details: {type(e).__name__}: {e}"
+                )
+                raise RuntimeError(error_msg) from e
+            except Exception as e:
+                # Check if this looks like a connection/TaskGroup error (common when server is down)
+                error_str = str(e).lower()
+                if any(term in error_str for term in ["taskgroup", "connection", "refused", "timeout", "unreachable", "connecterror"]):
+                    error_msg = (
+                        f"\n❌ Cannot connect to MCP server at {sse_url}\n\n"
+                        f"The MCP server appears to be down or unreachable.\n"
+                        f"Please start the MCP server before generating capabilities.\n\n"
+                        f"To use simulated mode instead (no server needed), add --simulated flag.\n\n"
+                        f"Error details: {type(e).__name__}: {e}"
+                    )
+                    raise RuntimeError(error_msg) from e
+                else:
+                    # Some other error during tool discovery
+                    error_msg = (
+                        f"\n❌ Failed to discover tools from MCP server at {sse_url}\n\n"
+                        f"Error details: {type(e).__name__}: {e}"
+                    )
+                    raise RuntimeError(error_msg) from e
+
+        return self.tools
+
+    async def generate_guides(self) -> tuple[ClassifierAnalysis, OrchestratorAnalysis]:
+        """Generate classifier and orchestrator guides using LLM.
+
+        Uses the configured orchestrator model (or overrides if specified)
+        to analyze the discovered tools and generate activation guides.
+
+        Implements retry logic (2 attempts) in case the LLM doesn't get the
+        schema right on the first try, especially for complex MCP servers.
+
+        Returns:
+            Tuple of (classifier_analysis, orchestrator_analysis)
+
+        Raises:
+            RuntimeError: If generation fails after all retry attempts
+        """
+        if self.verbose:
+            print("\n🤖 Analyzing tools with LLM...")
+
+        tools_json = json.dumps(self.tools, indent=2)
+
+        # Get model config from registry
+        model_config = get_model_config("orchestrator")
+
+        # Allow explicit provider/model override
+        if self.provider and self.model_id:
+            if self.verbose:
+                print(f"   Using explicit model: {self.provider}/{self.model_id}")
+            model_kwargs = {
+                "provider": self.provider,
+                "model_id": self.model_id,
+                "max_tokens": model_config.get("max_tokens", 4096)
+            }
+        else:
+            # Use orchestrator config from registry
+            if self.verbose:
+                provider = model_config.get("provider", "unknown")
+                model_id = model_config.get("model_id", "unknown")
+                print(f"   Using orchestrator model: {provider}/{model_id}")
+            model_kwargs = {"model_config": model_config}
+
+        # Retry logic for LLM calls (complex MCP servers may need multiple attempts)
+        max_attempts = 2
+        last_error = None
+
+        for attempt in range(1, max_attempts + 1):
+            try:
+                if self.verbose and attempt > 1:
+                    print(f"   Retry attempt {attempt}/{max_attempts}...")
+
+                # Generate classifier analysis
+                classifier_prompt = f"""You are an expert at analyzing tool capabilities and generating task classification rules.
+
+I have a capability called "{self.capability_name}" that wraps a {self.server_name} MCP server.
+
+Here are ALL the tools this MCP server provides:
+
+{tools_json}
+
+Your task: Analyze these tools and generate a comprehensive classifier guide.
+
+Generate:
+- Clear activation criteria
+- Key terms/patterns that indicate this capability is needed
+- 5-7 realistic positive examples (queries that SHOULD activate) with reasoning
+- 3-4 realistic negative examples (queries that SHOULD NOT activate) with reasoning
+- Edge cases to watch for
+
+Make the examples natural and varied - think about real users.
+Output as JSON matching the ClassifierAnalysis schema.
+"""
+
+                classifier_analysis = await asyncio.to_thread(
+                    get_chat_completion,
+                    message=classifier_prompt,
+                    **model_kwargs,
+                    output_model=ClassifierAnalysis
+                )
+
+                # Generate orchestrator analysis
+                orchestrator_prompt = f"""You are an expert at high-level task planning without business logic.
+
+I have a capability called "{self.capability_name}" that wraps a {self.server_name} MCP server.
+
+The capability uses a ReAct agent internally that autonomously selects from these MCP tools:
+
+{tools_json}
+
+Your task: Generate a SIMPLE orchestrator guide for HIGH-LEVEL planning only.
+
+The orchestrator should NOT know about specific MCP tools (the ReAct agent handles that).
+The orchestrator should ONLY know:
+- When to invoke the {self.capability_name} capability (what types of user requests)
+- How to formulate clear task_objective descriptions
+- General patterns for {self.server_name} operations
+
+Generate:
+- 3-5 example scenarios showing WHAT users might ask for (not HOW to implement with tools)
+- Each example should have a clear task_objective that describes the goal, not the implementation
+- **IMPORTANT**: Each example MUST have a descriptive context_key that captures the essence of the step
+  - Good: "current_weather_sf", "severe_alerts_boston", "forecast_tokyo_5day"
+  - Bad: "result_1", "weather_data", "output"
+  - The context_key should be specific, descriptive, and use snake_case
+- **CRITICAL**: If any tool parameters have default values, include AT LEAST ONE example that demonstrates using those defaults (omitting the parameter from task_objective). This teaches the orchestrator that parameters with defaults are truly optional.
+- Important notes about formulating good task objectives for the capability
+
+Do NOT include tool_name in examples - the ReAct agent decides which tools to use.
+The tool_name field can be empty or contain a generic placeholder.
+
+Output as JSON matching the OrchestratorAnalysis schema.
+"""
+
+                orchestrator_analysis = await asyncio.to_thread(
+                    get_chat_completion,
+                    message=orchestrator_prompt,
+                    **model_kwargs,
+                    output_model=OrchestratorAnalysis
+                )
+
+                if self.verbose:
+                    print("✓ Guides generated")
+
+                return classifier_analysis, orchestrator_analysis
+
+            except Exception as e:
+                last_error = e
+                if self.verbose:
+                    print(f"   Attempt {attempt} failed: {str(e)[:100]}")
+
+                # If this was the last attempt, raise with helpful message
+                if attempt == max_attempts:
+                    break
+
+        # All attempts failed - provide helpful error message
+        error_msg = (
+            f"\n❌ Failed to generate guides after {max_attempts} attempts.\n\n"
+            f"Last error: {str(last_error)}\n\n"
+            f"Suggestions:\n"
+            f"  1. Verify your MCP server provides valid tool schemas\n"
+            f"  2. Check that tools have clear descriptions\n"
+            f"  3. Try a more capable model (e.g., Claude Sonnet)\n"
+            f"  4. Use --provider and --model flags to override model\n\n"
+        )
+        raise RuntimeError(error_msg) from last_error
+
+    def generate_capability_code(
+        self,
+        classifier_analysis: ClassifierAnalysis,
+        orchestrator_analysis: OrchestratorAnalysis
+    ) -> str:
+        """Generate complete capability Python code.
+
+        Args:
+            classifier_analysis: Classifier guide analysis from LLM
+            orchestrator_analysis: Orchestrator guide analysis from LLM
+
+        Returns:
+            Complete Python source code for the capability
+        """
+        timestamp = datetime.now().isoformat()
+        class_name = ''.join(word.title() for word in self.capability_name.split('_')) + 'Capability'
+        context_class_name = ''.join(word.title() for word in self.capability_name.split('_')) + 'ResultsContext'
+        context_type = f"{self.server_name.upper()}_RESULTS"
+
+        # Build classifier examples
+        classifier_examples = []
+        for ex in classifier_analysis.positive_examples:
+            classifier_examples.append(
+                f"            ClassifierExample(\n"
+                f"                query=\"{ex.query}\",\n"
+                f"                result=True,\n"
+                f"                reason=\"{ex.reason}\"\n"
+                f"            )"
+            )
+        for ex in classifier_analysis.negative_examples:
+            classifier_examples.append(
+                f"            ClassifierExample(\n"
+                f"                query=\"{ex.query}\",\n"
+                f"                result=False,\n"
+                f"                reason=\"{ex.reason}\"\n"
+                f"            )"
+            )
+        classifier_examples_code = ",\n".join(classifier_examples)
+
+        # Build orchestrator examples
+        orchestrator_examples = []
+        for i, ex in enumerate(orchestrator_analysis.example_steps):
+            # Use LLM-generated context_key (descriptive), fallback to generic if missing
+            context_key = ex.context_key if ex.context_key else f"{self.capability_name}_result_{i+1}"
+            orchestrator_examples.append(
+                f"            OrchestratorExample(\n"
+                f"                step=PlannedStep(\n"
+                f"                    context_key=\"{context_key}\",\n"
+                f"                    capability=\"{self.capability_name}\",\n"
+                f"                    task_objective=\"{ex.task_objective}\",\n"
+                f"                    expected_output=\"{context_type}\",\n"
+                f"                    success_criteria=\"Successfully completed {self.server_name} operation\",\n"
+                f"                    inputs=[]\n"
+                f"                ),\n"
+                f"                scenario_description=\"{ex.scenario}\",\n"
+                f"                notes=\"The ReAct agent autonomously selects appropriate MCP tools based on task_objective\"\n"
+                f"            )"
+            )
+        orchestrator_examples_code = ",\n".join(orchestrator_examples)
+
+        # Build tools list for documentation
+        tools_list = "\n".join([f"        - {t['name']}: {t.get('description', 'N/A')}" for t in self.tools])
+
+        # Ensure SSE endpoint path is included
+        sse_url = self.mcp_url if self.mcp_url.endswith('/sse') else f"{self.mcp_url}/sse"
+
+        code = f'''"""
+{self.server_name} MCP Capability
+
+Auto-generated MCP capability for Osprey Framework.
+Generated: {timestamp}
+
+MCP Server: {self.server_name}
+Server URL: {sse_url}
+Tools: {len(self.tools)}
+
+This file contains everything needed to integrate the {self.server_name} MCP server:
+- Capability class with ReAct agent execution pattern
+- LangGraph ReAct agent with MCP tools integration
+- Classifier guide (when to activate)
+- Orchestrator guide (high-level planning only)
+- Context class for results
+- Error handling
+
+ARCHITECTURE:
+This capability uses a ReAct agent pattern that follows standard MCP usage:
+- The orchestrator simply decides to invoke this capability and provides a task_objective
+- The capability's ReAct agent autonomously:
+  * Sees all available MCP tools from the server
+  * Reasons about which tool(s) to call
+  * Executes tools and observes results
+  * Continues until the task is complete
+- This keeps business logic out of orchestration (proper separation of concerns)
+
+NEXT STEPS:
+1. Review the generated code
+2. **IMPORTANT: Customize {context_class_name}** - The generated context class is a minimal placeholder.
+   Customize it based on your MCP server's actual data structure. See the TODO comments
+   and documentation link in the context class section.
+3. **Configure ReAct Agent Model** - Add to your config.yml:
+   ```yaml
+   models:
+     {self.capability_name}_react:  # Optional - dedicated model for {self.capability_name} tool execution
+       provider: anthropic  # or openai, cborg, etc.
+       model_id: claude-sonnet-4
+       max_tokens: 4096
+   ```
+   If not configured, falls back to using the "orchestrator" model.
+   The ReAct agent needs good reasoning for autonomous tool selection.
+4. Adjust MCP server URL and transport in MCP_SERVER_CONFIG if needed
+5. Install required dependencies:
+   - pip install langchain-mcp-adapters langgraph
+   - pip install langchain-anthropic  # If using Anthropic provider
+   - pip install langchain-openai     # If using OpenAI or CBORG provider
+6. Consider moving {context_class_name} to a shared context_classes.py
+7. Add to your registry.py (see registration snippet at bottom)
+8. Test with real queries
+
+Generated by: osprey generate capability --from-mcp
+"""
+
+from __future__ import annotations
+from typing import Dict, Any, Optional, List, ClassVar, TYPE_CHECKING
+import textwrap
+
+if TYPE_CHECKING:
+    from osprey.state import AgentState
+
+# Framework imports
+from osprey.base.decorators import capability_node
+from osprey.base.capability import BaseCapability
+from osprey.base.errors import ErrorClassification, ErrorSeverity
+from osprey.base.planning import PlannedStep
+from osprey.base.examples import OrchestratorGuide, OrchestratorExample, TaskClassifierGuide, ClassifierExample, ClassifierActions
+from osprey.context import CapabilityContext
+from osprey.state import StateManager
+from osprey.registry import get_registry
+from osprey.utils.streaming import get_streamer
+from osprey.utils.logger import get_logger
+
+# MCP and LangGraph imports
+try:
+    from langchain_mcp_adapters.client import MultiServerMCPClient
+    from langgraph.prebuilt import create_react_agent
+except ImportError:
+    raise ImportError(
+        "MCP adapters not installed. Install with: "
+        "pip install langchain-mcp-adapters langgraph"
+    )
+
+# Get model for ReAct agent
+from osprey.utils.config import get_model_config, get_provider_config
+
+
+logger = get_logger("{self.capability_name}")
+registry = get_registry()
+
+
+# =============================================================================
+# Context Class - CUSTOMIZE THIS FOR YOUR USE CASE
+# =============================================================================
+# NOTE: This is a MINIMAL PLACEHOLDER. You should customize this based on your
+# actual MCP server's data structure and your application's needs.
+#
+# 📚 Documentation: For detailed guidance on creating context classes, see:
+# https://als-apg.github.io/osprey/developer-guides/03_core-framework-systems/02_context-management-system.html
+
+class {context_class_name}(CapabilityContext):
+    """
+    Context for {self.server_name} MCP results.
+
+    TODO: Customize this class based on your MCP server's actual data structure.
+    """
+
+    CONTEXT_TYPE: ClassVar[str] = "{context_type}"
+    CONTEXT_CATEGORY: ClassVar[str] = "EXTERNAL_DATA"
+
+    tool: str
+    results: Dict[str, Any]
+    description: str
+
+    def get_access_details(self, key_name: Optional[str] = None) -> Dict[str, Any]:
+        """Tell the LLM how to access this context data."""
+        key_ref = key_name if key_name else "key_name"
+        return {{
+            "tool_used": self.tool,
+            "description": self.description,
+            "data_structure": "Dict[str, Any]",
+            "access_pattern": f"context.{{self.CONTEXT_TYPE}}.{{key_ref}}.results",
+            "available_fields": list(self.results.keys()) if isinstance(self.results, dict) else "results",
+        }}
+
+    def get_summary(self, key_name: Optional[str] = None) -> Dict[str, Any]:
+        """Format data for human display."""
+        return {{
+            "type": "{self.server_name} Results",
+            "tool": self.tool,
+            "description": self.description,
+            "results": self.results,
+        }}
+
+
+# =============================================================================
+# Error Classes
+# =============================================================================
+
+class {class_name}Error(Exception):
+    """Base error for {self.server_name} MCP operations."""
+    pass
+
+
+class {self.server_name}ConnectionError({class_name}Error):
+    """MCP server connection failed."""
+    pass
+
+
+class {self.server_name}ToolError({class_name}Error):
+    """MCP tool execution failed."""
+    pass
+
+
+# =============================================================================
+# Capability Implementation
+# =============================================================================
+
+@capability_node
+class {class_name}(BaseCapability):
+    """
+    {self.server_name} MCP capability.
+
+    Integrates with {self.server_name} MCP server to provide:
+{tools_list}
+    """
+
+    name = "{self.capability_name}"
+    description = "{self.server_name} operations via MCP server"
+    provides = ["{context_type}"]
+    requires = []
+
+    # MCP server configuration
+    MCP_SERVER_URL = "{sse_url}"
+    MCP_SERVER_CONFIG = {{
+        "{self.capability_name}_server": {{
+            "url": "{sse_url}",
+            "transport": "sse",
+        }}
+    }}
+
+    # Class-level client and agent cache
+    _mcp_client: Optional[MultiServerMCPClient] = None
+    _react_agent = None
+
+    @classmethod
+    async def _get_react_agent(cls):
+        """Get or create ReAct agent with MCP tools (cached)."""
+        if cls._react_agent is None:
+            try:
+                # Initialize MCP client
+                if cls._mcp_client is None:
+                    cls._mcp_client = MultiServerMCPClient(cls.MCP_SERVER_CONFIG)
+                    logger.info(f"Connected to MCP server: {{cls.MCP_SERVER_URL}}")
+
+                # Get tools from MCP server
+                tools = await cls._mcp_client.get_tools()
+                logger.info(f"Loaded {{len(tools)}} tools from MCP server")
+
+                # Get LLM instance for ReAct agent
+                # Try to use dedicated "{self.capability_name}_react" model first, fallback to "orchestrator"
+                try:
+                    model_config = get_model_config("{self.capability_name}_react")
+                except Exception:
+                    model_config = get_model_config("orchestrator")
+
+                provider = model_config.get("provider")
+                model_id = model_config.get("model_id")
+                provider_config = get_provider_config(provider)
+
+                # Create LangChain ChatModel based on provider
+                if provider == "anthropic":
+                    from langchain_anthropic import ChatAnthropic
+                    llm = ChatAnthropic(
+                        model=model_id,
+                        anthropic_api_key=provider_config.get("api_key"),
+                        max_tokens=model_config.get("max_tokens", 4096)
+                    )
+                elif provider == "openai":
+                    from langchain_openai import ChatOpenAI
+                    llm = ChatOpenAI(
+                        model=model_id,
+                        api_key=provider_config.get("api_key"),
+                        max_tokens=model_config.get("max_tokens", 4096)
+                    )
+                elif provider == "cborg":
+                    from langchain_openai import ChatOpenAI
+                    llm = ChatOpenAI(
+                        model=model_id,
+                        api_key=provider_config.get("api_key"),
+                        base_url=provider_config.get("base_url"),
+                        max_tokens=model_config.get("max_tokens", 4096)
+                    )
+                else:
+                    raise ValueError(f"Provider {{provider}} not supported")
+
+                # Create ReAct agent
+                cls._react_agent = create_react_agent(llm, tools)
+                logger.info("ReAct agent initialized")
+
+            except (ConnectionError, ConnectionRefusedError, TimeoutError, OSError) as e:
+                # Connection-specific errors - likely server not running
+                error_msg = (
+                    f"{self.server_name} MCP server is not reachable at {{cls.MCP_SERVER_URL}}. "
+                    f"Please ensure the MCP server is running. Error: {{type(e).__name__}}: {{e}}"
+                )
+                logger.error(error_msg)
+                raise {self.server_name}ConnectionError(error_msg) from e
+            except Exception as e:
+                # Check if this looks like a connection/TaskGroup error (common when server is down)
+                error_str = str(e).lower()
+                if any(term in error_str for term in ["taskgroup", "connection", "refused", "timeout", "unreachable"]):
+                    error_msg = (
+                        f"{self.server_name} MCP server appears to be down or unreachable at {{cls.MCP_SERVER_URL}}. "
+                        f"Please start the MCP server before using this capability. "
+                        f"Technical details: {{type(e).__name__}}: {{e}}"
+                    )
+                    logger.error(error_msg)
+                    raise {self.server_name}ConnectionError(error_msg) from e
+                else:
+                    # Some other initialization error
+                    error_msg = f"Failed to initialize {self.server_name} ReAct agent: {{type(e).__name__}}: {{e}}"
+                    logger.error(error_msg)
+                    raise {self.server_name}ConnectionError(error_msg) from e
+
+        return cls._react_agent
+
+    @staticmethod
+    async def execute(state: AgentState, **kwargs) -> Dict[str, Any]:
+        """Execute {self.server_name} MCP capability using ReAct agent."""
+        step = StateManager.get_current_step(state)
+        task_objective = step.get('task_objective', 'unknown')
+
+        streamer = get_streamer("{self.capability_name}", state)
+        logger.info(f"{self.server_name} MCP: {{task_objective}}")
+        streamer.status(f"Initializing {self.server_name} ReAct agent...")
+
+        try:
+            # Get ReAct agent
+            agent = await {class_name}._get_react_agent()
+            streamer.status(f"Agent reasoning about task...")
+
+            # Invoke ReAct agent
+            response = await agent.ainvoke({{
+                "messages": [{{
+                    "role": "user",
+                    "content": task_objective
+                }}]
+            }})
+
+            logger.info(f"ReAct agent completed task")
+
+            # Extract final result
+            final_message = response["messages"][-1]
+            result_content = final_message.content if hasattr(final_message, 'content') else str(final_message)
+
+            # Format as context
+            context = {context_class_name}(
+                tool="react_agent",
+                results={{"final_output": result_content, "full_response": response}},
+                description=f"{self.server_name} ReAct agent: {{task_objective}}"
+            )
+
+            # Store in state
+            state_updates = StateManager.store_context(
+                state,
+                registry.context_types.{context_type},
+                step.get("context_key"),
+                context
+            )
+
+            streamer.status(f"{self.server_name} ReAct agent complete")
+            return state_updates
+
+        except {self.server_name}ConnectionError:
+            raise
+        except Exception as e:
+            error_msg = f"{self.server_name} ReAct agent failed: {{str(e)}}"
+            logger.error(error_msg)
+            raise {self.server_name}ToolError(error_msg) from e
+
+    @staticmethod
+    def classify_error(exc: Exception, context: dict) -> ErrorClassification:
+        """Classify {self.server_name} MCP errors."""
+        if isinstance(exc, {self.server_name}ConnectionError):
+            return ErrorClassification(
+                severity=ErrorSeverity.CRITICAL,
+                user_message=f"{self.server_name} MCP server unavailable: {{str(exc)}}",
+                metadata={{
+                    "technical_details": str(exc),
+                    "safety_abort_reason": f"Cannot connect to {self.server_name} MCP server"
+                }}
+            )
+        elif isinstance(exc, {self.server_name}ToolError):
+            return ErrorClassification(
+                severity=ErrorSeverity.RETRIABLE,
+                user_message=f"{self.server_name} operation failed: {{str(exc)}}",
+                metadata={{
+                    "technical_details": str(exc),
+                    "replanning_reason": f"{self.server_name} tool execution failed"
+                }}
+            )
+        else:
+            return ErrorClassification(
+                severity=ErrorSeverity.CRITICAL,
+                user_message=f"Unexpected {self.server_name} error: {{exc}}",
+                metadata={{
+                    "technical_details": str(exc),
+                    "safety_abort_reason": "Unhandled MCP error"
+                }}
+            )
+
+    def _create_classifier_guide(self) -> Optional[TaskClassifierGuide]:
+        """Classifier guide: When should this capability be activated?"""
+        return TaskClassifierGuide(
+            instructions=textwrap.dedent("""
+                {classifier_analysis.activation_criteria}
+
+                Activate if the query involves:
+                {chr(10).join('- ' + kw for kw in classifier_analysis.keywords[:10])}
+
+                Do NOT activate for purely informational queries about {self.server_name}.
+            """).strip(),
+            examples=[
+{classifier_examples_code}
+            ],
+            actions_if_true=ClassifierActions()
+        )
+
+    def _create_orchestrator_guide(self) -> Optional[OrchestratorGuide]:
+        """Orchestrator guide: How should steps be planned?"""
+        return OrchestratorGuide(
+            instructions=textwrap.dedent("""
+                **When to plan "{self.capability_name}" steps:**
+                {orchestrator_analysis.when_to_use}
+
+                **How This Capability Works:**
+                This capability uses an internal ReAct agent that autonomously selects and calls MCP tools.
+
+                **Your Role:**
+                You only need to:
+                1. Decide when to invoke this capability
+                2. Formulate clear task_objective descriptions
+
+                **Step Structure:**
+                - context_key: Descriptive identifier (e.g., "current_weather_sf", "forecast_tokyo_5day")
+                - capability: "{self.capability_name}"
+                - task_objective: Clear description of WHAT the user wants
+                - expected_output: "{context_type}"
+
+                **Output:** {context_type}
+                Contains results from the {self.server_name} ReAct agent.
+            """).strip(),
+            examples=[
+{orchestrator_examples_code}
+            ],
+            priority=2
+        )
+
+
+# =============================================================================
+# Registry Registration
+# =============================================================================
+"""
+Add this to your registry.py:
+
+from osprey.registry import RegistryConfigProvider, extend_framework_registry
+from osprey.registry.base import CapabilityRegistration, ContextClassRegistration
+
+class MyAppRegistryProvider(RegistryConfigProvider):
+    def get_registry_config(self):
+        return extend_framework_registry(
+            capabilities=[
+                CapabilityRegistration(
+                    name="{self.capability_name}",
+                    module_path="your_app.capabilities.{self.capability_name}",
+                    class_name="{class_name}",
+                    provides=["{context_type}"],
+                    requires=[]
+                ),
+            ],
+            context_classes=[
+                ContextClassRegistration(
+                    context_type="{context_type}",
+                    module_path="your_app.capabilities.{self.capability_name}",
+                    class_name="{context_class_name}"
+                ),
+            ]
+        )
+"""
+'''
+
+        return code
+
