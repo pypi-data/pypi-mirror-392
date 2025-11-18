@@ -1,0 +1,92 @@
+Metadata-Version: 2.4
+Name: tvi-solphit-base
+Version: 0.2.0
+Summary: Shared base utilities for the SolphIT stack.
+Author: Tobias Hagenbeek
+License: MIT License
+        
+        Copyright (c) 2025 Tobias Hagenbeek, SolphIT LLC
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the “Software”), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in
+        all copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+        THE SOFTWARE.
+Project-URL: Homepage, https://github.com/SolphIT/tvi-solphit-base
+Project-URL: Changelog, https://github.com/SolphIT/tvi-solphit-base/blob/main/CHANGELOG.md
+Keywords: logging,argparse,utilities,jsonl,filesystem
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.12
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Provides-Extra: test
+Requires-Dist: pytest>=7.0; extra == "test"
+Dynamic: license-file
+
+# tvi-solphit-base
+
+Shared utilities for the SolphIT stack. Clean, well‑named helpers for logging, CLI parsing, filesystem, JSONL, discovery, and timing.
+
+## Install (development)
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+python -m pip install -U pip
+python -m pip install -e .
+# or with tests if you add extras: python -m pip install -e .[test]
+```
+
+## Quick start
+
+```python
+from tvi.solphit.base.logging import SolphitLogger
+log = SolphitLogger.get_logger("demo")
+log.info("hello")
+```
+
+More examples:
+
+- [Logging / `SolphitLogger`](docs/logging-SolphitLogger.md)
+- [Argument parsing base (`ArgParsed`)](docs/arg_parsed.md)
+- [Custom arg types](docs/arg_types.md)
+- [Filesystem: `atomic_write_text`](docs/fs-atomic_write_text.md)
+- [JSONL helpers](docs/jsonl.md)
+- [File discovery](docs/discovery-find_files.md)
+- [Timing utilities](docs/timing.md)
+
+## Environment variables (logging)
+
+- `TVI_SOLPHIT_LOG_LEVEL=DEBUG|INFO|WARNING|ERROR|CRITICAL`
+- `TVI_SOLPHIT_LOG_DEST=stdout|file`
+- `TVI_SOLPHIT_LOG_FILE=solphit.log`
+- `TVI_SOLPHIT_LOG_FORMAT="%(asctime)s | %(levelname)s | %(name)s | %(message)s"`
+
+## Testing
+
+```bash
+pytest
+# or verbose with logs: pytest -s
+```
+
+## Versioning
+
+This project follows [Semantic Versioning](https://semver.org/). See [CHANGELOG.md](CHANGELOG.md) for release notes.
+
+## License
+
+MIT. See [LICENSE](LICENSE).

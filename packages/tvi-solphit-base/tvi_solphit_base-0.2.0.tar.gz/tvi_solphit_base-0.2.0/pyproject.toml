@@ -1,0 +1,34 @@
+[project]
+name = "tvi-solphit-base"
+version = "0.2.0"
+description = "Shared base utilities for the SolphIT stack."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [{ name = "Tobias Hagenbeek" }]
+keywords = ["logging", "argparse", "utilities", "jsonl", "filesystem"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/SolphIT/tvi-solphit-base"
+Changelog = "https://github.com/SolphIT/tvi-solphit-base/blob/main/CHANGELOG.md"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = true
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+pythonpath = ["src"]
