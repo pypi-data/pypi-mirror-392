@@ -1,0 +1,122 @@
+Metadata-Version: 2.4
+Name: basicdsplibrary
+Version: 0.0.12
+Summary: Basic DSP library without numpy
+Home-page: https://github.com/shivarao101/vcet-dsp-bec502
+Author: Shivaprasad
+Author-email: shivarao101@gmail.com
+License: MIT
+Keywords: DFT,IDFT,DFS,DTFT,DCT,DWT,Radix-2 DIT & DIF,Overlap save and add
+Classifier: Development Status :: 3 - Alpha
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Education
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Topic :: Scientific/Engineering
+Description-Content-Type: text/markdown
+License-File: LICENCE.txt
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: keywords
+Dynamic: license
+Dynamic: license-file
+Dynamic: summary
+
+# basicdsplibrary
+
+A lightweight Python package providing fundamental Digital Signal Processing (DSP) algorithms such as DFT,
+ IDFT, DFS, DTFT, Linear convolution, Circular convolution, FIR low-pass/high-pass filter design, DCT,DWT,
+ Overlap save/add method, Radix-2 DIT/DIF-FFT algorithm and more.  
+Ideal for students, researchers, and developers working with signal processing.
+
+---
+
+## 🚀 Installation
+
+Install directly from PyPI:
+
+```bash
+pip install basicdsplibrary
+
+## 📦 Available Functions
+
+| Function       | Description |
+|----------------|-------------|
+| `dft`          | Computes the Discrete Fourier Transform (DFT). |
+| `idft`         | Computes the Inverse Discrete Fourier Transform (IDFT). |
+| `dfs`          | Computes the Discrete Fourier Series. |
+| `idfs`         | Computes the Discrete Fourier Series. |
+| `dtft`         | Computes the Discrete-Time Fourier Transform (DTFT). |
+| `lin_conv`     | Performs linear convolution of two signals. |
+| `circ_conv`    | Performs circular convolution of two signals. |
+| `dct`          | Computes the Discrete Cosine Transform. |
+| `dwt `         | Computes 2nd level Discrete Wavelet Transform using haar wavelet. |
+| `upsample`     | Upsamples a signal by an integer factor. |
+| `downsample`   | Downsamples a signal by an integer factor. |
+|`radix2_dit_fft`| Determines DFT using Radix-2 DIT FFT method |
+|`radix2_dif_fft`| Determines DFT using Radix-2 DIF FFT method |
+| `overlap_save` | Determines Linear convolution using overlap save method |
+| `overlap_add`  | Determines Linear convolution using overlap add method |
+| `fir_lp`       | Designs a low-pass FIR filter using windowing. |
+| `fir_hp`       | Designs a high-pass FIR filter. |
+| `fir_bp`       | Designs a band-pass FIR filter. |
+| `fir_bs`       | Designs a band-stop FIR filter. |
+| `moving_avg`   | Computes a moving-average (MA) smoothing filter. |
+| `corr`         | Computes correlation between two signals. |
+| `auto_corr`    | Computes autocorrelation of a signal. |
+| `energy`       | Computes signal energy. |
+| `power`        | Computes average power of a signal. |
+
+## 🧠 Usage Examples
+
+Below are some basic examples demonstrating how to use the functions in the `basicdspalgorithms` package.
+
+---
+
+### ✔️ Import Functions
+
+```python
+from basicdsplibrary import (
+    dft, idft, dfs, dtft,
+    lin_conv, circ_conv,
+    upsample, downsample,
+    fir_lp, fir_hp, fir_bp,
+    moving_avg, energy, power
+)
+
+### 📌 Example-1
+
+x = [1, 2, 3, 4]
+X = dft(x)
+print("DFT:", X)
+
+### 📌 Example-2
+
+x = [1, 2, 3, 4]
+X = lin_conv(x)
+print("Linear Convolution:", X)
+
+### 📌 Example-3
+
+x = [1, 2, 3, 4]
+X = circ_conv(x)
+print("Circular Convolution:", X)
+
+### 📌 Example-4
+
+h = fir_lp(11,0.785)
+print(f"FIR LP filter using Hamming window(order={11},wc={pi/4}) :")
+
+Change Log
+===================
+
+0.012 (16/11/2025)
+Second Release
+
+===================
