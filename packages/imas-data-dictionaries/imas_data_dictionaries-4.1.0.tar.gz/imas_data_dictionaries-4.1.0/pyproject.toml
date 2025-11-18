@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=71", "setuptools-scm>=8", "packaging>=24.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "imas-data-dictionaries"
+description = "This package all released versions (IDSDef.xml + identifiers) of the Data Dictionary of ITER's Integrated Modelling & Analysis Suite (IMAS)"
+authors = [{name = "ITER Organization", email = "imas-support@iter.org"}]
+license = "LGPL-3.0+ AND CC-BY-ND-4.0"
+license-files = ["LICENSE-LGPL", "LICENSE-CC-BY-ND"]
+readme = "README.md"
+keywords = ["IMAS", "Data Dictionary", "IDS"]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+dynamic = ["version"]
+dependencies = [
+    "importlib_resources;python_version<'3.9'",
+    "packaging",
+]
+
+[project.urls]
+homepage = "https://github.com/iterorganization/IMAS-Data-Dictionaries"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["imas_data_dictionaries"]
+
+[tool.setuptools.package-data]
+imas_data_dictionaries = ["imas_data_dictionaries.zip"]
+
+[tool.setuptools_scm]
+local_scheme = "no-local-version"
