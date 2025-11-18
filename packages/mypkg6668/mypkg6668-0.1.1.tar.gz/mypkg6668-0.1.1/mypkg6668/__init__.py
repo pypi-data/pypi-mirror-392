@@ -1,0 +1,9 @@
+"""mypkg6668 - AutoWeave Import Hook 拦截器"""
+
+__version__ = "0.1.1"
+__author__ = "AutoWeave"
+
+# 自动安装 import hook
+from . import autoweave
+
+__all__ = ['autoweave']
