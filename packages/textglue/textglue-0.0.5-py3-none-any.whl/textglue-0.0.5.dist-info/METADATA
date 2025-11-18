@@ -1,0 +1,53 @@
+Metadata-Version: 2.4
+Name: textglue
+Version: 0.0.5
+Summary: textglue - An simple static template system
+Project-URL: Homepage, https://gitlab.com/derekmc/derekmc.gitlab.io/-/tree/main/projects/textglue
+Project-URL: Issues, https://gitlab.com/derekmc/derekmc.gitlab.io/-/tree/main/projects/textglue
+Author-email: derekmc <derek7mc@gmail.com>
+License-Expression: MIT
+License-File: LICENSE
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+
+# textglue
+
+### Text Glue
+### An extremely simple text based static templating system
+
+## Commands
+ 
+  - textglue init - creates a minimal starter project.
+  - textglue demo - creates a more complex demonstration project.
+  - textglue render - builds the project.
+
+## About
+
+textglue supports only two tags:
+
+    {{file:_body.html}} {{template:_body.html}}
+
+The "file" tag includes the raw source of the file, while
+the template tag recursively evaluates the file as another
+template. By default, the maximum recurse depth for
+templates is 8.
+
+Files with an
+underscore prefix are ignored unless used in a template.
+Files with a ".html" extension are rendered as a template,
+and files without an underscore prefix or ".html" extension,
+are directly copied to the output folder.
+
+The textglue.json file lets you configure a source directory "src",
+an output folder "out", as well as the prefix for which files to
+ignore when rendering
+
+Be careful!
+
+The default input and output folders are "src" and
+the current directory ".". If the output is not the
+working directory, and the source and output folders are
+different, then 'textglue render' will delete the output folder
+every build.
