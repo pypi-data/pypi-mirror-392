@@ -1,0 +1,204 @@
+Metadata-Version: 2.4
+Name: MyCommandCenter
+Version: 0.2.1
+Summary: Production-Ready MongoDB & Web Scraping Toolkit
+Author-email: Dharmik Vadher <dharmikv972@gmail.com>
+License: MIT
+Keywords: scraping,mongodb,web-scraping,distributed
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: license-file
+
+# Command Center - Production-Ready MongoDB & Web Scraping Toolkit
+
+**Version:** 0.2.1
+**Author:** Dharmik Vadher
+
+A comprehensive module for distributed web scraping with MongoDB state tracking.
+
+## Overview
+
+Command Center is a powerful Python toolkit designed for building robust, scalable, and production-ready web scraping solutions. It provides a cohesive set of components to manage distributed workers, track the state of scraped items in MongoDB, handle HTTP requests with intelligence, and ensure data quality.
+
+This module is born out of the need for a standardized, reliable framework for web scraping projects that can handle the complexities of distributed systems, data persistence, and error handling. It's built to be both powerful and easy to use, allowing developers to focus on the scraping logic rather than the underlying infrastructure.
+
+## Key Features
+
+*   **Distributed Worker Coordination:** The `Commander` class allows for the seamless coordination of multiple scraping workers. It uses a heartbeat mechanism to track active workers and dynamically distributes the workload, ensuring efficient and balanced scraping.
+*   **MongoDB State Management:** The `Record` class acts as an intelligent wrapper for MongoDB documents. It provides a simple API for tracking the state of each item (e.g., `scraping`, `processing`) with timestamps and metadata. A suite of `query_helpers` simplifies the process of finding items in specific states.
+*   **Resilient HTTP Client:** The `fetch()` function is a sophisticated HTTP client built on top of `cloudscraper`. It includes features like caching to local files, response validation, automatic retries with backoff, and proxy support.
+*   **Intelligent Logging:** `CustomLogger` provides an exception-aware logging solution with colored console output for improved readability. It automatically formats exceptions, making debugging faster and more efficient.
+*   **Data Validation and Sanitization:** With `validate_text()` and `clean_dict()`, you can enforce data quality at the source. Validate responses against a set of rules and sanitize dictionaries to ensure clean, consistent data enters your database.
+
+## Installation
+
+To use this module in your project, you can clone the repository and install the dependencies.
+
+```bash
+git clone https://github.com/dharmikv972/command_center
+cd command-center
+pip install -r requirements.txt
+```
+
+
+## Usage
+
+Here's a brief overview of how to use the core components of Command Center.
+
+### CustomLogger
+
+The `log` object is a global instance of `CustomLogger`, ready to be used throughout your project.
+
+```python
+from command_center import log
+
+log.info("This is an informational message.")
+log.warning("Something might be wrong.")
+
+try:
+    x = 1 / 0
+except Exception as e:
+    log.error(e) # Automatically formats the exception
+```
+
+### Commander: Distributed Worker Coordination
+
+Coordinate multiple scraper instances working on the same dataset.
+
+```python
+from pymongo import MongoClient
+from command_center import Commander
+
+# Connect to your MongoDB
+client = MongoClient('mongodb://localhost:27017/')
+db = client['my_database']
+workers_collection = db['workers']
+
+# Initialize the Commander
+commander = Commander(workers_collection)
+
+# In your worker script
+worker_ip = Commander.get_local_ip()
+config = commander.start_worker('my_feed_name', worker_ip)
+
+# Use the config to distribute work
+# For example, in a pymongo query:
+documents_to_process = db['data'].find({}).limit(config['threads_limit']).skip(config['threads_skip'])
+```
+
+### Record: MongoDB Document Wrapper
+
+The `Record` class simplifies interaction with your MongoDB documents and their state.
+
+```python
+from pymongo import MongoClient
+from command_center import Record
+
+client = MongoClient('mongodb://localhost:27017/')
+db = client['my_database']
+data_collection = db['data']
+
+# Fetch a document
+doc = data_collection.find_one({'_id': 'some_id'})
+
+if doc:
+    # Wrap it in a Record object
+    record = Record(doc, data_collection)
+
+    # Access data using dot notation
+    print(record.product_name)
+
+    # Mark the 'scraping' state as successful with metadata
+    record.mark_done('scraping', url="http://example.com", status_code=200)
+
+    # Mark the 'processing' state as failed
+    record.mark_fail('processing', error="Could not parse data")
+
+    # Check the state
+    if record.is_state_success('scraping'):
+        print("Scraping was successful.")
+```
+
+### Query Helpers
+
+Use the query helpers to easily find documents based on their state.
+
+```python
+from command_center import query_unprocessed, query_failed
+
+# Find all documents that haven't been scraped yet
+unprocessed_docs = data_collection.find(query_unprocessed('scraping'))
+
+# Find all documents where processing failed
+failed_docs = data_collection.find(query_failed('processing'))```
+
+### fetch(): HTTP Client
+
+A robust function for making HTTP requests.
+
+```python
+from command_center import fetch
+
+url = "http://example.com"
+save_path = "/path/to/cache"
+filename = "example.html"
+
+# Define validation rules
+rules = {
+    "required": ["</html>"],
+    "forbidden": ["Access Denied"]
+}
+
+# Fetch the URL
+response = fetch(url, save_dir=save_path, filename=filename, valid_rules=rules, max_retries=3)
+
+if not isinstance(response, Exception):
+    print("Successfully fetched and validated the page.")
+    print(response.text)
+else:
+    print(f"Failed to fetch the page: {response}")
+```
+
+### Utilities
+
+#### `validate_text()`
+Ensure the text you receive meets your criteria.
+
+```python
+from command_center import validate_text
+
+html_content = "<html><body><h1>Welcome</h1></body></html>"
+rules = {"required": ["<h1>"], "must_start_with": "<html>"}
+
+text, errors = validate_text(html_content, rules)
+
+if errors:
+    print(f"Validation failed: {errors}")
+else:
+    print("Validation successful.")
+```
+
+#### `clean_dict()`
+Sanitize dictionaries before inserting them into your database.
+
+```python
+from command_center import clean_dict
+
+dirty_data = {
+    "Product Name ": "  My Awesome Product\u2122 ",
+    "Price_$_": 19.99,
+    "Features": [" Feature 1 ", "Feature 2  "]
+}
+
+clean_data = clean_dict(dirty_data)
+# {'product_name': 'My Awesome Product', 'price_': 19.99, 'features': ['Feature 1', 'Feature 2']}
+print(clean_data)
+```
+
+## Contributing
+
+As this is a project from the Production Team, contributions are handled internally. Please refer to the team's development guidelines for more information.
