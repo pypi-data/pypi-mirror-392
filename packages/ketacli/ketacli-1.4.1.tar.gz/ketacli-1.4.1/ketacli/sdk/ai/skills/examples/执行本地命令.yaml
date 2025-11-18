@@ -1,0 +1,35 @@
+name: 执行本地命令
+summary: 在本地环境执行系统命令或脚本，仅用于安全的只读/信息查询操作
+enabled: true
+triggers: [执行命令, 运行命令, 本地命令, shell, bash, 终端, 命令行]
+permissions: [system]
+tools_whitelist: [execute_command, execute_script, create_and_execute_script]
+description: |
+  ## 使用说明
+  - 本技能用于在本地环境执行安全的系统命令或脚本，适合只读操作与信息查询（如 `ls`、`pwd`、`uname -a`、查看版本等）。
+  - 严格禁止危险命令（删除/格式化/账号/重启类），系统会自动拒绝执行，且需遵守系统环境限制。
+  - 如果用户需要执行危险命令，请提示告知用户操作不被允许。
+
+  ## 可用工具
+  - `execute_command`：执行系统命令；支持 `working_directory`、`timeout`、`environment_vars`、`shell` 参数。
+  - `execute_script`：执行脚本内容；支持 `python|shell|bash|sh|zsh`。
+  - `create_and_execute_script`：将脚本写入文件并（可选）立即执行。
+
+  ## 安全与约束
+  - 禁止示例（会被拒绝）：`rm -rf /`、`shutdown`、`reboot`、`passwd`、`sudo su`、`chmod 777 /` 等高危操作。
+  - 命令默认以非交互方式运行；若需 `shell=true`，仅用于简单管道或重定向，且必须是只读型。
+  - 建议优先使用非 `shell` 模式：`shell=false`，以避免注入风险。
+
+  ## 示例
+  - 查看当前目录与系统信息：
+    - `execute_command command="pwd"`
+    - `execute_command command="ls -la"`
+    - `execute_command command="uname -a"`
+  - 运行 Python 代码片段（输出 Hello）：
+    - `execute_script script_content='print("Hello from ketacli!")' script_type='python'`
+  - 写入并执行脚本文件（示例 Shell）：
+    - `create_and_execute_script script_content='echo KetaCLI && date' script_path='./tmp/run_demo.sh' script_type='bash' make_executable=true execute_immediately=true`
+
+  ## 常见问题
+  - 若命令包含不安全内容，将返回“拒绝执行危险命令”；请改为只读或信息查询操作。
+  - `working_directory` 不存在时会报错，请先确认或创建目录后再执行。

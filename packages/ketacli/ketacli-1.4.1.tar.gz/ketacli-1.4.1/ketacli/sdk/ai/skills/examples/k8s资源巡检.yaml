@@ -1,0 +1,24 @@
+name: k8s资源巡检
+summary: 对Kubernetes集群中的各类资源进行全面巡检，包括节点状态、Pod健康度、服务可用性、配置正确性等，及时发现潜在问题
+enabled: true
+triggers: [k8s巡检, k8s资源巡检, kubernetes巡检, 集群巡检]
+permissions: [read_only]
+tools_whitelist: [execute_command, execute_script, create_and_execute_script]
+description: |
+  ## 使用说明
+  - 本技能通过kubectl命令行工具对Kubernetes集群进行全面资源巡检
+  - 支持巡检节点、Pod、服务、工作负载、存储、配置等各类资源
+  - 可指定命名空间进行定向巡检，或巡检整个集群
+  - 提供基础、详细、全面三种巡检模式，适应不同场景需求
+  - 自动检测异常状态，提供巡检报告和改进建议
+  
+  ## 巡检步骤
+  1. 检查集群基础信息：获取集群版本、节点数量等基础信息
+  2. 节点状态巡检：检查所有节点的状态、资源使用情况，识别异常节点
+  3. Pod健康度检查：检查Pod状态、重启次数、异常Pod列表，统计Pod状态分布
+  4. 工作负载状态检查：检查Deployment、StatefulSet、DaemonSet状态，识别副本数不匹配的负载
+  5. 服务与网络检查：检查Service、Ingress状态，识别无Endpoints的服务
+  6. 存储资源检查：检查PV、PVC状态，识别异常存储资源
+  7. 配置资源检查：检查ConfigMap、Secret状态，识别未使用的配置资源
+  8. 资源使用分析：分析Pod资源使用情况，识别资源使用异常的Pod（详细模式）
+  9. 生成巡检报告：汇总巡检结果，输出巡检报告和关键发现
