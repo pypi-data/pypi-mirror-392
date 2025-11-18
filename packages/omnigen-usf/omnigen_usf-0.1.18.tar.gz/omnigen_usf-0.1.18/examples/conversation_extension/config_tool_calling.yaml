@@ -1,0 +1,257 @@
+# ============================================================================
+# CONVERSATION EXTENSION WITH TOOL CALLING SUPPORT
+# ============================================================================
+# This configuration demonstrates how to generate conversations with tool
+# calling capabilities and reasoning management.
+#
+# Features:
+# - Tool response simulation (success/failure scenarios)
+# - Reasoning block management (kept during tool sequences, cleaned from output)
+# - OpenAI tool format validation
+# - Configurable prompts for tool response generation
+# ============================================================================
+
+pipeline: conversation_extension
+workspace_id: "tool-calling-dataset-v1"
+
+# ============================================================================
+# TOOL CALLING CONFIGURATION
+# ============================================================================
+tool_calling:
+  # Enable reasoning/thinking blocks management
+  # When enabled, reasoning is preserved during tool sequences and cleaned
+  # according to the rules below
+  enable_reasoning: true
+  # Unified OpenRouter reasoning control. Use either `max_tokens` (thinking models)
+  # or `effort` (effort-based models), not both.
+  reasoning_control:
+    enabled: true
+    # For Anthropic thinking models, prefer a numeric budget below assistant max_tokens (8192 here)
+    max_tokens: 6000
+  
+  # Rules for reasoning in final output
+  reasoning_output_rules:
+    # OPTION 1 (DEFAULT): Save reasoning in ALL messages
+    save_all_reasoning: true            # Default: true
+    
+    # OPTION 2 (STRATEGIC): Uncomment below for selective saving
+    # save_all_reasoning: false         # Turn off save-all
+    # keep_with_tool_calls: true        # Save when calling tools
+    # keep_immediate_after_tool: true   # Save when processing tool results
+    # keep_last_message: true           # Save final message
+    # Result: Reasoning saved at key decision points only
+  
+  # Tool response simulation settings
+  tool_response:
+    enabled: true                        # Enable simulated tool responses
+    failure_ratio: 0.2                   # 20% failures, 80% success
+    temperature: 0.7
+    max_tokens: 2048
+    
+    # ========================================================================
+    # CUSTOM PROMPTS (with variable substitution)
+    # Available variables:
+    #   {tool_name}           - Tool function name
+    #   {tool_description}    - Tool description
+    #   {tool_schema}         - Complete tool schema (JSON)
+    #   {parameters_schema}   - Just the parameters schema (JSON)
+    #   {arguments}           - Actual arguments used (JSON)
+    #   {arguments_formatted} - Arguments as key=value pairs
+    # ========================================================================
+    
+    # Success scenario prompts
+    success_system_prompt: |
+      You are simulating a successful API response for the {tool_name} function.
+      
+      Generate realistic data that:
+      1. Matches the tool's expected output format
+      2. Uses the provided arguments appropriately
+      3. Contains realistic values (not placeholders like "example.com")
+      4. Is valid JSON
+      
+      CRITICAL: Return ONLY raw JSON data - no markdown code blocks, no explanations.
+      Do not wrap response in ```json or ``` tags.
+    
+    success_user_prompt: |
+      Generate successful API response.
+      
+      Tool: {tool_name}
+      Description: {tool_description}
+      Arguments: {arguments}
+      
+      Return ONLY valid JSON data matching the tool's expected format.
+    
+    # Failure scenario prompts
+    failure_system_prompt: |
+      You are simulating a realistic API error for the {tool_name} function.
+      
+      Common error types:
+      - rate_limit_exceeded: API rate limits hit
+      - invalid_parameter: Invalid or missing parameter
+      - not_found: Resource not found
+      - timeout: Request timeout
+      - auth_error: Authentication failed
+      - server_error: Internal server error
+      
+      Return format: {{"error": {{"type": "error_type", "message": "detailed message"}}}}
+      
+      CRITICAL: Return ONLY raw JSON error object - no markdown, no explanations.
+    
+    failure_user_prompt: |
+      Generate realistic API error.
+      
+      Tool: {tool_name}
+      Arguments: {arguments}
+      
+      Return ONLY JSON error object: {{"error": {{"type": "...", "message": "..."}}}}
+    
+    # Provider for generating tool responses
+    provider:
+      name: anthropic
+      api_key: ${ANTHROPIC_API_KEY}
+      model: claude-sonnet-4-20250514
+      temperature: 0.7
+      max_tokens: 2048
+    
+    # ========================================================================
+    # PER-TOOL CUSTOM PROMPTS (Optional)
+    # Override settings for specific tools
+    # ========================================================================
+    tool_specific_prompts:
+      get_weather:
+        failure_ratio: 0.1  # Lower failure rate for weather API
+        success_system_prompt: |
+          Generate realistic weather data for location in {arguments}.
+          Include: temperature, condition, humidity, wind_speed, pressure.
+          Return format: {{"temperature": num, "condition": str, "humidity": num, "wind_speed": num, "pressure": num}}
+      
+      search_flights:
+        failure_ratio: 0.3  # Higher failure rate for availability
+        success_system_prompt: |
+          Generate realistic flight search results.
+          Include realistic flight numbers, times, prices, and availability.
+          Return format: {{"flights": [...]}}
+
+# ============================================================================
+# PROVIDERS (Main conversation generation)
+# ============================================================================
+providers:
+  user_followup:
+    name: anthropic
+    api_key: ${ANTHROPIC_API_KEY}
+    model: claude-sonnet-4-20250514
+    temperature: 0.7
+    max_tokens: 4096
+    
+  assistant_response:
+    name: anthropic
+    api_key: ${ANTHROPIC_API_KEY}
+    model: claude-sonnet-4-20250514  # Reasoning-capable model
+    temperature: 0.7
+    max_tokens: 8192
+    # Anthropic-compatible: User MUST explicitly verify and set if model supports it
+    # WARNING: Not all Anthropic models support thinking/interleaved thinking!
+    # Check model documentation before enabling
+    # 
+    # Examples that MAY support (verify first):
+    #   Anthropic Claude 4 Sonnet (specific versions) with thinking capability
+    #   MiniMax M2: name: anthropic, base_url: https://api.minimax.io/anthropic, anthropic_compatible: true
+    #   Moonshot Kimi K2: Check provider docs for endpoint and compatibility
+    # 
+    # anthropic_compatible: true  # User must explicitly set - verify model support first
+    # 
+    # Interleaved thinking: resend reasoning to model during tool sequences
+    # Only works if: (1) model supports it, (2) anthropic_compatible: true is set
+    interleaved_thinking: false       # Default: false, set to true only after verifying support
+
+# ============================================================================
+# GENERATION SETTINGS
+# ============================================================================
+generation:
+  num_conversations: 0  # 0 = use base_data
+  turn_range:
+    min: 2
+    max: 5
+  parallel_workers: 50
+  extension_mode: smart  # smart | legacy
+  turn_calculation: additional  # additional | total
+  skip_invalid: true
+  track_tokens: true
+
+# ============================================================================
+# BASE DATA (with tools)
+# ============================================================================
+base_data:
+  enabled: true
+  source_type: jsonl
+  file_path: data/input/tool_conversations.jsonl
+  format: conversations  # Each line: {"id": "...", "conversations": [...], "tools": [...]}
+
+# ============================================================================
+# STORAGE
+# ============================================================================
+storage:
+  type: jsonl
+  output_file: data/output/tool_calling_output.jsonl
+  partial_file: data/output/tool_calling_partial.jsonl
+  failed_file: data/output/tool_calling_failed.jsonl
+
+# ============================================================================
+# CHECKPOINTING
+# ============================================================================
+checkpointing:
+  enabled: true
+  checkpoint_file: data/checkpoints/tool_calling_checkpoint.json
+  save_interval: 100
+
+# ============================================================================
+# ERROR HANDLING
+# ============================================================================
+error_handling:
+  max_retries: 3
+  retry_delay_seconds: 5
+  save_partial_on_error: true
+
+# ============================================================================
+# QUALITY VALIDATION
+# ============================================================================
+quality_validation:
+  enabled: true
+  max_retries: 1
+  fail_on_quality_issues: false
+  filter_failed_validations: false
+  min_messages: 2
+  max_empty_responses: 0
+  check_duplicate_responses: true
+  max_duplicate_ratio: 0.3
+
+# ============================================================================
+# EXAMPLE INPUT DATA FORMAT
+# ============================================================================
+# Create data/input/tool_conversations.jsonl with entries like:
+#
+# {
+#   "id": "conv_001",
+#   "conversations": [
+#     {"role": "user", "content": "What's the weather in London?"}
+#   ],
+#   "tools": [
+#     {
+#       "type": "function",
+#       "function": {
+#         "name": "get_weather",
+#         "description": "Get current weather for a location",
+#         "parameters": {
+#           "type": "object",
+#           "properties": {
+#             "location": {"type": "string", "description": "City name"},
+#             "units": {"type": "string", "enum": ["celsius", "fahrenheit"]}
+#           },
+#           "required": ["location"]
+#         }
+#       }
+#     }
+#   ],
+#   "tool_choice": "auto",
+#   "parallel_tool_calls": true
+# }
