@@ -1,0 +1,310 @@
+Metadata-Version: 2.4
+Name: pmv
+Version: 0.2.1
+Summary: A TUI image viewer for Kitty terminal with keyboard navigation and PDF support
+Author-email: darkard2003 <darkard2003@users.noreply.github.com>
+License-Expression: GPL-3.0-or-later
+Project-URL: Homepage, https://github.com/darkard2003/pymv
+Project-URL: Repository, https://github.com/darkard2003/pymv
+Project-URL: Issues, https://github.com/darkard2003/pymv/issues
+Keywords: kitty,terminal,image-viewer,tui,pdf-viewer,image,viewer,graphics
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Operating System :: MacOS
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Multimedia :: Graphics :: Viewers
+Classifier: Topic :: Terminals
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pillow>=11.3.0
+Requires-Dist: pdf2image>=1.17.0
+Provides-Extra: dev
+Requires-Dist: build; extra == "dev"
+Requires-Dist: twine; extra == "dev"
+Dynamic: license-file
+
+# PMV — Kitty TUI Image Viewer
+
+A TUI (Text User Interface) image viewer optimized for the Kitty terminal using the Kitty Graphics Protocol. View images and PDFs directly in your terminal with keyboard navigation and lazy loading.
+
+## Features
+
+- 🖼️ **Image Viewing**: Display images directly in Kitty terminal using the Kitty graphics protocol
+- 📄 **PDF Support**: Convert and view PDF pages as images
+- ⌨️ **Keyboard Navigation**: Navigate through multiple images with intuitive keyboard controls
+- 🚀 **Lazy Loading**: Efficient memory usage with on-demand image loading
+- 📁 **Folder Support**: View all images in a folder or recursively scan directories
+- 💾 **Image Caching**: Smart LRU caching system for improved performance
+- 🎨 **Multiple Formats**: Support for JPEG, PNG, GIF, BMP, WEBP, TIFF, SVG, and more
+
+## Requirements
+
+- **Kitty Terminal**: This application requires the Kitty terminal emulator
+  - Download: https://sw.kovidgoyal.net/kitty/
+- **Python**: 3.12 or higher
+- **Dependencies**:
+  - `pillow` - Image processing (required)
+  - `pdf2image` - PDF support (optional)
+  - `poppler-utils` - System package for PDF rendering (optional)
+
+## Installation
+
+### Install with uv (Recommended)
+
+**Prerequisite**: Have `uv` installed. See https://docs.astral.sh/uv/
+
+#### Editable install (developer mode):
+
+```bash
+uv pip install -e .
+
+# Run the CLI (after install places the script on PATH for the venv)
+pmv images/
+```
+
+#### Run without installing:
+
+```bash
+uv run main.py images/
+```
+
+#### Global tool-style install (no venv activation):
+
+```bash
+# Installs an isolated tool environment and exposes `pmv` on PATH
+uv tool install --reinstall .
+
+# Use anywhere
+pmv images/
+
+# Upgrade later from the same source
+uv tool install --reinstall .
+
+# Uninstall
+uv tool uninstall pmv
+```
+
+### Install with pip
+
+```bash
+# Clone or navigate to the project directory
+cd /path/to/pymv
+
+# Install the package
+pip install -e .
+
+# Or install dependencies manually
+pip install pillow pdf2image
+```
+
+### PDF Support (Optional)
+
+For PDF viewing, install additional dependencies:
+
+```bash
+# Install Python package
+pip install pdf2image
+
+# Install system package for PDF rendering
+# On Debian/Ubuntu:
+sudo apt install poppler-utils
+
+# On macOS:
+brew install poppler
+
+# On Fedora/RHEL:
+sudo dnf install poppler-utils
+```
+
+## Usage
+
+### Basic Commands
+
+```bash
+# View a single image
+pmv image.jpg
+
+# View multiple images
+pmv image1.jpg image2.png image3.gif
+
+# View all images in a folder
+pmv /path/to/images/
+
+# View images using wildcards
+pmv *.jpg
+
+# Mix folders and files
+pmv folder1/ folder2/ image.png
+```
+
+### Advanced Options
+
+```bash
+# Recursively scan folders for images
+pmv -r /path/to/images/
+pmv --recursive ~/Pictures/
+
+# View PDF file (each page as an image)
+pmv --pdf document.pdf
+
+# Skip Kitty terminal check (use at your own risk)
+pmv --skip-check image.jpg
+
+# Get help
+pmv --help
+```
+
+### Keyboard Controls
+
+Once the viewer is running, use these controls to navigate:
+
+| Key | Action |
+|-----|--------|
+| **Arrow Left** / **Right** | Navigate between images |
+| **A** / **D** | Navigate between images (alternative) |
+| **H** / **L** | Navigate between images (Vim-style) |
+| **Q** or **ESC** | Quit the viewer |
+
+### Usage Examples
+
+#### Example 1: View all images in current directory
+```bash
+pmv *.png
+```
+
+#### Example 2: View all images recursively in a directory tree
+```bash
+pmv -r ~/Pictures/
+```
+
+#### Example 3: View a PDF document
+```bash
+pmv --pdf report.pdf
+```
+
+#### Example 4: View specific images from different locations
+```bash
+pmv ~/photo1.jpg ~/Documents/diagram.png ~/Downloads/screenshot.png
+```
+
+#### Example 5: View all images in multiple folders
+```bash
+pmv ~/Photos/ ~/Screenshots/ ~/Downloads/
+```
+
+## Supported Image Formats
+
+- **JPEG** (.jpg, .jpeg)
+- **PNG** (.png)
+- **GIF** (.gif)
+- **BMP** (.bmp)
+- **WEBP** (.webp)
+- **TIFF** (.tiff, .tif)
+- **ICO** (.ico)
+- **PPM, PGM, PBM, PNM** (.ppm, .pgm, .pbm, .pnm)
+- **SVG** (.svg)
+
+## Project Structure
+
+```
+pymv/
+├── main.py              # Main entry point and CLI
+├── show_image.py        # Backward compatibility wrapper
+├── pyproject.toml       # Project configuration and metadata
+├── README.md            # This file
+├── image_viewer/        # Core modules
+│   ├── __init__.py      # Module exports
+│   ├── cache.py         # LRU image caching system
+│   ├── kitty.py         # Kitty graphics protocol implementation
+│   ├── pdf_processor.py # PDF to image conversion
+│   ├── processor.py     # Image loading and processing
+│   ├── show.py          # Display utilities
+│   ├── terminal.py      # Terminal helper functions
+│   └── viewer.py        # Main TUI viewer with navigation
+├── images/              # Sample images (if any)
+└── pdfs/                # Sample PDFs (if any)
+```
+
+## Architecture
+
+The project is organized into modular components:
+
+- **TerminalHelper**: Terminal information and control utilities
+- **ImageProcessor**: Image loading, resizing, and format conversion
+- **KittyGraphicsProtocol**: Low-level Kitty graphics protocol implementation
+- **ImageCache**: LRU-based caching for preloaded images
+- **ImageViewer**: Main TUI application with keyboard navigation
+- **PDFProcessor**: PDF to image conversion utilities
+
+## Troubleshooting
+
+### "Kitty terminal not detected" error
+
+Make sure you're running the application inside the Kitty terminal. If you're certain you're using Kitty but still get this error, you can bypass the check:
+
+```bash
+pmv --skip-check image.jpg
+```
+
+### PDF viewing not working
+
+Ensure you have the required dependencies installed:
+
+```bash
+pip install pdf2image
+
+# Install poppler-utils
+# On Debian/Ubuntu:
+sudo apt install poppler-utils
+
+# On macOS:
+brew install poppler
+```
+
+### Images not displaying correctly
+
+- Ensure your Kitty terminal is up to date
+- Check that your terminal window is large enough to display the image
+- Verify the image file is not corrupted
+- Try running with `--skip-check` if terminal detection fails
+
+### Performance issues with many images
+
+The viewer uses lazy loading and caching to optimize performance. Images are only loaded when viewed, and recently viewed images are cached for quick access.
+
+## Building Distributables
+
+Build wheel and source distributions:
+
+```bash
+uv build
+ls dist/
+```
+
+## Development
+
+To contribute or modify the project:
+
+1. Clone the repository
+2. Install in editable mode: `uv pip install -e .`
+3. Make your changes
+4. Test with: `pmv test_images/`
+
+## License
+
+This project is open source. See LICENSE file for details (if available).
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues or pull requests.
+
+## Credits
+
+Built with:
+- [Kitty Terminal](https://sw.kovidgoyal.net/kitty/) - Graphics protocol
+- [Pillow](https://python-pillow.org/) - Image processing
+- [pdf2image](https://github.com/Belval/pdf2image) - PDF conversion
