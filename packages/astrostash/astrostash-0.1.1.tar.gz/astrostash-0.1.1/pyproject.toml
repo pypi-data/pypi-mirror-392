@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "astrostash"
+version = "0.1.1"
+description = "An astronomy/astrophysics database building and syncing library"
+readme = "README.md"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+authors = [
+  {name = "Nicholas Kuechel", email = "njkuechel@protonmail.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "astroquery >= 0.4.10",
+    "pandas >= 2.3.0",
+    "SQLAlchemy >= 2.0.43",
+]
+
+[tool.setuptools.package-data]
+"astrostash" = ["schema/*.sql"]
+
+[project.optional-dependencies]
+dev = [
+    "build >= 0.10.0",
+    "pytest >= 8.4.1",
+    "pytest-cov >= 6.2.1",
+    "flake8 >= 7.3.0",
+]
