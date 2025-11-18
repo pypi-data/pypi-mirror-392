@@ -1,0 +1,75 @@
+[project]
+name = "fastapi-auth-starter"
+version = "1.0.5"
+description = "A clean architecture FastAPI starter template with authentication (WorkOS), PostgreSQL, and Alembic migrations"
+readme = "README.md"
+# Vercel supports up to Python 3.12
+requires-python = ">=3.12"
+# PyPI metadata - update with your information
+authors = [
+    {name = "Godswill William", email = "godswill.williamsz@gmail.com"},
+]
+# Some tools prefer maintainers field - include both for maximum compatibility
+# Reference: https://peps.python.org/pep-0621/#authors-maintainers
+maintainers = [
+    {name = "Godswill William", email = "godswill.williamsz@gmail.com"},
+]
+license = {text = "MIT"}
+keywords = ["fastapi", "starter", "template", "authentication", "postgresql", "alembic"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Framework :: FastAPI",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+]
+dependencies = [
+    "asyncpg>=0.30.0",
+    "authlib>=1.6.5",
+    "fastapi>=0.121.0",
+    "greenlet>=3.2.4",
+    "httpx>=0.28.1",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.11.0",
+    "sqlalchemy>=2.0.44",
+    "uvicorn[standard]>=0.38.0",
+    "workos>=5.0.0",
+]
+# Project URLs - update with your repository
+[project.urls]
+Homepage = "https://github.com/splenwilz/fastapi-auth-starter"
+Documentation = "https://github.com/splenwilz/fastapi-auth-starter#readme"
+Repository = "https://github.com/splenwilz/fastapi-auth-starter"
+Issues = "https://github.com/splenwilz/fastapi-auth-starter/issues"
+# CLI entry point for scaffolding new projects
+# Usage: fastapi-auth-starter init <project-name>
+[project.scripts]
+fastapi-auth-starter = "fastapi_auth_starter.cli:main"
+
+# Development dependencies (not needed for runtime on Vercel)
+# These are only needed for local development and migrations
+[project.optional-dependencies]
+dev = [
+    "alembic>=1.17.1",
+    "psycopg2-binary>=2.9.11",
+]
+
+# Build system configuration
+# Reference: https://peps.python.org/pep-0517/
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# Package data configuration
+# Include template files in the package itself
+# Reference: https://hatch.pypa.io/latest/config/build/#include
+[tool.hatch.build.targets.wheel]
+packages = ["fastapi_auth_starter"]
+# Include the templates directory in the package
+include = [
+    "fastapi_auth_starter/templates/**/*",
+]
