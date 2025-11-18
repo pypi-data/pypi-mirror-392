@@ -1,0 +1,457 @@
+Metadata-Version: 2.4
+Name: pocketbase_sdk
+Version: 0.1.1
+Summary: PocketBase Python SDK - A unofficial Python client library for PocketBase backend
+Author-email: PocketBase Python SDK <1154693969@qq.com>
+License: MIT
+Project-URL: Homepage, https://pocketbase.io
+Project-URL: Repository, https://github.com/pocketbase/pocketbase-python-sdk
+Project-URL: Documentation, https://pocketbase.io/docs/
+Project-URL: Bug Tracker, https://github.com/pocketbase/pocketbase-python-sdk/issues
+Keywords: pocketbase,database,backend,api,client,sdk
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Internet :: WWW/HTTP
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE.md
+Requires-Dist: aiohttp>=3.8.0
+Requires-Dist: websockets>=11.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.21.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: flake8>=6.0.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Dynamic: license-file
+
+# PocketBase Python SDK
+
+A unofficial Python client library for [PocketBase](https://pocketbase.io), the open-source backend as a service.
+
+## Features
+
+- 🚀 **Async/Await Support** - Built on `asyncio` for high-performance asynchronous operations
+- 🔐 **Authentication** - Complete auth support including OAuth2, OTP, and password reset
+- 📡 **Realtime** - WebSocket connections for real-time subscriptions
+- 🗄️ **CRUD Operations** - Full Create, Read, Update, Delete operations
+- 📊 **Batch Operations** - Transactional batch requests
+- 🏥 **Health Checks** - Monitor server health and status
+- 📝 **Logging** - Access and manage server logs
+- 🍪 **Token Storage** - Multiple auth store implementations (memory, local file, async)
+- 📝 **Type Hints** - Full TypeScript-style type annotations
+- 🧪 **Test Coverage** - Comprehensive test suite
+
+## Installation
+
+```bash
+pip install pocketbase_sdk
+```
+
+## Quick Start
+
+```python
+import asyncio
+from pocketbase_sdk import Client, LocalAuthStore
+
+async def main():
+    # Initialize client
+    client = Client("http://127.0.0.1:8090")
+    
+    try:
+        # Check server health
+        health = await client.health.check()
+        print(f"Server status: {health}")
+        
+        # Authenticate with email/password
+        auth_data = await client.collection("users").auth_with_password(
+            "user@example.com", 
+            "password123"
+        )
+        print(f"Authenticated as: {auth_data.record.email}")
+        
+        # Create a record
+        record = await client.collection("posts").create({
+            "title": "Hello PocketBase",
+            "content": "My first post"
+        })
+        print(f"Created record: {record.id}")
+        
+        # Subscribe to real-time updates
+        def on_update(data):
+            print(f"Real-time update: {data.action} - {data.record.id}")
+        
+        await client.collection("posts").subscribe("*", on_update)
+        
+        # Keep running to receive updates
+        await asyncio.sleep(10)
+        
+    except Exception as e:
+        print(f"Error: {e}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+## API Overview
+
+### Client
+
+The main `Client` class provides access to all services:
+
+```python
+from pocketbase_sdk import Client
+
+client = Client("http://127.0.0.1:8090")
+```
+
+### Authentication
+
+```python
+# Email/password authentication
+auth_data = await client.collection("users").auth_with_password(
+    "user@example.com", 
+    "password"
+)
+
+# OAuth2 authentication
+auth_data = await client.collection("users").auth_with_oauth2_code(
+    "google",
+    "authorization_code",
+    "code_verifier",
+    "http://localhost/callback"
+)
+
+# Refresh token
+auth_data = await client.collection("users").auth_refresh()
+
+# Password reset
+await client.collection("users").request_password_reset("user@example.com")
+await client.collection("users").confirm_password_reset(
+    "reset_token", 
+    "new_password", 
+    "new_password"
+)
+```
+
+### CRUD Operations
+
+```python
+# Create
+record = await client.collection("posts").create({
+    "title": "New Post",
+    "content": "Post content"
+})
+
+# Read
+record = await client.collection("posts").get_one(record.id)
+
+# List
+list_result = await client.collection("posts").get_list(
+    page=1, 
+    per_page=30,
+    filter="created > '2023-01-01'"
+)
+
+# Full list
+all_posts = await client.collection("posts").get_full_list(
+    batch=200
+)
+
+# Update
+updated = await client.collection("posts").update(record.id, {
+    "title": "Updated Title"
+})
+
+# Delete
+await client.collection("posts").delete(record.id)
+```
+
+### Real-time Subscriptions
+
+```python
+async def on_record_change(data):
+    if data.action == "create":
+        print(f"New record: {data.record}")
+    elif data.action == "update":
+        print(f"Updated record: {data.record}")
+    elif data.action == "delete":
+        print(f"Deleted record: {data.record}")
+
+# Subscribe to all changes in a collection
+unsubscribe = await client.collection("posts").subscribe("*", on_record_change)
+
+# Subscribe to specific record changes
+await client.collection("posts").subscribe(record.id, on_record_change)
+
+# Unsubscribe
+await unsubscribe()  # or await client.collection("posts").unsubscribe()
+```
+
+### Batch Operations
+
+```python
+batch = client.create_batch()
+
+# Add multiple operations
+batch.collection("posts").create({"title": "Post 1"})
+batch.collection("posts").update("post-id", {"title": "Updated Post"})
+batch.collection("users").delete("user-id")
+
+# Execute all operations in a single request
+results = await batch.send()
+```
+
+### Health Checks
+
+```python
+# Basic health check
+health = await client.health.check()
+
+# Wait for server to be healthy
+is_healthy = await client.health.wait_until_healthy(timeout=30)
+
+# Get database stats
+db_stats = await client.health.get_database_stats()
+
+# Get cache stats
+cache_stats = await client.health.get_cache_stats()
+```
+
+### Logging
+
+```python
+# Get recent logs
+logs = await client.logs.get_list(page=1, per_page=50)
+
+# Get error logs only
+error_logs = await client.logs.get_error_logs()
+
+# Get logs statistics
+stats = await client.logs.get_stats()
+
+# Delete old logs
+await client.logs.delete_logs_older_than(days=30)
+```
+
+### Filter Expressions
+
+```python
+# Build filters with parameters
+filter_expr = client.filter(
+    "title ~ {:title} && created >= {:date}",
+    {"title": "example", "date": "2023-01-01"}
+)
+
+# Use in queries
+posts = await client.collection("posts").get_list(filter=filter_expr)
+```
+
+## Advanced Usage
+
+### Custom Auth Store
+
+```python
+from pocketbase_sdk import Client, BaseAuthStore
+
+class CustomAuthStore(BaseAuthStore):
+    def __init__(self):
+        super().__init__()
+        # Custom initialization
+    
+    def save(self, token, record=None):
+        # Custom save logic
+        super().save(token, record)
+    
+    def clear(self):
+        # Custom clear logic
+        super().clear()
+
+client = Client("http://127.0.0.1:8090", auth_store=CustomAuthStore())
+```
+
+### Request Hooks
+
+```python
+async def before_send(url, options):
+    print(f"Making request to: {url}")
+    # Modify request if needed
+    return {"url": url, "options": options}
+
+async def after_send(response, data, options):
+    print(f"Response status: {response.status}")
+    # Modify response if needed
+    return data
+
+client.before_send = before_send
+client.after_send = after_send
+```
+
+### File Uploads
+
+```python
+from aiohttp import FormData
+
+# Upload file with form data
+form = FormData()
+form.add_field('file', open('image.jpg', 'rb'), filename='image.jpg')
+form.add_field('title', 'My Image')
+
+record = await client.collection("images").create(form)
+```
+
+## Error Handling
+
+```python
+from pocketbase_sdk import Client, ClientResponseError
+
+try:
+    await client.collection("users").auth_with_password("invalid", "credentials")
+except ClientResponseError as e:
+    print(f"Authentication failed: {e.message}")
+    print(f"Status: {e.status}")
+    print(f"URL: {e.url}")
+```
+
+## Configuration Options
+
+### Client Options
+
+```python
+client = Client(
+    base_url="http://127.0.0.1:8090",
+    auth_store=LocalAuthStore(),  # Default
+    lang="en-US"  # Default
+)
+```
+
+### Request Options
+
+All API methods accept optional request options:
+
+```python
+from pocketbase_sdk import RecordOptions
+
+await client.collection("posts").get_one(
+    "record-id",
+    RecordOptions(
+        fields="id,title,created",
+        expand="author,comments"
+    )
+)
+```
+
+## Development
+
+### Setup Development Environment
+
+```bash
+# Clone repository
+git clone https://github.com/pocketbase/pocketbase-python-sdk
+cd pocketbase-python-sdk
+
+# Install development dependencies
+pip install -e ".[dev]"
+
+# Run tests
+pytest
+
+# Run tests with coverage
+pytest --cov=pocketbase
+
+# Format code
+black src tests
+
+# Type checking
+mypy src
+```
+
+### Architecture Notes
+
+The SDK uses **lazy initialization** to avoid circular dependencies between Client and Services. Services are created only when first accessed through properties:
+
+```python
+client = Client("http://127.0.0.1:8090")
+
+# Services are created on-demand
+collections = client.collections  # CollectionService created here
+health = client.health      # HealthService created here
+logs = client.logs          # LogService created here
+realtime = client.realtime  # RealtimeService created here
+```
+
+This approach:
+- ✅ Eliminates circular dependency during initialization
+- ✅ Improves memory usage (only used services are created)  
+- ✅ Maintains API compatibility
+- ✅ Thread-safe for concurrent access
+
+For details, see `CIRCULAR_DEPENDENCY_FIX.md`.
+
+### Project Structure
+
+```
+pocketbase-python-sdk/
+├── src/
+│   ├── pocketbase_sdk/
+│   │   ├── __init__.py
+│   │   ├── client.py           # Main client class
+│   │   ├── exceptions.py       # Error handling
+│   │   ├── services/          # API services
+│   │   │   ├── __init__.py
+│   │   │   ├── base_service.py
+│   │   │   ├── collection_service.py
+│   │   │   ├── crud_service.py
+│   │   │   ├── health_service.py
+│   │   │   ├── log_service.py
+│   │   │   ├── record_service.py
+│   │   │   ├── realtime_service.py
+│   │   │   └── batch_service.py
+│   │   ├── stores/            # Auth stores
+│   │   │   ├── __init__.py
+│   │   │   ├── base_auth_store.py
+│   │   │   ├── local_auth_store.py
+│   │   │   └── async_auth_store.py
+│   │   └── utils/             # Utilities
+│   │       ├── __init__.py
+│   │       ├── dtos.py
+│   │       ├── options.py
+│   │       ├── jwt.py
+│   │       └── cookie.py
+├── tests/                    # Test suite
+├── README.md
+└── pyproject.toml
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Make your changes and add tests
+4. Run the test suite: `pytest`
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Related Projects
+
+- [PocketBase JavaScript SDK](https://github.com/pocketbase/js-sdk)
+- [PocketBase Dart SDK](https://github.com/pocketbase/dart-sdk)
+- [PocketBase Go SDK](https://github.com/pocketbase/go-sdk)
+
+## Support
+
+- [Documentation](https://pocketbase.io/docs/)
+- [GitHub Issues](https://github.com/pocketbase/pocketbase-python-sdk/issues)
+- [PocketBase Discord](https://pocketbase.io/docs/#discord-support)
