@@ -1,0 +1,70 @@
+Metadata-Version: 2.4
+Name: librosax
+Version: 0.1.1
+Summary: A JAX implementation of librosa, TorchLibrosa, and nnAudio
+Home-page: https://github.com/DBraun/librosax
+Author: David Braun
+Author-email: David Braun <braun@ccrma.stanford.edu>
+License: ISC
+Project-URL: Homepage, https://github.com/DBraun/librosax
+Project-URL: Issues, https://github.com/DBraun/librosax/issues
+Keywords: audio,machine learning,jax
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: ISC License (ISCL)
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: einops>=0.8.1
+Requires-Dist: flax>=0.12.0
+Requires-Dist: jax>=0.8.0
+Requires-Dist: librosa>=0.10.1
+Requires-Dist: numpy>=2.1.3
+Requires-Dist: scipy>=1.16.2
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: pytest-cov; extra == "dev"
+Requires-Dist: torch; extra == "dev"
+Requires-Dist: torchlibrosa; extra == "dev"
+Provides-Extra: docs
+Requires-Dist: sphinx>=4.0; extra == "docs"
+Requires-Dist: furo; extra == "docs"
+Requires-Dist: m2r2; extra == "docs"
+Requires-Dist: sphinx-autobuild; extra == "docs"
+Dynamic: license-file
+
+# librosax
+
+A [JAX](https://docs.jax.dev/en/latest/)/[Flax](https://flax.readthedocs.io/en/latest/) implementation of audio processing functions, inspired by and building upon [librosa](https://github.com/librosa/librosa) and [TorchLibrosa](https://github.com/qiuqiangkong/torchlibrosa).
+
+## Installation
+
+Although, it is optional, we recommend first installing the [jax-ai-stack](https://github.com/jax-ml/jax-ai-stack) with one of these three options:
+
+```bash
+pip install jax-ai-stack              # JAX CPU
+pip install jax-ai-stack "jax[cuda]"  # JAX + AI stack with GPU/CUDA support
+pip install jax-ai-stack "jax[tpu]"   # JAX + AI stack with TPU support
+```
+
+**Required**: Then install librosax:
+
+```bash
+pip install librosax
+```
+
+## Documentation
+
+Documentation is [here](http://dirt.design/librosax).
+
+## Acknowledgments
+
+This library is heavily inspired by and borrows code from:
+
+- **[librosa](https://github.com/librosa/librosa)** - The excellent Python library for audio and music analysis by the librosa development team
+- **[TorchLibrosa](https://github.com/qiuqiangkong/torchlibrosa)** - PyTorch implementations of librosa functions and neural net layers by Qiuqiang Kong
+- **[nnAudio](https://github.com/KinWaiCheuk/nnAudio)** - PyTorch implementations of CQT and other functions by Kin Wai Cheuk
+
+## License
+
+librosax is licensed under the ISC License, matching the license used by librosa. See the [LICENSE](LICENSE) file for details.
