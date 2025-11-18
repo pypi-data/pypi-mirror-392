@@ -1,0 +1,254 @@
+Metadata-Version: 2.4
+Name: pnw-python-subscriptions
+Version: 1.1.1
+Summary: PNW subscription utility
+Author: Sumnor
+License: MIT
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE.md
+Dynamic: license-file
+
+# Politics and War Subscriptions
+
+A Python package for subscribing to real-time Politics and War game events via the PnW API.
+
+## Features
+
+- 🎨 **Nation Color Changes** - Track when nations change their color bloc
+- 🌍 **Nations** - Monitor nation creation, updates, and deletions
+- 📊 **Trades** - Monitor trade offers in real-time
+- ⚔️ **Wars** - Track war declarations and outcomes
+- 💥 **Attacks** - Monitor individual war attacks as they happen
+- 🤝 **Alliances** - Watch alliance changes
+- 🏙️ **Cities** - Track city creation and improvements
+- 💰 **Bank Records** - Monitor alliance bank transactions
+- 📜 **Treaties** - Track treaty creation and cancellation
+- 🎯 **Bounties** - Monitor bounty creation and claims
+- ⚾ **Baseball Games** - Track baseball game results
+- 💎 **Treasure Trades** - Monitor treasure trading
+- 🚫 **Embargoes** - Track embargo creation and removal
+- 🐍 **Pythonic API** - Simple, clean interface
+- ⚡ **Real-time** - Powered by Pusher websockets
+- 🔄 **Automatic Reconnection** - Handles connection issues gracefully
+
+
+## Prerequisites
+
+- Python 3.7+
+- Node.js 14+ (with npm)
+- A Politics and War API key
+
+## Installation
+
+1. **Install the Python package:**
+```bash
+pip install -e .
+```
+
+2. **Install Node.js dependencies:**
+```bash
+cd pnw_subscriptions/scripts
+npm install pusher-js node-fetch
+```
+
+## Quick Start
+
+### Monitor Nation Color Changes
+
+```python
+from pnw_subscriptions import Subscription
+
+def handle_event(event):
+    print(f"{event['nation_name']} changed from {event['old_color']} to {event['new_color']}")
+
+sub = Subscription(
+    api_key="your_api_key_here",
+    subscription_type="nation_colors"
+)
+
+sub.start(callback=handle_event)
+```
+
+### Monitor Trade Market
+
+```python
+from pnw_subscriptions import Subscription
+
+def handle_trade(event):
+    if event['type'] == 'TRADE_CREATED':
+        print(f"New {event['buy_or_sell']} offer: {event['amount']} {event['offer_resource']} @ ${event['price']}")
+
+sub = Subscription(
+    api_key="your_api_key_here",
+    subscription_type="trades"
+)
+
+sub.start(callback=handle_trade)
+```
+
+### Monitor Multiple Subscriptions Simultaneously
+
+```python
+from pnw_subscriptions import MultiSubscription
+
+def handle_colors(event):
+    print(f"Color change: {event['nation_name']}")
+
+def handle_trades(event):
+    print(f"Trade: {event['offer_resource']}")
+
+# Create multi-subscription manager
+multi = MultiSubscription(api_key="your_api_key_here")
+
+# Add multiple subscriptions
+multi.add_subscription("nation_colors", handle_colors)
+multi.add_subscription("trades", handle_trades)
+
+# Start all subscriptions (blocks until Ctrl+C)
+multi.start_all()
+```
+
+## Event Types
+
+### Nation Color Changes
+
+```python
+{
+    "type": "COLOR_CHANGE",
+    "nation_id": "123456",
+    "nation_name": "Example Nation",
+    "alliance_name": "Example Alliance",
+    "old_color": "aqua",
+    "new_color": "red",
+    "beige_turns_left": 0,
+    "score": 1500.0
+}
+```
+
+### Trade Events
+
+```python
+{
+    "type": "TRADE_CREATED",  # or TRADE_UPDATED, TRADE_DELETED
+    "trade_id": "789012",
+    "offer_resource": "food",
+    "buy_or_sell": "sell",
+    "price": 50.0,
+    "amount": 1000,
+    "nation_id": "123456",
+    "nation_name": "Example Nation",
+    "date_accepted": null,
+    "original_trade_id": null
+}
+```
+
+## Advanced Usage
+
+### Multiple Subscriptions with Context Manager
+
+```python
+from pnw_subscriptions import MultiSubscription
+
+with MultiSubscription(api_key="your_key") as multi:
+    multi.add_subscription("nation_colors", handle_colors)
+    multi.add_subscription("trades", handle_trades)
+    multi.start_all()
+# Automatically cleaned up
+```
+
+### Non-Blocking Subscriptions
+
+```python
+# Run subscription in background thread
+sub = Subscription(api_key="your_key", subscription_type="nation_colors")
+sub.start(callback=handle_event, blocking=False)
+
+# Do other work while subscription runs in background
+do_other_work()
+
+# Stop when done
+sub.stop()
+```
+
+### Context Manager
+
+```python
+with Subscription(api_key="your_key", subscription_type="nation_colors") as sub:
+    sub.start(callback=handle_event)
+# Automatically cleaned up
+```
+
+### Filtering Events
+
+```python
+def handle_beige_exits(event):
+    if event['new_color'] != 'beige' and event['old_color'] == 'beige':
+        print(f"{event['nation_name']} exited beige!")
+
+sub = Subscription(api_key="your_key", subscription_type="nation_colors")
+sub.start(callback=handle_beige_exits)
+```
+
+### Error Handling
+
+```python
+def safe_handler(event):
+    try:
+        # Your processing logic
+        process_event(event)
+    except Exception as e:
+        print(f"Error processing event: {e}")
+
+sub.start(callback=safe_handler)
+```
+
+## Subscription Types
+
+Available subscription types:
+- `"nation_colors"` - Nation color bloc changes (tracked with full history)
+- `"nations"` - Nation creation, updates, and deletions
+- `"trades"` - Trade market activity (create, update, delete)
+- `"wars"` - War declarations and outcomes
+- `"attacks"` - Individual war attacks
+- `"alliances"` - Alliance changes
+- `"cities"` - City creation, updates, and improvements
+- `"banks"` - Alliance bank transactions (bankrecs)
+- `"treaties"` - Treaty creation, updates, and cancellation
+- `"bounties"` - Bounty creation, updates, and claims
+- `"baseball_games"` - Baseball game results
+- `"treasure_trades"` - Treasure trading activity
+- `"embargoes"` - Embargo creation and removal
+
+## How It Works
+
+This package wraps Node.js scripts that connect to the Politics and War Pusher websocket API. When events occur, the Node.js process outputs JSON to stdout, which the Python wrapper parses and passes to your callback function.
+
+## Troubleshooting
+
+**Node.js not found:**
+```
+RuntimeError: Node.js is not installed or not in PATH
+```
+Install Node.js from https://nodejs.org/
+
+**Missing dependencies:**
+```bash
+cd pnw_subscriptions/scripts
+npm install pusher-js node-fetch
+```
+
+**API Key issues:**
+Make sure your API key is valid and has the necessary permissions.
+
+## License
+
+MIT
+
+## Contributing
+
+Contributions welcome! Please open an issue or PR.
+
+## Credits
+
+Uses the [Politics and War API](https://politicsandwar.com/api/)
