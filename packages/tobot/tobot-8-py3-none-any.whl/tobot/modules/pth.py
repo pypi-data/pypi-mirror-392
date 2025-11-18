@@ -1,0 +1,16 @@
+# This file is placed in the Public Domain.
+
+
+import os
+
+
+a = os.path.abspath
+d = os.path.dirname
+p = os.path.join
+
+
+PATH = p(d(d(__file__)), "network", "html","index.html")
+
+
+def pth(event):
+    event.reply(f"file://{PATH}")

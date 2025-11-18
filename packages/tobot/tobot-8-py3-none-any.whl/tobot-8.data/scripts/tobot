@@ -1,0 +1,198 @@
+#!python
+# This file is placed in the Public Domain.
+
+
+import logging
+import os
+import sys
+import threading
+import time
+
+
+sys.path.insert(0, os.getcwd())
+
+
+from tob.clients import Client, Config
+from tob.command import Commands, command, parse, scan
+from tob.handler import Event
+from tob.loggers import level
+from tob.objects import update
+from tob.package import Mods, getmod, modules
+from tob.persist import Workdir, moddir, pidname
+from tob.threads import launch, threadhook
+from tob.utility import daemon, forever, pidfile, privileges, wrap
+from tob.utility import check, spl, where, wrapped
+
+
+NAME = "tobot"
+
+Config.name = NAME
+Config.version = 8
+
+
+class CLI(Client):
+
+    def __init__(self):
+        Client.__init__(self)
+        self.register("command", command)
+
+    def raw(self, text):
+        print(text.encode('utf-8', 'replace').decode("utf-8"))
+
+
+class Console(CLI):
+
+    def callback(self, event):
+        if not event.text:
+            return
+        super().callback(event)
+        event.wait()
+
+    def poll(self):
+        evt = Event()
+        evt.text = input("> ")
+        evt.type = "command"
+        return evt
+
+
+"in the begining"
+
+
+def banner(name, version):
+    tme = time.ctime(time.time()).replace("  ", " ")
+    logger = logging.getLogger()
+    print("%s %s since %s (%s)" % (
+                                   name.upper(),
+                                   version,
+                                   tme,
+                                   logging.getLevelName(logger.getEffectiveLevel())
+                                  ))
+    sys.stdout.flush()
+
+
+def boot():
+    Config.name = NAME
+    Workdir.init(NAME)
+    Mods.init("tobot.modules", ignore="mbx,rst,udp,web", local=True)
+
+
+def scanner(names, init=False):
+    mods = []
+    for name in names:
+        mod = getmod(name)
+        if mod:
+            scan(mod)
+        if init and "init" in dir(mod):
+            thr = launch(mod.init, Config())
+            mods.append((mod, thr))
+    return mods
+
+
+"scripts"
+
+
+def background():
+    daemon(check("v"))
+    privileges()
+    level("info")
+    scanner(modules(), True)
+    Commands.add(cmd, ver)
+    pidfile(pidname(Config.name))
+    forever()
+
+
+def console():
+    import readline # noqa: F401
+    parse(Config, " ".join(sys.argv[1:]))
+    level(Config.sets.get("level", "info"))
+    if "v" in Config.opts:
+        banner(Config.name, Config.version)
+    mods = []
+    if "a" in Config.opts:
+        mods = modules()
+    else:
+        mods = spl(Config.sets.get("init", ""))
+    Commands.add(cmd, ver)
+    csl = Console()
+    for _mod, thr in scanner(mods, True):
+        thr.join(30.0)
+    csl.start()
+    forever()
+
+
+def control():
+    if len(sys.argv) == 1:
+        return
+    scanner(modules(), False)
+    Commands.add(cmd, srv, ver)
+    csl = CLI()
+    csl.silent = False
+    evt = Event()
+    evt.orig = repr(csl)
+    evt.text = " ".join(sys.argv[1:])
+    evt.type = "command"
+    command(evt)
+    evt.wait()
+
+
+def service():
+    privileges()
+    level("info")
+    banner(Config.name, Config.version)
+    scanner(modules(), True)
+    Commands.add(cmd, ver)
+    pidfile(pidname(Config.name))
+    forever()
+
+
+"commands"
+
+
+def cmd(event):
+    event.reply(",".join(sorted(Commands.names or Commands.cmds)))
+
+
+def srv(event):
+    import getpass
+    name = getpass.getuser()
+    event.reply(TXT % (Config.name.upper(), name, name, name, Config.name))
+
+
+TXT = """[Unit]
+Description=%s
+After=network-online.target
+
+[Service]
+Type=simple
+User=%s
+Group=%s
+ExecStart=/home/%s/.local/bin/%s -s
+
+[Install]
+WantedBy=multi-user.target"""
+
+
+def ver(event):
+    event.reply(f"{Config.name.upper()} {Config.version}")
+
+
+"runtime"
+
+
+threading.excepthook = threadhook
+
+
+def main():
+    boot()
+    if check("c"):
+        wrap(console)
+    elif check("d"):
+        background()
+    elif check("s"):
+        wrapped(service)
+    else:
+        wrapped(control)
+
+
+if __name__ == "__main__":
+    main()
