@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fs-tree-spec"
+version = "0.1.1"
+description = "Translate between ASCII 'tree' text, JSON/YAML tree specs, and real directory structures."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [
+  { name = "Stephen Wood" }
+]
+keywords = ["filesystem", "tree", "cli", "yaml", "json", "directory", "tool"]
+
+dependencies = []
+
+# ✅ Merge all optional dependencies here
+[project.optional-dependencies]
+yaml = ["PyYAML>=6.0"]
+test = ["pytest"]
+
+[project.scripts]
+fs-tree-spec = "tree_adapter:main"
+
+[project.urls]
+Homepage = "https://example.com/fs-tree-spec"
+Source = "https://example.com/fs-tree-spec"
+Issues = "https://example.com/fs-tree-spec/issues"
+
+[tool.setuptools]
+py-modules = ["tree_adapter"]
+
+# ✅ pytest configuration (quiet mode by default)
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
