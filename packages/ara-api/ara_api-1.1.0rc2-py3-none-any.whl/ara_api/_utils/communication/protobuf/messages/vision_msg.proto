@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package protobuf.messages.vision_msg;
+
+import "messages/base_msg.proto";
+
+message image_data {
+    uint32 height = 1;
+    uint32 weight = 2;
+    bytes data = 3;
+    float noise = 4;
+}
+
+message image_data_stream {
+    bytes data = 1;
+}
+
+message aruco {
+    int32 id = 1;
+    messages.base_msg.vector3 position = 2;
+    messages.base_msg.vector3 orientation = 3;
+}
+
+message aruco_data_array {
+    repeated aruco markers = 1;
+}
+
+message qr_code {
+    string data = 1;
+    messages.base_msg.vector2 position = 2;
+}
+
+message qr_data_array {
+    repeated qr_code codes = 1;
+}
+
+message blob {
+    int32 id = 1;
+    messages.base_msg.vector2 position = 2;
+    float size = 3;
+}
+
+message blob_data_array {
+    repeated blob blobs = 1;
+}
+

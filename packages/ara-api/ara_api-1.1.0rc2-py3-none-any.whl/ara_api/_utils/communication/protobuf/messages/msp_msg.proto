@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package protobuf.messages.msp_msg;
+
+import "messages/base_msg.proto";
+
+message motor_data {
+    repeated int32 data = 1;
+}
+
+message imu_data {
+    messages.base_msg.vector3 gyro = 1;
+    messages.base_msg.vector3 acc = 2; 
+	optional messages.base_msg.vector3 mag = 3;
+}
+
+message attitude_data {
+    messages.base_msg.vector3 data = 1;
+}
+
+message altitude_data {
+    float data = 1;
+}
+
+message sonar_data {
+    float data = 1;
+}
+
+message optical_flow_data {
+	uint32 quality = 1;
+	messages.base_msg.vector2 flow_rate = 2;
+	messages.base_msg.vector2 body_rate = 3;
+}
+
+message position_data {
+	messages.base_msg.vector3 data = 1;
+}
+
+message velocity_data {
+	messages.base_msg.vector3 data = 1;
+}
+
+message analog_data {
+	float voltage = 1;
+	uint32 mAhdrawn = 2;
+    uint32 rssi = 3;
+    float amperage = 4;
+}
+
+message flags_data {
+    string activeSensors = 1;
+    string armingDisableFlags = 2;
+    string mode = 3;
+}
+
+message rc_in {
+    uint32 ail = 1; // roll
+    uint32 ele = 2; // pitch
+    uint32 thr = 3; // throttle
+    uint32 rud = 4; // yaw
+    uint32 aux1 = 5; // aux1
+    uint32 aux2 = 6; // aux2
+    uint32 aux3 = 7; // aux3
+    uint32 aux4 = 8; // aux4
+}
