@@ -1,0 +1,67 @@
+Metadata-Version: 2.4
+Name: subnethostcount
+Version: 0.1.2
+Summary: Count usable IPv4 hosts across CIDR subnets and individual IP addresses.
+Project-URL: Homepage, https://github.com/DefensiveOrigins/SubnetHostCount
+Project-URL: Source, https://github.com/DefensiveOrigins/SubnetHostCount
+Project-URL: Issue Tracker, https://github.com/DefensiveOrigins/SubnetHostCount/issues
+Author-email: Defensive Origins <info@defensiveorigins.com>
+Keywords: cidr,defensive origins,host count,ipv4,networking,subnet
+Classifier: Environment :: Console
+Classifier: Intended Audience :: System Administrators
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: System :: Networking
+Classifier: Topic :: Utilities
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+
+# SubnetHostCount
+Simple python to count hosts in a list of subnets and ip addresses
+
+
+# CIDR Host Counter
+
+This script reads a file containing IPv4 CIDR notations or individual IP addresses and calculates the total number of valid hosts. It excludes network and broadcast addresses for subnets, but counts single IPs (e.g., `10.0.0.5`) as one valid host.
+
+
+## Features
+
+- Accepts a file containing:
+  - IPv4 CIDR ranges (e.g., `192.168.1.0/24`)
+  - Individual IP addresses (e.g., `10.0.0.5`)
+- Excludes network and broadcast addresses from the host count
+- Ignores empty lines and lines starting with `#`
+- Warns about invalid lines with a descriptive message
+- Identifies duplicates (-D to list hosts appearing in multiple files)
+- Calculates RFC1918 private vs public host counts (-r) 
+
+## Usage
+
+### Prerequisites
+
+Python 3.6+
+
+### Command
+
+```bash
+python HostCount.py -d path/to/cidrs.txt
+```
+or
+```bash
+subnethostcount -d path/to/cidrs.txt
+```
+
+### 
+Optional flags:
+- `-D`, `--duplicates`  
+  When processing a directory, list hosts that appear in more than one file and which files they appear in.
+
+- `-r`, `--rfc1918`  
+  Show how many hosts are in RFC1918 private address space vs how many are not (prints per-file and totals).
+
