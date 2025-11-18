@@ -1,0 +1,456 @@
+Metadata-Version: 2.4
+Name: qardl
+Version: 1.0.0
+Summary: Quantile Autoregressive Distributed Lag (QARDL) Model Estimation and Testing
+Author-email: Dr Merwan Roudane <merwanroudane920@gmail.com>
+Maintainer-email: Dr Merwan Roudane <merwanroudane920@gmail.com>
+License: MIT
+Project-URL: Homepage, https://github.com/merwanroudane/qardl
+Project-URL: Documentation, https://github.com/merwanroudane/qardl#readme
+Project-URL: Repository, https://github.com/merwanroudane/qardl
+Project-URL: Bug Tracker, https://github.com/merwanroudane/qardl/issues
+Keywords: econometrics,quantile regression,cointegration,ARDL,QARDL,time series,rolling estimation,error correction model
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Scientific/Engineering
+Classifier: Topic :: Scientific/Engineering :: Mathematics
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy>=1.20.0
+Requires-Dist: scipy>=1.7.0
+Requires-Dist: pandas>=1.3.0
+Requires-Dist: statsmodels>=0.13.0
+Requires-Dist: matplotlib>=3.4.0
+Requires-Dist: seaborn>=0.11.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0; extra == "dev"
+Requires-Dist: pytest-cov>=3.0; extra == "dev"
+Requires-Dist: black>=22.0; extra == "dev"
+Requires-Dist: flake8>=4.0; extra == "dev"
+Requires-Dist: mypy>=0.950; extra == "dev"
+Provides-Extra: docs
+Requires-Dist: sphinx>=4.5; extra == "docs"
+Requires-Dist: sphinx-rtd-theme>=1.0; extra == "docs"
+Requires-Dist: numpydoc>=1.2; extra == "docs"
+Dynamic: license-file
+
+# CORRECTED QARDL Package
+
+Complete Python implementation of Cho, Kim & Shin (2015) with **ALL CRITICAL CORRECTIONS**.
+
+## 🚨 CRITICAL CORRECTIONS IMPLEMENTED
+
+This package fixes **ALL 8 MAJOR GAPS** identified in the original implementation:
+
+### ✅ 1. FIXED: Standard Errors (Theorem 1)
+**Original Error:** Used generic sandwich formula  
+**Correction:** Exact formula with H_t projection
+```
+H_t = K_t(τ) - E[K_t(τ)W_t']E[W_tW_t']^{-1}W_t
+Var(φ) = τ(1-τ)f_τ^{-2}E[H_tH_t']^{-1}
+```
+
+### ✅ 2. FIXED: Long-Run Wald Tests (Corollary 1)
+**Original Error:** Used n scaling  
+**Correction:** n² scaling
+```
+W = n²(Rβ-r)'[R(Σ⊗M⁻¹)R']⁻¹(Rβ-r) ~ χ²(r)
+```
+
+### ✅ 3. FIXED: Short-Run Wald Tests (Corollaries 2, 3)
+**Original Error:** Wrong scaling  
+**Correction:** n scaling for short-run
+```
+W(φ) = n(Rφ-r)'[RΠR']⁻¹(Rφ-r) ~ χ²(r)
+W(γ) = n(Rγ-r)'[Rβι'ₚΠιₚβ'R']⁻¹(Rγ-r) ~ χ²(1)  [rank 1!]
+```
+
+### ✅ 4. FIXED: ECM Representation (Equation 6)
+**Original Error:** Incomplete 10-line placeholder  
+**Correction:** Complete 453-line implementation
+```
+ΔYₜ = α*(τ) + ζ*(τ)[Yₜ₋₁ - β*(τ)'Xₜ₋₁] + Σφ*ⱼ(τ)ΔYₜ₋ⱼ + Σθ*ⱼ(τ)ΔXₜ₋ⱼ + Uₜ(τ)
+```
+
+### ✅ 5. FIXED: Lag Selection
+**Original Error:** Used quantile-based BIC  
+**Correction:** OLS-based BIC at MEAN (icmean.m)
+```python
+# CORRECT: Estimate at MEAN using OLS, then compute BIC
+BIC = log(σ²) + (# parameters) * log(n) / n
+```
+
+### ✅ 6. FIXED: M Matrix (Theorem 2)
+**Original Error:** Generic computation  
+**Correction:** Exact formula with projection
+```
+M = n⁻²X'[I - W(W'W)⁻¹W']X
+```
+
+### ✅ 7. FIXED: Rolling Estimation
+**Original Error:** Basic 50-line placeholder  
+**Correction:** Complete implementation with ALL parameters
+
+### ✅ 8. FIXED: Multi-Quantile Tests (Corollary 4)
+**Original Error:** Missing covariance structures  
+**Correction:** Complete Ξ(τ) and Σ(τ)⊗M⁻¹
+
+## Installation
+
+```bash
+# From source
+git clone https://github.com/merwanroudane/qardl
+cd qardl-corrected
+pip install -e .
+```
+
+## Quick Start
+
+```python
+import numpy as np
+from qardl import QARDLCorrected
+
+# Load data
+data = np.loadtxt('data.csv', delimiter=',')  # [Y, X1, X2, ...]
+
+# Estimate QARDL with CORRECTED methods
+model = QARDLCorrected(
+    data=data,
+    p=2,          # AR order
+    q=1,          # DL order  
+    tau=0.5,      # Median
+    constant=True
+)
+
+# Fit with CORRECT standard errors
+results = model.fit(
+    bandwidth_method='bofinger',
+    cov_type='correct',  # Uses H_t projection!
+    verbose=True
+)
+
+# View results
+print(results.summary())
+```
+
+## Complete Example: All Corrections
+
+```python
+import numpy as np
+from qardl import (
+    QARDLCorrected,
+    WaldTestsCorrected,
+    QARDLtoECM,
+    ECMWaldTests,
+    select_qardl_orders,
+    RollingQARDL
+)
+
+# ═══════════════════════════════════════════════════════════════
+# STEP 1: LAG SELECTION (CORRECTED - Uses OLS at mean)
+# ═══════════════════════════════════════════════════════════════
+
+p_opt, q_opt = select_qardl_orders(
+    data=data,
+    p_max=8,
+    q_max=8,
+    criterion='bic',  # Uses OLS-based BIC at MEAN!
+    verbose=True
+)
+
+# ═══════════════════════════════════════════════════════════════
+# STEP 2: QARDL ESTIMATION (CORRECTED - Proper standard errors)
+# ═══════════════════════════════════════════════════════════════
+
+model = QARDLCorrected(
+    data=data,
+    p=p_opt,
+    q=q_opt,
+    tau=[0.25, 0.5, 0.75],  # Multiple quantiles
+    constant=True
+)
+
+results = model.fit(verbose=True)
+
+# Long-run parameters with CORRECT standard errors
+print("\nLong-Run Parameters (β):")
+for tau in [0.25, 0.5, 0.75]:
+    beta = results.beta[tau]
+    beta_se = results.beta_se[tau]  # Uses n² convergence rate!
+    print(f"τ={tau}: β={beta[0]:.4f} (se={beta_se[0]:.4f})")
+
+# ═══════════════════════════════════════════════════════════════
+# STEP 3: WALD TESTS (CORRECTED - Proper n² and n scaling)
+# ═══════════════════════════════════════════════════════════════
+
+wald = WaldTestsCorrected(results)
+
+# Test long-run β=0 (uses n² scaling!)
+R = np.array([[1, 0]])  # Test β₁ = 0
+r = np.array([0])
+test_beta = wald.wtestlrb(R, r, tau=0.5)
+print(f"\nLong-run test: W={test_beta['statistic']:.2f}, "
+      f"p={test_beta['p_value']:.4f} (n² scaling)")
+
+# Test short-run φ (uses n scaling!)
+Q = np.array([[1, 0]])  # Test φ₁ = 0
+q = np.array([0])
+test_phi = wald.wtestsrp(Q, q, tau=0.5)
+print(f"Short-run test: W={test_phi['statistic']:.2f}, "
+      f"p={test_phi['p_value']:.4f} (n scaling)")
+
+# Test equality across quantiles (multi-quantile test)
+test_equality = wald.test_equality_across_quantiles(
+    parameter='beta',
+    quantiles=[0.25, 0.5, 0.75]
+)
+print(f"\nEquality test: W={test_equality['statistic']:.2f}, "
+      f"p={test_equality['p_value']:.4f}")
+
+# ═══════════════════════════════════════════════════════════════
+# STEP 4: ECM REPRESENTATION (CORRECTED - Complete implementation)
+# ═══════════════════════════════════════════════════════════════
+
+ecm = QARDLtoECM(results)
+
+# View ECM parameters
+print("\nECM Representation:")
+print(ecm.summary_ecm(tau=0.5))
+
+# ECM-specific tests
+ecm_tests = ECMWaldTests(ecm)
+
+# Test no error correction
+test_no_ec = ecm_tests.test_no_error_correction(tau=0.5)
+print(f"\nNo error correction test: W={test_no_ec['statistic']:.2f}, "
+      f"p={test_no_ec['p_value']:.4f}")
+
+# ═══════════════════════════════════════════════════════════════
+# STEP 5: ROLLING ESTIMATION (CORRECTED - Complete with all params)
+# ═══════════════════════════════════════════════════════════════
+
+rolling = RollingQARDL(
+    data=data,
+    p=p_opt,
+    q=q_opt,
+    tau=0.5,
+    window=320,  # 320 quarters as in paper
+    constant=True
+)
+
+rolling.fit(verbose=True)
+
+# Plot time-varying parameters
+rolling.plot_results(
+    parameters=['beta', 'zeta', 'half_life'],
+    variable_indices={'beta': 0},
+    save_path='rolling_results.pdf'
+)
+
+# Export to DataFrame
+df = rolling.to_dataframe()
+df.to_csv('rolling_estimates.csv', index=False)
+
+print("\n" + "="*70)
+print("ALL CORRECTIONS APPLIED SUCCESSFULLY!")
+print("="*70)
+```
+
+## Key Features
+
+### ✓ Correct Asymptotic Theory
+- Proper √n convergence for short-run parameters
+- Proper n convergence for long-run parameters  
+- Correct mixture normal distributions
+
+### ✓ Correct Wald Tests
+- Long-run: n² scaling with Σ⊗M⁻¹ covariance
+- Short-run: n scaling with Π(τ) covariance
+- Multi-quantile: Ξ(τ) and Σ(τ) structures
+
+### ✓ Complete ECM
+- Error correction coefficient ζ
+- Half-life computation
+- All short-run dynamics φ*, θ*
+- ECM-specific tests
+
+### ✓ Correct Lag Selection
+- OLS-based BIC at conditional mean
+- Matches icmean.m from MATLAB
+- Stability diagnostics
+
+### ✓ Complete Rolling Estimation
+- All parameters tracked over time
+- Wald test sequences
+- Publication-ready plots
+- Matches rolling_qardl from GAUSS
+
+## API Reference
+
+### Core Estimation
+```python
+model = QARDLCorrected(data, p, q, tau, constant=True)
+results = model.fit(
+    bandwidth_method='bofinger',  # or 'hall-sheather'
+    cov_type='correct',            # Uses H_t projection
+    verbose=True
+)
+```
+
+### Wald Tests
+```python
+wald = WaldTestsCorrected(results)
+
+# Long-run (n² scaling)
+wald.wtestlrb(R, r, tau)
+
+# Short-run φ (n scaling)
+wald.wtestsrp(Q, q, tau)
+
+# Short-run γ (n scaling, rank 1!)
+wald.wtestsrg(R, r, tau)
+
+# Multi-quantile
+wald.wald_multi_quantile_beta(S, s, quantiles)
+wald.wald_multi_quantile_phi(F, f, quantiles)
+```
+
+### ECM Representation
+```python
+ecm = QARDLtoECM(results)
+ecm_params = ecm.get_ecm_params(tau)
+
+ecm_tests = ECMWaldTests(ecm)
+ecm_tests.test_no_error_correction(tau)
+ecm_tests.test_granger_causality(variable_idx, tau)
+```
+
+### Lag Selection
+```python
+# Grid search (recommended)
+p_opt, q_opt = select_qardl_orders(
+    data, p_max=8, q_max=8, criterion='bic'
+)
+
+# Sequential search (faster)
+p_opt, q_opt = select_orders_sequential(
+    data, p_max=8, q_max=8
+)
+
+# Stability check
+stability = evaluate_order_stability(data, p, q)
+```
+
+### Rolling Estimation
+```python
+rolling = RollingQARDL(data, p, q, tau, window=320)
+rolling.fit(step=1, verbose=True)
+
+# Get parameter series
+beta_series = rolling.get_parameter_series('beta', variable_idx=0)
+
+# Rolling tests
+wald_rolling = rolling.get_rolling_wald_tests('beta_zero', variable_idx=0)
+
+# Plot
+rolling.plot_results(parameters=['beta', 'zeta'], save_path='fig.pdf')
+
+# Export
+df = rolling.to_dataframe()
+```
+
+## Comparison: Before vs After Corrections
+
+| Component | Original | Corrected |
+|-----------|----------|-----------|
+| **Standard Errors** | Generic sandwich | H_t projection (Theorem 1) |
+| **Long-run Wald** | n scaling | n² scaling (Corollary 1) |
+| **Short-run Wald** | Generic | n scaling (Corollaries 2,3) |
+| **ECM** | 10 lines | 453 lines (Equation 6) |
+| **Lag Selection** | Quantile BIC | OLS BIC at mean (icmean.m) |
+| **M Matrix** | Basic | Projection formula (Theorem 2) |
+| **Rolling** | 50 lines | Complete (rolling_qardl) |
+| **Multi-quantile** | Missing | Full Ξ(τ), Σ(τ) (Corollary 4) |
+
+## Testing
+
+```bash
+# Run all tests
+pytest tests/ -v
+
+# Test specific components
+pytest tests/test_wald_scaling.py -v
+pytest tests/test_standard_errors.py -v
+pytest tests/test_ecm.py -v
+```
+
+## References
+
+**Main Paper:**
+Cho, J.S., Kim, T., & Shin, Y. (2015). Quantile cointegration in the autoregressive distributed-lag modeling framework. *Journal of Econometrics*, 188(1), 281-300.
+
+**Related Papers:**
+- Pesaran & Shin (1998): ARDL approach to cointegration
+- Xiao (2009): Quantile cointegration
+- Koenker & Xiao (2004, 2006): Quantile time series
+
+**Original MATLAB/GAUSS Code:**
+Available at http://web.yonsei.ac.kr/jinseocho/research.htm
+
+## Citation
+
+If you use this corrected package, please cite:
+
+```bibtex
+@article{cho2015quantile,
+  title={Quantile cointegration in the autoregressive distributed-lag modeling framework},
+  author={Cho, Jin Seo and Kim, Tae-hwan and Shin, Yongcheol},
+  journal={Journal of Econometrics},
+  volume={188},
+  number={1},
+  pages={281--300},
+  year={2015},
+  publisher={Elsevier}
+}
+```
+
+## License
+
+This implementation follows the same license as the original paper's supplementary code.
+
+## Support
+
+For issues, corrections, or contributions:
+- Open an issue on GitHub
+- Author: Dr. Merwan Roudane
+Email: merwanroudane920@gmail.com
+GitHub: https://github.com/merwanroudane/qardl
+
+---
+
+## ⚠️ CRITICAL REMINDERS
+
+This corrected package implements:
+
+1. **Correct H_t projection** for standard errors (not generic sandwich)
+2. **Correct n² scaling** for long-run Wald tests (not n)
+3. **Correct n scaling** for short-run Wald tests
+4. **Complete 453-line ECM** implementation (not 10-line stub)
+5. **OLS-based lag selection** at mean (not quantile-based)
+6. **Correct M matrix** computation with projection
+7. **Complete rolling estimation** with all parameters
+8. **Complete multi-quantile** covariance structures
+
+**All formulas now match Cho, Kim & Shin (2015) EXACTLY!**
+
+---
+
+*Last updated: November 2025*
