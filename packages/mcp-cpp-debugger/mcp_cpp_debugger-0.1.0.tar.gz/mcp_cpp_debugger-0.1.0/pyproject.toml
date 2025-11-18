@@ -1,0 +1,29 @@
+[project]
+name = "mcp-cpp-debugger"
+version = "0.1.0"
+description = "MCP server for C++ debugging, supporting launch, attach, dump analysis, and interactive debugging operations"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    {name = "Shanwei", email = "cleardl@qq.com"}
+]
+keywords = ["mcp", "debugger", "C++", "CDB"]
+
+dependencies = [
+    "fastmcp>=2.11.3",
+]
+
+
+[project.scripts]
+mcp-cpp-debugger = "mcp_cpp_debugger.mcp.server:main"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+license-files = []
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
