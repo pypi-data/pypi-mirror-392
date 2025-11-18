@@ -1,0 +1,180 @@
+from email.policy import default
+
+from PIL import Image, ImageEnhance
+import os
+
+
+def auto_orient_image(image: Image.Image) -> Image.Image:
+    """
+    Reads the EXIF orientation tag and applies the appropriate rotation.
+    :param image: the image to rotate
+    :return: the rotated image
+    """
+    try:
+        exif = image.getexif()
+        if exif is None:
+            return image
+
+        orientation = exif.get(0x0112)
+        if orientation == 2:
+            image = image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+        elif orientation == 3:
+            image = image.transpose(Image.Transpose.ROTATE_180)
+        elif orientation == 4:
+            image = image.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
+        elif orientation == 5:
+            image = image.transpose(Image.Transpose.TRANSPOSE)
+        elif orientation == 6:
+            image = image.transpose(Image.Transpose.ROTATE_270)
+        elif orientation == 7:
+            image = image.transpose(Image.Transpose.TRANSVERSE)
+        elif orientation == 8:
+            image = image.transpose(Image.Transpose.ROTATE_90)
+        return image
+    except (AttributeError, KeyError, IndexError):
+        return image
+
+
+def process_image(
+        input_path: str,
+        output_path: str,
+        width: int,
+        height: int,
+        scale: float,
+        grayscale: bool = False,
+        brightness: float = 1.0,
+        contrast: float = 1.0,
+        rotate: str = None,
+):
+    """
+    Processes an image with resizing, grayscale, and compression.
+    :param input_path: input image path
+    :param output_path: output image path
+    :param width: image width
+    :param height: image height
+    :param scale: scaling factor
+    :param grayscale: grayscale image
+    :param brightness: brightness factor
+    :param contrast: contrast factor
+    :param rotate: rotation angle
+    """
+    try:
+        with Image.open(input_path) as img:
+            print(f'Processing image {input_path}')
+
+            img = auto_orient_image(img)
+
+            # handle brightness
+            if brightness != 1.0:
+                enhancer = ImageEnhance.Brightness(img)
+                img = enhancer.enhance(brightness)
+                print(f'adjusted brightness to {brightness}.')
+
+            # handle contrast
+            if contrast != 1.0:
+                enhancer = ImageEnhance.Contrast(img)
+                img = enhancer.enhance(contrast)
+                print(f'adjusted contrast to {contrast}.')
+
+            # handle converting to grayscale
+            if grayscale:
+                img = img.convert('L')
+                print('converted to grayscale.')
+
+            # handle rotation
+            if rotate:
+                angle = int(rotate)
+                img = img.rotate(angle, expand=True)
+                print(f'rotated by {angle} degrees.')
+
+            # handle resizing
+            original_width, original_height = img.size
+            new_width, new_height = original_width, original_height
+
+            if scale:
+                new_width = int(new_width * scale)
+                new_height = int(new_height * scale)
+            elif width:
+                new_width = width
+                new_height = int(new_height * width / original_width)
+            elif height:
+                new_height = height
+                new_width = int(new_width * height / original_height)
+
+            if (new_width, new_height) != (original_width, original_height):
+                img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+                print(f'resized to {new_width}x{new_height}.')
+
+            # handle saving
+            # get the file extension
+            extension = os.path.splitext(input_path)[1].lower()
+
+            save_options: dict = {'optimize': True}
+            if extension in ['.jpg', '.jpeg']:
+                if img.mode == 'RGBA':
+                    img = img.convert('RGB')
+                save_options['quality'] = 90
+
+            img.save(output_path, **save_options)
+            print(f'successfully saved image to {output_path}')
+
+    except FileNotFoundError:
+        print(f'Error: Input file not found at \"{input_path}\"')
+    except Exception as e:
+        print(f'An unexpected error occurred: {e}')
+
+
+import click
+
+
+@click.command()
+@click.argument('input_path', type=click.Path(exists=True))
+@click.argument('output_path', type=click.Path())
+@click.option('--width', '-w', type=int, help='The target width in pixels.')
+@click.option('--height', '-h', type=int, help='The target height in pixels.')
+@click.option('--scale', '-s', type=float, help='The scaling factor (e.g. 0.5 for 50%).')
+@click.option('--grayscale', '-g', is_flag=True, help='Convert the image to grayscale.')
+@click.option('--brightness', '-b', type=float, default=1.0, help='Adjust the brightness.')
+@click.option('--contrast', '-c', type=float, default=1.0, help='Adjust the contrast.')
+@click.option(
+    '--rotate', '-r',
+    type=click.Choice(['90', '180', '270']),
+    default=None,
+    help='Rotate the image clockwise by 90, 180, or 270 degrees.'
+)
+def main(
+        input_path: str,
+        output_path: str,
+        width: int,
+        height: int,
+        scale: float,
+        grayscale: bool,
+        brightness: float,
+        contrast: float,
+        rotate: str,
+):
+    """
+    A simple CLI tool for processing images.
+
+    Example:
+    ms-image input.jpg output.png --scale 0.5 --grayscale
+    """
+    resize_options = [width, height, scale]
+    if sum(1 for option in resize_options if option is not None) > 1:
+        raise click.UsageError('Only one of --width, --height, or --scale can be specified.')
+
+    process_image(
+        input_path,
+        output_path,
+        width,
+        height,
+        scale,
+        grayscale,
+        brightness,
+        contrast,
+        rotate,
+    )
+
+
+if __name__ == '__main__':
+    main()
