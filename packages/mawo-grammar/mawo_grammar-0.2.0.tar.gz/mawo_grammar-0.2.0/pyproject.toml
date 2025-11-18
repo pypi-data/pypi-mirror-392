@@ -1,0 +1,76 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mawo-grammar"
+version = "0.2.0"
+description = "Russian grammar checker with 690+ rules for professional NLP quality. Based on ЕГЭ 2025 analysis and НКРЯ corpus data"
+readme = "README.md"
+authors = [
+    {name = "MAWO Team", email = "info@mawo.ru"}
+]
+license = "MIT"
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Text Processing :: Linguistic",
+]
+keywords = ["nlp", "russian", "grammar", "checker", "linguistic", "morphology"]
+
+dependencies = [
+    "mawo-pymorphy3>=1.0.4",
+    "pyyaml>=6.0.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.0.0",
+    "pytest-cov>=7.0.0",
+    "black>=25.11.0",
+    "ruff>=0.14.4",
+    "mypy>=1.18.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/mawo-ru/mawo-grammar"
+Repository = "https://github.com/mawo-ru/mawo-grammar"
+Issues = "https://github.com/mawo-ru/mawo-grammar/issues"
+
+[tool.setuptools.packages.find]
+include = ["mawo_grammar*"]
+
+[tool.setuptools.package-data]
+mawo_grammar = ["data/*.yml", "data/*.yaml"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312", "py313"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+
+[[tool.mypy.overrides]]
+module = "mawo_pymorphy3.*"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "--cov=mawo_grammar --cov-report=term-missing --cov-report=html"
