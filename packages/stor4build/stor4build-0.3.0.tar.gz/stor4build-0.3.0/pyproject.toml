@@ -1,0 +1,76 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "stor4build"
+description = 'Stor4Build TES benefits and decision tool'
+readme = "README.md"
+requires-python = ">=3.8"
+license = "BSD-3-Clause"
+keywords = []
+authors = [
+  { name = "Jason W. DeGraw", email = "jason.degraw@gmail.com" },
+  { name = "Eric Bonnema" }
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "click",
+  "flask",
+  "scipy",
+  "SecondaryCoolantProps",
+  "pandas",
+  "psycopg2-binary",
+  "marshmallow"
+]
+dynamic = ["version"]
+
+[project.urls]
+Documentation = "https://github.com/stor4build/stor4build#readme"
+Issues = "https://github.com/stor4build/stor4build/issues"
+Source = "https://github.com/stor4build/stor4build"
+
+[project.scripts]
+stor4build = "stor4build.cli:s4b"
+
+[tool.hatch.version]
+path = "src/stor4build/__about__.py"
+
+[tool.hatch.envs.default]
+dependencies = [
+  "pytest",
+  "pytest-cov",
+  "httpx",
+  "apispec"
+]
+[tool.hatch.envs.default.scripts]
+cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=src/stor4build --cov=tests {args}"
+no-cov = "cov --no-cov {args}"
+
+[[tool.hatch.envs.test.matrix]]
+python = ["38", "39", "310", "311", "312", "313"]
+
+[tool.coverage.run]
+branch = true
+parallel = true
+omit = [
+  "src/stor4build/__about__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
