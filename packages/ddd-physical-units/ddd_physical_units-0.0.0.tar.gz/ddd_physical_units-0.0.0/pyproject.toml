@@ -1,0 +1,32 @@
+# pyproject.toml
+
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project]
+name = "ddd-physical-units"
+version = "0.0.0"
+description = "Support for units of measurement in domain-oriented design in Python."
+readme = "README.md"
+authors = [{ name = "Pavel Shmakov", email = "shmakovpn@yandex.ru" }]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+dependencies = []
+requires-python = ">=3.9"
+
+[project.optional-dependencies]
+dev = ['tomli; python_version < "3.11"', "pip-tools", "pytest", "coverage", "build"]
+
+[project.urls]
+Homepage = "https://github.com/shmakovpn/ddd-physical-units"
