@@ -1,0 +1,1 @@
+The my first library for 2D games with SceneManager, Camera, Physic and etc.
