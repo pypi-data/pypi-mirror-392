@@ -1,0 +1,209 @@
+Metadata-Version: 2.4
+Name: ara-api
+Version: 1.1.0rc2
+Summary: Applied Robotics Avia API for ARA MINI, ARA EDU and ARA FPV drones
+License: MIT License
+         
+         Copyright (c) 2025 Alexander Kleimenov
+         
+         Permission is hereby granted, free of charge, to any person obtaining a copy
+         of this software and associated documentation files (the "Software"), to deal
+         in the Software without restriction, including without limitation the rights
+         to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+         copies of the Software, and to permit persons to whom the Software is
+         furnished to do so, subject to the following conditions:
+         
+         The above copyright notice and this permission notice shall be included in all
+         copies or substantial portions of the Software.
+         
+         THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+         IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+         FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+         AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+         LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+         OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+         SOFTWARE.
+License-File: LICENSE
+Keywords: robotics,drones,API,ARA
+Author: Alexander Kleimenov
+Maintainer: Alexander Kleimenov
+Maintainer-email: nequamy@gmail.com
+Requires-Python: >=3.8
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Software Development
+Classifier: Topic :: Scientific/Engineering
+Classifier: Operating System :: Unix
+Classifier: Operating System :: MacOS
+Classifier: Operating System :: Microsoft :: Windows
+Requires-Dist: colorama (==0.4.6)
+Requires-Dist: customtkinter (==5.2.2)
+Requires-Dist: fastapi (>=0.100.0,<0.122.0) ; python_version < "3.9"
+Requires-Dist: fastapi (>=0.121.1,<0.122.0) ; python_version >= "3.9"
+Requires-Dist: grpcio (==1.69.0)
+Requires-Dist: grpcio-tools (==1.66.2)
+Requires-Dist: numpy (>=1.24.0,<1.25.0) ; python_version == "3.8"
+Requires-Dist: numpy (>=1.26.0,<2.0.0) ; python_version == "3.9"
+Requires-Dist: numpy (>=2.1.0,<3.0.0) ; python_version >= "3.10"
+Requires-Dist: opencv-contrib-python (==4.10.0.84)
+Requires-Dist: opencv-python (==4.10.0.84)
+Requires-Dist: pandas (>=2.0.0,<2.1.0) ; python_version == "3.8"
+Requires-Dist: pandas (>=2.2.0,<3.0.0) ; python_version >= "3.9"
+Requires-Dist: pillow (>=10.0.0,<11.0.0) ; python_version < "3.10"
+Requires-Dist: pillow (>=11.0.0,<12.0.0) ; python_version >= "3.10"
+Requires-Dist: pydantic (>=2.0.0,<2.6.0) ; python_version == "3.8"
+Requires-Dist: pydantic (>=2.5.0,<2.11.0) ; python_version == "3.9"
+Requires-Dist: pydantic (>=2.8.0,<3.0.0) ; python_version >= "3.10"
+Requires-Dist: pyfiglet (>=0.8.0,<1.0.0)
+Requires-Dist: pyserial (==3.5)
+Requires-Dist: requests (==2.32.3)
+Requires-Dist: rich (>=14.0.0,<15.0.0)
+Requires-Dist: scipy (>=1.10.0,<1.11.0) ; python_version == "3.8"
+Requires-Dist: scipy (>=1.13.0,<1.14.0) ; python_version == "3.9"
+Requires-Dist: scipy (>=1.14.0,<2.0.0) ; python_version >= "3.10"
+Requires-Dist: uvicorn (>=0.20.0,<0.28.0) ; python_version == "3.8"
+Requires-Dist: uvicorn (>=0.30.0,<0.40.0) ; python_version >= "3.9"
+Description-Content-Type: text/markdown
+
+
+# ARA API
+
+---
+
+![badge](https://img.shields.io/badge/Language-Python-green) ![badge](https://img.shields.io/badge/ARA_API-Software-blue) ![badge](https://img.shields.io/badge/Version-v1.0.0-red)
+
+**Applied Robotics Avia API** — это современный API для управления линейкой дронов и самолетов компании **Applied Robotics Avia**, а также для работы с симулятором **AgroTechSim**.
+
+
+--- 
+## 📖 Описание 
+
+Данный проект предлагает единый интерфейс для управления, анализа и автоматизации полетов. **ara-api** сочетает простоту использования, высокую производительность и поддержку множества языков программирования. 
+
+### Основные особенности: 
+1. Экранирование работы от конечного пользователя. 
+2. Интегрированная документация, загружаемая вместе с API. 
+3. Высокая скорость работы благодаря использованию HTTP/2 и gRPC. 
+4. Простота запуска и настройки. 
+5. Поддержка анализаторов для выполнения лабораторных работ. 
+6. Предохранительные меры для безопасности автономных полетов. 
+
+--- 
+## 🌟 Возможности 
+
+- **Мульти-языковая поддержка**: Автономное управление доступно на следующих языках: C#/.NET, C++, Dart, Go, Java, Kotlin, Node.js, Objective-C, PHP, Python, Ruby.  
+- **Протокол gRPC**: используется как внутри приложения, так и для внешнего взаимодействия. 
+- **Данные с полетного контроллера**: чтение одометрии, ориентации, IMU, оптического потока и дальномера.
+- **Встроенный анализатор**: запись и анализ логов, а также два режима запуска анализатора - online и offline.
+- **Библиотека работы с камерой**: анализ изображения и получение готовых значений(QR-code, Aruco, Blob)
+
+--- 
+## 🚀 Установка проекта 
+```
+foo@bar: pip3 install ara-api
+```
+## 📚 Использование
+### Терминал
+
+1) Запуск ядра API:
+```bash
+foo@bar:~$ ara-api-core 
+```
+2) Запуск анализатора: 
+```bash
+foo@bar:~$ ara-api-analyzer
+```
+3) Запуск пакета для работы с камерой:
+```bash
+foo@bar:~$ ara-api-vision 
+```
+
+***⚠️Важно!!! Перед началом использования удостоверьтесь, что ваш дрон обновлен до самой актуальной версии***
+
+---
+## Вызов документации по использованию команд:
+1) Запуск ядра API:
+```bash
+foo@bar:~$ ara-api-core --help
+```
+2) Запуск анализатора: 
+```bash
+foo@bar:~$ ara-api-analyzer --help
+```
+3) Запуск пакета для работы с камерой:
+```bash
+foo@bar:~$ ara-api-vision --help
+```
+
+---
+## 🧩Функции библиотеки ```ara_core```
+---
+### `takeoff(altitude)` 
+Вызывает сервис взлёта. 
+- **Параметры:** 
+	- `altitude` (float): Высота, на которую нужно подняться. 
+- **Возвращает:** 
+	- `str`: Статус операции взлёта. 
+--- 
+### `land()` 
+Вызывает сервис посадки. 
+- **Возвращает:** 
+	- `str`: Статус операции посадки. 
+--- 
+### `move_by_point(x, y)` 
+Вызывает сервис перемещения. 
+- **Параметры:**
+	- `x` (float): Координата X точки, в которую нужно переместиться. 
+	- `y` (float): Координата Y точки, в которую нужно переместиться. 
+- **Возвращает:** 
+	- `str`: Статус операции перемещения. 
+--- 
+### `change_altitude(altitude)` 
+Вызывает сервис изменения высоты. 
+- **Параметры:**
+	- `altitude` (float): значение высоты в метрах, на которую нужно переместиться. 
+- **Возвращает:** 
+	- `str`: Статус операции перемещения. 
+--- 
+### `set_velocity(vx, vy)` 
+Вызывает сервис задания скорости. 
+- **Параметры:**
+	- `vx` (float): Скорость дрона по X. 
+	- `vy` (float): Скорость дрона по Y. 
+- **Возвращает:** 
+	- `str`: Статус операции перемещения. 
+--- 
+### `reset_velocity_state()` 
+Вызывает сервис перемещения
+- **Возвращает:** 
+	- `str`: Статус операции перемещения. 
+--- 
+### `get_imu_data()` 
+Получает данные IMU (инерциального измерительного устройства) от сервиса драйвера. 
+- **Возвращает:** 
+	- `dict`: Словарь с данными гироскопа и акселерометра. 
+--- 
+### `get_attitude_data()` 
+Получает данные ориентации от сервиса драйвера. 
+- **Возвращает:** 
+	- `dict`: Словарь с данными об углах ориентации. 
+--- 
+### `get_odometry_data()` 
+Получает данные одометрии от сервиса драйвера. 
+- **Возвращает:** 
+	- `dict`: Словарь с данными о положении и скорости. 
+--- 
+### `get_optical_flow_data()`
+Получает данные оптического потока от сервиса драйвера. 
+- **Возвращает:** 
+	- `dict`: Словарь с данными об оптическом потоке.
+

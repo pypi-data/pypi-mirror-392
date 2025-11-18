@@ -1,0 +1,213 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[project]
+name = "ara-api"
+version = "1.1.0-pre2"
+license = {file = "LICENSE"}
+
+description = "Applied Robotics Avia API for ARA MINI, ARA EDU and ARA FPV drones"
+authors = [{name = "Alexander Kleimenov"}]
+maintainers = [
+    {name = "Alexander Kleimenov", email="nequamy@gmail.com"},
+]
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development",
+    'Topic :: Scientific/Engineering',
+    'Operating System :: Unix',
+    'Operating System :: MacOS',
+    'Operating System :: Microsoft :: Windows',
+]
+keywords = ["robotics", "drones", "API", "ARA"]
+dependencies = [
+    "requests==2.32.3",
+    "grpcio==1.69.0",
+    "grpcio-tools==1.66.2",
+    "pyserial==3.5",
+    "colorama==0.4.6",
+    "pyfiglet (>=0.8.0,<1.0.0)",
+    "opencv-python==4.10.0.84",
+    "opencv-contrib-python==4.10.0.84",
+    "customtkinter==5.2.2",
+    "rich (>=14.0.0,<15.0.0)",
+
+    # Conditional dependencies based on Python version
+    # NumPy: 1.24 for 3.8, 1.26 for 3.9, 2.x for 3.10+
+    "numpy (>=1.24.0,<1.25.0); python_version == '3.8'",
+    "numpy (>=1.26.0,<2.0.0); python_version == '3.9'",
+    "numpy (>=2.1.0,<3.0.0); python_version >= '3.10'",
+
+    # Pandas: 2.0 for 3.8, 2.2+ for 3.9+
+    "pandas (>=2.0.0,<2.1.0); python_version == '3.8'",
+    "pandas (>=2.2.0,<3.0.0); python_version >= '3.9'",
+
+    # SciPy: 1.10 for 3.8, 1.13 for 3.9, 1.14+ for 3.10+
+    "scipy (>=1.10.0,<1.11.0); python_version == '3.8'",
+    "scipy (>=1.13.0,<1.14.0); python_version == '3.9'",
+    "scipy (>=1.14.0,<2.0.0); python_version >= '3.10'",
+
+    # Pydantic: 2.0-2.5 for 3.8, 2.5-2.10 for 3.9, 2.8+ for 3.10+
+    "pydantic (>=2.0.0,<2.6.0); python_version == '3.8'",
+    "pydantic (>=2.5.0,<2.11.0); python_version == '3.9'",
+    "pydantic (>=2.8.0,<3.0.0); python_version >= '3.10'",
+
+    # Pillow: 10.x for 3.8-3.9, 11.x for 3.10+
+    "pillow (>=10.0.0,<11.0.0); python_version < '3.10'",
+    "pillow (>=11.0.0,<12.0.0); python_version >= '3.10'",
+
+    # Uvicorn: older versions for 3.8, 0.30+ for 3.9+
+    "uvicorn (>=0.20.0,<0.28.0); python_version == '3.8'",
+    "uvicorn (>=0.30.0,<0.40.0); python_version >= '3.9'",
+
+    # FastAPI: works across all versions
+    "fastapi (>=0.100.0,<0.122.0); python_version < '3.9'",
+    "fastapi (>=0.121.1,<0.122.0); python_version >= '3.9'",
+]
+
+packages = [
+    { include = "__init__.py", from = "ara_api"},
+]
+
+[project.scripts]
+ara-api-core = "ara_api.__main__:main"
+msp = "ara_api._services.msp.msp_service:main"
+
+[tool.ruff]
+line-length = 79
+target-version = "py38"
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+]
+ignore = []
+exclude = [
+    "*.pb2.py",
+    "*.pb2_grpc.py",
+    "__pycache__",
+    ".venv",
+    "build",
+    "dist",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+exclude = [
+    "**/*_pb2.py",
+    "**/*_pb2_grpc.py",
+    "ara_api/_utils/communication/gRPC",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"ara_api/proto/*" = ["ALL"]
+"*_pb2.py" = ["ALL"]
+"*_pb2_grpc.py" = ["ALL"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["ara_api"]
+force-single-line = false
+combine-as-imports = true
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 72
+
+[tool.towncrier]
+filename = "doc/changelog/CHANGELOG.md"
+directory = "doc/changelog/fragments"
+title_format = "## [{version}] - {project_date}"
+start_string = "<!-- towncrier release notes start -->\n"
+template = "doc/changelog/template.md"
+
+# issue_format = ""
+
+underlines = ["=", "-"]
+
+[[tool.towncrier.type]]
+directory = "feature"      # [+] добавление
+name = "✨ New Features"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "bugfix"       # [*] исправления
+name = "🐛 Bug Fixes"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "change"       # [~] изменения
+name = "🔄 Changes"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "breaking"     # [!] важные изменения
+name = "💥 Breaking Changes"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "misc"
+name = "🔧 Miscellaneous"
+showcontent = false
+
+[tool.poetry.group.dev.dependencies]
+setproctitle = "^1.3.5"
+
+[tool.coverage.run]
+source = ["ara_api"]
+omit = [
+    "*/tests/*",
+    "*/venv/*",
+    "*/__pycache__/*",
+    "ara_api/protos/*",  # Исключаем сгенерированные protobuf файлы
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "pass",
+]
+show_missing = true
+precision = 2
+
+[tool.coverage.html]
+directory = "tests/reports/coverage_html"
+
+[tool.poetry.group.test.dependencies]
+black = "^24.0.0"
+ruff = "^0.11.12"
+coverage = "^7.2.0"
+mypy = "^1.4.0"
+pytest = "^7.4.0"
+
+[tool.poetry.group.build.dependencies]
+mypy = "^1.4.0"
+setuptools = "^70.0.0"
+wheel = "^0.42.0"
+Cython = "^3.0.0"
+towncrier = "^24.8.0"
+
