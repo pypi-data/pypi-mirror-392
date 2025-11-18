@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openrouter-free"
+version = "0.1.0"
+description = "A Python client for managing multiple free OpenRouter API keys with automatic rotation"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Mediano4e", email = "mediano4e@gmail.com"}
+]
+keywords = [
+    "openrouter",
+    "llm",
+    "ai",
+    "llama-index",
+    "langchain",
+    "api",
+    "client"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers", 
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "openai>=1.0.0",
+    "httpx>=0.24.0",
+    "loguru>=0.7.0",
+]
+
+[project.optional-dependencies]
+llama-index = [
+    "llama-index-core>=0.10.0",
+]
+langchain = [
+    "langchain-core>=0.1.0",
+]
+all = [
+    "llama-index-core>=0.10.0",
+    "langchain-core>=0.1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/Mediano4e/openrouter-free-client"
+Repository = "https://github.com/Mediano4e/openrouter-free-client"
+Issues = "https://github.com/Mediano4e/openrouter-free-client/issues"
+Documentation = "https://github.com/Mediano4e/openrouter-free-client#readme"
+
+[tool.setuptools.packages.find]
+include = ["openrouter_free*"]
