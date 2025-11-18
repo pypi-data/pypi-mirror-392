@@ -1,0 +1,119 @@
+[build-system]
+requires = ["setuptools>=80.9.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "claia"
+version = "0.1.8"
+description = "CLAIA Framework"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [
+  { name = "Lloyd Bower" },
+  { name = "ExoFox, LLC" }
+]
+requires-python = ">=3.12"
+dependencies = [
+  "torch",
+  "diffusers",
+  "transformers>=4.50.0",
+  "aia",
+  "beautifulsoup4",
+  "chardet",
+  "python-dotenv",
+  "pluggy",
+  "requests",
+  "pyreadline3",
+  "pyfiglet",
+]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Libraries",
+]
+
+[project.urls]
+Homepage = "https://claia.dev"
+Repository = "https://gitlab.com/exofox/claia/claia.git"
+Issues = "https://gitlab.com/exofox/claia/claia/-/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools]
+license-files = ["LICENSE", "NOTICE*"]
+
+[project.scripts]
+claia = "claia.cli.__main__:main"
+
+# Entry points for plugin system
+[project.entry-points."claia.architectures"]
+openai = "claia.architectures.openai:OpenAIPlugin"
+anthropic = "claia.architectures.anthropic:AnthropicPlugin"
+transformers_generic = "claia.architectures.transformers_generic:TransformersGenericPlugin"
+transformers_gemma3 = "claia.architectures.transformers_gemma3:TransformersGemma3Plugin"
+dummy = "claia.architectures.dummy:DummyArchitecturePlugin"
+
+[project.entry-points."claia.deployments"]
+api = "claia.deployments.api:APIDeploymentPlugin"
+local = "claia.deployments.local:LocalDeploymentPlugin"
+remote = "claia.deployments.remote:RemoteDeploymentPlugin"
+dummy = "claia.deployments.dummy:DummyDeploymentPlugin"
+
+[project.entry-points."claia.solvers"]
+default = "claia.solvers.default:DefaultSolverPlugin"
+
+[project.entry-points."claia.definitions"]
+openai = "claia.definitions.openai:OpenAIDefinitionsPlugin"
+anthropic = "claia.definitions.anthropic:AnthropicDefinitionsPlugin"
+legacy = "claia.definitions.legacy:LegacyDefinitionsPlugin"
+
+[project.entry-points."claia.agents"]
+simple = "claia.agents.simple:SimpleAgentPlugin"
+bob = "extensions.bob:BobAgentPlugin"
+
+# Entry points for tools system
+[project.entry-points."claia.tool_patterns"]
+default = "claia.tool_patterns.default:DefaultToolPatternPlugin"
+
+[project.entry-points."claia.tool_protocols"]
+simple = "claia.tool_protocols.simple:SimpleProtocolPlugin"
+
+[project.entry-points."claia.tool_modules"]
+sample = "claia.tools.sample:SampleModulePlugin"
+system = "claia.tools.system:SystemModulePlugin"
+zammad = "extensions.zammad.plugin_basic:ZammadBasicModulePlugin"
+zammad_processes = "extensions.zammad.plugin_processes:ZammadProcessesModulePlugin"
+
+[tool.pytest.ini_options]
+testpaths = ["src/tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --import-mode=importlib --junitxml=report.xml"
+pythonpath = ["src"]
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "pass",
+    "raise ImportError",
+]
+ignore_errors = true
+omit = [
+    "tests/*",
+    "setup.py",
+    "conftest.py",
+]

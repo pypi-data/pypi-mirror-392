@@ -1,0 +1,39 @@
+[claia.agents]
+bob = extensions.bob:BobAgentPlugin
+simple = claia.agents.simple:SimpleAgentPlugin
+
+[claia.architectures]
+anthropic = claia.architectures.anthropic:AnthropicPlugin
+dummy = claia.architectures.dummy:DummyArchitecturePlugin
+openai = claia.architectures.openai:OpenAIPlugin
+transformers_gemma3 = claia.architectures.transformers_gemma3:TransformersGemma3Plugin
+transformers_generic = claia.architectures.transformers_generic:TransformersGenericPlugin
+
+[claia.definitions]
+anthropic = claia.definitions.anthropic:AnthropicDefinitionsPlugin
+legacy = claia.definitions.legacy:LegacyDefinitionsPlugin
+openai = claia.definitions.openai:OpenAIDefinitionsPlugin
+
+[claia.deployments]
+api = claia.deployments.api:APIDeploymentPlugin
+dummy = claia.deployments.dummy:DummyDeploymentPlugin
+local = claia.deployments.local:LocalDeploymentPlugin
+remote = claia.deployments.remote:RemoteDeploymentPlugin
+
+[claia.solvers]
+default = claia.solvers.default:DefaultSolverPlugin
+
+[claia.tool_modules]
+sample = claia.tools.sample:SampleModulePlugin
+system = claia.tools.system:SystemModulePlugin
+zammad = extensions.zammad.plugin_basic:ZammadBasicModulePlugin
+zammad_processes = extensions.zammad.plugin_processes:ZammadProcessesModulePlugin
+
+[claia.tool_patterns]
+default = claia.tool_patterns.default:DefaultToolPatternPlugin
+
+[claia.tool_protocols]
+simple = claia.tool_protocols.simple:SimpleProtocolPlugin
+
+[console_scripts]
+claia = claia.cli.__main__:main
