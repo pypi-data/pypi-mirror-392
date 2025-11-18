@@ -1,0 +1,218 @@
+# JSON Redactor
+
+A streaming-safe command-line tool that redacts or hashes sensitive fields inside large JSON documents while preserving structure, order, and formatting.
+
+Supports:
+
+- Arbitrarily nested JSON
+- Streaming processing (500MB+)
+- Case-insensitive key matching
+- Regex-based key matching
+- Deterministic SHA-256 hashing
+- Typing-friendly CLI via Typer
+- Optional parallel hashing
+
+---
+
+## Features
+
+| Feature                 | Description                                  |
+| ----------------------- | -------------------------------------------- |
+| **Mask mode**           | Replace values with `"***REDACTED***"`       |
+| **Hash mode**           | SHA-256 deterministic hashing                |
+| **Regex matching**      | `--keys-regex "(?i)pass(word)?$"`            |
+| **Streaming-safe**      | Uses `ijson` event parser; no full file load |
+| **Preserves structure** | Keeps object order, array order, keys        |
+| **Large file support**  | Safely processes files 500MB+                |
+| **CLI script**          | Installed as `json-redactor`                 |
+
+---
+
+# 📦 Installation
+
+You can install the project either for development using **uv** or via **pip** from source.
+
+---
+
+## 🔧 Development install (uv)
+
+```bash
+uv sync
+```
+
+Run locally:
+
+```bash
+uv run -m json_redactor --help
+```
+
+---
+
+## Install from source (pip)
+
+From the project root:
+
+```bash
+pip install .
+```
+
+Verify the CLI is installed:
+
+```bash
+json-redactor --help
+```
+
+---
+
+# 🚀 Usage Examples
+
+## 1. Redact specific keys (mask default)
+
+```bash
+cat people.json | json-redactor --keys email,password > out.json
+```
+
+Output:
+
+```json
+{
+  "email": "***REDACTED***",
+  "password": "***REDACTED***"
+}
+```
+
+---
+
+## 2. Hash sensitive fields (deterministic SHA-256)
+
+```bash
+json-redactor data.json --keys ssn --hash
+```
+
+---
+
+## 3. Use regex matching
+
+```bash
+json-redactor users.json --keys-regex '^pass' --mask
+```
+
+Matches: `pass`, `password`, `passphrase`, etc.
+
+---
+
+## 4. Load key names from file
+
+```
+secrets.txt:
+email
+ssn
+token
+```
+
+Run:
+
+```bash
+json-redactor input.json --key-file secrets.txt --hash
+```
+
+---
+
+## 5. Read from stdin explicitly
+
+```bash
+cat input.json | json-redactor -
+```
+
+---
+
+# 🧪 Running Tests
+
+Unit tests use **pytest**.
+
+Run all tests:
+
+```bash
+pytest
+```
+
+Run with coverage:
+
+```bash
+pytest --cov=src --cov-report=term-missing
+```
+
+---
+
+# 📂 Project Structure
+
+```
+.
+├── README.md
+├── makefile
+├── out.json
+├── pyproject.toml
+├── src
+│   ├── json_redactor
+├── tests
+│   ├── __init__.py
+│   └── test_core.py
+└── uv.lock
+```
+
+---
+
+# ⚙️ CLI Reference
+
+```
+Usage: json-redactor [OPTIONS] [INPUT_PATH]
+
+Redact or hash sensitive data in a JSON document.
+
+Options:
+  --keys TEXT           Comma-separated sensitive keys.
+  --key-file PATH       File containing one key per line.
+  --keys-regex TEXT     Regex patterns for key matching.
+  --mask                Mask values as "***REDACTED***".
+  --hash                Hash values using SHA-256.
+  --help                Show this message and exit.
+```
+
+---
+
+# 📝 Example: Before & After
+
+Input:
+
+```json
+{
+  "user": {
+    "email": "anna@example.com",
+    "ssn": "123-45-6789"
+  }
+}
+```
+
+Command:
+
+```bash
+json-redactor --keys email,ssn --hash
+```
+
+Output:
+
+```json
+{
+  "user": {
+    "email": "06f14e0a6a3376d9104f...",
+    "ssn": "5bf64d14db16bb7c8ca1..."
+  }
+}
+```
+
+---
+
+# 👤 Author
+
+Yalchin
+JSON Redactor — Technical Assessment Implementation
