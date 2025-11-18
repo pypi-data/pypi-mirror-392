@@ -1,0 +1,64 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "iowarp-agent-toolkit"
+version = "1.0.3"
+description = "Agent Toolkit - MCP Servers, Clients, and Tools for AI Agents"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "BSD-3-Clause"}
+authors = [
+    {name = "IoWarp Team - Gnosis Research Center", email = "grc@illinoistech.edu"}
+]
+
+# Only dependencies needed for the launcher
+dependencies = [
+  "click>=8.1.0",
+]
+
+keywords = ["mcp", "model-context-protocol", "ai-agents", "llm-tools", "scientific-computing", "hpc", "hdf5", "slurm", "parquet", "research-tools"]
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/iowarp/agent-toolkit"
+Repository = "https://github.com/iowarp/agent-toolkit"
+Issues = "https://github.com/iowarp/agent-toolkit/issues"
+
+[project.scripts]
+# Only the unified launcher entry point
+iowarp-agent-toolkit = "agent_toolkit:cli"
+
+[tool.hatch.build]
+sources = ["src"]
+
+# Include all server directories in the wheel for uvx execution
+[tool.hatch.build.targets.wheel]
+packages = ["agent_toolkit"]
+
+[tool.hatch.build.targets.wheel.shared-data]
+"agent-toolkit-mcp-servers" = "agent-toolkit-mcp-servers"
+"prompts" = "prompts"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/",
+    "agent-toolkit-mcp-servers/",
+    "prompts/",
+    "README.md",
+    "pyproject.toml"
+]
