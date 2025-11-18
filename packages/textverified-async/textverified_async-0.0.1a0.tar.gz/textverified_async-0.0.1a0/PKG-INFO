@@ -1,0 +1,145 @@
+Metadata-Version: 2.4
+Name: textverified_async
+Version: 0.0.1a0
+Summary: A simple asynchronous Python API client for working with the Textverified REST API
+Author: keynet
+Author-email: viktorplay377@gmail.com
+Project-URL: GitHub, https://github.com/Keynet123
+Keywords: textverified api client async asynchronous
+Classifier: Programming Language :: Python :: 3.10
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: aiohttp
+Requires-Dist: pydantic
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: keywords
+Dynamic: project-url
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+# Unofficial Textverified API client in Python #
+
+## в„№пёЏ About the Project
+<b>This library is designed to access the <a href="https://www.textverified.com/docs/api/v2#overview">TextVerified API</a> using an asynchronous Python client.</b>
+
+---
+
+## рџЏЋ The difference between the official and my code
+рџђў <a href = "https://pypi.org/project/textverified/">The official Python client</a> uses a <b>slow http.client</b>, and also stops the main stream (for example, the client.sms.incoming function)
+
+
+рџљЂ My client uses <b>aiohttp</b> as a request handler, and also has support for <i>create_task</i> and <i>gather</i> processes without blocking the main flow.
+
+
+рџ”ђ This client also supports <b>Bearer tokens</b> and automatically generates them after they expire for secure access to the API (just like the official client, but <b>faster</b>)
+
+## рџ’» Installation
+Library download is recommended for Python >= 3.9
+
+```
+pip install textverified_async
+```
+
+## рџ›  Usage
+Current available methods:
+
+- [x] Account Info
+- [x] Bearer Token
+- [ ] Service List
+- [ ] Sales
+- [ ] Billing Cycles
+- [ ] Back order rental reservation
+- [x] List Reservations
+- [ ] Verifications (Soon)
+- [ ] New Rental / Verification
+- [x] Renewable Rentals
+- [x] NonRenewable Rentals
+- [x] SMS
+- [ ] Calls and Voices
+- [x] Wake Requests
+- [ ] Webhook
+- [ ] Legacy
+
+There is no documentation yet, but it is quite easy to use.
+You can also hold down CTRL on the client and view the available functions and models, or get the current mini-documentation by hovering over the function.
+
+Import the library
+
+```python
+from textverified_async.api import TextVerifiedApi
+```
+
+Then create an API class (it will automatically create a session and token)
+
+```python
+api = TextVerifiedApi(вЂњapi-keyвЂќ, вЂњusernameвЂќ)
+```
+
+Next, you can safely use commands from the API using its class
+
+For example:
+```python
+info = await api.get_account_info()
+```
+
+### Note: If you want to get the information you need right away, put the asynchronous function in parentheses ###
+Example:
+```python
+balance = (await api.get_account_info()).currentBalance
+```
+
+All responses from the API will have the same value as in Textverified REST.API
+
+## рџ“‹ Example
+Here is an example of code for using the client (you will also see this code in the api.py class of the library):
+
+```python
+from textverified_async.api import TextVerifiedApi
+
+# Usage
+async def main():
+    api = TextVerifiedApi(вЂњapiвЂќ, вЂњmailвЂќ)
+    
+    await api.generate_bearer ()
+    status = await api.check_token_status()
+    print(fвЂњToken status: {status}вЂќ)
+
+    try:
+        # Get all rented numbers
+        all_rentals = await api.get_rentals()
+        print(fвЂњFound {len(all_rentals)} rentals:вЂќ)
+
+        for rental in all_rentals:
+            print(fвЂњ- {rental.serviceName}: {rental.number} ({rental.state})вЂќ)
+                
+        # Example of getting detailed information about a specific number
+        if all_rentals:
+            first_rental = all_rentals[0]
+            print(fвЂњ\nGetting details for rental: {first_rental.id}вЂќ)
+
+            rental_details = await api.get_rental_by_id(first_rental.id)
+
+			print(fвЂњDetailed info for {rental_details.number}:вЂќ)
+			print(fвЂњ  Service: {rental_details.serviceName}вЂќ)
+			print(fвЂњ  State: {rental_details.state}вЂќ)
+            print(fвЂњ  Always on: {rental_details.alwaysOn}вЂќ)
+            print(fвЂњ  Can refund: {rental_details.refund.canRefund}вЂќ)
+            print(fвЂњ  Billing cycle ID: {rental_details.billingCycleId}вЂќ)
+
+        wake = await api.wake_up_reservation(first_rental.id)
+        print(fвЂњ\nWoke up {wake.usageWindowStart} | Woke down {wake.usageWindowEnd} with wake ID {wake.id}вЂќ)
+                
+    except Exception as e:
+        print(fвЂњError: {e}вЂќ)
+
+
+if __name__ == вЂњ__main__вЂќ:
+    asyncio.run(main())
+```
