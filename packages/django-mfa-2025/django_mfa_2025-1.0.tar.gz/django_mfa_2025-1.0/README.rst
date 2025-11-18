@@ -1,0 +1,75 @@
+django-mfa-2025
+===============
+
+Django-mfa(Multi-factor Authentication) is a simple django package to add extra layer of security to your web application. Django-mfa is providing easiest integration to enable Multi factor authentication to your django applications. Inspired by the user experience of Google's Authentication, django-mfa allows users to authenticate through text message(SMS) or by using token generator app like google authenticator. 
+
+We welcome your feedback on this package. If you run into problems, please raise an issue or contribute to the project by forking the repository and sending some pull requests. 
+
+This Package is compatible with the following Django versions: 4.2 and above. Documentation is available at readthedocs(http://django-mfa.readthedocs.io/en/latest/)
+
+This package is a fork of django-mfa 2.1.0 and is compatible with Django 4.2 and above.
+
+Quick start
+-----------
+
+Installation
+~~~~~~~~~~~~
+
+The Git repository can be cloned with this command::
+
+    git clone https://github.com/nunombispo/django-mfa-2025
+
+The ``django_mfa_2025`` package, included in the distribution, should be
+placed on the ``PYTHONPATH``.
+
+Otherwise you can just ``easy_install -Z django-mfa-2025``
+or ``pip install django-mfa-2025``.
+
+Settings
+~~~~~~~~
+
+1. Add app name in settings.py::
+
+    INSTALLED_APPS = [
+       '..................',
+       'django_mfa_2025',
+       '..................'
+    ]
+
+2. Add 'django_mfa_2025.middleware.MfaMiddleware' to your project middlewares::
+
+    MIDDLEWARE = [
+       '....................................',
+       'django_mfa_2025.middleware.MfaMiddleware',
+       '....................................',
+    ]
+
+3. Optional issuer name.  This name will be shown in the Authenticator App along with the username
+
+   MFA_ISSUER_NAME = "Cool Django App"
+
+4. Optionally enable remember-my-browser.  If enabled, the browser will be trusted for specified number of days after the user enters the code once::
+
+    MFA_REMEMBER_MY_BROWSER = True
+    MFA_REMEMBER_DAYS = 90
+
+Urls
+~~~~
+
+Add the following to your root urls.py file.
+
+.. code:: django
+
+    urlpatterns = [
+        ...
+
+        re_path(r'^settings/', include('django_mfa_2025.urls')),
+    ]
+
+
+Done. With these settings you have now, you will get the MFA features.
+
+We welcome your feedback and support, raise `github ticket`_ if you want to report a bug.
+
+.. _github ticket: https://github.com/nunombispo/django-mfa-2025/issues
+
