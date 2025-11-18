@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pybookkeeper"
+authors = [
+    {name = "Sami J. Lehtinen", email = "sjl+bookkeeper@iki.fi"},
+]
+description = "Utility for small-scale Finnish double-ledger bookkeeping"
+readme = "README.md"
+requires-python = ">=3.10"
+urls.repository = "https://github.com/sjlehtin/bookkeeper.git"
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "click",
+    "lark-parser"
+]
+version = "0.11.0"
+
+[project.optional-dependencies]
+dev = ["pytest", "tox", "build", "tox-uv"]
+
+[project.scripts]
+bookkeeper = "bookkeeper.main:main"
