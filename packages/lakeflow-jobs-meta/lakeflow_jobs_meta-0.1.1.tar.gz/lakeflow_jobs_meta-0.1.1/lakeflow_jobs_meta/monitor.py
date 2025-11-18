@@ -1,0 +1,251 @@
+"""Continuous monitoring and automatic job update functionality"""
+
+import logging
+import os
+import time
+from datetime import datetime
+from typing import Optional, Dict, Any
+from databricks.sdk import WorkspaceClient
+
+from lakeflow_jobs_meta.orchestrator import JobOrchestrator
+from lakeflow_jobs_meta.metadata_manager import MetadataManager
+
+logger = logging.getLogger(__name__)
+
+
+class MetadataMonitor:
+    """Monitor metadata changes and automatically update jobs.
+
+    Monitors:
+    1. Delta control table for direct updates
+    2. Unity Catalog volume for YAML file changes
+
+    Automatically updates Databricks jobs when changes are detected.
+    """
+
+    def __init__(
+        self,
+        control_table: str,
+        check_interval_seconds: int = 60,
+        volume_path: Optional[str] = None,
+        auto_update_jobs: bool = True,
+    ):
+        """Initialize metadata monitor.
+
+        Args:
+            control_table: Name of the control table
+            check_interval_seconds: How often to check for changes (default: 60)
+            volume_path: Optional Unity Catalog volume path to watch for YAML files
+            auto_update_jobs: Whether to automatically update jobs on changes
+        """
+        self.control_table = control_table
+        self.check_interval = check_interval_seconds
+        self.volume_path = volume_path
+        self.auto_update_jobs = auto_update_jobs
+        self.last_check_timestamp = None
+        self.last_yaml_file_times = {}  # Track YAML file modification times
+        self.workspace_client = WorkspaceClient()
+        self.metadata_manager = MetadataManager(control_table)
+        self.orchestrator = JobOrchestrator(control_table, workspace_client=self.workspace_client)
+
+        # Ensure control table exists
+        self.metadata_manager.ensure_exists()
+
+    def _check_yaml_files_changed(self) -> bool:
+        """Check if any YAML files in volume have changed.
+
+        Returns:
+            True if any YAML files have been modified since last check
+        """
+        if not self.volume_path:
+            return False
+
+        try:
+            from pyspark.sql import SparkSession
+
+            spark = SparkSession.getActiveSession()
+            if not spark:
+                logger.warning("Spark session not available, cannot check YAML file changes")
+                return False
+
+            # List files in volume using Spark
+            try:
+                files_df = spark.sql(f"LIST '{self.volume_path}'")
+                files_list = files_df.collect()
+                yaml_files = {}
+                for row in files_list:
+                    filename = row["name"]
+                    if filename.endswith((".yaml", ".yml")):
+                        # Note: Spark LIST doesn't provide modification time directly
+                        # We'll use file path as a proxy for change detection
+                        file_path = row.get("path", f"{self.volume_path}/{filename}")
+                        yaml_files[filename] = file_path
+            except Exception:
+                # Fallback: try listing all files and filter
+                try:
+                    all_files = spark.sparkContext.wholeTextFiles(f"{self.volume_path}/*").keys().collect()
+                    yaml_files = {os.path.basename(f): f for f in all_files if f.endswith((".yaml", ".yml"))}
+                except Exception as list_error:
+                    logger.warning(f"Error listing files in volume: {str(list_error)}")
+                    return False
+
+            # Check if any files are new or modified
+            # Since we can't get modification time easily without dbutils,
+            # we'll check if file paths have changed or if files are new
+            for filename, file_path in yaml_files.items():
+                if filename not in self.last_yaml_file_times:
+                    # New file
+                    self.last_yaml_file_times[filename] = file_path
+                    logger.info(f"New YAML file detected: {filename}")
+                    return True
+                elif self.last_yaml_file_times[filename] != file_path:
+                    # File path changed (might indicate modification)
+                    logger.info(f"YAML file changed: {filename}")
+                    self.last_yaml_file_times[filename] = file_path
+                    return True
+
+            # Check for deleted files
+            deleted_files = set(self.last_yaml_file_times.keys()) - set(yaml_files.keys())
+            if deleted_files:
+                for filename in deleted_files:
+                    del self.last_yaml_file_times[filename]
+                    logger.info(f"YAML file deleted: {filename}")
+                return True
+
+            return False
+
+        except Exception as e:
+            logger.warning(f"Error checking YAML file changes: {str(e)}")
+            return False
+
+    def check_and_update(self) -> Dict[str, Any]:
+        """Check for metadata changes from both Delta table and YAML files, and update jobs if needed.
+
+        Returns:
+            Dictionary with change detection results and update status
+        """
+        result = {
+            "timestamp": datetime.now().isoformat(),
+            "changes_detected": False,
+            "yaml_changes": False,
+            "table_changes": False,
+            "jobs_updated": [],
+            "errors": [],
+        }
+
+        try:
+            # Check for YAML file changes in volume
+            yaml_changed = False
+            if self.volume_path:
+                yaml_changed = self._check_yaml_files_changed()
+                if yaml_changed:
+                    result["yaml_changes"] = True
+                    result["changes_detected"] = True
+                    logger.info("YAML files changed in volume, syncing...")
+                    try:
+                        tasks_loaded = self.metadata_manager.sync_from_volume(self.volume_path)
+                        logger.info(f"Synced {tasks_loaded} tasks from YAML files")
+                    except Exception as e:
+                        logger.warning(f"Failed to sync YAML from volume: {str(e)}")
+                        result["errors"].append(f"Volume sync error: {str(e)}")
+
+            # Detect changes in Delta table
+            changes = self.metadata_manager.detect_changes(self.last_check_timestamp)
+
+            table_changed = any([changes["new_jobs"], changes["updated_jobs"], changes["disabled_jobs"]])
+
+            if table_changed:
+                result["table_changes"] = True
+                result["changes_detected"] = True
+
+            jobs_to_update = set()
+
+            # Collect jobs that need updates
+            if changes["new_jobs"]:
+                jobs_to_update.update(changes["new_jobs"])
+
+            if changes["updated_jobs"]:
+                jobs_to_update.update(changes["updated_jobs"])
+
+            if changes["disabled_jobs"]:
+                jobs_to_update.update(changes["disabled_jobs"])
+
+            # If YAML changed, update all jobs (since YAML might affect any job)
+            if yaml_changed:
+                # Get all jobs to update
+                try:
+                    from pyspark.sql import SparkSession
+
+                    spark = SparkSession.getActiveSession()
+                    if spark:
+                        all_jobs = spark.table(self.control_table).select("job_name").distinct().collect()
+                        jobs_to_update.update([row["job_name"] for row in all_jobs])
+                    else:
+                        logger.warning("Spark session not available, cannot get all jobs")
+                except Exception as e:
+                    logger.warning(f"Could not get all jobs for YAML update: {str(e)}")
+
+            # Update jobs if changes detected
+            if jobs_to_update and self.auto_update_jobs:
+                logger.info(
+                    f"Updating {len(jobs_to_update)} job(s) due to metadata changes: {list(jobs_to_update)}"
+                )
+
+                try:
+                    # Use orchestrator to update changed jobs
+                    updated_jobs_list = []
+                    for job_name in jobs_to_update:
+                        try:
+                            job_id = self.orchestrator.create_or_update_job(job_name)
+                            updated_jobs_list.append({"job": job_name, "job_id": job_id})
+                        except Exception as job_error:
+                            logger.error(f"Failed to update job for job '{job_name}': {str(job_error)}")
+                            result["errors"].append(f"Job '{job_name}' update error: {str(job_error)}")
+
+                    result["jobs_updated"] = updated_jobs_list
+
+                except Exception as e:
+                    error_msg = f"Failed to update jobs: {str(e)}"
+                    logger.error(error_msg)
+                    result["errors"].append(error_msg)
+
+            # Update last check timestamp
+            self.last_check_timestamp = datetime.now().isoformat()
+            result["last_check_timestamp"] = self.last_check_timestamp
+
+        except Exception as e:
+            error_msg = f"Error in check_and_update: {str(e)}"
+            logger.error(error_msg)
+            result["errors"].append(error_msg)
+
+        return result
+
+    def run_continuous(self, max_iterations: Optional[int] = None):
+        """Run continuous monitoring loop.
+
+        Args:
+            max_iterations: Maximum number of iterations (None for infinite)
+        """
+        logger.info(f"Starting continuous monitoring (interval: {self.check_interval}s)")
+
+        iteration = 0
+        while max_iterations is None or iteration < max_iterations:
+            try:
+                result = self.check_and_update()
+
+                if result["changes_detected"]:
+                    logger.info(f"Changes detected: {len(result['jobs_updated'])} job(s) updated")
+                else:
+                    logger.debug("No changes detected")
+
+                iteration += 1
+
+                # Sleep until next check
+                time.sleep(self.check_interval)
+
+            except KeyboardInterrupt:
+                logger.info("Monitoring stopped by user")
+                break
+            except Exception as e:
+                logger.error(f"Error in monitoring loop: {str(e)}")
+                time.sleep(self.check_interval)  # Continue despite errors
