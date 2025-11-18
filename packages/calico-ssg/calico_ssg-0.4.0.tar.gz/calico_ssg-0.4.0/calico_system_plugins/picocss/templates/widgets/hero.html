@@ -1,0 +1,59 @@
+{% docstring %}
+  Renders a hero `section` wrapped in a `<hero>` tag. The background image will pull the `image` from the section if `use_image`
+  is set to `True` oterwise, Calico will try to use `background`.
+
+  Most text will be rendered inside of an `<hgroup>` tag.
+
+  If `cta` is present, it will be rendered as a link after the `<hgroup>` tag.
+
+  Markdown from that section will be yielded at the end of the `<hgroup>` tag.
+
+  Attributes:
+    image: (optional) Path to the image to use if `use_image` is `True`. This will always be used inside a `<col>` tag inside the `<hero>` if present.
+    svg: (optional) if `svg` is provided instead of `img`, calico will try to include the widget named in this property (ex: `svg.gitlab`)
+    background: (optional) Path to the image to use if `use_image` is `False`
+    style: (optional) Adds `style` to `<article>`
+    use_image: (defaults to `False`) Whether to use `image` or `background` as background image.
+    use_title: (defaults to `False`) Whether to use the `title` of the section inside an `<h1>` tag inside of `<hgroup>`.
+    use_subtitle: (defaults to `False`) Whether to use the `subtitle` of the section after the `<h1>` tag inside of `<hgroup>`. Is only useful if `use_title` is `True`.
+    title: (optional) Will be rendered as `<h1>` inside of `<hgroup>` if `use_title` is `True`
+    subtitle: (optional) Will be rendered after `<h1>` inside of `<hgroup>` if `use_title` and  `use_subtitle` are both `True`
+    cta: (optional) Call to action object. Rendered as an `<a>` tag after `<hgroup>`
+      - `class`: (defaults to `'btn btn-primary btn-lg px-4 me-md-2'`) the class to apply to the cta `<a>` tag
+      - `link`: (defaults to `'#'`) cta link
+      - `text`: cta text
+{% enddocstring %}
+{% with img=section|section_or_obj_background:object %}
+
+  {% if img %}
+    <style>
+      {{ img|background_img }}
+    </style>
+  {% endif %}
+
+  <hero id="{{img|slugify}}">
+    {% if section.image %}
+      <col><img src="{% static section.image %}"></col>
+    {% elif section.svg %}
+      <col><cc-component section.svg></cc-component></col>
+    {% endif %}
+    <hgroup>
+      {% if section.use_title %}
+        <h1>{{object.metadata.title}}</h1>
+      {% elif section.title %}
+        <h1>{{section.title}}</h1>
+      {% endif %}
+      {% if section.use_subtitle %}
+        {{object.metadata.subtitle|markdown}}
+      {% elif section.subtitle %}
+        {{section.subtitle|markdown}}
+      {% endif %}
+      {{yield}}
+    </hgroup>
+    {% if section.cta %}
+      <a class="{{ section.cta.class|default:'btn btn-primary btn-lg px-4 me-md-2' }}" href="{{ section.cta.link|default:'#' }}">
+        {{ section.cta.text }}
+      </a>
+    {% endif %}
+  </hero>
+{% endwith %}
