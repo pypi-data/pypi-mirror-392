@@ -1,0 +1,220 @@
+# Client for the crypto-extranet.com website
+
+This first release serves a single purpose: synchronizing documents.
+
+It downloads all documents to the current directory, which is usefull
+for local searching and backups.
+
+
+## Usage
+
+    pip install crypto-extranet
+    crypto-extranet SUBDOMAIN USERNAME PASSWORD
+
+
+## Example
+
+    crypto-extranet ajc-rochefort DOE&JOHN Sup3rSeCr3T
+
+If like me you're not willing to have your passowrd saved in bash
+history, and have a GPG key, then use
+[pass](https://www.passwordstore.org/):
+
+    $ crypto-extranet ajc-rochefort DOE&JOHN "$(pass ajc-rochefort)"
+
+and boom, no passoword in bash history, and no need to type it every time.
+
+
+## Compatibility
+
+It should work with any of those, and many more:
+
+- https://1001-adresses.crypto-extranet.com
+- https://a2cimmo.crypto-extranet.com
+- https://acantys.crypto-extranet.com
+- https://actifgestionimmobilier.crypto-extranet.com
+- https://activimmo.crypto-extranet.com
+- https://adelys.crypto-extranet.com
+- https://aedesgrandgeneve.crypto-extranet.com
+- https://agence-albret.crypto-extranet.com
+- https://agence-centrale.crypto-extranet.com
+- https://agence147.crypto-extranet.com
+- https://agenceatlantique.crypto-extranet.com
+- https://agenceboulenc.crypto-extranet.com
+- https://agencebsh.crypto-extranet.com
+- https://agencedeslices.crypto-extranet.com
+- https://agencerigaut.crypto-extranet.com
+- https://agencevia.crypto-extranet.com
+- https://agencevitry.crypto-extranet.com
+- https://agi2.crypto-extranet.com
+- https://ajc-rochefort.crypto-extranet.com
+- https://akimmoconseil.crypto-extranet.com
+- https://alphatransac.crypto-extranet.com
+- https://alter-immobilier.crypto-extranet.com
+- https://altergestion.crypto-extranet.com
+- https://alternativesimmo.crypto-extranet.com
+- https://amj-immobilier.crypto-extranet.com
+- https://aquigestion.crypto-extranet.com
+- https://arro-immobilier.crypto-extranet.com
+- https://artesia-syndic.crypto-extranet.com
+- https://arthurwinley.crypto-extranet.com
+- https://asg-immo.crypto-extranet.com
+- https://atisplus8.crypto-extranet.com
+- https://attentifimmo.crypto-extranet.com
+- https://aventin.crypto-extranet.com
+- https://axento.crypto-extranet.com
+- https://barroca-gestion.crypto-extranet.com
+- https://baustone.crypto-extranet.com
+- https://bbfi.crypto-extranet.com
+- https://belsim.crypto-extranet.com
+- https://bertaud-immobilier.crypto-extranet.com
+- https://bitz-immobilier.crypto-extranet.com
+- https://bordierchene.crypto-extranet.com
+- https://bouvet-cartier.crypto-extranet.com
+- https://buecherimmobilier.crypto-extranet.com
+- https://cabinetbruno.crypto-extranet.com
+- https://cabinetgide.crypto-extranet.com
+- https://cabinetguillotte.crypto-extranet.com
+- https://cabinetmollevi.crypto-extranet.com
+- https://cabinetverrey.crypto-extranet.com
+- https://cagip.crypto-extranet.com
+- https://cailleauimmo.crypto-extranet.com
+- https://cbmc.crypto-extranet.com
+- https://cegip.crypto-extranet.com
+- https://cesaretbrutus.crypto-extranet.com
+- https://chaltondubanchet.crypto-extranet.com
+- https://citeau.crypto-extranet.com
+- https://cnp-immo.crypto-extranet.com
+- https://conceptimmobilier.crypto-extranet.com
+- https://copro-reunion.crypto-extranet.com
+- https://coprogest.crypto-extranet.com
+- https://cosyhome.crypto-extranet.com
+- https://cottage.crypto-extranet.com
+- https://cpimmo.crypto-extranet.com
+- https://cpr-thionville.crypto-extranet.com
+- https://crossard.crypto-extranet.com
+- https://dauchezpm.crypto-extranet.com
+- https://domia.crypto-extranet.com
+- https://dpiconseil.crypto-extranet.com
+- https://ellipsegestion.crypto-extranet.com
+- https://eurofonciere.crypto-extranet.com
+- https://facilitim.crypto-extranet.com
+- https://faelensimmobilier.crypto-extranet.com
+- https://fidelis.crypto-extranet.com
+- https://frabat.crypto-extranet.com
+- https://francimmo.crypto-extranet.com
+- https://gab-immobilier.crypto-extranet.com
+- https://gerancimo.crypto-extranet.com
+- https://greneche.crypto-extranet.com
+- https://groupebadoil.crypto-extranet.com
+- https://groupelfb.crypto-extranet.com
+- https://gtiimmo.crypto-extranet.com
+- https://habitatdelill.crypto-extranet.com
+- https://hebdingimmobilier.crypto-extranet.com
+- https://herbeth-immobilier.crypto-extranet.com
+- https://hestia-copro.crypto-extranet.com
+- https://idisyndic.crypto-extranet.com
+- https://immo3l.crypto-extranet.com
+- https://immobilier-descolas.crypto-extranet.com
+- https://immobilier-sei.crypto-extranet.com
+- https://immobilierducoin.crypto-extranet.com
+- https://immobiliere-coulon.crypto-extranet.com
+- https://immobiliere-napoleon.crypto-extranet.com
+- https://immoconseil-debever.crypto-extranet.com
+- https://immoduparc.crypto-extranet.com
+- https://immoduval.crypto-extranet.com
+- https://immolg.crypto-extranet.com
+- https://immothentic.crypto-extranet.com
+- https://impact-property.crypto-extranet.com
+- https://ipm-immobilier.crypto-extranet.com
+- https://isautier.crypto-extranet.com
+- https://jagoraimmobilier.crypto-extranet.com
+- https://jhabiteenville.crypto-extranet.com
+- https://jmdconseil.crypto-extranet.com
+- https://josephbaurimmobilier.crypto-extranet.com
+- https://jurinimmobilier.crypto-extranet.com
+- https://keeper.crypto-extranet.com
+- https://ksimmo-service.crypto-extranet.com
+- https://lachenaieimmobilier.crypto-extranet.com
+- https://laforet-nancy.crypto-extranet.com
+- https://laresidence.crypto-extranet.com
+- https://lcbimmo.crypto-extranet.com
+- https://lechene.crypto-extranet.com
+- https://legros-immobilier.crypto-extranet.com
+- https://leitimmo.crypto-extranet.com
+- https://libertyhome.crypto-extranet.com
+- https://locaim.crypto-extranet.com
+- https://logeogestion.crypto-extranet.com
+- https://loger.crypto-extranet.com
+- https://lokizi.crypto-extranet.com
+- https://maisondelimmo.crypto-extranet.com
+- https://mongest.crypto-extranet.com
+- https://monlogement27.crypto-extranet.com
+- https://mpbi.crypto-extranet.com
+- https://my-orleans.crypto-extranet.com
+- https://neogestimmo.crypto-extranet.com
+- https://novadimm.crypto-extranet.com
+- https://novotim.crypto-extranet.com
+- https://olma.crypto-extranet.com
+- https://oltimmo.crypto-extranet.com
+- https://onyx.crypto-extranet.com
+- https://orpi-hagondange.crypto-extranet.com
+- https://palagest.crypto-extranet.com
+- https://passionimmo.crypto-extranet.com
+- https://patitifa.crypto-extranet.com
+- https://patrimoine-habitat.crypto-extranet.com
+- https://patrimoine971.crypto-extranet.com
+- https://perottino.crypto-extranet.com
+- https://philippemeunier.crypto-extranet.com
+- https://pmwb.crypto-extranet.com
+- https://pontoise-immobilier.crypto-extranet.com
+- https://pouletimmobilier.crypto-extranet.com
+- https://premiumioi.crypto-extranet.com
+- https://privatesyndic.crypto-extranet.com
+- https://progestim.crypto-extranet.com
+- https://proxima-syndic.crypto-extranet.com
+- https://proxisyndic.crypto-extranet.com
+- https://regiegeneraledelyon.crypto-extranet.com
+- https://regiegontard.crypto-extranet.com
+- https://regielepine.crypto-extranet.com
+- https://regielombard.crypto-extranet.com
+- https://renoult-habitat.crypto-extranet.com
+- https://rgrgestion.crypto-extranet.com
+- https://rhsr.crypto-extranet.com
+- https://rinc-nc.crypto-extranet.com
+- https://rstimmobilier.crypto-extranet.com
+- https://sabimo.crypto-extranet.com
+- https://sagirec.crypto-extranet.com
+- https://segerinvest.crypto-extranet.com
+- https://slpcvm.crypto-extranet.com
+- https://smcigestionsyndic.crypto-extranet.com
+- https://smebhabitat.crypto-extranet.com
+- https://sogim.crypto-extranet.com
+- https://square-hashford.crypto-extranet.com
+- https://srvc-be.crypto-extranet.com
+- https://stabulumimmobilier.crypto-extranet.com
+- https://stationimmo.crypto-extranet.com
+- https://sygestim.crypto-extranet.com
+- https://syndic-coprogest.crypto-extranet.com
+- https://syndicabis83.crypto-extranet.com
+- https://syndicavenir.crypto-extranet.com
+- https://syndimmogest.crypto-extranet.com
+- https://tahitiimmo.crypto-extranet.com
+- https://tassou-gestion.crypto-extranet.com
+- https://tekaimmo.crypto-extranet.com
+- https://tesserim.crypto-extranet.com
+- https://tlm.crypto-extranet.com
+- https://topimmobilier.crypto-extranet.com
+- https://toquetimmobilier.crypto-extranet.com
+- https://trimmolux.crypto-extranet.com
+- https://tripleximmobilier.crypto-extranet.com
+- https://triverioimmobilier.crypto-extranet.com
+- https://trusman.crypto-extranet.com
+- https://unicorn.crypto-extranet.com
+- https://venelles-immobilier.crypto-extranet.com
+- https://veron-transaction.crypto-extranet.com
+- https://vetier.crypto-extranet.com
+- https://vianovagestion.crypto-extranet.com
+- https://vipegestion.crypto-extranet.com
+- https://vv-bellevaux.crypto-extranet.com
+- https://xhimmobilier.crypto-extranet.com
