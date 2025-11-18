@@ -1,0 +1,1 @@
+- The module has been developed using a monkey patch to edit the CBLRequest class. It will be tried to edit it to Odoo extension inheritance changing the main class to a transientModel
