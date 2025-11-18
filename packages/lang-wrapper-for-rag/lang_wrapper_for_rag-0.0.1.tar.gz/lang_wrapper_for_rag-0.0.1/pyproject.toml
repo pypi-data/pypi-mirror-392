@@ -1,0 +1,40 @@
+[tool.poetry]
+name = "lang-wrapper-for-rag"
+version = "0.0.1"
+description = "A modern and secure RAG chatbot using FastAPI and LangChain."
+authors = ["Your Name <you@example.com>"] # Helyettesítsd be a saját adataiddal
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10" # Válassz egy megfelelő Python verziót
+
+# FastAPI és szerver
+fastapi = "^0.111.0"
+uvicorn = {version = "^0.30.0", extras = ["standard"]}
+
+# Pydantic (a FastAPI-hoz)
+pydantic = "^2.7.0"
+
+# LangChain alap csomagok
+langchain = "^0.2.0"
+langchain-openai = "^0.1.7"
+chromadb = "^0.5.0"
+pypdf = "^4.2.0"
+tiktoken = "^0.7.0"
+
+# Biztonsági és modernizációs csomagok
+slowapi = "^0.1.9"
+langchain-experimental = "^0.0.60"
+presidio-anonymizer = "^2.2.35"
+presidio-analyzer = "^2.2.35"
+spacy = ">=3.0.0,<4.0.0"
+faker = "^38.0.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
