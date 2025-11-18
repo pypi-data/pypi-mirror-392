@@ -1,0 +1,62 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "northroot"
+version = "0.1.1"
+description = "Python SDK providing high-level bindings to the Northroot Engine. Record work, verify receipts, and manage proof storage with simple async/sync APIs."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+dependencies = []
+authors = [
+    { name = "Northroot Contributors" }
+]
+keywords = [
+    "proof",
+    "verification",
+    "compute",
+    "receipt",
+    "delta-compute",
+    "data-shapes",
+    "observability",
+    "audit",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Rust",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Distributed Computing",
+    "Topic :: System :: Logging",
+]
+
+[project.optional-dependencies]
+otel = ["opentelemetry-api>=1.20.0"]
+dev = [
+    "maturin>=1.0,<2.0",
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.0.0",
+    "mypy>=1.0.0",
+    "ruff>=0.1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/Northroot-Labs/northroot"
+Documentation = "https://docs.northroot.dev"
+Repository = "https://github.com/Northroot-Labs/northroot"
+
+[tool.maturin]
+features = ["storage"]  # Enable storage feature by default
+python-source = "."  # Look for Python package in current directory
+module-name = "_northroot"  # Internal Rust module name, wrapped by northroot/__init__.py
+manifest-path = "sdk/python/northroot/Cargo.toml"
+# The northroot/ directory (with __init__.py) should be in the same directory as pyproject.toml
+

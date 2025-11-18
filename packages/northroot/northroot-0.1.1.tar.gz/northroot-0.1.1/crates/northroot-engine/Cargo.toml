@@ -1,0 +1,50 @@
+[package]
+name = "northroot-engine"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+
+description = "Proof algebra engine for receipt validation, composition, and commitment computation"
+keywords = ["proof", "algebra", "engine", "validation", "commitment"]
+categories = ["algorithms", "data-structures"]
+publish = false
+readme = "README.md"
+
+[[example]]
+name = "finops_cost_attribution"
+path = "../../examples/finops_cost_attribution/main.rs"
+
+[[example]]
+name = "etl_partition_reuse"
+path = "../../examples/etl_partition_reuse/main.rs"
+
+[[example]]
+name = "analytics_dashboard"
+path = "../../examples/analytics_dashboard/main.rs"
+
+[dependencies]
+northroot-receipts = { path = "../northroot-receipts" }
+northroot-commons = { path = "../northroot-commons" }
+northroot-policy = { path = "../northroot-policy" }
+northroot-storage = { path = "../northroot-storage" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+ed25519-dalek = "2.1"
+base64 = "0.22"
+bs58 = "0.5"
+ciborium = "0.2"
+thiserror = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+rand = "0.8"
+
+[dev-dependencies]
+serde_json = { workspace = true }
+northroot-storage = { path = "../northroot-storage" }
+tempfile = "3.10"
+proptest = "1.4"
