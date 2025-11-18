@@ -1,0 +1,79 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ratisbona_utils"
+version = "0.0.4"
+authors = [
+  { name="Ulrich Schwenk", email="ulrich-schwenk@gmx.de" },
+]
+description = "A package comprising various utilities useful for many python projects."
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "pathlib",
+    "click",
+    "graphviz",
+    "python-magic",
+    "matplotlib",
+    "asyncio",
+    "Unidecode",
+    "transliterate",
+    "tzdata"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pylint",
+    # Code style
+    "black[d]",
+    # Strict typing
+    "mypy",
+    # Test coverage
+    "pytest",
+    "coverage",
+    "poethepoet",
+    "build",
+    "twine"
+]
+
+[project.scripts]
+ratisbona_palette_cli = "ratisbona_utils.colors.__main__:main"
+ratisbona_project_starter = "ratisbona_utils.project_start.__main__:main"
+
+
+[tool.poe.tasks]
+coverage-report = { help = "Create a html report of test-coverage", shell = "python -m coverage html" }
+coverage = { help = "Run unit tests with coverage", shell = "python -m coverage run -m unittest" }
+build-wheel = { help = "Build the wheel distribution", shell = "python -m build --wheel" }
+build = { help = "Build the wheel distribution", shell = "python -m build" }
+test-publish = { help = "Publish to TestPyPI", shell = "twine upload --verbose --repository testpypi dist/*" }
+publish = { help = "Publish to PyPI", shell = "twine upload dist/*" }
+blackd = { help = "Run black formatter daemon", shell = "blackd" }
+pylint = { help = "Run pylint", shell = "pylint src/ratisbona_utils" }
+
+[project.urls]
+"Homepage" = "https://sourceforge.net/projects/ratisbona-utils/"
+
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ratisbona_utils"]
+include = [
+    "ratisbona_utils/colors/resources/*",
+    "ratisbona_utils/latex/resources/*",
+    "ratisbona_utils/languages/resources/*",
+]
+
+
+[tool.hatch.metadata]
+allow-directories = [
+    "ratisbona_utils/colors/resources/*",
+    "ratisbona_utils/latex/resources/*",
+    "ratisbona_utils/languages/resources/*",
+]
