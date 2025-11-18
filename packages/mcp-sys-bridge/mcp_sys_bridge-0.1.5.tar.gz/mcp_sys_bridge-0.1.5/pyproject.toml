@@ -1,0 +1,61 @@
+[project]
+name = "mcp-sys-bridge"
+version = "0.1.5"
+description = "An implementation of the Model Context Protocol (MCP), acting as a simple bridge to native OS functionalities like clipboard management, URL handling, and system notifications."
+authors = [
+    { name = "Leynier Gutiérrez González", email = "leynier41@gmail.com" },
+]
+readme = "readme.md"
+license = "MIT"
+license-files = ["license"]
+keywords = [
+    "python",
+    "clipboard",
+    "automation",
+    "library",
+    "cross-platform",
+    "toolkit",
+    "mcp",
+    "utils",
+    "protocol",
+    "developer-tools",
+    "system-integration",
+    "system-bridge",
+    "url-opener",
+    "model-context-protocol",
+    "mcp-server",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+requires-python = ">=3.12"
+
+dependencies = ["fastmcp>=2.7.0", "plyer>=2.1.0", "pydantic>=2.11.5", "pyperclip>=1.9.0"]
+
+[dependency-groups]
+dev = ["ruff>=0.11.13"]
+
+[project.scripts]
+mcp-sys-bridge = "src.server:main"
+
+[project.urls]
+homepage = "https://github.com/leynier/mcp-sys-bridge"
+documentation = "https://github.com/leynier/mcp-sys-bridge"
+repository = "https://github.com/leynier/mcp-sys-bridge"
+issues = "https://github.com/leynier/mcp-sys-bridge/issues"
+changelog = "https://github.com/leynier/mcp-sys-bridge"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
