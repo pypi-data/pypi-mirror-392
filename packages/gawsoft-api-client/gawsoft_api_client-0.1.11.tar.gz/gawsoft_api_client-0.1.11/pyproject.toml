@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gawsoft_api_client"
+dynamic = ["version"]
+description = "Rest Api Client"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+authors = [
+    { name = "Gawsoft.com", email = "contact@gawsoft.com" }
+]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent"
+]
+
+[project.urls]
+Homepage = "https://gawsoft.com"
+Repository = "https://github.com/gawsoftpl/rest-api-client-framework-python"
+
+[tool.setuptools.packages.find]
+include = ["gawsoft.*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "gawsoft.api_client.version.__version__" }
