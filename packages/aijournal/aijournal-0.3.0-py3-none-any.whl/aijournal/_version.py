@@ -1,0 +1,22 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+__version__ = "0.3.0"
+
+if not __version__:
+    try:
+        import versioningit
+        from versioningit.errors import Error as VersioningitError
+    except ImportError:  # pragma: no cover
+        import importlib.metadata
+
+        __version__ = importlib.metadata.version("aijournal")
+    else:
+        PROJECT_DIR = Path(__file__).resolve().parents[2]
+        try:
+            __version__ = versioningit.get_version(project_dir=PROJECT_DIR)
+        except VersioningitError:
+            import importlib.metadata
+
+            __version__ = importlib.metadata.version("aijournal")
