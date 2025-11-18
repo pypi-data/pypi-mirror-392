@@ -1,0 +1,80 @@
+Metadata-Version: 2.4
+Name: csan
+Version: 0.1.0
+Summary: CLI tool that generates a Cutter-Sanborn identifier, given a first and a last name.
+Keywords: cutter,sanborn,cutter-sanborn,cutter-number,cutter-notation,catalog,cataloging,cataloguing,library,library-catalog,call-number,three-figure,bibliographic,cli,command-line
+Author: VERA LVX
+Author-email: VERA LVX <veralvx@veralvx.com>
+License-Expression: Apache-2.0
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Information Technology
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Text Processing
+Classifier: Topic :: Text Processing :: General
+Classifier: Topic :: Text Processing :: Indexing
+Classifier: Topic :: Utilities
+Classifier: Typing :: Typed
+Maintainer: VERA LVX
+Maintainer-email: VERA LVX <veralvx@veralvx.com>
+Requires-Python: >=3.10
+Project-URL: Changelog, https://github.com/veralvx/csan/blob/main/CHANGELOG.md
+Project-URL: Documentation, https://github.com/veralvx/csan
+Project-URL: Homepage, https://github.com/veralvx/csan
+Project-URL: Issues, https://github.com/veralvx/csan/issues
+Project-URL: Releasenotes, https://github.com/veralvx/csan/releases
+Project-URL: Repository, https://github.com/veralvx/csan
+Description-Content-Type: text/markdown
+
+# CSAN: Cutter-Sanborn Number Generator
+
+`csan` is a CLI tool that generates a Cutter-Sanborn identifier, given a first and a last name.
+
+The Cutter-Sanborn identifier, commonly called "Cutter number", is an alphanumeric code used in library classification systems in order to arrange books alphabetically by author. It consists of the first letter of the author's last name followed by three-digit number derived from a predefined [table](https://github.com/veralvx/cutter-sanborn-table). This system was originally developed by Charles Cutter, and revised by Kate Sanborn.
+
+## Installation
+
+You can install this tool using `pip` or `uv`:
+
+```console
+uv tool install csan
+```
+
+```console
+pip install csan
+```
+
+## Usage  
+
+
+```console
+usage: csan [-h] -f FIRST_NAME -l LAST_NAME [-t TITLE] [-v]
+
+Cutter-Sanborn identifier generator.
+
+options:
+  -h, --help            show this help message and exit
+  -f FIRST_NAME, --first-name FIRST_NAME
+  -l LAST_NAME, --last-name LAST_NAME
+  -t TITLE, --title TITLE
+  -v, --verbose
+```
+
+## Examples  
+
+- `csan -f John -l Doe` -> D649
+- `csan -f John -l Doe -t "My Book"` -> D649m
+- `csan -f First -l Last -v` -> L349, with log output to the console
+- `csan -f Jorge -l "De la Cruz"` -> D332
