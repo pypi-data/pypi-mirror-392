@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "netwatchpy"
+version = "0.1.6"
+authors = [
+    { name = "Pranav Kishan", email = "ty.pranavkishan7905@gmail.com" }
+]
+description = "A TUI network usage monitor."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+
+dependencies = [
+    "textual",
+    "psutil",
+    "platformdirs",
+    "desktop-notifier; platform_system != 'Linux'",
+    "desktop-notifier[dbus]; platform_system == 'Linux'"
+]
+
+[project.scripts]
+netwatch = "netwatch.tui:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["netwatch"]
+
+[project.urls]
+Homepage = "https://github.com/Destroyer795/Netwatchpy-package"
+Issues = "https://github.com/Destroyer795/Netwatchpy-package/issues"
