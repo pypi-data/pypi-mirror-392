@@ -1,0 +1,72 @@
+[package]
+name = "rapidquery"
+version = "0.1.0-alpha1"
+edition = "2021"
+description = "RapiQuery is the fastest, full-feature, and easy-to-use Python SQL query builder written in Rust."
+readme = "README.md"
+license = "GNU GPLv3"
+homepage = "https://github.com/awolverp/rapidquery"
+repository = "https://github.com/awolverp/rapidquery.git"
+authors = ["awolverp"]
+
+[lib]
+name = "rapidquery"
+crate-type = ["cdylib"]
+
+[features]
+optimize = []
+
+[profile.dev]
+lto = true
+panic = "unwind"
+strip = "symbols"
+
+[profile.release]
+codegen-units = 1
+debug = false
+incremental = false
+lto = true
+panic = "unwind"
+strip = "symbols"
+
+[dependencies]
+pgvector = { version = "~0.4", default-features = false }
+ipnetwork = { version = "0.20", default-features = false }
+mac_address = { version = "1.1", default-features = false }
+uuid = { version = "1.18.1", default-features = false, features = ["v4"] }
+chrono = { version = "0.4.27", default-features = false, features = ["clock"] }
+serde_json = { version = "1", default-features = false, features = ["std"] }
+rust_decimal = { version = "1.38.0", default-features = false }
+once_cell = { version = "1.21.3", default-features = false, features = ["parking_lot"]}
+
+[dependencies.parking_lot]
+version = "0.12.4"
+
+[dependencies.sea-query]
+version = "0.32.7"
+default-features = false
+features = [
+    "backend-mysql",
+    "backend-postgres",
+    "backend-sqlite",
+    "thread-safe",
+    "with-chrono",
+    "with-json",
+    "with-rust_decimal",
+    "with-uuid",
+    "with-ipnetwork",
+    "with-mac_address",
+    "postgres-array",
+    "postgres-interval",
+    "postgres-vector",
+    "hashable-value"
+]
+
+[dependencies.pyo3]
+version = "0.27"
+default-features = false
+features = ["macros", "extension-module", "chrono", "uuid", "rust_decimal", "generate-import-lib"]
+
+[lints.clippy]
+dbg_macro = "warn"
+print_stdout = "warn"
