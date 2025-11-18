@@ -1,0 +1,153 @@
+[project]
+name = "noggin-aaa"
+description = "Noggin is a self-service portal for FreeIPA. The primary purpose of the portal is to allow users to sign up and manage their account information and group membership."
+license = "MIT"
+keywords = ["security"]
+version = "1.11.0"
+dynamic = ["classifiers"]
+readme = "README.md"
+authors = [{name = "Fedora Infrastructure", email = "admin@fedoraproject.org"}]
+requires-python = ">=3.9.0,<4.0.0"
+dependencies = [
+    "cryptography (>=3.4.7)",
+    "flask (>=2.0.0,<4.0.0)",
+    "flask-wtf (>=0.14.3,<2.0.0)",
+    "python-freeipa (>=1.0.6,<2.0.0)",
+    "click (>=8.0,<9.0)",
+    "pyjwt (>=2.1.0,<3.0.0)",
+    "Flask-Mail (>=0.9.1,<0.11.0)",
+    "fedora-messaging (>=2.1.0,<4.0)",
+    "backoff (>=1.6.0,<3.0)",
+    "noggin-messages (>=1.1.0,<2.0.0)",
+    "whitenoise (>=5.3,<7.0)",
+    "flask-babel (>=4.0.0,<5.0.0)",
+    "flask-healthz (>=1.0.0,<2.0.0)",
+    "markupsafe (>=1.1.1,<4.0.0)",
+    "wtforms[email] (>=3.0.0,<4.0.0)",
+    "requests[security] (>=2.25.0,<3.0.0)",
+    "translitcodec (>=0.7.0)",
+    "unidecode (>=1.2.0,<2.0.0)",
+    "flask-talisman (>=0.8.1,<2.0)",
+    "pyotp (>=2.2.7,<3.0.0)",
+    "srvlookup (>=2.0.0,<4.0.0)",
+]
+
+[project.urls]
+homepage = "https://github.com/fedora-infra/noggin"
+repository = "https://github.com/fedora-infra/noggin"
+
+[project.optional-dependencies]
+deploy = ["gunicorn (>=20.0,<24.0.0)"]
+
+[tool.poetry]
+packages = [
+    { include = "noggin" },
+]
+include = [
+    "tox.ini",
+    "babel.cfg",
+    "deployment/*",
+    "docs/*",
+    "tests/*",
+]
+classifiers = [
+    "Environment :: Web Environment",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: System :: Systems Administration :: Authentication/Directory",
+]
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=7.1.0"
+pytest-cov = ">=3.0.0"
+beautifulsoup4 = ">=4.9"
+vcrpy = ">=5.0"
+pytest-vcr = ">=1.0"
+liccheck = ">=0.6.4"
+bandit = ">=1.6"
+black = ">=22.0.0"
+flake8 = ">=4.0.1"
+Faker = ">=13.0.0"
+pytest-mock = ">=3.0.0"
+isort = ">=5.1.4"
+rstcheck = ">=6.0.0"
+typer = "^0.11.0"
+pre-commit = ">=2.13.0"
+towncrier = ">=21.3.0"
+
+[tool.poetry.group.docs.dependencies]
+sphinx = ">=4.2"
+myst-parser = ">=2.0.0"
+
+[tool.black]
+skip-string-normalization = true
+
+[tool.towncrier]
+package = "noggin"
+filename = "docs/release_notes.md"
+directory = "news/"
+start_string = "<!-- towncrier release notes start -->\n"
+underlines = ["", "", ""]
+template = "news/_template.md"
+title_format = "## v{version}"
+issue_format = "{issue}"
+
+  [[tool.towncrier.type]]
+  directory = "bic"
+  name = "Backwards Incompatible Changes"
+  showcontent = true
+
+  [[tool.towncrier.type]]
+  directory = "dependency"
+  name = "Dependency Changes"
+  showcontent = true
+
+  [[tool.towncrier.type]]
+  directory = "feature"
+  name = "Features"
+  showcontent = true
+
+  [[tool.towncrier.type]]
+  directory = "bug"
+  name = "Bug Fixes"
+  showcontent = true
+
+  [[tool.towncrier.type]]
+  directory = "dev"
+  name = "Development Improvements"
+  showcontent = true
+
+  [[tool.towncrier.type]]
+  directory = "docs"
+  name = "Documentation Improvements"
+  showcontent = true
+
+  [[tool.towncrier.type]]
+  directory = "other"
+  name = "Other Changes"
+  showcontent = true
+
+  [[tool.towncrier.type]]
+  directory = "author"
+  name = "Contributors"
+  showcontent = true
+
+[tool.isort]
+profile = "black"
+known_first_party = ["noggin", "noggin_messages"]
+lines_after_imports = 2
+
+[tool.ruff.lint.isort]
+lines-after-imports = 2
+order-by-type = true
+known-first-party = ["noggin", "noggin_messages"]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests/unit",
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
