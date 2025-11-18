@@ -1,0 +1,364 @@
+Metadata-Version: 2.4
+Name: aimusic-mcp
+Version: 1.0.4
+Summary: The MCP server of MusicMCP.AI - AI Music Generation Platform
+Author-email: "MusicMCP.AI Team" <support@musicmcp.ai>
+Project-URL: Homepage, https://www.musicmcp.ai
+Keywords: aimusic,musicmcp,mcp,music,song,ai,generate,model-context-protocol
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Multimedia :: Sound/Audio
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: mcp[cli]>=1.6.0
+Requires-Dist: httpx>=0.24.0
+Dynamic: license-file
+
+<div align="center">
+
+# 🎵 MusicMCP.AI MCP Server
+
+**AI-Powered Music Generation with Model Context Protocol**
+
+Official MusicMCP.AI Model Context Protocol (MCP) server that enables seamless interaction with our advanced AI music generation platform. This server allows MCP clients like [Claude Desktop](https://www.anthropic.com/claude), [OpenAI Agents](https://github.com/openai/openai-agents-python) and others to generate AI music through natural language commands.
+
+</div>
+
+## ✨ Features
+
+- **🎼 AI Music Generation**: Generate songs based on text prompts using MusicMCP.AI's state-of-the-art AI models
+- **🎵 Dual Generation Modes**: Support for both inspiration mode and custom mode
+- **🔗 Direct Download Links**: Get direct download URLs for generated music
+- **🎹 Instrumental Options**: Generate instrumental-only music or full songs with vocals
+- **✅ Credit Balance Check**: Check your API key validity and remaining credits
+- **🏥 Health Monitoring**: Check API service health status
+
+## 🚀 Quickstart with Claude Desktop
+
+1. **Get Your API Key**: Obtain your API key from [MusicMCP.AI Platform](https://www.musicmcp.ai)
+2. **Install uv**: Install the Python package manager with `curl -LsSf https://astral.sh/uv/install.sh | sh`
+3. **Configure Claude**: Go to Claude > Settings > Developer > Edit Config > claude_desktop_config.json and add:
+
+```json
+{
+    "mcpServers": {
+        "MusicMCP.AI": {
+            "command": "uvx",
+            "args": [
+                "aimusic-mcp"
+            ],
+            "env": {
+                "MUSICMCP_API_KEY": "<insert-your-api-key-here>",
+                "MUSICMCP_API_URL": "https://www.musicmcp.ai/api",
+                "TIME_OUT_SECONDS": "600"
+            }
+        }
+    }
+}
+```
+
+4. **Restart Claude**: Restart the Claude app and you'll see **4 MCP tools** available, indicating successful loading
+
+## ⚙️ Environment Variables
+
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `MUSICMCP_API_KEY` | Your MusicMCP.AI API key | - | ✅ Yes |
+| `MUSICMCP_API_URL` | MusicMCP.AI API base URL | `https://www.musicmcp.ai/api` | ❌ No |
+| `TIME_OUT_SECONDS` | Timeout for music generation in seconds | `600` (10 min) | ❌ No |
+
+## 🛠️ Available Tools
+
+### 1. 🎼 Generate Prompt Song (Inspiration Mode)
+Generate AI music based on simple text descriptions. AI automatically creates title, lyrics, and style.
+
+**Cost**: 5 credits per generation (creates 2 songs)
+
+**Parameters:**
+- `prompt` (str): Simple description of the music theme (1-1200 characters)
+- `instrumental` (bool): Whether to generate instrumental music only
+- `style` (str, optional): Music style (e.g., "ambient", "pop", "rock")
+
+**Example Prompts:**
+```
+"Help me generate a song about a peaceful morning"
+"Want a song that expresses longing"
+"Create music about friendship"
+```
+
+**Output Example:**
+```
+✅ Song 1 generated successfully!
+
+📌 Title: Peaceful Morning
+🆔 ID: c7630638-b8ba-4984-876b-6dd7e6eeb796
+🔗 Download URL: https://cdn.musicmcp.ai/songs/abc123.mp3
+🖼️  Cover Image: https://cdn.musicmcp.ai/images/abc123.jpg
+⏱️  Duration: 180s
+🎵 Style Tags: ambient, meditation, peaceful
+🎹 Instrumental: No
+📅 Created: 2025-01-15T10:30:45.123Z
+📝 Lyrics Preview:
+[Verse]
+Gentle sunlight fills the room
+Morning dew and sweet perfume...
+
+You can download or play the audio from the URL above.
+
+✅ Song 2 generated successfully!
+
+📌 Title: Morning Peace
+🆔 ID: d8741749-c9cb-5095-987c-7ee8f7ffb907
+🔗 Download URL: https://cdn.musicmcp.ai/songs/def456.mp3
+🖼️  Cover Image: https://cdn.musicmcp.ai/images/def456.jpg
+⏱️  Duration: 213s
+🎵 Style Tags: ambient, meditation, peaceful
+🎹 Instrumental: No
+📅 Created: 2025-01-15T10:30:45.126Z
+📝 Lyrics Preview:
+[Verse]
+Calm and quiet, soft and still
+Peaceful thoughts upon the hill...
+
+You can download or play the audio from the URL above.
+```
+
+### 2. 🎵 Generate Custom Song (Custom Mode)
+Generate AI music with specific lyrics, title, and style parameters that you provide.
+
+**Cost**: 5 credits per generation (creates 2 songs)
+
+**Parameters:**
+- `title` (str): Song title (required)
+- `instrumental` (bool): Whether to generate instrumental music only (required)
+- `lyric` (str, optional): Complete lyrics content (not required when instrumental is true)
+- `tags` (str, optional): Music style tags (e.g., 'pop', 'rock', 'folk')
+
+**Example Usage:**
+```
+Please help me generate a song:
+Title: Summer Dreams
+Lyrics: [complete lyrics content]
+Style: folk
+
+Or for instrumental:
+Title: Summer Breeze
+Instrumental: yes
+Style: ambient
+```
+
+**Output Example:**
+```
+✅ Custom song 'Summer Dreams' (version 1) generated successfully!
+
+📌 Title: Summer Dreams
+🆔 ID: d1ed75a7-3e0b-42c6-b2be-7631204074fe
+🔗 Download URL: https://cdn.musicmcp.ai/songs/xyz789.mp3
+🖼️ Cover Image: https://cdn.musicmcp.ai/images/xyz789.jpg
+⏱️ Duration: 195s
+🎵 Style Tags: folk, acoustic, summer
+🎹 Instrumental: No
+📅 Created: 2025-01-15T11:45:30.456Z
+📝 Lyrics Preview:
+[Verse]
+Walking through the summer fields
+Golden wheat and nature's yields...
+
+You can download or play the audio from the URL above.
+
+✅ Custom song 'Summer Dreams' (version 2) generated successfully!
+
+📌 Title: Summer Dreams
+🆔 ID: e2fe86b8-4f1c-53d7-c3cf-8742305185gf
+🔗 Download URL: https://cdn.musicmcp.ai/songs/uvw012.mp3
+🖼️ Cover Image: https://cdn.musicmcp.ai/images/uvw012.jpg
+⏱️ Duration: 203s
+🎵 Style Tags: folk, acoustic, summer
+🎹 Instrumental: No
+📅 Created: 2025-01-15T11:45:30.459Z
+📝 Lyrics Preview:
+[Verse]
+Walking through the summer fields
+Golden wheat and nature's yields...
+
+You can download or play the audio from the URL above.
+```
+
+### 3. ✅ Check Credit Balance
+Check if your API key is valid and see your remaining credits.
+
+**Cost**: Free
+
+**Example Usage:**
+```
+"Check my credit balance"
+"How many credits do I have left?"
+```
+
+### 4. 🏥 Check API Health
+Monitor the health status of the MusicMCP.AI API service.
+
+**Cost**: Free
+
+**Example Usage:**
+```
+"Check API service status"
+```
+
+## 💰 Credits & Pricing
+
+| Operation | Credits Cost | Output |
+|-----------|-------------|--------|
+| Generate Inspiration Music | 5 credits | 2 songs |
+| Generate Custom Music | 5 credits | 2 songs |
+| Query Music Status | 0 credits (Free) | - |
+| Check Credit Balance | 0 credits (Free) | - |
+| API Health Check | 0 credits (Free) | - |
+
+## 💡 Example Usage
+
+⚠️ **Note**: MusicMCP.AI credits are required to use the music generation tools.
+
+### Try asking Claude:
+
+#### **Inspiration Mode:**
+- "Please help me generate a song about a peaceful morning"
+- "Want a song that expresses longing"
+- "Create music about friendship"
+- "Generate an ambient music track"
+
+#### **Custom Mode:**
+- "Please help me generate a song, Title: Summer Dreams, Lyrics: [complete lyrics], Style: folk"
+- "Create a song, Title: Spring Promise, Lyrics: [complete lyrics], Pop style"
+- "Generate an instrumental song, Title: Ocean Breeze, Style: ambient"
+
+#### **Management Functions:**
+- "Check my credit balance"
+- "How many credits do I have left?"
+- "Check API service status"
+
+## 📦 Installation
+
+### Using uv (Recommended)
+```bash
+uvx aimusic-mcp
+```
+
+### Using pip
+```bash
+pip install aimusic-mcp
+```
+
+## 🔌 API Integration
+
+This MCP server integrates with MusicMCP.AI's RESTful API:
+
+- **`POST /music/generate/inspiration`**: Create music generation task (inspiration mode)
+- **`POST /music/generate/custom`**: Create custom music generation task
+- **`POST /music/generate/query`**: Query music status (batch query supported)
+- **`GET /credit`**: Check credit balance
+- **`GET /health`**: Check API service health
+
+### 🔄 Async API Workflow
+
+Music generation is **asynchronous**. The MCP server handles this automatically:
+
+**Step 1: Submit Generation Request**
+```bash
+POST /music/generate/inspiration or /music/generate/custom
+→ Returns: {"code": 200, "data": {"ids": ["id1", "id2"]}}
+```
+
+**Step 2: Automatic Polling (handled internally by MCP)**
+```bash
+POST /music/generate/query with {"ids": ["id1", "id2"]}
+→ Polls every 2 seconds until status = 1 (completed)
+→ Song status: 0 = Failed, 1 = Completed, 2 = In Progress
+```
+
+**Step 3: Return Complete Song Information**
+```
+Once all songs are completed, returns full details:
+- songName, songUrl, imgUrl, duration, tags, etc.
+```
+
+**Behind the Scenes:**
+1. User calls `generate_prompt_song()` or `generate_custom_song()`
+2. MCP sends generation request → receives 2 song IDs
+3. MCP automatically polls `/music/generate/query` every 2 seconds
+4. When all songs complete (status=1), returns download URLs
+5. Default timeout: 10 minutes (configurable via `TIME_OUT_SECONDS`)
+
+**Important Notes:**
+- ⏱️ Generation typically takes 2-5 minutes per song
+- 🔁 The MCP server handles all polling automatically
+- 🎵 Each generation always creates 2 song variations
+- 💰 Credits (5) are deducted when generation request succeeds
+- ⚠️ If generation fails, credits are NOT consumed
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **API Key Error**: Ensure `MUSICMCP_API_KEY` is set correctly
+   - Use the `check_credit_balance` tool to check your key
+
+2. **Insufficient Credits (402 Error)**: You don't have enough credits
+   - Check your balance at https://www.musicmcp.ai
+   - Recharge your account
+
+3. **Timeout Errors**: Increase `TIME_OUT_SECONDS` if music generation takes longer
+
+### Logs
+
+When running with Claude Desktop, logs can be found at:
+
+- **Windows**: `%APPDATA%\Claude\logs\mcp-server-MusicMCP.AI.log`
+- **macOS**: `~/Library/Logs/Claude/mcp-server-MusicMCP.AI.log`
+
+## 🧪 Development
+
+### Running Tests
+```bash
+pytest tests/
+```
+
+### Local Development
+```bash
+python -m musicmcp_ai_mcp.api
+```
+
+### Code Structure
+```
+musicmcp_ai_mcp/
+├── __init__.py          # Package initialization
+├── __main__.py          # CLI entry point
+└── api.py               # Core MCP server implementation (430 lines)
+```
+
+## 🔗 Links
+
+- **Platform**: https://www.musicmcp.ai
+- **Documentation**: https://www.musicmcp.ai/docs
+- **Support**: support@musicmcp.ai
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+
+**Made with ❤️ by the MusicMCP.AI Team**
+
+*Transform your ideas into music with AI*
+
+</div>
