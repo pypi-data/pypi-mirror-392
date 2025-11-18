@@ -1,0 +1,96 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "beets-alternatives"
+version = "0.14.0"
+description = "beets plugin to manage multiple files"
+authors = [
+  { name = "Thomas Scholtes", email = "geigerzaehler@axiom.fm" },
+  { name = "wisp3rwind", email = "wisp3rwind@posteo.eu" },
+]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["beets>=2.1.0, <3", "typing-extensions>=4.9.0"]
+classifiers = [
+  "Topic :: Multimedia :: Sound/Audio",
+  "Topic :: Multimedia :: Sound/Audio :: Players :: MP3",
+  "License :: OSI Approved :: MIT License",
+  "Environment :: Console",
+  "Programming Language :: Python",
+]
+
+[project.urls]
+Homepage = "http://www.github.com/geigerzaehler/beets-alternatives"
+Repository = "http://www.github.com/geigerzaehler/beets-alternatives"
+
+[dependency-groups]
+dev = [
+  "confuse>=2.0.1",
+  "coverage>=7.4.4",
+  "mediafile>=0.13.0",
+  "mock>=5.0.2",
+  "pyright>=1.1.340",
+  "pytest>=8.0.2",
+  "pytest-cov>=7.0.0",
+  "ruff>=0.14.0",
+  "typeguard>=4.1.5",
+  "pillow>=11.1.0",
+  "pytest-watcher>=0.4.3",
+  "tomli>=2.2.1",
+]
+
+[tool.hatch.build.targets.sdist]
+include = ["/beetsplug", "/CHANGELOG.md", "/README.md", "/LICENSE"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["beetsplug"]
+
+[tool.pytest.ini_options]
+addopts = "--cov --cov-report=term --cov-report=html --cov-branch --doctest-modules"
+filterwarnings = [
+  "error",
+  "ignore:.*pkgutil.get_loader.*:DeprecationWarning:confuse.util",
+  "ignore:.*beets.art.*:DeprecationWarning:beets",
+  "ignore::ResourceWarning:beets.util.artresizer",
+]
+
+[tool.pyright]
+typeCheckingMode = "strict"
+reportMissingTypeStubs = "none"
+# We haven’t made an effort to fix the following issues. Most are caused by
+# missing type annotations from beets.
+reportUnknownMemberType = "none"
+reportUnknownArgumentType = "none"
+reportUnknownVariableType = "none"
+
+[tool.ruff]
+target-version = "py310"
+unsafe-fixes = true
+preview = true
+
+[tool.ruff.lint]
+extend-select = [
+  "I",    # Sort imports
+  "C",    # Pyflakes conventions
+  "PTH",  # Use pathlib instead of os
+  "PIE",  # Misc. lints
+  "UP",   # Enforce modern Python syntax
+  "FURB", # Also enforce more modern Python syntax
+  "PT",   # Pytest style
+  "B",    # Bugbear, avoid common sources of bugs
+  "SIM",  # Simplify
+  "T20",  # Warn about `print()`
+  "RUF",
+  "C4",   # List comprehension
+]
+ignore = [
+  # Pyright checks for unused imports and does it better.
+  "F401",
+  # ternary can be less readable
+  "SIM108",
+]
+
+allowed-confusables = ["’"]
