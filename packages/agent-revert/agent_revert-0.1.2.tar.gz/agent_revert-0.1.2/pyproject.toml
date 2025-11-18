@@ -1,0 +1,71 @@
+[build-system]
+requires = [ "setuptools>=61.0", "wheel",]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-revert"
+version = "0.1.2"
+description = "A simple decorator for tracking and reverting agent actions"
+readme = "README.md"
+requires-python = ">=3.8"
+keywords = [ "agent", "tracking", "revert", "decorator",]
+classifiers = [ "Development Status :: 3 - Alpha", "Intended Audience :: Developers", "License :: OSI Approved :: MIT License", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3.8", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12", "Topic :: Software Development :: Libraries :: Python Modules",]
+dependencies = [ "requests>=2.25.0",]
+[[project.authors]]
+name = "Anshul Basia"
+email = "anshulbasia@alumni.iitd.ac.in"
+
+[[project.authors]]
+name = "Siddharth Goyal"
+email = "goyal.siddharth22@gmail.com"
+
+[[project.maintainers]]
+name = "Anshul Basia"
+email = "anshulbasia@alumni.iitd.ac.in"
+
+[[project.maintainers]]
+name = "Siddharth Goyal"
+email = "goyal.siddharth22@gmail.com"
+
+[project.license]
+text = "MIT"
+
+[project.optional-dependencies]
+dev = [ "pytest>=7.0.0", "pytest-asyncio>=0.21.0", "black>=23.0.0", "ruff>=0.1.0", "mypy>=1.0.0",]
+
+[project.urls]
+Homepage = "https://github.com/gateagent/govern"
+Repository = "https://github.com/gateagent/govern"
+Issues = "https://github.com/gateagent/govern"
+
+[tool.black]
+line-length = 100
+target-version = [ "py38", "py39", "py310", "py311",]
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+
+[tool.ruff.lint]
+select = [ "E", "F", "I", "N", "W", "UP",]
+ignore = []
+
+[tool.setuptools.package-data]
+agent_revert = [ "py.typed",]
+
+[tool.pytest.ini_options]
+testpaths = [ "tests",]
+python_files = [ "test_*.py",]
+python_classes = [ "Test*",]
+python_functions = [ "test_*",]
+asyncio_mode = "auto"
+
+[tool.setuptools.packages.find]
+where = [ "src",]
+include = [ "agent_revert*",]
