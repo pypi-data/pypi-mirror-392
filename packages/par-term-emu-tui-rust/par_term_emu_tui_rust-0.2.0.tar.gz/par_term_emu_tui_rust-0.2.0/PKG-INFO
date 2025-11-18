@@ -1,0 +1,331 @@
+Metadata-Version: 2.4
+Name: par-term-emu-tui-rust
+Version: 0.2.0
+Summary: Textual-based TUI demonstration of par-term-emu-tui-rust terminal emulator
+Project-URL: Homepage, https://github.com/paulrobello/par-term-emu-tui-rust
+Project-URL: Documentation, https://github.com/paulrobello/par-term-emu-tui-rust/blob/main/README.md
+Project-URL: Repository, https://github.com/paulrobello/par-term-emu-tui-rust
+Project-URL: Issues, https://github.com/paulrobello/par-term-emu-tui-rust/issues
+Project-URL: Discussions, https://github.com/paulrobello/par-term-emu-tui-rust/discussions
+Author-email: Paul Robello <probello@gmail.com>
+Maintainer-email: Paul Robello <probello@gmail.com>
+License: MIT License
+        
+        Copyright (c) 2025 Paul Robello
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+License-File: LICENSE
+Keywords: ansi,emulator,pty,sixel,terminal,terminal-emulator,textual,true-color,tui,unicode,vt100,vt220,vt320,vt420
+Classifier: Development Status :: 3 - Alpha
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: MacOS
+Classifier: Operating System :: Microsoft :: Windows :: Windows 10
+Classifier: Operating System :: Microsoft :: Windows :: Windows 11
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Terminals
+Classifier: Topic :: Terminals :: Terminal Emulators/X Terminals
+Classifier: Typing :: Typed
+Requires-Python: >=3.14
+Requires-Dist: par-term-emu-core-rust>=0.2.3
+Requires-Dist: pyperclip>=1.11.0
+Requires-Dist: pyyaml>=6.0.3
+Requires-Dist: textual[syntax]>=6.6.0
+Requires-Dist: xdg-base-dirs>=6.0.2
+Description-Content-Type: text/markdown
+
+# Par Term Emu TUI Rust
+
+[![PyPI](https://img.shields.io/pypi/v/par_term_emu_tui_rust)](https://pypi.org/project/par_term_emu_tui_rust/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/par_term_emu_tui_rust.svg)](https://pypi.org/project/par_term_emu_tui_rust/)
+![Runs on Linux | MacOS | Windows](https://img.shields.io/badge/runs%20on-Linux%20%7C%20MacOS%20%7C%20Windows-blue)
+![Arch x86-64 | ARM | AppleSilicon](https://img.shields.io/badge/arch-x86--64%20%7C%20ARM%20%7C%20AppleSilicon-blue)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/par_term_emu_tui_rust)
+![PyPI - License](https://img.shields.io/pypi/l/par_term_emu_tui_rust)
+
+A modern terminal emulator TUI built with [Textual](https://textual.textualize.io/) and [par-term-emu-core-rust](https://github.com/paulrobello/par-term-emu-core-rust), featuring efficient rendering, comprehensive ANSI support, and advanced terminal features.
+
+![Screenshot](Screenshot.png)
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoffee.com/probello3)
+
+## What's New in v0.2.0
+
+### Code Quality & Testing
+- Fixed all lint errors (22 → 0) and achieved 100% type checking compliance
+- Enhanced test suite reliability with all 20 tests passing
+- Added pytest-asyncio support for async clipboard tests
+- Improved code consistency and type safety across codebase
+
+## Quick Start
+
+```bash
+# Clone and install
+git clone https://github.com/paulrobello/par-term-emu-tui-rust.git
+cd par-term-emu-tui-rust
+uv sync
+
+# Install components (recommended)
+par-term-emu-tui-rust install all
+
+# Run the TUI
+make run
+```
+
+See the [Quick Start Guide](docs/QUICK_START.md) for detailed instructions.
+
+## Features
+
+- **Efficient Rendering** - Textual Line API for optimal performance
+- **Full ANSI Support** - 16/256/true color, bold, italic, underline, and more
+- **Scrollback Buffer** - Navigate history with keyboard and mouse
+- **Mouse Support** - Text selection, clickable URLs, and mouse tracking
+- **Hyperlinks** - OSC 8 hyperlinks and auto-detected plain text URLs
+- **Notifications** - OSC 9/777 notification support with toast messages
+- **Shell Integration** - Working directory tracking, prompt navigation
+- **Screenshots** - Multiple formats (PNG, SVG, HTML) with auto-capture
+- **Themes** - 12 built-in themes with custom theme support
+- **Clipboard** - Cross-platform copy/paste with OSC 52 support
+
+See [Features](docs/FEATURES.md) for complete feature documentation.
+
+## Documentation
+
+### Getting Started
+- [Quick Start Guide](docs/QUICK_START.md) - Get up and running in 5 minutes
+- [Installation Guide](docs/INSTALLATION.md) - Detailed installation instructions
+- [Usage Guide](docs/USAGE.md) - Command-line options and workflows
+
+### Reference
+- [Features](docs/FEATURES.md) - Complete feature descriptions
+- [Key Bindings](docs/KEY_BINDINGS.md) - Keyboard shortcuts and mouse actions
+- [Configuration Reference](docs/CONFIG_REFERENCE.md) - All configuration options
+- [Screenshots Guide](docs/SCREENSHOTS.md) - Screenshot functionality
+
+### Advanced
+- [Architecture](docs/ARCHITECTURE.md) - System design and implementation
+- [Debug Guide](docs/DEBUG.md) - Debugging and development
+- [Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues and solutions
+- [Contributing](CONTRIBUTING.md) - Development setup and guidelines
+
+## Installation
+
+### Prerequisites
+
+- Python 3.12 or higher
+- uv package manager
+- Terminal with true color support
+
+### Install from Source
+
+```bash
+# Clone repository
+git clone https://github.com/paulrobello/par-term-emu-tui-rust.git
+cd par-term-emu-tui-rust
+
+# Install dependencies
+uv sync
+
+# Install all components
+par-term-emu-tui-rust install all
+```
+
+See [Installation Guide](docs/INSTALLATION.md) for detailed instructions.
+
+## Basic Usage
+
+```bash
+# Run with default shell
+par-term-emu-tui-rust
+
+# Use custom shell
+par-term-emu-tui-rust --shell /bin/zsh
+
+# Apply theme
+par-term-emu-tui-rust --theme solarized-dark
+
+# Take screenshot
+par-term-emu-tui-rust --screenshot 3 --auto-quit 5
+```
+
+### Key Bindings
+
+| Shortcut | Action |
+|----------|--------|
+| **Ctrl+Shift+Q** | Quit application |
+| **Ctrl+Shift+S** | Take screenshot |
+| **Ctrl+Shift+C** | Copy selection |
+| **Shift+PageUp/Down** | Scroll history |
+| **Shift+Home/End** | Jump to top/bottom |
+
+See [Key Bindings](docs/KEY_BINDINGS.md) for complete reference.
+
+## Configuration
+
+Configuration file location: `~/.config/par-term-emu-tui-rust/config.yaml`
+
+**Create default configuration:**
+```bash
+par-term-emu-tui-rust --init-config
+```
+
+**Essential settings:**
+```yaml
+# Theme
+theme: "dark-background"
+
+# Scrollback
+scrollback_lines: 10000
+
+# Clipboard
+auto_copy_selection: true
+middle_click_paste: true
+
+# Screenshots
+screenshot_format: "png"
+```
+
+See [Configuration Reference](docs/CONFIG_REFERENCE.md) for all options.
+
+## Technology
+
+- **Python** 3.12+ - Application logic
+- **Textual** - TUI framework
+- **par-term-emu-core-rust** - Terminal emulation (Rust)
+- **PyYAML** - Configuration
+- **pyperclip** - Clipboard support
+- **xdg-base-dirs** - XDG compliance
+
+## Security & Safety Notes
+
+Par Term Emu TUI Rust aims to provide sensible, configurable defaults for
+potentially sensitive features:
+
+- **Clipboard access (OSC 52)**  
+  Controlled by `expose_system_clipboard`:
+  - When `true` (default), terminal applications can read/write the system clipboard
+    via OSC 52 escape sequences.
+  - When `false`, clipboard reads from applications are blocked.
+
+- **Clickable URLs**  
+  Clickable links (OSC 8 and auto-detected plain URLs) are allowed only for
+  configured schemes:
+  - `allowed_url_schemes` defaults to: `http`, `https`, `ftp`, `ftps`, `file`, `mailto`.
+  - Unknown/unsupported schemes are blocked; when `warn_on_unknown_url_scheme` is
+    `true`, a non-fatal warning is shown in the TUI instead of opening the link.
+
+- **Escape sequence safety**  
+  Some sequences can be powerful (and potentially dangerous). You can harden
+  behavior with:
+  - `disable_insecure_sequences`: when `true`, the Rust core filters out escape
+    sequences considered risky.
+
+See the [Configuration Reference](docs/CONFIG_REFERENCE.md) for details and
+recommended values for locked-down environments.
+
+## Architecture
+
+```mermaid
+graph TD
+    App[TerminalApp]
+    Widget[TerminalWidget]
+    Core[Terminal Core Rust]
+    Render[Rendering Engine]
+    Display[Display]
+
+    App --> Widget
+    Widget --> Core
+    Core --> Render
+    Render --> Display
+
+    style App fill:#e65100,stroke:#ff9800,stroke-width:3px,color:#ffffff
+    style Widget fill:#1b5e20,stroke:#4caf50,stroke-width:2px,color:#ffffff
+    style Core fill:#0d47a1,stroke:#2196f3,stroke-width:2px,color:#ffffff
+    style Render fill:#4a148c,stroke:#9c27b0,stroke-width:2px,color:#ffffff
+    style Display fill:#880e4f,stroke:#c2185b,stroke-width:2px,color:#ffffff
+```
+
+See [Architecture](docs/ARCHITECTURE.md) for detailed system design.
+
+## Contributing
+
+Contributions are welcome! Please read the [Contributing Guide](CONTRIBUTING.md) for:
+
+- Development setup
+- Code quality standards
+- Testing requirements
+- Pull request process
+
+### Development Setup
+
+```bash
+# Clone repository
+git clone https://github.com/paulrobello/par-term-emu-tui-rust.git
+cd par-term-emu-tui-rust
+
+# Install dependencies
+uv sync
+
+# Install pre-commit hooks
+uv run pre-commit install
+
+# Run quality checks
+make checkall
+```
+
+## Resources
+
+- [GitHub Repository](https://github.com/paulrobello/par-term-emu-tui-rust)
+- [Issue Tracker](https://github.com/paulrobello/par-term-emu-tui-rust/issues)
+- [Discussions](https://github.com/paulrobello/par-term-emu-tui-rust/discussions)
+- [Textual Documentation](https://textual.textualize.io/)
+- [par-term-emu-core-rust](https://github.com/paulrobello/par-term-emu-core-rust)
+
+## Troubleshooting
+
+For common issues and solutions, see the [Troubleshooting Guide](docs/TROUBLESHOOTING.md).
+
+**Quick diagnostics:**
+```bash
+# Enable debug logging
+par-term-emu-tui-rust --debug
+
+# Test with minimal config
+par-term-emu-tui-rust --auto-quit 2
+```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Author
+
+Paul Robello - probello@gmail.com
+
+## Acknowledgments
+
+- Built with [Textual](https://textual.textualize.io/)
+- Terminal emulation by [par-term-emu-core-rust](https://github.com/paulrobello/par-term-emu-core-rust)
+- Inspired by modern terminal emulators (iTerm2, Alacritty, Wezterm)
