@@ -1,0 +1,923 @@
+Metadata-Version: 2.4
+Name: synq-ai
+Version: 0.2.0
+Summary: Python SDK for Synq - Multi-Agent AI Interaction System
+Home-page: https://github.com/yourusername/synq
+Author: Synq Team
+Author-email: Synq Team <support@synq.dev>
+License: Proprietary
+Keywords: ai,agents,multi-agent,openai,gpt,chatbot,simulation
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: License :: Other/Proprietary License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: requests>=2.31.0
+Requires-Dist: typing-extensions>=4.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: flake8>=6.0.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Dynamic: author
+Dynamic: home-page
+Dynamic: license-file
+Dynamic: requires-python
+
+# Synq 🚀
+
+**Multi-Agent AI Interaction System**
+
+Synq is a powerful platform for orchestrating conversations between multiple AI agents. Create sophisticated multi-agent systems, simulate social interactions, build AI-to-AI negotiations, and more—all through simple APIs.
+
+> **Note:** This is proprietary software. This documentation is for users with authorized access to the Synq codebase.
+
+---
+
+## 📖 Table of Contents
+
+- [What is Synq?](#what-is-synq)
+- [Key Features](#key-features)
+- [Quick Start](#quick-start)
+- [Ways to Use Synq](#ways-to-use-synq)
+  - [1. Python SDK (Orchestration)](#1-python-sdk-orchestration)
+  - [2. Agent SDK (Build Custom Agents)](#2-agent-sdk-build-custom-agents)
+  - [3. REST API](#3-rest-api)
+  - [4. WebSocket API](#4-websocket-api)
+  - [5. Web UI](#5-web-ui)
+- [Installation](#installation)
+- [Architecture](#architecture)
+- [Use Cases](#use-cases)
+- [API Reference](#api-reference)
+- [Examples](#examples)
+- [Development](#development)
+- [License](#license)
+
+---
+
+## What is Synq?
+
+Synq enables you to:
+
+- **Orchestrate AI Conversations**: Create "sandboxes" where multiple AI agents interact autonomously
+- **Build Custom Agents**: Connect your own AI agents using Python or Go SDKs
+- **Control & Monitor**: Watch conversations in real-time via WebSocket streams
+- **Generate Insights**: Automatically summarize conversations with structured output formats
+- **Scale Effortlessly**: Run multiple concurrent conversations with automatic cleanup
+
+**No complex infrastructure needed** — just start the server and begin orchestrating AI agents.
+
+---
+
+## Key Features
+
+✨ **Multi-Agent Orchestration** — Coordinate conversations between 2+ AI agents  
+🔌 **Flexible Agent Integration** — Use built-in AI models (OpenAI, Anthropic) or bring your own  
+🎯 **Structured Outputs** — Generate summaries, decisions, or custom JSON from conversations  
+⚡ **Real-Time Streaming** — WebSocket support for live conversation monitoring  
+🔒 **Sandboxed Conversations** — Isolated environments with automatic TTL-based cleanup  
+🛠️ **Multiple Interfaces** — Python SDK, REST API, WebSocket API, and Web UI  
+📦 **Production Ready** — Built in Go for performance and reliability  
+
+---
+
+## Quick Start
+
+### 1. Start the Synq Server
+
+```bash
+# Navigate to the Synq directory
+cd /path/to/synq
+
+# Start the server
+go run cmd/synq/main.go
+```
+
+The server will start on `http://localhost:8080`
+
+### 2. Install Python SDK
+
+```bash
+# From the Synq repository
+cd /path/to/synq/python
+pip install -e .
+```
+
+### 3. Run Your First Conversation
+
+```python
+from synq import SynqClient, OutputFormat, OutputFormatType
+
+# Connect to Synq
+client = SynqClient(base_url="http://localhost:8080")
+
+# Create two AI agents
+client.create_agent(
+    agent_id="alice",
+    provider="openai",
+    system_prompt="You are Alice, a friendly software engineer.",
+    model="gpt-4o-mini",
+    temperature=0.7
+)
+
+client.create_agent(
+    agent_id="bob",
+    provider="openai",
+    system_prompt="You are Bob, an enthusiastic product manager.",
+    model="gpt-4o-mini",
+    temperature=0.7
+)
+
+# Create a sandbox for them to talk
+sandbox = client.create_sandbox(
+    sandbox_id="my_first_conversation",
+    agent_ids=["alice", "bob"],
+    ttl_seconds=3600
+)
+
+# Start the conversation
+client.start_ai_conversation(sandbox_id="my_first_conversation", rounds=5)
+
+# Get the transcript
+messages = client.get_messages(sandbox_id="my_first_conversation")
+for msg in messages:
+    print(f"{msg.from_agent_id}: {msg.payload['content']}")
+
+# Clean up
+client.close_sandbox(sandbox_id="my_first_conversation")
+```
+
+🎉 **That's it!** You've orchestrated your first multi-agent conversation.
+
+---
+
+## Ways to Use Synq
+
+Synq offers multiple interfaces to fit your workflow:
+
+### 1. Python SDK (Orchestration)
+
+**Best for:** Orchestrating conversations, running experiments, building AI simulations
+
+The Python SDK is the easiest way to create and manage multi-agent conversations.
+
+#### Installation
+
+```bash
+# Install from the Synq repository
+cd /path/to/synq/python
+pip install -e .
+```
+
+#### Basic Usage
+
+```python
+from synq import SynqClient, OutputFormat, OutputFormatType
+
+client = SynqClient(base_url="http://localhost:8080")
+
+# List available agents
+agents = client.list_agents()
+
+# Create a sandbox
+sandbox = client.create_sandbox(
+    sandbox_id="dating_sim",
+    agent_ids=["alice", "bob"],
+    ttl_seconds=3600,
+    output_format=OutputFormat(
+        type=OutputFormatType.SUMMARY,
+        instructions="Summarize their compatibility and chemistry"
+    )
+)
+
+# Start conversation
+client.start_ai_conversation(sandbox_id="dating_sim", rounds=10)
+
+# Get messages
+messages = client.get_messages(sandbox_id="dating_sim")
+
+# Generate structured output
+summary = client.generate_output(sandbox_id="dating_sim")
+print(summary)
+```
+
+#### Key Methods
+
+| Method | Description |
+|--------|-------------|
+| `create_agent()` | Register a new AI agent |
+| `list_agents()` | Get all available agents |
+| `create_sandbox()` | Create a conversation space |
+| `start_ai_conversation()` | Begin autonomous conversation |
+| `get_messages()` | Retrieve conversation history |
+| `generate_output()` | Get structured summary/output |
+| `close_sandbox()` | End conversation and cleanup |
+
+**[📚 Full Python SDK Documentation →](python/synq/)**
+
+---
+
+### 2. Agent SDK (Build Custom Agents)
+
+**Best for:** Connecting your own AI logic, building specialized agents, integrating external systems
+
+Build agents that connect to Synq sandboxes and participate in conversations. Available in Python and Go.
+
+#### Python Agent SDK
+
+```python
+from synq_agent import AgentClient
+
+# Create your agent
+client = AgentClient(
+    agent_id="my_custom_bot",
+    pod_id="sb_conversation_123",
+    synq_url="ws://localhost:8080"
+)
+
+# Handle incoming messages
+@client.on_message
+def handle_message(msg):
+    print(f"Received: {msg.content}")
+    
+    # Your custom AI logic here
+    response = generate_response(msg.content)
+    
+    # Send response back
+    client.send(response)
+
+# Run the agent
+client.run()
+```
+
+#### Go Agent SDK
+
+```go
+import synqagent "github.com/synq/agent-sdk-go"
+
+// Create agent
+client := synqagent.NewAgentClient("my_bot", "sb_123", "ws://localhost:8080")
+
+// Handle messages
+client.OnMessage(func(msg synqagent.Message) {
+    fmt.Printf("Received: %s\n", msg.Content)
+    
+    // Your logic here
+    response := generateResponse(msg.Content)
+    
+    // Send response
+    client.SendSimple(response)
+})
+
+// Run
+client.Run(context.Background())
+```
+
+#### Use Cases for Custom Agents
+
+- **Integrate OpenAI/Anthropic directly** — Use your own API keys and configurations
+- **Connect to LangChain/LlamaIndex** — Leverage RAG and other advanced patterns
+- **Build specialized logic** — Rules engines, database queries, API calls
+- **Multi-modal agents** — Process images, audio, or other data types
+- **Human-in-the-loop** — Build agents that consult humans before responding
+
+**[📚 Agent SDK Documentation →](sdk/README.md)**
+
+---
+
+### 3. REST API
+
+**Best for:** Integration with any language/platform, webhooks, serverless functions
+
+Full REST API for all Synq functionality.
+
+#### Base URL
+
+```
+http://localhost:8080/v1
+```
+
+#### Key Endpoints
+
+**Agents**
+
+```bash
+# Create an agent
+POST /v1/agents
+{
+  "id": "agent_name",
+  "provider": "openai",  # or "anthropic", "custom", "external"
+  "system_prompt": "You are a helpful assistant",
+  "model": "gpt-4o-mini",
+  "temperature": 0.7,
+  "api_key": "optional_key"  # Falls back to env var
+}
+
+# List agents
+GET /v1/agents
+
+# Get specific agent
+GET /v1/agents/{agent_id}
+
+# Update agent
+PATCH /v1/agents/{agent_id}
+{
+  "system_prompt": "Updated prompt",
+  "metadata": {"key": "value"}
+}
+
+# Delete agent
+DELETE /v1/agents/{agent_id}
+```
+
+**Sandboxes (Pods)**
+
+```bash
+# Create sandbox
+POST /v1/pods
+{
+  "agents": ["agent1", "agent2"],
+  "ttl_seconds": 3600,
+  "metadata": {"experiment": "test_1"}
+}
+
+# List sandboxes
+GET /v1/pods
+
+# Get sandbox details
+GET /v1/pods/{sandbox_id}
+
+# Get messages
+GET /v1/pods/{sandbox_id}/messages
+
+# Inject a message
+POST /v1/pods/{sandbox_id}/inject
+{
+  "from_agent": "system",
+  "content": "Change topic to sports"
+}
+
+# Stop sandbox
+POST /v1/pods/{sandbox_id}/stop
+```
+
+#### Example: cURL
+
+```bash
+# Create two agents
+curl -X POST http://localhost:8080/v1/agents \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "alice",
+    "provider": "openai",
+    "system_prompt": "You are Alice, a software engineer",
+    "model": "gpt-4o-mini"
+  }'
+
+curl -X POST http://localhost:8080/v1/agents \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "bob",
+    "provider": "openai",
+    "system_prompt": "You are Bob, a product manager",
+    "model": "gpt-4o-mini"
+  }'
+
+# Create sandbox
+curl -X POST http://localhost:8080/v1/pods \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agents": ["alice", "bob"],
+    "ttl_seconds": 3600
+  }'
+# Returns: {"id": "sb_abc123", ...}
+
+# Get messages
+curl http://localhost:8080/v1/pods/sb_abc123/messages
+```
+
+**[📚 Complete REST API Reference →](#api-reference)**
+
+---
+
+### 4. WebSocket API
+
+**Best for:** Real-time monitoring, live dashboards, streaming UIs
+
+Stream conversation messages in real-time as they happen.
+
+#### Connection URLs
+
+**Stream Sandbox Messages:**
+```
+ws://localhost:8080/v1/pods/{sandbox_id}/stream
+```
+
+**Connect Custom Agent:**
+```
+ws://localhost:8080/v1/pods/{sandbox_id}/agents/{agent_id}/connect
+```
+
+#### Example: JavaScript
+
+```javascript
+// Stream a conversation in real-time
+const ws = new WebSocket('ws://localhost:8080/v1/pods/sb_123/stream');
+
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  
+  if (data.type === 'message') {
+    console.log(`${data.from}: ${data.content}`);
+  }
+};
+
+ws.onopen = () => console.log('Connected to sandbox stream');
+```
+
+#### Example: Python
+
+```python
+import asyncio
+import websockets
+import json
+
+async def stream_conversation(sandbox_id):
+    uri = f"ws://localhost:8080/v1/pods/{sandbox_id}/stream"
+    
+    async with websockets.connect(uri) as websocket:
+        print("Connected to sandbox stream")
+        
+        async for message in websocket:
+            data = json.loads(message)
+            
+            if data['type'] == 'message':
+                print(f"{data['from']}: {data['content']}")
+
+asyncio.run(stream_conversation("sb_123"))
+```
+
+#### Message Types
+
+**From Synq to Client:**
+
+```json
+// Connection confirmed
+{"type": "connected", "sandbox_id": "sb_123"}
+
+// New message
+{
+  "type": "message",
+  "message": {
+    "id": "msg_456",
+    "from": "alice",
+    "content": "Hello!",
+    "created_at": "2025-11-14T12:00:00Z"
+  }
+}
+
+// Agent joined
+{"type": "agent_joined", "agent_id": "bob"}
+
+// Conversation ended
+{"type": "completed", "reason": "all_rounds_complete"}
+
+// Error
+{"type": "error", "error": "Agent not found"}
+```
+
+**From Client to Synq** (when connected as agent):
+
+```json
+// Send message
+{
+  "type": "message",
+  "content": "Response text",
+  "metadata": {"confidence": 0.95}
+}
+```
+
+---
+
+### 5. Web UI
+
+**Best for:** Visual exploration, demos, quick testing
+
+Synq includes a built-in web interface for managing agents and conversations.
+
+#### Access
+
+```
+http://localhost:8080/
+```
+
+#### Features
+
+- 📋 **Agent Management** — View, create, and edit agents
+- 💬 **Sandbox Dashboard** — Monitor active conversations
+- 📊 **Message History** — Browse conversation transcripts
+- ⚡ **Live Streaming** — Watch conversations in real-time
+- 🎨 **Visual Output** — Formatted display of structured outputs
+
+**Note:** The Web UI is currently in active development and features are being added regularly.
+
+---
+
+## Installation
+
+### Server (Go)
+
+**Prerequisites:**
+- Go 1.21+
+- API keys for AI providers (OpenAI, Anthropic, etc.)
+- Access to Synq repository
+
+**Setup:**
+
+```bash
+# Navigate to Synq directory
+cd /path/to/synq
+
+# Install dependencies
+go mod download
+
+# Set up environment variables
+# Create .env file with your API keys:
+# OPENAI_API_KEY=sk-...
+# ANTHROPIC_API_KEY=sk-ant-...
+
+# Run server
+go run cmd/synq/main.go
+
+# Or build binary
+go build -o synq cmd/synq/main.go
+./synq
+```
+
+Server will start on `http://localhost:8080`
+
+### Python SDK
+
+```bash
+# Install from the Synq repository
+cd /path/to/synq/python
+pip install -e .
+```
+
+### Python Agent SDK
+
+```bash
+cd /path/to/synq/sdk/python
+pip install -e .
+```
+
+### Go Agent SDK
+
+The Go Agent SDK is available in the repository at `/path/to/synq/sdk/go/`. Import it directly in your Go projects.
+
+---
+
+## Architecture
+
+Synq is built with a clean, modular architecture:
+
+```
+┌─────────────────────────────────────────────────┐
+│                   Clients                        │
+│  (Python SDK, REST API, WebSocket, Web UI)      │
+└────────────────┬────────────────────────────────┘
+                 │
+┌────────────────▼────────────────────────────────┐
+│              API Server (Go)                     │
+│  • REST Endpoints  • WebSocket Handlers         │
+└────────────────┬────────────────────────────────┘
+                 │
+    ┌────────────┼────────────┐
+    │            │            │
+    ▼            ▼            ▼
+┌─────────┐ ┌──────────┐ ┌──────────┐
+│ Agent   │ │ Sandbox  │ │ Message  │
+│Registry │ │ Manager  │ │   Bus    │
+└─────────┘ └──────────┘ └──────────┘
+    │            │            │
+    └────────────┼────────────┘
+                 │
+         ┌───────┴───────┐
+         ▼               ▼
+    ┌─────────┐     ┌─────────┐
+    │  Agent  │ ... │  Agent  │
+    │    1    │     │    N    │
+    └─────────┘     └─────────┘
+```
+
+**Components:**
+
+- **Agent Registry** — Stores agent configurations and AI implementations
+- **Sandbox Manager** — Creates and manages isolated conversation environments
+- **Message Bus** — Routes messages between agents in real-time
+- **Vector Index** — Enables semantic search across agents (future feature)
+
+---
+
+## Use Cases
+
+### 1. AI Simulations
+
+Simulate social interactions, debates, or negotiations:
+
+```python
+# Create a debate between two AI personas
+client.create_agent("liberal", provider="openai", 
+                   system_prompt="You are a liberal arguing for policy X")
+client.create_agent("conservative", provider="openai",
+                   system_prompt="You are a conservative arguing against policy X")
+
+sandbox = client.create_sandbox("debate", ["liberal", "conservative"])
+client.start_ai_conversation("debate", rounds=10)
+summary = client.generate_output("debate")  # Get debate summary
+```
+
+### 2. Dating/Social Matching
+
+Evaluate compatibility between personas:
+
+```python
+alice = create_agent("alice", "25F who loves hiking, reading sci-fi")
+bob = create_agent("bob", "28M who enjoys sports, travel")
+
+sandbox = client.create_sandbox(
+    "date_sim",
+    ["alice", "bob"],
+    output_format=OutputFormat(
+        type=OutputFormatType.JSON,
+        schema={"compatibility_score": "number", "insights": "string"}
+    )
+)
+
+client.start_ai_conversation("date_sim", rounds=8)
+result = client.generate_output("date_sim")
+# {"compatibility_score": 8.5, "insights": "Great match..."}
+```
+
+### 3. Multi-Agent Research
+
+Collaborate multiple AI agents on complex tasks:
+
+```python
+agents = ["researcher", "analyst", "critic", "synthesizer"]
+sandbox = client.create_sandbox("research_project", agents)
+
+# Inject research topic
+client.inject_message(sandbox, "system", "Research topic: AI safety")
+
+client.start_ai_conversation(sandbox, rounds=15)
+report = client.generate_output(sandbox)
+```
+
+### 4. Customer Service Simulation
+
+Test chatbot responses with AI personas:
+
+```python
+client.create_agent("customer", "Frustrated customer with billing issue")
+client.create_agent("support", "Empathetic support agent")
+
+sandbox = client.create_sandbox("support_test", ["customer", "support"])
+client.start_ai_conversation("support_test", rounds=6)
+
+# Analyze support agent's performance
+summary = client.generate_output("support_test")
+```
+
+### 5. Creative Collaboration
+
+Generate content through AI collaboration:
+
+```python
+agents = ["storyteller", "editor", "character_expert", "worldbuilder"]
+sandbox = client.create_sandbox("story_creation", agents,
+    output_format=OutputFormat(
+        type=OutputFormatType.CUSTOM,
+        instructions="Generate a complete short story with characters and world"
+    )
+)
+
+client.start_ai_conversation("story_creation", rounds=20)
+story = client.generate_output("story_creation")
+```
+
+---
+
+## API Reference
+
+### Python SDK
+
+#### SynqClient
+
+```python
+class SynqClient:
+    def __init__(self, base_url: str = "http://localhost:8080", timeout: int = 30)
+    
+    # Agent Management
+    def create_agent(self, agent_id: str, provider: str, system_prompt: str, 
+                    model: str = None, temperature: float = 0.7, 
+                    api_key: str = None) -> Agent
+    def list_agents(self) -> List[Agent]
+    def get_agent(self, agent_id: str) -> Optional[Agent]
+    def delete_agent(self, agent_id: str) -> Dict
+    
+    # Sandbox Management
+    def create_sandbox(self, sandbox_id: str, agent_ids: List[str], 
+                      ttl_seconds: int = 3600, 
+                      output_format: OutputFormat = None,
+                      context: Dict = None) -> Sandbox
+    def list_sandboxes(self) -> List[Sandbox]
+    def get_sandbox(self, sandbox_id: str) -> Optional[Sandbox]
+    def close_sandbox(self, sandbox_id: str) -> Dict
+    
+    # Conversation Control
+    def start_ai_conversation(self, sandbox_id: str, rounds: int = 5) -> Dict
+    def continue_conversation(self, sandbox_id: str, rounds: int = 3) -> Dict
+    def agent_respond(self, sandbox_id: str, agent_id: str, message: str) -> Dict
+    
+    # Message Management
+    def get_messages(self, sandbox_id: str) -> List[Message]
+    def inject_message(self, sandbox_id: str, from_agent: str, content: str) -> Dict
+    
+    # Output Generation
+    def generate_output(self, sandbox_id: str) -> Dict
+    
+    # Utilities
+    def health_check(self) -> Dict
+```
+
+#### OutputFormat
+
+```python
+class OutputFormat:
+    type: OutputFormatType  # SUMMARY, DECISION, JSON, CUSTOM
+    instructions: Optional[str]
+    schema: Optional[Dict]
+
+class OutputFormatType(Enum):
+    SUMMARY = "summary"      # Generate narrative summary
+    DECISION = "decision"    # Extract key decisions
+    JSON = "json"           # Structured JSON output
+    CUSTOM = "custom"       # Custom format with instructions
+```
+
+### Agent SDK (Python)
+
+```python
+from synq_agent import AgentClient
+
+client = AgentClient(
+    agent_id: str,           # Your agent's ID
+    pod_id: str,             # Sandbox ID to join
+    synq_url: str,           # WebSocket URL (default: ws://localhost:8080)
+    auto_reconnect: bool     # Auto-reconnect on disconnect (default: True)
+)
+
+@client.on_message
+def handle_message(msg: Message):
+    # msg.id, msg.from_agent, msg.content, msg.created_at, msg.metadata
+    pass
+
+client.send(content: str, metadata: Dict = None)
+client.run()  # Blocking
+client.stop()
+```
+
+### Agent SDK (Go)
+
+```go
+import synqagent "github.com/synq/agent-sdk-go"
+
+client := synqagent.NewAgentClient(agentID, podID, synqURL)
+
+client.OnMessage(func(msg synqagent.Message) {
+    // msg.From, msg.Content, msg.CreatedAt, msg.Metadata
+})
+
+client.Send(content string, metadata map[string]interface{}) error
+client.SendSimple(content string) error
+client.Run(ctx context.Context) error
+client.Stop()
+```
+
+---
+
+## Examples
+
+Check out the [`examples/`](examples/) directory for complete working examples:
+
+### Python SDK Examples
+
+- **[simple_synq_example.py](simple_synq_example.py)** - Basic two-agent conversation
+- **[my_first_synq_script.py](my_first_synq_script.py)** - Getting started tutorial
+- **[complete_synq_script.py](complete_synq_script.py)** - Full-featured example
+
+### Agent SDK Examples
+
+- **[Python Echo Bot](sdk/python/examples/echo_bot.py)** - Simple echo agent
+- **[Go Echo Bot](sdk/go/examples/echo_bot/main.go)** - Go implementation
+
+### Test Scripts
+
+- **[test_sdk.sh](test_sdk.sh)** - Test agent SDK integration
+- **[comprehensive_test.sh](comprehensive_test.sh)** - Full system test
+
+---
+
+## Development
+
+### Development Setup
+
+```bash
+# Navigate to Synq directory
+cd /path/to/synq
+
+# Install Go dependencies
+go mod download
+
+# Install Python SDK in development mode
+cd python
+pip install -e ".[dev]"
+
+# Run tests
+cd ..
+go test ./...
+pytest python/tests/
+```
+
+### Running Tests
+
+```bash
+# Comprehensive test suite
+./comprehensive_test.sh
+
+# Quick tests
+./quick_test.sh
+
+# SDK tests
+./test_sdk.sh
+```
+
+---
+
+## License
+
+**Proprietary** - All rights reserved
+
+This software is proprietary and confidential. Unauthorized copying, distribution, or use is strictly prohibited.
+
+---
+
+## Support
+
+For questions, issues, or feature requests, please contact the development team or refer to internal documentation.
+
+---
+
+## Roadmap
+
+Planned features and improvements:
+
+- JavaScript/TypeScript Agent SDK
+- Persistent storage for conversations
+- Advanced scheduling algorithms
+- Agent discovery via vector search
+- Webhook support for events
+- Multi-tenant support with authentication
+- Enhanced monitoring and analytics
+
+---
+
+## Built With
+
+- [Go](https://golang.org/) - High-performance backend
+- [Gorilla WebSocket](https://github.com/gorilla/websocket) - WebSocket support
+- [Anthropic API](https://www.anthropic.com/) - Claude models
+- [OpenAI API](https://openai.com/) - GPT models
+
+---
+
+## Quick Links
+
+- [Quick Start Guide](QUICKSTART.md)
+- [Usage Guide](USAGE_GUIDE.md) - Choose the right interface
+- [API Reference](API_REFERENCE.md) - Complete API documentation
+- [Python SDK Reference](python/synq/)
+- [Agent SDK Guide](sdk/README.md)
+- [Examples](examples/)
+
