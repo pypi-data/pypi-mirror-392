@@ -1,0 +1,30 @@
+FROM rapid7/insightconnect-python-3-slim-plugin:6.3.10
+
+WORKDIR /python/src
+
+ENV ORCHESTRATOR=true
+
+RUN apt-get update && apt-get install -y gosu
+
+ADD requirements.txt /python/src/requirements.txt
+
+ADD ./entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+{% if data.use_artifactory %}
+RUN pip install -U --pre r7_surcom_api --extra-index-url "https://artifacts.corp.rapid7.com/artifactory/api/pypi/pypi-local/simple"
+{% else %}
+RUN pip install -r requirements.txt
+{% endif %}
+
+
+ADD . /python/src
+
+RUN pip install .
+
+# NOTE: we are working around orchestrators not having the right permissions on the bind mounts
+# the entrypoint creates the directories with the right permissions then runs the connectors as nobody with gosu
+USER root
+
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

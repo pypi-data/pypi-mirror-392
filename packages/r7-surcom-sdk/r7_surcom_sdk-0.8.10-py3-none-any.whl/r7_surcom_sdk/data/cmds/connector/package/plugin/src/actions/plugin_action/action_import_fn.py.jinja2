@@ -1,0 +1,25 @@
+import {{ data.base_module }}
+from .schema import {{ data.action_name | underscore_to_camel }}Input, {{ data.action_name | underscore_to_camel }}Output, Component
+from ...util.icon_plugin_wrapper import call_connector_import_function
+
+{% if data.action_import %}
+# Import the Function
+{{ data.action_import }}
+{% endif %}
+
+
+class {{ data.action_name | underscore_to_camel }}({{ data.base_module }}.Action):
+
+    def __init__(self):
+        super(self.__class__, self).__init__(
+            name="{{ data.action_name }}",
+            description=Component.DESCRIPTION,
+            input={{ data.action_name | underscore_to_camel }}Input(),
+            output={{ data.action_name | underscore_to_camel }}Output()
+        )
+
+    def run(self, params={}):
+
+        result = call_connector_import_function({{ data.action_name }}, self.logger, params)
+
+        return {**result}

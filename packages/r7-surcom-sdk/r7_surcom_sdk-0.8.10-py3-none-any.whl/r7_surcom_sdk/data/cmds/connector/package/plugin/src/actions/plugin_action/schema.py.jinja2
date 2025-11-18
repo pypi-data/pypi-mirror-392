@@ -1,0 +1,42 @@
+import {{ data.base_module }}
+import json
+
+
+class Component:
+    DESCRIPTION = "{{ data.action.description }}"
+
+
+class Input:
+{%- for i in data.action.input.keys() | sort %}
+
+    {{ i | upper }} = "{{ i }}"
+    {% else %}pass
+{% endfor %}
+
+
+class Output:
+{%- for o in data.action.output.keys() | sort %}
+
+    {{ o | upper }} = "{{ o }}"
+    {% else %}pass
+{% endfor %}
+
+
+class {{ data.action_name | underscore_to_camel }}Input({{ data.base_module }}.Input):
+
+    schema = json.loads(r"""
+{{ data.action.input_schema }}
+    """)
+
+    def __init__(self):
+        super(self.__class__, self).__init__(self.schema)
+
+
+class {{ data.action_name | underscore_to_camel }}Output({{ data.base_module }}.Output):
+
+    schema = json.loads(r"""
+{{ data.action.output_schema }}
+    """)
+
+    def __init__(self):
+        super(self.__class__, self).__init__(self.schema)

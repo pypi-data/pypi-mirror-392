@@ -1,0 +1,14 @@
+# Required dependencies for all Surcom Plugins
+r7-surcom-api
+insightconnect-plugin-runtime
+
+aiofiles==24.1.0
+cryptography==46.0.1
+logstash-formatter==0.5.17
+{% if data.python_dependencies %}
+
+# Extra dependencies used by this Connector
+{% for dep in data.python_dependencies %}
+{{ dep }}
+{% endfor %}
+{% endif %}

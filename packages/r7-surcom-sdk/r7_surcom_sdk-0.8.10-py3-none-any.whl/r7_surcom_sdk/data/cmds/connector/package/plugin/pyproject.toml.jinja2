@@ -1,0 +1,17 @@
+[build-system]
+
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "{{ data.plugin_id }}"
+version = "{{ data.version}}"
+
+
+[tool.setuptools.package-data]
+# Include all .jinja2, .json and .yaml files at any level in the {{ data.plugin_id }}/ dir
+"{{ data.plugin_id }}" = ["**/*.jinja2", "**/*.json", "**/*.yaml"]
+
+
+[project.scripts]
+{{ data.plugin_id }} = "{{ data.plugin_id }}.__main__:main"
