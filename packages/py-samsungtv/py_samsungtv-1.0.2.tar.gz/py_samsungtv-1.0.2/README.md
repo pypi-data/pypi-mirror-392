@@ -1,0 +1,39 @@
+# pysamsungtv
+
+`pysamsungtv` is an async Python library that talks to Samsung TVs over HTTPS JSON-RPC.
+
+## Why
+
+Samsung, in their infinite wisdom, disabled ports 8001 and 8002. This breaks the existing Home Assistant integration/libraries for all 2024+ models. They still expose their JSON-RPC over port 1516/1515, but it is undocumented.
+
+I got frustrated enough to do a clean-room implemenation of it here.
+
+## Installation
+
+```bash
+# pypi
+pip install pysamsungtv
+
+# local dev
+just install
+```
+
+The package depends on `aiohttp` for HTTP/1.1 TLS transport. TLS verification is disabled by default because Samsung panels present self-signed certificates; set `verify_ssl=True` when the certificate chain is trusted on your host.
+
+## Usage
+
+Check [tests](tests/integration/test_live_client.py) for example usage.
+
+Every helper method corresponds to the JSON-RPC methods in the protocol notes (e.g. `get_tv_states`, `direct_channel_control`, `volume_up_down`, `remote_key_control`, `sound_mode_control`, etc). Each coroutine returns the parsed `result` body or raises a `SamsungTVError` subclass on transport/protocol failures. Custom RPCs can be issued with `SamsungTVClient.send_request()`.
+
+The optional `on_update` callback is invoked sequentially after every response. It receives the RPC method name and the parsed payload, making it easy to wire into Home Assistant's entity update routines.
+
+## Development
+
+- Install and run `pre-commit` (`pip install pre-commit && pre-commit install`) to ensure `mypy` and `pytest` pass locally before committing.
+- All code is typed and passes `mypy` using the configuration in `pyproject.toml`.
+- Run the test suite with `pytest`. Unit tests use fully mocked transports.
+- Integration tests require a real TV: set `SAMSUNG_TV_HOST` (plus optional `SAMSUNG_TV_PORT` and/or `SAMSUNG_TV_TOKEN`) and run `pytest -m integration`. If no token is supplied the first run will prompt for authorization and cache the returned token under `.pytest_cache/samsung_tv_token` for later runs.
+- A `Justfile` is included for convenience: `just install`, `just install-tests`, `just test`, `just mypy`, etc.
+- All command inputs are exposed as enums in `pysamsungtv.enums` (also re-exported at the package root) so you can rely on autocomplete/validation for things like `InputSource`, `PictureMode`, `SoundMode`, and `RemoteKey`.
+- Convenience helpers such as `set_picture_mode`, `set_sound_mode`, `select_speaker`, `select_input_source`, `set_volume`, `mute()/unmute()`, and `art_mode_on()/art_mode_off()` call the corresponding `*_control` RPCs for you.
