@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm[toml]"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sendmyl"
+authors = [
+  { name = "Philipp Schmitt", email = "philipp@schmitt.co" },
+]
+description = "Simple lib to send mail"
+readme = { file = "README.md", content-type = "text/markdown" }
+license = { file = "LICENSE" }
+requires-python = ">=3.7"
+dependencies = [
+  "myl-discovery >= 0.6.4",
+  "rich >= 13.0.0, < 15.0.0",
+  "rich-argparse >= 1.5.0, <2.0.0",
+]
+dynamic = ["version"]
+
+[tool.setuptools_scm]
+version_file = "version.txt"
+version_scheme = "only-version"
+local_scheme = "no-local-version"
+
+[project.urls]
+homepage = "https://github.com/pschmitt/sendmyl"
+documentation = "https://github.com/pschmitt/sendmyl/blob/HEAD/README.md"
+repository = "https://github.com/pschmitt/sendmyl"
+issues = "https://github.com/pschmitt/sendmyl/issues"
+
+[project.scripts]
+sendmyl = "sendmyl:main"
+justsendmail = "sendmyl:main" # legacy
+
+[project.optional-dependencies]
+dev = [
+  "black",
+  "pyinstaller",
+  "mypy"
+]
+
+[tool.black]
+line-length = 79
