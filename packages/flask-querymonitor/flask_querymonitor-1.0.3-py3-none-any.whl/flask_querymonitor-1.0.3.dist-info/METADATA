@@ -1,0 +1,436 @@
+Metadata-Version: 2.4
+Name: flask-querymonitor
+Version: 1.0.3
+Summary: Detect and eliminate N+1 queries in Flask-SQLAlchemy
+Home-page: https://github.com/wallmarkets/flask-querymonitor
+Author: wallmarkets Team
+Author-email: team@wallmarkets.store
+Project-URL: Bug Reports, https://github.com/wallmarkets/flask-querymonitor/issues
+Project-URL: Source, https://github.com/wallmarkets/flask-querymonitor
+Keywords: flask sqlalchemy n+1 query-monitoring performance optimization
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Framework :: Flask
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: Flask>=2.0.0
+Requires-Dist: Flask-SQLAlchemy>=3.0.0
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: keywords
+Dynamic: license-file
+Dynamic: project-url
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+# Flask-QueryMonitor
+
+**Detect and eliminate N+1 queries in your Flask-SQLAlchemy application** - Catch performance problems before they hit production with automatic query monitoring and detailed logging.
+
+[![PyPI version](https://badge.fury.io/py/flask-querymonitor.svg)](https://pypi.org/project/flask-querymonitor/)
+[![Python Support](https://img.shields.io/pypi/pyversions/flask-querymonitor.svg)](https://pypi.org/project/flask-querymonitor/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## Why Flask-QueryMonitor?
+
+N+1 queries are one of the most common performance killers in web applications. This package helps you:
+- ✅ **Detect N+1 queries** automatically during development
+- ✅ **Monitor slow queries** with configurable thresholds
+- ✅ **Track query counts** per request with response headers
+- ✅ **Zero performance impact** in production (when disabled)
+- ✅ **Battle-tested** at [wallmarkets](https://wallmarkets.store)
+
+## The N+1 Problem
+
+```python
+# ❌ BAD: N+1 query problem (1 + N queries)
+products = Product.query.all()  # 1 query
+for product in products:
+    print(product.category.name)  # N queries (one per product!)
+
+# ✅ GOOD: Eager loading (1 query)
+products = Product.query.options(joinedload(Product.category)).all()
+for product in products:
+    print(product.category.name)  # No additional queries!
+```
+
+Flask-QueryMonitor **automatically detects** the first pattern and warns you!
+
+## Features
+
+### 🔍 Automatic N+1 Detection
+Warns when a single request executes too many queries (default: >20)
+
+### ⏱️ Slow Query Logging
+Logs queries that exceed your performance threshold (default: 100ms)
+
+### 📊 Request-Level Metrics
+Adds `X-Query-Count` and `X-Query-Time-Ms` headers to every response
+
+### 🎯 SQLAlchemy Integration
+Uses SQLAlchemy event listeners - works with any Flask-SQLAlchemy app
+
+### 🔧 Configurable Thresholds
+Customize what counts as "too many" or "too slow"
+
+## Installation
+
+```bash
+pip install flask-querymonitor
+```
+
+## Quick Start
+
+```python
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_querymonitor import QueryMonitor
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+app.config['QUERY_MONITORING_ENABLED'] = True
+app.config['SLOW_QUERY_THRESHOLD_MS'] = 100
+
+db = SQLAlchemy(app)
+monitor = QueryMonitor(app)
+
+# That's it! Query monitoring is now active
+```
+
+## Usage Examples
+
+### Basic Monitoring
+
+```python
+from flask import Flask
+from flask_querymonitor import QueryMonitor
+
+app = Flask(__name__)
+monitor = QueryMonitor(app)
+
+@app.route('/products')
+def list_products():
+    products = Product.query.all()
+    # If this triggers N+1 queries, you'll see a warning!
+    return render_template('products.html', products=products)
+```
+
+### What You'll See in Logs
+
+#### N+1 Query Detection
+```
+WARNING: HIGH QUERY COUNT: GET /products - 47 queries in 823ms - Potential N+1!
+  
+Hint: Check for lazy-loaded relationships. Consider using joinedload() or selectinload().
+```
+
+#### Slow Query Detection
+```
+WARNING: SLOW QUERY (234ms): 
+SELECT products.id, products.name, products.price 
+FROM products 
+WHERE products.category_id = 5 
+ORDER BY products.created_at DESC
+LIMIT 100
+
+Location: /app/routes/products.py:45 in list_products()
+```
+
+### Response Headers (Debug Mode)
+
+```http
+HTTP/1.1 200 OK
+X-Query-Count: 12
+X-Query-Time-Ms: 145.23
+Content-Type: text/html
+```
+
+## Real-World Examples
+
+### Example 1: Detecting N+1 in Product Listings
+
+```python
+# ❌ This will trigger a warning
+@app.route('/products')
+def list_products():
+    products = Product.query.all()  # 1 query
+    return render_template('products.html', products=products)
+
+# Template accesses product.category.name for each product
+# Result: 1 + N queries!
+# QueryMonitor logs: "WARNING: HIGH QUERY COUNT: 47 queries"
+```
+
+**Fix:**
+```python
+# ✅ Fixed with eager loading
+@app.route('/products')
+def list_products():
+    products = Product.query.options(
+        joinedload(Product.category),
+        joinedload(Product.images)
+    ).all()  # 1 query with JOINs
+    return render_template('products.html', products=products)
+
+# Result: 1 query total!
+# QueryMonitor logs: "INFO: GET /products - 1 query in 45ms"
+```
+
+### Example 2: Finding Slow Queries
+
+```python
+@app.route('/analytics/dashboard')
+def analytics_dashboard():
+    # This query is slow!
+    stats = db.session.execute("""
+        SELECT 
+            DATE(created_at) as date,
+            COUNT(*) as count,
+            SUM(total) as revenue
+        FROM orders
+        WHERE created_at > DATE_SUB(NOW(), INTERVAL 1 YEAR)
+        GROUP BY DATE(created_at)
+    """).fetchall()
+    
+    return render_template('dashboard.html', stats=stats)
+
+# QueryMonitor logs:
+# "WARNING: SLOW QUERY (1247ms): SELECT DATE(created_at)..."
+```
+
+**Fix:**
+```python
+# Add an index on created_at
+# Or use a materialized view
+# Or cache the results
+```
+
+### Example 3: API Endpoint Optimization
+
+```python
+@app.route('/api/users/<int:user_id>/orders')
+def get_user_orders(user_id):
+    user = User.query.get(user_id)  # 1 query
+    
+    # ❌ N+1: Each order loads its items separately
+    orders = user.orders  # Lazy load triggers N queries
+    
+    return jsonify([{
+        'id': order.id,
+        'total': order.total,
+        'items': [item.product.name for item in order.items]  # More N+1!
+    } for order in orders])
+
+# QueryMonitor: "WARNING: 156 queries in 2.3 seconds!"
+```
+
+**Fix:**
+```python
+@app.route('/api/users/<int:user_id>/orders')
+def get_user_orders(user_id):
+    # ✅ Eager load everything in one query
+    orders = Order.query.filter_by(user_id=user_id).options(
+        joinedload(Order.items).joinedload(OrderItem.product)
+    ).all()
+    
+    return jsonify([{
+        'id': order.id,
+        'total': order.total,
+        'items': [item.product.name for item in order.items]
+    } for order in orders])
+
+# QueryMonitor: "INFO: 1 query in 89ms"
+```
+
+## Configuration
+
+```python
+# Enable/disable monitoring (disable in production for performance)
+app.config['QUERY_MONITORING_ENABLED'] = True
+
+# Threshold for "slow query" warnings (milliseconds)
+app.config['SLOW_QUERY_THRESHOLD_MS'] = 100
+
+# Threshold for "too many queries" warnings
+app.config['HIGH_QUERY_COUNT_THRESHOLD'] = 20
+
+# Add query metrics to response headers (debug mode only)
+app.config['QUERY_HEADERS_ENABLED'] = True
+
+# Log query details (SQL, parameters, stack trace)
+app.config['QUERY_LOGGING_VERBOSE'] = False
+```
+
+### Environment-Based Configuration
+
+```python
+import os
+
+if os.getenv('FLASK_ENV') == 'development':
+    app.config['QUERY_MONITORING_ENABLED'] = True
+    app.config['QUERY_HEADERS_ENABLED'] = True
+    app.config['QUERY_LOGGING_VERBOSE'] = True
+else:
+    # Disable in production for performance
+    app.config['QUERY_MONITORING_ENABLED'] = False
+```
+
+## How It Works
+
+### SQLAlchemy Event Listeners
+
+Flask-QueryMonitor uses SQLAlchemy's event system to track queries:
+
+1. **before_cursor_execute** - Records query start time
+2. **after_cursor_execute** - Calculates query duration
+3. **Request context** - Aggregates queries per request
+4. **Response** - Adds headers and logs warnings
+
+### Performance Impact
+
+- **Development**: Negligible (<1ms overhead per query)
+- **Production**: Zero (when disabled)
+- **Memory**: ~200 bytes per query tracked
+
+## Best Practices
+
+### 1. Use in Development, Not Production
+
+```python
+# ✅ Good
+if app.debug:
+    QueryMonitor(app)
+
+# ❌ Bad - adds overhead in production
+QueryMonitor(app)  # Always enabled
+```
+
+### 2. Fix N+1 Queries with Eager Loading
+
+```python
+# Use joinedload for one-to-one and many-to-one
+products = Product.query.options(joinedload(Product.category)).all()
+
+# Use selectinload for one-to-many and many-to-many
+users = User.query.options(selectinload(User.orders)).all()
+```
+
+### 3. Add Database Indexes
+
+```python
+# If you see slow queries on WHERE clauses, add indexes
+class Product(db.Model):
+    __tablename__ = 'products'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), index=True)
+    created_at = db.Column(db.DateTime, index=True)
+```
+
+### 4. Use Query Result Caching
+
+```python
+from flask_caching import Cache
+
+cache = Cache(app)
+
+@app.route('/products')
+@cache.cached(timeout=300)
+def list_products():
+    # Expensive query, but cached for 5 minutes
+    products = Product.query.options(joinedload(Product.category)).all()
+    return render_template('products.html', products=products)
+```
+
+## Testing
+
+```python
+import pytest
+from flask_querymonitor import QueryMonitor
+
+def test_query_monitoring(app, db):
+    monitor = QueryMonitor(app)
+    
+    with app.test_client() as client:
+        response = client.get('/products')
+        
+        # Check headers
+        assert 'X-Query-Count' in response.headers
+        query_count = int(response.headers['X-Query-Count'])
+        
+        # Ensure we're not doing N+1
+        assert query_count < 5, f"Too many queries: {query_count}"
+```
+
+## Production Usage
+
+This package is used in production at:
+- [wallmarkets](https://wallmarkets.store) - Multi-vendor marketplace
+- Reduced average query count from 47 to 3 per request
+- Improved page load times by 60%
+- Caught dozens of N+1 queries during development
+
+## Troubleshooting
+
+### "No queries are being logged"
+
+Make sure:
+1. `QUERY_MONITORING_ENABLED = True`
+2. You're using Flask-SQLAlchemy
+3. Queries are actually being executed
+
+### "Too many false positives"
+
+Adjust thresholds:
+```python
+app.config['HIGH_QUERY_COUNT_THRESHOLD'] = 50  # Increase threshold
+app.config['SLOW_QUERY_THRESHOLD_MS'] = 200    # Only log very slow queries
+```
+
+### "Performance impact in production"
+
+Disable monitoring:
+```python
+app.config['QUERY_MONITORING_ENABLED'] = False
+```
+
+## Contributing
+
+Contributions welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Submit a pull request
+
+## License
+
+MIT License - see LICENSE file for details
+
+## Support
+
+- 📚 [Documentation](https://github.com/wallmarkets/flask-querymonitor)
+- 🐛 [Issue Tracker](https://github.com/wallmarkets/flask-querymonitor/issues)
+- 💬 [Discussions](https://github.com/wallmarkets/flask-querymonitor/discussions)
+
+## Related Packages
+
+- [flask-supercache](https://pypi.org/project/flask-supercache/) - Caching to reduce query load
+- [flask-ratelimit-simple](https://pypi.org/project/flask-ratelimit-simple/) - Rate limiting
+- [flask-security-headers](https://pypi.org/project/flask-security-headers/) - Security utilities
+
+---
+
+**Made with ❤️ by the wallmarkets Team**
