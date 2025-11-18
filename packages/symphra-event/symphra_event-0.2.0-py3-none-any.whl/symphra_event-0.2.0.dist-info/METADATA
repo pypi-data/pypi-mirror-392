@@ -1,0 +1,240 @@
+Metadata-Version: 2.4
+Name: symphra-event
+Version: 0.2.0
+Summary: High-performance event library for Python 3.11+
+Author-email: Symphra <symphra@getaix.tech>
+License: MIT
+License-File: LICENSE
+Keywords: emitter,event,observer,pubsub,signal
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Typing :: Typed
+Requires-Python: >=3.11
+Provides-Extra: dev
+Requires-Dist: mypy>=1.7; extra == 'dev'
+Requires-Dist: pytest-benchmark>=4.0; extra == 'dev'
+Requires-Dist: pytest-cov>=4.1; extra == 'dev'
+Requires-Dist: pytest>=7.4; extra == 'dev'
+Requires-Dist: ruff>=0.1.0; extra == 'dev'
+Description-Content-Type: text/markdown
+
+# Symphra-Event
+
+高性能事件库，支持同步、异步和混合模式的事件处理。
+
+## 特性
+
+- **高性能**：使用智能缓存、延迟清理、批量操作等优化策略
+- **异步支持**：深度集成 async/await，支持同步、异步和混合模式
+- **事件总线**：全局命名空间管理，支持跨模块事件通信
+- **优先级系统**：基于优先级的监听器排序
+- **条件过滤**：支持条件函数过滤事件
+- **一次性监听器**：自动移除的单次监听器
+- **弱引用清理**：自动清理失效的处理器引用
+- **标签管理**：基于标签的监听器管理
+- **批量操作**：支持批量注册和移除监听器
+- **中间件系统**：可插拔的中间件架构
+- **执行策略**：支持串行、并行、流水线三种执行模式
+- **插件系统**：可扩展的插件架构
+
+## 安装
+
+### 从源码安装
+
+```bash
+git clone https://git.getaix.tech/symphra/symphra-event.git
+cd symphra-event
+pip install -e .
+```
+
+### 从Git安装
+
+```bash
+pip install git+https://git.getaix.tech/symphra/symphra-event.git
+```
+
+## 快速开始
+
+### 基本用法
+
+```python
+from symphra_event import EventEmitter
+
+# 创建事件发射器
+emitter = EventEmitter()
+
+# 注册监听器
+@emitter.on
+def handler(data: str) -> None:
+    print(f"收到: {data}")
+
+# 触发事件
+emitter.emit(data="Hello, World!")
+```
+
+### 使用事件总线
+
+```python
+from symphra_event import EventBus
+
+# 创建命名空间事件发射器
+user_emitter = EventBus.create("user")
+
+@user_emitter.on
+def on_user_login(data: dict) -> None:
+    print(f"用户登录: {data['username']}")
+
+# 触发事件
+user_emitter.emit(username="alice", action="login")
+```
+
+### 异步支持
+
+```python
+import asyncio
+from symphra_event import AsyncEventEmitter
+
+async def main():
+    emitter = AsyncEventEmitter()
+
+    @emitter.on
+    async def async_handler(data: str) -> None:
+        await asyncio.sleep(1)
+        print(f"异步处理: {data}")
+
+    # 触发异步事件
+    await emitter.emit(data="async test")
+
+asyncio.run(main())
+```
+
+### 使用装饰器
+
+```python
+from symphra_event import emitter, emit
+
+@emitter("user.register")
+def handle_user_register(data: dict) -> None:
+    print(f"新用户注册: {data['username']}")
+
+# 触发事件
+emit("user.register", username="bob", email="bob@example.com")
+```
+
+## 高级特性
+
+### 优先级控制
+
+```python
+from symphra_event.types import Priority
+
+@emitter.on(priority=Priority.HIGH)
+def high_priority_handler(data: str) -> None:
+    print("高优先级处理器")
+
+@emitter.on(priority=Priority.LOW)
+def low_priority_handler(data: str) -> None:
+    print("低优先级处理器")
+```
+
+### 条件过滤
+
+```python
+def only_errors(data: dict) -> bool:
+    return data.get("level") == "error"
+
+@emitter.on(condition=only_errors)
+def error_handler(data: dict) -> None:
+    print(f"错误: {data['message']}")
+```
+
+### 一次性监听器
+
+```python
+@emitter.once
+def one_time_handler(data: str) -> None:
+    print("只执行一次")
+
+emitter.emit(data="test")  # 执行
+emitter.emit(data="test")  # 不执行
+```
+
+### 批量操作
+
+```python
+# 批量注册处理器
+emitter.on_many([
+    handler1,
+    handler2,
+    handler3
+], priority=10)
+
+# 批量移除
+emitter.off_many([handler1, handler2])
+```
+
+## 执行策略
+
+### 串行执行
+
+```python
+from symphra_event.execution import SequentialExecutor
+
+executor = SequentialExecutor()
+result = executor.execute(listeners, data="test")
+```
+
+### 并行执行
+
+```python
+from symphra_event.execution import ParallelExecutor
+
+executor = ParallelExecutor(max_workers=4)
+result = executor.execute(listeners, data="test")
+```
+
+### 流水线执行
+
+```python
+from symphra_event.execution import PipelineExecutor
+
+# 流水线：每个处理器的输出作为下一个的输入
+def step1(data: dict) -> dict:
+    return {"processed": data["input"].upper()}
+
+def step2(data: dict) -> dict:
+    return {"result": f"Processed: {data['processed']}"}
+
+listeners = [Listener(handler=step1), Listener(handler=step2)]
+result = PipelineExecutor.execute(listeners, input="test")
+# result.pipeline_output = {"result": "Processed: TEST"}
+```
+
+## 文档
+
+完整文档请访问：[https://symphra.getaix.tech](https://symphra.getaix.tech)
+
+- [快速开始](https://symphra.getaix.tech/quickstart/)
+- [用户指南](https://symphra.getaix.tech/user-guide/)
+- [API文档](https://symphra.getaix.tech/api/)
+- [高级特性](https://symphra.getaix.tech/advanced/)
+
+## 许可证
+
+本项目采用 Apache 2.0 许可证 - 详见 [LICENSE](LICENSE) 文件
+
+## 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+## 联系方式
+
+- 项目地址: https://git.getaix.tech/symphra/symphra-event
+- 邮箱: symphra@getaix.tech
+
+## 版本
+
+当前版本: 0.2.0
