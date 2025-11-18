@@ -1,0 +1,48 @@
+name: Python application
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1
+      matrix:
+        python-version:
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.14"
+    steps:
+    - uses: actions/checkout@v5
+    - name: Install uv and Python
+      uses: astral-sh/setup-uv@v6
+      with:
+        enable-cache: true
+        python-version: ${{ matrix.python-version }}
+    - name: Setup uv venv
+      run: |
+        uv sync --locked --all-extras --dev
+    - name: Lint with ruff
+      run: |
+        uv run ruff check tastytrade/ tests/
+    - name: Type check with pyright
+      run: |
+        uv run pyright tastytrade/ tests/
+    - name: Type check with mypy
+      run: |
+        uv run mypy tastytrade/
+    - name: Test with pytest
+      run: |
+        uv run pytest --cov=tastytrade --cov-report=term-missing tests/ --cov-fail-under=95
+      env:
+        TT_REFRESH_SANDBOX: ${{ secrets.TT_REFRESH_SANDBOX }}
+        TT_SECRET_SANDBOX: ${{ secrets.TT_SECRET_SANDBOX }}
+        TT_ACCOUNT: ${{ secrets.TT_ACCOUNT }}
+        TT_REFRESH: ${{ secrets.TT_REFRESH }}
+        TT_SECRET: ${{ secrets.TT_SECRET }}
