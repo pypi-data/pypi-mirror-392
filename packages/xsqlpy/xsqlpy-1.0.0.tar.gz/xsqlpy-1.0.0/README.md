@@ -1,0 +1,3 @@
+XSQLPY
+
+pip install xsqlpy
