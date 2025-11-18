@@ -1,0 +1,87 @@
+Metadata-Version: 2.4
+Name: toon-parser-async
+Version: 0.1.2
+Summary: Async wrapper for toon-parser - Fast TOON format parser
+Author-email: magi8101 <sharmamagi0@gmail.com>
+License: MIT
+Project-URL: Homepage, https://github.com/magi8101/atoonpy
+Project-URL: Repository, https://github.com/magi8101/atoonpy
+Project-URL: Documentation, https://github.com/magi8101/atoonpy#readme
+Keywords: toon,async,asyncio,parser,serialization
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Framework :: AsyncIO
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Text Processing
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: toon-parser>=0.1.0
+Dynamic: license-file
+
+# toon-parser-async
+
+Async wrapper for [toon-parser](https://pypi.org/project/toon-parser/) - Fast TOON format parser with asyncio support.
+
+## Installation
+
+```bash
+pip install toon-parser-async
+```
+
+This will automatically install `toon-parser` as a dependency.
+
+## Quick Start
+
+```python
+import asyncio
+from toon_parser_async import encode, decode, encode_batch, decode_batch
+
+async def main():
+    # Encode data
+    data = {"name": "Alice", "age": 30}
+    toon_str = await encode(data)
+    print(toon_str)  # name:Alice|age:30
+    
+    # Decode data
+    decoded = await decode(toon_str)
+    print(decoded)  # {'name': 'Alice', 'age': 30}
+    
+    # Batch operations
+    items = [{"id": i} for i in range(10)]
+    encoded_items = await encode_batch(items)
+    decoded_items = await decode_batch(encoded_items)
+
+asyncio.run(main())
+```
+
+## API
+
+All functions are async and use `asyncio.to_thread()` to run the sync `toon-parser` functions in the thread pool:
+
+- `async encode(data, delimiter=None, strict=None)` - Encode Python data to TOON format
+- `async decode(toon_str, delimiter=None, strict=None)` - Decode TOON format to Python data
+- `async dumps(data, **kwargs)` - Alias for encode
+- `async loads(toon_str, **kwargs)` - Alias for decode
+- `async encode_batch(data_list, **kwargs)` - Encode multiple items concurrently
+- `async decode_batch(toon_strs, **kwargs)` - Decode multiple strings concurrently
+
+## Performance
+
+`toon-parser-async` uses the high-performance `toon-parser` Rust library under the hood, which is **5.82x faster** than other TOON implementations on average. The async wrapper adds minimal overhead while enabling concurrent I/O operations.
+
+## Credits
+
+- Built on [toon-parser](https://pypi.org/project/toon-parser/) by magi8101
+- TOON format parser [toon-rs](https://github.com/jimmystridh/toon-rs) by Jimmy Stridh
+
+## License
+
+MIT License
