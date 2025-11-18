@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iflow-mcp_FinQ4Cn-mcp-server"
+version = "0.1.0"
+description = "A dedicated MCP server for quantitative analysis of China's A-share market"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp==1.6.0",
+    "pydantic==2.11.1",
+    "akshare==1.16.73",
+    "pandas==2.2.3",
+    "backtrader==1.9.78.123",
+    "lib-pybroker==1.2.5",
+    "matplotlib"
+]
+
+[project.scripts]
+iflow-mcp_FinQ4Cn-mcp-server = "mcp_server.fs_server:main"
+
+[tool.setuptools]
+packages = ["mcp_server", "mcp_server.utils"]
+
+[tool.setuptools.package-dir]
+mcp_server = "mcp-server"
