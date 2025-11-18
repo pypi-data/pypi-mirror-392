@@ -1,0 +1,124 @@
+model:
+  simulation_name: "sim 1 - Diseases are autoregressively dependent on rain with 3 month lag, where rain is dependent on season"
+  time_granularity: "W"
+  simulation_length: 350
+  features:
+    - name: "population"
+      function: |
+        def get_population():
+          return 100
+    - name: "rainfall"
+      function: |
+        def get_rainfall(region, i):
+          i = (i - 1) % 12 + 1
+          rain_season = False
+          for season in region.rain_season:
+            if season.start <= i <= season.end:
+              rain_season = True
+          if rain_season:
+              return np.random.gamma(shape=6, scale=1.0) * 4
+          else:
+              return np.random.gamma(shape=2, scale=0.5) * 2
+    - name: "mean_temperature"
+      function: |
+        def get_temperature(i):
+          i = (i - 1) % 12 + 1
+          seasonal_temp = 24 + 5 * np.sin(2 * np.pi * i / 52)
+          random_noise = np.random.normal(0, 2)
+          return seasonal_temp + random_noise
+
+    - name: "lagged_rainfall"
+      function: |
+        def get_lagged_rainfall(rainfall):
+          if len(rainfall) < 3:
+              return rainfall[-1]
+          last_three = rainfall[-3:]
+          return sum(last_three) / len(last_three)
+
+    - name: "disease_cases"
+      function: |
+        def get_disease_cases(population, disease_cases, lagged_rainfall):
+          random_noise = np.random.normal(0, 2)
+          if (len(disease_cases) < 2):
+            new_case = disease_cases[-1] + random_noise
+          else:
+            prev_case_1 = disease_cases[-1]
+            prev_case_2 = disease_cases[-2]
+            new_case = (prev_case_1 * 0.4) + (prev_case_2 * 0.3) + random_noise
+
+          if (new_case < 0):
+            new_case = np.random.randint(1,3)
+
+          new_case = new_case + (lagged_rainfall[-1] * 0.3)
+
+          return int(min(new_case,population[-1]))
+
+  regions:
+    - name: "Finnmark"
+      region_id: 1
+      rain_season: [[2, 4], [7, 9]]
+      neighbour: [2]
+
+simulations:
+  - simulation_name: "sim 2 - Diseases are dependent on rain with 4 month lag, where rain is dependent on season"
+    features:
+      - name: "lagged_rainfall"
+        function: |
+          def get_lagged_rainfall(rainfall):
+            if len(rainfall) < 3:
+                return rainfall[-1]
+            last_four = rainfall[-4:]
+            return sum(last_four) / len(last_four)
+
+      - name: "disease_cases"
+        function: |
+          def get_disease_cases(population, lagged_rainfall):
+            disease_cases = lagged_rainfall[-1] * 0.5
+            return int(min(disease_cases,population[-1]))
+  - simulation_name: "sim 3 - Diseases are autoregressively dependent on rain with 2 month lag"
+    features:
+      - name: "rainfall"
+        function: |
+          def get_rainfall():
+            random_value = np.random.rand()
+            if random_value >= 0.5:
+                return np.random.gamma(shape=6, scale=1.0) * 4
+            else:
+                return np.random.gamma(shape=2, scale=0.5) * 2
+      - name: "lagged_rainfall"
+        function: |
+          def get_lagged_rainfall(rainfall):
+            if len(rainfall) < 2:
+                return rainfall[-1]
+            last_two = rainfall[-2:]
+            return sum(last_two) / len(last_two)
+
+  - simulation_name: "sim 4 - Diseases are autoregressive, but do not dependent on anything"
+    features:
+      - name: "disease_cases"
+        function: |
+          def get_disease_cases(population, disease_cases):
+            random_noise = np.random.normal(0, 2)
+            if (len(disease_cases) < 2):
+              new_case = disease_cases[-1] + random_noise
+            else:
+              prev_case_1 = disease_cases[-1]
+              prev_case_2 = disease_cases[-2]
+              new_case = (prev_case_1 * 0.6) + (prev_case_2 * 0.4) + random_noise
+
+            if (new_case < 0):
+              new_case = np.random.randint(1,3)
+
+            return int(min(new_case,population[-1]))
+
+evaluators:
+  - model: "https://github.com/sandvelab/chap_auto_ewars@58d56f86641f4c7b09bbb635afd61740deff0640"
+    time_granularity: "M"
+    prediction_length: 3
+    stride: 3
+    n_test_sets: 2
+  - model: https://github.com/sandvelab/monthly_ar_model@cadd785872624b4bcd839a39f5e7020c25254c31
+    time_granularity: "M"
+    prediction_length: 3
+    stride: 3
+    n_test_sets: 2

@@ -1,0 +1,118 @@
+#In this file, 'unit tests' in form of simulations are defined.
+public:
+  functions:
+    get_flat_value: |
+      def get_flat_value(mean, randomness):
+        return np.random.normal(mean, randomness)
+    get_rainfall_spike: |
+      def get_rainfall(i, seasonal_spikes, random_spikes):
+        if i in seasonal_spikes or i in random_spikes:
+          return 50
+        else:
+          return 10
+    get_rainfall_spike_2: |
+      def get_rainfall(i, random_spikes):
+        if i in random_spikes:
+          return 50
+        else:
+          return 10
+    get_disease_cases_with_lag: |
+      def get_disease_cases_with_lag(rainfall, lag):
+        if len(rainfall) < lag:
+          return int(rainfall[-1])
+        return int(rainfall[-lag])
+  lists:
+    seasonal_spikes: [5, 17, 29, 41, 53, 65, 77, 89]
+
+simulators:
+  - id: 1
+    name: train with no random spike
+    description: Is the model detecting the seasonality or time lag? The model is trained on seasonal spikes, and tested on a seasonal and a random spike
+    time_delta: M
+    length: 15
+    regions:
+      - name: Kalungu
+        region_id: 1
+      - name: Buikwe
+        region_id: 2
+    x:
+      - name: rainfall
+        function_ref: get_rainfall_spike
+        params:
+          random_spikes: [93]
+      - name: population
+        function_ref: get_flat_value
+        params:
+          mean: 1000
+          randomness: 5
+      - name: mean_temperature
+        function_ref: get_flat_value
+        params:
+          mean: 27
+          randomness: 3
+    y:
+      - name: disease_cases
+        function_ref: get_disease_cases_with_lag
+        params:
+          lag: 3
+  - id: 2
+    inherit: 1
+    name: train with one random spike
+    description: In this case, the model is trained with one random spike added to the train set
+    x:
+      - name: rainfall
+        params:
+          random_spikes: [56, 93]
+  - id: 3
+    inherit: 1
+    name: train with two random spikes
+    description: In this case, the model is trained with two random spikes added to the train set
+    x:
+      - name: rainfall
+        params:
+          random_spikes: [23, 56, 93]
+  - id: 4
+    inherit: 1
+    name: train with three random spikes
+    description: In this case, the model is trained with three random spikes added to the train set
+    x:
+      - name: rainfall
+        params:
+          random_spikes: [23, 37, 64, 93]
+  - id: 5
+    inherit: 1
+    name: train with four random spikes
+    description: In this case, the model is trained with four random spikes added to the train set
+    x:
+      - name: rainfall
+        params:
+          random_spikes: [23, 37, 56, 72, 93]
+  - id: 6
+    inherit: 1
+    name: only random spikes
+    description: In this case, the model is train and predicts on random spikes only. No seasonality
+    x:
+      - name: rainfall
+        function_ref: get_rainfall_spike_2
+        params:
+          random_spikes:
+            [3, 7, 14, 19, 26, 35, 41, 49, 55, 59, 66, 77, 84, 90, 95]
+evaluators:
+  - model: https://github.com/dhis2-chap/ewars_template.git
+    prediction_length: 3
+    stride: 2
+    n_test_sets: 6
+    metrics: [mse, pocid, theils_u]
+    plot_length: 100
+  - model: "https://github.com/sandvelab/chap_auto_ewars@58d56f86641f4c7b09bbb635afd61740deff0640"
+    prediction_length: 3
+    stride: 2
+    n_test_sets: 6
+    metrics: [mse, pocid, theils_u]
+    plot_length: 40
+  - model: https://github.com/sandvelab/monthly_ar_model@cadd785872624b4bcd839a39f5e7020c25254c31
+    prediction_length: 3
+    stride: 2
+    n_test_sets: 6
+    metrics: [mse, pocid, theils_u]
+    plot_length: 40

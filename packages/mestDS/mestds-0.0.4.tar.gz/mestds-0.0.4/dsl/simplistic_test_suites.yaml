@@ -1,0 +1,78 @@
+simulations:
+  - id: 1
+    simulation_name: "DC = lagged_rainfall"
+    time_granularity: "W"
+    simulation_length: 200
+    features:
+      - name: "population"
+        function: |
+          def get_population():
+            return 100
+      - name: "rainfall"
+        function: |
+          def get_rainfall(region, i):
+            spikes = [30,60,90,120,150,190]
+            if i in spikes:
+              return 50
+            return np.random.randint(0,10)
+      - name: "mean_temperature"
+        function: |
+          def get_temperature(i):
+            i = (i - 1) % 52 + 1
+            if (20 < i < 36):
+              return 30
+            return 15
+
+      - name: "lagged_rainfall"
+        function: |
+          def get_lagged_rainfall(rainfall):
+            if len(rainfall) < 3:
+                return rainfall[-1]
+            last_three = rainfall[-3:]
+            return sum(last_three) / len(last_three)
+      - name: "disease_cases"
+        function: |
+          def get_disease_cases(lagged_rainfall):
+            return int(lagged_rainfall[-1] * 1.5)
+    regions:
+      - name: "Finnmark"
+        region_id: 1
+
+  # - id: 2
+  #   inherits: 1
+  #   simulation_name: "DC = rainfall"
+  #   features:
+  #     - name: "disease_cases"
+  #       function: |
+  #         def get_disease_cases(rainfall):
+  #           return int(rainfall[-1] * 1.5)
+
+  # - id: 3
+  #   inherits: 1
+  #   simulation_name: "DC = lagged_rainfall + temperature"
+  #   features:
+  #     - name: "disease_cases"
+  #       function: |
+  #         def get_disease_cases(rainfall, mean_temperature):
+  #           return int(rainfall[-1] * 1.5 + mean_temperature[-1] * 1.5)
+evaluators:
+  - time_granularity: "W"
+    prediction_length: 12
+    model: "https://github.com/sandvelab/chap_auto_ewars_weekly@737446a7accf61725d4fe0ffee009a682e7457f6"
+    stride: 11
+    n_test_sets: 3
+  # - model: "https://github.com/sandvelab/chap_auto_ewars@58d56f86641f4c7b09bbb635afd61740deff0640"
+  #   time_granularity: "M"
+  #   prediction_length: 3
+  #   stride: 2
+  #   n_test_sets: 3
+  # - model: "models/weekly_ar_model"
+  #   time_granularity: "W"
+  #   n_test_sets: 3
+  #   stride: 11
+  #   prediction_lengt: 12
+  # - model: https://github.com/sandvelab/monthly_ar_model@cadd785872624b4bcd839a39f5e7020c25254c31
+  #   time_granularity: "M"
+  #   prediction_length: 3
+  #   stride: 2
+  #   n_test_sets: 3

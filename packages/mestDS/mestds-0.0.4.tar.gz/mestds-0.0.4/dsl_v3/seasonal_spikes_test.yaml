@@ -1,0 +1,165 @@
+#In this file, 'unit tests' in form of simulations are defined.
+public:
+  functions:
+    get_flat_value: |
+      def get_flat_value(mean, randomness):
+        return np.random.normal(mean, randomness)
+    get_rainfall_spike: |
+      def get_rainfall(i, seasonal_spikes):
+        if i in seasonal_spikes:
+          return 50 + np.random.randint(0,2)
+        else:
+          return np.random.randint(0,2)
+    get_rainfall_spike_2: |
+      def get_rainfall(i, seasonal_spikes_2):
+        if i in seasonal_spikes_2:
+          return 50 + np.random.randint(0,2)
+        else:
+          return + np.random.randint(0,2)
+    get_disease_cases_with_lag: |
+      def get_disease_cases_with_lag(rainfall, lag):
+        if len(rainfall) < lag:
+          return int(rainfall[-1])
+        return int(rainfall[-lag])
+  lists:
+    seasonal_spikes:
+      [5, 17, 29, 41, 53, 65, 77, 89, 101, 113, 125, 137, 149, 161]
+    seasonal_spikes_2: [5, 29, 53, 77, 89, 113]
+
+simulators:
+  - id: 1
+    name: seasonal spikes for 60 months (trained on 4 spikes)
+    description: Is the model able to detect the lag relationship between rainfall and disease cases?
+    time_delta: M
+    length: 60
+    x:
+      - name: rainfall
+        function_ref: get_rainfall_spike
+      - name: population
+        function_ref: get_flat_value
+        params:
+          mean: 1000
+          randomness: 5
+      - name: mean_temperature
+        function_ref: get_flat_value
+        params:
+          mean: 27
+          randomness: 3
+    y:
+      - name: disease_cases
+        function_ref: get_disease_cases_with_lag
+        params:
+          lag: 3
+  # - id: 3
+  #   inherit: 1
+  #   name: seasonal spikes for 70 months (trained on 5 spikes)
+  #   length: 70
+  # - id: 4
+  #   inherit: 1
+  #   name: seasonal spikes for 82 months (trained on 6 spikes)
+  #   length: 82
+  # - id: 8
+  #   inherit: 1
+  #   name: seasonal spikes for 94 months (trained on 7 spikes)
+  #   length: 94
+  # - id: 9
+  #   inherit: 1
+  #   name: seasonal spikes for 82 months (trained on 8 spikes)
+  #   length: 105
+  # - id: 10
+  #   inherit: 1
+  #   name: seasonal spikes for 70 months (trained on 9 spikes)
+  #   length: 120
+  - id: 11
+    inherit: 1
+    name: seasonal spikes for 82 months (trained on 10 spikes)
+    length: 132
+  - id: 12
+    inherit: 1
+    name: seasonal spikes for 82 months (trained on 11 spikes)
+    length: 142
+  - id: 13
+    inherit: 1
+    name: seasonal spikes for 82 months (trained on 12 spikes)
+    length: 154
+  - id: 14
+    inherit: 1
+    name: seasonal spikes for 164 months (trained on 13 spikes)
+    length: 166
+  # - id: 2
+  #   inherit: 1
+  #   name: seasonal spikes for 60 months (trained on 2 spikes, biennial)
+  #   length: 60
+  #   x:
+  #     - name: rainfall
+  #       function_ref: get_rainfall_spike_2
+  # - id: 5
+  #   inherit: 2
+  #   name: seasonal spikes for 82 months (trained on 3 spikes, biennial)
+  #   length: 82
+  # - id: 6
+  #   inherit: 2
+  #   name: seasonal spikes for 94 months (trained on 4 spikes, biennial)
+  #   length: 94
+  # - id: 7
+  #   inherit: 2
+  #   name: seasonal spikes for 120 months (trained on 5 spikes, biennial)
+  #   length: 120
+
+  # - id: 5
+  #   inherit: 1
+  #   name: seasonal spikes for 100 months (8 spikes)
+  #   length: 100
+  # - id: 6
+  #   inherit: 1
+  #   name: seasonal spikes for 120 months (10 spikes)
+  #   length: 120
+  # - id: 7
+  #   inherit: 1
+  #   name: seasonal random spikes for 60 months
+  #   x:
+  #     - name: rainfall
+  #       function_ref: get_rainfall_spike_2
+  # - id: 8
+  #   inherit: 3
+  #   name: seasonal random spikes for 70 months
+  #   x:
+  #     - name: rainfall
+  #       function_ref: get_rainfall_spike_2
+  # - id: 9
+  #   inherit: 4
+  #   name: seasonal random spikes for 82 months
+  #   x:
+  #     - name: rainfall
+  #       function_ref: get_rainfall_spike_2
+  # - id: 10
+  #   inherit: 5
+  #   name: seasonal random spikes for 100 months
+  #   x:
+  #     - name: rainfall
+  #       function_ref: get_rainfall_spike_2
+  # - id: 11
+  #   inherit: 6
+  #   name: seasonal random spikes for 120 months
+  #   x:
+  #     - name: rainfall
+  #       function_ref: get_rainfall_spike_2
+evaluators:
+  # - model: https://github.com/dhis2-chap/ewars_template.git
+  #   prediction_length: 3
+  #   stride: 2
+  #   n_test_sets: 6
+  #   metrics: [mse, pocid, theils_u]
+  #   plot_length: 60
+  # - model: "https://github.com/sandvelab/chap_auto_ewars"
+  #   prediction_length: 3
+  #   stride: 2
+  #   n_test_sets: 6
+  #   plot_length: 60
+  #   metrics: [mse, pocid, theils_u]
+  - model: https://github.com/sandvelab/monthly_ar_model
+    prediction_length: 3
+    stride: 2
+    n_test_sets: 6
+    metrics: [mse, pocid, theils_u]
+    plot_length: 60

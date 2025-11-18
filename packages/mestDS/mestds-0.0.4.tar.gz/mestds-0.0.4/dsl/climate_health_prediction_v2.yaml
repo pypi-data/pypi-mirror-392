@@ -1,0 +1,75 @@
+model:
+  simulation_name: "sim 1"
+  time_granularity: "M"
+  simulation_length: 100
+  features:
+    - name: "rainfall"
+      function: |
+        def get_rainfall(region, i):
+          if (i==50):
+            return 4
+          return 0
+    - name: "mean_temperature"
+      function: |
+        def get_temperature(i):
+          if (i==50):
+            return 4
+          return 0
+    - name: "white_noise"
+      function: |
+        def get_white_noise():
+          return 0
+    - name: "disease_cases"
+      function: |
+        def get_disease_cases(i, rainfall, mean_temperature):
+          population = 100
+          poisson_rate = 0
+          for covariate, lag in zip([rainfall, mean_temperature], [3, 3]):
+            poisson_rate += np.roll(covariate, lag)[i]
+
+          disease_cases = np.int32((1 / (1 + np.exp(-poisson_rate))) * population)
+          disease_cases = np.random.poisson(disease_cases)
+
+          return min(disease_cases, population)
+  regions:
+    - name: "Finnmark"
+      region_id: 1
+      rain_season: []
+      neighbour: []
+simulations:
+  - simulation_name: "sim 2"
+    features:
+      - name: "white_noise"
+        function: |
+          def get_white_noise(i, white_noise, rainfall, mean_temperature):
+            from sklearn.preprocessing import StandardScaler
+            wn = np.random.normal(0, 0.2)  # Generate a single noise value
+
+            # Apply lag and standardization
+            for covariate, lag in zip([rainfall, mean_temperature], [3, 3]):
+              lagged_covariate = np.roll(covariate, lag)
+              scaler = StandardScaler()
+              scaled_data = scaler.fit_transform(lagged_covariate[1:].reshape(-1, 1))
+              wn += scaled_data.flatten() * 0.5
+            return wn[-1]
+      - name: "disease_cases"
+        function: |
+          def get_disease_cases(i, rainfall, mean_temperature, disease_cases, white_noise):
+            population = 100
+            disease_cases = np.cumsum(white_noise)
+            disease_cases_previous = disease_cases[i - 1] if i > 0 else 0
+            disease_cases = np.insert(disease_cases, 0, 0) - 0.5
+            disease_cases = np.int32((1 / (1 + np.exp(-disease_cases))) * population)
+
+            return disease_cases[-1]
+evaluators:
+  - evaluation_technique: "holdout"
+    model: "models/minimalist_multiregion"
+    test_size: 0.2
+  - evaluation_technique: "tscv"
+    model: "models/minimalist_multiregion"
+    folds: 5
+  - evaluation_technique: "custom_holdout"
+    model: "models/minimalist_multiregion"
+    train_file: "a"
+    test_file: "b"

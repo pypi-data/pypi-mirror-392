@@ -1,0 +1,126 @@
+public:
+  # Define public functions, lists, seasons, regions that will be used for the simulations.
+  functions:
+    get_population: |
+      def get_population(i, region):
+        return 100
+    get_spiky_rainfall: |
+      def get_rainfall(i, spikes):
+        if i in spikes:
+          return 50
+        return 1
+
+    get_sinus_temp: |
+      def simulate_temperature(i):
+        i = (i - 1) % 52 + 1
+        avg_temp=15
+        amplitude=10
+        noise_level=2
+        period=52
+        phase_shift=-80
+        seasonal = amplitude * np.sin(2 * np.pi * (i + phase_shift) / period)
+        noise = np.random.normal(0, noise_level)
+        return avg_temp + seasonal + noise
+
+    get_flat_temp: |
+      def get_flet_temp(i):
+        return 20
+
+    get_seasonal_dc: |
+      def get_seasonal_effected_dc(i):
+        i = (i - 1) % 52 + 1
+        cases = 10 + 5 * np.sin(2 * np.pi * (i / 52))
+        return int(cases)
+
+    get_non_linear_dc: |
+      def get_seasonal_effected_dc(rainfall):
+        cases = cases = 5 + 10 * max(0, rainfall[-2] - 20)
+        return int(cases)
+
+    get_concept_drift: |
+      def get_dc(i, mean_temperature, rainfall):
+        i = (i - 1) % 52 + 1
+        if i < 25:
+          return int(mean_temperature[-2] * 0.5)
+        else:
+          return int(rainfall[-2] * 0.5)
+
+    get_interacting_variables: |
+      def get_interacting_variables_dc(rainfall, mean_temperature):
+        cases = 5 + 2 * (rainfall[-2] * mean_temperature[-2]) / 100
+        return int(cases)
+
+    get_confounding_variable: |
+      def get_confounding_variable(disease_cases):
+        return (disease_cases[-1] * 2)
+
+  lists:
+    spikes: [10, 30, 50, 70, 90, 110, 130, 150, 170, 190]
+
+simulators:
+  - id: 1
+    name: seasonal disease cases
+    time_delta: W
+    length: 200
+    x:
+      - name: population
+        function: |
+          def get_pop():
+            return 100
+      - name: rainfall
+        function_ref: get_spiky_rainfall
+      - name: mean_temperature
+        function_ref: get_sinus_temp
+    y:
+      - name: disease_cases
+        function_ref: get_seasonal_dc
+  # - id: 2
+  #   name: non linear disease cases
+  #   inherit: 1
+  #   y:
+  #     - name: disease_cases
+  #       function_ref: get_non_linear_dc
+  # - id: 3
+  #   name: concept drift disease cases
+  #   inherit: 1
+  #   y:
+  #     - name: disease_cases
+  #       function_ref: get_concept_drift
+  # - id: 4
+  #   name: interacting variables = disease cases
+  #   inherit: 1
+  #   y:
+  #     - name: disease_cases
+  #       function_ref: get_interacting_variables
+  # - id: 5
+  #   name: confounding variable disease cases
+  #   inherit: 1
+  #   x:
+  #     - name: confounding
+  #       function_ref: get_confounding_variable
+
+  - id: 6
+    name: seasonal with flat temp and some bumps
+    inherit: 1
+    x:
+      - name: mean_temperature
+        function_ref: get_flat_temp
+  - id: 7
+    name: seasonal with flat temp and rain
+    inherit: 6
+    x:
+      - name: rainfall
+        function_ref: get_flat_temp
+evaluators:
+  - time_delta: "W"
+    prediction_length: 12
+    model: "https://github.com/sandvelab/chap_auto_ewars_weekly@737446a7accf61725d4fe0ffee009a682e7457f6"
+    stride: 11
+    n_test_sets: 3
+    metrics: [mse, pocid, theils_u]
+  - model: "models/weekly_ar_model"
+    time_delta: "W"
+    n_test_sets: 3
+    stride: 11
+    prediction_lengt: 12
+    metrics: [mse, pocid, theils_u]

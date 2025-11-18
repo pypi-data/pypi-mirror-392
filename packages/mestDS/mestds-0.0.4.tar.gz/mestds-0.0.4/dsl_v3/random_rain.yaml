@@ -1,0 +1,66 @@
+public:
+  functions:
+    get_random: |
+      def get_random(min, max):
+        return np.random.randint(min,max)
+    get_dc: |
+      def get_disease_cases_with_lag(rainfall, lag):
+        if len(rainfall) < lag:
+          return int(rainfall[-1])
+        return int(rainfall[-lag])
+  lists:
+    placeholder: []
+simulators:
+  - id: 1
+    name: Lag 3, length 100
+    description: ""
+    time_delta: M
+    length: 60
+    x:
+      - name: population
+        function_ref: get_random
+        params:
+          min: 990
+          max: 1010
+      - name: rainfall
+        function_ref: get_random
+        params:
+          min: 0
+          max: 30
+      - name: mean_temperature
+        function_ref: get_random
+        params:
+          min: 20
+          max: 30
+    y:
+      - name: disease_cases
+        function_ref: get_dc
+        params:
+          lag: 2
+  - id: 2
+    inherit: 1
+    name: Lag 3, length 600
+    length: 600
+  - id: 2
+    inherit: 1
+    name: Lag 3, length 700
+    length: 700
+evaluators:
+  - model: https://github.com/dhis2-chap/ewars_template.git
+    prediction_length: 3
+    stride: 2
+    n_test_sets: 6
+    metrics: [mse, pocid, theils_u]
+    plot_length: 60
+  - model: "https://github.com/sandvelab/chap_auto_ewars"
+    prediction_length: 3
+    stride: 2
+    n_test_sets: 6
+    metrics: [mse, pocid, theils_u]
+    plot_length: 60
+  - model: https://github.com/sandvelab/monthly_ar_model
+    prediction_length: 3
+    stride: 2
+    n_test_sets: 6
+    metrics: [mse, pocid, theils_u]
+    plot_length: 60

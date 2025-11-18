@@ -1,0 +1,313 @@
+# The simulations in this file are meant to test whether or not a model is able to capture known patterns from vector borne disease dynamics,
+# such as the time lag from wet conditions/drought to increased disease cases.
+# The specific patterns are tested in isolation, in order to easily verify whether or not the model is able to capture known disease dynamics.
+public:
+  functions:
+    get_flat_value: |
+      def get_flat_value(base, noise):
+        return base + np.random.normal(0, noise)
+    get_spiky_rain: |
+      def get_spiky_rain(i, spikes):
+        if i in spikes:
+          return 50
+        return 10
+    get_lagged_variable: |
+      def get_lagged_variable(i, variable, from_month, to_month):
+        if len(variable) < from_month:
+            return variable[-1]
+        if to_month == 0:
+            relevant = variable[-from_month:]
+        else:
+            relevant = variable[-from_month:-to_month]
+        return np.mean(relevant)
+
+    get_sinus_value: |
+      def get_sinus_value(i, avg, amp, noise, phase_shift, period):
+        i = (i - 1) % 12 + 1
+        seasonal = amp * np.sin(2 * np.pi * (i + phase_shift) / period)
+        noise = np.random.normal(0, noise)
+        value = max(avg + seasonal + noise, 0)
+        return value
+
+    get_drought_rainfall: |
+      def get_drought_rainfall(i, drought_seasons):
+        in_drought_period = False
+        for season in drought_seasons:
+          if season[0] <= i <= season[1]:
+            in_drought_period = True
+            break
+        if in_drought_period:
+          rain = np.random.randint(0,2)
+        else:
+          rain = np.random.normal(10, 5)
+
+        return int(rain)
+    get_linear_disease_cases: |
+      def get_linear_disease_cases(variable, weight):
+        return int(variable[-1]*weight)
+
+    get_threshold_disease_cases: |
+      def get_threshold_disease_cases(variable, threshold):
+        if variable[-1] < threshold:
+          return int(np.random.normal(30, 2))
+        return int(np.random.randint(1,5))
+
+    get_linear_threshold_disease_cases: |
+      def get_threshold_disease_cases(variable, variable_2, threshold):
+        if variable[-1] > threshold:
+          return int(variable_2[-1] * 0.5)
+        return int(np.random.randint(0,2))
+
+    get_ar_linear_disease_cases: |
+      def get_ar_linear_disease_cases(disease_cases, weight_1, variable, weight_2):
+        return int(disease_cases[-1] * weight_1 + variable[-1] * weight_2)
+
+    get_ar_threshold_disease_cases: |
+      def get_ar_threshold_disease_cases(disease_cases, weight, variable, threshold):
+        cases = 0
+        if variable[-1] < threshold:
+          cases = np.random.normal(30, 2)
+        else:
+          cases = np.random.randint(1,5)
+        return int((disease_cases[-1] * weight) + cases)
+
+    get_ar_linear_threshold_disease_cases: |
+      def get_threshold_disease_cases(disease_cases, variable, variable_2, threshold):
+        if variable[-1] > threshold:
+          return int(disease_cases[-1] * 0.5 + variable_2[-1] * 0.5)
+        return int(disease_cases[-1] * 0.5 + np.random.randint(0,2))
+
+    get_increasing_value: |
+      def get_inreasing_value(i, value, increase, noise, length):
+        calculated_increase = value * increase
+        increase_per_time_step = calculated_increase / length
+        new_value = value + (increase_per_time_step * i)
+        return int(np.random.normal(new_value, noise))
+
+    get_increasing_disease_cases: |
+      def get_idc(lagged_rainfall, lagged_temperature, population):
+        tw = 0
+        if lagged_temperature[-1] > 18:
+          tw += 0.3
+          if lagged_temperature[-1] > 22:
+            tw += 0.3
+            if lagged_temperature[-1] > 24:
+              tw += 0.3
+              if lagged_temperature[-1] > 29:
+                tw += -0.3
+                if lagged_temperature[-1] > 32:
+                  tw += -0.3
+        new_value = (lagged_rainfall[-1]) * tw
+        new_value_population_adjusted = (new_value * population[-1]) / 1000
+        return int(max(new_value_population_adjusted, 0))
+
+  lists:
+    spikes: [7, 13, 20, 26, 33, 36, 44, 50, 55, 59, 64, 70, 77, 83, 90, 93, 98]
+    drought_seasons:
+      [
+        [2, 7],
+        [12, 19],
+        [27, 33],
+        [40, 42],
+        [52, 57],
+        [67, 77],
+        [85, 88],
+        [94, 97],
+      ]
+    rain_seasons:
+
+simulators:
+  # According to research, wet conditions increases the incubation spots for mosquitoes. After 0-3 months, we can see an increase in vbd cases.
+  # https://pdf.sciencedirectassets.com/316495/1-s2.0-S2542519621X00046/1-s2.0-S2542519620302928/main.pdf?X-Amz-Security-Token=IQoJb3JpZ2luX2VjEFYaCXVzLWVhc3QtMSJIMEYCIQDWvWV25JkuKNEa4vZCIdemlFw61GbGYFWXFMroMlmZ5QIhANHYGGImeBmcowLvo8EaoKhU6c7YdEhcpEFjUPUaR7%2BbKrMFCC8QBRoMMDU5MDAzNTQ2ODY1IgywstDnwRfhb2AtJJIqkAWC1ibOTwtvSBBHP%2FF%2Bcp8VwGPJvZtPAWPDKc0PpjJcUYQ64xE0jGagnQVCPKpXKpTQB7paPT%2FbylJUKLQc7JT0VZe1iLuqIAABy5BoVmpmoUpjJZQIBWngJCnqwgdfeufkYmYEfwDHNFjLXp4%2FiHpcE2MgKFlTmwGoVkMw3BFNTfJXRv2OuSHLU46dYLV4PlW4P9mQIOQfkqRVVYEsVdi4TnzQKzVavC%2Bi7HhPgf8t1795pBx5GpQz%2BdPlqXys%2FbNMOqdz%2BrXtjMKeJhrcd3zQ%2BrQRIm9A1b8IAtemCC9zCDu4y5mm6EfglFjP%2BdNnCAXsLTyTlwsc01SICjv9XyTxc8%2B64OF9UFED0YX%2FCJs82xkm37aKHYu2%2BE5Zt%2F3wnxCLI6avTaKGR4sNG9lpfkPupKGGw4AtUey%2BASNgbBhnxtazAaNJ%2Fz9Sj6IAflIiosGg370rkEBqMwm%2FmFPDvfsNXHHLbZdZS%2BEGA0C9lsmIyDUzhHazXccE0n2qL2lWssxIHg28wgfiH5SO3h5CeLyPKKr8F19SXhaAaDSx3xon7%2BzNYgGKMV7K3AKqXXhpIfPOTZl95vkFoxc70CEXuwR%2BI1HGEwjJuL7WxKHv%2BilKNNhdZrM1Xm5vj%2BcZ2KjerNAhW2jW%2Fr%2F4SCDIOC85luDMVv%2FpR%2BEdOpot1919WdZ3F0DzdjlXSvao2d1GztN1gIjtcZhMXDJYEVWbWCJsPPRbxteIbZMof%2Fv0NJgEFL9iZ3sRnqkOCn2Bxb4YwNKOsd0C%2BPanqYj5bsK4qIVxcnMUnkk85udxiB%2BnR%2BixTnVKlc6KrpNkpJwJXpYJj42qcYLhG%2BwoHCTaQLEi6TXqiJOBQNqtMClNxBYN9XZMH9jkJjCLlYHCBjqwAej02TE8lME6ihQ8FttsLm%2Fm2%2BlQJQ2IO%2Fo8A9Kv0Rpsg8E5bwZXwi3GMJyyb79Qlss%2BXug4kGGThZA6f2NS3c6k2iVij6n8h%2FAX8FnEfT%2Bp8yXLOjt0of%2FqMmFYOuoOgUXzUMqRVhmTyYedGzdgO%2BJgdp7ZH%2FCkKJyMnsmBMjPUyDhNIc4X4Zn5vquif%2F7yVPTIdlKx50bHCN5h%2FGDkdgRAEp7ltZfezo86UbDsnkCN&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20250604T133553Z&X-Amz-SignedHeaders=host&X-Amz-Expires=300&X-Amz-Credential=ASIAQ3PHCVTY25TMWI4R%2F20250604%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=7c4e8dc1cbd315986f836610968fb5dc3888b966f73aca5030a0f7c37f34ef57&hash=bade4c03244565d5a468570a9f419cce2b87c6c2865ebf47281894ea5ba61fc7&host=68042c943591013ac2b2430a89b270f6af2c76d8dfd086a07176afe7c76c2c61&pii=S2542519620302928&tid=spdf-b13ba76f-703f-444c-8160-40f946517b52&sid=9dd2ec7e920a0342b249479254ec34a7eba9gxrqb&type=client&tsoh=d3d3LnNjaWVuY2VkaXJlY3QuY29t&rh=d3d3LnNjaWVuY2VkaXJlY3QuY29t&ua=14095f5106540b53025456&rr=94a7d0e48ad22e01&cc=no
+  - id: 1
+    name: dc = time lag rain (wet conditions, 0-3 months)
+    description: According to research, wet conditions increases the incubation spots for mosquitoes. After 0-3 months, we can see an increase in vbd cases.
+    time_delta: M
+    length: 100
+    x:
+      - name: population
+        function_ref: get_flat_value
+        params:
+          base: 1000
+          noise: 5
+      - name: mean_temperature
+        function_ref: get_flat_value
+        params:
+          base: 25
+          noise: 2
+      - name: rainfall
+        function_ref: get_spiky_rain
+      - name: lagged_rainfall
+        function_ref: get_lagged_variable
+        params:
+          variable: rainfall
+          from_month: 3
+          to_month: 0
+    y:
+      - name: disease_cases
+        function_ref: get_linear_disease_cases
+        params:
+          variable: lagged_rainfall
+          weight: 0.5
+
+  - id: 2
+    inherit: 1
+    name: dc = time lag rain (drought, 3-5)
+    description: Another cause of increased vbd cases is drought, due to changes in water storage. 3-5 months after a drought period, an increase in vbd cases can be expected
+    x:
+      - name: rainfall
+        function_ref: get_drought_rainfall
+      - name: lagged_rainfall
+        params:
+          to_month: 3
+          from_month: 5
+    y:
+      - name: disease_cases
+        function_ref: get_threshold_disease_cases
+        params:
+          variable: lagged_rainfall
+          threshold: 3
+
+  - id: 3
+    inherit: 1
+    name: dc = time lag temperature (2-6 weeks = 0-2 months)
+    description: For mosquitoes and the pathogens to fully develop, optimal temperatures are required. It takes typically, 2-6 weeks of warm enough temperatures for an increase in cases. E.g., when winter ends and the temperatures become warm enough, we don't see a sudden increase in vbd cases. This is a simplistic version that only tests whether or not a model is able to capture the time lag of temperature.
+    x:
+      - name: rainfall
+        function_ref: get_flat_value
+        params:
+          base: 10
+          noise: 2
+      #           set hyperparams when testing models
+      # do unit testing for models as well
+      - name: mean_temperature
+        function_ref: get_sinus_value
+        params:
+          avg: 20
+          amp: 10
+          noise: 2
+          phase_shift: -30
+          period: 12
+      - name: lagged_temperature
+        function_ref: get_lagged_variable
+        params:
+          variable: mean_temperature
+          from_month: 2
+          to_month: 0
+    y:
+      - name: disease_cases
+        function_ref: get_linear_threshold_disease_cases
+        params:
+          variable: mean_temperature
+          variable_2: lagged_temperature
+          threshold: 18 # Mosquitoes are ectotermic and don't strive in cold climates, subsequently neither does vbd.
+
+  # Disease cases are autoregressive by nature. Lets try to add autoregressiveness to the simulations.
+  - id: 4
+    name: dc = AR + time lag rain (wet conditions, 0-3 months)
+    description: This is has added autoregressiveness
+    inherit: 1
+    y:
+      - name: disease_cases
+        function_ref: get_ar_linear_disease_cases
+        params:
+          weight_1: 0.5
+          variable: lagged_rainfall
+          weight_2: 0.5
+  - id: 5
+    name: dc = AR + time lag rain (drought, 3-5)
+    description: This is has added autoregressiveness
+    inherit: 2
+    y:
+      - name: disease_cases
+        function_ref: get_ar_threshold_disease_cases
+        params:
+          weight: 0.5
+          variable: lagged_rainfall
+          threshold: 18
+
+  - id: 6
+    name: dc = AR + time lag temperature (2-6 weeks = 0-2 months)
+    description: This is has added autoregressiveness
+    inherit: 3
+    y:
+      - name: disease_cases
+        function_ref: get_ar_linear_threshold_disease_cases
+        params:
+          variable: lagged_rainfall
+          threshold: 3
+
+  # The three major components of time series are trend, seasonality and resiude. Lets also explore seasonality and trend.
+  # Residue is the short term fluctauations that are neither systematic nor predictable.
+  - id: 7
+    name: dc = f(((rain * weight) * f(temperature)), population)
+    description: This simulation aims at testing if the model can capture the increasing trend, due to higher population, and the seasonality of rainfall and temperature
+    time_delta: M
+    length: 200
+    x:
+      - name: population
+        function_ref: get_increasing_value
+        params:
+          value: 1000
+          increase: 0.5
+          noise: 20
+          length: 200
+      - name: mean_temperature
+        function_ref: get_sinus_value
+        params:
+          avg: 20
+          amp: 10
+          noise: 2
+          phase_shift: -30
+          period: 12
+      - name: lagged_temperature
+        function_ref: get_lagged_variable
+        params:
+          variable: mean_temperature
+          from_month: 1
+          to_month: 0
+      - name: rainfall
+        function_ref: get_sinus_value
+        params:
+          avg: 120
+          amp: 60
+          noise: 5
+          phase_shift: 3
+          period: 6
+      - name: lagged_rainfall
+        function_ref: get_lagged_variable
+        params:
+          variable: rainfall
+          from_month: 3
+          to_month: 0
+    y:
+      - name: disease_cases
+        function_ref: get_increasing_disease_cases
+
+  # - id: 8
+  #   name: dc = f(((rain * weight) * f(temperature)), money spent on VBD)
+  #   description: This simulation aims at testing if the model can capture the decreasing trend due to more money spent on VBD, and the seasonality of rainfall and temperature
+evaluators:
+  - model: https://github.com/dhis2-chap/ewars_template.git
+    prediction_length: 3
+    stride: 2
+    n_test_sets: 6
+    metrics: [mse, pocid, theils_u]
+    plot_length: 100
+    user_options:
+      n_lags:
+        type: integer
+        default: 3
+        description: Number of lags to include in the model.
+  - model: "https://github.com/sandvelab/chap_auto_ewars@58d56f86641f4c7b09bbb635afd61740deff0640"
+    prediction_length: 3
+    stride: 2
+    n_test_sets: 6
+    metrics: [mse, pocid, theils_u]
+    plot_length: 40
+  - model: https://github.com/sandvelab/monthly_ar_model@cadd785872624b4bcd839a39f5e7020c25254c31
+    prediction_length: 3
+    stride: 3
+    n_test_sets: 6
+    metrics: [mse, pocid, theils_u]
+    plot_length: 40

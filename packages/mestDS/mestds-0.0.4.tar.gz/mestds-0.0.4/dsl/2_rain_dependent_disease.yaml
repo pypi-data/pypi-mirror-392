@@ -1,0 +1,47 @@
+model:
+  simulation_name: "disease_cases_4_month_lagged_rain_dependent"
+  time_granularity: "W"
+  simulation_length: 350
+  features:
+    - name: "population"
+      function: |
+        def get_population():
+          return 10000
+    - name: "rainfall"
+      function: |
+        def get_rainfall(region, i):
+          i = (i - 1) % 52 + 1
+          rain_season = False
+          for season in region.rain_season:
+            if season.start <= i <= season.end:
+              rain_season = True
+          if rain_season:
+              return np.random.gamma(shape=6, scale=1.0) * 4
+          else:
+              return np.random.gamma(shape=2, scale=0.5) * 2
+    - name: "mean_temperature"
+      function: |
+        def get_temperature(i):
+          i = (i - 1) % 52 + 1
+          seasonal_temp = 24 + 5 * np.sin(2 * np.pi * i / 52)
+          random_noise = np.random.normal(0, 2)
+          return seasonal_temp + random_noise
+
+    - name: "lagged_rainfall"
+      function: |
+        def get_lagged_rainfall(rainfall):
+          if len(rainfall) < 3:
+              return rainfall[-1]  
+          last_four = rainfall[-4:]
+          return sum(last_four) / len(last_four)
+
+    - name: "disease_cases"
+      function: |
+        def get_disease_cases(population, lagged_rainfall):
+          disease_cases = lagged_rainfall[-1] * 0.5
+          return min(disease_cases,population[-1])
+  regions:
+    - name: "Finnmark"
+      region_id: 1
+      rain_season: [[10, 15], [40, 45]]
+      neighbour: [2]

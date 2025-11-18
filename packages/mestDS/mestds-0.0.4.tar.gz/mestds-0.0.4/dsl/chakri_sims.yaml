@@ -1,0 +1,82 @@
+model:
+  simulation_name: "lagged_linear"
+  time_granularity: "M"
+  simulation_length: 100
+  features:
+    - name: "rainfall"
+      function: |
+        def get_rainfall(region, i):
+          i = (i - 1) % 52 + 1
+          rain_season = False
+          for season in region.rain_season:
+            if season.start <= i <= season.end:
+              rain_season = True
+          if rain_season:
+              return np.random.gamma(shape=6, scale=1.0) * 4
+          else:
+              return np.random.gamma(shape=2, scale=0.5) * 2
+    - name: "mean_temperature"
+      function: |
+        def get_temperature(i):
+          i = (i - 1) % 52 + 1
+          seasonal_temp = 24 + 5 * np.sin(2 * np.pi * i / 52)
+          random_noise = np.random.normal(0, 2)
+          return seasonal_temp + random_noise
+    - name: "lagged_sickness"
+      function: |
+        def get_lagged_sickness(disease_cases, i):
+          if i > 3:
+            return np.mean(disease_cases[i-4:i-1])
+          return disease_cases[-1]
+    - name: "disease_cases"
+      function: |
+        def get_disease_cases(mean_temperature, rainfall, lagged_sickness):
+          sickness = (mean_temperature[-1] * 0.5) + (rainfall[-1] * 0.5) + (lagged_sickness[-1] * 0.5)
+          return sickness
+
+  regions:
+    - name: "Finnmark"
+      region_id: 1
+      rain_season: [[10, 23], [45, 52]]
+      neighbour: [2]
+    - name: "Troms"
+      region_id: 2
+      rain_season: [[10, 16], [37, 45]]
+      neighbour: [1, 3]
+    - name: "Nordland"
+      region_id: 3
+      neighbour: [2, 4]
+    - name: "Trøndelag"
+      region_id: 4
+      rain_season: [[5, 10], [15, 25], [45, 52]]
+      neighbour: [3]
+
+simulations:
+  - simulation_name: "not_lagged_linear"
+    features:
+      - name: "disease_cases"
+        function: |
+          def get_disease_cases(mean_temperature, rainfall, lagged_sickness):
+            sickness = 100 + (mean_temperature[-1] * 0.3) + (rainfall[-1] *0.5)
+            return sickness
+  - simulation_name: "Heavily rain dependent simulation with diseaae lag"
+    features:
+      - name: "disease_cases"
+        function: |
+          def get_disease_cases(mean_temperature, rainfall, lagged_sickness):
+            sickness = (mean_temperature[-1] * 0.3) + (rainfall[-1] *0.9) + (lagged_sickness[-1] * 0.5)
+            return sickness
+  - simulation_name: "Heavily rain dependent simulation without diseaae lag"
+    features:
+      - name: "disease_cases"
+        function: |
+          def get_disease_cases(mean_temperature, rainfall, lagged_sickness):
+            sickness = (mean_temperature[-1] * 0.3) + (rainfall[-1] *0.9)
+            return sickness
+  - simulation_name: "Only lag"
+    features:
+      - name: "disease_cases"
+        function: |
+          def get_disease_cases(mean_temperature, rainfall, lagged_sickness):
+            sickness = (mean_temperature[-1] * 0.3) + (lagged_sickness[-1] * 0.5)
+            return sickness

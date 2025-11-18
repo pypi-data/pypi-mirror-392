@@ -1,0 +1,420 @@
+public:
+  # Define public functions, lists, seasons, regions that will be used for the simulations.
+  functions:
+    get_population: |
+      def get_population(i, region):
+        return 100
+    get_spiky_rainfall: |
+      def get_rainfall(i, spikes):
+        if i in spikes:
+          return 50
+        return 1
+    get_flat_rainfall: |
+      def get_rainfall():
+        return 10
+    get_spiky_temperature: |
+      def get_temperature(i, region):
+        if i in region.seasons['spikes']:
+          return 50
+        return 1
+    get_flat_temperature: |
+      def get_temperature():
+        return 10
+    get_lagged_variable: |
+      def get_lagged_variable(variable, from_week, to_week):
+        if len(variable) < from_week:
+            return variable[-1]  # Not enough data to compute lagged rainfall
+        if to_week == 0:
+          relevant_weeks = variable[-from_week:]
+        else:
+          relevant_weeks = variable[-from_week:-to_week]
+        return sum(relevant_weeks) / len(relevant_weeks)
+    get_period_value: |
+      def get_rainfall(rainfall_season, i):
+        rain_season = False
+        for season in rainfall_season:
+          if season[0] <= i <= season[1]:
+            rain_season = True
+        if rain_season:
+            return 50
+        else:
+            return 1
+    get_disease_cases: |
+      def get_disease_cases(variable):
+        return int(variable[-1] * 1.5)
+
+    get_rain_temp_dc: |
+      def get_rain_temp_dc(rainfall, mean_temperature):
+
+    get_ar_disease_cases: |
+      def get_dc(variable, variable_2, disease_cases):
+        dc = disease_cases[-1] * 0.5
+        if (len(disease_cases) > 1):
+          dc+= disease_cases[-2] * 0.3
+        dc += variable[-1] * 0.5
+        if type(variable_2) == list:
+          dc += variable_2[-1] * 0.5
+        return int(dc)
+        print(value)
+
+    get_sinus_temp: |
+      def simulate_temperature(i):
+        i = (i - 1) % 52 + 1
+        avg_temp=15
+        amplitude=10
+        noise_level=2
+        period=52
+        phase_shift=-80
+        seasonal = amplitude * np.sin(2 * np.pi * (i + phase_shift) / period)
+        noise = np.random.normal(0, noise_level)
+        return avg_temp + seasonal + noise
+
+  lists:
+    spikes: [10, 30, 50, 70, 90, 110, 130, 150, 170, 190]
+    rainfall_season:
+      [
+        [10, 15],
+        [25, 35],
+        [45, 50],
+        [70, 90],
+        [110, 115],
+        [130, 135],
+        [150, 155],
+        [175, 185],
+      ]
+    high_temp_season:
+
+simulators:
+  # Define simulations using either the public variables or define simulation specific functions or regions inside the simulation definition.
+  - id: 1
+    name: disease_cases = lagged_rainfall 3-6 weeks (spikes)
+    time_delta: W # either D(ays), W(eeks), or M(onths)
+    length: 200 # in this case the simulation is 200 weeks long
+    x: # define the x variables in the dataset
+      - name: population
+        function_ref: get_population
+      - name: rainfall
+        function_ref: get_spiky_rainfall
+      - name: "mean_temperature"
+        function_ref: get_flat_temperature
+      - name: lagged_value
+        function_ref: get_lagged_variable
+        params: # define the interval of the lagged value
+          variable: rainfall
+          from_week: 6
+          to_week: 3
+      - name: blank
+        function: |
+          def blank():
+            return 0
+    y:
+      - name: disease_cases
+        function_ref: get_disease_cases
+        params:
+          variable: lagged_value
+    regions:
+      - name: "Finnmark"
+        id: 1
+        seasons:
+          - name: rain_season
+            season_ref: rainfall_season
+          - name: spikes
+            season_ref: spikes
+
+  - id: 2
+    inherit: 1 #  copy sim id 1, and ammend changes.
+    name: disease_cases = lagged_rainfall 2-4 weeks (spikes)
+    x:
+      - name: lagged_value #variable is already defined in sim id 1 - meaning we are ammending changes to the function and the function_ref and variable in params does not need to be defined again
+        params:
+          from_week: 4
+          to_week: 2
+  - id: 3
+    inherit: 1
+    name: disease_cases = lagged_rainfall 1-3 weeks (spikes)
+    x:
+      - name: lagged_value
+        params:
+          from_week: 3
+          to_week: 1
+  - id: 4
+    inherit: 1
+    name: disease_cases = lagged_temperature 3-6 weeks (spikes)
+    x:
+      - name: rainfall
+        function_ref: get_flat_rainfall
+      - name: mean_temperature
+        function_ref: get_spiky_temperature
+      - name: lagged_value
+        params:
+          variable: mean_temperature
+  - id: 5
+    inherit: 4
+    name: disease_cases = lagged_temperature 2-4 weeks (spikes)
+    x:
+      - name: lagged_value
+        params:
+          from_week: 4
+          to_week: 2
+  - id: 6
+    inherit: 4
+    name: disease_cases = lagged_temperature 1-3 weeks (spikes)
+    x:
+      - name: lagged_value
+        params:
+          from_week: 3
+          to_week: 1
+  - id: 7
+    inherit: 1
+    name: "disease_cases = lagged_rainfall 3-6 weeks (periods)"
+    x:
+      - name: rainfall
+        function_ref: get_period_value
+  - id: 8
+    inherit: 2
+    name: "disease_cases = lagged_rainfall 2-4 weeks (periods)"
+    x:
+      - name: rainfall
+        function_ref: get_period_value
+  - id: 9
+    inherit: 3
+    name: "disease_cases = lagged_temperature 1-3 weeks (periods)"
+    x:
+      - name: mean_temperature
+        function_ref: get_period_value
+  - id: 10
+    inherit: 4
+    name: "disease_cases = lagged_temperature 3-6 weeks (periods)"
+    x:
+      - name: mean_temperature
+        function_ref: get_period_value
+  - id: 11
+    inherit: 5
+    name: "disease_cases = lagged_temperature 2-4 weeks (periods)"
+    x:
+      - name: mean_temperature
+        function_ref: get_period_value
+  - id: 12
+    inherit: 6
+    name: "disease_cases = lagged_temperature 1-3 weeks (periods)"
+    x:
+      - name: mean_temperature
+        function_ref: get_period_value
+  - id: 13
+    inherit: 1
+    name: AR disease_cases = lagged_rainfall 3-6 weeks (spikes)
+    y:
+      - name: disease_cases
+        function_ref: get_ar_disease_cases
+        params:
+          variable: lagged_value
+          variable_2: blank
+  - id: 14
+    inherit: 2
+    name: AR disease_cases = lagged_rainfall 2-4 weeks (spikes)
+    y:
+      - name: disease_cases
+        function_ref: get_ar_disease_cases
+        params:
+          variable: lagged_value
+          variable_2: blank
+  - id: 15
+    inherit: 3
+    name: AR disease_cases = lagged_rainfall 1-3 weeks (spikes)
+    y:
+      - name: disease_cases
+        function_ref: get_ar_disease_cases
+        params:
+          variable: lagged_value
+          variable_2: blank
+  - id: 16
+    inherit: 4
+    name: AR disease_cases = lagged_temperature 3-6 weeks (spikes)
+    y:
+      - name: disease_cases
+        function_ref: get_ar_disease_cases
+        params:
+          variable: lagged_value
+          variable_2: blank
+  - id: 17
+    inherit: 5
+    name: AR disease_cases = lagged_temperature 2-4 weeks (spikes)
+    y:
+      - name: disease_cases
+        function_ref: get_ar_disease_cases
+        params:
+          variable: lagged_value
+          variable_2: blank
+  - id: 18
+    inherit: 6
+    name: AR disease_cases = lagged_temperature 1-3 weeks (spikes)
+    y:
+      - name: disease_cases
+        function_ref: get_ar_disease_cases
+        params:
+          variable: lagged_value
+          variable_2: blank
+  - id: 19
+    inherit: 7
+    name: AR disease_cases = lagged_rainfall 3-6 weeks (period)
+    y:
+      - name: disease_cases
+        function_ref: get_ar_disease_cases
+        params:
+          variable: lagged_value
+          variable_2: blank
+  - id: 20
+    inherit: 8
+    name: AR disease_cases = lagged_rainfall 2-4 weeks (period)
+    y:
+      - name: disease_cases
+        function_ref: get_ar_disease_cases
+        params:
+          variable: lagged_value
+          variable_2: blank
+  - id: 21
+    inherit: 9
+    name: AR disease_cases = lagged_rainfall 1-3 weeks (period)
+    y:
+      - name: disease_cases
+        function_ref: get_ar_disease_cases
+        params:
+          variable: lagged_value
+          variable_2: blank
+  - id: 22
+    inherit: 10
+    name: AR disease_cases = lagged_temperature 3-6 weeks (period)
+    y:
+      - name: disease_cases
+        function_ref: get_ar_disease_cases
+        params:
+          variable: lagged_value
+          variable_2: blank
+  - id: 23
+    inherit: 11
+    name: AR disease_cases = lagged_temperature 2-4 weeks (period)
+    y:
+      - name: disease_cases
+        function_ref: get_ar_disease_cases
+        params:
+          variable: lagged_value
+          variable_2: blank
+  - id: 24
+    inherit: 12
+    name: AR disease_cases = lagged_temperature 1-3 weeks (period)
+    y:
+      - name: disease_cases
+        function_ref: get_ar_disease_cases
+        params:
+          variable: lagged_value
+          variable_2: blank
+  - id: 25
+    inherit: 1
+    name: Lagged rain and temp = dc (3-6 week lag)
+    x:
+      - name: mean_temperature
+        function_ref: get_sinus_temp
+      - name: lagged_mean_temperature
+        function_ref: get_lagged_variable
+        params:
+          variable: mean_temperature
+          from_week: 6
+          to_week: 3
+    y:
+      - name: disease_cases
+        function: |
+          def get_dc(lagged_mean_temperature, lagged_value):
+            return int(lagged_mean_temperature[-1]*0.5 + lagged_value[-1] * 0.5)
+  - id: 26
+    inherit: 25
+    name: (no lag) rain and temp = dc
+    y:
+      - name: disease_cases
+        function: |
+          def get_dc(mean_temperature, rainfall):
+            return int(mean_temperature[-1]*0.5 + rainfall[-1]*0.5)
+
+  - id: 27
+    inherit: 25
+    name: AR - lagged rain and temp = dc (3-6 week lag)
+    y:
+      - name: disease_cases
+        function_ref: get_ar_disease_cases
+        params:
+          variable: lagged_value
+          variable_2: lagged_mean_temperature
+  - id: 28
+    inherit: 26
+    name: AR - (no lag) rain and temp = dc
+    y:
+      - name: disease_cases
+        function_ref: get_ar_disease_cases
+        params:
+          variable: rainfall
+          variable_2: mean_temperature
+  - id: 29
+    inherit: 2
+    name: Lagged rain and temp = dc (2-4 week lag)
+    x:
+      - name: mean_temperature
+        function_ref: get_sinus_temp
+      - name: lagged_mean_temperature
+        function_ref: get_lagged_variable
+        params:
+          variable: mean_temperature
+          from_week: 4
+          to_week: 2
+    y:
+      - name: disease_cases
+        function: |
+          def get_dc(lagged_mean_temperature, lagged_value):
+            return int(lagged_mean_temperature[-1]*0.5 + lagged_value[-1] * 0.5)
+  - id: 30
+    inherit: 29
+    name: AR - lagged rain and temp = dc (2-4 week lag)
+    y:
+      - name: disease_cases
+        function_ref: get_ar_disease_cases
+        params:
+          variable: lagged_value
+          variable_2: lagged_mean_temperature
+
+  - id: 31
+    inherit: 3
+    name: Lagged rain and temp = dc (1-3 week lag)
+    x:
+      - name: mean_temperature
+        function_ref: get_sinus_temp
+      - name: lagged_mean_temperature
+        function_ref: get_lagged_variable
+        params:
+          variable: mean_temperature
+          from_week: 3
+          to_week: 1
+    y:
+      - name: disease_cases
+        function: |
+          def get_dc(lagged_mean_temperature, lagged_value):
+            return int(lagged_mean_temperature[-1]*0.5 + lagged_value[-1] * 0.5)
+  - id: 32
+    inherit: 30
+    name: AR - lagged rain and temp = dc (1-3 week lag)
+    y:
+      - name: disease_cases
+        function_ref: get_ar_disease_cases
+        params:
+          variable: lagged_value
+          variable_2: lagged_mean_temperature
+evaluators:
+  - time_delta: "W"
+    prediction_length: 12
+    model: "https://github.com/sandvelab/chap_auto_ewars_weekly" #@737446a7accf61725d4fe0ffee009a682e7457f6
+    stride: 11
+    n_test_sets: 3
+    metrics: [mse, pocid, theils_u]
+  - model: "models/weekly_ar_model"
+    time_delta: "W"
+    n_test_sets: 3
+    stride: 11
+    prediction_lengt: 12
+    metrics: [mse, pocid, theils_u]

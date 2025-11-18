@@ -1,0 +1,306 @@
+public:
+  functions:
+    get_flat_value: |
+      def get_flat_value(mean, randomness):
+        return np.random.normal(mean, randomness)
+    get_rainfall_spike: |
+      def get_rainfall(i, random_spikes):
+        if i in random_spikes:
+          return 50
+        else:
+          return 10
+    get_rainfall_period: |
+      def get_rainfall(i, random_spikes, period_length):
+        for x in range(0, period_length):
+          if (i-x) in random_spikes:
+            return 50
+        return 10
+    get_disease_cases_with_lag: |
+      def get_disease_cases_with_lag(rainfall, lag):
+        if len(rainfall) < lag:
+          return int(rainfall[-1])
+        return int(rainfall[-lag])
+  lists:
+    random_spikes:
+      [
+        4,
+        7,
+        10,
+        18,
+        22,
+        26,
+        35,
+        37,
+        39,
+        41,
+        45,
+        46,
+        52,
+        57,
+        58,
+        67,
+        70,
+        78,
+        81,
+        82,
+        86,
+        94,
+        95,
+        96,
+        100,
+        107,
+        115,
+        125,
+        130,
+        132,
+        137,
+        140,
+        146,
+        157,
+        158,
+        165,
+        171,
+        176,
+        184,
+        189,
+        193,
+        195,
+        206,
+        207,
+        208,
+        210,
+        211,
+        217,
+        218,
+        222,
+        225,
+        231,
+        236,
+        251,
+        252,
+        254,
+        255,
+        263,
+        273,
+        277,
+        282,
+        284,
+        290,
+        295,
+        306,
+        308,
+        312,
+        314,
+        319,
+        326,
+        332,
+        334,
+        353,
+        357,
+        360,
+        364,
+        366,
+        374,
+        384,
+        387,
+        390,
+        391,
+        393,
+        398,
+        404,
+        405,
+        406,
+        408,
+        409,
+        415,
+        418,
+        432,
+        438,
+        439,
+        440,
+        442,
+        450,
+        454,
+        460,
+        471,
+        482,
+        488,
+        493,
+        499,
+        505,
+        509,
+        518,
+        524,
+        529,
+        544,
+        550,
+        553,
+        558,
+        563,
+        567,
+        572,
+        581,
+        585,
+        593,
+        594,
+        595,
+        606,
+        615,
+        619,
+        624,
+        625,
+        626,
+        633,
+        640,
+        641,
+        648,
+        652,
+        655,
+        662,
+        664,
+        668,
+        669,
+        671,
+        678,
+        683,
+        684,
+        691,
+        700,
+        703,
+        710,
+        715,
+        718,
+        722,
+        730,
+        738,
+        743,
+        745,
+        751,
+        757,
+        758,
+        763,
+        769,
+        771,
+        775,
+        783,
+        790,
+        792,
+        796,
+        802,
+        809,
+        817,
+        823,
+        826,
+        827,
+        830,
+        839,
+        841,
+        844,
+        869,
+        899,
+        900,
+        930,
+        932,
+        940,
+        943,
+        948,
+        953,
+        969,
+        973,
+        984,
+        987,
+        990,
+      ]
+
+simulators:
+  - id: 1
+    name: random spikes for 90 months (21 spikes)
+    description: Is the model able to detect the lag relationship between rainfall and disease cases?
+    time_delta: M
+    length: 90
+    x:
+      - name: rainfall
+        function_ref: get_rainfall_spike
+      - name: population
+        function_ref: get_flat_value
+        params:
+          mean: 1000
+          randomness: 5
+      - name: mean_temperature
+        function_ref: get_flat_value
+        params:
+          mean: 27
+          randomness: 0
+    y:
+      - name: disease_cases
+        function_ref: get_disease_cases_with_lag
+        params:
+          lag: 1
+  - id: 3
+    inherit: 1
+    name: random spikes for 120 months (25 spikes)
+    length: 120
+  # - id: 4
+  #   inherit: 1
+  #   name: random spikes for 150 months (32 spikes)
+  #   length: 150
+  - id: 5
+    inherit: 1
+    name: random spikes for 180 months (38 spikes)
+    length: 180
+  # - id: 6
+  #   inherit: 1
+  #   name: random spikes for 230 months (49 spikes)
+  #   length: 230
+  - id: 7
+    inherit: 1
+    name: random spikes for 270 months (55 spikes)
+    length: 270
+  # - id: 8
+  #   inherit: 1
+  #   name: random spikes for 300 months (60 spikes)
+  #   length: 300
+  - id: 9
+    inherit: 1
+    name: random spikes for 330 months (67 spikes)
+    length: 330
+  - id: 10
+    inherit: 1
+    name: random spikes for 370 months (73 spikes)
+    length: 370
+  - id: 11
+    inherit: 1
+    name: random spikes for 420 months (87 spikes)
+    length: 420
+  - id: 12
+    inherit: 1
+    name: random spikes for 500 months (99 spikes)
+    length: 500
+  - id: 13
+    inherit: 1
+    name: random spikes for 600 months (115 spikes)
+    length: 600
+  - id: 14
+    inherit: 1
+    name: random spikes for 600 months (169 spikes)
+    length: 997
+
+evaluators:
+  - model: https://github.com/dhis2-chap/ewars_template.git
+    prediction_length: 3
+    stride: 2
+    n_test_sets: 6
+    metrics: [mse, pocid, theils_u]
+    plot_length: 60
+  - model: "https://github.com/sandvelab/chap_auto_ewars"
+    prediction_length: 3
+    stride: 2
+    n_test_sets: 6
+    metrics: [mse, pocid, theils_u]
+    plot_length: 60
+  - model: https://github.com/sandvelab/monthly_ar_model
+    prediction_length: 3
+    stride: 2
+    n_test_sets: 6
+    metrics: [mse, pocid, theils_u]
+    plot_length: 60

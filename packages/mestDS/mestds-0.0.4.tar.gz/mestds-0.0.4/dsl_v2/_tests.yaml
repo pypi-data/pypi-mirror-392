@@ -1,0 +1,44 @@
+#The simulations in this file aim to test a models ability to predict disease cases
+public:
+  functions:
+    get_sinus_rainfall: |
+      def get_rainfall(i):
+        i = (i - 1) % 52 + 1
+        avg_temp=0
+        amplitude=20
+        noise_level=2
+        period=52
+        phase_shift=-80
+        seasonal = amplitude * np.sin(2 * np.pi * (i + phase_shift) / period)
+        noise = np.random.normal(0, noise_level)
+        return max(seasonal, 0)
+    get_sinus_temp: |
+      def get_temp(i):
+        i = (i - 1) % 52 + 1
+        avg_temp=15
+        amplitude=10
+        noise_level=2
+        period=52
+        phase_shift=-80
+        seasonal = amplitude * np.sin(2 * np.pi * (i + phase_shift) / period)
+        noise = np.random.normal(0, noise_level)
+        return avg_temp + seasonal + noise
+
+    get_drought_indicator: |
+      def get_drought_indicator(rainfall):
+        if rainfall[-1] < 5:
+          return 1
+        return 0
+
+    get_lagged_variable: |
+      def get_lagged_variable(variable, from_week, to_week):
+        if len(variable) < from_week:
+            return variable[-1]
+        if to_week == 0:
+          relevant_weeks = variable[-from_week:]
+        else:
+          relevant_weeks = variable[-from_week:-to_week]
+        return sum(relevant_weeks) / len(relevant_weeks)
+
+    get_threshold_disease_cases: |
+      def get_threshold_disease_cases():
