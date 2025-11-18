@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python UI-Me</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/uime.css">
+</head>
+<body class="uime-body">
+<div class="uime-shell">
+    <header class="uime-header">
+        <div class="brand">
+            <span class="brand-icon" aria-hidden="true">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="4 17 10 11 4 5" />
+                  <line x1="12" y1="19" x2="20" y2="19" />
+                </svg>
+            </span>
+            <div class="brand-copy">
+                <p class="brand-kicker">python ui-me</p>
+                <h1 class="brand-title">{{ title }}</h1>
+                <p class="brand-subtitle">{{ description }}</p>
+            </div>
+        </div>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to light mode">
+            <span class="sr-only">Toggle theme</span>
+            <svg data-icon="sun" viewBox="0 0 24 24" role="presentation" focusable="false">
+                <circle cx="12" cy="12" r="5" />
+                <path d="M12 1v2" />
+                <path d="M12 21v2" />
+                <path d="M4.22 4.22 5.64 5.64" />
+                <path d="M18.36 18.36l1.42 1.42" />
+                <path d="M1 12h2" />
+                <path d="M21 12h2" />
+                <path d="m4.22 19.78 1.42-1.42" />
+                <path d="M18.36 5.64l1.42-1.42" />
+            </svg>
+            <svg data-icon="moon" viewBox="0 0 24 24" role="presentation" focusable="false">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z" />
+            </svg>
+        </button>
+    </header>
+
+    <section class="uime-tabs" role="tablist" aria-label="Function groups">
+        {% for group in groups.keys() %}
+            <button
+                type="button"
+                class="tab-trigger{% if loop.first %} is-active{% endif %}"
+                data-tab-trigger="{{ group }}"
+                role="tab"
+                aria-selected="{{ 'true' if loop.first else 'false' }}"
+            >
+                <span class="tab-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+                        <path d="M5 12h14" />
+                        <path d="M5 5h14" />
+                        <path d="M5 19h14" />
+                    </svg>
+                </span>
+                {{ group }}
+            </button>
+        {% endfor %}
+    </section>
+
+    {% for group, funcs in groups.items() %}
+        <section id="{{ group }}" class="group-panel{% if loop.first %} is-active{% endif %}" data-group-panel role="tabpanel">
+            <aside class="group-sidebar">
+                <div class="sidebar-card">
+                    <p class="sidebar-kicker">Functions</p>
+                        <nav class="sidebar-nav" aria-label="{{ group }} functions">
+                            {% for func in funcs %}
+                            <button
+                                type="button"
+                                class="sidebar-link"
+                                data-scroll-to="{{ func.name }}"
+                                data-group="{{ group }}"
+                                data-func="{{ func.name }}"
+                            >
+                                <span aria-hidden="true">→</span>
+                                {{ func.title or func.name }}
+                            </button>
+                            {% endfor %}
+                        </nav>
+                </div>
+
+                {% if global_vars|length > 0 %}
+                    <div class="sidebar-card">
+                        <p class="sidebar-kicker">Globals</p>
+                        <form id="global-vars-form-{{ group }}" class="global-form" data-global-form>
+                            {% for var in global_vars %}
+                                <label class="field">
+                                    <span class="field-meta">
+                                        <span class="field-label">{{ var }}</span>
+                                        <span class="field-type">global</span>
+                                    </span>
+                                    <input
+                                        id="{{ group }}-{{ var }}"
+                                        class="text-input"
+                                        name="{{ var }}"
+                                        value="{{ global_vars[var]['value'] }}"
+                                        placeholder="Enter value"
+                                    />
+                                </label>
+                            {% endfor %}
+                            <button type="submit" class="ghost-button">
+                                Save globals
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
+            </aside>
+
+            <main class="group-main" aria-live="polite">
+                {% for func in funcs %}
+                    <article id="{{ func.name }}" class="function-card" data-group="{{ group }}" data-func="{{ func.name }}">
+                        <form id="{{ func.name }}-form" class="function-form" data-group="{{ group }}">
+                            <div class="function-card-head">
+                                <div class="function-head-info">
+                                    <span class="function-icon" aria-hidden="true">
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          width="24"
+                                          height="24"
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          stroke-width="2"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                        >
+                                          <polyline points="16 18 22 12 16 6" />
+                                          <polyline points="8 6 2 12 8 18" />
+                                        </svg>
+                                    </span>
+                                    <div>
+                                        <p class="function-name">{{ func.title or func.name }}</p>
+                                        {% if func.description %}
+                                            <p class="function-desc">{{ func.description }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <button type="submit" class="primary-button function-execute">
+                                    <span aria-hidden="true">▶</span>
+                                    Execute
+                                </button>
+                            </div>
+
+                            <div class="field-stack">
+                                {% for param in func.parameters %}
+                                    {% set param_type = param.type %}
+                                    <div class="field">
+                                        <div class="field-meta">
+                                            <label for="{{ func.name }}-{{ param.name }}" class="field-label">{{ param.name }}</label>
+                                            {% if param_type and param_type != 'str' %}
+                                                <span class="field-type">{{ param_type }}</span>
+                                            {% endif %}
+                                        </div>
+
+                                        {% if param_type in ('int', 'float') %}
+                                            <input
+                                                id="{{ func.name }}-{{ param.name }}"
+                                                name="{{ param.name }}"
+                                                type="number"
+                                                class="text-input"
+                                                step="{{ '1' if param_type == 'int' else '0.01' }}"
+                                                {% if param.default is not none %}value="{{ param.default }}"{% endif %}
+                                                placeholder="Enter {{ param.name }}"
+                                                required
+                                            />
+                                        {% elif param_type == 'complex' %}
+                                            <input
+                                                id="{{ func.name }}-{{ param.name }}"
+                                                name="{{ param.name }}"
+                                                type="text"
+                                                class="text-input"
+                                                {% if param.default is not none %}value="{{ param.default }}"{% endif %}
+                                                placeholder="e.g. 3+4j"
+                                                required
+                                            />
+                                        {% elif param_type == 'bool' %}
+                                            <label class="switch">
+                                                <input
+                                                    type="checkbox"
+                                                    id="{{ func.name }}-{{ param.name }}"
+                                                    name="{{ param.name }}"
+                                                    class="switch-input"
+                                                    value="on"
+                                                    {% if param.default %}checked{% endif %}
+                                                />
+                                                <span class="switch-control" aria-hidden="true"></span>
+                                                <span class="switch-text">False</span>
+                                            </label>
+                                        {% elif param_type == 'dict' %}
+                                            <textarea
+                                                id="{{ func.name }}-{{ param.name }}"
+                                                name="{{ param.name }}"
+                                                class="text-area json-editor"
+                                                data-json-editor="dict"
+                                                placeholder="{ }"
+                                                spellcheck="false"
+                                                required
+                                            >{% if param.default is not none %}{{ param.default }}{% endif %}</textarea>
+                                        {% elif not param_type %}
+                                            <textarea
+                                                id="{{ func.name }}-{{ param.name }}"
+                                                name="{{ param.name }}"
+                                                class="text-area json-editor"
+                                                data-json-editor="generic"
+                                                placeholder="{ }"
+                                                spellcheck="false"
+                                                required
+                                            >{% if param.default is not none %}{{ param.default }}{% endif %}</textarea>
+                                        {% elif param_type in ('List[str]', 'list', 'set', 'tuple', 'List[int]', 'List[float]', 'List[list]', 'List[complex]') %}
+                                            <textarea
+                                                id="{{ func.name }}-{{ param.name }}"
+                                                name="{{ param.name }}"
+                                                class="text-area"
+                                                placeholder="One entry per line"
+                                                required
+                                            >{% if param.default is not none %}{{ param.default }}{% endif %}</textarea>
+                                        {% else %}
+                                            <input
+                                                id="{{ func.name }}-{{ param.name }}"
+                                                name="{{ param.name }}"
+                                                type="text"
+                                                class="text-input"
+                                                {% if param.default is not none %}value="{{ param.default }}"{% endif %}
+                                                placeholder="Enter {{ param.name }}"
+                                                required
+                                            />
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                        </form>
+
+                        <div id="{{ func.name }}_section" class="result-panel hidden" data-result-panel>
+                            <div class="result-meta">
+                                <span class="result-pill" data-result-label>Waiting…</span>
+                                <span class="result-time" data-result-time></span>
+                                <button
+                                    type="button"
+                                    class="ghost-button ghost-button--quiet"
+                                    id="{{ func.name }}_copy"
+                                    data-copy-target="{{ func.name }}_result"
+                                >
+                                    Copy
+                                </button>
+                            </div>
+                            <pre id="{{ func.name }}_result" class="result-body" tabindex="0"></pre>
+                        </div>
+                    </article>
+                {% endfor %}
+            </main>
+        </section>
+    {% endfor %}
+</div>
+
+<script src="/static/js/uime.js"></script>
+</body>
+</html>
