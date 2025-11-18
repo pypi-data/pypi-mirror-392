@@ -1,0 +1,29 @@
+---
+# Ansible playbook to apply SwOS/SwOS Lite switch configuration
+# Usage: ansible-playbook -i inventory.yml apply_config.yml
+
+- name: Apply MikroTik SwOS/SwOS Lite Configuration
+  hosts: switches
+  gather_facts: no
+  connection: local
+
+  tasks:
+    - name: Load switch configuration from file
+      set_fact:
+        switch_config: "{{ lookup('file', config_file | default('switch_config.yml')) | from_yaml }}"
+
+    - name: Apply switch configuration
+      swos:
+        host: "{{ ansible_host }}"
+        username: "{{ switch_username | default('admin') }}"
+        password: "{{ switch_password | default('') }}"
+        config: "{{ switch_config }}"
+      register: config_result
+
+    - name: Display configuration results
+      debug:
+        msg: "{{ config_result.msg }}"
+
+    - name: Show if changes were made
+      debug:
+        msg: "Configuration changed: {{ config_result.changed }}"
