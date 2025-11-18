@@ -1,0 +1,124 @@
+<iframe id="iframe-{{ id }}" allow="fullscreen" src="about:blank" style="{{ style }}" title="Loading ..."></iframe>
+
+<script>
+  (() => {
+    const TITLE = {{ title| tojson
+  }};
+  const IFRAME_ID = "iframe-{{ id }}";
+  const BRIDGE_ID = {{ bridge_id| tojson }};
+  const SERVER_ID = {{ server_id| tojson }};
+  const STATE_JSON = {{ state| safe }};
+  const SCRIPT_URL = {{ script_url| tojson }};
+
+  const doc = document.implementation.createHTMLDocument(TITLE);
+  const h = tag => doc.createElement(tag);
+  const toHead = el => doc.head.appendChild(el);
+  const toBody = el => doc.body.appendChild(el);
+
+  doc.documentElement.lang = 'en';
+
+  const metaCharset = h('meta'); metaCharset.setAttribute('charset', 'UTF-8'); toHead(metaCharset);
+  const metaViewport = h('meta'); metaViewport.name = 'viewport'; metaViewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'; toHead(metaViewport);
+  const metaTheme = h('meta'); metaTheme.name = 'theme-color'; metaTheme.content = '#000000'; toHead(metaTheme);
+
+  const stateScript = h('script'); stateScript.id = 'rete-state-script'; stateScript.type = 'application/json'; stateScript.text = typeof STATE_JSON === 'string' ? STATE_JSON : JSON.stringify(STATE_JSON); toHead(stateScript);
+
+  const noscript = h('noscript'); noscript.innerText = 'You need to enable JavaScript to run this app.'; toBody(noscript);
+
+  const root = h('div'); root.id = 'root'; toBody(root);
+
+  const bootstrap = h('script');
+  bootstrap.text = `
+    (function() {
+      var _port = null;
+      var _pending = new Map(); // request_id -> {resolve,reject}
+      var _respHandlers = new Set();
+
+      window.RETE = {
+        send: function(req) {
+          if (!_port) throw new Error('Bridge is not connected yet');
+          if (!req || typeof req !== 'object') throw new Error('Bad request');
+          if (!req.request_id) {
+            if (crypto && crypto.randomUUID) req.request_id = crypto.randomUUID();
+            else req.request_id = String(Date.now()) + '-' + Math.random().toString(36).slice(2);
+          }
+          return new Promise(function(resolve, reject) {
+            _pending.set(req.request_id, {resolve: resolve, reject: reject});
+            _port.postMessage({ type: 'request', request: req });
+          });
+        },
+        onResponse: function(cb) {
+          if (typeof cb === 'function') _respHandlers.add(cb);
+          return function() { _respHandlers.delete(cb); };
+        }
+      };
+
+      window.addEventListener('message', function(ev) {
+        if (!ev || ev.data?.type !== 'RETE_INIT' || !ev.ports || !ev.ports[0]) return;
+        _port = ev.ports[0];
+        _port.onmessage = function(e) {
+          var msg = e.data || {};
+          if (msg.type === 'response' && msg.response) {
+            var r = msg.response;
+            _respHandlers.forEach(function(cb){ try { cb(r); } catch(_){} });
+            var slot = r.request_id && _pending.get(r.request_id);
+            if (slot) {
+              (r.success ? slot.resolve : slot.reject)(r);
+              _pending.delete(r.request_id);
+            }
+          }
+        };
+      });
+
+      var s = document.createElement('script');
+      s.id = 'rete-app-script';
+      s.src = ${JSON.stringify(SCRIPT_URL)};
+      document.body.appendChild(s);
+    })();
+  `;
+  toBody(bootstrap);
+
+  const iframe = document.getElementById(IFRAME_ID);
+  if (!iframe) return;
+
+  const iframeDoc = iframe.contentDocument;
+  iframe.title = TITLE;
+  iframeDoc.open();
+  iframeDoc.write('<!DOCTYPE html>' + doc.documentElement.outerHTML);
+  iframeDoc.close();
+
+  function getBridge() {
+    return (window.IpyBridge && window.IpyBridge[BRIDGE_ID]) || null;
+  }
+
+  function setup() {
+    const bridge = getBridge();
+    if (!bridge) { setTimeout(setup, 50); return; }
+
+    const ch = new MessageChannel();
+    const portToFrame = ch.port2;
+    const portHere = ch.port1;
+
+    iframe.contentWindow.postMessage({ type: 'RETE_INIT' }, '*', [portToFrame]);
+
+    portHere.onmessage = (ev) => {
+      const data = ev.data || {};
+      if (data.type !== 'request' || !data.request) return;
+      const req = data.request;
+      bridge.send({
+        server_id: SERVER_ID,
+        request_id: req.request_id,
+        method: req.method,
+        payload: req.payload
+      });
+    };
+
+    bridge.subscribe((resp) => {
+      if (!resp || resp.server_id !== SERVER_ID || !resp.request_id) return;
+      portHere.postMessage({ type: 'response', response: resp });
+    });
+  }
+
+  setup();
+}) ();
+</script>
