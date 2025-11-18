@@ -1,0 +1,92 @@
+Metadata-Version: 2.4
+Name: winipedia-utils
+Version: 0.7.20
+Summary: A package with many utility functions
+License-Expression: MIT
+License-File: LICENSE
+Author: Winipedia
+Author-email: win.steveker@gmx.de
+Requires-Python: >=3.12
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Requires-Dist: bandit
+Requires-Dist: cryptography
+Requires-Dist: defusedxml
+Requires-Dist: dotenv
+Requires-Dist: keyring
+Requires-Dist: mypy
+Requires-Dist: networkx
+Requires-Dist: packaging
+Requires-Dist: pathspec
+Requires-Dist: polars
+Requires-Dist: pre-commit
+Requires-Dist: pygithub
+Requires-Dist: pytest
+Requires-Dist: pytest-mock
+Requires-Dist: pyyaml
+Requires-Dist: ruff
+Requires-Dist: setuptools
+Requires-Dist: tomlkit
+Requires-Dist: tqdm
+Requires-Dist: typer
+Requires-Dist: types-defusedxml
+Requires-Dist: types-networkx
+Requires-Dist: types-pyyaml
+Requires-Dist: types-setuptools
+Requires-Dist: types-tqdm
+Description-Content-Type: text/markdown
+
+# winipedia-utils
+
+
+## Project Setup
+When you start a new project you can use winipedia-utils to set up the project.
+It is assumed that you use git and poetry for your project.
+It is assumed that the root folder (cwd) has the same name as the repository and follows the naming convention of smth-smth with hyphens.
+
+Lets say your project is called my-project. Then you would do the following:
+
+```bash
+poetry init or poetry new
+poetry add winipedia-utils
+poetry run winipedia-utils create-root
+```
+
+This will create the following structure (with __init__.py files):
+
+```bash
+my-project
+├── my_project
+│   ├── dev
+│   │   ├── artifacts
+│   │   │   └── builder
+│   │   │   │   ├── builder.py
+│   │   ├── cli
+│   │   │   ├── cli.py
+│   │   │   ├── subcommands.py
+│   │   ├── configs
+│   │   │   ├── configs.py
+├── tests
+│   ├── base
+│   │   ├── fixtures
+│   │   ├── utils
+│   │   │   ├── utils.py
+│   └── test_my_project
+│   │   ├── __init__.py
+│   │   └── test_builder.py
+│   └── conftest.py
+│   └── test_zero.py
+│   
+├── .env
+├── .gitignore
+├── .pre-commit-config.yaml
+├── .python-version
+├── experiment.py
+├── LICENSE
+├── poetry.lock
+├── pyproject.toml
+├── README.md
+└── ...
+```
