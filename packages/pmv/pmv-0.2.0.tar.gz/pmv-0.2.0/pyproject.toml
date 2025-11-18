@@ -1,0 +1,46 @@
+[project]
+name = "pmv"
+version = "0.2.0"
+description = "A TUI image viewer for Kitty terminal with keyboard navigation and PDF support"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    {name = "darkard2003", email = "darkard2003@users.noreply.github.com"}
+]
+license = "GPL-3.0-or-later"
+keywords = ["kitty", "terminal", "image-viewer", "tui", "pdf-viewer", "image", "viewer", "graphics"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Graphics :: Viewers",
+    "Topic :: Terminals",
+]
+
+dependencies = [
+    "pillow>=11.3.0",
+    "pdf2image>=1.17.0",
+]
+
+[project.optional-dependencies]
+dev = ["build", "twine"]
+
+[project.urls]
+Homepage = "https://github.com/darkard2003/pymv"
+Repository = "https://github.com/darkard2003/pymv"
+Issues = "https://github.com/darkard2003/pymv/issues"
+
+[project.scripts]
+pmv = "main:main"
+
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["image_viewer"]
+py-modules = ["main", "show_image"]
