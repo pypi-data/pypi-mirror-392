@@ -1,0 +1,70 @@
+
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xmovsystemmonitor"
+dynamic = ["version"]
+description = "A Python library for xmov systemmonitor"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "jiangbin", email = "07jiangbin@gmail.com" }]
+keywords = ["python", "xmov", "systemmonitor"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.6"
+dependencies = ["psutil", "fastapi", "uvicorn"]
+
+[project.optional-dependencies]
+dev = [
+    "twine",
+    "pip-tools",
+    "build",
+    "pytest>=6.0",
+    "pytest-cov>=2.0",
+    "black>=22.0",
+    "flake8>=4.0",
+    "mypy>=0.900",
+]
+
+[project.urls]
+Homepage = "https://git.xmov.ai/jiangbin/xmovsystemmonitor"
+Repository = "https://git.xmov.ai/jiangbin/xmovsystemmonitor"
+Issues = "https://git.xmov.ai/jiangbin/xmovsystemmonitor"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["xmovsystemmonitor*"]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.setuptools.dynamic]
+version = { attr = "xmovsystemmonitor.__version__" }
