@@ -1,0 +1,134 @@
+# mathlib
+
+## Run tests — cleanest way
+
+Install dev-dependencies
+
+```bash
+pip install .[dev]
+```
+
+---
+
+### ✅ **1. `pytest -q` — Run your tests**
+
+You run:
+
+```
+pytest -q
+```
+
+when you want to **test your package code**.
+
+Use it:
+
+* During development
+* Before committing
+* Before releasing/publishing
+
+It checks that everything works **inside your local environment**.
+
+---
+
+### ✅ **2. `pip install -e .` — Editable install (development mode)**
+
+You run:
+
+```
+pip install -e .
+```
+
+when you want to:
+
+* Use this package **inside another project**
+* Test how the package behaves when imported
+* Develop two packages at once
+* Import the package without reinstalling after every edit
+
+Editable mode = “link the source folder directly”.
+
+Changes in:
+
+```
+src/mathlib/
+```
+
+are immediately reflected everywhere Python imports `mathlib`.
+
+This is what most developers use **all the time during development**.
+
+---
+
+### ✅ **3. `python -m build` — Create release artifacts**
+
+You run:
+
+```
+python -m build
+```
+
+when you are **done developing** and want to **ship** the package.
+
+This creates:
+
+```
+dist/myproject-0.1.0-py3-none-any.whl
+dist/myproject-0.1.0.tar.gz
+```
+
+Use this when:
+
+* Releasing on **GitHub Releases**
+* Publishing to **PyPI**
+* Giving the packaged library to someone else
+* Deploying internally / privately
+
+This is the “final compiled package” that others install.
+
+---
+
+## 🎯 **Perfect, clean workflow**
+
+### **Daily development workflow**
+
+```
+pip install -e .
+pytest -q
+```
+
+→ develop, test, iterate
+
+---
+
+### **Before release**
+
+```
+pytest -q
+python -m build
+```
+
+→ package is ready for upload
+
+---
+
+### **Publishing**
+
+For PyPI:
+
+```
+twine upload dist/*
+```
+
+For GitHub:
+
+* Upload the wheel + tar.gz to a release
+
+---
+
+## ⭐ Summary (very clean)
+
+| Action                | Command            | Purpose                                    |
+| --------------------- | ------------------ | ------------------------------------------ |
+| **Test the package**  | `pytest -q`        | Make sure package works                    |
+| **Editable install**  | `pip install -e .` | Use package in dev without reinstalling    |
+| **Build for release** | `python -m build`  | Produce wheel + source dist for publishing |
