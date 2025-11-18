@@ -1,0 +1,25 @@
+<odoo>
+  <record id="view_map_form" model="ir.ui.view">
+    <field name="name">cm.map.form (key submissions)</field>
+    <field name="model">cm.map</field>
+    <field name="type">form</field>
+    <field name="inherit_id" ref="community_maps.view_map_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//notebook" position="inside">
+        <page string="Key Submissions">
+          <group>
+            <field name="key_submissions_target" />
+            <field name="key_submissions_metadata_key" />
+            <field name="key_submissions_metadata_values" />
+          </group>
+        </page>
+      </xpath>
+      <xpath expr="//field[@name='crowdfunding_notification_request_ids']/tree/field[@name='notify_admins']" position="after">
+        <field name="notify_key_submissions" />
+      </xpath>
+      <xpath expr="//field[@name='crowdfunding_notification_request_ids']/tree/field[@name='template_admins']" position="after">
+        <field name="template_key_submissions" attrs="{'required': [('notify_key_submissions', '=', True)]}"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>
