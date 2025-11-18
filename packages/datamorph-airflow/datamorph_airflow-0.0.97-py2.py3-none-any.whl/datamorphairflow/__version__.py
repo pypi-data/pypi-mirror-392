@@ -1,0 +1,10 @@
+"""
+Module contains the version of datamorph-airflow,
+ChangeLog.md with the release details for the version change needs to be updated
+"""
+__version__ = "0.0.97"
+
+"""
+0.0.97 - change to remove parameters from prefix in job params
+0.0.89, 90, 91, 92, 93, 94 , 95, 96- debug - datamorph and glue action to include load parameters from a s3 location
+"""
