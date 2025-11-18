@@ -1,0 +1,12 @@
+{% docstring %}
+Displays a list of excerpts for published posts
+
+Attributes:
+  exclude_date: (default: `False`) If `True` do not display date information (`post.published_date`, `post.published_at`)
+  exclude_author: (default: `True`) If `True` do not display author information (extracted from `post.author`)
+  exclude_read_more: (default: `False`) If `True` do not display "read more..." link at the bottom of the excerpt
+  include_read_full: (default: `False`) If `True` display "read full article..." link at the top of the excerpt
+{% enddocstring %}
+
+{% var count=section.posts_count|default:5 %}
+{% include 'blog/articles_list.html' with posts=count|latest_posts %}
