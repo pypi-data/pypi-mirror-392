@@ -1,0 +1,76 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tdxlite"
+dynamic = ["version"]
+description = 'A lightweight TDX protocol parser and client library'
+readme = "README.md"
+requires-python = ">=3.10, <3.13"
+license = "MIT"
+keywords = ["quant", "trading", "finance", "tdx"]
+authors = [
+    { name = "jett2025ab", email = "jett2025ab@outlook.com" },
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "bitstring",
+]
+
+[project.urls]
+Homepage = "https://github.com/jett2025ab/tdxlite"
+Repository = "https://github.com/jett2025ab/tdxlite"
+Documentation = "https://github.com/jett2025ab/tdxlite#readme"
+
+[project.optional-dependencies]
+test = ["pytest", "pytest-cov"]
+
+[tool.hatch.version]
+path = "tdxlite/__about__.py"
+
+[tool.hatch.envs.default.scripts]
+test = "pytest tests"
+
+# 多环境测试命令：hatch run -e py* test
+[tool.hatch.envs.py310]
+python = "3.10"
+features = ["test"]
+dependencies = ["tdxlite"]
+[tool.hatch.envs.py310.scripts]
+test = "pytest tests/"
+
+[tool.hatch.envs.py311]
+python = "3.11"
+features = ["test"]
+dependencies = ["tdxlite"]
+[tool.hatch.envs.py311.scripts]
+test = "pytest tests/"
+
+[tool.hatch.envs.py312]
+python = "3.12"
+features = ["test"]
+dependencies = ["tdxlite"]
+[tool.hatch.envs.py312.scripts]
+test = "pytest tests/"
+
+# 创建独立内网环境：env_tdxlite
+[tool.hatch.envs.env_tdxlite]
+python = "3.11"
+dependencies = ["tdxlite"]
+[tool.hatch.envs.env_tdxlite.env-vars]
+PIP_INDEX_URL = "http://123.60.144.72:8989/simple"
+PIP_EXTRA_INDEX_URL = "https://pypi.org/simple"
+PIP_TRUSTED_HOST = "123.60.144.72"
+
+[tool.hatch.build.targets.sdist]
+include = ["tdxlite", "README.md"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["tdxlite"]
