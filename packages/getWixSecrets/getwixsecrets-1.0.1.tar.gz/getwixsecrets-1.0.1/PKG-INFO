@@ -1,0 +1,50 @@
+Metadata-Version: 2.4
+Name: getWixSecrets
+Version: 1.0.1
+Summary: A package to read secrets from WIX site secrets or from a local file
+Author-email: Xavier Mayeur <xavier@mayeur.be>
+Project-URL: Homepage, https://github.com/icambristi/getWIXSecrets
+Project-URL: Bug Tracker, https://github.com/icambrsiti/getWIXSecrets/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pyyaml
+Requires-Dist: requests
+Dynamic: license-file
+
+# getSecrets package
+
+getWIXSecrets is a simple package that reads from a WIX site secrets vault
+It can also read data from the local vault.yml file
+
+usage:
+
+```
+from getSecrets import *
+
+data = get_secret(<id>)
+
+usr, pwd = get_user_pwd(<id> )
+
+updater = update_secret(<id>, <new_object>)
+
+```
+
+Vault parameters are stored in a config file ~/.config/.vault/.vault.yml
+
+```
+WIXAPI:
+  token: "<access token>"
+  url: https://wwww.mysite.com
+  uri: _functions/secrets
+ 
+id:
+  item1: 1
+  item2: 2
+  username: user
+  password: !@•?
+```
+
