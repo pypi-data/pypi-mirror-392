@@ -1,0 +1,87 @@
+Metadata-Version: 2.4
+Name: option-price-repair
+Version: 0.2.0
+Summary: Repair arbitrage in European call option prices.
+Keywords: option,price,repair,finance,arbitrage,data,typing
+Author: Christopher McDonald
+License-Expression: MIT
+License-File: LICENSE
+Classifier: Development Status :: 4 - Beta
+Classifier: Operating System :: OS Independent
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: Intended Audience :: Financial and Insurance Industry
+Classifier: Topic :: Office/Business :: Financial
+Classifier: Topic :: Office/Business :: Financial :: Investment
+Classifier: Topic :: Scientific/Engineering
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Project-URL: Repository, http://github.com/chris-mcdo/option-price-repair
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+
+# option_price_repair: Repair Arbitrage in Option Prices
+
+An pure-python implementation of the arbitrage repair algorithm described in
+[Detect and Repair Arbitrage in Price Data of Traded Options](https://arxiv.org/abs/2008.09454).
+
+Perturbs a set of European call option prices (of arbitrary strike and expiry)
+on the same underlyer to ensure that certain no-arbitrage conditions
+are met.
+
+```python
+# pip install option-price-repair[cvxpy,analysis]
+import polars as pl
+from option_price_repair import repair
+
+input_file = "https://raw.githubusercontent.com/vicaws/arbitragerepair/refs/heads/master/data/sample.csv" # authors' sample data
+use_bid_ask = True # use bid-ask -based optim
+
+# prepare data
+data = pl.read_csv(input_file)
+mids = data.filter(pl.col("quote").eq("mid"))
+t = mids.get_column("expiry").to_list()
+k = mids.get_column("strike").to_list()
+c = mids.get_column("call_fv").to_list()
+fwd = mids.get_column("forward").to_list()
+bid = data.filter(pl.col("quote").eq("bid")).get_column("call_fv").to_list()
+ask = data.filter(pl.col("quote").eq("ask")).get_column("call_fv").to_list()
+f = {t: fwd for t, fwd in zip(t, fwd)}
+
+bid_ask = {"bid": bid, "ask": ask} if use_bid_ask else None
+repaired_prices repair(k, t, c, bid_ask, f, None, verbose=True, plot=True, output_dir=".")
+```
+
+## Installation
+
+With cvxpy solver:
+
+`pip install option-price-repair[cvxpy]`
+
+Without a solver:
+
+`pip install option-price-repair`
+
+With (optional) perturbation plots:
+
+`pip install option-price-repair[cvxpy,analysis]`
+
+## Features
+
+* MIT license
+* Minimal dependencies (only the solver you choose)
+* Solver agnostic: cvxpy (Apache 2.0 license) solver implementation is provided,
+simple to add your own solver
+* Verified against the authors' implementation
+[here](https://github.com/vicaws/arbitragerepair)
+
+## User Guide
+
+See `__init__.py` for the main entrypoint; `repair.py` for core functions
+which normalize data and construct constraints, and `cvxpy.py` for
+a sample solver implementation.
+
+## License
+
+Licensed under the MIT license.
