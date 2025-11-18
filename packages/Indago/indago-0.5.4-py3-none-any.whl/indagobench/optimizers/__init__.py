@@ -1,0 +1,1 @@
+from ._standard_test_optimizers import indagobench25_optimizers

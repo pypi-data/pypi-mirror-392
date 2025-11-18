@@ -1,0 +1,28 @@
+from indagobench.problems._cec2014 import cec2014_10d_problems_dict_list, cec2014_20d_problems_dict_list, cec2014_50d_problems_dict_list, CEC_problems_dict_list
+from indagobench.problems._analytical_engineering_problems import AEP_problems_dict_list
+from indagobench.problems._empirical_regression import ER_problems_dict_list
+from indagobench.problems._ill_posed_problems import IPP_problems_dict_list
+from indagobench.problems._shortest_path import SP_problems_dict_list
+from indagobench.problems._hydraulic_network import HN_problems_dict_list
+from indagobench.problems._structural_frame import SFD_problems_dict_list
+from indagobench.problems._ergodic import EC_problems_dict_list
+from indagobench.problems._airfoil_design import AD_problems_dict_list
+from indagobench.problems._flow_fit import FF_problems_dict_list
+from indagobench.problems._packing_problems import PP_problems_dict_list
+
+indagobench25_problems = []
+# indagobench25_problems.extend(cec2014_10d_problems_dict_list)
+# indagobench25_problems.extend(cec2014_20d_problems_dict_list)
+# indagobench25_problems.extend(cec2014_50d_problems_dict_list)
+indagobench25_problems.extend(CEC_problems_dict_list)
+indagobench25_problems.extend(AEP_problems_dict_list)
+indagobench25_problems.extend(ER_problems_dict_list)
+indagobench25_problems.extend(SP_problems_dict_list)
+indagobench25_problems.extend(EC_problems_dict_list)
+indagobench25_problems.extend(PP_problems_dict_list)
+indagobench25_problems.extend(AD_problems_dict_list)
+indagobench25_problems.extend(FF_problems_dict_list)
+indagobench25_problems.extend(HN_problems_dict_list)
+indagobench25_problems.extend(SFD_problems_dict_list)
+indagobench25_problems.extend(IPP_problems_dict_list)
+# indagobench25_problems = indagobench25_problems[:205]#[90:99]
