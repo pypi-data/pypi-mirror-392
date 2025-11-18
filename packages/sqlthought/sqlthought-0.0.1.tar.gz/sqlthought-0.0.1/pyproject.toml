@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sqlthought"
+version = "0.0.1"
+description = "A multi-agent SQL-of-Thought engine for NLQ-to-SQL, correction loops, and evaluation."
+authors = [
+    { name="Tiyasa Mukherjee", email="mukherjeetiyasa1998@gmail.com" }
+]
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+keywords = ["nlq", "sql", "text-to-sql", "langgraph", "llm", "agentic-ai"]
+
+dependencies = [
+    "langgraph>=0.3.3",
+    "sqlparse",
+    "pydantic>=2.0",
+    "psutil",
+    "Pillow",
+    "langchain-ollama",
+    "deepeval",
+    "groq>=0.5.0"
+]
+
+[tool.setuptools.packages.find]
+include = ["sqlthought*"]   
+
+[project.scripts]
+sqlthought = "sqlthought.cli:cli"
