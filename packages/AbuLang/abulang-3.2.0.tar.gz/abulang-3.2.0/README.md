@@ -1,0 +1,215 @@
+# AbuLangModule - Complete AbuLang for Python IDLE
+
+This module enables ALL AbuLang commands to work in Python IDLE with full syntax support.
+
+## Installation
+
+```python
+# In Python IDLE
+import sys
+sys.path.append('path/to/AbuLangModule')
+from AbuLangModule import *
+```
+
+Or install as package:
+```bash
+pip install -e AbuLangModule
+```
+
+## Usage in IDLE
+
+```python
+>>> from AbuLangModule import *
+[AbuLang] Initializing AbuLang Module...
+[AbuLang] ✓ Enabled!
+[AbuLang] Available commands:
+  I/O: show, ask, input
+  Import: libra, library
+  Math: plus, minus, multi, divid, expon, modul, absof, sumup, avera
+  String: strip, lower, upper, replc, findt, lengt
+  System: pausi, exitp
+  File: readf, write
+
+Type 'help_abulang()' for full command list
+
+>>> show("Hello, AbuLang!")
+Hello, AbuLang!
+
+>>> x = 10
+>>> y = 5
+>>> show("Sum:", plus(x, y))
+Sum: 15
+
+>>> name = ask("Your name: ")
+Your name: Abu
+>>> show("Hello,", name)
+Hello, Abu
+
+>>> libra("math")
+[AbuLang] Imported math
+>>> show(math.sqrt(16))
+4.0
+```
+
+## Available Commands
+
+### I/O Commands
+- `show(...)` - Display output
+- `ask(prompt)` - Get user input
+
+### Import Commands
+- `libra(module)` - Import library
+
+### Advanced Features (NEW!)
+- `get_line(n, file)` - Read specific line from file
+- `save_as(file)` - Save format buffer to file
+- `switch(format)` - Multi-format blocks (yaml, json, csv)
+- `assign_compare(var, val, cmp)` - Inverse walrus operator (=:)
+- `isolate(str, list)` - Filter list by string
+- `local(func).var` - Access local variables from functions
+- `local_to_global(func, var)` - Pull local variable to global
+- `save_local(func, var, val)` - Save local variable
+
+See `ADVANCED_FEATURES.md` for complete guide!
+
+### Math Commands
+- `plus(a, b)` - Add numbers
+- `minus(a, b)` - Subtract numbers
+- `multi(a, b)` - Multiply numbers
+- `divid(a, b)` - Divide numbers
+- `expon(a, b)` - Power (a^b)
+- `modul(a, b)` - Modulo (a%b)
+- `absof(x)` - Absolute value
+- `sumup(list)` - Sum of list
+- `avera(list)` - Average of list
+
+### String Commands
+- `strip(text)` - Remove spaces
+- `lower(text)` - Lowercase
+- `upper(text)` - Uppercase
+- `replc(text, old, new)` - Replace text
+- `findt(text, word)` - Find substring
+- `lengt(text)` - Length
+
+### System Commands
+- `pausi(seconds)` - Pause/sleep
+- `exitp()` - Exit program
+
+### File Commands
+- `readf(file)` - Read file
+- `write(file, text)` - Write file
+
+## AbuLang Packages
+
+### AbuSmart - System Utilities
+```python
+>>> libra("AbuSmart")
+>>> show(smart.time())
+10:30:45
+>>> show(smart.date())
+2024-11-15
+>>> smart.system_info()
+=== System Information ===
+...
+```
+
+### AbuFILES - File Operations
+```python
+>>> libra("AbuFILES")
+>>> data = {"name": "Abu", "score": 100}
+>>> files.save_data("mydata", data)
+>>> loaded = files.load_data("mydata")
+>>> show(loaded)
+{'name': 'Abu', 'score': 100}
+```
+
+### AbuINSTALL - Package Manager
+```python
+>>> libra("AbuINSTALL")
+>>> installer.check("requests")
+✓ requests is installed
+>>> installer.list_installed()
+[List of packages...]
+```
+
+### AbuChess - Chess AI
+```python
+>>> libra("AbuChess")
+>>> chess.info()
+=== AbuChess - Neural Chess AI ===
+...
+>>> chess.AIweb()  # Launch web interface
+```
+
+## Complete Example
+
+```python
+>>> from AbuLangModule import *
+[AbuLang] Initializing AbuLang Module...
+[AbuLang] ✓ Enabled!
+
+>>> show("=== Calculator ===")
+=== Calculator ===
+
+>>> x = ask("First number: ")
+First number: 10
+>>> y = ask("Second number: ")
+Second number: 5
+
+>>> x = int(x)
+>>> y = int(y)
+
+>>> show("Sum:", plus(x, y))
+Sum: 15
+>>> show("Difference:", minus(x, y))
+Difference: 5
+>>> show("Product:", multi(x, y))
+Product: 50
+>>> show("Division:", divid(x, y))
+Division: 2.0
+
+>>> libra("math")
+[AbuLang] Imported math
+>>> show("Square root of x:", math.sqrt(x))
+Square root of x: 3.1622776601683795
+
+>>> libra("AbuSmart")
+>>> show("Current time:", smart.time())
+Current time: 10:30:45
+```
+
+## Help
+
+```python
+>>> help_abulang()
+[Shows complete command list]
+```
+
+## Disable AbuLang
+
+```python
+>>> disable_abulang()
+[AbuLang] Disabled
+```
+
+## Notes
+
+- In IDLE, you must use parentheses: `show("text")`
+- For no-parentheses syntax, use .abu files: `python cli.py file.abu`
+- All commands are added to Python's builtins
+- Original builtins are preserved and can be restored
+
+## Requirements
+
+- Python 3.8+
+- PyYAML (for commands.yaml)
+
+Optional:
+- psutil (for battery info)
+- pyperclip (for clipboard)
+- opencv-python (for webcam)
+- python-chess, torch, flask (for AbuChess)
+
+---
+
+**Made with ❤️ by Abu**
