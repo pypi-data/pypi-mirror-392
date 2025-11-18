@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "osclient"
+version = "0.1.1"
+description = "OpenStack client library with simplified authentication"
+readme = "README.md"
+requires-python = ">=3.6"
+license = {text = "MIT"}
+authors = [
+    {name = "Toan Nguyen", email = "ntoand@gmail.com"}
+]
+keywords = ["openstack", "cloud", "client"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "keystoneauth1>=4.0.0",
+    "python-novaclient>=17.0.0",
+    "python-keystoneclient>=4.0.0",
+    "python-cinderclient>=7.0.0",
+    "python-neutronclient>=7.0.0",
+    "nectarallocationclient>=1.0.0",
+    "python-glanceclient>=3.0.0",
+    "requests>=2.25.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov>=2.0",
+    "black>=21.0",
+    "flake8>=3.8",
+]
+
+[tool.setuptools]
+packages = ["osclient"]
+
+[tool.setuptools.package-data]
+"*" = ["*.txt", "*.md"]
+
