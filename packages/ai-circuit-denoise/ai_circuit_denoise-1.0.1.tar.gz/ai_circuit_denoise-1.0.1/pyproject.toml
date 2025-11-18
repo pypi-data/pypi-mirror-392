@@ -1,0 +1,86 @@
+[build-system]
+requires = [
+    "setuptools>=45.0",
+    "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-circuit-denoise"
+version = "1.0.1"
+description = "AI-based circuit image denoising tool for electronics engineers"
+readme = "README.md"
+requires-python = ">=3.7"
+keywords = ["circuit", "denoise", "ai", "electronics", "image-processing"]
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
+    "Intended Audience :: Manufacturing",
+    "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+    "Topic :: Scientific/Engineering :: Image Processing",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: OS Independent",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX :: Linux",
+]
+
+dependencies = [
+    "PyQt5>=5.15.0",
+    "torch>=1.9.0",
+    "torchvision>=0.10.0",
+    "numpy>=1.21.0",
+    "opencv-python>=4.5.0",
+    "Pillow>=8.3.0",
+    "scikit-image>=0.18.0",
+    "matplotlib>=3.4.0",
+]
+
+[project.optional-dependencies]
+gpu = [
+    "torch>=1.9.0",
+    "torchvision>=0.10.0"
+]
+dev = [
+    "pytest>=6.0",
+    "pytest-qt>=4.0",
+    "black>=21.0",
+    "flake8>=3.9",
+]
+windows = [
+    "pywin32>=300",
+    "winshell>=0.6",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/ai-circuit-denoise"
+Documentation = "https://github.com/yourusername/ai-circuit-denoise/wiki"
+Source = "https://github.com/yourusername/ai-circuit-denoise"
+Issues = "https://github.com/yourusername/ai-circuit-denoise/issues"
+
+[project.scripts]
+ai-circuit-denoise = "circuit_denoiser.main:main"
+circuit-denoise = "circuit_denoiser.main:main"
+
+[project.gui-scripts]
+ai-circuit-denoise-gui = "circuit_denoiser.main:main"
+circuit-denoise-gui = "circuit_denoiser.main:main"
+
+[tool.setuptools]
+packages = ["circuit_denoiser"]
+
+[tool.setuptools.package-dir]
+circuit_denoiser = "."
+
+[tool.setuptools.package-data]
+circuit_denoiser = ["*.py", "widgets/*.py"]
