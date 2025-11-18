@@ -1,0 +1,45 @@
+# Binary Cosmic Evolution Optimization (B-CEO)
+
+[![Test & Publish](https://github.com/Optimization-MetaheuristicsCEO/BinaryCEO/actions/workflows/publish.yml/badge.svg)](https://github.com/Optimization-MetaheuristicsCEO/BinaryCEO/actions/workflows/publish.yml)
+[![PyPI version](https://img.shields.io/pypi/v/binaryceo)](https://pypi.org/project/binaryceo/)
+[![Python Version](https://img.shields.io/pypi/pyversions/binaryceo)](https://pypi.org/project/binaryceo)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
+A Python package for **multi-objective feature selection** using a novel binarized version of the **Cosmic Evolution Optimization (CEO)** algorithm.
+
+This package is designed to find optimal feature subsets that **maximize classification accuracy** while simultaneously **minimizing the number of selected features**.
+
+## 📖 Background: The Problem
+
+In machine learning, the **"Curse of Dimensionality"** refers to the problems that arise when dealing with high-dimensional data (datasets with many features). High feature counts can lead to model overfitting, slow training times, and poor generalization.
+
+**Feature selection** is the process of identifying the most relevant subset of features to build a model, improving performance and reducing complexity. Metaheuristic algorithms are particularly well-suited for this, as they can efficiently explore the vast, complex search space of all possible feature combinations.
+
+[cite_start]This package adapts the **Cosmic Evolution Optimization (CEO)** algorithm, a powerful physics-based metaheuristic[cite: 4], for this binary optimization task.
+
+## 🚀 What is BinaryCEO?
+
+This package implements a unique "True-CEO" binarization strategy that remains faithful to the core mathematics of the original paper:
+
+1.  **Continuous Internal State:** Each solution ("celestial body") maintains a continuous vector (`continuous_position`) that represents its *propensity* or "probabilistic momentum" for each feature.
+2.  **Physics-Based Updates:** This continuous vector is updated using the paper's original physics-based forces:
+    * **Local Gravitation (Exploitation):** A pull toward the local system's leader.
+    * **Global Gravitation (Exploitation):** An adaptive pull toward the global best solution.
+    * **Cosmic Expansion (Exploration):** A decaying random "jump" to explore the search space.
+3.  **Probabilistic Translation:** A **Sigmoid function** translates the continuous vector (e.g., `[-2.2, 1.5, 0.1]`) into a probability vector (e.g., `[0.1, 0.8, 0.5]`).
+4.  **Stochastic Binarization:** A "weighted coin flip" based on these probabilities generates the final binary solution (`[0, 1, 1]`) to be evaluated.
+
+This approach uses the paper's "natural brake" (where forces weaken as continuous positions converge) and avoids the need for an artificial inertia weight `w` common in other binarization methods like Binary PSO.
+
+### Key Features
+* **Multi-Objective Fitness:** Balances classification accuracy and feature count using a single, weighted objective function.
+* **Modular Design:** Written with a clean, modular structure (Initialization, Partitioning, Update, Selection).
+* **Local Search:** Implements the paper's "Celestial Resonance" as a **binary bit-flip local search** to refine elite solutions.
+* **Robust Testing:** Type-checked with `mypy` and unit-tested with `pytest`.
+
+## 📦 Installation
+
+You can install `BinaryCEO` directly from PyPI:
+
+```bash
+pip install binaryceo
