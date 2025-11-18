@@ -1,0 +1,63 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
+name = "smoothglue_conflictid"
+version = "1.0.0"
+description = "A Django app providing high-performance, synchronous deconfliction for scheduling and resource management."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "BrainGu", email = "smoothglue@braingu.com" }
+]
+license = { text = "Proprietary" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Framework :: Django",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    "django>=4.2",
+    "djangorestframework>=3.14"
+]
+
+[project.optional-dependencies]
+dev = [
+    "psycopg2-binary>=2.9",
+    "pytest-django>=4.8",
+    "coverage>=7.0",
+]
+
+[project.urls]
+Homepage = "https://braingu.com/solutions/smoothglue/"
+
+[tool.poetry]
+packages = [
+    { include = "smoothglue", from = "." },
+]
+
+[tool.poetry.group.dev.dependencies]
+psycopg2-binary = ">=2.9"
+pytest-django = ">=4.8"
+coverage = ">=7.0"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+pythonpath = ["sandbox"]
+
+[tool.coverage.run]
+command_line = "-m pytest"
+source = ["smoothglue.conflictid"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+omit = [
+    "smoothglue/conflictid/tests/*",
+    "smoothglue/conflictid/migrations/*",
+    "sandbox/*"
+]
