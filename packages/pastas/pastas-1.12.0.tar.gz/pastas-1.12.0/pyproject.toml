@@ -1,0 +1,157 @@
+[build-system]
+requires = ["setuptools>=64.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pastas"
+dynamic = ["version"]
+description = "Pastas is an open-source Python framework for the analysis of groundwater time series."
+license = { file = "LICENSE" }
+readme = "README.md"
+authors = [{ name = "Collenteur et al. 2019" }]
+maintainers = [
+    { name = "R.A. Collenteur", email = "raoulcollenteur@gmail.com" },
+    { name = "M. Bakker", email = "markbak@gmail.com" },
+    { name = "R. Calje", email = "r.calje@artesia-water.nl" },
+    { name = "F. Schaars", email = "f.schaars@artesia-water.nl" },
+    { name = "D.A. Brakenhoff", email = "d.brakenhoff@artesia-water.nl" },
+    { name = "O.N. Ebbens", email = "o.ebbens@artesia-water.nl" },
+    { name = "M.A. Vonk", email = "vonk.mart@gmail.com" },
+]
+requires-python = ">= 3.10"
+dependencies = [
+    "numpy >= 2.0.0",
+    "matplotlib >= 3.9.0",
+    "pandas >= 2.2.2",
+    "scipy >= 1.13.0",
+    "numba >= 0.60.0, < 0.63.0 ; python_version < '3.14'",
+    "numba >= 0.63.0b1 ; python_version == '3.14'",
+]
+keywords = ["hydrology", "groundwater", "timeseries", "analysis"]
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Intended Audience :: Science/Research',
+    'Intended Audience :: Other Audience',
+    'License :: OSI Approved :: MIT License',
+    'Programming Language :: Python :: 3 :: Only',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3.14',
+    'Topic :: Scientific/Engineering :: Hydrology',
+]
+
+[project.urls]
+homepage = "https://pastas.dev"
+repository = "https://github.com/pastas/pastas"
+documentation = "https://pastas.readthedocs.io"
+download = "https://pypi.org/project/pastas/"
+
+[project.optional-dependencies]
+solvers = ["lmfit >= 1.3.2", "emcee >= 3.1.5"]
+latexify = ["latexify-py"]
+interactive = ["bokeh >= 3.6", "plotly"]
+datasets = ["requests"]
+ruffing = ["ruff"]
+formatting = ["pastas[ruffing]"]
+linting = ["pastas[ruffing]"]
+caching = ["cachetools"]
+codespelling = ["codespell[toml]"]
+full = ["pastas[latexify,solvers,interactive,datasets,caching]"]
+pytesting = ["pytest>=7", "pytest-cov", "pytest-sugar"]
+ci = [
+    "pastas[pytesting,solvers,interactive,caching]",
+    "jupyter",
+    "coverage",
+    "corner",
+    "tqdm",
+]
+rtd = [
+    "pastas[solvers,latexify]",
+    "Ipython",
+    "ipykernel",
+    "pydata-sphinx-theme",
+    "sphinx",
+    "sphinxcontrib-bibtex",
+    "requests",
+    "numpydoc",
+    "sphinx-design",
+    "myst_nb",
+    "sphinx-autoapi",
+]
+dev = ["tox", "pre-commit", "pastas[ruffing,codespelling,ci,rtd]"]
+
+[tool.setuptools.dynamic]
+version = { attr = "pastas.version.__version__" }
+
+[tool.ruff]
+extend-include = ["*.ipynb"]
+lint.extend-select = ["I"]
+show-fixes = true
+fix = true
+
+[tool.pytest.ini_options]
+addopts = "--strict-markers --durations=0"
+markers = ["notebooks: run notebooks", "bnotebooks: run benchmark notebooks"]
+
+[tool.codespell]
+skip = "*.pdf,*.csv,*.txt"
+ignore-regex = "[A-Za-z0-9+/]{100,}"                           # base64-encoded data in *.ipynb files
+ignore-words-list = ["delt", "te", "theses", "Bilt", "Strack"]
+
+[tool.tox]
+requires = ["tox>=4"]
+env_list = ["py310", "py311", "py312", "py313", "py314", "ruff", "notebooks"]
+
+[tool.tox.env_run_base]
+description = "run unit tests"
+extras = ["ci"]
+commands = [["pytest", "tests", "-m", "not notebooks and not bnotebooks"]]
+
+[tool.tox.env.all]
+description = "run all unit tests (including Notebooks) and obtain coverage"
+extras = ["ci"]
+commands = [
+    [
+        "coverage",
+        "run",
+        "-m",
+        "pytest",
+        "tests",
+        "-m",
+        "not bnotebooks",
+    ],
+    [
+        "coverage",
+        "xml",
+    ],
+]
+
+[tool.tox.env.notebooks]
+description = "run the benchmark notebooks"
+extras = ["ci"]
+commands = [["pytest", "tests", "-m", "bnotebooks"]]
+
+[tool.tox.env.ruff]
+description = "run ruff checks"
+extras = ["ruffing"]
+commands = [
+    [
+        "ruff",
+        "check",
+        "--extend-select",
+        "I",
+        "--preview",
+    ],
+    [
+        "ruff",
+        "format",
+        "--check",
+    ],
+]
+
+[tool.tox.env.codespell]
+description = "run spelling checks"
+extras = ["codespelling"]
+commands = [["codespell"]]
