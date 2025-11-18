@@ -1,0 +1,1 @@
+from .funcoes import logging_config, Cores, textoCor, limpar, pausa
