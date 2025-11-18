@@ -1,0 +1,40 @@
+-- ============================================================================
+-- CORE LOGIC: {{ entity.schema }}.{{ action.name }}
+-- Custom Business Action
+-- ============================================================================
+CREATE OR REPLACE FUNCTION {{ entity.schema }}.{{ action.name }}(
+    auth_tenant_id UUID,
+    input_data {{ composite_type }},
+    input_payload JSONB,
+    auth_user_id UUID
+) RETURNS app.mutation_result
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_{{ entity.name | lower }}_id UUID := input_data.id;
+    {%- for declaration in declarations %}
+    {{ declaration }};
+    {%- endfor %}
+BEGIN
+    -- Debug: Input parameters
+    RAISE NOTICE '{{ action.name }}: input_data.id=%, auth_tenant_id=%', input_data.id, auth_tenant_id;
+
+    {%- for step in compiled_steps %}
+    {{ step }}
+    {%- endfor %}
+
+    -- === SUCCESS RESPONSE ===
+    RETURN app.log_and_return_mutation(
+        auth_tenant_id,
+        auth_user_id,
+        '{{ entity.name | lower }}',
+        v_{{ entity.name | lower }}_id,
+        'CUSTOM',
+        'success',
+        ARRAY[]::TEXT[],
+        '{{ action.name | replace("_", " ") | title }} completed',
+        (SELECT row_to_json(t.*) FROM {{ entity.schema }}.{{ entity.table_name }} t WHERE t.id = v_{{ entity.name | lower }}_id)::JSONB,
+        NULL
+    );
+END;
+$$;
