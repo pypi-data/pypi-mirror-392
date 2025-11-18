@@ -1,0 +1,187 @@
+import sqlite3
+from datetime import datetime
+from pathlib import Path
+
+
+# Application data directory: always under the user's home directory
+APP_DIR = Path.home() / ".money"
+DB_PATH = APP_DIR / "money.db"
+
+
+def _ensure_db():
+    APP_DIR.mkdir(parents=True, exist_ok=True)
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS accounts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL UNIQUE,
+                created_at TEXT NOT NULL
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS incomes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                year INTEGER NOT NULL,
+                month INTEGER NOT NULL CHECK (month BETWEEN 1 AND 12),
+                amount_cents INTEGER NOT NULL,
+                updated_at TEXT NOT NULL,
+                UNIQUE(year, month)
+            )
+            """
+        )
+
+
+def create_account(name: str) -> dict:
+    """Create a new account with the given name.
+
+    Returns a dict with keys: id, name, created_at.
+    Raises ValueError if the name is invalid or already exists.
+    """
+    name = (name or "").strip()
+    if not name:
+        raise ValueError("Account name cannot be empty")
+
+    _ensure_db()
+    created_at = datetime.utcnow().isoformat(timespec="seconds") + "Z"
+
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            cur = conn.execute(
+                "INSERT INTO accounts(name, created_at) VALUES(?, ?)", (name, created_at)
+            )
+            account_id = cur.lastrowid
+            return {"id": account_id, "name": name, "created_at": created_at}
+    except sqlite3.IntegrityError as e:
+        # Likely UNIQUE constraint failed
+        raise ValueError(f"Account '{name}' already exists") from e
+
+
+def list_accounts() -> list[str]:
+    """Return a list of all account names.
+
+    The names are ordered alphabetically (case-insensitive by SQLite default).
+    If no accounts exist, returns an empty list.
+    """
+    _ensure_db()
+    with sqlite3.connect(DB_PATH) as conn:
+        rows = conn.execute("SELECT name FROM accounts ORDER BY name ASC").fetchall()
+        return [r[0] for r in rows]
+
+
+def set_month_income(year: int, month: int, amount_cents: int) -> dict:
+    """Add income for a given year and month, accumulating totals.
+
+    If an income already exists for the (year, month), the provided
+    ``amount_cents`` is added to the existing value. Otherwise, a new
+    row is inserted with ``amount_cents`` as the initial value.
+
+    Stores the value in cents to avoid floating point issues.
+    Returns a dict with keys: id, year, month, amount_cents, updated_at
+    where ``amount_cents`` is the resulting total for that month.
+    """
+    if not (1 <= int(month) <= 12):
+        raise ValueError("Month must be in 1..12")
+    year = int(year)
+    amount_cents = int(amount_cents)
+    _ensure_db()
+    updated_at = datetime.utcnow().isoformat(timespec="seconds") + "Z"
+
+    with sqlite3.connect(DB_PATH) as conn:
+        # Try to accumulate into an existing row first
+        cur = conn.execute(
+            "UPDATE incomes SET amount_cents = amount_cents + ?, updated_at = ? WHERE year = ? AND month = ?",
+            (amount_cents, updated_at, year, month),
+        )
+
+        if cur.rowcount == 0:
+            # No existing row: insert new
+            conn.execute(
+                "INSERT INTO incomes(year, month, amount_cents, updated_at) VALUES(?, ?, ?, ?)",
+                (year, month, amount_cents, updated_at),
+            )
+
+        # Fetch the full, up-to-date record to return the total
+        row = conn.execute(
+            "SELECT id, year, month, amount_cents, updated_at FROM incomes WHERE year = ? AND month = ?",
+            (year, month),
+        ).fetchone()
+
+        return {
+            "id": row[0],
+            "year": row[1],
+            "month": row[2],
+            "amount_cents": row[3],
+            "updated_at": row[4],
+        }
+
+
+def get_month_income(year: int, month: int) -> dict | None:
+    """Fetch the income record for a given year and month.
+
+    Returns a dict with keys: id, year, month, amount_cents, updated_at,
+    or None if no record exists.
+    """
+    if not (1 <= int(month) <= 12):
+        raise ValueError("Month must be in 1..12")
+    year = int(year)
+    _ensure_db()
+
+    with sqlite3.connect(DB_PATH) as conn:
+        row = conn.execute(
+            "SELECT id, year, month, amount_cents, updated_at FROM incomes WHERE year = ? AND month = ?",
+            (year, month),
+        ).fetchone()
+        if not row:
+            return None
+        return {
+            "id": row[0],
+            "year": row[1],
+            "month": row[2],
+            "amount_cents": row[3],
+            "updated_at": row[4],
+        }
+
+
+def list_incomes() -> list[dict]:
+    """Return all saved incomes ordered by year then month.
+
+    Each item is a dict with keys: id, year, month, amount_cents, updated_at.
+    Returns an empty list if there are no incomes.
+    """
+    _ensure_db()
+    with sqlite3.connect(DB_PATH) as conn:
+        rows = conn.execute(
+            "SELECT id, year, month, amount_cents, updated_at FROM incomes ORDER BY year ASC, month ASC"
+        ).fetchall()
+        return [
+            {
+                "id": r[0],
+                "year": r[1],
+                "month": r[2],
+                "amount_cents": r[3],
+                "updated_at": r[4],
+            }
+            for r in rows
+        ]
+
+
+def delete_month_income(year: int, month: int) -> int:
+    """Delete the income record for a given year and month.
+
+    Returns the number of rows deleted (0 or 1).
+    Raises ValueError if inputs are invalid.
+    """
+    if not (1 <= int(month) <= 12):
+        raise ValueError("Month must be in 1..12")
+    year = int(year)
+    _ensure_db()
+
+    with sqlite3.connect(DB_PATH) as conn:
+        cur = conn.execute(
+            "DELETE FROM incomes WHERE year = ? AND month = ?",
+            (year, month),
+        )
+        return int(cur.rowcount)
