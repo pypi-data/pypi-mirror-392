@@ -1,0 +1,28 @@
+fix: avoid triggering `Filter.__bool__` warning in `_equals_none_to_not_exists` (#533)
+
+# Description
+
+**Reviewer**: All code inside `examples/` is generated.
+
+The `Filter` class raises a `UserWarning` when evaluated in a boolean
+context to prevent users from incorrectly combining filters with
+`and`/`or`.
+
+However, pygen's internal code was triggering this warning by using `if
+(res := ...)` instead of `if (res := ...) is not None` when processing
+`And`, `Or`, and `Not` filters.
+
+This follows the same fix applied to the SDK in
+https://github.com/cognitedata/cognite-sdk-python/pull/2341
+
+## Bump
+
+- [x] Patch
+- [ ] Minor
+- [ ] Skip
+
+## Changelog
+### Fixed
+
+- Use explicit `is not None` checks in `_equals_none_to_not_exists` to
+avoid triggering `Filter.__bool__` UserWarning from cognite-sdk-python
