@@ -1,0 +1,1 @@
+"""CLI prompt module."""
