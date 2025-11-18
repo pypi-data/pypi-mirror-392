@@ -1,0 +1,22 @@
+[package]
+name = "python_api"
+version = "0.1.0"
+edition = "2024"
+license-file = "PYTHON_LICENSE"
+description = "Python bindings for the OpenFire fire safety engineering library"
+homepage = "https://github.com/fire-library/openfire"
+repository = "https://github.com/fire-library/openfire"
+documentation = "https://fire-library.github.io/openfire/"
+
+[lib]
+name = "ofire"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.22", features = ["extension-module", "abi3-py38"] }
+openfire = { path = "../.." }
+
+[package.metadata.maturin]
+name = "ofire"
+bindings = "pyo3"
+include = ["src/**", "Cargo.toml", "PYTHON_README.md", "PYTHON_LICENSE"]
