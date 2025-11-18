@@ -1,0 +1,54 @@
+Metadata-Version: 2.4
+Name: racerts
+Version: 0.1.2
+Summary: Rapid and Accurate Conformer Ensemble with RDKit for Transition States
+Author-email: "Stefan P. Schmid" <stefan.schmid@chem.ethz.ch>, Henrik Seng <stefan.schmid@chem.ethz.ch>, Thibault Kläy <stefan.schmid@chem.ethz.ch>, Kjell Jorner <kjell.jorner@chem.ethz.ch>
+License-Expression: MIT
+Project-URL: Homepage, https://github.com/digital-chemistry-laboratory/racerts/
+Project-URL: Documentation, https://digital-chemistry-laboratory.github.io/racerts/
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: rdkit>=2023.9.5
+Provides-Extra: dev
+Requires-Dist: black>=21.12b0; extra == "dev"
+Requires-Dist: flake8>=6.1.0; extra == "dev"
+Requires-Dist: isort>=5.12.0; extra == "dev"
+Dynamic: license-file
+
+<img src="https://raw.githubusercontent.com/digital-chemistry-laboratory/racerts/main/docs/img/logo.png" alt="Logo" width="1000">
+
+**R**apid and **A**ccurate **C**onformer **E**nsembles with **R**DKit for **T**ransition **S**tates
+
+<img src="https://raw.githubusercontent.com/digital-chemistry-laboratory/racerts/main/docs/img/TOC.png" alt="TOC" width="400">
+
+# Installation
+
+```shell
+$ pip install racerts
+```
+
+# Usage
+
+racerTS can be imported as a Python module that is easily integrated into
+workflows for transition state conformer ensemble generation.
+For further information, see the separate [documentation](https://digital-chemistry-laboratory.github.io/racerts/).
+
+```shell
+>>> from racerts import ConformerGenerator
+>>> cg = ConformerGenerator()
+>>> ts_conformers_mol = cg.generate_conformers(file_name="example.xyz", charge=0, reacting_atoms=[2,3,4])
+>>> cg.write_xyz("ensemble.xyz")
+```
+
+It can also be accessed via a command line interface.
+
+```console
+$ racerts example.xyz --charge 0 --reacting_atoms 2 3 4
+```
+
+
+# License
+MIT License
+
+Copyright &copy; 2025 ETH Zürich
