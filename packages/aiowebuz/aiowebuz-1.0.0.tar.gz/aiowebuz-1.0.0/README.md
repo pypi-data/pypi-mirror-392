@@ -1,0 +1,218 @@
+# 🚀 aiowebuz
+
+O'zbek tilida mukammal web parsing va avtomatizatsiya kutubxonasi! 
+
+Bu kutubxona HTTP so'rovlar, HTML parsing, brauzer avtomatizatsiyasi, fayllarni yuklab olish va GUI avtomatizatsiyasini o'z ichiga oladi.
+
+## 📦 O'rnatish
+```bash
+pip install aiowebuz
+```
+
+## 🎯 Xususiyatlar
+
+- ✅ Sinxron va asinxron HTTP so'rovlar (requests va httpx)
+- ✅ Kuchli HTML parsing (BeautifulSoup va lxml)
+- ✅ Brauzer avtomatizatsiyasi (SeleniumBase)
+- ✅ Fayllarni yuklab olish (wget)
+- ✅ GUI avtomatizatsiya (PyAutoGUI)
+- ✅ To'liq o'zbekcha dokumentatsiya
+- ✅ Oson va tushunarli interfeys
+
+## 📚 Foydalanish
+
+### 1. Oddiy HTTP So'rov
+```python
+from aiowebuz import WebClient
+
+# Klient yaratish
+client = WebClient()
+
+# GET so'rov
+response = client.get('https://example.com')
+print(response.text)
+print(response.status_code)
+
+# POST so'rov
+response = client.post('https://api.example.com/data', 
+                       json={'ism': 'Ali', 'yosh': 25})
+```
+
+### 2. Asinxron So'rovlar
+```python
+import asyncio
+from aiowebuz import AsyncWebClient
+
+async def main():
+    async with AsyncWebClient() as client:
+        response = await client.get('https://example.com')
+        print(response.text)
+
+asyncio.run(main())
+```
+
+### 3. HTML Parsing
+```python
+from aiowebuz import WebClient
+
+client = WebClient()
+response = client.get('https://example.com')
+
+# HTML ni parsing qilish
+parser = response.parse()
+
+# Element topish
+title = parser.find('h1')
+print(title.text())
+
+# Class bo'yicha topish
+content = parser.find('.content')
+print(content.text())
+
+# Barcha havolalarni topish
+links = parser.find_all('a')
+for link in links:
+    print(link.attr('href'))
+
+# CSS selector
+element = parser.css('div.main > p')
+print(element.text())
+
+# XPath
+elements = parser.xpath('//div[@class="content"]//p')
+for elem in elements:
+    print(elem)
+```
+
+### 4. Brauzer Avtomatizatsiyasi
+```python
+from aiowebuz import Browser
+
+# Brauzer ochish
+with Browser(headless=False) as browser:
+    # Sahifani ochish
+    browser.open('https://google.com')
+    
+    # Qidiruv maydoniga yozish
+    browser.type('textarea[name="q"]', 'AioWebUz')
+    
+    # Enter bosish
+    browser.click('input[name="btnK"]')
+    
+    # Kutish
+    browser.wait(2)
+    
+    # Skrinshot olish
+    browser.screenshot('natija.png')
+```
+
+### 5. Fayllarni Yuklab Olish
+```python
+from aiowebuz import Downloader
+
+# Downloader yaratish
+dl = Downloader(output_dir='yuklamalar')
+
+# Bitta faylni yuklash
+dl.download('https://example.com/file.pdf')
+
+# Nomi bilan yuklash
+dl.download('https://example.com/image.jpg', filename='rasm.jpg')
+
+# Bir nechta fayllarni yuklash
+urls = [
+    'https://example.com/file1.pdf',
+    'https://example.com/file2.pdf',
+]
+dl.download_multiple(urls)
+```
+
+### 6. GUI Avtomatizatsiya
+```python
+from aiowebuz import Automation
+
+auto = Automation()
+
+# Sichqoncha bilan bosish
+auto.click(100, 200)
+
+# Matn yozish
+auto.type_text('Salom dunyo!')
+
+# Klaviatura tugmalarini bosish
+auto.press('enter')
+auto.hotkey('ctrl', 'c')
+
+# Ekran rasmini olish
+auto.screenshot('ekran.png')
+
+# Rasm bo'yicha topish va bosish
+auto.click_image('tugma.png')
+
+# Scroll qilish
+auto.scroll(5)  # Yuqoriga
+auto.scroll(-5)  # Pastga
+```
+
+### 7. Kompleks Misol
+```python
+from aiowebuz import WebClient, Browser, Downloader
+
+# 1. Sahifadan ma'lumot olish
+client = WebClient()
+response = client.get('https://example.com/products')
+parser = response.parse()
+
+# 2. Mahsulotlarni parsing qilish
+products = parser.find_all('.product')
+for product in products:
+    name = product.find('h2').text()
+    price = product.find('.price').text()
+    image_url = product.find('img').attr('src')
+    
+    print(f'{name}: {price}')
+    
+    # Rasmni yuklash
+    dl = Downloader()
+    dl.download(image_url, filename=f'{name}.jpg')
+
+# 3. Brauzer bilan login qilish
+with Browser() as browser:
+    browser.open('https://example.com/login')
+    browser.type('#username', 'mening_login')
+    browser.type('#password', 'mening_parol')
+    browser.click('#login-button')
+    browser.wait(2)
+    
+    # Login qilgandan keyin sahifani olish
+    html = browser.get_page_source()
+    parser = Parser(html)
+    # ... davom etish
+```
+
+## 📖 To'liq Dokumentatsiya
+
+Har bir modul uchun batafsil dokumentatsiya:
+
+- `WebClient` - Sinxron HTTP so'rovlar
+- `AsyncWebClient` - Asinxron HTTP so'rovlar  
+- `Parser` - HTML parsing
+- `Browser` - Brauzer avtomatizatsiyasi
+- `Downloader` - Fayllarni yuklab olish
+- `Automation` - GUI avtomatizatsiya
+
+## 🤝 Hissa Qo'shish
+
+Loyihaga hissa qo'shishni xohlasangiz, Pull Request yuboring!
+
+## 📄 Litsenziya
+
+MIT License
+
+## 👨‍💻 Muallif
+
+Ozodbek Sobirjonovich - oscoder@gmail.com
+
+## 🌟 Qo'llab-quvvatlash
+
+Agar loyiha foydali bo'lsa, GitHub'da ⭐ qo'ying!
