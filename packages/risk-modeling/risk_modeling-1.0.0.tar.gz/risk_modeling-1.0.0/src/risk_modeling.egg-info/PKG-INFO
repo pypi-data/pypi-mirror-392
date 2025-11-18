@@ -1,0 +1,49 @@
+Metadata-Version: 2.4
+Name: risk_modeling
+Version: 1.0.0
+Summary: ML modeling tools in python for risk management domain including loan, credit card, etc.
+Author-email: Xin Zhang <749958200@qq.com>
+License: MIT
+Project-URL: Homepage, https://github.com/yourusername/my_package
+Project-URL: Bug Tracker, https://github.com/yourusername/my_package/issues
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: lightgbm==4.6.0
+Requires-Dist: numpy==2.1.2
+Requires-Dist: pandas==2.3.2
+Requires-Dist: scikit-learn==1.7.2
+Requires-Dist: xgboost==3.0.5
+Requires-Dist: matplotlib==3.10.6
+
+# About The Project
+
+While GitHub hosts many excellent risk modeling libraries, most emphasize traditional logistic regression approaches. This project addresses modern needs by:
+1.  Focusing on **tree-based methodologies** (XGBoost, LightGBM)
+2.  Providing **essential modeling tools** (PSI, IV, Bivar, etc.)
+3.  Supporting **documentation of all modeling steps**
+
+---
+
+## Library Functionality
+
+### 📈 Modeling Procedure
+- **Hyperparameter Tuning**:  
+  `random_search_xgboost()`, `random_search_lightgbm()`
+- **Model Training**:  
+  `train_single_model_xgboost()`, `train_single_model_lightgbm()`
+- **Feature Analysis**:  
+  `feature_importance()` (gain-based),  
+  `variable_reduction()` (feature-importance-driven selection)
+- **Performance Metrics**:  
+  `model_performance()` (AUC, KS, Top Capture Rate, Top Bad Rate)
+
+### 🛠️ Modeling Tools
+- **Stability Analysis**:  
+  `calculate_numeric_psi()`, `calculate_categorical_psi()`
+- **Predictive Strength**:  
+  `calculate_numeric_iv()`, `calculate_categorical_iv()`
+- **Feature Evaluation**:  
+  `compute_numeric_bivar()`, `compute_categorical_bivar()`,  
+  `proc_means()` (quality checks)
+- **UAT Support**:  
+  `proc_compare()` (feature-by-feature value validation)
