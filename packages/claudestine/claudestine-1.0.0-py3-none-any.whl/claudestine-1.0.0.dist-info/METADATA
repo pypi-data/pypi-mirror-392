@@ -1,0 +1,250 @@
+Metadata-Version: 2.4
+Name: claudestine
+Version: 1.0.0
+Summary: Reverse-engineered Claude Code agent system prompt generator
+Project-URL: Homepage, https://github.com/starbased-co/claudestine
+Project-URL: Repository, https://github.com/starbased-co/claudestine
+Project-URL: Issues, https://github.com/starbased-co/claudestine/issues
+Author-email: starbased <s@starbased.net>
+License: MIT
+License-File: LICENSE
+Keywords: agent,ai,anthropic,claude,llm,prompt
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+
+# _Claudestine_ - A clandestine Claude Code reverse-engineering
+
+A python re-implementation of Claude Code's agent system prompt generator, reverse-engineered from the official Claude Code distribution.
+
+## Overview
+
+This package provides a faithful recreation of the prompt building system used internally by Claude Code. It includes:
+
+- ✅ All base system prompts (interactive, SDK, non-interactive, Vertex AI)
+- ✅ Built-in agent definitions (general-purpose, Explore)
+- ✅ Dynamic prompt construction with environment context
+- ✅ Security guidelines and safety instructions
+- ✅ Comprehensive test coverage
+
+## Why
+
+For use with the [`zen-mcp-server` CLI Link feature](github.com/BeehiveInnovations/zen-mcp-server/blob/main/docs/tools/clink.md), I wanted the exact system prompt used by the general purpose agent for "jailbreaking" agents to allow for recursive invocations (Agents calling agents), which is explicitly prohibited by Anthropic, who removed the feature a couple days or so after the agent feature was released.
+
+## How?
+
+tldr; If you are curious, here are the key functions you can inspect yourself:
+
+- `jCD` - Main prompt construction
+- `VTD` - Environment context generation
+- `y_H` - Base prompt selection
+- `v0$`, `A3` - Agent definitions
+
+This was achieved by an "automated" analysis of Claude Code's obfuscated source. That is, in of itself, a non-trivial process involving [webrack](https://github.com/j4k0xb/webcrack) for reversing the control flow flattening ([good blog](https://nerodesu017.github.io/posts/2023-12-01-antibots-part-8)) done during obfuscation (and more, but this is notable for it's impact on AST control flow graphs), followed by using babel to traverse the AST and storing the ENTIRE tree into neo4j, resulting in a data directory of about 16 GB.
+
+From here, I used a previous project I have published, [`ccproxy`](https://neo4j.com/docs/java-reference/current/traversal-framework/), so that I could capture a Claude Code session and view it in [LangFuse](https://langfuse.com). I prompted sonnet to "Use the @agent-general purpose to say hi", and used some of the system prompt text to find the AST node containing the string:
+
+> You are an agent for Claude Code, Anthropic's official CLI for Claude. Given the user's message, you should use the tools available to complete the task. Do what has been asked; nothing more, nothing less. When you complete the task simply respond with a detailed writeup...
+
+The full prompt goes on for several paragraphs and is dynamically generated and includes things like your git status, `uname -r`, working directory, recently edited files, etc.
+
+[Next, it's vibe coding time](https://archive.ph/vbzds). Using the [Neo4j Traversal Framework](https://neo4j.com/docs/java-reference/current/traversal-framework/), which is much simpler for this use case than choosing Cypher, iterating on java AI slop kept Claude busy for an afternoon, traversing the AST and reconstructing the deobfuscated code using a breadth first traversal, until the size of the reconstructed code hit the 50k token limit I specified. I took this 50k token blob of deobfuscated javascript, and shoved it back into Claude, sternly ordering it to "Using python, recreate the prompt building logic for constructing system prompts", and the results speak for themselves... Wait, you don't like python?
+
+---
+
+## Installation
+
+```bash
+uv add git+https://github.com/starbased-co/claudestine.git
+```
+
+Or using pip:
+
+```bash
+pip install git+https://github.com/starbased-co/claudestine.git
+```
+
+## Quick Start
+
+```python
+from claudestine import build_agent_prompt, get_agent, PromptBuilder
+
+# Build a prompt for the general-purpose agent
+prompts = build_agent_prompt("general-purpose")
+
+# Access agent definitions
+agent = get_agent("Explore")
+print(agent.system_prompt)
+
+# Custom prompt building
+custom_prompts = PromptBuilder.build_system_prompt(
+    agent=get_agent("general-purpose"),
+    model="claude-sonnet-4-5-20250929",
+    additional_working_dirs=["/path/to/project"],
+    include_security=True
+)
+```
+
+## Features
+
+### Built-in Agents
+
+#### General-Purpose Agent
+
+```python
+from claudestine import GENERAL_PURPOSE_AGENT
+
+# Agent optimized for:
+# - Searching code across large codebases
+# - Analyzing multiple files
+# - Investigating complex questions
+# - Multi-step research tasks
+```
+
+#### Explore Agent
+
+```python
+from claudestine import EXPLORE_AGENT
+
+# Agent specialized for:
+# - Finding files by patterns (glob searches)
+# - Searching code for keywords
+# - Answering codebase structure questions
+```
+
+### Prompt Building
+
+```python
+from claudestine import PromptBuilder
+
+# Build complete system prompt
+prompts = PromptBuilder.build_system_prompt(
+    agent=GENERAL_PURPOSE_AGENT,
+    model="claude-sonnet-4-5-20250929",
+    additional_working_dirs=["/home/user/project"],
+    cwd="/home/user/current",
+    include_security=False # the most important feature
+)
+
+# Returns list of prompt sections:
+# 1. Agent's system prompt
+# 2. Security guidelines (if enabled)
+# 3. Notes (absolute paths, cwd reset, no emojis)
+# 4. Environment context (platform, date, model info)
+```
+
+### Environment Context
+
+The system automatically includes:
+
+- Current working directory
+- Platform information (Linux, macOS, Windows)
+- OS version (from `uname`)
+- Today's date
+- Model information with friendly names
+- Additional working directories (if specified)
+
+### Dynamic Notes Section
+
+All prompts include operational notes:
+
+```
+Notes:
+- Agent threads always have their cwd reset between bash calls,
+  as a result please only use absolute file paths.
+- In your final response always share relevant file names and code snippets.
+  Any file paths you return in your response MUST be absolute.
+  Do NOT use relative paths.
+- For clear communication with the user the assistant MUST avoid using emojis.
+```
+
+## API Reference
+
+### `build_agent_prompt(agent_type, model, **kwargs)`
+
+Build a prompt for a built-in agent.
+
+**Parameters:**
+
+- `agent_type` (str): Agent type ("general-purpose", "Explore")
+- `model` (str): Model ID (e.g., "claude-sonnet-4-5-20250929")
+- `additional_working_dirs` (list[str], optional): Additional directories
+- `**kwargs`: Additional options passed to `PromptBuilder.build_system_prompt()`
+
+**Returns:** `list[str]` - List of prompt sections
+
+**Raises:** `ValueError` if agent_type is unknown
+
+### `get_agent(agent_type)`
+
+Get a built-in agent definition.
+
+**Parameters:**
+
+- `agent_type` (str): Agent type
+
+**Returns:** `AgentDefinition | None`
+
+### `PromptBuilder.build_system_prompt(...)`
+
+Build a complete system prompt with all sections.
+
+**Parameters:**
+
+- `agent` (AgentDefinition, optional): Agent definition
+- `base_prompts` (list[str], optional): Custom base prompts
+- `model` (str): Model ID
+- `additional_working_dirs` (list[str], optional): Additional directories
+- `cwd` (str, optional): Current working directory (defaults to `os.getcwd()`)
+- `mode` (PromptMode): Prompt mode
+- `is_non_interactive` (bool): Non-interactive session flag
+- `has_append_system_prompt` (bool): SDK append flag
+- `include_security` (bool): Include security guidelines
+
+**Returns:** `list[str]` - List of prompt sections
+
+## Agent Definitions
+
+### Creating Custom Agents
+
+```python
+from claudestine import AgentDefinition
+
+custom_agent = AgentDefinition(
+    agent_type="code-reviewer",
+    when_to_use="Use for code review tasks",
+    system_prompt="You are a code review specialist...",
+    model="sonnet",
+    tools=("Read", "Grep", "Glob"),
+    color="blue"
+)
+
+# Build prompt for custom agent
+prompts = PromptBuilder.build_system_prompt(
+    agent=custom_agent,
+    model="claude-sonnet-4-5-20250929"
+)
+```
+
+## Testing
+
+```bash
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=claudestine --cov-report=html
+
+# Run specific test
+pytest tests/test_prompts.py::TestPromptBuilder
+```
+
+## License
+
+MIT
