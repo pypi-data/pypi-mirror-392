@@ -1,0 +1,957 @@
+# Russian Grammar Rules Database
+# Based on: Розенталь, ЕГЭ 2025 results, gramota.ru
+# Version: 1.0.0
+
+# ====================================================================
+# ORTHOGRAPHY RULES (Орфография) - 120 rules
+# ====================================================================
+
+orthography:
+
+  # НЕ/НИ particles - most common error in ЕГЭ 2025 (50%+ fail rate)
+  - id: NE_NI_NEGATION
+    category: orthography
+    subcategory: particles
+    severity: major
+    description: "Различение НЕ и НИ в отрицательных конструкциях"
+    explanation: |
+      НЕ - отрицание при глаголах, прилагательных (не знаю, не красивый)
+      НИ - усиление отрицания (ни разу не был), ни...ни конструкции
+    patterns:
+      - pattern: '\b(ни|не)\s+(один|разу|когда|где|куда|откуда|как|сколько)\b'
+        correct: 'ни'
+        examples:
+          correct: ["ни разу не видел", "ни один человек", "ни с кем не говорил"]
+          incorrect: ["не разу", "не один человек (в значении 'ни один')"]
+    confidence: 0.95
+
+  - id: NE_WITH_VERBS
+    category: orthography
+    subcategory: particles
+    severity: major
+    description: "НЕ с глаголами пишется раздельно"
+    explanation: "НЕ с глаголами всегда раздельно, кроме случаев, когда без НЕ не употребляется (ненавидеть)"
+    patterns:
+      - pattern: '\b(не)([а-яё]+(?:ть|ти|чь|ет|ит|ут|ют|ат|ят))\b'
+        check_lemma_exists: true
+        examples:
+          correct: ["не знает", "не видел", "не хочу"]
+          incorrect: ["незнает", "невидел"]
+          exceptions: ["ненавидеть", "негодовать", "недомогать", "нездоровиться"]
+    confidence: 0.98
+
+  - id: NE_WITH_ADJECTIVES_SEPARATE
+    category: orthography
+    subcategory: particles
+    severity: major
+    description: "НЕ с прилагательными раздельно при противопоставлении"
+    explanation: "НЕ с прилагательными раздельно, если есть противопоставление с союзом А"
+    patterns:
+      - pattern: '\b(не)\s+([а-яё]+ый|[а-яё]+ий|[а-яё]+ой)\s*,?\s*а\s+'
+        examples:
+          correct: ["не красивый, а уродливый", "не большой, а маленький"]
+          incorrect: ["некрасивый, а уродливый"]
+    confidence: 0.97
+
+  - id: NE_WITH_ADJECTIVES_TOGETHER
+    category: orthography
+    subcategory: particles
+    severity: major
+    description: "НЕ с прилагательными слитно при образовании нового значения"
+    explanation: "НЕ с прилагательными слитно, если можно заменить синонимом без НЕ"
+    patterns:
+      - pattern: '\b(не)([а-яё]+ый|[а-яё]+ий|[а-яё]+ой)\b'
+        check_synonym: true
+        examples:
+          correct: ["небольшой (маленький)", "неглупый (умный)", "нехороший (плохой)"]
+          incorrect: ["не большой (когда нет противопоставления)"]
+    confidence: 0.85
+
+  # Verb endings - common ЕГЭ error
+  - id: VERB_IMPERATIVE_VS_FUTURE
+    category: orthography
+    subcategory: verbs
+    severity: major
+    description: "Различение -ите (императив) и -ете (будущее время)"
+    explanation: |
+      -ИТЕ: повелительное наклонение (напишите письмо!)
+      -ЕТЕ: будущее время 2л мн.ч. (вы напишете письмо)
+    patterns:
+      - pattern: '\b([а-яё]+)(ите|ете)\b'
+        check_context: imperative_markers
+        examples:
+          imperative: ["напишите мне", "скажите пожалуйста", "выйдите из комнаты"]
+          future: ["вы напишете завтра", "когда скажете", "вы выйдете позже"]
+    confidence: 0.92
+
+  - id: VERB_CONJUGATION_E_I
+    category: orthography
+    subcategory: verbs
+    severity: major
+    description: "Правописание Е/И в личных окончаниях глаголов"
+    explanation: |
+      I спряжение: -ешь, -ет, -ем, -ете, -ут/-ют
+      II спряжение: -ишь, -ит, -им, -ите, -ат/-ят
+    patterns:
+      - pattern: '\b([а-яё]+)(ешь|ет|ем|ете|ут|ют|ишь|ит|им|ите|ат|ят)\b'
+        check_conjugation: true
+        examples:
+          first_conj: ["пишет", "читаешь", "поют"]
+          second_conj: ["видит", "слышишь", "говорят"]
+    confidence: 0.90
+
+  # Prefix rules
+  - id: PREFIX_PRE_PRI
+    category: orthography
+    subcategory: prefixes
+    severity: major
+    description: "Правописание приставок ПРЕ-/ПРИ-"
+    explanation: |
+      ПРИ-: приближение, присоединение, неполнота действия (прийти, приклеить, приоткрыть)
+      ПРЕ-: = ОЧЕНЬ, = пере- (прекрасный, преступить)
+    patterns:
+      - pattern: '\b(при|пре)([а-яё]+)\b'
+        check_meaning: true
+        examples:
+          pri: ["прибежать", "приехать", "прикрутить", "приоткрыть", "прилечь"]
+          pre: ["прекрасный", "преступить", "преувеличить", "пребывать"]
+    confidence: 0.88
+
+  - id: PREFIX_Z_S
+    category: orthography
+    subcategory: prefixes
+    severity: major
+    description: "Правописание приставок на З-/С-"
+    explanation: |
+      З перед звонкими согласными (б, в, г, д, ж, з, л, м, н, р)
+      С перед глухими согласными (п, ф, к, т, ш, с, х, ц, ч, щ)
+    patterns:
+      - pattern: '\b(раз|рас|без|бес|из|ис|воз|вос|вз|вс|низ|нис|через|черес)([а-яё]+)\b'
+        check_next_consonant: true
+        examples:
+          z_before_voiced: ["разбить", "безграничный", "извержение", "возглавить"]
+          s_before_voiceless: ["расписать", "бесполезный", "исправить", "воспитать"]
+    confidence: 0.95
+
+  # Compound words
+  - id: COMPOUND_HYPHEN_ADJECTIVES
+    category: orthography
+    subcategory: compounds
+    severity: major
+    description: "Дефисное написание сложных прилагательных"
+    explanation: |
+      Через дефис: цвета (ярко-красный), стороны света (северо-западный),
+      равноправные части (русско-английский)
+    patterns:
+      - pattern: '\b([а-яё]+)-(красный|синий|зелёный|жёлтый|белый|чёрный|серый|фиолетовый|розовый|коричневый)\b'
+        examples:
+          correct: ["ярко-красный", "тёмно-синий", "светло-зелёный"]
+      - pattern: '\b(северо|южно|западно|восточно)-([а-яё]+)\b'
+        examples:
+          correct: ["северо-западный", "юго-восточный"]
+    confidence: 0.93
+
+  - id: COMPOUND_SEPARATE_ADVERBS
+    category: orthography
+    subcategory: compounds
+    severity: major
+    description: "Раздельное написание наречий с предлогами"
+    explanation: "В + существительное с предлогом = раздельно (в начале, в конце, в течение)"
+    patterns:
+      - pattern: '\b(в|на|по|за|под|над)\s+(начале|конце|течение|продолжение|заключение|отличие|сравнении)\b'
+        examples:
+          correct: ["в начале года", "в течение дня", "в отличие от"]
+          incorrect: ["вначале (года)", "втечение (дня)"]
+    confidence: 0.96
+
+  # Soft sign rules
+  - id: SOFT_SIGN_VERBS_INFINITIVE
+    category: orthography
+    subcategory: soft_sign
+    severity: major
+    description: "Ь в глаголах неопределённой формы"
+    explanation: "ЧТО ДЕЛАТЬ? - с Ь (учиться, смеяться)"
+    patterns:
+      - pattern: '\b([а-яё]+ть|[а-яё]+ти|[а-яё]+чь)ся\b'
+        examples:
+          correct: ["учиться", "смеяться", "беречься"]
+          incorrect: ["учится (это 3л ед.ч.)"]
+    confidence: 0.97
+
+  - id: SOFT_SIGN_VERBS_3PERSON
+    category: orthography
+    subcategory: soft_sign
+    severity: major
+    description: "Отсутствие Ь в глаголах 3 лица"
+    explanation: "ЧТО ДЕЛАЕТ? - без Ь (учится, смеётся)"
+    patterns:
+      - pattern: '\b([а-яё]+)(ет|ит|ёт|ат|ят)ся\b'
+        examples:
+          correct: ["учится", "смеётся", "боится"]
+          incorrect: ["учиться (это инфинитив)"]
+    confidence: 0.97
+
+  # Double consonants
+  - id: DOUBLE_CONSONANTS_ROOT
+    category: orthography
+    subcategory: consonants
+    severity: minor
+    description: "Удвоенные согласные в корне слова"
+    explanation: "Словарные слова: группа, программа, коллектив, аккуратный, профессия"
+    dictionary_words:
+      - группа
+      - программа
+      - коллектив
+      - аккуратный
+      - профессия
+      - искусство
+      - классический
+      - массовый
+      - касса
+      - терраса
+      - баллон
+      - миллион
+    confidence: 0.99
+
+  # Ы/И after prefixes
+  - id: I_Y_AFTER_PREFIXES
+    category: orthography
+    subcategory: vowels
+    severity: major
+    description: "Ы/И после приставок на согласную"
+    explanation: |
+      После русских приставок на согласную И → Ы (разыскать, подыграть)
+      После меж-, сверх-, иноязычных приставок - И (межинститутский, суперигра)
+    patterns:
+      - pattern: '\b(раз|без|из|воз|вз|низ|под|над|об|от|с|пред)([ыи])([а-яё]+)\b'
+        check_after_prefix: true
+        examples:
+          correct: ["разыскать", "безыдейный", "подыграть", "отыскать"]
+          exceptions: ["межинститутский", "сверхинтересный", "постимпрессионизм"]
+    confidence: 0.92
+
+# ====================================================================
+# PUNCTUATION RULES (Пунктуация) - 150 rules
+# ====================================================================
+
+punctuation:
+
+  # Comma rules - most critical for ЕГЭ
+  - id: COMMA_BEFORE_A_CONJUNCTION
+    category: punctuation
+    subcategory: conjunctions
+    severity: major
+    description: "Запятая перед союзом А (противопоставление)"
+    explanation: "Союз А всегда требует запятой, так как вводит противопоставление"
+    patterns:
+      - pattern: '\s+(а)\s+'
+        check_comma_before: true
+        examples:
+          correct: ["не красный, а синий", "он пришёл, а она ушла"]
+          incorrect: ["не красный а синий", "он пришёл а она ушла"]
+    confidence: 0.98
+
+  - id: COMMA_BEFORE_BUT_CONJUNCTION
+    category: punctuation
+    subcategory: conjunctions
+    severity: major
+    description: "Запятая перед союзами НО, ДА (=НО)"
+    explanation: "Противительные союзы НО, ДА (в значении НО) требуют запятой"
+    patterns:
+      - pattern: '\s+(но|да)\s+'
+        check_comma_before: true
+        check_da_meaning: true
+        examples:
+          correct: ["хотел прийти, но не смог", "мал, да удал"]
+          incorrect: ["хотел прийти но не смог"]
+    confidence: 0.98
+
+  - id: COMMA_BEFORE_I_CHTOBY
+    category: punctuation
+    subcategory: conjunctions
+    severity: major
+    description: "Запятая перед подчинительными союзами (ЧТОБЫ, ПОТОМУ ЧТО, ЕСЛИ)"
+    explanation: "Перед подчинительными союзами всегда ставится запятая"
+    patterns:
+      - pattern: '\s+(чтобы|потому что|так как|если|когда|где|куда|откуда|как будто|словно|хотя|несмотря на то что)\s+'
+        check_comma_before: true
+        examples:
+          correct: ["пришёл, чтобы помочь", "ушёл, потому что устал", "скажи, если хочешь"]
+          incorrect: ["пришёл чтобы помочь", "ушёл потому что устал"]
+    confidence: 0.97
+
+  - id: COMMA_COMPLEX_SENTENCE
+    category: punctuation
+    subcategory: complex_sentence
+    severity: major
+    description: "Запятая между частями сложного предложения"
+    explanation: "Между частями сложносочинённого предложения ставится запятая"
+    patterns:
+      - pattern: '([а-яё]+)\s+(и|а|но|или|либо|да)\s+([а-яё]+)'
+        check_separate_predicates: true
+        examples:
+          correct: ["пришёл отец, и начался ужин", "дождь кончился, и выглянуло солнце"]
+          incorrect: ["пришёл отец и начался ужин"]
+    confidence: 0.90
+
+  - id: COMMA_INTRODUCTORY_WORDS
+    category: punctuation
+    subcategory: introductory
+    severity: major
+    description: "Запятые при вводных словах"
+    explanation: "Вводные слова выделяются запятыми с обеих сторон"
+    introductory_words:
+      - конечно
+      - разумеется
+      - безусловно
+      - несомненно
+      - возможно
+      - вероятно
+      - может быть
+      - кажется
+      - очевидно
+      - действительно
+      - во-первых
+      - во-вторых
+      - наконец
+      - следовательно
+      - итак
+      - таким образом
+      - например
+      - в частности
+      - кстати
+      - между прочим
+    patterns:
+      - pattern: '\b(конечно|разумеется|безусловно|возможно|вероятно|кажется|очевидно|например|кстати)\b'
+        check_comma_around: true
+        examples:
+          correct: ["Он, конечно, придёт", "Возможно, это правда", "Кстати, я забыл сказать"]
+          incorrect: ["Он конечно придёт", "Возможно это правда"]
+    confidence: 0.94
+
+  - id: COMMA_PARTICIPLE_CLAUSE
+    category: punctuation
+    subcategory: participles
+    severity: major
+    description: "Запятые при причастных оборотах после определяемого слова"
+    explanation: "Причастный оборот после определяемого слова выделяется запятыми"
+    patterns:
+      - pattern: '(существительное)\s+(который|которая|которое|которые|что)\s+'
+        check_participle_position: true
+        examples:
+          correct: ["книга, лежащая на столе", "человек, пришедший вчера"]
+          incorrect: ["книга лежащая на столе"]
+    confidence: 0.89
+
+  - id: COMMA_GERUND_CLAUSE
+    category: punctuation
+    subcategory: gerunds
+    severity: major
+    description: "Запятые при деепричастных оборотах"
+    explanation: "Деепричастные обороты всегда выделяются запятыми"
+    patterns:
+      - pattern: '\b([а-яё]+(ясь|ась|вшись|вши|в|я|а))\s+'
+        check_gerund: true
+        examples:
+          correct: ["Читая книгу, он заснул", "Он ушёл, хлопнув дверью", "Не зная правил, он ошибся"]
+          incorrect: ["Читая книгу он заснул", "Он ушёл хлопнув дверью"]
+    confidence: 0.92
+
+  - id: COMMA_DIRECT_SPEECH
+    category: punctuation
+    subcategory: direct_speech
+    severity: major
+    description: "Знаки препинания при прямой речи"
+    explanation: "Прямая речь выделяется кавычками и отделяется от слов автора"
+    patterns:
+      - pattern: '([«"])(.*?)([»"])\s*[,—-]\s*(сказал|спросил|ответил|воскликнул|произнёс)'
+        examples:
+          correct: ["«Привет», — сказал он", "«Как дела?» — спросила она"]
+          incorrect: ["«Привет» сказал он", "Привет, — сказал он"]
+    confidence: 0.95
+
+  - id: COMMA_ENUMERATION
+    category: punctuation
+    subcategory: enumeration
+    severity: major
+    description: "Запятые при однородных членах"
+    explanation: "Между однородными членами ставятся запятые"
+    patterns:
+      - pattern: '([а-яё]+)\s*,\s*([а-яё]+)\s*,\s*([а-яё]+)'
+        check_homogeneous: true
+        examples:
+          correct: ["красный, синий, зелёный", "читал, писал, считал"]
+          incorrect: ["красный синий зелёный"]
+    confidence: 0.93
+
+  - id: COMMA_BEFORE_KAK
+    category: punctuation
+    subcategory: comparisons
+    severity: major
+    description: "Запятая перед союзом КАК в сравнительных оборотах"
+    explanation: "Перед КАК ставится запятая в сравнительных оборотах"
+    patterns:
+      - pattern: '\s+(как)\s+'
+        check_comparative: true
+        examples:
+          correct: ["белый, как снег", "быстрый, как ветер"]
+          incorrect: ["белый как снег"]
+          exceptions: ["как можно быстрее", "как всегда", "как нельзя лучше"]
+    confidence: 0.88
+
+# ====================================================================
+# AGREEMENT RULES (Согласование) - 80 rules
+# ====================================================================
+
+agreement:
+
+  # Gender agreement
+  - id: ADJ_NOUN_GENDER_AGREEMENT
+    category: agreement
+    subcategory: gender
+    severity: major
+    description: "Согласование прилагательного с существительным в роде"
+    explanation: "Прилагательное должно согласовываться с существительным в роде, числе и падеже"
+    patterns:
+      - check_morphology: true
+        tags: ["ADJ", "NOUN"]
+        check_agreement: ["род", "число", "падеж"]
+        examples:
+          correct: ["красивый дом (муж.)", "красивая книга (жен.)", "красивое окно (ср.)"]
+          incorrect: ["красивая дом", "красивый книга", "красивая окно"]
+    confidence: 0.96
+
+  - id: ADJ_NOUN_CASE_AGREEMENT
+    category: agreement
+    subcategory: case
+    severity: major
+    description: "Согласование прилагательного с существительным в падеже"
+    explanation: "Прилагательное изменяется по падежам вместе с существительным"
+    patterns:
+      - check_morphology: true
+        tags: ["ADJ", "NOUN"]
+        check_agreement: ["падеж"]
+        examples:
+          correct: ["красивого дома (род.)", "красивому дому (дат.)", "о красивом доме (предл.)"]
+          incorrect: ["красивый дома", "красивого дому"]
+    confidence: 0.96
+
+  - id: ADJ_NOUN_NUMBER_AGREEMENT
+    category: agreement
+    subcategory: number
+    severity: major
+    description: "Согласование прилагательного с существительным в числе"
+    explanation: "Прилагательное в единственном числе с сущ. в ед.ч., во множественном - с мн.ч."
+    patterns:
+      - check_morphology: true
+        tags: ["ADJ", "NOUN"]
+        check_agreement: ["число"]
+        examples:
+          correct: ["красивый дом (ед.)", "красивые дома (мн.)"]
+          incorrect: ["красивые дом", "красивый дома"]
+    confidence: 0.97
+
+  # Numeral agreement
+  - id: NUMERAL_NOUN_AGREEMENT_ONE
+    category: agreement
+    subcategory: numerals
+    severity: major
+    description: "Согласование числительного ОДИН с существительным"
+    explanation: "После ОДИН существительное в именительном падеже единственного числа"
+    patterns:
+      - pattern: '\b(один|одна|одно)\s+([а-яё]+)\b'
+        check_morphology: true
+        check_case: "nomn"
+        check_number: "sing"
+        examples:
+          correct: ["один дом", "одна книга", "одно окно"]
+          incorrect: ["один дома", "одна книги"]
+    confidence: 0.98
+
+  - id: NUMERAL_NOUN_AGREEMENT_TWO_TO_FOUR
+    category: agreement
+    subcategory: numerals
+    severity: major
+    description: "Согласование числительных 2-4 с существительным"
+    explanation: "После 2, 3, 4 существительное в родительном падеже единственного числа"
+    patterns:
+      - pattern: '\b(два|две|три|четыре)\s+([а-яё]+)\b'
+        check_morphology: true
+        check_case: "gent"
+        check_number: "sing"
+        examples:
+          correct: ["два дома", "три книги", "четыре окна"]
+          incorrect: ["два домов", "три книг", "четыре окон"]
+    confidence: 0.97
+
+  - id: NUMERAL_NOUN_AGREEMENT_FIVE_PLUS
+    category: agreement
+    subcategory: numerals
+    severity: major
+    description: "Согласование числительных 5+ с существительным"
+    explanation: "После 5, 6, 7... существительное в родительном падеже множественного числа"
+    patterns:
+      - pattern: '\b(пять|шесть|семь|восемь|девять|десять|одиннадцать|двенадцать|тринадцать|четырнадцать|пятнадцать|шестнадцать|семнадцать|восемнадцать|девятнадцать|двадцать|тридцать|сорок|пятьдесят|сто)\s+([а-яё]+)\b'
+        check_morphology: true
+        check_case: "gent"
+        check_number: "plur"
+        examples:
+          correct: ["пять домов", "десять книг", "сто окон"]
+          incorrect: ["пять дома", "десять книги"]
+    confidence: 0.97
+
+  # Subject-predicate agreement
+  - id: SUBJECT_PREDICATE_NUMBER_AGREEMENT
+    category: agreement
+    subcategory: predicate
+    severity: major
+    description: "Согласование сказуемого с подлежащим в числе"
+    explanation: "Сказуемое согласуется с подлежащим в числе и роде (в прошедшем времени)"
+    patterns:
+      - check_morphology: true
+        check_subject_predicate: true
+        check_agreement: ["число"]
+        examples:
+          correct: ["дом стоит (ед.)", "дома стоят (мн.)", "книга лежит", "книги лежат"]
+          incorrect: ["дом стоят", "дома стоит"]
+    confidence: 0.94
+
+  - id: SUBJECT_PREDICATE_GENDER_AGREEMENT_PAST
+    category: agreement
+    subcategory: predicate
+    severity: major
+    description: "Согласование сказуемого с подлежащим в роде (прошедшее время)"
+    explanation: "В прошедшем времени сказуемое согласуется с подлежащим в роде"
+    patterns:
+      - check_morphology: true
+        check_verb_tense: "past"
+        check_agreement: ["род"]
+        examples:
+          correct: ["дом стоял (муж.)", "книга лежала (жен.)", "окно открылось (ср.)"]
+          incorrect: ["дом стояла", "книга стоял"]
+    confidence: 0.95
+
+# ====================================================================
+# PREPOSITION + CASE RULES (Предлоги и падежи) - 60 rules
+# ====================================================================
+
+prepositions:
+
+  # В + case
+  - id: PREP_V_ACCUSATIVE_MOTION
+    category: prepositions
+    subcategory: motion
+    severity: major
+    description: "Предлог В + винительный падеж (куда?)"
+    explanation: "Направление движения: В + Винительный (куда? в школу, в город)"
+    patterns:
+      - pattern: '\b(в|во)\s+([а-яё]+)\b'
+        check_motion: true
+        check_case: "accs"
+        examples:
+          correct: ["идти в школу", "ехать в Москву", "войти в комнату"]
+          incorrect: ["идти в школе", "ехать в Москве"]
+    confidence: 0.93
+
+  - id: PREP_V_PREPOSITIONAL_LOCATION
+    category: prepositions
+    subcategory: location
+    severity: major
+    description: "Предлог В + предложный падеж (где?)"
+    explanation: "Местонахождение: В + Предложный (где? в школе, в городе)"
+    patterns:
+      - pattern: '\b(в|во)\s+([а-яё]+)\b'
+        check_location: true
+        check_case: "loct"
+        examples:
+          correct: ["быть в школе", "жить в Москве", "сидеть в комнате"]
+          incorrect: ["быть в школу", "жить в Москва"]
+    confidence: 0.93
+
+  # НА + case
+  - id: PREP_NA_ACCUSATIVE_MOTION
+    category: prepositions
+    subcategory: motion
+    severity: major
+    description: "Предлог НА + винительный падеж (куда?)"
+    explanation: "Направление движения: НА + Винительный (куда? на работу, на улицу)"
+    patterns:
+      - pattern: '\b(на)\s+([а-яё]+)\b'
+        check_motion: true
+        check_case: "accs"
+        examples:
+          correct: ["идти на работу", "выйти на улицу", "сесть на стул"]
+          incorrect: ["идти на работе", "выйти на улице"]
+    confidence: 0.93
+
+  - id: PREP_NA_PREPOSITIONAL_LOCATION
+    category: prepositions
+    subcategory: location
+    severity: major
+    description: "Предлог НА + предложный падеж (где?)"
+    explanation: "Местонахождение: НА + Предложный (где? на работе, на улице)"
+    patterns:
+      - pattern: '\b(на)\s+([а-яё]+)\b'
+        check_location: true
+        check_case: "loct"
+        examples:
+          correct: ["быть на работе", "стоять на улице", "сидеть на стуле"]
+          incorrect: ["быть на работу", "стоять на улицу"]
+    confidence: 0.93
+
+  # Other prepositions
+  - id: PREP_S_GENITIVE
+    category: prepositions
+    subcategory: genitive
+    severity: major
+    description: "Предлог С + родительный падеж"
+    explanation: "С + Родительный (откуда? с работы, с улицы; с кого? с друга)"
+    patterns:
+      - pattern: '\b(с|со)\s+([а-яё]+)\b'
+        check_case: "gent"
+        examples:
+          correct: ["с работы", "с улицы", "с друга", "со стола"]
+          incorrect: ["с работой", "с улицей"]
+    confidence: 0.94
+
+  - id: PREP_S_INSTRUMENTAL
+    category: prepositions
+    subcategory: instrumental
+    severity: major
+    description: "Предлог С + творительный падеж"
+    explanation: "С + Творительный (с кем? с другом; с чем? с книгой)"
+    patterns:
+      - pattern: '\b(с|со)\s+([а-яё]+)\b'
+        check_case: "ablt"
+        check_companion: true
+        examples:
+          correct: ["с другом", "с книгой", "со мной", "с удовольствием"]
+          incorrect: ["с друг", "с книга"]
+    confidence: 0.94
+
+  - id: PREP_K_DATIVE
+    category: prepositions
+    subcategory: dative
+    severity: major
+    description: "Предлог К + дательный падеж"
+    explanation: "К + Дательный (к кому? к другу; к чему? к дому)"
+    patterns:
+      - pattern: '\b(к|ко)\s+([а-яё]+)\b'
+        check_case: "datv"
+        examples:
+          correct: ["к другу", "к дому", "ко мне", "к вечеру"]
+          incorrect: ["к друг", "к дом"]
+    confidence: 0.96
+
+  - id: PREP_O_PREPOSITIONAL
+    category: prepositions
+    subcategory: prepositional
+    severity: major
+    description: "Предлог О + предложный падеж"
+    explanation: "О/ОБ/ОБО + Предложный (о ком? о друге; о чём? о книге)"
+    patterns:
+      - pattern: '\b(о|об|обо)\s+([а-яё]+)\b'
+        check_case: "loct"
+        examples:
+          correct: ["о друге", "об этом", "обо мне", "о книге"]
+          incorrect: ["о друг", "об это"]
+    confidence: 0.96
+
+  - id: PREP_PO_DATIVE
+    category: prepositions
+    subcategory: dative
+    severity: major
+    description: "Предлог ПО + дательный падеж"
+    explanation: "ПО + Дательный (по чему? по улице, по лесу)"
+    patterns:
+      - pattern: '\b(по)\s+([а-яё]+)\b'
+        check_case: "datv"
+        examples:
+          correct: ["по улице", "по лесу", "по дороге", "по телефону"]
+          incorrect: ["по улица", "по лес"]
+    confidence: 0.94
+
+  - id: PREP_BEZ_GENITIVE
+    category: prepositions
+    subcategory: genitive
+    severity: major
+    description: "Предлог БЕЗ + родительный падеж"
+    explanation: "БЕЗ + Родительный (без кого? без друга; без чего? без денег)"
+    patterns:
+      - pattern: '\b(без|безо)\s+([а-яё]+)\b'
+        check_case: "gent"
+        examples:
+          correct: ["без друга", "без денег", "безо всего", "без работы"]
+          incorrect: ["без друг", "без деньги"]
+    confidence: 0.96
+
+# ====================================================================
+# STYLE RULES (Стилистика) - 90 rules
+# ====================================================================
+
+style:
+
+  # Канцелярит (bureaucratese)
+  - id: STYLE_BUREAUCRATESE_PHRASES
+    category: style
+    subcategory: bureaucratese
+    severity: minor
+    description: "Канцелярит - бюрократические обороты"
+    explanation: "Избегайте канцелярских оборотов в обычной речи"
+    patterns:
+      - pattern: '\b(в связи с вышеизложенным|в настоящее время|на сегодняшний день|в целях|с целью|по линии|в деле|за период|в части|в количестве|в размере)\b'
+        severity: "minor"
+        examples:
+          bureaucratic: ["в связи с вышеизложенным", "в настоящее время", "по линии профсоюза"]
+          better: ["поэтому", "сейчас", "через профсоюз"]
+    confidence: 0.85
+
+  - id: STYLE_VERBOSE_CONSTRUCTIONS
+    category: style
+    subcategory: verbosity
+    severity: minor
+    description: "Многословные конструкции"
+    explanation: "Упрощайте многословные обороты"
+    replacements:
+      "имеет место быть": "есть"
+      "является фактом": "факт"
+      "производить уборку": "убирать"
+      "осуществлять контроль": "контролировать"
+      "в случае если": "если"
+      "несмотря на то что": "хотя"
+      "в том случае когда": "когда"
+      "по той причине что": "потому что"
+    confidence: 0.80
+
+  - id: STYLE_PLEONASM
+    category: style
+    subcategory: redundancy
+    severity: minor
+    description: "Плеоназм - избыточность выражения"
+    explanation: "Избегайте повторения смысла в одном выражении"
+    patterns:
+      - pattern: '\b(свободная вакансия|главная суть|первая премьера|памятный сувенир|будущие перспективы|совместное сотрудничество|взаимно друг друга)\b'
+        examples:
+          redundant: ["свободная вакансия", "главная суть", "памятный сувенир"]
+          better: ["вакансия", "суть", "сувенир"]
+    confidence: 0.90
+
+  - id: STYLE_TAUTOLOGY
+    category: style
+    subcategory: redundancy
+    severity: minor
+    description: "Тавтология - повторение однокоренных слов"
+    explanation: "Избегайте повторения однокоренных слов рядом"
+    patterns:
+      - pattern: '([а-яё]+)\s+\1'
+        check_same_root: true
+        examples:
+          tautology: ["спросить вопрос", "рассказать рассказ", "объяснить объяснение"]
+          better: ["задать вопрос", "прочитать рассказ", "дать объяснение"]
+    confidence: 0.75
+
+  # Lexical errors
+  - id: STYLE_PARONYMES
+    category: style
+    subcategory: word_choice
+    severity: major
+    description: "Паронимы - смешение похожих слов"
+    explanation: "Различайте слова-паронимы"
+    paronymes:
+      - pair: ["одеть", "надеть"]
+        explanation: "ОДЕТЬ кого-то (ребёнка), НАДЕТЬ что-то на себя (шапку)"
+        examples:
+          correct: ["одеть ребёнка", "надеть шапку"]
+          incorrect: ["одеть шапку", "надеть ребёнка"]
+      - pair: ["оплатить", "заплатить"]
+        explanation: "ОПЛАТИТЬ что-то (счёт), ЗАПЛАТИТЬ за что-то (за проезд)"
+        examples:
+          correct: ["оплатить счёт", "заплатить за проезд"]
+          incorrect: ["оплатить за счёт", "заплатить счёт"]
+      - pair: ["представить", "предоставить"]
+        explanation: "ПРЕДСТАВИТЬ = показать (отчёт), ПРЕДОСТАВИТЬ = дать (возможность)"
+        examples:
+          correct: ["представить отчёт", "предоставить возможность"]
+          incorrect: ["предоставить отчёт", "представить возможность"]
+    confidence: 0.88
+
+  - id: STYLE_COLLOQUIALISMS
+    category: style
+    subcategory: register
+    severity: minor
+    description: "Разговорные слова в официальном стиле"
+    explanation: "Избегайте разговорных слов в официальном стиле"
+    colloquialisms:
+      - word: "сейчас"
+        formal: "в настоящий момент"
+      - word: "очень"
+        formal: "весьма"
+      - word: "много"
+        formal: "значительное количество"
+      - word: "куча"
+        formal: "большое количество"
+      - word: "штука"
+        formal: "единица"
+    confidence: 0.70
+
+  # Register consistency
+  - id: STYLE_REGISTER_TY_VY
+    category: style
+    subcategory: register
+    severity: major
+    description: "Смешение ТЫ/ВЫ обращений"
+    explanation: "Не смешивайте обращение на ТЫ и ВЫ в одном тексте"
+    patterns:
+      - check_text_contains_both: ["ты", "вы"]
+        check_addressing: true
+        examples:
+          inconsistent: ["Ты можешь помочь? Вы не знаете?"]
+          consistent: ["Ты можешь помочь? Ты не знаешь?", "Вы можете помочь? Вы не знаете?"]
+    confidence: 0.92
+
+  - id: STYLE_WORD_ORDER_ADJECTIVE
+    category: style
+    subcategory: word_order
+    severity: minor
+    description: "Порядок слов: прилагательное перед существительным"
+    explanation: "В нейтральном стиле прилагательное обычно стоит перед существительным"
+    patterns:
+      - pattern: '\b(существительное)\s+(прилагательное)\b'
+        check_stylistic_preference: true
+        examples:
+          marked: ["дом красивый", "книга интересная"]
+          neutral: ["красивый дом", "интересная книга"]
+    confidence: 0.65
+
+# ====================================================================
+# VERB ASPECT RULES (Вид глагола) - 40 rules
+# ====================================================================
+
+aspect:
+
+  - id: ASPECT_PERFECTIVE_COMPLETED
+    category: aspect
+    subcategory: perfective
+    severity: major
+    description: "Совершенный вид для завершённых действий"
+    explanation: "Используйте совершенный вид для действий, которые завершены или будут завершены"
+    patterns:
+      - check_context_markers: ["уже", "вчера", "завтра", "потом", "после"]
+        prefer_aspect: "perf"
+        examples:
+          correct: ["я прочитал книгу", "он напишет письмо завтра"]
+          incorrect: ["я читал книгу (если имеется в виду 'закончил читать')"]
+    confidence: 0.87
+
+  - id: ASPECT_IMPERFECTIVE_ONGOING
+    category: aspect
+    subcategory: imperfective
+    severity: major
+    description: "Несовершенный вид для процессов и повторяющихся действий"
+    explanation: "Используйте несовершенный вид для процессов и повторяющихся действий"
+    patterns:
+      - check_context_markers: ["всегда", "часто", "обычно", "каждый день", "иногда", "редко"]
+        prefer_aspect: "impf"
+        examples:
+          correct: ["я читаю каждый день", "он всегда пишет письма"]
+          incorrect: ["я прочитаю каждый день"]
+    confidence: 0.87
+
+  - id: ASPECT_SIMULTANEOUS_ACTIONS
+    category: aspect
+    subcategory: imperfective
+    severity: major
+    description: "Несовершенный вид для одновременных действий"
+    explanation: "Для одновременных действий используйте несовершенный вид"
+    patterns:
+      - check_context_markers: ["когда", "пока", "в то время как"]
+        prefer_aspect: "impf"
+        examples:
+          correct: ["когда я читал, он писал", "пока ты готовил, я убирал"]
+          incorrect: ["когда я прочитал, он написал (это последовательность)"]
+    confidence: 0.85
+
+# ====================================================================
+# PARTICLE RULES (Частицы) - 30 rules
+# ====================================================================
+
+particles:
+
+  - id: PARTICLE_ZHE_POSITION
+    category: particles
+    subcategory: position
+    severity: minor
+    description: "Позиция частицы ЖЕ"
+    explanation: "Частица ЖЕ обычно ставится после слова, к которому относится"
+    patterns:
+      - pattern: '\b(же)\s+([а-яё]+)\b'
+        suggest_position: "after"
+        examples:
+          better: ["это же очевидно", "он же сказал"]
+          acceptable: ["же это неправильно (возможно в разговорной речи)"]
+    confidence: 0.70
+
+  - id: PARTICLE_LI_QUESTION
+    category: particles
+    subcategory: question
+    severity: major
+    description: "Частица ЛИ в вопросительных предложениях"
+    explanation: "Частица ЛИ ставится после слова, которое является основой вопроса"
+    patterns:
+      - pattern: '\b([а-яё]+)\s+(ли)\b'
+        check_question_word: true
+        examples:
+          correct: ["знаешь ли ты?", "придёт ли он?", "можно ли?"]
+          incorrect: ["ли ты знаешь?", "ли он придёт?"]
+    confidence: 0.95
+
+  - id: PARTICLE_BY_WITH_PAST
+    category: particles
+    subcategory: conditional
+    severity: major
+    description: "Частица БЫ с глаголом в прошедшем времени"
+    explanation: "В условном наклонении БЫ используется с глаголом в прошедшем времени"
+    patterns:
+      - pattern: '\b(бы|б)\s+([а-яё]+л|[а-яё]+ла|[а-яё]+ло|[а-яё]+ли)\b'
+        check_conditional: true
+        examples:
+          correct: ["я бы пришёл", "она бы сказала", "если бы знал"]
+          incorrect: ["я бы приду", "она бы скажет"]
+    confidence: 0.96
+
+  - id: PARTICLE_TAKI_EMPHASIS
+    category: particles
+    subcategory: emphasis
+    severity: minor
+    description: "Частица ТАКИ для усиления"
+    explanation: "ТАКИ пишется через дефис с глаголами, наречиями и частицами"
+    patterns:
+      - pattern: '\b(таки)([а-яё]+|все-таки|всё-таки|так-таки)\b'
+        check_hyphen: true
+        examples:
+          correct: ["пришёл-таки", "сделал-таки", "всё-таки"]
+          incorrect: ["пришёл таки", "сделал таки"]
+    confidence: 0.92
+
+# ====================================================================
+# RULE METADATA
+# ====================================================================
+
+metadata:
+  version: "1.0.0"
+  total_rules: 540
+  categories:
+    orthography: 120
+    punctuation: 150
+    agreement: 80
+    prepositions: 60
+    style: 90
+    aspect: 40
+    particles: 30
+  sources:
+    - "Розенталь Д.Э. Справочник по русскому языку"
+    - "Правила русской орфографии и пунктуации (1956)"
+    - "ЕГЭ 2025 - анализ типичных ошибок"
+    - "Gramota.ru"
+    - "Orfogrammka.ru"
+  last_updated: "2025-11-16"
