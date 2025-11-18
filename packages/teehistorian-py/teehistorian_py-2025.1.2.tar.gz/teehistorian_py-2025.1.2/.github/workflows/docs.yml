@@ -1,0 +1,97 @@
+# .github/workflows/docs.yml
+name: Documentation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  deploy-docs:
+    name: Deploy Documentation
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if docs exist
+        id: check_docs
+        run: |
+          if [ -f "mkdocs.yml" ] && [ -d "docs" ]; then
+            echo "docs_exist=true" >> $GITHUB_OUTPUT
+          else
+            echo "docs_exist=false" >> $GITHUB_OUTPUT
+            echo "MkDocs configuration or docs directory not found, skipping deployment"
+          fi
+
+      - name: Configure Git Credentials
+        if: steps.check_docs.outputs.docs_exist == 'true'
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+
+      - name: Set up Python
+        if: steps.check_docs.outputs.docs_exist == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+
+      - name: Set up cache
+        if: steps.check_docs.outputs.docs_exist == 'true'
+        run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
+
+      - name: Cache dependencies
+        if: steps.check_docs.outputs.docs_exist == 'true'
+        uses: actions/cache@v4
+        with:
+          key: mkdocs-material-${{ env.cache_id }}
+          path: ~/.cache
+          restore-keys: |
+            mkdocs-material-
+
+      - name: Install dependencies
+        if: steps.check_docs.outputs.docs_exist == 'true'
+        run: pip install mkdocs-material mkdocstrings[python]
+
+      - name: Deploy documentation
+        if: steps.check_docs.outputs.docs_exist == 'true'
+        run: mkdocs gh-deploy --force
+
+  build-docs:
+    name: Build Documentation (PR)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check if docs exist
+        id: check_docs
+        run: |
+          if [ -f "mkdocs.yml" ] && [ -d "docs" ]; then
+            echo "docs_exist=true" >> $GITHUB_OUTPUT
+          else
+            echo "docs_exist=false" >> $GITHUB_OUTPUT
+            echo "MkDocs configuration or docs directory not found, skipping build"
+          fi
+
+      - name: Set up Python
+        if: steps.check_docs.outputs.docs_exist == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+
+      - name: Install dependencies
+        if: steps.check_docs.outputs.docs_exist == 'true'
+        run: pip install mkdocs-material mkdocstrings[python]
+
+      - name: Build documentation
+        if: steps.check_docs.outputs.docs_exist == 'true'
+        run: mkdocs build --strict
