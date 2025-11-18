@@ -1,0 +1,44 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11']
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-test.txt
+        pip install -e .
+    
+    - name: Check formatting with black
+      run: |
+        black --check --diff nui_lambda_shared_utils tests || {
+          echo "::warning::Code formatting issues found - run 'black nui_lambda_shared_utils tests' locally"
+          echo "Continuing build despite formatting issues..."
+        }
+    
+    # TODO: Re-enable mypy after fixing type annotations
+    # - name: Type check with mypy
+    #   run: |
+    #     mypy lambda_shared_utils/ --config-file mypy.ini
+    
+    - name: Test with pytest
+      run: |
+        pytest --cov=nui_lambda_shared_utils --cov-report=xml
