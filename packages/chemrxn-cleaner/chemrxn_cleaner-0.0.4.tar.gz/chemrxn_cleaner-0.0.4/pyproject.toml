@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chemrxn-cleaner"
+dynamic = ["version"]
+description = "A lightweight toolkit for cleaning and standardizing organic reaction datasets."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+    {name = "Peiye Liu", email = "peiyeliu.work@outlook.com"}
+]
+license = {text = "MIT"}
+dependencies = [
+    "rdkit",
+    "pandas>=1.5.0",
+    "tqdm>=4.64.0",
+    "ord-schema>=0.3.0",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.optional-dependencies]
+ord = ["ord-schema>=0.3.0"]
+
+[project.urls]
+Homepage = "https://github.com/peiyeliu/chemrxn-cleaner"
+
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[tool.setuptools.dynamic]
+version = { attr = "chemrxn_cleaner.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["tests", "tests.*", "examples", "examples.*"]
