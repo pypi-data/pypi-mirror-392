@@ -1,0 +1,157 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "wsi-toolbox"
+version = "0.1.1"
+description = "A comprehensive toolkit for Whole Slide Image processing, feature extraction, and clustering analysis"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Ken Enda", email = "ken@endaaman.com"},
+]
+keywords = ["wsi", "pathology", "deep-learning", "clustering", "histopathology"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+]
+dependencies = [
+    "h5py>=3.13.0",
+    "hdbscan>=0.8.40",
+    "imagecodecs>=2024.12.30",
+    "joblib>=1.4.2",
+    "leidenalg>=0.10.2",
+    "matplotlib>=3.9.4",
+    "networkx>=3.3",
+    "numpy<2",
+    "opencv-python-headless>=4.11.0.86",
+    "openpyxl>=3.1.5",
+    "openslide-python>=1.4.1",
+    "pandas>=2.2.3",
+    "pillow>=11.0.0",
+    "pydantic>=2.10.6",
+    "pydantic-autocli>=0.1.4",
+    "pyqt6>=6.8.1",
+    "python-igraph>=0.11.8",
+    "rich>=14.0.0",
+    "scikit-learn>=1.6.1",
+    "seaborn>=0.13.2",
+    "streamlit>=1.43.2",
+    "streamlit-antd-components>=0.3.2",
+    "streamlit-aggrid>=0.3.4.post3",
+    "taskipy>=1.14.1",
+    "tifffile>=2025.2.18",
+    "timm>=0.9.16",
+    "torch>=2.5.1",
+    "torchvision>=0.20.1",
+    "umap-learn>=0.5.7",
+    "zarr>=3",
+]
+
+[project.scripts]
+wsi-toolbox = "wsi_toolbox.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/endaaman/wsi-toolbox"
+Repository = "https://github.com/endaaman/wsi-toolbox"
+Documentation = "https://github.com/endaaman/wsi-toolbox/blob/master/README.md"
+
+[[tool.uv.index]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu121"
+
+[project.optional-dependencies]
+build = ["torch", "packaging", "wheel", "setuptools"]
+compile = ["flash-attn"]
+# Slide-level encoding (CLI only)
+# Note: gigapath moved to dependency-groups because PyPI doesn't allow git dependencies
+# gigapath = [
+#     "gigapath @ git+https://github.com/prov-gigapath/prov-gigapath.git@5d77be0",
+#     "flash-attn>=2.7.4",
+#     "einops>=0.8.1",
+#     "fairscale>=0.4.13",
+# ]
+
+[tool.uv]
+no-build-isolation-package = ["flash-attn"]
+
+[tool.uv.extra-build-dependencies]
+flash-attn = ["setuptools", "wheel", "packaging", "ninja", "torch"]
+
+[[tool.uv.dependency-metadata]]
+name = "flash-attn"
+version = "2.7.4"
+requires-dist = ["torch", "einops"]
+
+
+[tool.taskipy.tasks]
+cli = "python -m wsi_toolbox.cli"
+app = "streamlit run wsi_toolbox/app.py --server.address 0.0.0.0 --server.port ${PORT:-8501}"
+watcher = "python -m wsi_toolbox.watcher"
+clean = "rm -rf build/ dist/ *.egg-info/ __pycache__/ && find . -name '*.pyc' -delete && find . -name '__pycache__' -delete"
+build = "python -m build"
+check = "python -m twine check dist/*"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["wsi_toolbox"]
+
+[dependency-groups]
+dev = [
+    "ipython>=9.1.0",
+    "jupyterlab>=4.1.6",
+    "ruff>=0.8.0",
+]
+build = [
+    "build>=1.0.0",
+    "twine>=5.0.0",
+]
+# Slide-level encoding (CLI only) - uv-only feature, not uploaded to PyPI
+gigapath = [
+    "gigapath @ git+https://github.com/prov-gigapath/prov-gigapath.git@5d77be0",
+    "flash-attn>=2.7.4",
+    "einops>=0.8.1",
+    "fairscale>=0.4.13",
+]
+
+[tool.ruff]
+# Exclude common directories
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "*.egg-info",
+    "wsi_toolbox/exp.py",  # Experimental file
+]
+
+# Same as Black.
+line-length = 120
+
+[tool.ruff.lint]
+# Enable specific rule categories
+select = [
+    "E",   # pycodestyle errors
+    "F",   # Pyflakes
+    "W",   # pycodestyle warnings
+    "I",   # isort
+]
+
+# Ignore specific rules
+ignore = [
+    "E501",  # Line too long (handled by formatter)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["wsi_toolbox"]
+
+[tool.ruff.lint.per-file-ignores]
+"wsi_toolbox/app.py" = ["E402"]
