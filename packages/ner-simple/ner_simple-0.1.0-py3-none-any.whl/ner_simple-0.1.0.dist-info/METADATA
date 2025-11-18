@@ -1,0 +1,41 @@
+Metadata-Version: 2.4
+Name: ner_simple
+Version: 0.1.0
+Summary: A minimal package exposing a simple NER runner using Hugging Face transformers pipeline.
+Author-email: Your Name <you@example.com>
+License: MIT
+Keywords: ner,transformers,nlp
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Libraries
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: transformers>=4.0
+Requires-Dist: torch
+Dynamic: license-file
+
+# ner_simple
+
+A minimal package that exposes a single function `run_ner(text, model=...)` to run Named Entity Recognition using Hugging Face transformers pipeline.
+
+## Files
+- `ner_simple/ner.py` - contains `run_ner` function.
+- `requirements.txt` - basic dependencies.
+
+## Usage
+```bash
+pip install -r requirements.txt
+# or install transformers and torch manually
+```
+
+```python
+from ner_simple import run_ner
+
+text = "Barack Obama was born in Hawaii and was the 44th President of the United States."
+entities = run_ner(text)
+print(entities)
+```
+
+The default model is `dbmdz/bert-large-cased-finetuned-conll03-english` which is fine-tuned for CoNLL-03 NER tasks.
