@@ -1,0 +1,232 @@
+# Telugu Translation & Transliteration Package v1.0.0
+
+Complete Telugu language support package combining translation, transliteration, and an interactive typing tool.
+
+## Features
+
+### Translation (Online - requires internet)
+- **English ↔ Telugu**: Full bidirectional translation using Google Translate
+- **Automatic Fallback**: Uses deep-translator as backup if primary service fails
+- **Multi-language Support**: Translate from/to any language supported by Google Translate
+
+### Transliteration (Offline - no internet required)
+- **Roman ↔ Telugu Script**: Convert between Roman text and Telugu script
+- **Phonetic Conversion**: Convert English phonetic spelling to Telugu script
+- **Fully Offline**: Works without internet connection
+
+### Built-in Typing Tool (NEW!)
+- **Interactive Typing**: Type in Roman script, press SPACE to auto-convert to Telugu
+- **GUI Application**: Full-featured typing tool with real-time conversion
+- **Command-line Access**: Launch with simple commands
+- **Space-triggered Conversion**: Automatic transliteration when you press spacebar
+
+## Installation
+
+```bash
+pip install -r requirements.txt
+```
+
+Or install directly:
+
+```bash
+pip install googletrans==4.0.0rc1 deep-translator indic-transliteration
+```
+
+## Quick Start
+
+```python
+from my_telugu_lib import (
+    en2te, te2en,                    # Translation
+    roman_to_telugu, telugu_to_roman # Transliteration
+)
+
+# Translation (needs internet)
+print(en2te("Hello"))              # Output: హలో
+print(te2en("నమస్కారం"))            # Output: Hello
+
+# Transliteration (offline)
+print(roman_to_telugu("ramu"))     # Output: రాము
+print(telugu_to_roman("పుస్తకం"))   # Output: pusthakam
+```
+
+## API Reference
+
+### Translation Functions
+
+#### `en2te(text)`
+Translate English to Telugu.
+
+**Parameters:**
+- `text` (str): English text to translate
+
+**Returns:**
+- str: Telugu translation
+
+**Example:**
+```python
+>>> en2te("Good morning")
+'శుభోదయం'
+```
+
+#### `te2en(text)`
+Translate Telugu to English.
+
+**Parameters:**
+- `text` (str): Telugu text to translate
+
+**Returns:**
+- str: English translation
+
+**Example:**
+```python
+>>> te2en("రాము")
+'Ramu'
+```
+
+#### `translate(text, source='auto', target='te')`
+Generic translation function for any language pair.
+
+**Parameters:**
+- `text` (str): Text to translate
+- `source` (str): Source language code (default: 'auto')
+- `target` (str): Target language code (default: 'te')
+
+**Returns:**
+- str: Translated text
+
+**Example:**
+```python
+>>> translate("Bonjour", source='fr', target='te')
+'బోన్జోర్'
+```
+
+### Transliteration Functions
+
+#### `roman_to_telugu(text)`
+Convert Romanized Telugu to Telugu script.
+
+**Parameters:**
+- `text` (str): Roman text (e.g., "ramu")
+
+**Returns:**
+- str: Telugu script (e.g., "రాము")
+
+**Example:**
+```python
+>>> roman_to_telugu("ramu pusthakam")
+'రాము పుస్తకం'
+```
+
+#### `telugu_to_roman(text)`
+Convert Telugu script to Roman transliteration.
+
+**Parameters:**
+- `text` (str): Telugu text (e.g., "రాము")
+
+**Returns:**
+- str: Roman text (e.g., "rAmu")
+
+**Example:**
+```python
+>>> telugu_to_roman("రాము పుస్తకం")
+'rAmu pusthakam'
+```
+
+#### `english_to_telugu_script(text)`
+Convert English phonetic spelling to Telugu script.
+
+**Parameters:**
+- `text` (str): English text
+
+**Returns:**
+- str: Telugu script approximation
+
+**Example:**
+```python
+>>> english_to_telugu_script("hello")
+'హెల్లొ'
+```
+
+### Typing Tool Functions
+
+#### `start_typing_tool()`
+Launch the interactive Telugu typing tool GUI.
+
+**Usage:**
+```python
+from my_telugu_lib import start_typing_tool
+start_typing_tool()
+```
+
+**Command-line:**
+```bash
+telugu-typing
+```
+
+#### `convert_on_space(text)`
+Convert Roman text to Telugu (used internally by typing tool).
+
+**Parameters:**
+- `text` (str): Roman text to convert
+
+**Returns:**
+- str: Telugu script
+
+**Example:**
+```python
+>>> convert_on_space("ramu")
+'రాము'
+```
+
+#### `interactive_typing()`
+Start interactive typing mode in the console.
+
+**Usage:**
+```python
+from my_telugu_lib import interactive_typing
+interactive_typing()
+```
+
+**Command-line:**
+```bash
+telugu-interactive
+```
+
+## Typing Tool Quick Start
+
+Type in Roman script and press **SPACE** to automatically convert to Telugu:
+
+```python
+# In your Python script
+from my_telugu_lib import start_typing_tool
+start_typing_tool()
+
+# Or from command line
+# telugu-typing
+```
+
+Type: `ramu` → Press SPACE → Output: `రాము`
+
+## Running the Demo
+
+```bash
+python demo.py
+```
+
+## Dependencies
+
+- `googletrans==4.0.0rc1` - Google Translate API wrapper
+- `deep-translator` - Alternative translation service
+- `indic-transliteration` - Indian language script conversion
+
+## License
+
+MIT License
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Support
+
+For issues and questions, please open an issue on the GitHub repository.
