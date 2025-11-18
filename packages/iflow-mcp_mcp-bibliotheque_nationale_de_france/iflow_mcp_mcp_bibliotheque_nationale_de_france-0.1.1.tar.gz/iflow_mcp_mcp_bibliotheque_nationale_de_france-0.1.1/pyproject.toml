@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iflow-mcp_mcp-bibliotheque_nationale_de_france"
+version = "0.1.1"
+description = "Un serveur MCP pour accéder à l'API Gallica de la Bibliothèque nationale de France (BnF)"
+authors = [
+    {name = "Kryzo", email = "kryzo@example.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+    "requests==2.31.0",
+    "fastmcp==0.1.0"
+]
+
+[project.scripts]
+mcp-bibliotheque-nationale-de-france = "bnf_server:main"
+
+[project.urls]
+Homepage = "https://github.com/iflow-mcp/mcp-bibliotheque_nationale_de_france"
+Repository = "https://github.com/iflow-mcp/mcp-bibliotheque_nationale_de_france"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["bnf_api*", "bnf_server*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.py"]
