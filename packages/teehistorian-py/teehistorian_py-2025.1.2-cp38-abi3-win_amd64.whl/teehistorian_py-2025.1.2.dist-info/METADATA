@@ -1,0 +1,128 @@
+Metadata-Version: 2.4
+Name: teehistorian-py
+Version: 2025.1.2
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Rust
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Topic :: Games/Entertainment
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Typing :: Typed
+Requires-Dist: maturin>=1.0 ; extra == 'dev'
+Requires-Dist: pytest>=7.0 ; extra == 'dev'
+Requires-Dist: pytest-cov>=4.0 ; extra == 'dev'
+Requires-Dist: black>=22.0 ; extra == 'dev'
+Requires-Dist: isort>=5.0 ; extra == 'dev'
+Requires-Dist: mypy>=1.0 ; extra == 'dev'
+Requires-Dist: pre-commit>=2.0 ; extra == 'dev'
+Requires-Dist: mkdocs>=1.5 ; extra == 'docs'
+Requires-Dist: mkdocs-material>=9.0 ; extra == 'docs'
+Requires-Dist: mkdocstrings[python]>=0.24 ; extra == 'docs'
+Requires-Dist: pytest>=7.0 ; extra == 'test'
+Requires-Dist: pytest-cov>=4.0 ; extra == 'test'
+Requires-Dist: pytest-benchmark>=4.0 ; extra == 'test'
+Provides-Extra: dev
+Provides-Extra: docs
+Provides-Extra: test
+License-File: LICENSE
+Summary: Python bindings for teehistorian with event processing
+Keywords: teeworlds,ddnet,parser,gaming
+Author-email: Avolicious <avolicious@kog.tw>
+Maintainer-email: Avolicious <avolicious@kog.tw>
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown; charset=UTF-8; variant=GFM
+Project-URL: Homepage, https://github.com/KoG-teeworlds/teehistorian-py
+Project-URL: Documentation, https://teehistorian-py.readthedocs.io/
+Project-URL: Repository, https://github.com/KoG-teeworlds/teehistorian-py
+Project-URL: Bug Tracker, https://github.com/KoG-teeworlds/teehistorian-py/issues
+Project-URL: Changelog, https://github.com/KoG-teeworlds/teehistorian-py/blob/main/CHANGELOG.md
+
+# teehistorian-py
+
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![PyPI version](https://badge.fury.io/py/teehistorian-py.svg)](https://badge.fury.io/py/teehistorian-py)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+
+High-performance Python bindings for parsing Teeworlds/DDNet teehistorian files. Built with Rust for speed and memory safety.
+
+## Features
+
+- 🚀 **Fast**: Rust-powered parsing with minimal Python overhead
+- 🔒 **Memory Safe**: No buffer overflows or memory leaks
+- 📦 **Simple API**: Clean Python interface for easy integration  
+- 🧩 **Extensible**: Support for custom UUID handlers for mods
+- 🎯 **Complete**: Covers all standard teehistorian chunk types
+
+## Installation
+
+```bash
+pip install teehistorian-py
+```
+
+## Quick Start
+
+```python
+import teehistorian_py as th
+
+# Parse a teehistorian file
+with open("server.teehistorian", "rb") as f:
+    data = f.read()
+
+parser = th.Teehistorian(data)
+
+# Iterate through all chunks
+for chunk in parser:
+    if isinstance(chunk, th.Join):
+        print(f"Player {chunk.client_id} joined")
+    elif isinstance(chunk, th.Drop):
+        print(f"Player {chunk.client_id} left: {chunk.reason}")
+    elif isinstance(chunk, th.PlayerName):
+        print(f"Player {chunk.client_id} is now called '{chunk.name}'")
+```
+
+## Development
+
+### Building from Source
+
+```bash
+# Install development dependencies
+pip install maturin
+
+# Build extension module
+maturin develop --release
+
+# Run tests
+pytest tests/
+```
+
+### Requirements
+
+- Python 3.8+
+- Rust 1.70+ (for building from source)
+
+## License
+
+This project is licensed under the GNU Affero General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+
+## Credits
+
+- Built on top of the excellent [teehistorian](https://crates.io/crates/teehistorian) Rust crate
+- Part of the [KoG-teeworlds](https://github.com/KoG-teeworlds) ecosystem
+
+## Related Projects
+
+- [teehistorian](https://github.com/heinrich5991/teehistorian) - Original Rust implementation
+- [Teeworlds](https://teeworlds.com/) - The game that generates these files
+- [DDNet](https://ddnet.tw/) - Popular Teeworlds modification
+
+---
+
+**Need help?** Open an issue or check our [documentation](https://github.com/KoG-teeworlds/teehistorian-py).
+
