@@ -1,0 +1,32 @@
+[build-system]
+requires = [ "hatchling>=1.25.0",]
+build-backend = "hatchling.build"
+
+[project]
+name = "wigle2kml-py"
+version = "0.1.2"
+description = "Convert Wigle API JSON output to KML for Google Earth and other geo tools."
+readme = "README.md"
+requires-python = ">=3.8"
+keywords = [ "wigle", "kml", "wifi", "geospatial", "google-earth",]
+classifiers = [ "Development Status :: 3 - Alpha", "Intended Audience :: Information Technology", "Intended Audience :: System Administrators", "Topic :: Security", "Topic :: Utilities", "Programming Language :: Python", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only", "Programming Language :: Python :: 3.8", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11",]
+dependencies = []
+[[project.authors]]
+name = "Kent Ickler"
+
+[project.license]
+text = "MIT"
+
+[project.urls]
+Homepage = "https://github.com/DefensiveOrigins/Wigle2KML-py"
+Source = "https://github.com/DefensiveOrigins/Wigle2KML-py"
+Issues = "https://github.com/DefensiveOrigins/Wigle2KML-py/issues"
+
+[project.scripts]
+wigle2kml = "wigle2kml:main"
+
+[tool.hatch.build.targets.wheel]
+include = [ "wigle2kml.py", "README.md",]
+
+[tool.hatch.build.targets.sdist]
+include = [ "wigle2kml.py", "README.md",]
