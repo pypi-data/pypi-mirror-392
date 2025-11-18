@@ -1,0 +1,195 @@
+Metadata-Version: 2.4
+Name: netpro_fortinet_adapter
+Version: 1.0.0
+Summary: Fortinet adapter package for the NetPro automation platform.
+Author-email: Joel Loreno <jcloreno@gmail.com>
+Project-URL: Homepage, https://github.com/netpro-community/netpro-fortinet-adapter
+Project-URL: Issues, https://github.com/netpro-community/netpro-fortinet-adapter/issues
+Keywords: netpro,fortinet,fortigate,network-automation,firewall
+Classifier: Intended Audience :: System Administrators
+Classifier: Intended Audience :: Information Technology
+Classifier: Topic :: System :: Networking
+Classifier: Topic :: System :: Systems Administration
+Classifier: License :: OSI Approved :: GNU Affero General Public License v3
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: netpro-firewall>=1.0
+Dynamic: license-file
+
+# NetPro Fortinet Adapter
+
+The **NetPro Fortinet Adapter** lets **NetPro** communicate with  
+**Fortinet appliances/devices – currently FortiGate firewalls running FortiOS** –  
+using HTTPS API (with optional CLI support planned for the future).
+
+> **Scope:** As of this version, **only FortiGate (FortiOS)** is implemented.  
+> The architecture is designed to support additional Fortinet product families in future releases.
+
+This package cleanly isolates all **Fortinet-specific logic** from NetPro Core,  
+allowing independent versioning, development, and licensing while relying on  
+NetPro’s built-in adapter framework.
+
+---
+
+## 🔑 Key Features
+
+- **Versioned FortiOS adapter classes**, all named `FORTIGATE`, registered via  
+  the NetPro adapter framework:
+  - `v7_0`, `v7_2`, `v7_4`, `v7_6`, `v7_6_4`
+- Shared **base adapter**: `BaseFortigateAPIAdapter`
+  - **Based on FortiOS 7.6 API**  
+  - **Backward compatible with 7.0 → 7.4** through conditional endpoint maps,
+    feature detection, and compatibility shims.
+  - Inherits from NetPro Core’s `APIAdapterBase`
+- Automatic adapter registration via **entry-points**:
+  ```toml
+  [project.entry-points."netpro.adapters"]
+  netpro_fortinet_adapter = "netpro_fortinet_adapter:register"
+  ```
+
+> **Compatibility Note:**  
+> `BaseFortigateAPIAdapter` implements a **FortiOS 7.6-first architecture**,  
+> but includes internal logic that automatically adapts to 7.0–7.4 API paths  
+> and feature differences.
+
+---
+
+## 🧾 Requirements
+
+- **NetPro Core** 1.0 or higher  
+- **Python** 3.12.10 or higher
+
+---
+
+## 📦 Installation
+
+Standard install:
+
+```bash
+pip install netpro-fortinet-adapter
+```
+
+Or directly from GitHub:
+
+```bash
+pip install "git+https://github.com/netpro-community/netpro-fortinet-adapter.git#egg=netpro_fortinet_adapter"
+```
+
+Enable the adapter in your NetPro configuration:
+
+```python
+PLUGINS = {
+    "netpro_fortinet_adapter": {"enabled": True},
+}
+```
+
+Restart NetPro after installation.
+
+---
+
+## 🚀 Quick Start
+
+After installation, the adapter registers itself into NetPro’s global adapter registry.
+
+### Example: Resolve the adapter class for FortiOS 7.4
+
+```python
+from netpro.core.registries import adapter_registry
+
+adapter_cls = adapter_registry.get(vendor="fortinet", os="FortiOS", version="7.4")
+
+adapter = adapter_cls(
+    logger_name="FORTIGATE",
+    debug=False,
+)
+```
+
+### Configure connection
+
+```python
+adapter.ip = "192.168.20.100"
+adapter.vdom = "root"     # optional
+adapter.user = "admin"
+adapter.password = "yourpass"
+```
+
+### Example calls
+
+```python
+adapter.login()
+system_info = adapter.get_system_info()
+policy = adapter.policy_lookup(src="10.0.1.0/24", dst="10.0.2.0/24", service="ALL")
+```
+
+> Connection/session parameters may also be passed through `__init__`  
+> depending on your implementation.
+
+---
+
+## ⚙️ Adapter API Overview
+
+All versioned `FORTIGATE` classes inherit from:
+
+```
+netpro_fortinet_adapter/adapters/FortiGate/base.py:BaseFortigateAPIAdapter
+```
+
+### Key behaviors
+
+- `inventory_domain = "firewall"`
+- Standard runtime attributes:
+  - `hostname`
+  - `vdom` (default: `'root'`)
+  - `version`
+- Standard data buckets populated by inventory sync:
+  - `interfaces`, `zones`, `addresses`, `address_groups`
+  - `services`, `service_groups`, `security_profiles`
+  - `policies`, `routes`, `routing_policies`
+  - `vip`, `vip_groups`, `ippools`
+  - `vdoms`, `users`, `user_groups`, `authentication_servers`
+  - `schedule_onetime`, `schedule_recurring`, `schedule_groups`
+  - `system_info`
+
+### Compatibility Strategy
+
+`BaseFortigateAPIAdapter` detects and adapts to API model differences:
+
+- conditional endpoint maps (7.0/7.2/7.4 vs 7.6)  
+- presence/absence of fields in returned JSON  
+- fallback routines for older versions  
+- graceful omission of unsupported features  
+
+---
+
+## 🧩 Supported Versions (Matrix)
+
+| FortiOS | Class Path                                    | Notes                                |
+|--------:|-----------------------------------------------|--------------------------------------|
+|   7.0   | `adapters/FortiGate/v7_0/api.py:FORTIGATE`    | Extends 7.6 base w/ compatibility    |
+|   7.2   | `adapters/FortiGate/v7_2/api.py:FORTIGATE`    | Extends 7.0                          |
+|   7.4   | `adapters/FortiGate/v7_4/api.py:FORTIGATE`    | Extends 7.2                          |
+|   7.6   | `adapters/FortiGate/v7_6/api.py:FORTIGATE`    | Native base version                  |
+|  7.6.4  | `adapters/FortiGate/v7_6_4/api.py:FORTIGATE`  | Minor extensions on 7.6              |
+
+Registration for each version is handled via:
+
+```python
+@register_adapter(vendor="fortinet", os="FortiOS", version="<ver>")
+class FORTIGATE(BaseFortigateAPIAdapter):
+    ...
+```
+
+---
+
+## 📄 License
+
+[![License](https://img.shields.io/badge/license-AGPLv3-blue.svg)](LICENSE)
+
+This project is licensed under the **GNU Affero General Public License v3.0**.  
+See the full text in the [`LICENSE`](LICENSE) file.
