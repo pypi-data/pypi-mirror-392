@@ -1,0 +1,79 @@
+name: Performance Benchmarks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    name: Run Benchmarks
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check if benchmarks directory exists
+        id: check_benchmarks
+        run: |
+          if [ -d "benchmarks" ]; then
+            echo "benchmarks_exist=true" >> $GITHUB_OUTPUT
+          else
+            echo "benchmarks_exist=false" >> $GITHUB_OUTPUT
+            echo "Benchmarks directory not found, skipping benchmark run"
+          fi
+
+      - name: Set up Python
+        if: steps.check_benchmarks.outputs.benchmarks_exist == 'true'
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Set up Rust
+        if: steps.check_benchmarks.outputs.benchmarks_exist == 'true'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Create virtual environment
+        if: steps.check_benchmarks.outputs.benchmarks_exist == 'true'
+        run: |
+          python -m pip install --upgrade pip
+          python -m venv .venv
+
+      - name: Install dependencies
+        if: steps.check_benchmarks.outputs.benchmarks_exist == 'true'
+        run: |
+          source .venv/bin/activate
+          pip install maturin pytest-benchmark
+
+      - name: Build extension
+        if: steps.check_benchmarks.outputs.benchmarks_exist == 'true'
+        run: |
+          source .venv/bin/activate
+          maturin develop --release
+
+      - name: Run benchmarks
+        if: steps.check_benchmarks.outputs.benchmarks_exist == 'true'
+        run: |
+          source .venv/bin/activate
+          pytest benchmarks/ --benchmark-json=benchmark-results.json
+
+      - name: Check if benchmark results exist
+        id: check_results
+        if: steps.check_benchmarks.outputs.benchmarks_exist == 'true'
+        run: |
+          if [ -f "benchmark-results.json" ]; then
+            echo "results_exist=true" >> $GITHUB_OUTPUT
+          else
+            echo "results_exist=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Store benchmark results
+        if: steps.check_benchmarks.outputs.benchmarks_exist == 'true' && steps.check_results.outputs.results_exist == 'true'
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          tool: "pytest"
+          output-file-path: benchmark-results.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
