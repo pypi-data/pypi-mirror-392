@@ -1,0 +1,140 @@
+[project]
+name = "msvcpp-normalize-pe"
+dynamic = ["version"]
+description = "Normalize PE files for reproducible MSVC++ builds"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Tim Ansell", email = "me@mith.ro"}
+]
+keywords = ["msvc", "reproducible-builds", "pe", "windows", "compiler", "deterministic"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: Compilers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = []
+
+[project.scripts]
+msvcpp-normalize-pe = "msvcpp_normalize_pe.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/mithro/msvcpp-normalize-pe"
+Documentation = "https://msvcpp-normalize-pe.readthedocs.io"
+Repository = "https://github.com/mithro/msvcpp-normalize-pe"
+Issues = "https://github.com/mithro/msvcpp-normalize-pe/issues"
+Changelog = "https://github.com/mithro/msvcpp-normalize-pe/releases"
+
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+# Use git-describe for version numbering
+# Formats versions like: 0.0.post37+g3a3ceb5 (37 commits after v0.0 tag)
+version_scheme = "post-release"
+local_scheme = "no-local-version"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=4.1",
+    "hypothesis>=6.92",
+    "ruff>=0.1.0",
+    "mypy>=1.8",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "F",      # pyflakes
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "A",      # flake8-builtins
+    "C4",     # flake8-comprehensions
+    "PIE",    # flake8-pie
+    "RET",    # flake8-return
+    "SIM",    # flake8-simplify
+    "PTH",    # flake8-use-pathlib
+    "FBT",    # flake8-boolean-trap
+    "EM",     # flake8-errmsg
+    "TRY",    # tryceratops
+    "FA",     # flake8-future-annotations
+    "COM",    # flake8-commas
+    "D",      # pydocstyle
+    "RUF",    # ruff-specific rules
+    "PLR",    # pylint refactoring
+]
+
+ignore = [
+    "TRY003",  # Long exception messages are fine in this codebase
+    "EM101",   # Exception message string literals are acceptable
+    "EM102",   # Exception message f-strings are acceptable
+    "D203",    # Incompatible with D211
+    "D213",    # Incompatible with D212
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "S101",    # Assert statements are required in tests
+]
+"src/msvcpp_normalize_pe/cli.py" = [
+    "T201",    # print() is appropriate for CLI tool
+]
+"src/msvcpp_normalize_pe/patcher.py" = [
+    "T201",    # print() used for verbose output
+    "PLR0911", # Multiple returns in validation function is clear
+    "BLE001",  # Generic exceptions needed for robustness
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = [
+    "--cov=msvcpp_normalize_pe",
+    "--cov-report=term-missing",
+    "--cov-report=xml",
+    "--strict-markers",
+    "-v",
+]
+
+[tool.mypy]
+python_version = "3.9"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_any_generics = true
+# Ignore external packages that may use newer Python syntax
+exclude = [
+    "^\\.venv/",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
