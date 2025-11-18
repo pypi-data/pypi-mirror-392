@@ -1,0 +1,93 @@
+Metadata-Version: 2.4
+Name: CelleditPy
+Version: 0.1.6
+Summary: A GUI tool to set and adjust unit cell parameters for molecular structures.
+Author-email: HiroYokoyama <titech.yoko.hiro@gmail.com>
+License: Apache-2.0
+Project-URL: Homepage, https://github.com/HiroYokoyama/crystal-cell-settler
+Project-URL: Repository, https://github.com/HiroYokoyama/crystal-cell-settler
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Scientific/Engineering :: Chemistry
+Classifier: Topic :: Scientific/Engineering :: Visualization
+Classifier: Environment :: X11 Applications :: Qt
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: numpy
+Requires-Dist: pyvista
+Requires-Dist: PyQt6
+Requires-Dist: pyvistaqt
+Requires-Dist: ase
+Requires-Dist: scipy
+
+# CelleditPy
+
+![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17620125.svg)
+![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)
+
+
+`CelleditPy` is a Python-based GUI application designed for crystallographers and computational chemists. It provides a visual, interactive environment to load molecular structures (from `.mol` or `.cif` files), define or adjust unit cell parameters, and reposition the molecule within the cell before saving the result as a `.cif` file.
+
+This tool is built using PyQt6, PyVista, and ASE (Atomic Simulation Environment).
+
+## Features
+
+* **Load Structures:** Load molecular structures from `.mol` and `.cif` files.
+* **Save as CIF:** Save the final structure, including the unit cell, in `.cif` format.
+* **Interactive Cell Editing:** Manually set or adjust unit cell parameters (`a`, `b`, `c`, `alpha`, `beta`, `gamma`).
+* **Auto-Fit Cell:** Automatically calculate and apply the minimum cell dimensions (`a`, `b`, `c`) required to contain the molecule, while preserving the current cell angles.
+* **3D Manipulation:**
+    * **Translation:** Move the molecule along Cartesian (XYZ) axes or fractional cell (ABC) axes.
+    * **Rotation:** Rotate the molecule around Cartesian (XYZ) axes (centered on a selected atom) or cell (ABC) axes (centered on the axis itself).
+* **Molecule Fitting:**
+    * **Fit Molecule to Axis:** Align the molecule to a specific cell axis (`a`, `b`, or `c`) by defining the molecular direction using two or more atoms.
+    * **Fit in Cell (Auto-fit):** Automatically detects atoms lying on a cell axis, fixes them, and rotates the rest of the molecule to best fit within the cell boundaries.
+* **Coordinate Wrapping:** Wrap atomic coordinates to fit all atoms inside the defined unit cell (0.0 to 1.0 fractional coordinates).
+* **Visualization:**
+    * 3D visualization powered by PyVista.
+    * Toggle the display of atom indices.
+    * Reset the camera view.
+
+## Installation
+
+**Prerequisites:**
+* Python 3.8+
+* The following libraries (and their dependencies) are required:
+    * `PyQt6`
+    * `pyvista`
+    * `pyvistaqt`
+    * `ase`
+    * `numpy`
+    * `scipy`
+
+These dependencies will be installed automatically when installing the package.
+
+**Install from Source:**
+
+Install the package using `pip`. This will also install all required dependencies and register the command-line entry point.
+    ```bash
+    pip install celleditpy
+    ```
+
+## Usage
+
+After installation, you can run the application by simply typing the following command in your terminal:
+
+```bash
+celleditpy
+````
+
+This will launch the main application window.
+
+## License
+
+This project is licensed under the Apache-2.0 License. See the `LICENSE` file for details.
+
+## Author
+
+  * **HiroYokoyama**
+
+
+```
+
