@@ -1,0 +1,157 @@
+# vitrea-host
+
+Python library for controlling Vitrea Smart Home Controllers via TCP.
+
+This library provides an Async Python interface to communicate with Vitrea VBox controllers over TCP/IP, enabling control of lights, blinds, thermostats, fans, scenarios, and other smart home devices.
+
+## Features
+
+- **Asynchronous API**: Built on `asyncio` for efficient concurrent operations
+- **Device Control**: Control lights (dimmers), blinds, thermostats, fans, and more
+- **Database Reading**: Read and parse the Vitrea controller's device database
+- **Status Updates**: Real-time status updates via callbacks
+- **Connection Management**: Automatic reconnection and health monitoring
+- **Multiple API Versions**: Supports Vitrea Parameter API v1, v2, and v3
+
+## Installation
+
+### From PyPI
+
+```bash
+pip install vitrea-host
+```
+
+### From Source
+
+```bash
+git clone https://github.com/vitrea-sh/py-vitrea-host.git
+cd py-vitrea-host
+pip install -e .
+```
+
+## Requirements
+
+- Python 3.8 or higher
+- Network access to the Vitrea controller
+
+## Quick Start
+
+```python
+import asyncio
+from vitrea_host import VBoxController
+
+async def main():
+    # Create a controller instance
+    controller = VBoxController(
+        ip="192.168.1.100",
+        port=5000,
+        status_update_callback=handle_status_update
+    )
+    
+    # Connect and load database
+    await controller.connect()
+    
+    # Access devices through the database
+    for floor in controller.database.floors:
+        for room in floor.rooms:
+            for key in room.keys:
+                print(f"Device: {key.name} in {room.name}")
+    
+    # Close connection
+    await controller.close()
+
+async def handle_status_update(update):
+    print(f"Status update: {update}")
+
+asyncio.run(main())
+```
+
+## Usage
+
+### Basic Connection
+
+```python
+from vitrea_host import VBoxController, validate_controller_availability
+
+# Validate controller is available
+result = await validate_controller_availability("192.168.1.100", 5000)
+if result["supported"]:
+    print(f"Controller version: {result['version']}")
+    
+    # Create and connect
+    controller = VBoxController(ip="192.168.1.100", port=5000)
+    await controller.connect()
+```
+
+### Status Updates
+
+```python
+async def status_callback(update):
+    if update.get("type") == "node_status":
+        node_id = update.get("node_id")
+        key_id = update.get("key")
+        status = update.get("status")
+        print(f"Node {node_id}, Key {key_id}: {status}")
+
+controller = VBoxController(
+    ip="192.168.1.100",
+    port=5000,
+    status_update_callback=status_callback
+)
+```
+
+## Home Assistant Integration
+
+This library is used by the [Home Assistant Vitrea Integration](https://github.com/vitrea-sh/hass-vitrea).
+
+To use this library in your Home Assistant integration:
+
+```python
+# In your Home Assistant integration
+from vitrea_host import VBoxController
+
+# The integration will handle the connection and device management
+```
+
+## API Reference
+
+### Main Classes
+
+- **`VBoxController`**: Main controller class for managing connections and devices
+- **`VBoxConnection`**: Low-level TCP connection management
+- **`VitreaDatabaseModel`**: Database model containing floors, rooms, keys, and devices
+
+### Functions
+
+- **`authenticate_vitrea_device(host, port)`**: Authenticate to a Vitrea controller
+- **`validate_controller_availability(ip, port)`**: Check if controller is available and supported
+
+## Development
+
+### Setup Development Environment
+
+```bash
+git clone https://github.com/vitrea-sh/py-vitrea-host.git
+cd py-vitrea-host
+pip install -e ".[dev]"
+```
+
+### Running Tests
+
+```bash
+pytest
+```
+
+## License
+
+Apache-2.0 License. See LICENSE file for details.
+
+## Support
+
+- **Issues**: [GitHub Issues](https://github.com/vitrea-sh/py-vitrea-host/issues)
+- **Home Assistant Integration**: [hass-vitrea](https://github.com/vitrea-sh/hass-vitrea)
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
