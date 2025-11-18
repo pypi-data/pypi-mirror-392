@@ -1,0 +1,98 @@
+[project]
+name = "mri-nufft"
+description = "MRI Non-Cartesian Fourier Operators with multiple computation backends."
+authors = [{name="Pierre-antoine Comby", email="pierre-antoine.comby@crans.org"}]
+
+readme = "README.rst"
+dependencies = ["numpy>=2.2", "scipy>=1.13", "matplotlib>=3.9", "tqdm", "joblib>=1.4"]
+requires-python = ">=3.10"
+
+dynamic = ["version"]
+
+[project.optional-dependencies]
+
+gpunufft = ["gpuNUFFT>=0.10.1", "cupy-cuda12x"]
+
+torchkbnufft = ["torchkbnufft", "cupy-cuda12x"]
+torchkbnufft-cpu = ["torchkbnufft", "cupy-cuda12x"]
+torchkbnufft-gpu = ["torchkbnufft", "cupy-cuda12x"]
+
+cufinufft = ["cufinufft>=2.4.0", "cupy-cuda12x"]
+tensorflow = ["tensorflow-mri>=0.22.0"]
+finufft = ["finufft>=2.4.0"]
+sigpy = ["sigpy"]
+pynfft = ["pynfft3"]
+
+pynufft = ["pynufft"]
+pynufft-cpu = ["pynufft"]
+pynufft-gpu = ["pynufft"]
+
+io = ["pymapvbvd"]
+extra = ["pymapvbvd", "scikit-image", "scikit-learn", "pywavelets"]
+autodiff = ["torch"]
+
+
+test = ["pytest<8.0.0", "pytest-cov", "pytest-xdist", "pytest-sugar", "pytest-cases"]
+dev = ["black", "isort", "ruff"]
+doc = ["sphinx-book-theme","sphinx-copybutton", "sphinxcontrib-video", "sphinx-gallery", "matplotlib", "pooch", "brainweb-dl", "coverage", "fastmri"]
+# pooch is for scipy.datasets
+
+[build-system]
+requires = ["setuptools", "setuptools-scm[toml]", "wheel"]
+
+[tool.setuptools_scm]
+write_to = "src/mrinufft/_version.py"
+version_scheme = "python-simplified-semver"
+local_scheme="no-local-version"
+fallback_version="v99-dev"
+
+[tool.coverage.run]
+omit = ["*tests*", "*__init__*", "*setup.py*", "*_version.py*", "*example*"]
+relative_files = true
+source = ["src"]
+
+[tool.coverage.report]
+precision = 2
+exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+
+# Formatting using black.
+[tool.black]
+
+#linting using ruff
+[tool.ruff]
+extend-exclude = [ "example_*.py" , "*_version.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "Q", "UP", "D"]
+
+ignore = [
+"B905", # zip() without an explicit strict= parameter
+"B028", # No explicit stacklevel keyword argument found
+"F401", # Using ``try: import ... except:`` is nice.
+]
+[tool.ruff.lint.per-file-ignores]
+"examples/**" = ["D"]
+
+[tool.ruff.lint.pydocstyle]
+convention="numpy"
+
+[tool.isort]
+profile="black"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+norecursedirs = ["tests/helpers"]
+testpaths=["tests"]
+
+[tool.pylsp-mypy]
+enabled = false
+live_mode = false
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.pyright]
+reportPossiblyUnboundVariable = false
+typeCheckingMode = "basic"
+reportOptionalSubscript = false
+reportOptionalMemberAccess = false
