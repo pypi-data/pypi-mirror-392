@@ -1,0 +1,94 @@
+# Djvurn Rbac
+# RBAC with teams and DRF integration
+
+[tool.poetry]
+name = "djvurn-rbac"
+version = "0.1.0"
+description = "RBAC with teams and DRF integration"
+authors = ["Gojjo Tech <dev@gojjo.tech>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/hmesfin/djvurn-packages"
+repository = "https://github.com/hmesfin/djvurn-packages"
+documentation = "https://djvurn-rbac.readthedocs.io"
+keywords = ["django", "rest-framework", "vue", "typescript", "django-guardian"]
+packages = [{include = "djvurn_rbac", from = "src"}]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: Django",
+    "Framework :: Django :: 5.0",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+django = "^5.0"
+djangorestframework = "^3.14"
+djangorestframework-simplejwt = "^5.3.0"
+django-guardian = "^3.2.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+pytest-django = "^4.7.0"
+pytest-cov = "^4.1.0"
+factory-boy = "^3.3.0"
+faker = "^20.1.0"
+black = "^23.12.0"
+ruff = "^0.1.0"
+mypy = "^1.7.0"
+django-stubs = "^4.2.0"
+djangorestframework-stubs = "^3.14.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+extend = "../../pyproject.toml"  # Inherit from root config
+
+[tool.black]
+line-length = 100
+extend = "../../pyproject.toml"
+
+[tool.mypy]
+plugins = ["mypy_django_plugin.main"]
+extend = "../../pyproject.toml"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+python_files = ["test_*.py", "*_test.py"]
+testpaths = ["tests"]
+addopts = [
+    "--reuse-db",
+    "--cov=src/djvurn_rbac",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/migrations/*",
+    "*/__init__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
