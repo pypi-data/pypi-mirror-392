@@ -1,0 +1,99 @@
+Metadata-Version: 2.4
+Name: pytest-scim2-server
+Version: 0.1.6
+Summary: SCIM2 server fixture for Pytest
+Project-URL: repository, https://gitlab.com/pytest-dev/pytest-scim2-server
+Author-email: Yaal Coop <contact@yaal.coop>
+Maintainer-email: Éloi Rivard <eloi@yaal.coop>
+License: MIT License
+        
+        Copyright (c) 2025 Éloi Rivard
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+License-File: LICENSE
+Keywords: fixture,pytest,rfc7643,rfc7644,scim,scim2
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Requires-Python: >=3.10
+Requires-Dist: portpicker>=1.6.0
+Requires-Dist: pytest>=8.3.4
+Requires-Dist: scim2-server>=0.1.4
+Description-Content-Type: text/markdown
+
+# pytest-scim2-server
+
+SCIM2 server fixture for Pytest
+
+## Installation
+
+```
+pip install pytest-scim2-server
+```
+
+## Usage
+
+pytest-scim2-server creates a ``scim2_server`` fixture that runs an instance of [scim2-server](https://github.com/python-scim/scim2-server) on a random port, in a dedicated thread.
+
+```python
+import requests
+
+def test_scim_foobar(scim2_server):
+    res = request.get(f"http://localhost:{scim2_server.port}")
+    ...
+```
+
+Note that you can use [scim2-client](https://scim2-client.readthedocs.io) to interact with the SCIM server.
+
+```python
+import pytest
+from httpx import Client
+from scim2_client.engines.httpx import SyncSCIMClient
+
+
+@pytest.fixture(scope="session")
+def scim_client(scim2_server):
+    http_client = Client(base_url=f"http://localhost:{scim2_server.port}")
+    scim_client = SyncSCIMClient(http_client)
+    scim_client.discover()
+    return scim_client
+
+
+def test_scim2_server(scim_client):
+    User = scim_client.get_resource_model("User")
+    user = User(user_name="bjensen@example.com")
+    response = scim_client.create(user)
+
+    users = scim_client.query(User)
+    assert users.resources[0].id == response.id
+```
+
+## Related projects
+
+If you are working with SCIM and Python you might also want to have a look at:
+- [scim2-models](https://scim2-models.readthedocs.io)
+- [scim2-client](https://scim2-client.readthedocs.io)
+- [scim2-cli](https://scim2-cli.readthedocs.io)
+- [scim2-tester](https://scim2-tester.readthedocs.io)
