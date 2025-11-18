@@ -1,0 +1,212 @@
+Metadata-Version: 2.4
+Name: visusat
+Version: 0.2.0
+Summary: Satellite data visualisation toolkit for EUMETSAT and Copernicus Marine datasets.
+Author-email: Nicolas Sasso <n.sasso56@gmail.com>
+License: MIT License
+        
+        Copyright (c) 2025 Nicolas SASSO
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Project-URL: Homepage, https://github.com/nsasso56-cell/VisuSat
+Project-URL: Documentation, https://visusat.readthedocs.io
+Project-URL: Source, https://github.com/nsasso56-cell/VisuSat
+Project-URL: Issues, https://github.com/nsasso56-cell/VisuSat/issues
+Keywords: EUMETSAT,Copernicus,remote sensing,satellite,oceanography,meteorology,visualization,xarray
+Classifier: Development Status :: 3 - Alpha
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Scientific/Engineering :: Atmospheric Science
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: eumdac
+Requires-Dist: xarray
+Requires-Dist: matplotlib
+Requires-Dist: pandas>=2.3.3
+Requires-Dist: h5py>=3.14.0
+Requires-Dist: netcdf4>=1.7.2
+Requires-Dist: h5netcdf>=1.6.4
+Requires-Dist: cdsapi>=0.7.7
+Requires-Dist: copernicusmarine>=2.2.3
+Requires-Dist: rioxarray>=0.15.0
+Requires-Dist: sphinx>=7.4.7
+Requires-Dist: sphinx-autodoc-typehints>=2.3.0
+Requires-Dist: sphinx-rtd-theme>=3.0.2
+Requires-Dist: myst-parser>=3.0.1
+Requires-Dist: tree>=0.2.4
+Dynamic: license-file
+
+# 🛰️ VisuSat project : 
+
+[![Documentation Status](https://readthedocs.org/projects/visusat/badge/?version=latest)](https://visusat.readthedocs.io/en/latest/)
+![Python Versions](https://img.shields.io/badge/python-3.9+-blue.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+VisuSat is a Python toolkit for visualising, handling and processing satellite and oceanographic data, with dedicated pipelines for :
+
+- **EUMETSAT Data Store & Data Tailor**
+- **Copernicus Marine Service (CMEMS)**
+
+It provides high-level wrappers around `eumdac`, `copernicusmarine`, `xarray`,  
+and advanced visualisation utilities using `cartopy` and `matplotlib`.
+
+📘 Full documentation: https://visusat.readthedocs.io/en/latest/
+
+# 🌍 Examples of Visualisations :
+
+## 🌦️ EUMETSAT Data Store - AMVs (Atmospheric Motion Vectors)
+
+Derived from MTG-FCI Level 2 wind products :
+
+<p align="center">
+  <img src="examples/images/example_AMVs_FCI2.png" width="420">
+  <img src="examples/images/zoom_exampleAMVs_FCI2.png" width="420">
+</p>
+## 🌊 Copernicus Marine Service
+
+Allows to download and visualize available datasets from Copernicus Marine datastore  (https://data.marine.copernicus.eu/products). 
+
+Example of the the Sea Level Anomaly (in meter) from an aggregate of all available satellites data into Global Ocean Gridded Level4 product ([link](https://data.marine.copernicus.eu/product/SEALEVEL_GLO_PHY_L4_NRT_008_046/description)) :
+
+### 🌐 Global Ocean Gridded Sea Level Anomaly (L4)
+
+Product: [SEALEVEL_GLO_PHY_L4_NRT_008_046](https://data.marine.copernicus.eu/product/SEALEVEL_GLO_PHY_L4_NRT_008_046/description)
+
+<p align="center">
+  <img src="exmaples/images/example_Copernicus_allsatellitesGlobalOceanGridded_ssh_%20sealevelanomaly.png" width="700">
+</p>
+
+### 🌀 Global Ocean Physics (Mercator Ocean)
+
+Hourly Sea Water Potential Temperature —  
+Product: [GLOBAL_ANALYSISFORECAST_PHY_001_024](https://data.marine.copernicus.eu/product/GLOBAL_ANALYSISFORECAST_PHY_001_024/description)
+
+<p align="center">
+  <img src="exmaples/images/example_Copernicus_GOPhysicsOutputs_hourlymean_sst.png" width="700">
+</p>
+
+---
+
+# 🚀 Installation :
+
+Clone the repository an install dependencies in virtual environnement :
+
+```bash
+git clone https://github.com/nsasso56-cell/VisuSat
+cd VisuSat
+uv sync
+```
+
+Or install with pip :
+
+```bash
+pip install requirements.txt
+```
+
+Or installe the package in editable mode :
+
+```bash
+pip install -e .
+```
+
+---
+# 💡 Quick Start Examples
+
+Here is a minimal example showing how to download and plot a Copernicus Marine dataset:
+
+```python
+from visusat import copernicus
+
+request = copernicus.CopernicusRequest(
+    dataset_id="cmems_obs-sl_glo_phy-ssh_nrt_allsat-l4-duacs-0.125deg_P1D",
+    variables=["sla", "err_sla"],
+    minimum_longitude=1,
+    maximum_longitude=359,
+    minimum_latitude=-70,
+    maximum_latitude=80,
+    start_datetime="2025-10-22T00:00:00",
+    end_datetime="2025-10-22T00:00:00",
+    output_filename="duacs_sla.nc",
+)
+
+ds = copernicus.get_copdataset(request)
+
+# Plot all fields
+copernicus.plot_copdataset(request, ds)
+
+# Plot surface currents
+copernicus.plot_currents(request, ds, vectors=False)
+```
+
+More examples are available in the examples/ folder.
+
+---
+
+# 🛠️ Features
+
+- High-level wrappers for Copernicus Marine API
+- Automation of EUMETSAT Data Tailor workflows
+- Built-in plotting functions (AMVs, radiances, currents…)
+- Dataset registry and metadata helpers
+- Strong logging system
+- Full Sphinx documentation (ReadTheDocs)
+
+---
+
+# 📁 Project Structure
+
+```text
+VisuSat/
+├── pyproject.toml
+├── README.md
+├── src/
+│   └── visusat/
+│       ├── copernicus.py
+│       ├── eumetsat.py
+│       ├── utils.py
+│       └── eumetsat_products_registry.py
+├── docs/
+│   └── source/
+├── examples/
+│   ├── demo_copernicus_globmodel.py
+│   ├── demo_eumetsat_datatailor.py
+│   └── images/
+└── data/
+    ├── copernicus/
+    └── eumetsat/
+```
+
+---
+
+# 📬 Contact
+
+Author : Nicolas SASSO.
+- e-mail : [n.sasso56@gmail.com](mailto:n.sasso56@gmail.com)
+- LinkedIn : [linkedin.com/in/nicolas-sasso-6356ab172](http://www.linkedin.com/in/nicolas-sasso-6356ab172)
+
+---
+
+# 📄 License
+
+Distributed under the MIT License.

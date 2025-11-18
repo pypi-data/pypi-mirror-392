@@ -1,0 +1,93 @@
+[project]
+name = "visusat"
+version = "0.2.0"
+description = "Satellite data visualisation toolkit for EUMETSAT and Copernicus Marine datasets."
+readme = { file = "README.md", content-type = "text/markdown" }
+authors = [{ name = "Nicolas Sasso" , email = "n.sasso56@gmail.com"}]
+license = {file = "LICENSE"}
+requires-python = ">=3.9"
+
+keywords = [
+    "EUMETSAT",
+    "Copernicus",
+    "remote sensing",
+    "satellite",
+    "oceanography",
+    "meteorology",
+    "visualization",
+    "xarray",
+]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+]
+
+dependencies = [
+    "eumdac",
+    "xarray",
+    "matplotlib",
+    "pandas>=2.3.3",
+    "h5py>=3.14.0",
+    "netcdf4>=1.7.2",
+    "h5netcdf>=1.6.4",
+    "cdsapi>=0.7.7",
+    "copernicusmarine>=2.2.3",
+    "rioxarray>=0.15.0",
+    "sphinx>=7.4.7",
+    "sphinx-autodoc-typehints>=2.3.0",
+    "sphinx-rtd-theme>=3.0.2",
+    "myst-parser>=3.0.1",
+    "tree>=0.2.4",
+]
+
+[project.urls]
+Homepage = "https://github.com/nsasso56-cell/VisuSat"
+Documentation = "https://visusat.readthedocs.io"
+Source = "https://github.com/nsasso56-cell/VisuSat"
+Issues = "https://github.com/nsasso56-cell/VisuSat/issues"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[build-system]
+requires = ["setuptools>=64.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+# Dev dependencies :
+[dependency-groups]
+dev = ["ruff", "black"]
+
+[tool.setuptools.package-data]
+visusat = ["data/*"]
+
+# -----------------------------
+# Formatting / Linters
+# -----------------------------
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+select = ["E", "F", "I"]  # errors, styles, import order
+ignore = ["E501"]         # ignore too long lines. 
+fix = true               # if true, allows `ruff --fix` dto correct automatically
+exclude = ["docs", "build"]
+
+[tool.black]
+line-length = 88
+target-version = ["py39"]
+
+# -----------------------------
+# Optional: Mypy (static typing)
+# -----------------------------
+[tool.mypy]
+ignore_missing_imports = true
+strict_optional = true
