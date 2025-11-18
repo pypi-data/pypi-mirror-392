@@ -1,0 +1,59 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "betwatch"
+version = "1.6.0"
+description = 'A Python package for interacting with the Betwatch.com API'
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+keywords = ["betwatch", "betting", "sports", "api", "sdk"]
+authors = [{ name = "Jamie Watts", email = "jamie@betwatch.com" }]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+    "gql[httpx,websockets,requests]>=4.0.0",
+    "typedload>=2.39",
+    "ciso8601>=2.3.3",
+]
+
+[project.urls]
+Documentation = "https://github.com/betwatch/betwatch-sdk-python#readme"
+Issues = "https://github.com/betwatch/betwatch-sdk-python/issues"
+Source = "https://github.com/betwatch/betwatch-sdk-python"
+"Betwatch.com" = "https://betwatch.com"
+
+
+[tool.rye]
+managed = true
+dev-dependencies = ["pytest>=7.4.3", "pytest-asyncio>=0.21.1", "isort>=5.12.0"]
+
+[tool.rye.scripts]
+test = "pytest"
+
+[tool.hatch.version]
+path = "betwatch/__about__.py"
+
+[tool.ruff]
+exclude = [".rye"]
+# Enable Pyflakes and pycodestyle rules.
+lint.select = ["E", "F", "B"]
+# Never enforce `E501` (line length violations).
+lint.ignore = ["E501"]
+fix = true
+
+# Ignore `E402` (import violations) in all `__init__.py` files
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401", "E402"]
+
+[dependency-groups]
+dev = ["basedpyright>=1.29.1", "ruff>=0.8.1"]
