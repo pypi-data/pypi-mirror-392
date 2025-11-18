@@ -1,0 +1,118 @@
+Metadata-Version: 2.4
+Name: prefer
+Version: 0.2.0
+Summary: A user-preference focused configuration library for Python.
+Author-email: LimpidTech <info@limpidtech.com>
+License: MIT
+Project-URL: Homepage, https://github.com/LimpidTech/prefer.py
+Project-URL: Repository, https://github.com/LimpidTech/prefer.py
+Project-URL: Issues, https://github.com/LimpidTech/prefer.py/issues
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: PyYAML>=5.1
+Requires-Dist: xmljson>=0.2.0
+Requires-Dist: json5>=0.9.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.21.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0; extra == "dev"
+Requires-Dist: pytest-watch>=4.2; extra == "dev"
+Requires-Dist: pytest-blockage>=0.2.0; extra == "dev"
+Requires-Dist: mypy>=1.0; extra == "dev"
+Requires-Dist: ruff>=0.1.0; extra == "dev"
+Requires-Dist: mock>=4.0; extra == "dev"
+Requires-Dist: types-PyYAML>=6.0; extra == "dev"
+
+What is it? [![CI](https://github.com/LimpidTech/prefer.py/workflows/CI/badge.svg)](https://github.com/LimpidTech/prefer.py/actions) [![codecov](https://codecov.io/gh/LimpidTech/prefer.py/branch/main/graph/badge.svg)](https://codecov.io/gh/LimpidTech/prefer.py)
+-----------
+
+Prefer is a library for helping you manage application configurations while
+providing your users the flexibility of using whatever configuration format
+fits their needs.
+
+It provides a set of interfaces which provide standard methods for
+reading arbitrary project configuration data. This can vary from simple cases
+like JSON, to more complicated examples - such as retreiving configuration data
+from a database.
+
+
+How do I use it?
+----------------
+
+Firstly, you'll want to install the module. This can be done easily with
+`easy_install` or `pip`.
+
+```sh
+easy_install prefer
+
+```
+
+Prefer is fairly simple to use. A basic use case might be that you have the
+following JSON configuration in *settings.json*:
+
+```json
+{
+  "auth": {
+    "username": "user",
+    "password": "pass"
+  }
+}
+```
+
+You can load these settings with the following code using promises:
+
+```python
+import prefer
+
+configuration = await prefer.load('settings')
+username = configration.get('auth.username')
+```
+
+You will notice that prefer only required 'settings' as the filename. It is
+recommended to be given without a path or extension, because prefer takes care
+of looking through the filesystem for configuration files. On both Unix and
+Windows systems, it will look in all of the standard folders, as well as some
+conventional places where people like to put their configurations.
+
+Ordering matters, so having a file in `./settings.json` as well as another in
+`/etc/settings.json` is still reliable. The configuration in `./settings.json`
+will be used first. Prefer doesn't care what format your user writes your
+settings in, so they can also use `settings.yaml` if they like.
+
+
+Supported configuration formats
+-------------------------------
+
+Along with being fully configurable to support any arbitrary data source you'd
+like, the following types of data can immediately be used as configuration formats
+upon installation of prefer:
+
+- JSON / JSON5 (with comments, trailing commas, unquoted keys)
+- YAML
+- INI / CFG
+- XML
+
+
+Why asyncronous?
+----------------
+
+In order to supply a more-simple method of getting the configuration, many
+configuration tools prefer to provide a blocking method of retrieving a project
+configuration. One goal of prefer is to ensure that we aren't limiting users to
+specific use-cases - and some projects require real-time, dynamic updating of
+their configuration. Prefer provides all it's interfaces as asyncronous
+functions in order to provide that possibility without the requirement that
+those actions are blocking.
+
+
+
+
