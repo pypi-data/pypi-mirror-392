@@ -1,0 +1,33 @@
+<form class="flex flex-col gap-4" hx-post="{% url 'terminusgps_notifications:units form' %}" hx-target="this" hx-indicator="#loading" hx-swap="outerHTML">
+    <section id="notice" class="p-4 rounded border border-current bg-yellow-50 text-yellow-700 flex flex-col gap-2 items-center md:flex-row">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 fill-yellow-100 text-yellow-800 md:size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+        </svg>
+        <p>Notifications may not be delivered if the resource lacks access to the selected units/unit groups.</p>
+    </section>
+    {% csrf_token %}
+    <section class="flex flex-col gap-2">
+        {{ form.resource_id }}
+        <label class="order-first font-semibold peer-user-invalid:text-red-600" for="{{ form.resource_id.id_for_label }}">Wialon Resource</label>
+        <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.resource_id.id_for_label }}_helptext">{{ form.resource_id.help_text }}</p>
+        {% if form.resource_id.errors %}<div class="animate-jiggle font-italic">{{ form.resource_id.errors }}</div>{% endif %}
+    </section>
+    <section class="flex flex-col gap-2">
+        {{ form.unit_list }}
+        <div class="peer-user-invalid:text-red-600 flex order-first justify-between gap-2 items-center">
+            <div class="flex gap-2 items-center">
+                <label class="font-semibold" for="{{ form.unit_list.id_for_label }}">Wialon Units/Unit Groups</label>
+                <svg id="unit_list_indicator" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 animate-spin htmx-indicator">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+            </div>
+            <select class="p-2 border rounded bg-gray-100" id="id_items_type" name="items_type" hx-get="{% url 'terminusgps_notifications:units form' %}" hx-trigger="change" hx-target="#id_unit_list" hx-swap="outerHTML" hx-select="#id_unit_list" hx-include="[name='resource_id']" hx-indicator="#unit_list_indicator">
+                <option value="avl_unit" selected>Units</option>
+                <option value="avl_unit_group">Unit Groups</option>
+            </select>
+        </div>
+        <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.unit_list.id_for_label }}_helptext">{{ form.unit_list.help_text }}</p>
+        {% if form.unit_list.errors %}<div class="animate-jiggle font-italic">{{ form.unit_list.errors }}</div>{% endif %}
+    </section>
+    <button class="flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-terminus-red-900 bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" type="submit">Next</button>
+</form>
