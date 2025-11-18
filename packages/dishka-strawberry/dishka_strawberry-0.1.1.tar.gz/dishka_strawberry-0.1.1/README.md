@@ -1,0 +1,85 @@
+# Strawberry
+
+Though it is not required, you can use *dishka-strawberry* integration. It features:
+
+* automatic injection of dependencies into GraphQL resolver functions
+* integration with FastAPI through `strawberry.fastapi.GraphQLRouter`
+
+## Installation
+
+Install using pip:
+
+```shell
+pip install dishka-strawberry
+```
+
+Or using uv:
+
+```shell
+uv add dishka-strawberry
+```
+
+## How to use
+
+### 1. Import
+
+```python
+from dishka_strawberry.fastapi import (
+    FromDishka,
+    inject,
+)
+from dishka.integrations.fastapi import (
+    FastapiProvider,
+    setup_dishka,
+)
+from dishka import make_async_container, Provider, provide, Scope
+```
+
+### 2. Create provider
+
+You can use `FastapiProvider` as a base class if you need to access `fastapi.Request` in your providers
+
+```python
+class AppProvider(FastapiProvider):
+    @provide(scope=Scope.REQUEST)
+    def create_message(self) -> Message:
+         return Message("42")
+```
+
+### 3. Mark resolver parameters
+
+Mark resolver parameters which are to be injected with `FromDishka[]` and decorate them using `@inject`
+
+```python
+@strawberry.type
+class Query:
+    @strawberry.field
+    @inject
+    def answer(self, message: FromDishka[Message]) -> MessageGQL:
+        return MessageGQL(message=message)
+```
+
+### 4. Create Strawberry schema
+
+Create Strawberry schema and integrate it with FastAPI using `GraphQLRouter`
+
+```python
+schema = strawberry.Schema(query=Query)
+graphql_router = GraphQLRouter(schema)
+
+app = FastAPI()
+app.include_router(graphql_router, prefix="/graphql")
+```
+
+### 5. Setup dishka integration
+
+Setup `dishka` integration for FastAPI (which will handle the container lifecycle for GraphQL requests as well)
+
+```python
+container = make_async_container(AppProvider())
+setup_dishka(container=container, app=app)
+```
+
+## Contributing
+
+Contributors are welcome! If you'd like to contribute to this project, please feel free to open an issue or submit a pull request.
