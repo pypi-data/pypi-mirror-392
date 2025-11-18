@@ -1,0 +1,45 @@
+[project]
+name = "stalcraft-api"
+description = "stalcraft api unofficial python library"
+keywords = ["stalcraft", "api", "stalcraft-api", "api-client"]
+
+authors = [{ name = "onejeuu", email = "mail@66rk.ru" }]
+
+dynamic = ["version"]
+
+requires-python = ">=3.11"
+
+readme = "README.md"
+license = "MIT"
+
+dependencies = [
+    "pydantic>=1.10.0",
+    "httpx>=0.25.0",
+]
+
+[dependency-groups]
+dev = [
+    "rich>=13.6.0",
+    "pytest>=7.4.2",
+    "python-dotenv>=1.0.0",
+    "pytest-asyncio>=0.21.1",
+]
+
+[project.urls]
+Repository = "https://github.com/onejeuu/stalcraft-api"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = { find = { include = ["stalcraft", "stalcraft.*"] } }
+
+[tool.setuptools.package-data]
+stalcraft = ["**/*.json"]
+
+[tool.setuptools.dynamic]
+version = {attr = "stalcraft.__version__"}
+
+[tool.ruff]
+ignore = ["E501"]
