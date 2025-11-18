@@ -1,0 +1,95 @@
+name: Package python packages
+
+on:
+  - workflow_call
+
+jobs:
+  build-packages:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        os:
+          [
+            ubuntu-latest,
+            ubuntu-24.04-arm,
+            windows-latest,
+            macos-15-intel,
+            macos-latest,
+          ]
+
+    runs-on: ${{ matrix.os }}
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: everything
+
+      - name: Get tests and clean workspace
+        run: |
+          mv everything/tests .
+          mv everything/pyproject.toml .
+          rm -rf everything
+
+      - name: Collect packages
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Move wheels to easier to specify location
+        run: |
+          mkdir wheels
+          mv artifacts/speakeasy2-python-*-${{ github.sha }}/* wheels
+
+      - name: Set up python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # For pip installing dependencies without installing the project.
+      - name: Create script to get required dependencies
+        run: |
+          cat << _EOF_ > project_deps.py
+          import toml
+          pyproject = toml.load("pyproject.toml")
+          deps = pyproject["project"]["dependencies"]
+          deps += pyproject["dependency-groups"]["test"]
+          print(" ".join(deps))
+          _EOF_
+
+      - name: Install python packages
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install toml
+          python -m pip install $(python project_deps.py)
+          python -m pip uninstall --yes toml
+          python -m pip install --no-index --find-links=wheels/ speakeasy2
+
+      - name: Run tests
+        run: pytest tests/ --junitxml=test-results/results.xml
+
+      - name: Upload test results
+        uses: EnricoMi/publish-unit-test-result-action/windows@v2
+        if: always() && runner.os == 'Windows'
+        with:
+          check_name: ${{ matrix.os }} Test Results
+          files: test-results/results.xml
+
+      - name: Upload test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always() && runner.os == 'Linux'
+        with:
+          check_name: ${{ matrix.os }} Test Results
+          files: test-results/results.xml
+
+      - name: Upload test results
+        uses: EnricoMi/publish-unit-test-result-action/macos@v2
+        if: always() && runner.os == 'macOS'
+        with:
+          check_name: ${{ matrix.os }} Test Results
+          files: test-results/results.xml

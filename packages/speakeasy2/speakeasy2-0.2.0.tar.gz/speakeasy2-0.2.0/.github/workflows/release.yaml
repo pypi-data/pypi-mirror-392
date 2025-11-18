@@ -1,0 +1,95 @@
+name: Release packages
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+    branches:
+      - devel
+
+permissions:
+  checks: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  package_python:
+    uses: ./.github/workflows/build.yaml
+
+  check_packages:
+    needs: package_python
+    uses: ./.github/workflows/test.yaml
+
+  github_release:
+    name: Release new packages
+    needs: check_packages
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
+    env:
+      TAG_NAME: ${{ github.ref_name }}
+    permissions:
+      checks: write
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Collect packages
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Copy final packages to release
+        run: |
+          mkdir dist
+          mv artifacts/speakeasy2-python-*-${{ github.sha }}/* dist
+
+      - name: Create release name
+        run: echo RELEASE_NAME=${TAG_NAME/v/speakeasy2 } >> $GITHUB_ENV
+
+      - name: Create release notes
+        run: |
+          range=$(grep --max-count=2 --line-number "## \[" < CHANGELOG.md |\
+            cut -f 1 -d: | tr '\n' ',' | sed -n 's/,$/p\n/p')
+          sed -n $range < CHANGELOG.md | head -n-2 | tail -n+3 > release_notes.md
+          sed -i 's/###/##/g' release_notes.md
+
+      - name: Upload assets to release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ env.RELEASE_NAME }}
+          body_path: release_notes.md
+          files: dist/*
+
+  publish_pypi:
+    name: Release new packages
+    needs: check_packages
+    runs-on: ubuntu-latest
+    environment: release_${{ github.ref_type }}
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Collect packages
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Copy final packages to release
+        run: |
+          mkdir dist
+          mv artifacts/speakeasy2-python-*-${{ github.sha }}/* dist
+
+      - name: Upload release to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        if: github.ref_type == 'tag'
+
+      - name: Upload devel to test PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        if: github.ref_type == 'branch'
+        with:
+          repository-url: https://test.pypi.org/legacy/

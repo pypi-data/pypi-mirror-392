@@ -1,0 +1,102 @@
+name: Package python packages
+
+on:
+  - workflow_call
+
+env:
+  PYTHON_VERSION: "3.10"
+
+jobs:
+  build-packages:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, macos-15-intel]
+        include:
+          - os: ubuntu-latest
+            arch: x64
+          - os: ubuntu-24.04-arm
+            arch: arm
+          - os: macos-latest
+            arch: arm
+          - os: macos-15-intel
+            arch: x64
+          - os: windows-latest
+            arch: win_amd64
+            vcpkg_arch: x64
+            cmake_arch: x64
+          - os: windows-latest
+            arch: win32
+            vcpkg_arch: x86
+            cmake_arch: Win32
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Cache vcpkg
+        if: runner.os == 'Windows'
+        uses: actions/cache@v4
+        with:
+          path: C:/vcpkg/installed/
+          key: vcpkg-${{ runner.os }}-${{ matrix.vcpkg_arch }}
+
+      - name: Install Windows dependencies
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          vcpkg integrate install
+          vcpkg install libxml2:${{ matrix.vcpkg_arch }}-windows-static-md pthreads:${{ matrix.vcpkg_arch }}-windows-static-md
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Clone vendored software
+        shell: bash
+        run: |
+          cd vendor/speakeasy2
+          git submodule init
+          git submodule update --recursive
+
+      - name: Build wheel
+        uses: pypa/cibuildwheel@v3.2.1
+        env:
+          CIBW_BUILD: ${{ runner.os == 'Windows' && format('*-{0}', matrix.arch) || '' }}
+          CIBW_BEFORE_BUILD_LINUX: >-
+            (if command -v yum; then
+               yum install -y libxml2-devel zlib-devel;
+             elif command -v apk; then
+               apk add libxml2-dev zlib-dev;
+             fi) && pip install -U cmake
+          CIBW_ENVIRONMENT_MACOS: 'LDFLAGS="-L$(brew --prefix libxml2)/lib" CPPFLAGS="-I$(brew --prefix libxml2)/include"'
+          CIBW_ENVIRONMENT_WINDOWS: >-
+            CMAKE_ARGS="-DVCPKG_TARGET_TRIPLET=${{ matrix.vcpkg_arch }}-windows-static-md -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -A ${{ matrix.cmake_arch }}"
+            IGRAPH_EXTRA_LIBRARY_PATH="C:/vcpkg/installed/${{ matrix.vcpkg_arch }}-windows-static-md/lib/"
+            IGRAPH_EXTRA_LIBRARIES="libxml2,lzma,zlib,iconv,charset,bcrypt"
+            IGRAPH_EXTRA_DYNAMIC_LIBRARIES="wsock32,ws2_32"
+            IGRAPH_STATIC_EXTENSION=1
+        with:
+          output-dir: dist
+
+      - name: Set up python
+        if: runner.os == 'Linux'
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install python build packages
+        if: runner.os == 'Linux'
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build
+
+      - name: Build source dist
+        if: matrix.os == 'ubuntu-latest'
+        run: python -m build --sdist
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: speakeasy2-python-${{ matrix.os }}-${{ matrix.arch }}-${{ github.sha }}
+          path: dist/*
