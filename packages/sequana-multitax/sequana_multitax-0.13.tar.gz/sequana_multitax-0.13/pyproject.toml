@@ -1,0 +1,52 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "sequana-multitax"
+version = "0.13"
+description = "A multi-sample and multi-databases taxonomic analysis using Kraken"
+authors = ["Sequana Team"]
+license = "BSD-3"
+repository = "https://github.com/sequana/multitax"
+readme = "README.rst"
+keywords = ["snakemake", "NGS", "sequana", "taxonomy", "kraken"]
+classifiers = [
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Education",
+        "Intended Audience :: End Users/Desktop",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: BSD License",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
+        "Topic :: Scientific/Engineering :: Information Analysis",
+]
+
+packages = [
+    {include = "sequana_pipelines"}
+]
+
+
+[tool.poetry.dependencies]
+python = ">=3.8,<4.0"
+sequana = ">=0.17.2"
+sequana_pipetools = ">=1.0.2"
+click-completion = "^0.5.2"
+pulp = "<2.8.0"
+
+[tool.poetry.scripts]
+sequana_multitax = "sequana_pipelines.multitax.main:main"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+pytest = "^7.4.0"
+mock = "^5.1.0"
+pytest-mock = "^3.11.1"
+pytest-cov = "^4.1.0"
+
