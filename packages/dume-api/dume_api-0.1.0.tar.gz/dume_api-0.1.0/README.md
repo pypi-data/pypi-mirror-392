@@ -1,0 +1,56 @@
+Tiny helper for downloading the “données essentielles” exposed at https://dume.chorus-pro.gouv.fr/#/accueil/donnees-essentielles/rechercher. Everything here reproduces the JSON calls the official SPA makes to `https://dume.chorus-pro.gouv.fr/dumes/donneesEssentielles`.
+
+## Setup
+
+```bash
+pip install dume-api
+```
+
+## Quick start
+
+```py
+import dume_api as dume
+
+# Lightweight list view (same fields as the website table).
+rows = dume.get_contracts(date="2024-01-11")
+
+# Add filters the same way you would in the UI.
+rows = dume.get_contracts(
+    date_start="2024-01-01",
+    date_end="2024-01-31",
+    cpv_code="45210000",
+    type_de="Marché public",
+)
+
+# Request the complete contract structure (one API call per reference).
+contracts = dume.get_contracts(date="2024-01-05", complete=True)
+
+# Single-contract lookup (used internally by the snippet above).
+record = dume.get_contract("AIFEDUME-daoxup8c")
+```
+
+That’s it—you rarely need to instantiate anything else. If you do want to manage your own session (different base URL, manual iteration, etc.), instantiate `dume_api.DumeApiClient`.
+
+## Filters & options
+
+Both helper functions accept the same keyword arguments as the website:
+
+Supported filter keywords and their UI equivalents:
+
+| Argument | UI label | Notes |
+| --- | --- | --- |
+| `reference` / `reference_unique` | Référence fonctionnelle | Exact ref such as `AIFEDUME-daoxup8c`. |
+| `date` | Date de publication | Shortcut that sets both start and end to a single day. |
+| `date_start` / `date_end` | Date de publication (du/au) | `YYYY-MM-DD` strings; use both to define a range. |
+| `internal_id` | Identifiant interne | Matches the `ID` column returned by the API. |
+| `nature` | Nature | Use the exact label (`Marché`, `Contrat de concession`, …). |
+| `procedure` | Procédure | Exact label shown on the site (`Procédure adaptée`, etc.). |
+| `cpv_code` | Code CPV | Full CPV value (e.g. `45210000`). |
+| `type_de` | Type de DE | Accepts `MP`, `Marché public`, `CC`, or `Contrat de concession`. |
+| `acheteur_id` | Acheteur / Autorité concédante | Provide the SIRET coming from the autocomplete. |
+| `titulaire_id` | Titulaire / Concessionnaire | Provide the SIRET coming from the autocomplete. |
+
+### Behind the scenes
+
+- The platform caps each query at 100 rows, so `get_contracts()` automatically splits large date ranges and toggles between MP/CC when needed. If the API still returns 100 results for a tiny filter the helper raises an error so you can narrow it manually.
+- Each HTTP request retries on 429/5xx responses, backing off exponentially. Call `dume.configure_client(pause=0.5, max_retries=5)` to slow down or override the defaults.
