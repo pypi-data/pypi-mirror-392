@@ -1,0 +1,1398 @@
+# calculator.py
+"""
+Core calculation engine for the Advanced Python Calculator.
+
+Pipeline
+--------
+1) Tokenizer: converts a raw input string into a flat list of tokens.
+2) Parser (AST): builds an Abstract Syntax Tree (recursive-descent, precedence aware).
+3) Evaluator / Solver:
+   - Evaluate pure numeric expressions
+   - Solve linear equations with a single variable (e.g. 'x')
+4) Formatter: renders results using Decimal/Fraction and user preferences.
+"""
+
+from decimal import Decimal, getcontext, Overflow
+import fractions
+import inspect
+from typing import Union
+import math
+
+from docutils.utils import extract_options
+
+from . import config_manager as config_manager
+from . import ScientificEngine
+from . import error as E
+
+# Debug toggle for optional prints in this module
+debug = False
+
+# Supported operators / functions (kept as simple lists for quick membership checks)
+Operations = ["+", "-", "*", "/", "=", "^", ">>", "<<", "<", ">", "|","&" ]
+Science_Operations = ["sin", "cos", "tan", "10^x", "log", "e^", "π", "√"]
+
+# Global Decimal precision used by this module (UI may also enforce this before calls)
+getcontext().prec = 10000
+
+
+# -----------------------------
+# Utilities / small helpers
+# -----------------------------
+
+def boolean(value):
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        if value == "True":
+            return True
+        elif value == "False":
+            return False
+        elif value == "1":
+            return True
+        elif value == "0":
+            return False
+        raise E.ConversionError("Couldnt convert type to bool", code="8003")
+    raise E.ConversionError("Couldnt convert type to bool", code="8003")
+
+
+def isDecimal(value):
+    if isinstance(value, Decimal):
+        return True
+    try:
+        Decimal(value)
+        return True
+    except Exception as e:
+        return False
+
+
+def get_line_number():
+    """Return the caller line number (small debug helper)."""
+    return inspect.currentframe().f_back.f_lineno
+
+
+def isInt(number_str):
+    """Return True if the given string can be parsed as int; else False."""
+    try:
+        x = int(number_str)
+        return True
+    except ValueError:
+        return False
+
+
+def isfloat(number_str):
+    """Return True if the given string can be parsed as float; else False.
+    Note: tokenization may probe with float; evaluation uses Decimal.
+    """
+    try:
+        x = float(number_str)
+        return True
+    except ValueError:
+        return False
+
+
+def isScOp(token):
+    """Return index of a known scientific operation or -1 if unknown."""
+    try:
+        return Science_Operations.index(token)
+    except ValueError:
+        return -1
+
+
+def isOp(token):
+    """Return index of a known basic operator or -1 if unknown."""
+    try:
+        return Operations.index(token)
+    except ValueError:
+        return -1
+
+
+def isolate_bracket(problem, start_pos):
+    """Return substring from the opening '(' at/after start_pos up to its matching ')'.
+
+    This walks forward and counts parentheses depth; raises on missing '('.
+    Returns:
+        (substring_including_brackets, position_after_closing_paren)
+    """
+    start = start_pos
+    start_klammer_index = problem.find('(', start)
+    if start_klammer_index == -1:
+        raise E.SyntaxError(f"Multiple missing opening parentheses after function name.", code="3000")
+    b = start_klammer_index + 1
+    bracket_count = 1
+    while bracket_count != 0 and b < len(problem):
+        if problem[b] == '(':
+            bracket_count += 1
+        elif problem[b] == ')':
+            bracket_count -= 1
+        b += 1
+    result = problem[start:b]
+    return (result, b)
+
+
+# -----------------------------
+# AST node types
+# -----------------------------
+
+class Number:
+    """AST node for numeric literal backed by Decimal."""
+
+    def __init__(self, value):
+        # Always normalize input to Decimal via string to avoid float artifacts
+        if not isinstance(value, Decimal):
+            value = str(value)
+        self.value = Decimal(value)
+
+    def evaluate(self):
+        """Return Decimal value for this literal."""
+        return self.value
+
+    def collect_term(self, var_name):
+        """Return (factor_of_var, constant) for linear collection."""
+        return (0, self.value)
+
+    def __repr__(self):
+        # Helpful for debugging/printing the AST
+        try:
+            display_value = self.value.to_normal_string()
+        except AttributeError:
+            # Fallback for older Decimal versions
+            display_value = str(self.value)
+        return f"Number({display_value})"
+
+
+class Variable:
+    """AST node representing a single symbolic variable (e.g. 'var0')."""
+
+    def __init__(self, name):
+        self.name = name
+
+    def evaluate(self):
+        """Variables cannot be directly evaluated without solving."""
+        raise E.SolverError(f"Non linear problem.", code="3005")
+
+    def collect_term(self, var_name):
+        """Return (1, 0) if this variable matches var_name; else error."""
+        if self.name == var_name:
+            return (1, 0)
+        else:
+            # Only one variable supported in the linear solver
+            raise E.SolverError(f"Multiple variables found: {self.name}", code="3002")
+            return (0, 0)
+
+    def __repr__(self):
+        return f"Variable('{self.name}')"
+
+
+class BinOp:
+    """AST node for a binary operation: left <operator> right."""
+
+    def __init__(self, left, operator, right):
+        self.left = left
+        self.operator = operator
+        self.right = right
+
+    def evaluate(self):
+        """Evaluate numeric subtree and apply the binary operator."""
+        left_value = self.left.evaluate()
+        right_value = self.right.evaluate()
+
+        if self.operator == '+':
+            return left_value + right_value
+
+        elif self.operator == '-':
+            return left_value - right_value
+
+        elif self.operator == '&':
+            if left_value % 1 != 0 or right_value % 1 != 0:
+                raise E.CalculationError("Bitwise AND requires integers.", code="3042")
+            return Decimal(int(left_value) & int(right_value))
+
+        elif self.operator == '|':
+            if left_value % 1 != 0 or right_value % 1 != 0:
+                raise E.CalculationError("Bitwise OR requires integers.", code="3042")
+            return Decimal(int(left_value) | int(right_value))
+
+        elif self.operator == '^':
+            if left_value % 1 != 0 or right_value % 1 != 0:
+                raise E.CalculationError("XOR requires integers.", code="3042")
+            return Decimal(int(left_value) ^ int(right_value))
+
+        elif self.operator == '<<':
+            if left_value % 1 != 0 or right_value % 1 != 0:
+                raise E.CalculationError("Bitshift requires integers.", code="3041")
+            return Decimal(int(left_value) << int(right_value))
+
+        elif self.operator == '>>':
+            if left_value % 1 != 0 or right_value % 1 != 0:
+                raise E.CalculationError("Bitshift requires integers.", code="3041")
+            return Decimal(int(left_value) >> int(right_value))
+
+        elif self.operator == '*':
+            return left_value * right_value
+
+        elif self.operator == '**':
+            return left_value ** right_value
+
+        elif self.operator == '/':
+            if right_value == 0:
+                raise E.CalculationError("Division by zero", code="3003")
+            return left_value / right_value
+
+        elif self.operator == '=':
+            # Equality is evaluated to a boolean (used for "= True/False" responses)
+            return left_value == right_value
+        else:
+            raise E.CalculationError(f"Unknown operator: {self.operator}", code="3004")
+
+    def collect_term(self, var_name):
+        """Collect linear terms on this subtree into (factor_of_var, constant).
+
+        Only linear combinations are allowed; non-linear forms raise Solver/Syntax errors.
+        """
+        (left_factor, left_constant) = self.left.collect_term(var_name)
+        (right_factor, right_constant) = self.right.collect_term(var_name)
+
+        if self.operator == '+':
+            result_factor = left_factor + right_factor
+            result_constant = left_constant + right_constant
+            return (result_factor, result_constant)
+
+        elif self.operator == '-':
+            result_factor = left_factor - right_factor
+            result_constant = left_constant - right_constant
+            return (result_factor, result_constant)
+
+        elif self.operator == '*':
+            # Only constant * (A*x + B) is allowed. (A*x + B)*(C*x + D) would be non-linear.
+            if left_factor != 0 and right_factor != 0:
+                raise E.SyntaxError("x^x Error.", code="3005")
+
+            elif left_factor == 0:
+                # B * (C*x + D) = (B*C)*x + (B*D)
+                result_factor = left_constant * right_factor
+                result_constant = left_constant * right_constant
+                return (result_factor, result_constant)
+
+            elif right_factor == 0:
+                # (A*x + B) * D = (A*D)*x + (B*D)
+                result_factor = right_constant * left_factor
+                result_constant = right_constant * left_constant
+                return (result_factor, result_constant)
+
+            elif left_factor == 0 and right_factor == 0:
+                # Pure constant multiplication
+                result_factor = 0
+                result_constant = right_constant * left_constant
+                return (result_factor, result_constant)
+
+        elif self.operator == '/':
+            # (A*x + B) / D is allowed; division by (C*x + D) is non-linear
+            if right_factor != 0:
+                raise E.SolverError("Non-linear equation. (Division by x)", code="3006")
+            elif right_constant == 0:
+                raise E.SolverError("Solver: Division by zero", code="3003")
+            else:
+                # (A*x + B) / D = (A/D)*x + (B/D)
+                result_factor = left_factor / right_constant
+                result_constant = left_constant / right_constant
+                return (result_factor, result_constant)
+
+        elif self.operator == '**':
+            # Powers generate non-linear terms (e.g., x^2)
+            raise E.SolverError("Powers are not supported by the linear solver.", code="3007")
+
+        elif self.operator == '=':
+            # '=' only belongs at the root for solving; not inside collection
+            raise E.SolverError("Should not happen: '=' inside collect_terms", code="3720")
+
+        else:
+            raise E.CalculationError(f"Unknown operator: {self.operator}", code="3004")
+
+    def __repr__(self):
+        return f"BinOp({self.operator!r}, left={self.left}, right={self.right})"
+
+
+# -----------------------------
+# Tokenizer
+# -----------------------------
+
+RAW_FUNCTION_MAP = {
+    "sin(": 'sin',
+    "cos(": 'cos',
+    "tan(": 'tan',
+    "log(": 'log',
+    "e^(": 'e^',
+    "√(": '√',
+    "sqrt(": "√",
+    "pi" : "π",
+    "PI" : "π",
+    "Pi" : "π"
+}
+FUNCTION_STARTS_OPTIMIZED = {
+    start_str: (token, len(start_str))
+    for start_str, token in RAW_FUNCTION_MAP.items()
+}
+
+
+def non_decimal_scan(problem: str, b: int, settings: dict):
+    """
+    Versucht, eine nicht-dezimale Zahl (0b, 0x, 0o) am Index b zu parsen.
+
+    Gibt (Decimal(value), next_index) bei Erfolg zurück.
+    Gibt (None, b) zurück, wenn es sich nicht um eine nicht-dezimale Zahl handelt.
+    """
+    # Überprüfen, ob nicht-dezimale Zahlen überhaupt erlaubt sind
+    if not settings.get("allow_non_decimal", False):
+        return (None, b)
+
+    current_char = problem[b]
+    non_decimal_flags = {"b", "B", "x", "X", "o", "O"}
+    forbidden_char = {".", ","}
+
+    # Prüft auf das Präfix 0b, 0x oder 0o
+    if current_char == '0' and (b + 1 < len(problem)) and problem[b + 1] in non_decimal_flags:
+        prefix_char = problem[b + 1]
+
+        if prefix_char in ("b", "B"):
+            value_prefix = "0b"
+            prefix_name = "Binary"
+            allowed_char = {"0", "1"}
+        elif prefix_char in ("x", "X"):
+            value_prefix = "0x"
+            prefix_name = "Hexadecimal"
+            allowed_char = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+                            "A", "B", "C", "D", "E", "F", "a", "b", "c", "d", "e", "f"}
+        else:  # ("o", "O")
+            value_prefix = "0o"
+            prefix_name = "Octal"
+            allowed_char = {"0", "1", "2", "3", "4", "5", "6", "7"}
+
+        a = b + 2  # Start-Index für die Ziffern nach dem Präfix
+
+        # Falls nur "0b" ohne Ziffern dasteht, wird value_to_int fehlschlagen
+        if a >= len(problem) or problem[a] not in allowed_char:
+            # value_to_int wirft hier den korrekten SyntaxError
+            pass
+
+        # Ziffern sammeln
+        while a < len(problem):
+            char_a = problem[a]
+            if char_a in allowed_char:
+                value_prefix += char_a
+            elif char_a in forbidden_char:
+                raise E.ConversionError(f"Unexpected token in {prefix_name}: {char_a}", code="8004", position=a)
+            elif char_a in Operations or char_a == " " or char_a in "()":
+                # Ende der Zahl erreicht
+                break
+            else:
+                # Ungültiges Zeichen für diese Basis
+                raise E.ConversionError(f"Unexpected token in {prefix_name}: {char_a}", code="8004", position=a)
+            a += 1
+
+        # Nach der Schleife ist 'a' der Index *nach* der letzten Ziffer
+        int_value = value_to_int(str(value_prefix))
+        # Geben Sie den Wert und den nächsten zu lesenden Index 'a' zurück
+        return (Decimal(int_value), a)
+
+    # Es wurde keine nicht-dezimale Zahl gefunden
+    return (None, b)
+
+
+
+
+
+
+def translator(problem, custom_variables, settings):
+    """Convert raw input string into a token list (numbers, ops, parens, variables, functions).
+
+    Notes:
+    - Inserts implicit multiplication where needed (e.g., '5x' -> '5', '*', 'var0').
+    - Maps '≈' to '=' so the rest of the pipeline can handle equality uniformly.
+    """
+    var_counter = 0
+    var_list = [None] * len(problem)  # Track seen variable symbols → var0, var1, ...
+    full_problem = []
+    b = 0
+
+
+
+    CONTEXT_VARS = {}
+    for var_name, value in custom_variables.items():
+
+        if isinstance(value, (int, float, Decimal)):
+            CONTEXT_VARS[var_name] = str(value)
+        elif isinstance(value, bool):
+            CONTEXT_VARS[var_name] = "1" if value else "0"
+        else:
+            CONTEXT_VARS[var_name] = str(value)
+
+    sorted_vars = sorted(CONTEXT_VARS.keys(), key=len, reverse=True)
+    HEX_DIGITS = "0123456789ABCDEFabcdef"
+    temp_problem = problem
+    for var_name in sorted_vars:
+        value_str = CONTEXT_VARS[var_name]
+        temp_problem = temp_problem.replace(var_name, value_str)
+
+    problem = temp_problem
+
+    temp_var = -1
+    while b < len(problem):
+        found_function = False
+        current_char = problem[b]
+
+
+        for start_str, (token, length) in FUNCTION_STARTS_OPTIMIZED.items():
+            if problem.startswith(start_str, b):
+                full_problem.append(token)
+                if token != "π" and token != "E" and token != "e":
+                    full_problem.append("(")
+                b += length - 0
+                found_function = True
+                break
+        if found_function:
+            if settings["only_hex"] == True or settings["only_binary"] == True or settings["only_octal"]== True:
+                raise E.SyntaxError(f"Function not support with only not decimals.", code="3033")
+            continue
+
+        # --- Numbers: digits and decimal separator (EXPONENTIAL NOTATION SUPPORT ADDED) ---
+        if isInt(current_char) or (b >= 0 and current_char == "."):
+
+            # 1. VERSUCH: Als nicht-dezimale Zahl parsen (0b, 0x, 0o)
+            parsed_value, new_index = non_decimal_scan(problem, b, settings)
+
+            if parsed_value is not None:
+                # Erfolg! Füge Wert hinzu und setze den Index auf das Ende der Zahl
+                full_problem.append(parsed_value)
+                b = new_index - 1  # -1, da die Schleife am Ende b+1 rechnet
+
+            else:
+                # 2. VERSUCH: Als Standard-Dezimalzahl parsen (inkl. Exponent)
+                str_number = current_char
+                # Bug-Fix: has_decimal_point muss hier korrekt gesetzt werden
+                has_decimal_point = (current_char == '.')
+                has_exponent_e = False
+
+                # Kopieren Sie hier die Logik zum Parsen von Dezimalzahlen
+                # (Ihre ursprünglichen Zeilen 409 - 449)
+                while (b + 1 < len(problem)):
+                    next_char = problem[b + 1]
+
+                    # 1. Handle decimal points
+                    if next_char == ".":
+                        if has_decimal_point:
+                            raise E.SyntaxError(f"Double decimal point.", code="3008", position=b + 1)
+                        has_decimal_point = True
+
+                    # 2. Handle the 'E' or 'e' for exponent
+                    elif next_char in ('e', 'E'):
+                        if temp_var == b and b > 0:
+                            raise E.SyntaxError(f"Multiple digit variables not supported.",
+                                                code="3032", position=b + 1)
+                        if has_exponent_e:
+                            # Cannot have two 'e's in a single number
+                            raise E.SyntaxError("Double exponent sign 'E'/'e'.", code="3031", position=b + 1)
+                        has_exponent_e = True
+
+                    # 3. Handle the sign (+ or -) immediately following 'E'/'e'
+                    elif next_char in ('+', '-'):
+                        # The sign is only valid if it immediately follows 'e' or 'E'
+                        if not (problem[b] in ('e', 'E') and has_exponent_e):
+                            break
+
+                    # 4. End the loop if the next character is not a number component
+                    elif not isInt(next_char):
+                        break
+
+                    # If we made it here, the character is a valid part of the number
+                    b += 1
+                    str_number += problem[b]
+
+                # Validate the final collected string
+                if isfloat(str_number) or isInt(str_number):
+                    if settings["only_hex"] == True:
+                        str_number = value_to_int("0x"+str_number)
+                    elif settings["only_binary"] == True:
+                        str_number = value_to_int("0b"+str_number)
+                    elif settings["only_octal"] == True:
+                        str_number = value_to_int("0O"+str_number)
+                    full_problem.append(Decimal(str_number))
+                else:
+                    if has_exponent_e and not str_number[-1].isdigit():
+                        raise E.SyntaxError("Missing exponent value after 'E'/'e'.", code="3032", position=b)
+
+        # --- Operators ---
+        elif isOp(current_char) != -1:
+            if current_char == "*" and b + 1 < len(problem) and problem[b + 1] == "*":
+                full_problem.append("**")
+                b += 1
+            elif current_char != "<" and current_char != ">":
+                full_problem.append(current_char)
+            elif current_char == "<" and b<= len(problem)+1:
+                if problem[b+1] == "<":
+                    full_problem.append("<<")
+                    b+=1
+                elif problem[b+1] == ">":
+                    raise E.SyntaxError("Invalid shift Operation <>", code = "3040")
+
+
+            elif current_char == ">" and b <= len(problem) + 1:
+                following_char = problem[b + 1]
+                if problem[b + 1] == ">":
+                    full_problem.append(">>")
+                    b += 1
+                elif problem[b+1] == "<":
+                    raise E.SyntaxError("Invalid shift Operation ><", code = "3040")
+
+            else:
+                raise E.SyntaxError("Unknown Error.", code = "9999")
+
+
+
+
+        # --- Whitespace (ignored) ---
+        elif current_char == " ":
+            pass
+
+        # --- Parentheses ---
+        elif current_char == "(":
+            full_problem.append("(")
+        elif current_char == "≈":  # treat as equality
+            full_problem.append("=")
+        elif current_char == ")":
+            full_problem.append(")")
+        elif current_char == ",":
+            full_problem.append(",")
+
+        # --- Scientific functions and special forms: sin(, cos(, tan(, log(, √(, e^( ---
+
+        elif settings.get("only_hex", False) and current_char in HEX_DIGITS:
+            # Sammle alle aufeinanderfolgenden Hex-Zeichen (z.B. "FF", "1A3")
+            str_number = current_char
+            while b + 1 < len(problem) and problem[b + 1] in HEX_DIGITS:
+                b += 1
+                str_number += problem[b]
+
+            # Jetzt "0x" davorsetzen und in int -> Decimal umwandeln
+            try:
+                int_value = value_to_int("0x" + str_number)
+                full_problem.append(Decimal(int_value))
+            except E.ConversionError as e:
+                # Wenn du möchtest, hier ein schönerer Fehler
+                raise
+
+        # --- Constant π ---
+        elif current_char == 'π':
+            if settings["only_hex"] == True or settings["only_binary"] == True or settings["only_octal"]== True:
+                raise E.SyntaxError(f"Error with constant π:{result_string}", code="3033", position=b)
+            result_string = ScientificEngine.isPi(str(current_char))
+            try:
+                calculated_value = Decimal(result_string)
+                full_problem.append(calculated_value)
+            except ValueError:
+                raise E.CalculationError(f"Error with constant π:{result_string}", code="3219", position=b)
+
+        # --- Variables (fallback) ---
+        else:
+
+            if temp_var == b-1 and b > 0 and temp_var != -1:
+                print("x")
+                raise E.SyntaxError(f"Multiple digit variables not supported.", code ="3032", position=b)
+
+            # Map each new variable symbol to var{n} to keep internal representation uniform
+            if current_char in var_list:
+                full_problem.append("var" + str(var_list.index(current_char)))
+            else:
+                full_problem.append("var" + str(var_counter))
+                temp_var = b
+                var_list[var_counter] = current_char
+                var_counter += 1
+
+        b = b + 1
+
+    # --- Implicit multiplication pass ---
+    # Insert '*' between adjacent tokens that imply multiplication:
+    # number/variable/')' followed by '(' / number / variable / function name
+    b = 0
+    while b < len(full_problem):
+
+        if b + 1 < len(full_problem):
+
+            current_element = full_problem[b]
+            successor = full_problem[b + 1]
+            insertion_needed = False
+
+            is_function_name = isScOp(successor) != -1
+            is_number_or_variable = isinstance(current_element, (int, float, Decimal)) or (
+                        "var" in str(current_element) and
+                        isinstance(current_element, str))
+            is_paren_or_variable_or_number = (
+                        successor == '(' or ("var" in str(successor) and isinstance(successor, str)) or
+                        isinstance(successor, (int, float, Decimal)) or is_function_name)
+            is_not_an_operator = current_element not in Operations and successor not in Operations
+
+            if (is_number_or_variable or current_element == ')') and \
+                    (is_paren_or_variable_or_number or successor == '(') and \
+                    is_not_an_operator:
+
+                if current_element in ['*', '+', '-', '/'] or successor in ['*', '+', '-', '/']:
+                    insertion_needed = False
+                elif current_element == ')' and successor == '(':
+                    insertion_needed = True
+                elif current_element != '(' and successor != ')':
+                    insertion_needed = True
+
+            if insertion_needed:
+                full_problem.insert(b + 1, '*')
+
+        b += 1
+    return full_problem, var_counter
+
+
+# -----------------------------
+# Parser (recursive descent)
+# -----------------------------
+
+def ast(received_string, settings, custom_variables):
+    """Parse a token stream into an AST.
+    Implements precedence via nested functions: factor → unary → power → term → sum → equation.
+
+    NEW: `settings` is used to control UI-driven parsing behavior (e.g. allowing
+    augmented assignment patterns like `12+=6`):
+      - settings["allow_augmented_assignment"] → influences pre-parse validation/rewrites.
+    """
+    analysed, var_counter = translator(received_string, custom_variables, settings)
+    d = 0
+    mutliple_equalsign = False
+    temp_position = -2
+    expected_bool = False
+    while d < len(analysed):
+        "3==3"
+        if analysed[d] == "=":
+            if temp_position != -2 and temp_position != d-1:
+                raise E.CalculationError("Multiple Equal signs in one Problem.", code = "3036")
+            elif temp_position == -2 and temp_position != d-1:
+                temp_position = d
+            elif temp_position != -2 and temp_position == d-1:
+                expected_bool = True
+                temp_position = d
+
+        d+=1
+    if analysed == []:
+        raise E.SyntaxError("Empty String", code = "3034")
+    # Normalize spurious leading/trailing '=' if there's no variable; keep equations intact
+    if analysed and analysed[0] == "=" and not "var0" in analysed:
+        analysed.pop(0)
+
+    if analysed and analysed[-1] == "=" and not "var0" in analysed:
+        analysed.pop()
+
+    # NEW: Guard against starting with '*' or '/' which implies a missing left operand.
+    if analysed and (analysed[0] == "*" or analysed[0] == "/"):
+        raise E.CalculationError("Missing Number.", code="3028")
+
+    # NEW: Additional pre-parse validations / rewrites to support augmented assignment.
+    if analysed:
+        b = 0
+        while b < len(analysed) - 1:
+
+            # Case 1: operator directly followed by '=' (e.g., "+=") without AA allowed → error
+            if (len(analysed) != b + 1) and (analysed[b + 1] == "=" and (analysed[b] in Operations)) and (
+                    settings["allow_augmented_assignment"] == False):
+                raise E.CalculationError("Missing Number before '='.", code="3028")
+
+            # Case 1a (NEW): If AA is allowed and there is NO variable in the expression,
+            # rewrite "A += B" into "A = (A + B)":
+            #   - insert '(' after '='
+            #   - append ')' at the end
+            #   - remove the original '=' right after operator (so it becomes an infix '=')
+            elif ((len(analysed) != b + 1 or len(analysed) != b + 2) and (
+                    analysed[b + 1] == "=" and (analysed[b] in Operations)) and (
+                          settings["allow_augmented_assignment"] == True) and not "var0" in analysed):
+                analysed.append(")")
+                analysed.insert(b + 2, "(")
+                analysed.pop(b + 1)
+
+            # Case 1b (NEW): If AA is attempted while variables exist, forbid it
+            # to avoid ambiguous solver semantics.
+            elif ((len(analysed) != b + 1 or len(analysed) != b + 2) and (
+                    analysed[b + 1] == "=" and (analysed[b] in Operations)) and (
+                          settings["allow_augmented_assignment"] == True) and "var0" in analysed):
+                raise E.CalculationError("Augmented assignment not allowed with variables.", code="3030")
+
+            # Case 2: '=' precedes an operator (e.g., "=+") → number missing after '='
+            elif (b > 0) and (analysed[b + 1] == "=" and (analysed[b] in Operations)):
+                raise E.CalculationError("Missing Number after '='.", code="3028")
+
+            # NEW: Expression ends with an operator → explicit "missing number" after that operator.
+            elif analysed[-1] in Operations:
+                raise E.CalculationError(f"Missing Number after {analysed[-1]}", code="3029")
+
+            # NEW: operator followed by '=' (AA disabled) and no variables → still "missing number after <op>"
+            elif (analysed[b] in Operations and (analysed[b + 1] == "=" and (
+                    settings["allow_augmented_assignment"] == False))) and not "var0" in analysed:
+                raise E.CalculationError(f"Missing Number after {analysed[b]}", code="3029")
+
+            b += 1
+
+    # '=' at start/end while a variable exists → malformed equation
+    if ((analysed and analysed[-1] == "=") or (analysed and analysed[0] == "=")) and "var0" in analysed:
+        raise E.CalculationError(f"{received_string}", code="3025")
+
+    if debug == True:
+        print(analysed)
+    # ---- Parsing functions in precedence order ----
+
+    def parse_factor(tokens):
+        """Numbers, variables, sub-expressions in '()', and scientific functions."""
+        if len(tokens) > 0:
+            token = tokens.pop(0)
+        else:
+            # NEW: explicit "missing number" when a factor is required but tokens are exhausted.
+            raise E.CalculationError(f"Missing Number.", code="3027")
+
+        # Parenthesized sub-expression
+        if token == "(":
+            subtree_in_paren = parse_bor(tokens)
+            if not tokens or tokens.pop(0) != ')':
+                raise E.SyntaxError("Missing closing parenthesis ')'", code="3009")
+            return subtree_in_paren
+
+        # Scientific functions / constants
+        elif token in Science_Operations:
+
+            if token == 'π':
+                result = ScientificEngine.isPi(token)
+                try:
+                    calculated_value = Decimal(result)
+                    return Number(calculated_value)
+                except ValueError:
+                    raise E.SyntaxError(f"Error with constant π: {result}", code="3219")
+
+            else:
+                # function must be followed by '('
+                if not tokens or tokens.pop(0) != '(':
+                    raise E.SyntaxError(f"Missing opening parenthesis after function {token}", code="3010")
+
+                argument_subtree = parse_bor(tokens)
+
+                # Special case: log(number, base)
+                if token == 'log' and tokens and tokens[0] == ',':
+                    tokens.pop(0)
+                    base_subtree = parse_bor(tokens)
+                    if not tokens or tokens.pop(0) != ')':
+                        raise E.SyntaxError(f"Missing closing parenthesis after logarithm base.", code="3009")
+                    argument_value = argument_subtree.evaluate()
+                    base_value = base_subtree.evaluate()
+                    ScienceOp = f"{token}({argument_value},{base_value})"
+                else:
+                    if not tokens or tokens.pop(0) != ')':
+                        raise E.SyntaxError(f"Missing closing parenthesis after function '{token}'", code="3009")
+                    argument_value = argument_subtree.evaluate()
+                    ScienceOp = f"{token}({argument_value})"
+
+                # Delegate to scientific engine; keep result as-is for Number()
+                result_string = ScientificEngine.unknown_function(ScienceOp)
+                if isinstance(result_string, str) and result_string.startswith("ERROR:"):
+                    # Wenn ScientificEngine einen Fehler meldet, werfe ihn als SyntaxError
+                    raise E.SyntaxError(result_string, code="3218")
+                try:
+                    calculated_value = result_string
+                    return Number(calculated_value)
+                except ValueError:
+                    raise E.SyntaxError(f"Error in scientific function: {result_string}", code="3218")
+
+        # Literals / variables
+        elif isinstance(token, Decimal):
+            return Number(token)
+        elif isInt(token):
+            return Number(token)
+        elif isfloat(token):
+            return Number(token)
+        elif "var" in str(token):
+            return Variable(token)
+        else:
+            raise E.SyntaxError(f"Unexpected token: {token}", code="3012")
+
+    def parse_unary(tokens):
+        """Handle leading '+'/'-' (unary minus becomes 0 - operand)."""
+        if tokens and tokens[0] in ('+', '-'):
+            operator = tokens.pop(0)
+            operand = parse_unary(tokens)
+
+            if operator == '-':
+                # Optimize for literal: -Number → Number(-value)
+                if isinstance(operand, Number):
+                    return Number(-operand.evaluate())
+                return BinOp(Number('0'), '-', operand)
+            else:
+                return operand
+        return parse_power(tokens)
+
+    def parse_power(tokens):
+        """Exponentiation '^' (handled before * and +)."""
+        current_subtree = parse_factor(tokens)
+        while tokens and (tokens[0] == "**"):
+            operator = tokens.pop(0)
+            right_part = parse_unary(tokens)
+            if not isinstance(current_subtree, Variable) and not isinstance(right_part, Variable):
+                # Pre-evaluate when both sides are numeric
+                base = current_subtree.evaluate()
+                exponent = right_part.evaluate()
+                result = base ** exponent
+                current_subtree = Number(result)
+            else:
+                # Keep as symbolic BinOp otherwise
+                current_subtree = BinOp(current_subtree, operator, right_part)
+        return current_subtree
+
+    def parse_term(tokens):
+        """Multiplication and division."""
+        current_subtree = parse_unary(tokens)
+        while tokens and tokens[0] in ("*", "/"):
+            operator = tokens.pop(0)
+            right_part = parse_unary(tokens)
+            current_subtree = BinOp(current_subtree, operator, right_part)
+        return current_subtree
+
+    def parse_shift(tokens):
+        current_subtree = parse_sum(tokens)
+        while tokens and tokens[0] in ("<<", ">>"):
+            operator = tokens.pop(0)
+            right_side = parse_sum(tokens)
+            current_subtree = BinOp(current_subtree, operator, right_side)
+        return current_subtree
+
+    def parse_sum(tokens):
+        """Addition and subtraction."""
+        current_subtree = parse_term(tokens)
+        while tokens and tokens[0] in ("+", "-"):
+            operator = tokens.pop(0)
+            right_side = parse_term(tokens)
+            current_subtree = BinOp(current_subtree, operator, right_side)
+        return current_subtree
+
+    def parse_bor(tokens):
+        current_subtree = parse_bxor(tokens)
+        while tokens and tokens[0] == "|":
+            operator = tokens.pop(0)
+            right_side = parse_bxor(tokens)
+            current_subtree = BinOp(current_subtree, operator, right_side)
+        return current_subtree
+
+    def parse_bxor(tokens):
+        current_subtree = parse_band(tokens)
+        while tokens and tokens[0] == "^":
+            operator = tokens.pop(0)
+            right_side = parse_band(tokens)
+            current_subtree = BinOp(current_subtree, operator, right_side)
+        return current_subtree
+
+    def parse_band(tokens):
+        current_subtree = parse_shift(tokens)
+        while tokens and tokens[0] == "&":
+            operator = tokens.pop(0)
+            right_side = parse_shift(tokens)
+            current_subtree = BinOp(current_subtree, operator, right_side)
+        return current_subtree
+
+    def parse_gleichung(tokens):
+        """Optional '=' at the top level: build BinOp('=') when present."""
+        left_side = parse_bor(tokens)
+        if tokens and tokens[0] == "=":
+            operator = tokens.pop(0)
+            right_side = parse_shift(tokens)
+            return BinOp(left_side, operator, right_side)
+        return left_side
+
+    # Build the final AST
+    final_tree = parse_gleichung(analysed)
+    # Decide if this is a CAS-style equation with <= 1 variable
+    if isinstance(final_tree, BinOp) and final_tree.operator == '=' and var_counter <= 1:
+        cas = True
+    if isinstance(final_tree, BinOp) and final_tree.operator == '=' and var_counter > 1:
+        cas = True
+
+    if debug == True:
+        print("Final AST:")
+        print(final_tree)
+
+    # `cas` may or may not be set above; default to False
+    cas = locals().get('cas', False)
+    return final_tree, cas, var_counter,expected_bool
+
+
+# -----------------------------
+# Linear solver (one variable)
+# -----------------------------
+
+def solve(tree, var_name):
+    """Solve (A*x + B) = (C*x + D) for x, or detect no/inf. solutions."""
+    if not isinstance(tree, BinOp) or tree.operator != '=':
+        raise E.SolverError("No valid equation to solve.", code="3012")
+    (A, B) = tree.left.collect_term(var_name)
+    (C, D) = tree.right.collect_term(var_name)
+    denominator = A - C
+    numerator = D - B
+    if denominator == 0:
+        if numerator == 0:
+            return "Inf. Solutions"
+        else:
+            return "No Solution"
+    return numerator / denominator
+
+
+# -----------------------------
+# Result formatting
+# -----------------------------
+
+def cleanup(result):
+    """Format a numeric result as Fraction or Decimal depending on settings.
+
+    Returns:
+        (rendered_value, rounding_flag)
+    where rounding_flag indicates whether Decimal rounding occurred.
+    """
+    rounding = locals().get('rounding', False)
+
+    target_decimals = config_manager.load_setting_value("decimal_places")
+    target_fractions = config_manager.load_setting_value("fractions")
+
+    # Try Fraction rendering if enabled and the result is Decimal
+    if target_fractions == True and isinstance(result, Decimal):
+        try:
+            fraction_result = fractions.Fraction.from_decimal(result)
+            simplified_fraction = fraction_result.limit_denominator(100000)
+            numerator = simplified_fraction.numerator
+            denominator = simplified_fraction.denominator
+            if abs(numerator) > denominator:
+                # Mixed fraction form (e.g., 3/2 -> "1 1/2")
+                integer_part = numerator // denominator
+                remainder_numerator = numerator % denominator
+
+                if remainder_numerator == 0:
+                    return str(integer_part), rounding
+                else:
+                    # Adjust for negatives so that the remainder part is positive
+                    if integer_part < 0 and remainder_numerator > 0:
+                        integer_part += 1
+                        remainder_numerator = abs(denominator - remainder_numerator)
+                    return f"{integer_part} {remainder_numerator}/{denominator}", rounding
+
+            return str(simplified_fraction), rounding
+
+        except Exception as e:
+            # Surface as CalculationError (preserves UI error handling)
+            raise E.CalculationError(f"Warning: Fraction conversion failed: {e}", code="3024")
+
+    if isinstance(result, Decimal):
+
+        # --- Smarter Rounding Logic ---
+        #
+        # Handles rounding for Decimal results with dynamic precision.
+        # Integers are returned as-is (just normalized),
+        # while non-integers are rounded to 'target_decimals'.
+        #
+        # A temporary precision boost (prec=128) prevents
+        # Decimal.InvalidOperation during quantize() for long or repeating numbers.
+        # After rounding, precision is reset to the global standard (50).
+        #
+
+        if result % 1 == 0:
+            # Integer result – return normalized without rounding
+            return result, rounding
+        else:
+            # Non-integer result (e.g. 1/3 or repeating decimals)
+            getcontext().prec = 10000  # Prevent quantize overflow
+
+            if target_decimals >= 0:
+                rounding_pattern = Decimal('1e-' + str(target_decimals))
+            else:
+                rounding_pattern = Decimal('1')
+
+            rounded_result = result.quantize(rounding_pattern)
+            getcontext().prec = 10000  # Restore standard precision
+
+            if rounded_result != result:
+                rounding = True
+
+            return rounded_result, rounding
+
+
+    # Legacy float/int handling (in case evaluation produced non-Decimal)
+    elif isinstance(result, (int, float)) and not isinstance(result, bool):
+        if result == int(result):
+            return int(result), rounding
+
+        else:
+            s_result = str(result)
+            if '.' in s_result:
+                decimal_index = s_result.find('.')
+                actual_decimals = len(s_result) - decimal_index - 1
+                if actual_decimals > target_decimals:
+                    rounding = True
+                    new_number = round(result, target_decimals)
+                    return new_number, rounding
+
+                return result, rounding
+            return result, rounding
+
+    # Fallback: unknown type, return as-is
+    return result, rounding
+
+def value_to_int(value):
+    if not isinstance(value, str):
+        raise E.ConversionError("Converter didnt receive string: " + str(type(value)), code="8002")
+    else:
+        if value == "0b":
+            raise E.SyntaxError("Invalid Binary Number", code = "3035")
+        elif  value == "0x":
+            raise E.SyntaxError("Invalid Hex Number", code="3035")
+        elif  value == "0O":
+            raise E.SyntaxError("Invalid Octcal Number", code="3035")
+        try:
+            value = int(value, 0)
+            return value
+
+        except ValueError as e:
+            raise E.ConversionError(f"Couldnt convert {value} to int: {e}", code="8000")
+
+        except Exception as e:
+            raise E.ConversionError(f"Unexpected conversion error: {e}", code="8001")
+
+
+def int_to_value(number, output_prefix, settings):
+    if isinstance(number, (Decimal, float, int)) and number % 1 != 0:
+        raise E.ConversionError("Cannot convert non-integer value to non decimal.", code="8003")
+    try:
+        if isinstance(number, Decimal):
+            number = int(number.to_integral_value())
+        else:
+            number = int(number)
+    except Exception:
+        raise E.ConversionError("Input could not be converted to a Python integer.", code="8004")
+
+    val = number
+    word_size = settings.get("word_size", 0)
+    signed_mode = settings.get("signed_mode", True)
+
+    if word_size > 0:
+        limit = 1 << word_size
+        mask = limit - 1
+
+        val = val & mask
+
+        if signed_mode:
+            msb_threshold = limit >> 1
+            if val >= msb_threshold:
+                val = val - limit
+
+    try:
+        if output_prefix == "hexadecimal:":
+            converted_value = hex(val)
+        elif output_prefix == "binary:":
+            converted_value = bin(val)
+        elif output_prefix == "octal:":
+            converted_value = oct(val)
+        return converted_value
+    except Exception as e:
+        raise E.ConversionError(f"Couldnt convert int to non decimal: {e}", code="8001")
+
+
+def apply_word_limit(value,settings:dict):
+    word_size = settings["word_size"]
+    if word_size == 0:
+        return value
+    if value % 1 != 0:
+        raise E.ConversionError("Requires whole numbers.", code="5004")
+    else:
+        try:
+            val_int = int(value)
+            limit = 1 << word_size
+            mask = limit - 1
+            val_int = val_int & mask
+            if settings.get("signed_mode", True):
+                msb_threshold = limit >> 1
+                if val_int >= msb_threshold:
+                    val_int = val_int - limit
+
+            return Decimal(val_int)
+        except Exception as e:
+            raise E.ConversionError("Error converting value into int.", code ="5004")
+
+
+# -----------------------------
+# Public entry point
+# -----------------------------
+
+def calculate(problem: str, custom_variables: Union[dict, None] = None, validate : int = 0):
+    if custom_variables is None:
+        custom_variables = {}
+
+    """Main API: parse → (evaluate | solve | equality-check) → format → render string."""
+    # Guard precision locally before each calculation (UI may adjust as well)
+    getcontext().prec = 10000
+    settings = config_manager.load_setting_value("all")  # pass UI settings down to parser
+    global debug
+    debug = settings.get("debug", False)
+    var_list = []
+    allowed_prefix = (
+        "dec:", "d:", "Decimal:",
+        "int:", "i:", "integer:",
+        "float:", "f:",
+        "bool:", "bo", "boolean:",
+        "hex:", "h:", "hexadecimal:",
+        "str:", "s:", "string:",
+        "bin:", "bi:", "binary:",
+        "oc:", "o:", "octal:"
+    )
+    output_prefix = ""
+    problem_lower = problem.lower()
+    try:
+        for prefix in allowed_prefix:
+            if problem_lower.startswith(prefix):
+                if prefix.startswith("s")or prefix.startswith("S"):
+                    output_prefix = "string:"
+                elif prefix.startswith("bo")or prefix.startswith("Bo"):
+                    output_prefix = "boolean:"
+                elif prefix.startswith("d") or prefix.startswith("D"):
+                    output_prefix = "decimal:"
+                elif prefix.startswith("f") or prefix.startswith("F"):
+                    output_prefix = "float:"
+                elif prefix.startswith("i") or prefix.startswith("I"):
+                    output_prefix = "int:"
+                elif prefix.startswith("h") or prefix.startswith("H"):
+                    output_prefix = "hexadecimal:"
+                elif prefix.startswith("bi") or prefix.startswith("Bi"):
+                    output_prefix = "binary:"
+                elif prefix.startswith("o") or prefix.startswith("O"):
+                    output_prefix = "octal:"
+
+                start = problem.index(":")
+                problem = problem[start+1:]
+                break
+
+
+        final_tree, cas, var_counter, expected_bool = ast(problem, settings, custom_variables)  # NEW: settings param enables AA handling
+        if output_prefix != "boolean:" and expected_bool == True and output_prefix != "" and settings["correct_output_format"]== False:
+            raise E.SyntaxError("Couldnt convert result into the given prefix", code="3037")
+
+        elif output_prefix != "boolean:" and expected_bool == True and output_prefix == "":
+            output_prefix = "boolean:"
+
+        elif output_prefix != "boolean:" and expected_bool == True and settings["correct_output_format"]== True:
+            output_prefix = "boolean:"
+
+        if output_prefix == "" and settings["only_hex"] == True:
+            output_prefix = "hexadecimal:"
+        elif output_prefix == "" and settings["only_binary"] == True:
+            output_prefix = "binary:"
+        elif output_prefix == "" and settings["only_octal"] == True:
+            output_prefix = "octal:"
+
+        if validate == 0:
+            result = final_tree
+
+        # Decide evaluation mode
+        if cas and var_counter > 0:
+            # Solve linear equation for first variable symbol in the token stream
+            var_name_in_ast = "var0"
+            if settings["only_hex"] == True or settings["only_binary"] == True or settings["only_octal"] == True:
+                raise E.SolverError("Variables not supported with only_hex, only_binary or only_octal mode.",
+                                    code="3038")
+            if validate == 1:
+                result = solve(final_tree, var_name_in_ast)
+
+        elif not cas and var_counter == 0:
+            # Pure numeric evaluation
+            if validate == 1:
+                result = final_tree.evaluate()
+
+        elif cas and var_counter == 0:
+            if output_prefix == "":
+                output_prefix = "boolean:"
+            # Pure equality check (no variable): returns "= True/False"
+            left_val = final_tree.left.evaluate()
+            right_val = final_tree.right.evaluate()
+            output_string = "True" if left_val == right_val else "False"
+            if validate == 1:
+                result = (left_val == right_val)
+            if output_prefix != "boolean:" and output_prefix != "string:" and output_prefix != "":
+                raise E.ConversionOutputError("Couldnt convert result into the given prefix", code = "8006")
+            if output_prefix == "boolean:":
+                try:
+                    boolean(output_string)
+                    #return boolean(output_string)
+                except Exception as e:
+                    raise E.ConversionError("Couldnt convert type to" + str(output_prefix), code="8003")
+
+        else:
+            # Mixed/invalid states with or without '=' and variables
+            if cas:
+                raise E.SolverError("The solver was used on a non-equation", code="3005")
+            elif not cas and not "=" in problem:
+                if settings["only_hex"] == True or settings["only_binary"] == True or settings["only_octal"] == True:
+                    raise E.SolverError("Variables not supported with only_hex, only_binary or only_octal mode.", code="3038")
+                raise E.SolverError("No '=' found, although a variable was specified.", code="3012")
+            elif cas and "=" in problem and (
+                    problem.index("=") == 0 or problem.index("=") == (len(problem) - 1)):
+                raise E.SolverError("One of the sides is empty: " + str(problem), code="3022")
+            elif cas and var_counter>1:
+                raise E.SolverError("Multiple Variables found.", error = "")
+            else:
+                print(cas)
+                print(var_counter)
+                raise E.CalculationError("The calculator was called on an equation.", code="3015")
+
+        # Render result based on settings (fractions/decimals, rounding flag)
+        if validate == 1:
+            result, rounding = cleanup(result)
+            result = apply_word_limit(result, settings)
+        approx_sign = "\u2248"  # "≈"
+        if validate == 1:
+            # --- START OF MODIFIED BLOCK FOR EXPONENTIAL NOTATION CONTROL ---
+
+            # Convert normalized result to string (Decimal supports to_normal_string)
+            if isinstance(result, str) and '/' in result:
+                output_string = result
+
+            elif isinstance(result, Decimal):
+                # Threshold for scientific notation: 1 Billion (1e9)
+                scientific_threshold = Decimal('1e9')
+                output_string = result
+                if result.is_zero():
+                    output_string = "0"
+
+            else:
+                output_string = result
+            if output_prefix == "":
+                output_prefix = settings["default_output_format"]
+            if output_prefix == "decimal:":
+                try:
+                    Decimal(output_string)
+                    return Decimal(output_string)
+                except Exception as e:
+                    raise E.ConversionOutputError("Couldnt convert type to" + str(output_prefix), code="8003")
+
+            elif output_prefix == "string:":
+                try:
+                    return str(output_string)
+                except Exception as e:
+                    raise E.ConversionOutputError("Couldnt convert type to" + str(output_prefix), code="8003")
+
+            elif output_prefix == "hexadecimal:":
+                try:
+                    int_to_value(output_string, output_prefix, settings)
+                    return int_to_value(output_string, output_prefix, settings)
+                except Exception as e:
+                    raise E.ConversionOutputError("Couldnt convert type to" + str(output_prefix), code="8003")
+
+            elif output_prefix == "binary:":
+                try:
+                    int_to_value(output_string, output_prefix, settings)
+                    return int_to_value(output_string, output_prefix, settings)
+                except Exception as e:
+                    raise E.ConversionOutputError("Couldnt convert type to" + str(output_prefix), code="8003")
+            elif output_prefix == "octal:":
+                try:
+                    int_to_value(output_string, output_prefix, settings)
+                    return int_to_value(output_string, output_prefix, settings)
+                except Exception as e:
+                    raise E.ConversionOutputError("Couldnt convert type to" + str(output_prefix), code="8003")
+
+            elif output_prefix == "boolean:":
+                try:
+                    boolean(output_string)
+                    return boolean(output_string)
+                except Exception as e:
+                    raise E.ConversionOutputError("Couldnt convert type to" + str(output_prefix), code = "8003")
+
+
+            elif output_prefix == "int:":
+                try:
+                    int_value = int(output_string)
+                    float_value = float(output_string)
+                    if int_value != float_value:
+                        raise E.ConversionOutputError(
+                            f"Cannot convert non-integer value '{output_string}' to exact integer.",
+                            code="8005"
+                        )
+                    else:
+                        return int(output_string)
+                except Exception as e:
+                    raise E.ConversionOutputError("Couldnt convert type to" + str(output_prefix), code="8003")
+
+            elif output_prefix == "float:":
+                try:
+                    float(output_string)
+                    return float(output_string)
+                except Exception as e:
+                    raise E.ConversionOutputError("Couldnt convert type to" + str(output_prefix), code="8003")
+
+            else:
+                raise E.SyntaxError("Unknown Error", code = "9999")
+        else:
+            return result
+
+
+    # Known numeric overflow
+    except Overflow as e:
+        raise E.CalculationError(
+            message="Number too large (Arithmetic overflow).",
+            code="3026",
+            equation=problem
+        )
+
+    except E.ConversionOutputError as e:
+        # fallback_versuche = [ "decimal:", "boolean:", "string:"]
+        #
+        # if settings["correct_output_format"] == True and settings["only_hex"] == False and settings["only_binary"] == False and settings["only_octal"]== False:
+        #     for versuch in fallback_versuche:
+        #         try:
+        #             if versuch == "decimal:":
+        #                 if isDecimal(output_string) != False:
+        #                     return Decimal(output_string)
+        #
+        #             elif versuch == "boolean:":
+        #                 bool_result = boolean(output_string)
+        #                 if bool_result in (True, False):
+        #                     return bool_result
+        #
+        #             elif versuch == "string:":
+        #                 return str(output_string)
+        #
+        #         except Exception as e:
+        #             continue
+        # else:
+            raise E.ConversionError(
+                f"Couldnt convert result '{output_string}' into '{output_prefix}'",
+                code="8006"
+            )
+    # Re-raise our domain errors after attaching the source equation
+    except E.MathError as e:
+        e.equation = problem
+        raise e
+    # Convert unexpected Python exceptions to our unified error type
+    except (ValueError, SyntaxError, ZeroDivisionError, TypeError, Exception) as e:
+        error_message = str(e).strip()
+        parts = error_message.split(maxsplit=1)
+        code = "9999"
+        message = error_message
+
+        # If an error string already begins with a 4-digit code, respect it
+        if parts and parts[0].isdigit() and len(parts[0]) == 4:
+            code = parts[0]
+            if len(parts) > 1:
+                message = parts[1]
+        raise E.MathError(message=message, code=code, equation=problem)
+
+
+def test_main():
+    """Simple REPL-like runner for manual testing of the engine."""
+    print("Enter the problem: ")
+    problem = input()
+    result = calculate(problem)
+    print(result)
+    test_main()  # recursive call disabled
+
+if __name__ == "__main__":
+    test_main()
