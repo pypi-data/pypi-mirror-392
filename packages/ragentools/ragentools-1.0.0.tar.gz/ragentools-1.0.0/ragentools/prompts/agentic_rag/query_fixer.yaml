@@ -1,0 +1,24 @@
+prompt: |
+  **Goal:**
+  You are an expert in query completion and enhancement for information retrieval.
+  Given a query and a suggestion describing the missing or inadequate parts,
+  generate a list of refined queries that fully covers the intended information need.
+  Do NOT need to preserve all parts of the original query — focus on the improve parts instead.
+
+  **Guidelines:**
+  - The refined query should be self-contained and ready for retrieval (complete sentence).
+  - Avoid repeating, irrelevant or redundant parts from the suggestion.
+  - Subquestions should complete different aspects and do not overlap in meaning.
+  - If there is only one aspect to improve, just return a list with that single refined query.
+
+  **Query:**  {{ query }}
+  
+  **Suggestion:** {{ suggestion }}
+
+default_replacements: {}
+
+response_format:
+  subquestions:
+    type: array
+    items:
+      type: string
