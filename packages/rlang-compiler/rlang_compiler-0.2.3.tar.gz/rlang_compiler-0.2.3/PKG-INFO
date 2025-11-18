@@ -1,0 +1,1509 @@
+Metadata-Version: 2.4
+Name: rlang-compiler
+Version: 0.2.3
+Summary: Deterministic RLang compiler with cryptographic proof generation for BoR (Blockchain of Reasoning)
+Author: Kushagra Bhatnagar
+Maintainer: Kushagra Bhatnagar
+License: MIT
+Project-URL: Homepage, https://github.com/kushagrab21/Compiler_application
+Project-URL: Documentation, https://github.com/kushagrab21/Compiler_application
+Keywords: deterministic-compiler,bor,blockchain-of-reasoning,rlang,cryptographic-verification,proof-generation,verifiable-computation,dsl
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Operating System :: OS Independent
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Software Development :: Compilers
+Classifier: Topic :: Scientific/Engineering
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Provides-Extra: dev
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: ruff>=0.1.0; extra == "dev"
+Provides-Extra: test
+Requires-Dist: pytest>=7.0.0; extra == "test"
+Requires-Dist: pytest-cov>=4.0.0; extra == "test"
+Provides-Extra: bor-sdk
+Requires-Dist: bor-sdk>=1.0.0; extra == "bor-sdk"
+Dynamic: license-file
+
+# RLang Compiler — Deterministic Reasoning Pipeline with Cryptographic Proof Generation
+
+![Version](https://img.shields.io/badge/version-0.2.2-blue)
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![Determinism](https://img.shields.io/badge/determinism-verified-blue)
+![BoR Verification](https://img.shields.io/badge/BoR%20verification-ok-success)
+![Tests](https://img.shields.io/badge/tests-190%2B-green)
+
+A **first-principles compiler** that translates RLang source code into executable reasoning pipelines with cryptographic proof generation compatible with the BoR (Blockchain of Reasoning) system. This compiler provides **bit-for-bit deterministic execution** suitable for trustless verification and cryptographic auditing.
+
+**Installation**: `pip install rlang-compiler`  
+**Documentation**: See [`docs/compiler_physics.md`](docs/compiler_physics.md) for formal specification  
+**Playbook**: See [`docs/compiler_expansion_playbook.md`](docs/compiler_expansion_playbook.md) for extension guidelines
+
+---
+
+## Quick Onboarding Guide (Start Here)
+
+### What RLang Is
+
+RLang is a deterministic domain-specific language (DSL) designed for building verifiable reasoning pipelines. The compiler translates RLang source code into a canonical intermediate representation (IR) that serves as the "physics layer" for deterministic execution. Every program execution produces a cryptographically verifiable proof bundle compatible with the BoR (Blockchain of Reasoning) system, enabling trustless verification of computation results.
+
+The compiler enforces three non-negotiable invariants: deterministic semantics (same input always produces same output), deterministic proof shape (same execution always produces same trace), and single-source specification (canonical representation ensures hash stability). These invariants are analogous to physical laws—they cannot be violated without breaking fundamental guarantees.
+
+### Installation and Setup
+
+**Install via PyPI:**
+
+```bash
+pip install rlang-compiler
+```
+
+**Install for local development:**
+
+```bash
+git clone https://github.com/your-org/Compiler_implementation.git
+cd Compiler_implementation
+pip install -e .[dev,test]
+./run_all.sh
+```
+
+### Minimal Working Example
+
+Create a file `examples/basic.rlang`:
+
+```rlang
+fn inc(x: Int) -> Int;
+
+pipeline main(Int) -> Int {
+  inc
+}
+```
+
+Compile and inspect output:
+
+```bash
+rlangc examples/basic.rlang --out out/basic.json
+```
+
+The output JSON contains the canonical IR representation of your program.
+
+### Proof Generation and Verification
+
+Generate a proof bundle:
+
+```bash
+./verify_bundle.sh
+```
+
+Verify with BoR CLI:
+
+```bash
+borp verify-bundle --bundle out/rich_proof_bundle.json
+```
+
+These commands compile an RLang program, execute it with a provided input, generate a cryptographic proof bundle containing execution traces (TRP), and verify the bundle's integrity using BoR-compatible hashing (HMASTER, HRICH).
+
+### Python API Quickstart
+
+```python
+from rlang.bor import run_program_with_proof
+
+source = """
+fn inc(x: Int) -> Int;
+pipeline main(Int) -> Int { inc }
+"""
+
+bundle = run_program_with_proof(
+    source=source,
+    input_value=10,
+    fn_registry={"inc": lambda x: x + 1}
+)
+
+print("Output:", bundle.output_value)  # 11
+```
+
+### Determinism Demonstration (10-second test)
+
+```python
+from rlang.bor import run_program_with_proof
+import hashlib
+import json
+
+src = """
+fn inc(x: Int) -> Int;
+pipeline main(Int) -> Int { inc }
+"""
+
+def compute_hash():
+    b = run_program_with_proof(src, 42, fn_registry={"inc": lambda x: x + 1})
+    j = json.dumps(b.to_dict(), sort_keys=True)
+    return hashlib.sha256(j.encode()).hexdigest()
+
+h1 = compute_hash()
+h2 = compute_hash()
+assert h1 == h2  # Always true: deterministic execution
+print("Determinism verified:", h1 == h2)
+```
+
+This works because RLang execution is purely functional and deterministic—same program and input always produce identical proof bundles, enabling cryptographic verification.
+
+### End-to-End Compiler & Proof Flow
+
+```
+RLang Source
+    |
+    v
+[Parser] → [Resolver] → [Type Checker]
+    |
+    v
+[IR Lowering] → [Canonical JSON]
+    |
+    v
+[Execution Engine] → [Proof Bundle] → [HRICH]
+```
+
+Or as a Mermaid diagram:
+
+```mermaid
+flowchart LR
+    A[RLang Source] --> B[Parser]
+    B --> C[Resolver]
+    C --> D[Type Checker]
+    D --> E[IR Lowering]
+    E --> F[Canonical JSON]
+    F --> G[Execution & Proof Generation]
+    G --> H[HRICH Verification]
+```
+
+### Where to Go Next
+
+- **Language Specification**: See [`docs/language.md`](docs/language.md) for complete RLang syntax and semantics
+- **Compiler Architecture**: See [Architecture Overview](#2-architecture-overview) for component classification and modification rules
+- **Proof System Documentation**: See [`docs/proof-system.md`](docs/proof-system.md) for BoR integration details
+- **Developer Workflows**: See [Extension Guidelines](#13-extension-guidelines) for adding new language features
+- **Tests and Golden Files**: See [Testing & Verification](#12-testing--verification) for test suite structure
+
+---
+
+## Table of Contents
+
+1. [First Principles: The Three Non-Negotiable Invariants](#1-first-principles-the-three-non-negotiable-invariants)
+2. [Architecture Overview](#2-architecture-overview)
+3. [Language Semantics (Formal)](#3-language-semantics-formal)
+4. [IR Specification: The Physics Layer](#4-ir-specification-the-physics-layer)
+5. [Canonicalization Specification](#5-canonicalization-specification)
+6. [Execution Semantics](#6-execution-semantics)
+7. [Proof System Architecture](#7-proof-system-architecture)
+8. [The Untouchable Core (Frozen Physics)](#8-the-untouchable-core-frozen-physics)
+9. [Expandable Surfaces (Safe to Extend)](#9-expandable-surfaces-safe-to-extend)
+10. [Quick Start](#10-quick-start)
+11. [API Reference](#11-api-reference)
+12. [Testing & Verification](#12-testing--verification)
+13. [Extension Guidelines](#13-extension-guidelines)
+
+---
+
+## 1. First Principles: The Three Non-Negotiable Invariants
+
+The RLang compiler is built on **three non-negotiable invariants** that define the "physics layer" of deterministic computation. These invariants are analogous to physical laws—they cannot be violated without breaking fundamental guarantees.
+
+### Invariant 1: Deterministic Semantics Invariant
+
+**Formal Definition:**
+
+For any RLang program `P` and input value `x`, there exists a unique output value `y` such that:
+
+```
+Eval(P, x) = y
+```
+
+This must hold **regardless of**:
+- Execution environment (OS, hardware, Python version)
+- Execution time (today vs. tomorrow)
+- Execution order (if multiple valid orders exist, they must be equivalent)
+- Random number generators (none allowed)
+- External state (none allowed)
+
+**Mathematical Properties:**
+
+- **Functionality**: `∀P, x. ∃!y. Eval(P, x) = y`
+- **Idempotency**: `Eval(P, x) = Eval(P, x)` (always)
+- **Compositionality**: `Eval(P₁; P₂, x) = Eval(P₂, Eval(P₁, x))`
+
+**Violation Examples:**
+
+**FORBIDDEN**: Using `time.time()` in function registry  
+**FORBIDDEN**: Reading from `/dev/urandom`  
+**FORBIDDEN**: Non-deterministic iteration order  
+**FORBIDDEN**: Floating-point operations that vary by platform
+
+**ALLOWED**: Pure mathematical operations  
+**ALLOWED**: Deterministic string operations  
+**ALLOWED**: Fixed-order list operations
+
+### Invariant 2: Deterministic Proof Shape Invariant
+
+**Formal Definition:**
+
+For any RLang program `P` and input value `x`, there exists a unique execution trace `trace` such that:
+
+```
+TRP(P, x) = trace
+```
+
+The trace must be:
+- **Complete**: Every step execution is recorded
+- **Ordered**: Steps appear in execution order
+- **Deterministic**: Same execution → same trace
+- **Canonical**: Trace structure is stable across serializations
+
+**Trace Structure (TRP v1):**
+
+```python
+trace = {
+    "steps": [
+        {
+            "index": int,           # 0-based step index
+            "step_name": str,        # Function name
+            "template_id": str,     # Template reference
+            "input": Any,           # Input snapshot
+            "output": Any           # Output snapshot
+        },
+        ...
+    ],
+    "branches": [
+        {
+            "index": int,           # IF step index
+            "path": "then" | "else",
+            "condition_value": bool
+        },
+        ...
+    ]
+}
+```
+
+**Hash Invariants:**
+
+```
+Hash(canonical(P)) = H_IR          # Program IR hash
+Hash(trace) = HRICH                 # Execution trace hash
+Hash(H_IR | HRICH) = HMASTER        # Master hash
+```
+
+**Violation Examples:**
+
+**FORBIDDEN**: Recording steps in non-deterministic order  
+**FORBIDDEN**: Including timestamps in trace  
+**FORBIDDEN**: Non-deterministic trace serialization  
+**FORBIDDEN**: Omitting steps from trace
+
+**ALLOWED**: Recording all steps in execution order  
+**ALLOWED**: Canonical JSON serialization  
+**ALLOWED**: Deterministic branch recording
+
+### Invariant 3: Single-Source Specification Invariant
+
+**Formal Definition:**
+
+For any RLang program `P`, there exists a unique canonical representation `canonical(P)` such that:
+
+```
+canonical(P₁) = canonical(P₂) ⟺ P₁ ≡ P₂
+```
+
+Where `≡` denotes semantic equivalence.
+
+**Canonical Representation Rules:**
+
+1. **Key Ordering**: All dictionary keys must be sorted alphabetically
+2. **Value Normalization**: Floats normalized, integers preferred where possible
+3. **Structure Stability**: Same structure → same JSON string
+4. **Encoding Stability**: UTF-8, no BOM, consistent line endings
+
+**Hash Stability:**
+
+```
+Hash(canonical(P)) = H_IR
+```
+
+This hash must be **stable** across:
+- Different compiler versions (if semantics unchanged)
+- Different platforms
+- Different Python versions
+- Different serialization libraries
+
+**Violation Examples:**
+
+**FORBIDDEN**: Non-deterministic key ordering  
+**FORBIDDEN**: Platform-dependent float formatting  
+**FORBIDDEN**: Non-canonical JSON serialization  
+**FORBIDDEN**: Including compiler metadata in canonical form
+
+**ALLOWED**: Alphabetically sorted keys  
+**ALLOWED**: Normalized float representation  
+**ALLOWED**: Consistent JSON formatting
+
+---
+
+## 2. Architecture Overview
+
+### Compilation Pipeline
+
+```
+┌─────────┐
+│ Source  │
+│  Code   │
+└────┬────┘
+     │
+     ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    FRONTEND (EXTENSION-SAFE)                │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌──────────┐    ┌──────────┐    ┌──────────┐             │
+│  │  Lexer   │───▶│  Parser  │───▶│ Resolver │             │
+│  │          │    │          │    │          │             │
+│  │ PLUGGABLE│    │ PLUGGABLE│    │ PLUGGABLE│             │
+│  └──────────┘    └──────────┘    └──────────┘             │
+│                                                              │
+│                          │                                   │
+│                          ▼                                   │
+│                  ┌──────────────┐                            │
+│                  │ Type Checker │                            │
+│                  │              │                            │
+│                  │ EXTENSION-   │                            │
+│                  │ SAFE         │                            │
+│                  └──────────────┘                            │
+└──────────────────────────┬───────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│              MIDDLE-END (SAFE BUT STRICT)                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│                  ┌──────────────┐                            │
+│                  │   Lowering   │                            │
+│                  │              │                            │
+│                  │ MUST REMAIN  │                            │
+│                  │ DETERMINISTIC│                            │
+│                  └──────┬───────┘                            │
+│                         │                                     │
+│                         ▼                                     │
+│                  ┌──────────────┐                            │
+│                  │      IR      │                            │
+│                  │              │                            │
+│                  │   PHYSICS   │                            │
+│                  │    LAYER    │                            │
+│                  └──────┬───────┘                            │
+└─────────────────────────┼─────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│              BACKEND (VERY SENSITIVE)                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌──────────────┐    ┌──────────────┐                      │
+│  │ Canonicalizer│───▶│   Executor   │                      │
+│  │              │    │              │                      │
+│  │    FIXED     │    │ MUST REMAIN  │                      │
+│  │              │    │ DETERMINISTIC│                      │
+│  └──────┬───────┘    └──────┬───────┘                      │
+│         │                    │                               │
+│         ▼                    ▼                               │
+│  ┌──────────────┐    ┌──────────────┐                      │
+│  │   Canonical  │    │  Proof Trace │                      │
+│  │     JSON     │    │   (TRP v1)   │                      │
+│  │              │    │              │                      │
+│  │    FIXED     │    │    FIXED     │                      │
+│  └──────┬───────┘    └──────┬───────┘                      │
+│         │                    │                               │
+│         └──────────┬─────────┘                               │
+│                    ▼                                         │
+│            ┌──────────────┐                                  │
+│            │   Hashing    │                                  │
+│            │              │                                  │
+│            │ HMASTER/     │                                  │
+│            │ HRICH        │                                  │
+│            │              │                                  │
+│            │    FIXED     │                                  │
+│            └──────────────┘                                  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Component Classification
+
+| Component | Classification | Rationale |
+|-----------|----------------|-----------|
+| **Lexer** | `PLUGGABLE` | Tokenization is syntax-level; can extend for new keywords/symbols |
+| **Parser** | `PLUGGABLE` | AST construction is syntax-level; can add new AST nodes |
+| **Resolver** | `PLUGGABLE` | Symbol resolution is syntax-level; can extend symbol table |
+| **Type Checker** | `EXTENSION-SAFE` | Type checking must remain deterministic but can add new types |
+| **Lowering** | `MUST REMAIN DETERMINISTIC` | IR generation must preserve semantics deterministically |
+| **IR** | `PHYSICS LAYER` | IR structure defines execution model; changes break proofs |
+| **Canonicalizer** | `FIXED` | Canonical JSON rules cannot change without breaking hashes |
+| **Executor** | `MUST REMAIN DETERMINISTIC` | Execution semantics must remain deterministic |
+| **Proof System** | `FIXED` | TRP structure is frozen; extensions via versioning |
+| **Hashing** | `FIXED` | Hash algorithms and structure are frozen |
+
+---
+
+## 3. Language Semantics (Formal)
+
+### Type System
+
+#### Primitive Types
+
+RLang defines five primitive types:
+
+- **`Int`**: 64-bit signed integers (Python `int`, unbounded)
+- **`Float`**: IEEE 754 double-precision floating-point (Python `float`)
+- **`String`**: UTF-8 encoded strings (Python `str`)
+- **`Bool`**: Boolean values `true` / `false` (Python `bool`)
+- **`Unit`**: Unit type (Python `None`)
+
+**Type Semantics:**
+
+```
+Type ::= Int | Float | String | Bool | Unit
+```
+
+**Type Equivalence:**
+
+Two types `T₁` and `T₂` are equivalent (`T₁ ≡ T₂`) if:
+- Both are primitive and have the same name, OR
+- Both are generic with same name and equivalent type arguments
+
+#### Type Aliases
+
+Type aliases provide semantic meaning:
+
+```rlang
+type UserId = Int;
+type Email = String;
+```
+
+**Semantics:**
+
+```
+type_alias ::= type IDENTIFIER = TypeExpr;
+```
+
+Type aliases are **transparent** during type checking—they resolve to their underlying types.
+
+### Expressions
+
+#### Literal Expressions
+
+```
+Literal ::= INTEGER | FLOAT | STRING | BOOLEAN
+```
+
+**Evaluation:**
+
+```
+Eval(42) = 42
+Eval(3.14) = 3.14
+Eval("hello") = "hello"
+Eval(true) = True
+Eval(false) = False
+```
+
+#### Identifier Expressions
+
+```
+Identifier ::= IDENTIFIER
+```
+
+**Special Identifiers:**
+
+- **`__value`**: Current pipeline value (runtime context)
+
+**Evaluation:**
+
+```
+Eval(__value, ctx) = ctx.current_value
+```
+
+#### Binary Operations
+
+```
+BinaryOp ::= Expr OP Expr
+OP ::= + | - | * | / | > | < | >= | <= | == | !=
+```
+
+**Arithmetic Operations:**
+
+```
+Eval(e₁ + e₂, ctx) = Eval(e₁, ctx) + Eval(e₂, ctx)
+Eval(e₁ - e₂, ctx) = Eval(e₁, ctx) - Eval(e₂, ctx)
+Eval(e₁ * e₂, ctx) = Eval(e₁, ctx) * Eval(e₂, ctx)
+Eval(e₁ / e₂, ctx) = Eval(e₁, ctx) / Eval(e₂, ctx)  [if Eval(e₂, ctx) ≠ 0]
+```
+
+**Comparison Operations:**
+
+```
+Eval(e₁ > e₂, ctx) = Eval(e₁, ctx) > Eval(e₂, ctx)
+Eval(e₁ < e₂, ctx) = Eval(e₁, ctx) < Eval(e₂, ctx)
+Eval(e₁ >= e₂, ctx) = Eval(e₁, ctx) >= Eval(e₂, ctx)
+Eval(e₁ <= e₂, ctx) = Eval(e₁, ctx) <= Eval(e₂, ctx)
+Eval(e₁ == e₂, ctx) = Eval(e₁, ctx) == Eval(e₂, ctx)
+Eval(e₁ != e₂, ctx) = Eval(e₁, ctx) != Eval(e₂, ctx)
+```
+
+**Type Rules:**
+
+- Arithmetic: `Int + Int → Int`, `Float + Float → Float`, `Int + Float → Float`
+- Comparison: `T × T → Bool` (for comparable types)
+
+#### Function Calls
+
+```
+Call ::= IDENTIFIER ( Expr₁, ..., Exprₙ )
+```
+
+**Evaluation:**
+
+```
+Eval(f(e₁, ..., eₙ), ctx) = fn_registry[f](Eval(e₁, ctx), ..., Eval(eₙ, ctx))
+```
+
+**Type Rules:**
+
+```
+f : T₁ × ... × Tₙ → T
+e₁ : T₁, ..., eₙ : Tₙ
+─────────────────────────
+f(e₁, ..., eₙ) : T
+```
+
+#### Conditional Expressions (v0.2+)
+
+```
+IfExpr ::= if ( Expr ) { Steps } [ else { Steps } ]
+```
+
+**Evaluation:**
+
+```
+Eval(if (c) { s₁ } else { s₂ }, ctx) = 
+    if Eval(c, ctx) then Eval(s₁, ctx) else Eval(s₂, ctx)
+```
+
+**Type Rules:**
+
+```
+c : Bool
+s₁ : T
+s₂ : T
+─────────────────────────
+if (c) { s₁ } else { s₂ } : T
+```
+
+**Determinism Requirement:**
+
+The condition `c` must be a **pure expression**—no side effects, no randomness, no time-dependent operations.
+
+### Pipeline Semantics
+
+#### Pipeline Definition
+
+```
+Pipeline ::= pipeline IDENTIFIER ( Type ) -> Type { Steps }
+Steps ::= Step₁ -> Step₂ -> ... -> Stepₙ
+```
+
+**Evaluation:**
+
+```
+Eval(pipeline main(T_in) -> T_out { s₁ -> ... -> sₙ }, x) =
+    Eval(sₙ, Eval(sₙ₋₁, ..., Eval(s₁, x)...))
+```
+
+**Composition:**
+
+```
+Eval(s₁ -> s₂, x) = Eval(s₂, Eval(s₁, x))
+```
+
+#### Step Semantics
+
+**Function Step:**
+
+```
+Eval(f, x) = fn_registry[f](x)
+```
+
+**Conditional Step:**
+
+```
+Eval(if (c) { s₁ } else { s₂ }, x) =
+    if Eval(c, x) then Eval(s₁, x) else Eval(s₂, x)
+```
+
+### Deterministic Requirements
+
+#### No Randomness
+
+**FORBIDDEN:**
+- Random number generation
+- Non-deterministic algorithms
+- Probabilistic data structures
+
+#### No I/O
+
+**FORBIDDEN:**
+- File system access
+- Network operations
+- Standard input/output
+- Environment variables (except compile-time)
+
+#### No Time Dependence
+
+**FORBIDDEN:**
+- Timestamps
+- System time
+- Date/time operations
+
+#### Fixed Evaluation Order
+
+**REQUIRED:**
+- Left-to-right evaluation
+- Sequential pipeline execution
+- Deterministic branch selection
+
+---
+
+## 4. IR Specification: The Physics Layer
+
+The Intermediate Representation (IR) is the **physics layer** of RLang. It defines:
+
+1. **What can be executed**: Only IR nodes can appear in execution traces
+2. **How execution proceeds**: IR structure determines execution order
+3. **What is provable**: Only IR-level operations generate proof records
+
+**IR Invariants:**
+
+1. **Purity**: Every IR node is pure (no side effects)
+2. **Determinism**: IR evaluation is deterministic
+3. **Canonicalizability**: Every IR node can be serialized to canonical JSON
+4. **Completeness**: All semantic constructs must lower to IR
+
+### Current IR Node Types (v0.2.2)
+
+#### IRExpr
+
+Base class for all expressions in IR.
+
+```python
+@dataclass(frozen=True)
+class IRExpr:
+    kind: str  # "literal" | "identifier" | "binary_op" | "call" | "boolean_and" | "boolean_or" | "boolean_not" | "record" | "field_access" | "list"
+    # ... fields depend on kind
+```
+
+**Kinds:**
+
+1. **`literal`**: Literal values
+2. **`identifier`**: Variable references (e.g., `__value`)
+3. **`binary_op`**: Binary operations (`+`, `-`, `*`, `/`, `>`, `<`, etc.)
+4. **`call`**: Function calls
+5. **`boolean_and`**: Boolean AND (`&&`)
+6. **`boolean_or`**: Boolean OR (`||`)
+7. **`boolean_not`**: Boolean NOT (`!`)
+8. **`record`**: Record construction `{ field1: expr1, ... }`
+9. **`field_access`**: Field access `obj.field`
+10. **`list`**: List construction `[expr1, expr2, ...]`
+
+#### IRIf
+
+Conditional execution node.
+
+```python
+@dataclass(frozen=True)
+class IRIf:
+    condition: IRExpr
+    then_steps: list[PipelineStepIR]
+    else_steps: list[PipelineStepIR]
+```
+
+**Semantics:**
+
+- Condition must evaluate to `Bool`
+- Both branches must produce same output type
+- Execution is deterministic based on condition value
+
+#### PipelineStepIR
+
+Single step in a pipeline.
+
+```python
+@dataclass(frozen=True)
+class PipelineStepIR:
+    index: int
+    name: str
+    template_id: str
+    arg_types: list[str]
+    input_type: str | None
+    output_type: str | None
+```
+
+#### PipelineIR
+
+Complete pipeline definition.
+
+```python
+@dataclass(frozen=True)
+class PipelineIR:
+    id: str
+    name: str
+    input_type: str | None
+    output_type: str | None
+    steps: list[PipelineStepIR | IRIf]
+```
+
+### Rules for Adding New IR Nodes
+
+Every new IR node **MUST**:
+
+1. **Be Pure**: No side effects, no hidden state
+2. **Be Deterministic**: Same inputs → same outputs
+3. **Be Canonicalizable**: Implement `to_dict()` with sorted keys
+4. **Have Fixed Evaluation Order**: No non-deterministic iteration
+5. **Preserve Type Information**: Include type annotations
+
+**Example: Adding IRRecord (v0.3)**
+
+```python
+@dataclass(frozen=True)
+class IRRecord:
+    """IR representation of a record construction."""
+    fields: dict[str, IRExpr]  # Field name → expression
+    
+    def to_dict(self) -> dict[str, Any]:
+        """Canonical dictionary representation."""
+        return {
+            "fields": {
+                k: v.to_dict() 
+                for k, v in sorted(self.fields.items())  # Sorted!
+            },
+            "kind": "record"
+        }
+```
+
+**Key Point**: Record fields must be sorted alphabetically to ensure canonical representation.
+
+---
+
+## 5. Canonicalization Specification
+
+Canonical JSON is the **stable serialization format** that ensures:
+
+- Same data structure → same JSON string
+- Same JSON string → same hash
+- Deterministic across platforms and Python versions
+
+### Key Ordering Rule
+
+**RULE**: All dictionary keys must be sorted **alphabetically**.
+
+**Implementation:**
+
+```python
+def canonical_dumps(obj: Any) -> str:
+    return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+```
+
+**Example:**
+
+```python
+{"b": 2, "a": 1} → '{"a":1,"b":2}'
+```
+
+**Why This Matters:**
+
+Non-deterministic key ordering breaks hash stability:
+
+```python
+# WRONG
+{"b": 2, "a": 1} → hash₁
+{"a": 1, "b": 2} → hash₂  # Different hash!
+
+# CORRECT
+{"b": 2, "a": 1} → '{"a":1,"b":2}' → hash
+{"a": 1, "b": 2} → '{"a":1,"b":2}' → hash  # Same hash!
+```
+
+### Float Normalization Rule
+
+**RULE**: Floats must be normalized to ensure platform-independent representation.
+
+**Implementation:**
+
+```python
+def _normalize_floats(obj: Any) -> Any:
+    if isinstance(obj, float):
+        if obj.is_integer():
+            return int(obj)  # 3.0 → 3
+        return round(obj, 10)  # Round to 10 decimal places
+    elif isinstance(obj, dict):
+        return {k: _normalize_floats(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [_normalize_floats(item) for item in obj]
+    return obj
+```
+
+### Whitespace Rule
+
+**RULE**: Minimal whitespace (compact JSON) unless indentation is explicitly requested.
+
+**Implementation:**
+
+```python
+# Compact (default)
+json.dumps(obj, separators=(",", ":"))  # No spaces
+
+# Pretty (for debugging)
+json.dumps(obj, indent=2)  # 2-space indentation
+```
+
+### Encoding Rule
+
+**RULE**: UTF-8 encoding, no BOM, consistent line endings.
+
+**Implementation:**
+
+```python
+canonical_json.encode("utf-8")
+```
+
+### What Breaks Determinism
+
+**FORBIDDEN:**
+
+1. Non-deterministic key ordering
+2. Platform-dependent float representation
+3. Non-canonical JSON serialization
+4. Including metadata in canonical form
+5. Non-deterministic whitespace
+
+**REQUIRED:**
+
+1. Alphabetically sorted keys
+2. Normalized floats
+3. Canonical JSON serialization
+4. Pure data structures only
+5. Consistent encoding
+
+---
+
+## 6. Execution Semantics
+
+RLang execution is **purely functional** and **deterministic**:
+
+- No mutable state
+- No side effects
+- No I/O operations
+- No randomness
+
+### Function Application
+
+**Semantics:**
+
+```
+Apply(f, x) = fn_registry[f](x)
+```
+
+**Requirements:**
+
+1. `fn_registry[f]` must be a **pure function**
+2. No side effects allowed
+3. Deterministic output for same input
+
+### Step Execution
+
+**Sequential Execution:**
+
+```
+Execute([s₁, ..., sₙ], x₀) =
+    let x₁ = Execute(s₁, x₀) in
+    let x₂ = Execute(s₂, x₁) in
+    ...
+    let xₙ = Execute(sₙ, xₙ₋₁) in
+    xₙ
+```
+
+**Trace Recording:**
+
+Each step execution produces a **StepExecutionRecord**:
+
+```python
+StepExecutionRecord(
+    index=i,
+    step_name=name,
+    template_id=template_id,
+    input_snapshot=xᵢ,
+    output_snapshot=xᵢ₊₁
+)
+```
+
+### Conditional Execution
+
+**Branch Selection:**
+
+```
+Execute(IRIf(condition=c, then_steps=t, else_steps=e), x) =
+    if Eval(c, x) then
+        Execute(t, x)
+    else
+        Execute(e, x)
+```
+
+**Branch Recording:**
+
+Each conditional execution produces a **BranchExecutionRecord**:
+
+```python
+BranchExecutionRecord(
+    index=i,
+    path="then" | "else",
+    condition_value=bool
+)
+```
+
+**Determinism:**
+
+Same condition value → same branch path → same execution trace.
+
+---
+
+## 7. Proof System Architecture
+
+### TRP v1 (Current)
+
+**TRP (Trace of Reasoning Process)** is the execution trace format.
+
+#### Structure
+
+```python
+PipelineProofBundle(
+    version: str,
+    language: str,
+    entry_pipeline: str | None,
+    program_ir: PrimaryProgramIR,
+    input_value: Any,
+    output_value: Any,
+    steps: List[StepExecutionRecord],
+    branches: List[BranchExecutionRecord]
+)
+```
+
+#### Step Records
+
+```python
+StepExecutionRecord(
+    index: int,           # 0-based step index
+    step_name: str,        # Function name
+    template_id: str,      # Template reference
+    input_snapshot: Any,   # Input value
+    output_snapshot: Any   # Output value
+)
+```
+
+#### Branch Records
+
+```python
+BranchExecutionRecord(
+    index: int,           # IF step index
+    path: str,            # "then" | "else"
+    condition_value: bool  # Condition evaluation result
+)
+```
+
+### Hashing Model
+
+#### HMASTER
+
+**Definition:**
+
+```
+HMASTER = Hash(canonical(program_ir))
+```
+
+**Computation:**
+
+```python
+def compute_HMASTER(program_ir: PrimaryProgramIR) -> str:
+    canonical_json = program_ir.to_json()
+    return hashlib.sha256(canonical_json.encode("utf-8")).hexdigest()
+```
+
+**Invariant:**
+
+Same program IR → same HMASTER.
+
+#### HRICH
+
+**Definition:**
+
+```
+HRICH = Hash(canonical(proof_bundle))
+```
+
+**Computation:**
+
+```python
+def compute_HRICH(proof_bundle: PipelineProofBundle) -> str:
+    # Convert to rich bundle format
+    rich_bundle = {
+        "primary": {
+            "master": HMASTER,
+            "steps": [step.to_dict() for step in proof_bundle.steps],
+            "branches": [branch.to_dict() for branch in proof_bundle.branches]
+        },
+        "H_RICH": None  # Computed below
+    }
+    
+    # Compute subproof hashes
+    subproof_hashes = compute_subproof_hashes(subproofs)
+    
+    # Compute HRICH from subproof hashes
+    HRICH = compute_HRICH_from_subproof_hashes(subproof_hashes)
+    
+    return HRICH
+```
+
+**Subproof Hashes:**
+
+```
+subproof_hashes = {
+    "DIP": Hash(DIP_subproof),
+    "DP": Hash(DP_subproof),
+    "PEP": Hash(PEP_subproof),
+    "PoPI": Hash(PoPI_subproof),
+    "CCP": Hash(CCP_subproof),
+    "CMIP": Hash(CMIP_subproof),
+    "PP": Hash(PP_subproof),
+    "TRP": Hash(TRP_subproof)
+}
+```
+
+**HRICH Computation:**
+
+```
+HRICH = SHA256(
+    sorted(subproof_hashes.values()).join("|")
+)
+```
+
+**Invariant:**
+
+Same execution trace → same HRICH.
+
+---
+
+## 8. The Untouchable Core (Frozen Physics)
+
+These components **MUST NEVER BE MODIFIED** without breaking determinism guarantees:
+
+| Component | Frozen? | Why? |
+|-----------|---------|------|
+| **Canonical JSON Rules** | YES | Breaks HMASTER stability |
+| **Hash Algorithms** | YES | Breaks verification |
+| **TRP Structure Rules** | YES | Breaks proof compatibility |
+| **Branch Decision Semantics** | YES | Breaks determinism |
+| **Deterministic Data Structures** | YES | Breaks execution determinism |
+| **No Non-Deterministic Iteration** | YES | Breaks execution determinism |
+| **No Mutation in IR** | YES | Breaks purity |
+
+### Partially Frozen Components
+
+These components can be **extended** but must preserve determinism:
+
+| Component | Frozen? | Why? |
+|-----------|---------|------|
+| **AST → IR Lowering** | PARTIAL | Must remain deterministic |
+| **Type System** | PARTIAL | Can add types, but rules must be deterministic |
+| **Executor** | PARTIAL | Semantics must remain deterministic |
+| **Parser** | NO | Extensions allowed (new syntax) |
+| **Resolver** | NO | Extensions allowed (new symbols) |
+
+### Modification Rules
+
+#### Canonical JSON
+
+**NEVER CHANGE:**
+
+- Key sorting algorithm
+- Float normalization rules
+- JSON encoding (UTF-8)
+- Whitespace rules
+
+**ALLOWED:**
+
+- Adding new fields to existing structures (if canonicalized correctly)
+
+#### Hash Algorithms
+
+**NEVER CHANGE:**
+
+- SHA-256 algorithm
+- Hash computation order
+- Subproof hash structure
+
+**ALLOWED:**
+
+- Adding new hash types (with new names)
+- Extending hash inputs (additive only)
+
+#### TRP Structure
+
+**NEVER CHANGE:**
+
+- Step record structure (v1)
+- Branch record structure (v1)
+- Record field names
+
+**ALLOWED:**
+
+- Adding new record types (TRP v2)
+- Extending existing records (additive fields)
+
+---
+
+## 9. Expandable Surfaces (Safe to Extend)
+
+### Frontend Extensions
+
+#### Lexer
+
+**Safe to Add:**
+
+- New keywords
+- New operators
+- New literal types
+- New comment styles
+
+#### Parser
+
+**Safe to Add:**
+
+- New AST nodes
+- New expression forms
+- New statement types
+
+#### Resolver
+
+**Safe to Add:**
+
+- New symbol kinds
+- New scoping rules
+- New name resolution strategies
+
+### Middle-End Extensions
+
+#### Type System
+
+**Safe to Add:**
+
+- New primitive types
+- New generic types
+- New type constructors
+
+#### Lowering
+
+**Safe to Add:**
+
+- New AST → IR lowering rules
+- New IR node types (following IR invariants)
+
+### Backend Extensions
+
+#### Executor
+
+**Safe to Add:**
+
+- New execution strategies
+- New optimization passes
+- New proof recording formats
+
+#### Proof System
+
+**Safe to Add:**
+
+- New proof record types (TRP v2)
+- New subproof types
+- New verification strategies
+
+### Extension Guidelines
+
+**Before Adding:**
+
+1. Verify determinism (same input → same output)
+2. Verify canonicalizability (can serialize to JSON)
+3. Verify purity (no side effects)
+4. Add tests (determinism tests required)
+5. Update documentation
+
+**After Adding:**
+
+1. Run full test suite
+2. Verify hash stability
+3. Update golden files
+4. Document extension
+
+---
+
+## 10. Quick Start
+
+### Installation
+
+```bash
+pip install rlang-compiler
+```
+
+### Basic Usage
+
+**Example 1: Simple Pipeline**
+
+```rlang
+fn inc(x: Int) -> Int;
+
+pipeline main(Int) -> Int { inc }
+```
+
+Compile:
+
+```bash
+rlangc examples/simple.rlang --out out/simple.json
+```
+
+**Example 2: Conditional Execution**
+
+```rlang
+fn double(x: Int) -> Int;
+fn half(x: Int) -> Int;
+
+pipeline main(Int) -> Int {
+  if (__value > 10) {
+    double
+  } else {
+    half
+  }
+}
+```
+
+**Example 3: Proof Generation**
+
+```python
+from rlang.bor import run_program_with_proof, RLangBoRCrypto
+
+source = """
+fn inc(x: Int) -> Int;
+pipeline main(Int) -> Int { inc }
+"""
+
+bundle = run_program_with_proof(
+    source=source,
+    input_value=10,
+    fn_registry={"inc": lambda x: x + 1}
+)
+
+crypto = RLangBoRCrypto(bundle)
+rich = crypto.to_rich_bundle()
+
+print("HMASTER:", rich.rich["primary"]["master"])
+print("HRICH:", rich.rich["H_RICH"])
+```
+
+### Verification
+
+```bash
+# Generate proof bundle
+python verify_proof_bundle.py
+
+# Verify with BoR CLI
+borp verify-bundle --bundle out/rich_proof_bundle.json
+```
+
+---
+
+## 11. API Reference
+
+### Core Compiler API
+
+```python
+from rlang import compile_source_to_ir, compile_source_to_json
+
+# Compile to IR
+result = compile_source_to_ir(
+    source="fn inc(x: Int) -> Int; pipeline main(Int) -> Int { inc }",
+    version="v0",
+    language="rlang"
+)
+
+# Compile to JSON
+json_str = compile_source_to_json(
+    source="fn inc(x: Int) -> Int; pipeline main(Int) -> Int { inc }"
+)
+```
+
+### Proof Generation API
+
+```python
+from rlang.bor import run_program_with_proof, RLangBoRCrypto
+
+# Generate proof bundle
+bundle = run_program_with_proof(
+    source=source,
+    input_value=10,
+    fn_registry={"inc": lambda x: x + 1}
+)
+
+# Convert to rich bundle
+crypto = RLangBoRCrypto(bundle)
+rich_bundle = crypto.to_rich_bundle()
+```
+
+### CLI Usage
+
+```bash
+# Compile to stdout
+rlangc program.rlang
+
+# Compile to file
+rlangc program.rlang --out output.json
+
+# Specify entry pipeline
+rlangc program.rlang --entry main --out output.json
+```
+
+---
+
+## 12. Testing & Verification
+
+### Test Suite
+
+The compiler includes **190+ tests** covering:
+
+- Lexer (tokenization, comments, floats)
+- Parser (AST construction, operator precedence)
+- Type Checker (type inference, type aliases, control flow)
+- IR (lowering, primary IR construction)
+- Emitter (end-to-end compilation)
+- CLI (command-line interface)
+- BoR Integration (proof generation, crypto hashing, CLI compatibility)
+- Determinism (SHA256 comparison, tamper detection)
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest -q --disable-warnings
+
+# Run specific test file
+pytest tests/test_parser.py -v
+
+# Run with coverage
+pytest --cov=rlang
+```
+
+### Determinism Verification
+
+```bash
+# Run deterministic test suite
+./next_tests.sh
+
+# Verify proof bundles
+./verify_bundle.sh
+```
+
+### Release Audit
+
+```bash
+# Run comprehensive release audit
+./scripts/run_release_audit.sh
+```
+
+The audit checks:
+- Environment reset
+- Static code consistency
+- Full test suite
+- Determinism tests
+- Golden file verification
+- Canonical JSON boundary audit
+- IR shape stability
+- TRP audit
+- Hash boundary tests
+- CLI verification
+- Packaging readiness
+
+---
+
+## 13. Extension Guidelines
+
+For detailed extension guidelines, see [`docs/compiler_expansion_playbook.md`](docs/compiler_expansion_playbook.md).
+
+### Quick Checklist
+
+When adding a new feature:
+
+1. [ ] Update grammar in `docs/compiler_physics.md`
+2. [ ] Add lexer tokens
+3. [ ] Add parser AST nodes
+4. [ ] Add resolver logic
+5. [ ] Add type checking rules
+6. [ ] Add IR node (if needed)
+7. [ ] Add lowering rules
+8. [ ] Add execution logic
+9. [ ] Verify canonicalization
+10. [ ] Add proof recording (if needed)
+11. [ ] Add comprehensive tests
+12. [ ] Update golden files
+13. [ ] Update documentation
+
+### Test Matrix
+
+For each new construct:
+
+- [ ] Parser tests (basic, nested, empty, invalid, edge cases)
+- [ ] Typechecker tests (valid, invalid, inference, nested, edge cases)
+- [ ] Lowering tests (basic, nested, deterministic, edge cases)
+- [ ] IR tests (structure, canonical, deterministic, edge cases)
+- [ ] Executor tests (basic, proof, deterministic, edge cases)
+- [ ] Determinism tests (IR, H_IR, TRP, HRICH, cross-platform)
+- [ ] Canonical JSON tests (sorted keys, float normalization, stable representation)
+- [ ] Proof stability tests (branching, loops, collections, pattern matching)
+
+---
+
+## References
+
+- **Formal Specification**: [`docs/compiler_physics.md`](docs/compiler_physics.md) — Complete deterministic execution & proof architecture specification
+- **Extension Playbook**: [`docs/compiler_expansion_playbook.md`](docs/compiler_expansion_playbook.md) — Implementation checklists, test matrices & modularization guide
+- **Language Specification**: [`docs/language.md`](docs/language.md) — RLang language syntax and semantics
+- **Proof System**: [`docs/proof-system.md`](docs/proof-system.md) — BoR proof system integration
+
+---
+
+## Status
+
+**Compiler**: Fully functional (190+ tests passing)  
+**Control Flow**: Deterministic `if/else` in pipelines with type-checked branches  
+**Proof Generation**: Complete and deterministic, including branch-aware TRP subproofs  
+**BoR Integration**: Verified with `borp verify-bundle`  
+**Determinism**: Bit-for-bit reproducible including branch traces  
+**Security**: Tamper detection working for both steps and branches  
+**Version**: 0.2.2 (published to PyPI)
+
+---
+
+**License**: MIT License  
+**Author**: Kushagra Bhatnagar  
+**Last Updated**: November 2025
