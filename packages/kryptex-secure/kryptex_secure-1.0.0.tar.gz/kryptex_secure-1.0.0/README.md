@@ -1,0 +1,316 @@
+# kryptex - Secure Key Wrapping and File Encryption
+
+[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+Production-grade command-line tool for secure key wrapping and file encryption using industry-standard cryptography.
+
+## Features
+
+- **AES-256-GCM Encryption**: Industry-standard authenticated encryption
+- **Scrypt KDF**: Password-based key derivation with OWASP-recommended parameters
+- **HMAC Integrity**: Detect tampered keyfiles before decryption attempts
+- **Rate Limiting**: Protection against brute-force attacks
+- **Key Rotation**: Change passwords without re-encrypting data
+- **Input Validation**: Comprehensive security checks on all inputs
+- **Metadata Display**: View keyfile information safely
+
+## Installation
+
+### From PyPI (Recommended)
+
+```bash
+pip install kryptex-secure
+```
+
+### From Source
+
+```bash
+git clone https://github.com/Sammy750-cyber/kryptex.git
+cd kryptex
+pip install -e .
+```
+
+### For Development
+
+```bash
+git clone https://github.com/Sammy750-cyber/kryptex.git
+cd kryptex
+pip install -e ".[dev]"
+```
+
+## Quick Start
+
+### 1. Create a wrapped key
+
+```bash
+kryptex wrap-key --keyfile my.key
+```
+
+You'll be prompted to create a strong password.
+
+### 2. Encrypt a file
+
+```bash
+kryptex encrypt --keyfile my.key --infile secret.txt --outfile secret.enc
+```
+
+### 3. Decrypt a file
+
+```bash
+kryptex decrypt --keyfile my.key --infile secret.enc --outfile recovered.txt
+```
+
+### 4. Change keyfile password
+
+```bash
+kryptex rotate-key --keyfile my.key
+```
+
+### 5. View keyfile metadata
+
+```bash
+kryptex info --keyfile my.key
+```
+
+## Usage Examples
+
+### Basic Encryption Workflow
+
+```bash
+# Step 1: Create a new key
+kryptex wrap-key --keyfile backup.key
+
+# Step 2: Encrypt sensitive files
+kryptex encrypt --keyfile backup.key --infile documents.tar.gz --outfile documents.enc
+
+# Step 3: Decrypt when needed
+kryptex decrypt --keyfile backup.key --infile documents.enc --outfile documents.tar.gz
+```
+
+### Key Rotation
+
+```bash
+# Change password without re-encrypting files
+kryptex rotate-key --keyfile backup.key
+```
+
+### Force Overwrite
+
+```bash
+# Skip confirmation prompts
+kryptex wrap-key --keyfile my.key --force
+kryptex encrypt --keyfile my.key --infile data.txt --outfile data.enc --force
+```
+
+## Security Features
+
+### Password Requirements
+- Minimum 12 characters
+- At least 3 of: uppercase, lowercase, digits, special characters
+- Not in common password list
+
+### Cryptographic Specifications
+- **Encryption**: AES-256-GCM (Authenticated Encryption)
+- **KDF**: Scrypt with N=131,072 (2^17), r=8, p=1
+- **Key Derivation**: HKDF-SHA256 for subkey separation
+- **HMAC**: SHA-256 for integrity verification
+- **Random Generation**: OS-provided cryptographic random (os.urandom)
+
+### Rate Limiting
+- Maximum 5 failed unlock attempts
+- 24-hour lockout period
+- Automatic reset after timeout
+
+### File Permissions
+- Keyfiles automatically set to 0600 (owner read/write only)
+- Encrypted files respect user's umask
+
+## Command Reference
+
+### wrap-key
+Generate and password-protect a data encryption key.
+
+```bash
+kryptex wrap-key --keyfile PATH [--force]
+```
+
+**Options:**
+- `--keyfile PATH`: Output keyfile path (required)
+- `--force`: Overwrite existing file without prompting
+
+### encrypt
+Encrypt a file using a wrapped key.
+
+```bash
+kryptex encrypt --keyfile PATH --infile PATH --outfile PATH [--force]
+```
+
+**Options:**
+- `--keyfile PATH`: Path to keyfile (required)
+- `--infile PATH`: Input file to encrypt (required)
+- `--outfile PATH`: Output encrypted file (required)
+- `--force`: Overwrite existing output file without prompting
+
+**Limits:**
+- Maximum file size: 500MB
+
+### decrypt
+Decrypt a file using a wrapped key.
+
+```bash
+kryptex decrypt --keyfile PATH --infile PATH --outfile PATH [--force]
+```
+
+**Options:**
+- `--keyfile PATH`: Path to keyfile (required)
+- `--infile PATH`: Input encrypted file (required)
+- `--outfile PATH`: Output decrypted file (required)
+- `--force`: Overwrite existing output file without prompting
+
+### rotate-key
+Change keyfile password without changing the data encryption key.
+
+```bash
+kryptex rotate-key --keyfile PATH
+```
+
+**Options:**
+- `--keyfile PATH`: Path to keyfile (required)
+
+### info
+Display keyfile metadata (non-sensitive information only).
+
+```bash
+kryptex info --keyfile PATH
+```
+
+**Options:**
+- `--keyfile PATH`: Path to keyfile (required)
+
+## File Formats
+
+### Keyfile Format (JSON)
+```json
+{
+  "version": 1,
+  "kdf": "scrypt",
+  "kdf_salt": "base64...",
+  "kdf_params": {"n": 131072, "r": 8, "p": 1},
+  "cipher": "AES-GCM",
+  "key_size": 256,
+  "created_at": "2025-01-15T10:30:00Z",
+  "kek_nonce": "base64...",
+  "wrapped_key": "base64...",
+  "hmac": "hex..."
+}
+```
+
+### Encrypted File Format (JSON)
+```json
+{
+  "version": 1,
+  "cipher": "AES-GCM",
+  "nonce": "base64...",
+  "ciphertext": "base64...",
+  "original_size": 1024,
+  "encrypted_at": "2025-01-15T10:31:00Z"
+}
+```
+
+## Troubleshooting
+
+### "Maximum unlock attempts exceeded"
+Wait 24 hours or delete the `.attempts` file next to your keyfile:
+```bash
+rm my.key.attempts
+```
+
+### "File too large"
+The current limit is 500MB. For larger files, split them first:
+```bash
+split -b 400M largefile.dat part_
+# Then encrypt each part separately
+```
+
+### "Keyfile is corrupted"
+Ensure the keyfile is valid JSON and hasn't been modified. Use `kryptex info` to check.
+
+## Development
+
+### Running Tests
+```bash
+pytest
+```
+
+### Code Coverage
+```bash
+pytest --cov=kryptex --cov-report=html
+```
+
+### Code Formatting
+```bash
+black kryptex/
+```
+
+### Type Checking
+```bash
+mypy kryptex/
+```
+
+## Security Considerations
+
+### What This Tool Protects Against
+- Unauthorized file access  
+- Password brute-forcing (via Scrypt + rate limiting)  
+- Keyfile tampering (via HMAC)  
+- Timing attacks (constant-time comparisons)  
+
+### What This Tool Does NOT Protect Against
+- Malware on your system reading memory  
+- Keyloggers capturing your password  
+- Physical access to unlocked systems  
+- Side-channel attacks (cache timing, power analysis)  
+- Quantum computers (AES-256 has reduced security against quantum attacks)  
+
+### Best Practices
+1. Use strong, unique passwords
+2. Store keyfiles separately from encrypted data
+3. Regular backups of keyfiles (encrypted)
+4. Don't share keyfiles via insecure channels
+5. Use full-disk encryption alongside this tool
+6. Regular password rotation
+
+## Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
+
+## License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## Changelog
+
+### Version 1.0.0 (2025-01-15)
+- Initial release
+- AES-256-GCM encryption
+- Scrypt KDF with OWASP parameters
+- HMAC integrity verification
+- Rate limiting
+- Key rotation support
+
+## Authors
+
+- Adegboyega Samuel - Initial work - [Sammy750-cyber](https://github.com/Sammy750-cyber)
+
+## Acknowledgments
+
+- Uses [cryptography](https://cryptography.io/) library
+- Follows OWASP cryptographic recommendations
+- Inspired by best practices from NIST and security research
+
+## Support
+
+- Email: samscwhack@gmail.com
+- Issues: [GitHub Issues](https://github.com/Sammy750-cyber/kryptex/issues)
+- Discussions: [GitHub Discussions](https://github.com/Sammy750-cyber/kryptex/discussions)

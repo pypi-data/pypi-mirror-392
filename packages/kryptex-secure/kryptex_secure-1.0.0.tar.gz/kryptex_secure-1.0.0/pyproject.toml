@@ -1,0 +1,77 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kryptex-secure"
+version = "1.0.0"
+description = "Production-grade secure key wrapping and file encryption tool"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+maintainers = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+keywords = ["encryption", "cryptography", "security", "aes-gcm", "scrypt", "key-management"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Topic :: Security :: Cryptography",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: OS Independent",
+    "Environment :: Console",
+]
+dependencies = [
+    "cryptography>=41.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=3.0",
+    "black>=22.0",
+    "flake8>=4.0",
+    "mypy>=0.950",
+]
+
+[project.urls]
+Homepage = "https://github.com/Sammy750-cyber/kryptex"
+Documentation = "https://github.com/Sammy750-cyber/kryptex/docs"
+Repository = "https://github.com/Sammy750-cyber/kryptex"
+"Bug Reports" = "https://github.com/Sammy750-cyber/kryptex/issues"
+
+[project.scripts]
+kryptex = "kryptex.cli:main"
+
+[tool.setuptools]
+packages = ["kryptex"]
+
+[tool.setuptools.package-data]
+kryptex = ["py.typed"]
+
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311']
+include = '\.pyi?$'
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --cov=kryptex --cov-report=term-missing"
+testpaths = [
+    "tests",
+]
