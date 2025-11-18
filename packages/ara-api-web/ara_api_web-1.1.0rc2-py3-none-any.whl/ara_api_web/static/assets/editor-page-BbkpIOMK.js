@@ -1,0 +1,1 @@
+import{_ as r,c as t,b as o,e as n}from"./index-CVS72YE-.js";const s={};function a(c,e){return o(),t("div",null,[...e[0]||(e[0]=[n("h1",null,"ARA API WEB",-1),n("p",null,"EDITOR PAGE",-1)])])}const _=r(s,[["render",a]]);export{_ as default};
