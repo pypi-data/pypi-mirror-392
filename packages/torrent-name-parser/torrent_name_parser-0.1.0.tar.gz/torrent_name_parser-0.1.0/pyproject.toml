@@ -1,0 +1,78 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "torrent-name-parser"
+version = "0.1.0"
+description = "Extract media information from torrent-like filenames"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Dragos Pancescu", email = "dragos.pnc@gmail.com" }]
+requires-python = ">=3.9, <3.14"
+dependencies = []
+keywords = [
+  "parse",
+  "parser",
+  "torrent",
+  "torrents",
+  "name",
+  "names",
+  "proper",
+  "rename",
+  "movie",
+  "movies",
+  "tv",
+  "show",
+  "shows",
+  "series",
+  "extract",
+  "find",
+  "quality",
+  "group",
+  "codec",
+  "audio",
+  "resolution",
+  "title",
+  "season",
+  "episode",
+  "year",
+  "information",
+  "filename",
+  "filenames",
+  "file",
+  "files",
+  "meaningful",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.urls]
+Homepage = "https://github.com/DragosPancescu/torrent-name-parser"
+Source = "https://github.com/DragosPancescu/torrent-name-parser"
+Documentation = "https://github.com/DragosPancescu/torrent-name-parser#readme"
+Issues = "https://github.com/DragosPancescu/torrent-name-parser/issues"
+
+[project.optional-dependencies]
+dev = ["pytest", "tox"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.tox]
+envlist = ["py39", "py310", "py311", "py312", "py313"]
+
+[tool.tox.env_run_base]
+description = "Run tests under {base_python}"
+deps = ["pytest"]
+commands = [["pytest"]]
