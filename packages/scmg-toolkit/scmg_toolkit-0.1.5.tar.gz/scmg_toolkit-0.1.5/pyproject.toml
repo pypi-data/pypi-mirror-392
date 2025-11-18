@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scmg_toolkit"
+version = "0.1.5"
+description = "SCMG toolkit package"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+
+# 你的依赖
+dependencies = [
+    "rdkit",
+    "SmilesPE",
+    "torch",
+    "torchvision"
+]
+
+[tool.setuptools]
+# 👉 使用当前目录作为 package 根目录
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+# 👉 明确告诉 setuptools：请把 SCMG 目录当作包一起安装
+include = ["SCMG"]
+
