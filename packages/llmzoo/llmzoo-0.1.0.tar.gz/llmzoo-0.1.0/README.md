@@ -1,0 +1,154 @@
+# llmpy
+
+轻量、可扩展的 LLM 工具库：抽象基类 + 提供商/向量库适配，支持 Chat、Embeddings、VectorStore（Chroma、Milvus Lite）。专注最小依赖与可扩展性，避免依赖 LangChain 等高度封装库。
+
+## 特性
+- 抽象基类：`BaseChat` / `BaseEmbedding` / `BaseVectorStore`
+- 工厂入口：`build_chat` / `build_embedding` / `build_vector_store`
+- OpenAI 兼容协议实现（`/v1/chat/completions` 与 `/v1/embeddings`）
+- 可选依赖：Chroma、Milvus Lite（pymilvus）按需安装
+- 全参数外部注入（不写死 API Key / Base URL / Model）
+
+## 安装
+- 基础：
+```bash
+pip install llmpy
+```
+- 可选向量库：
+```bash
+pip install llmpy[chroma]
+pip install llmpy[milvus]
+pip install llmpy[pg]
+```
+
+## 快速开始
+```python
+from llmpy import build_chat, build_embedding, build_vector_store
+
+# Chat（Zhipu）
+chat = build_chat("zhipu", api_key="<ZHIPU_KEY>", model="glm-4")
+print(chat.complete("你好！"))
+
+# Embedding（Moonshot，需开通 Embeddings 权限）
+emb = build_embedding("moonshot", api_key="<KIMI_KEY>", model="text-embedding-3-small")
+vectors = emb.embed_texts(["你好，世界"])
+
+# VectorStore（Chroma 持久化示例）
+store = build_vector_store("chroma", collection_name="demo", persist_path="./chroma-data")
+ids = store.add_texts(["hello", "world"], embeddings=vectors)
+results = store.similarity_search_by_vector(vectors[0], k=2)
+print(results)
+```
+
+## 提供商与后端
+- Chat：Zhipu、Moonshot（Kimi）
+- Embedding：Zhipu、Moonshot（需账号开通 Embeddings 权限，否则会 403）
+- VectorStore：Chroma、Milvus Lite（本地）、PgVector（Postgres/RDS）
+
+### 默认 Base URL 与常见模型名
+- Zhipu（OpenAI 兼容）：`base_url=https://open.bigmodel.cn/api/paas/v4`
+  - Chat 模型：`glm-4` 等
+  - Embeddings 模型：`embedding-2` 等
+- Moonshot（OpenAI 兼容）：`base_url=https://api.moonshot.cn/v1`
+  - Chat 模型：`moonshot-v1-8k`、`moonshot-v1-32k` 等
+  - Embeddings 模型：`text-embedding-3-small`（如未开通将返回 403）
+
+> 你可在构造时传入 `base_url` / `model` / `api_key` 等参数覆盖默认值。
+
+## API 概览
+### Chat
+```python
+chat = build_chat("zhipu", api_key="<ZHIPU>", model="glm-4")
+chat.complete("你好")  # -> str
+chat.chat([{"role": "user", "content": "你好"}])  # -> str
+```
+
+### Embeddings
+```python
+emb = build_embedding("zhipu", api_key="<ZHIPU>", model="embedding-2")
+emb.embed_texts(["text1", "text2"])  # -> List[List[float]]
+```
+
+### VectorStore（统一接口）
+```python
+store = build_vector_store("chroma", collection_name="demo", persist_path="./chroma")
+ids = store.add_texts(["hello"], embeddings=[[0.1, 0.2, 0.3]])  # -> List[str]
+hits = store.similarity_search_by_vector([0.1, 0.2, 0.3], k=1)  # -> List[Dict]
+```
+
+#### PgVector（Postgres/RDS）
+必须显式传入数据库名与表名（框架不提供默认资源名）：
+```python
+from llmpy import build_vector_store
+
+store = build_vector_store(
+    "pgvector",
+    host="<pg-host>", port=5432,
+    dbname="<your_db>", user="<user>", password="<password>",
+    table_name="<your_table>", dim=1536, metric="cosine", sslmode="require",
+)
+store.add_texts(["hello"], embeddings=[[0.1]*1536])
+print(store.similarity_search_by_vector([0.1]*1536, k=1))
+```
+
+## 配置方式
+所有配置经由构造参数传入，例如：
+```python
+build_chat("zhipu", api_key="<KEY>", base_url="https://.../v4", model="glm-4", temperature=0.3, timeout=30)
+build_embedding("moonshot", api_key="<KEY>", base_url="https://.../v1", model="text-embedding-3-small")
+build_vector_store("milvus-lite", collection_name="demo", dim=1536, uri="milvus_demo.db")
+```
+也可通过环境变量在你应用层读取后再传入，例如 `ZHIPU_API_KEY`、`MOONSHOT_API_KEY`。
+
+## 可扩展性
+实现自定义提供商或后端，只需继承相应基类并在工厂中注册：
+```python
+from llmpy.core.base import BaseChat, BaseEmbedding, BaseVectorStore
+
+class MyChat(BaseChat):
+    def chat(self, messages):
+        ...
+
+class MyEmbedding(BaseEmbedding):
+    def embed_texts(self, texts):
+        ...
+
+class MyStore(BaseVectorStore):
+    def add_embeddings(self, embeddings, *, ids=None, metadatas=None, documents=None):
+        ...
+    def similarity_search_by_vector(self, query_vector, *, k=5):
+        ...
+```
+
+## 实现说明（架构）
+- `llmpy/core/base.py`：定义三大抽象基类与统一接口
+- `llmpy/providers/openai_compat.py`：OpenAI 兼容协议实现（Chat、Embedding）
+- `llmpy/providers/zhipu.py`、`llmpy/providers/moonshot.py`：具体提供商适配（默认 Base URL、常用模型）
+- `llmpy/vectorstores/chroma.py`、`llmpy/vectorstores/milvus_lite.py`、`llmpy/vectorstores/pgvector.py`：向量库适配
+- `llmpy/factory.py`：统一工厂入口
+
+## 本地测试
+可选依赖未安装时，对应测试会跳过：
+```bash
+pip install llmpy[chroma] llmpy[milvus]
+export ZHIPU_API_KEY="..."; export MOONSHOT_API_KEY="..."
+python - <<'PY'
+from llmpy import build_chat
+import os
+chat = build_chat("zhipu", api_key=os.environ["ZHIPU_API_KEY"], model="glm-4")
+print(chat.complete("你好！"))
+PY
+```
+
+> Moonshot 的 Embeddings 需在账号侧开通权限，否则将返回 403。Chat 接口可正常使用。
+
+## 版本与发布
+`pyproject.toml` 已配置：
+```bash
+pip install build twine
+python -m build
+twine upload dist/*
+```
+
+## 许可证
+MIT
