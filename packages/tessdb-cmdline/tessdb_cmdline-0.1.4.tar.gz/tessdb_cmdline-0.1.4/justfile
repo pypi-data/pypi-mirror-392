@@ -1,0 +1,216 @@
+# To install just on a per-project basis
+# 1. Activate your virtual environemnt
+# 2. uv add --dev rust-just
+# 3. Use just within the activated environment
+
+pkg := "tessdb-cmdline"
+module := "tess"
+
+drive_uuid := "77688511-78c5-4de3-9108-b631ff823ef4"
+user :=  file_stem(home_dir())
+def_drive := join("/media", user, drive_uuid, "env")
+project := file_stem(justfile_dir())
+local_env := join(justfile_dir(), ".env")
+
+# list all recipes
+default:
+    just --list
+
+# Add conveniente development dependencies
+dev:
+    uv add --dev pytest pytest-asyncio
+
+# Build the package
+build:
+    rm -fr dist/*
+    uv build
+
+# Install tools globally
+tools:
+    uv tool install twine
+    uv tool install ruff
+
+# Publish the package to PyPi
+publish: build
+    twine upload -r pypi dist/*
+    uv run --no-project --with {{pkg}} --refresh-package {{pkg}} \
+        -- python -c "from {{module}} import __version__; print(__version__)"
+
+# Publish to Test PyPi server
+test-publish: build
+    twine upload --verbose -r testpypi dist/*
+    uv run --no-project  --with {{pkg}} --refresh-package {{pkg}} \
+        --index-url https://test.pypi.org/simple/ \
+        --extra-index-url https://pypi.org/simple/ \
+        -- python -c "from {{module}} import __version__; print(__version__)"
+
+# upgrades library and uv.lock
+upgrade library:
+    uv pip install --upgrade {{library}}
+    uv lock --upgrade
+
+pull:
+    git pull --rebase --tags
+
+# ==================
+# Development
+# ==================
+
+
+small: (check_mnt def_drive) (db-restore "anew")
+medium: (check_mnt def_drive) (db-restore "medium")
+big: (check_mnt def_drive) (db-restore "big")
+
+tess-loc-lookup raw="":
+    uv run tess-location --console --trace reverse {{raw}} -la 42.94248957 -lo 0.2847685811
+
+tess-loc-create1: (check_mnt def_drive) (db-restore "medium")
+    uv run tess-location --console --trace create -lo 8.837625 -la 46.041231 -he 582 -pl " Osservatorio Le Pleiadi del Monte Lema" -ne 200  
+    uv run tess-location --console --trace create -lo 8.837620 -la 46.041220 -he 582 -pl " Foo Fighters" -ne 200
+
+tess-loc-list:
+     uv run tess-location --console --trace list
+    
+tess-log2 name="stars1267" logdir="log" verbose="":
+    uv run tess-log --console --trace {{verbose}} readings --name {{name}} --log-dir {{logdir}} --output-file readings.txt
+
+tess-phot-create:
+    uv run tess-photometer --console --trace register --help
+
+tess-phot-generate:
+    uv run tess-photometer --console --trace generate -ic register.csv -os register.sh
+
+# -----------
+# Operations
+# -----------
+
+spreadsheet := "Recuperando lecturas de log"
+
+
+# Despues de ejecutar esto, hay que importar el fichero register a Google y rellenar el observador y el place
+# scan log directpries for new photometers and missing readings
+log-scan yymmdd="" logdir=join(def_drive, ".." ,"tessdb-operations", "log"): (check_mnt def_drive)
+    #!/usr/bin/env bash
+    set -exuo pipefail
+    yymmdd={{yymmdd}}
+    if [[ "${yymmdd}" = "" ]]; then
+        uv run tess-log --console --trace names --log-dir {{logdir}} --output-file phot_names.csv --registry-file register.csv
+    else
+        uv run tess-log --console --trace names --log-dir {{logdir}} --start $yymmdd --output-file phot_names.csv --registry-file register.csv
+    fi
+
+log-extract name yymmdd="" batch="30" logdir=join(def_drive, ".." ,"tessdb-operations", "log"): (check_mnt def_drive)
+    #!/usr/bin/env bash
+    set -exuo pipefail
+    yymmdd={{yymmdd}}
+    if [[ "$yymmdd" = "" ]]; then
+         uv run tess-log --console --trace readings --name {{name}} -bs {{batch}} --log-dir {{logdir}} --output-file {{name}}_readings.csv
+    else
+         uv run tess-log --console --trace readings --name {{name}} -bs {{batch}} --start $yymmdd --log-dir {{logdir}} --output-file {{name}}_readings.csv
+    fi
+
+
+log-upload ifile dry_run="--dry-run":
+    uv run tess-photometer --console --trace upload -ic {{ifile}} {{dry_run}}
+
+obs-script:
+    uv run tess-observer --console --trace generate -ic "{{ spreadsheet }} - observers.csv" -os observers.sh
+
+loc-script:
+    uv run tess-location --console --trace generate -ic "{{ spreadsheet }} - locations.csv" -os locations.sh
+
+phot-script:
+    uv run tess-photometer --console --trace generate -ic "register.csv" -os register.sh
+
+
+gen-scripts: (obs-script) (loc-script) (phot-script)
+
+
+tess-tx name="stars1":
+    uv run tess-period --console estimate -na {{name}}
+
+
+fix-valid-since name tstamp:
+    uv run tess-photometer --console --trace valid_since --name {{name}} --timestamp {{tstamp}}
+
+
+# ============================
+# Recovering readings from ...
+# ============================
+
+
+# =============
+# PyTest driver
+# =============
+
+test pkg module:
+    uv run pytest tests/{{pkg}}/test_{{module}}.py
+
+testf pkg module func:
+    uv run pytest tests/{{pkg}}/test_{{module}}.py::test_{{func}}
+
+
+# =================
+# Restore databases
+# =================
+
+[private]
+db-restore which="anew":
+    #!/usr/bin/env bash
+    set -exuo pipefail
+    time benice cp {{ def_drive }}/{{project}}/tess.{{which}}.db tess.db
+
+# ==================
+# Backup environment
+# ==================
+
+# Backup .env to storage unit
+env-bak drive=def_drive: (check_mnt drive) (env-backup join(drive, project))
+
+# Restore .env from storage unit
+env-rst drive=def_drive: (check_mnt drive) (env-restore join(drive, project))
+
+[private]
+check_mnt mnt:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [[ ! -d  {{ mnt }} ]]; then
+        echo "Drive not mounted: {{ mnt }}"
+        exit 1 
+    fi
+
+[private]
+env-backup bak_dir:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [[ ! -f  {{ local_env }} ]]; then
+        echo "Can't backup: {{ local_env }} doesn't exists"
+        exit 1 
+    fi
+    if [[ ! -d  {{ bak_dir }} ]]; then
+        mkdir {{ bak_dir }}
+    fi
+    echo "Copy {{ local_env }} => {{ bak_dir }}"
+    cp {{ local_env }} {{ bak_dir }}
+    cp phot_names.csv {{ bak_dir }}
+    cp observers.csv {{ bak_dir }}
+    cp locations.csv {{ bak_dir }}
+
+
+[private]
+env-restore bak_dir:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [[ ! -f  {{ bak_dir }}/.env ]]; then
+        echo "Can't restore: {{ bak_dir }}/.env doesn't exists"
+        exit 1 
+    fi
+    echo "Copy {{ bak_dir }}/.env => {{ local_env }}"
+    cp {{ bak_dir }}/.env {{ local_env }}
+    echo "Copy {{ bak_dir }}/tess.medium.db => ."
+    cp {{ bak_dir }}/tess.medium.db .
+    echo "Copy {{ bak_dir }}/tess.anew.db => ."
+    cp {{ bak_dir }}/tess.anew.db .
+    cp {{ bak_dir }}/phot_names.csv .
+    cp {{ bak_dir }}/observers.csv .
+    cp {{ bak_dir }}/locations.csv .
