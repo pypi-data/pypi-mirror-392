@@ -1,0 +1,171 @@
+# Copilot Instructions for Zabob-Houdini
+
+## Project Overview
+Zabob-Houdini is a Python API for creating Houdini node graphs programmatically. This is an early-stage project that provides a simplified interface for building and connecting Houdini nodes.
+
+## Core Architecture Concepts
+
+### Node Graph API Design
+- **`node()`** function: Core API for creating individual nodes
+  - Takes `NodeType`, optional name, and keyword attributes
+  - Returns `NodeInstance` objects
+  - Special `_input` keyword connects 0+ input nodes
+- **`chain()`** function: Creates linear node sequences
+  - Connects nodes in sequence automatically
+  - Accepts `_input` for external connections
+  - Can be nested/spliced into other chains
+  - Returns `Chain` objects
+- **Instantiation Pattern**: Both `NodeInstance` and `Chain` use `.create()` method for actual creation
+
+### Project Structure
+- `src/zabob_houdini/`: Main package directory
+- Currently minimal implementation - most API described in README is not yet implemented
+- Uses modern Python packaging with `pyproject.toml` and hatchling
+
+## Development Conventions
+
+### Response Guidelines
+- **Be concise and focused** in all responses to prevent context overflow
+- When performing code changes:
+  - Make minimal, targeted edits that address the specific request
+  - Avoid explaining what you're doing unless asked
+  - Don't repeat information already established in the conversation
+  - Skip verbose descriptions of obvious changes
+- **Inline chat spatial signals**: When user starts with "here," "this line," "on this line," etc., make surgical changes at that exact location only
+- **Context preservation**: Prioritize actionable content over explanatory text to maintain focus on technical work
+
+### Python Standards
+- **Compatibility**: Requires Python 3.11+ (pyproject.toml), for hython compatibility.
+- Entry point: `zabob_houdini:main` console script
+- **CLI framework**: Uses Click instead of argparse for command-line interface
+- **Type hints**: Use modern built-in types (`list`, `dict`, `tuple`) instead of `typing.List`, etc.
+- **Docstrings**: Write comprehensive docstrings for all public functions and classes, global variables.
+  - Docstrings for global variables should follow the definition of the variable and provide a clear description of its purpose and usage.
+- **Modern constructs**: Use dataclasses, match statements, and other Python 3.13+ features
+- **Parameter typing**: Declare all parameter types explicitly
+
+### Key Files to Understand
+- `README.md`: Contains the complete API specification and usage patterns
+- `src/zabob_houdini/__init__.py`: Current minimal implementation
+- `pyproject.toml`: Project configuration and dependencies
+- `.gitignore`: Python and Houdini-specific ignore patterns
+- `.gitattributes`: LFS configuration for Houdini binary files
+- `.env.example.*`: Platform-specific environment variable templates (users copy to `.env`)
+- `stubs/hou.pyi`: Type stubs for Houdini's `hou` module for development IntelliSense
+- `TODO.md`: Deferred tasks to avoid branching work - add items here instead of implementing immediately
+
+## Implementation Notes
+
+### Current State
+The project is in early development - the README describes the intended API, but implementation is minimal (just a hello world function). When implementing:
+
+1. **Follow the README specification exactly** - it defines the expected behavior
+2. **Implement the `node()` and `chain()` functions** as the core API
+3. **Create `NodeInstance` and `Chain` classes** with `.create()` methods
+4. **Handle the `_input` keyword parameter** for node connections
+5. **Start with string-based NodeType** (SOP node names like "box", "merge")
+6. **Defer `hou` module calls** - only execute during `.create()`, not during node definition
+7. **Plan for NodeTypeInstance expansion** - namespace resolution for duplicate names across categories
+
+### Integration Considerations
+- **Abstraction Layer**: This is a Python wrapper that calls Houdini's `hou` module during `.create()` execution
+- **Houdini Python compatibility**: Watch for potential issues with `hython` and other Houdini Python tools due to historical version constraints
+- **NodeType Implementation**:
+  - Initially: strings representing SOP node type names (e.g., "box", "merge", "transform")
+  - Future: `NodeTypeInstance` objects to resolve namespace conflicts across categories
+  - Long-term: Context-aware validation (e.g., SOPs under `geo` nodes)
+- **Creation Pattern**: Nodes are defined declaratively, then `.create()` calls `hou` module functions
+
+## Testing & Development
+- **Testing**: Uses pytest framework for testing
+- **Package management**: Uses UV - always run `uv sync` after modifying dependencies in pyproject.toml
+- **Code organization**: Consider dataclasses for structured data (e.g., node configurations)
+- **Modern Python**: Leverage Python 3.13+ features like improved type hints and pattern matching
+- No CI/CD setup yet - runs as console application via entry point
+- Development should focus on implementing the API described in README.md first
+
+### Test Architecture
+- **Unit Tests**: Test object construction, equality, hashing, copying WITHOUT importing hou
+  - **NEVER mock modules** - restructure tests to avoid import issues instead
+  - Focus on dataclass behavior, caching via @functools.cache, immutability
+  - Test the API functions (node(), chain()) rather than classes directly if needed
+- **Integration Tests**: Use `hython_test` fixture to run actual Houdini operations
+  - Never mock hou in integration tests - they should run in real Houdini environment
+  - Call functions in `houdini_test_functions.py` via the bridge
+
+### Module Import Strategy
+- core.py imports hou at module level - this is correct for Houdini environment
+- Unit tests should avoid importing core directly if it causes hou import issues
+- Integration tests run in Houdini via hython_test fixture
+
+### Context Overflow Prevention
+- **Be extremely concise** - this project has hit context limits multiple times
+- When architectural changes are needed, focus on ONE specific issue at a time
+- Don't explain what you're doing unless asked - just make the minimal change
+- If you find yourself in an edit loop, stop and ask for clarification
+- The core.py architecture is mature - be very cautious about major changes
+
+### Immutable Architecture (ESTABLISHED - Don't Change)
+- Frozen dataclasses with @functools.cache for automatic caching
+- HashableMapping for dict fields to enable hashing
+- Objects constructed without hou imports, hou only imported in .create() methods
+- Identity-based hashing allows object-specific caching
+- .copy() methods create deep copies, .create() returns cached hou.Node instances
+
+## Task Management
+- **TODO.md**: Use for deferred tasks to avoid branching current work
+- When encountering complex tasks that would derail current focus, add to TODO.md instead of implementing
+- Keep TODO.md organized with categories and clear descriptions
+- Mark completed items and remove them periodically
+
+## VS Code Configuration Management
+- **Personal Settings**: `.vscode/settings.json` is personal (not committed) and created from `.vscode/settings.json.example`
+- **Template Sync**: When `.vscode/settings.json` is modified with project-relevant changes, remind the user to update `.vscode/settings.json.example` for other contributors
+- **Project Files**: `.vscode/project-dictionary.txt`, `.vscode/extensions.json`, and `.vscode/setup-vscode.sh` are committed
+- **Setup Script**: New contributors use `./.vscode/setup-vscode.sh` for automated setup
+- **Spell Checking**: Uses cSpell with project dictionary - add technical terms to `.vscode/project-dictionary.txt`
+
+## Communication Guidelines
+
+### Avoid Sycophantic Language
+- **NEVER** use phrases like "You're absolutely right!", "You're absolutely correct!", "Excellent point!", or similar flattery
+- **NEVER** validate statements as "right" when the user didn't make a factual claim that could be evaluated
+- **NEVER** use general praise or validation as conversational filler
+
+### Appropriate Acknowledgments
+Use brief, factual acknowledgments only to confirm understanding of instructions:
+- "Got it."
+- "Ok, that makes sense."
+- "I understand."
+- "I see the issue."
+
+These should only be used when:
+1. You genuinely understand the instruction and its reasoning
+2. The acknowledgment adds clarity about what you'll do next
+3. You're confirming understanding of a technical requirement or constraint
+
+### Examples
+
+#### ❌ Inappropriate (Sycophantic)
+User: "Yes please."
+Assistant: "You're absolutely right! That's a great decision."
+
+User: "Let's remove this unused code."
+Assistant: "Excellent point! You're absolutely correct that we should clean this up."
+
+#### ✅ Appropriate (Brief Acknowledgment)
+User: "Yes please."
+Assistant: "Got it." [proceeds with the requested action]
+
+User: "Let's remove this unused code."
+Assistant: "I'll remove the unused code path." [proceeds with removal]
+
+#### ✅ Also Appropriate (No Acknowledgment)
+User: "Yes please."
+Assistant: [proceeds directly with the requested action]
+
+### Rationale
+- Maintains professional, technical communication
+- Avoids artificial validation of non-factual statements
+- Focuses on understanding and execution rather than praise
+- Prevents misrepresenting user statements as claims that could be "right" or "wrong"
