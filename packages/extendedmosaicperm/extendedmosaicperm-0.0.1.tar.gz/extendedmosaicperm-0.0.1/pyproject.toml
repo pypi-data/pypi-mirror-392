@@ -1,0 +1,90 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "extendedmosaicperm"
+version = "0.0.1"
+description = "Extensions to mosaicperm: sign-flip inference, ridge-regularized residuals, and adaptive tiling for factor models."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+
+authors = [
+  { name = "Kacper Skonieczka", email = "k.skonieczka01@gmail.com" }
+]
+
+keywords = ["statistics", "econometrics", "factor models", "permutation tests"]
+
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering :: Mathematics",
+  "License :: OSI Approved :: MIT License"
+]
+
+# --- runtime dependencies ---
+dependencies = [
+  "numpy>=1.22",
+  "pandas>=1.5",
+  "scipy>=1.10",
+  "scikit-learn>=1.2",
+  "mosaicperm>=0.1.5",
+  "tqdm>=4.65",
+  "matplotlib>=3.7",
+]
+
+# --- urls ---
+[project.urls]
+Homepage = "https://github.com/skonieczkak/extendedmosaicperm"
+Documentation = "https://extendedmosaicperm.readthedocs.io/en/latest/"
+Source = "https://github.com/skonieczkak/extendedmosaicperm"
+Issues = "https://github.com/skonieczkak/extendedmosaicperm/issues"
+
+[project.optional-dependencies]
+# --- documentation extras ---
+docs = [
+  "sphinx>=7.0",
+  "sphinx-rtd-theme>=2.0",
+  "myst-parser>=2.0",
+  "sphinxcontrib-napoleon>=0.7",
+  "sphinx-autodoc-typehints>=2.0"
+]
+
+# --- development extras ---
+dev = [
+  "black>=24.0",
+  "ruff>=0.6",
+  "pytest>=7.0",
+  "pytest-cov>=4.0"
+]
+
+# --- notebooks / experiments ---
+notebooks = [
+  "jupyter>=1.0",
+  "ipykernel>=6.0",
+  "seaborn>=0.12",
+  "notebook>=7.0"
+]
+
+
+# --- setuptools ---
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["extendedmosaicperm*"]
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
+skip-string-normalization = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+select = ["E", "F", "I"]
+ignore = ["E501"]
