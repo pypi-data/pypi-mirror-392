@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+    <style>
+        body {
+            background-color: var(--{{theme}}-bg);
+            color: var(--{{theme}}-color);
+        }
+        #sideBar {
+            background-color: var(--{{theme}}-fg);
+        }
+        #content {
+            background-color: var(--{{theme}}-fg);
+        }
+        .horizontal-bar-chart::before {
+            background-color: var(--{{theme}}-fg);
+            border-color: var(--{{theme}}-data-outline);
+        }
+        .pie-chart-wrapper {
+            border-color: var(--{{theme}}-data-outline);
+        }
+    </style>
+    <title>{{title}}</title>
+</head>
+<body>
+    <nav id="sideBar" onresize="sideBarResize()">
+    </nav>
+    <div id="content">{{content|safe}}</div>
+</body>
+</html>
