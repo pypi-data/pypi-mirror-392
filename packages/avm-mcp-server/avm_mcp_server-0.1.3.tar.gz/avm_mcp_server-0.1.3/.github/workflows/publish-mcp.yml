@@ -1,0 +1,89 @@
+name: Publish to MCP Registry
+
+on:
+  push:
+    tags: ["v*"]  # Triggers on version tags like v1.0.0
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for OIDC authentication
+      contents: write  # Required for creating releases
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Build package
+        run: |
+          uv build
+
+      - name: Publish to PyPI
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          uv publish
+
+      - name: Update server.json version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          python -c "import json; data = json.load(open('server.json')); data['version'] = '$VERSION'; data['packages'][0]['version'] = '$VERSION'; json.dump(data, open('server.json', 'w'), indent=2)"
+
+      - name: Install MCP Publisher
+        run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+
+      - name: Login to MCP Registry
+        run: ./mcp-publisher login github-oidc
+
+      - name: Publish to MCP Registry
+        run: ./mcp-publisher publish
+
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          cat << EOF > release_notes.md
+          ## Azure Verified Modules MCP Server v$VERSION
+          
+          ### Installation
+          
+          \`\`\`powershell
+          # Using uvx (recommended)
+          uvx avm-mcp-server
+          
+          # Or install globally
+          uv tool install avm-mcp-server
+          \`\`\`
+          
+          ### What's Changed
+          
+          See the [README](https://github.com/stefanstranger/avm-mcp-server/blob/main/README.md) for full documentation.
+          
+          ### Links
+          
+          - 📦 [PyPI Package](https://pypi.org/project/avm-mcp-server/$VERSION/)
+          - 🔧 [MCP Registry](https://registry.modelcontextprotocol.io/)
+          - 📖 [Documentation](https://github.com/stefanstranger/avm-mcp-server#readme)
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release_notes.md
+          files: |
+            dist/*
+          generate_release_notes: true
+          append_body: true
