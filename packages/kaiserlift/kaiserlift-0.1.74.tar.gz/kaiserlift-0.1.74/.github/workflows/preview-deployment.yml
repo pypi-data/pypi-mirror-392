@@ -1,0 +1,351 @@
+name: Preview Deployment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+  pages: write
+  id-token: write
+
+jobs:
+  deploy-preview:
+    name: Deploy Preview
+    runs-on: ubuntu-latest
+    concurrency:
+      group: preview-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history needed for setuptools-scm
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Install dependencies
+        run: |
+          uv venv
+          uv pip install -e .
+
+      - name: Inject version into client
+        run: uv run --with setuptools-scm python scripts/inject_version.py
+
+      - name: Generate HTML examples
+        run: uv run python tests/example_use/generate_example_html.py
+
+      - name: Prepare preview deployment
+        run: |
+          mkdir -p preview
+          mkdir -p preview/pr-${{ github.event.pull_request.number }}
+          # Copy build files, excluding __pycache__ and other unwanted files
+          rsync -av --exclude='__pycache__' --exclude='*.pyc' --exclude='*.pyo' \
+            tests/example_use/build/ preview/pr-${{ github.event.pull_request.number }}/
+
+          # Create index page for preview
+          cat > preview/pr-${{ github.event.pull_request.number }}/PREVIEW.md << 'EOL'
+          # Preview Deployment
+
+          This is a preview deployment for PR #${{ github.event.pull_request.number }}
+
+          ## Available Examples
+          - [Lifting Example](lifting/)
+          - [Running Example](running/)
+
+          ## PR Information
+          - **Title:** ${{ github.event.pull_request.title }}
+          - **Branch:** ${{ github.head_ref }}
+          - **Commit:** ${{ github.event.pull_request.head.sha }}
+
+          [View PR](${{ github.event.pull_request.html_url }})
+          EOL
+
+      # Upload as artifact (always available)
+      - name: Upload preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-pr-${{ github.event.pull_request.number }}
+          path: preview/pr-${{ github.event.pull_request.number }}
+          retention-days: 30
+
+      # Option 1: Deploy to GitHub Pages (if enabled)
+      - name: Check if Pages is enabled
+        id: pages_check
+        continue-on-error: true
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer ${{secrets.GITHUB_TOKEN}}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/${{ github.repository }}/pages)
+          if [[ "$status" == "200" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Deploy to gh-pages branch with PR-specific directory
+      - name: Deploy to gh-pages branch
+        if: steps.pages_check.outputs.enabled == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Save current branch
+          CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+          # Save preview content to temp directory (outside git working tree)
+          # This ensures it survives git reset operations
+          TEMP_PREVIEW="/tmp/pr-preview-${{ github.event.pull_request.number }}"
+          rm -rf "$TEMP_PREVIEW"
+          mkdir -p "$TEMP_PREVIEW"
+          rsync -av --exclude='__pycache__' --exclude='*.pyc' --exclude='*.pyo' \
+            preview/pr-${{ github.event.pull_request.number }}/ "$TEMP_PREVIEW/"
+
+          # Fetch gh-pages branch or create it
+          git fetch origin gh-pages || true
+          git checkout gh-pages || git checkout --orphan gh-pages
+
+          # Clean working directory if orphan
+          if [ -z "$(git log --oneline -1 2>/dev/null)" ]; then
+            git rm -rf . 2>/dev/null || true
+          else
+            # Pull latest changes to avoid non-fast-forward errors
+            git pull origin gh-pages || true
+          fi
+
+          # Create PR directory and copy files from temp location
+          mkdir -p pr-${{ github.event.pull_request.number }}
+          rsync -av "$TEMP_PREVIEW/" pr-${{ github.event.pull_request.number }}/
+
+          # Create or update index
+          if [ ! -f index.html ]; then
+            cat > index.html <<'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head><title>KaiserLift Previews</title></head>
+          <body>
+            <h1>KaiserLift Preview Deployments</h1>
+            <p>Preview deployments are organized by PR number.</p>
+            <ul id="pr-list"></ul>
+            <script>
+              // List PR directories
+              fetch('.')
+                .then(r => r.text())
+                .then(html => {
+                  const dirs = [...html.matchAll(/pr-(\d+)/g)].map(m => m[1]);
+                  const list = document.getElementById('pr-list');
+                  [...new Set(dirs)].sort((a,b) => b-a).forEach(pr => {
+                    const li = document.createElement('li');
+                    li.innerHTML = '<a href="pr-' + pr + '/">PR #' + pr + '</a>';
+                    list.appendChild(li);
+                  });
+                });
+            </script>
+          </body>
+          </html>
+          EOF
+          fi
+
+          # Only add the PR directory and index, not preview/ or other files
+          git add pr-${{ github.event.pull_request.number }}/ index.html
+          git commit -m "Deploy preview for PR #${{ github.event.pull_request.number }}" || echo "No changes to commit"
+
+          # Push with retry logic to handle concurrent deployments
+          MAX_RETRIES=5
+          RETRY_COUNT=0
+          PUSH_SUCCESS=false
+
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if git push origin gh-pages 2>&1; then
+              PUSH_SUCCESS=true
+              break
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "Push failed, attempting to rebase and retry ($RETRY_COUNT/$MAX_RETRIES)..."
+                sleep $((RETRY_COUNT * 2))  # Exponential backoff: 2s, 4s, 6s, 8s
+                git fetch origin gh-pages
+
+                # Try rebase with automatic conflict resolution (favor our version)
+                git rebase origin/gh-pages || {
+                  echo "Rebase had conflicts, resolving by accepting our version..."
+                  # Accept our version for all conflicts
+                  git checkout --ours pr-${{ github.event.pull_request.number }}/ index.html
+                  git add pr-${{ github.event.pull_request.number }}/ index.html
+                  git rebase --continue || {
+                    echo "Rebase continue failed, aborting and trying fresh checkout..."
+                    git rebase --abort 2>/dev/null || true
+                    # Start fresh from origin/gh-pages
+                    git reset --hard origin/gh-pages
+                    # Re-apply our changes from temp directory
+                    mkdir -p pr-${{ github.event.pull_request.number }}
+                    rsync -av "$TEMP_PREVIEW/" pr-${{ github.event.pull_request.number }}/
+                    # Ensure index exists (create minimal version if needed)
+                    if [ ! -f index.html ]; then
+                      echo '<!DOCTYPE html><html><head><title>KaiserLift Previews</title></head><body><h1>KaiserLift Preview Deployments</h1><p>Preview deployments are organized by PR number.</p></body></html>' > index.html
+                    fi
+                    git add pr-${{ github.event.pull_request.number }}/ index.html
+                    git commit -m "Deploy preview for PR #${{ github.event.pull_request.number }}" || true
+                  }
+                }
+              fi
+            fi
+          done
+
+          if [ "$PUSH_SUCCESS" = false ]; then
+            echo "Failed to push after $MAX_RETRIES attempts"
+            exit 1
+          fi
+
+          # Switch back to original branch
+          git checkout "$CURRENT_BRANCH" || git checkout -
+
+      # Deploy to external GitHub Pages repo
+      - name: Deploy preview to douglastkaiser.github.io
+        id: external_deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAGES_DEPLOY_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          # Configure git
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Clone the GitHub Pages repository
+          PAGES_REPO="douglastkaiser/douglastkaiser.github.io"
+          TEMP_DIR="/tmp/pages-repo-pr"
+          rm -rf "$TEMP_DIR"
+
+          # Use token authentication for cloning
+          if git clone "https://x-access-token:${GITHUB_TOKEN}@github.com/${PAGES_REPO}.git" "$TEMP_DIR" 2>&1; then
+            cd "$TEMP_DIR"
+
+            # Create kaiserlift/pr-X directory
+            mkdir -p "kaiserlift/pr-${{ github.event.pull_request.number }}"
+
+            # Remove old preview contents
+            rm -rf "kaiserlift/pr-${{ github.event.pull_request.number }}/*"
+
+            # Copy new build files
+            rsync -av --exclude='__pycache__' --exclude='*.pyc' --exclude='*.pyo' \
+              ${{ github.workspace }}/tests/example_use/build/ \
+              "kaiserlift/pr-${{ github.event.pull_request.number }}/"
+
+            # Stage changes
+            git add "kaiserlift/pr-${{ github.event.pull_request.number }}/"
+
+            # Commit if there are changes
+            if git diff --staged --quiet; then
+              echo "No changes to deploy"
+              echo "deployed=false" >> "$GITHUB_OUTPUT"
+            else
+              git commit -m "Deploy preview for PR #${{ github.event.pull_request.number }} from kaiserlift"
+
+              # Push with retry logic
+              MAX_RETRIES=4
+              RETRY_COUNT=0
+              PUSH_SUCCESS=false
+
+              while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+                if git push origin main 2>&1; then
+                  PUSH_SUCCESS=true
+                  echo "deployed=true" >> "$GITHUB_OUTPUT"
+                  echo "Successfully deployed preview!"
+                  break
+                else
+                  RETRY_COUNT=$((RETRY_COUNT + 1))
+                  if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                    WAIT_TIME=$((2 ** RETRY_COUNT))
+                    echo "Push failed, retrying in ${WAIT_TIME}s..."
+                    sleep $WAIT_TIME
+                    git pull --rebase origin main
+                  fi
+                fi
+              done
+
+              if [ "$PUSH_SUCCESS" = false ]; then
+                echo "deployed=false" >> "$GITHUB_OUTPUT"
+                echo "Warning: Failed to push preview after $MAX_RETRIES attempts"
+              fi
+            fi
+          else
+            echo "deployed=false" >> "$GITHUB_OUTPUT"
+            echo "Warning: Could not clone Pages repository. Check PAGES_DEPLOY_TOKEN secret."
+          fi
+
+      # Comment on PR with preview link
+      - name: Comment preview link
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = ${{ github.event.pull_request.number }};
+            const runId = ${{ github.run_id }};
+            const pagesEnabled = '${{ steps.pages_check.outputs.enabled }}' === 'true';
+            const externalDeployed = '${{ steps.external_deploy.outputs.deployed }}' === 'true';
+
+            // Primary preview URL (external GitHub Pages)
+            const previewUrl = `https://www.douglastkaiser.com/kaiserlift/pr-${prNumber}/`;
+
+            // Fallback URL (internal gh-pages)
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const fallbackUrl = `https://${owner}.github.io/${repo}/pr-${prNumber}/`;
+
+            const body = `## 🌐 Preview Deployment
+
+            ${externalDeployed ?
+              `### 🏠 Live Preview
+              **[View Preview Landing Page](${previewUrl})**
+
+              ### 📊 Direct Links to Examples
+              - 🏋️ [Lifting Example](${previewUrl}lifting/) - Weight training with 1RM calculations
+              - 🏃 [Running Example](${previewUrl}running/) - Running/cardio with pace predictions` :
+              pagesEnabled ?
+              `### 🏠 Landing Page
+              **[View Preview Landing Page](${fallbackUrl})**
+
+              ### 📊 Direct Links to Examples
+              - 🏋️ [Lifting Example](${fallbackUrl}lifting/) - Weight training with 1RM calculations
+              - 🏃 [Running Example](${fallbackUrl}running/) - Running/cardio with pace predictions
+
+              ⚠️ External deployment unavailable. Using fallback URL.` :
+              `### Artifact Preview
+              GitHub Pages is not enabled. Download the preview artifact to view locally.`
+            }
+
+            ### 📥 Download Preview
+            [Download Preview Artifact](https://github.com/${{ github.repository }}/actions/runs/${runId})
+
+            ---
+            <sub>Updated: ${new Date().toISOString()} | [Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${runId})</sub>`;
+
+            // Find existing preview comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            const previewComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('Preview Deployment')
+            );
+
+            if (previewComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: previewComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: body
+              });
+            }
