@@ -1,0 +1,62 @@
+Metadata-Version: 2.4
+Name: allianceauth-corptools-tax-tools
+Version: 0.1.1b2
+Summary: Corp Tools - Tax Tools
+Keywords: allianceauth,eveonline
+Author-email: AaronKable <aaronkable@gmail.com>
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Celery
+Classifier: Framework :: Django
+Classifier: Framework :: Django :: 4.0
+Classifier: Framework :: Django :: 4.2
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Internet :: WWW/HTTP :: Dynamic Content
+License-File: LICENSE
+Requires-Dist: allianceauth>=3.1,<5
+Requires-Dist: allianceauth-corptools>=2.5.5
+Requires-Dist: allianceauth-invoices>=0.1.5
+Requires-Dist: py-cord>2,<3
+Project-URL: Homepage, https://github.com/Solar-Helix-Independent-Transport/allianceauth-corp-tools-tax-tools
+Project-URL: Source, https://github.com/Solar-Helix-Independent-Transport/allianceauth-corp-tools-tax-tools
+Project-URL: Tracker, https://github.com/Solar-Helix-Independent-Transport/allianceauth-corp-tools-tax-tools/issues
+
+
+# Corp Tools - Tax Tools
+
+## Installation
+
+Requires AllianceAuth - CorpTools and AllianceAuth - Invoice Manager
+
+1. Install from pip `pip install allianceauth-corptools-tax-tools`
+2. Add `'taxtools'` to INSTALLED_APPS in local.py
+3. Run Migrations, collectstatic
+4. `python manage.py tax_defaults`
+5. Configure taxes as wanted
+    Add Alliances and Taxes to `admin/taxtools/corptaxconfiguration/`
+6. `python manage.py tax_explain`. Read it to see if you are happy.
+7. Run `Send Invoices to all Corps!` on `admin/django_celery_beat/periodictask/` to generate a base level tax. If you dont want to back-charge people you can delete them.
+
+## Features
+
+## Permissions
+
+Category | Perm | Admin Site | Auth Site
+--- | --- | --- | ---
+
+## Contributing
+
+Make sure you have signed the [License Agreement](https://developers.eveonline.com/resource/license-agreement) by logging in at <https://developers.eveonline.com> before submitting any pull requests. All bug fixes or features must not include extra superfluous formatting changes.
+
