@@ -1,0 +1,24 @@
+[project]
+name = "llm-electronhub"
+version = "0.1"
+description = "LLM plugin for models hosted by ElectronHub"
+readme = "README.md"
+authors = [{name = "Olivia"}]
+license = {text = "Apache-2.0"}
+classifiers = [
+    "License :: OSI Approved :: Apache Software License"
+]
+dependencies = [
+    "llm>=0.27.1",
+    "httpx",
+    "openai>=1.57.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/taygetea/llm-electronhub"
+
+[project.entry-points.llm]
+electronhub = "llm_electronhub"
+
+[project.optional-dependencies]
+test = ["pytest", "pytest-recording", "inline-snapshot"]

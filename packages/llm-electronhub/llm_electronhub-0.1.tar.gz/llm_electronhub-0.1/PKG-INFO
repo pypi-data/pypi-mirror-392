@@ -1,0 +1,136 @@
+Metadata-Version: 2.4
+Name: llm-electronhub
+Version: 0.1
+Summary: LLM plugin for models hosted by ElectronHub
+Author: Olivia
+License: Apache-2.0
+Project-URL: Homepage, https://github.com/taygetea/llm-electronhub
+Classifier: License :: OSI Approved :: Apache Software License
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: llm>=0.27.1
+Requires-Dist: httpx
+Requires-Dist: openai>=1.57.0
+Provides-Extra: test
+Requires-Dist: pytest; extra == "test"
+Requires-Dist: pytest-recording; extra == "test"
+Requires-Dist: inline-snapshot; extra == "test"
+Dynamic: license-file
+
+# llm-electronhub
+
+[![PyPI](https://img.shields.io/pypi/v/llm-electronhub.svg)](https://pypi.org/project/llm-electronhub/)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/taygetea/llm-electronhub/blob/main/LICENSE)
+
+LLM plugin for accessing 450+ models via [ElectronHub](https://electronhub.ai/)
+
+## Installation
+
+Install this plugin in the same environment as [LLM](https://llm.datasette.io/).
+
+```bash
+llm install llm-electronhub
+```
+
+Or for development:
+
+```bash
+cd llm-electronhub
+llm install -e .
+```
+
+## Configuration
+
+You need to set an ElectronHub API key using the `llm keys set electronhub` command:
+
+```bash
+llm keys set electronhub
+# Paste your ElectronHub API key
+```
+
+Or set the `ELECTRONHUB_API_KEY` environment variable.
+
+## Usage
+
+Once configured, all ElectronHub models will be available with the `electronhub/` prefix:
+
+```bash
+# List all available models
+llm electronhub models
+
+# List only chat-capable models
+llm electronhub models --chat-only
+
+# Use a model
+llm -m electronhub/claude-opus-4-1-20250805 "Explain quantum computing"
+
+# Use GPT-5
+llm -m electronhub/gpt-5 "Write a haiku about programming"
+
+# Use Gemini 2.5 Pro (1M context!)
+llm -m electronhub/gemini-2.5-pro "Summarize this long document..."
+```
+
+## Features
+
+- **450+ models** supporting chat completions from various providers
+- **OpenAI-compatible API** for seamless integration
+- **Vision support** for multimodal models
+- **Large context windows** - up to 2M tokens (Grok-4-fast)
+- **Reasoning models** - Models with `-thinking` suffix for extended reasoning
+
+## Available Commands
+
+### List models
+
+```bash
+# List all models
+llm electronhub models
+
+# List as JSON
+llm electronhub models --json
+
+# List only chat-capable models
+llm electronhub models --chat-only
+```
+
+### Check API key status
+
+```bash
+llm electronhub key
+```
+
+## Recommended Models
+
+- **Claude:** `electronhub/claude-opus-4-1-20250805` (200k context)
+- **GPT:** `electronhub/gpt-5` (400k context)
+- **Gemini:** `electronhub/gemini-2.5-pro` (1M context)
+- **Grok:** `electronhub/grok-4-0709` (256k context)
+- **DeepSeek:** `electronhub/deepseek-v3.1` (164k context)
+- **Qwen:** `electronhub/qwen3-max` (256k context)
+
+## Development
+
+To set up this plugin locally, first checkout the code. Then create a new virtual environment:
+
+```bash
+cd llm-electronhub
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+Now install the dependencies and test dependencies:
+
+```bash
+llm install -e '.[test]'
+```
+
+To run the tests:
+
+```bash
+pytest
+```
+
+## About ElectronHub
+
+ElectronHub is a unified LLM API proxy service that provides access to 450+ models from various providers (Anthropic, OpenAI, Google, Meta, xAI, Alibaba, and more) through a single API endpoint and key.
