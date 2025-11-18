@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pySwivells"
+version = "1.0.2"
+description = "python utilities for Swivells"
+readme = "README.md"
+authors = [
+  { name="Arnaud Hoffmann", email="info@css23.fr" }
+]
+license = { text = "MIT" }
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "numpy",
+    "pandas",
+    "openpyxl",
+    "requests",
+    "rich",
+    "fire"
+]
+
+[project.scripts]
+pyswivells = "pySwivells.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["pySwivells*"]
+exclude = ["tmp*", "data*"]
