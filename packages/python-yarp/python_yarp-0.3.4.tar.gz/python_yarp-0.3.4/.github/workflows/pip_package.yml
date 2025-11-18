@@ -1,0 +1,155 @@
+name: Build and Publish to PyPI
+
+# Default permissions - restrict everything by default
+permissions:
+  contents: read
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read  # Only read access needed for checkout
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Clean test environment
+      run: |
+        # Clean Python cache files
+        find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+        find . -type f -name "*.pyc" -delete 2>/dev/null || true
+        # Clean coverage files
+        rm -f .coverage 2>/dev/null || true
+        rm -rf htmlcov/ 2>/dev/null || true
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        enable-cache: true
+        cache-dependency-glob: "uv.lock"
+
+    - name: Install dependencies
+      run: uv sync --dev --extra cpu
+
+    - name: Run tests
+      run: uv run pytest
+
+  build:
+    name: Build distribution
+    runs-on: ubuntu-latest
+    needs:
+    - test
+    permissions:
+      contents: read  # Only read access needed for checkout
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Clean build artifacts and cache
+      run: |
+        # Clean distribution artifacts
+        rm -rf dist/
+        rm -rf build/
+        # Clean Python cache files
+        find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+        find . -type f -name "*.pyc" -delete 2>/dev/null || true
+        find . -type f -name "*.pyo" -delete 2>/dev/null || true
+        # Clean egg-info directories
+        rm -rf *.egg-info/ 2>/dev/null || true
+        # Ensure dist directory exists for build
+        mkdir -p dist
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        enable-cache: true
+        cache-dependency-glob: "uv.lock"
+        
+    - name: Build a binary wheel and a source tarball
+      run: uv build
+    
+    - name: Verify build artifacts
+      run: |
+        echo "Build artifacts created:"
+        ls -la dist/
+        echo "Verifying artifact integrity..."
+        # Check that we have both wheel and source distribution
+        if [ ! -f dist/*.whl ]; then
+          echo "Error: No wheel file found"
+          exit 1
+        fi
+        if [ ! -f dist/*.tar.gz ]; then
+          echo "Error: No source distribution found"
+          exit 1
+        fi
+        echo "Build verification completed successfully"
+    
+    - name: Store the distribution packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
+
+  publish-to-pypi:
+    name: Publish Python distribution to PyPI
+    if: github.event_name == 'release'
+    needs:
+    - build
+    runs-on: ubuntu-latest
+    environment: pypi-publish
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+
+    steps:
+    - name: Download all the dists
+      uses: actions/download-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
+    
+    - name: Publish distribution to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        print-hash: true
+
+  github-release:
+    name: Sign the Python distribution with Sigstore and upload them to GitHub Release
+    needs:
+    - publish-to-pypi
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+
+    permissions:
+      contents: write  # IMPORTANT: mandatory for making GitHub Releases
+      id-token: write  # IMPORTANT: mandatory for sigstore
+
+    steps:
+    - name: Download all the dists
+      uses: actions/download-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
+    
+    - name: Sign the dists with Sigstore
+      uses: sigstore/gh-action-sigstore-python@v3.0.0
+      with:
+        inputs: >-
+          ./dist/*.tar.gz
+          ./dist/*.whl

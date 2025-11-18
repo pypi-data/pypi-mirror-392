@@ -1,0 +1,98 @@
+[project]
+name = "python-yarp"
+version = "0.3.4"
+description = "Yet Another RAG Pipeline(YARP) with strong focus on In Memory Vector DB with ANN"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    {name = "Bijay Regmi", email = "bijay@regmi.dev"}
+]
+dependencies = [
+    "markupsafe==2.1.5",
+    "annoy>=1.17.3",
+    "levenshtein>=0.27.1",
+    "numpy<=1.26.4",
+    "pydantic>=2.11.9",
+]
+
+[project.optional-dependencies]
+cpu = [
+    "torch==2.8.0+cpu; platform_machine != 'arm64' and platform_system != 'Darwin'",
+    "torch==2.8.0; platform_machine == 'arm64' or platform_system == 'Darwin'",
+    "sentence-transformers>=5.1.0"
+]
+gpu = [
+    "torch>=2.8.0",
+    "sentence-transformers>=5.1.0"
+]
+docs = [
+    "sphinx>=7.1.0",
+    "sphinx-rtd-theme>=2.0.0",
+    "sphinx-autobuild>=2024.4.16",
+]
+
+[project.urls]
+Homepage = "https://github.com/regmibijay/yarp"
+Documentation = "https://regmibijay.github.io/yarp"
+Repository = "https://github.com/regmibijay/yarp"
+"Author Blog" = "https://blog.regmi.dev"
+
+[dependency-groups]
+dev = [
+    "black>=25.9.0",
+    "coverage>=7.10.6",
+    "psutil>=7.1.0",
+    "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.13.1",
+]
+[tool.uv]
+index-url = "https://pypi.org/simple"
+# Extra index for PyTorch CPU wheels - automatically used when cpu extra is installed
+extra-index-url = ["https://download.pytorch.org/whl/cpu"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--cov=yarp",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-fail-under=95",
+    "-v"
+]
+
+[tool.coverage.run]
+source = ["yarp"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__init__.py"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError"
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["yarp"]
+
+# Documentation build configuration
+[tool.sphinx]
+source-dir = "docs/source"
+build-dir = "docs/build"
+
+# pre-commit runs
+[tool.ruff]
+exclude = ["tests", "docs"]
