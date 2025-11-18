@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=69.5"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "genin2"
+authors = [
+    {name = "Alessandro Sartori", email = "asartori@izsvenezie.it"},
+    {name = "Edoardo Giussani", email = "egiussani@izsvenezie.it"},
+]
+description = "Genin2 is a lightining-fast bioinformatic tool to predict genotypes for H5 viruses belonging to the European clade 2.3.4.4b"
+keywords = ["avian-influenza", "genotype-inspector", "genotype-predictor"]
+dynamic = ["version"]
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Bio-Informatics"
+]
+dependencies = [
+    "biopython >= 1.85",
+    "click >= 8.1.0",
+    "importlib-resources >= 6.5.2",
+    "numpy >= 2.0.2",
+    "joblib >= 1.4.0",
+    "scikit-learn >= 1.6.1, < 1.7.0",
+    "requests >= 2.32.3"
+]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.urls]
+"Homepage" = "https://izsvenezie-virology.github.io/genin2"
+"Bug Tracker" = "https://github.com/izsvenezie-virology/genin2/issues"
+
+[project.scripts]
+genin2 = "genin2.cli:start_cli"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = true
+
+[tool.setuptools.package-data]
+genin2 = ["dd.xz", "models.xz", "compositions.tsv"]
+
+[tool.setuptools.dynamic]
+version = {attr = "genin2.genin2_core.__version__"}
