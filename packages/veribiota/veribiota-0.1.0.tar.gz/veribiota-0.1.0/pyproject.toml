@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "veribiota"
+version = "0.1.0"
+description = "Python adapter and CLI for VeriBiota EditDAG JSON normalization and Lean suite generation."
+authors = [
+  { name = "VeriBiota developers" }
+]
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "License :: OSI Approved :: Apache Software License",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+dependencies = []
+
+[project.scripts]
+veribiota = "veribiota.adapter.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "python"}
+packages = ["veribiota", "veribiota.adapter"]
+
