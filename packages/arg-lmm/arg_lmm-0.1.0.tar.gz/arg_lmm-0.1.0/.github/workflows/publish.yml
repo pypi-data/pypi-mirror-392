@@ -1,0 +1,34 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - v* # Publish any tag starting with `v`, e.g., v0.1.0
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Install Python 3.13
+        run: uv python install 3.13
+      - name: Build
+        run: uv build
+      - name: Smoke test
+        run: |
+          uv venv
+          source .venv/bin/activate
+          uv pip install dist/arg_lmm-0.1.0*.whl
+          mkdir out
+          arg-lmm demo_files/sims.N5000.chr{1..3}.arg --pheno demo_files/sims.N5000.phenotypes --out out/arg_loco.new --blup
+          arg-lmm --rhe demo_files/10kb_region_20k_samples.argn --pheno demo_files/h2_5e-03_alpha_-0.5.phenos --out out/output.csv --mu 1e-6 --alpha -0.5 --mac 1 --seed 42
+      - name: Publish
+        run: uv publish
