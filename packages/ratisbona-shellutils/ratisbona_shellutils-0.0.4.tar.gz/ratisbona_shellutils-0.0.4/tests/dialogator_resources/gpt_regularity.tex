@@ -1,0 +1,226 @@
+\documentclass[a4paper]{article}
+\usepackage[ngerman]{babel}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[export]{adjustbox} % loads also graphicx
+\usepackage{amsmath}
+\usepackage{emoji}
+\usepackage{fontspec}
+\usepackage{dialogue}
+\usepackage{wasysym}
+\usepackage{minted}
+\usepackage{cprotect}
+\usepackage[colorlinks=true, allcolors=TealBlue]{hyperref}
+\usepackage{longtable,tabu}
+\setlength{\parindent}{0ex}
+\setlength{\parskip}{1ex}
+\setminted{breaklines=true, breakanywhere=true}
+
+\newcommand{\uliji}[1]{
+  {\setmainfont{Noto Color Emoji}[Renderer=Harfbuzz]{#1}}
+}
+
+
+\author{Ulrich Schwenk}
+\title{test gpt}
+
+\begin{document}
+\setlength{\tabulinesep}{6pt}
+\maketitle
+\newpage
+
+\begin{dialogue}
+\speak{system} \leavevmode\\
+\end{dialogue}
+
+
+
+
+\section*{2025-02-15}
+\begin{dialogue}
+\speak{system} \leavevmode\\
+\speak{user} \leavevmode\\
+Wie genau unterscheidet man in der Informatik, welche Funktionalität man in den Parser und welche man in den Tokenizer packt? In welchem Zusammenhang steht das mit dem Begriff "`Regularität"'?
+\speak{assistant} \leavevmode\\
+In der Informatik, insbesondere in der Compiler- und Sprachverarbeitung, unterscheidet man zwischen \textbf{Tokenizer (Lexikalische Analyse)} und \textbf{Parser (Syntaktische Analyse)} anhand der \textbf{Art der Grammatik}, die zur Beschreibung der Sprache verwendet wird. Der zentrale Begriff, der dabei hilft, die Grenze zwischen den beiden Komponenten zu ziehen, ist die \textbf{Regularität}.
+
+\end{dialogue}
+\subsection*{1. Tokenizer (Lexikalische Analyse)}
+Der Tokenizer (auch \textbf{Lexer} oder Scanner genannt) ist für die \textbf{Zerlegung eines Eingabetextes in Tokens} zuständig. Dabei geht es um \textbf{Wortbildung} und \textbf{Struktur auf der Ebene regulärer Sprachen}. Ein Tokenizer:
+\begin{itemize}
+  \begin{item}
+    \textbf{Erkennt reguläre Muster} in einem Eingabetext (z. B. Schlüsselwörter, Identifikatoren, Zahlen, Operatoren).
+  \end{item}
+  \begin{item}
+    \textbf{Arbeitet mit regulären Ausdrücken} oder \textbf{endlichen Automaten}, um Zeichenketten zu gruppieren.
+  \end{item}
+  \begin{item}
+    Hat keine Hierarchie oder rekursive Strukturen, sondern betrachtet nur aufeinanderfolgende Zeichenfolgen.
+  \end{item}
+\end{itemize}
+Beispiel für Tokenizer-Regeln in einer Programmiersprache:
+
+\begin{minted}{text}
+IF -> Schlüsselwort
+x  -> Bezeichner
+=  -> Zuweisungsoperator
+42 -> Ganzzahl
+;  -> Semikolon
+\end{minted}
+Der Tokenizer gibt dann eine Sequenz von Tokens aus, z. B.:
+
+\begin{minted}{text}
+[IF, IDENT(x), ASSIGN_OP, INT(42), SEMICOLON]
+\end{minted}
+Ein \textbf{entscheidendes Merkmal} ist, dass ein Tokenizer \textbf{keine Kontextfreiheit benötigt}. Er verarbeitet die Eingabe \textbf{rein sequentiell} nach regulären Mustern.
+
+\uliji{➡} \textbf{Tokenization basiert auf regulären Sprachen} (Regularität!).
+\subsection*{2. Parser (Syntaktische Analyse)}
+Der Parser analysiert die \textbf{hierarchische Struktur} der Token-Sequenz nach den Regeln einer \textbf{kontextfreien Grammatik} (CFG, Context-Free Grammar). Er überprüft, ob die Reihenfolge der Tokens mit der zugrunde liegenden Sprache übereinstimmt.
+
+Ein Parser:
+\begin{itemize}
+  \begin{item}
+    \textbf{Liest Tokens ein und prüft die Syntax} nach einer \textbf{kontextfreien Grammatik}.
+  \end{item}
+  \begin{item}
+    \textbf{Erkennt verschachtelte Strukturen} (z. B. verschachtelte Klammern, Funktionsaufrufe).
+  \end{item}
+  \begin{item}
+    Nutzt \textbf{Parsebäume} oder \textbf{Ableitungsregeln}, um zu entscheiden, ob eine Token-Sequenz gültig ist.
+  \end{item}
+\end{itemize}
+Beispiel für eine kontextfreie Grammatik für eine Zuweisung:
+
+\begin{minted}{text}
+<statement> ::= <identifier> "=" <expression> ";"
+<expression> ::= <number> | <identifier>
+\end{minted}
+Diese Regel erlaubt z. B. die Eingabe:
+
+\begin{minted}{text}
+x = 42;
+\end{minted}
+Der Parser würde die Token-Sequenz \mintinline{text}{[IDENT(x), ASSIGN_OP, INT(42), SEMICOLON]} analysieren und bestätigen, dass sie zur Regel \mintinline{text}{<statement>} passt.
+
+\uliji{➡} \textbf{Parsing erfordert kontextfreie Grammatiken, die über Regularität hinausgehen}.
+\subsection*{3. Zusammenhang mit "`Regularität"'}
+Der Begriff \textbf{Regularität} bezieht sich auf die \textbf{Klassen von Grammatiken} in der Chomsky-Hierarchie:
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabu} to \linewidth { |X[m,c]|X[m,c]|X[m,c]| }
+
+\hline
+\textbf{Grammatikkategorie} & \textbf{Beispiel} & \textbf{Verwendung}\\\hline 
+\hline
+\textbf{Reguläre Sprachen (Regular Expressions, RE)} & Keywords, Zahlen, Operatoren & \textbf{Tokenization} (durch reguläre Ausdrücke oder endliche Automaten)\\\hline 
+\textbf{Kontextfreie Sprachen (Context-Free Grammar, CFG)} & Verschachtelte Strukturen (z. B. \mintinline{text}{if (x == 1) { ... }}) & \textbf{Parsing} (durch Parser wie LL(1), LR(1), etc.)\\\hline 
+\end{tabu}
+\end{table}
+
+\textbf{Die zentrale Regel:}
+\begin{itemize}
+  \begin{item}
+    \textbf{Alles, was mit regulären Sprachen beschrieben werden kann, gehört in den Tokenizer.}
+  \end{item}
+  \begin{item}
+    \textbf{Alles, was kontextfreie (oder sogar kontextabhängige) Strukturen benötigt, gehört in den Parser.}
+  \end{item}
+\end{itemize}
+\subsection*{4. Konkrete Unterscheidung zwischen Tokenizer und Parser}
+\subsubsection*{\uliji{✅} Gehört in den Tokenizer (Lexer)?}
+\begin{itemize}
+  \begin{item}
+    \textbf{Ja, wenn es mit regulären Ausdrücken beschrieben werden kann}:
+    \begin{itemize}
+      \begin{item}
+        Schlüsselwörter (\mintinline{text}{if}, \mintinline{text}{while}, \mintinline{text}{return})
+      \end{item}
+      \begin{item}
+        Bezeichner (\mintinline{text}{myVar}, \mintinline{text}{x})
+      \end{item}
+      \begin{item}
+        Zahlen (\mintinline{text}{42}, \mintinline{text}{3.14})
+      \end{item}
+      \begin{item}
+        Operatoren (\mintinline{text}{+}, \mintinline{text}{-}, \mintinline{text}{*})
+      \end{item}
+      \begin{item}
+        Klammern (\mintinline{text}{(}, \mintinline{text}{)})
+      \end{item}
+    \end{itemize}
+  \end{item}
+\end{itemize}
+\subsubsection*{\uliji{✅} Gehört in den Parser?}
+\begin{itemize}
+  \begin{item}
+    \textbf{Ja, wenn eine hierarchische, rekursive Struktur vorhanden ist}:
+    \begin{itemize}
+      \begin{item}
+        Verschachtelte Ausdrücke (\mintinline{text}{(a + (b * c))})
+      \end{item}
+      \begin{item}
+        Bedingte Anweisungen (\mintinline{text}{if (x == 1) { y = 2; }})
+      \end{item}
+      \begin{item}
+        Schleifen (\mintinline{text}{while (x < 10) { x++; }})
+      \end{item}
+    \end{itemize}
+  \end{item}
+\end{itemize}
+\subsection*{5. Beispiel zur Abgrenzung}
+Angenommen, wir analysieren folgenden Code:
+
+\begin{minted}{c}
+if (x == 10) { y = 5; }
+\end{minted}
+\begin{itemize}
+  \begin{item}
+    \textbf{Tokenizer erzeugt Tokens:}
+
+\begin{minted}{text}
+[IF, LPAREN, IDENT(x), EQ_OP, INT(10), RPAREN, LBRACE, IDENT(y), ASSIGN_OP, INT(5), SEMICOLON, RBRACE]
+\end{minted}
+  \end{item}
+  \begin{item}
+    \textbf{Parser überprüft die Struktur} anhand einer Grammatik:
+
+\begin{minted}{text}
+<if_statement> ::= "if" "(" <condition> ")" "{" <statement> "}"
+\end{minted}
+  \end{item}
+\end{itemize}
+\uliji{💡} \textbf{Schlussfolgerung:}
+\begin{itemize}
+  \begin{item}
+    Der \textbf{Tokenization-Prozess ist regulär} (basiert auf festen Mustern).
+  \end{item}
+  \begin{item}
+    Die \textbf{Parsing-Phase erfordert eine kontextfreie Grammatik}, weil sie \textbf{Verschachtelung} und \textbf{rekursive Strukturen} erkennt.
+  \end{item}
+\end{itemize}
+\subsection*{6. Warum kann der Tokenizer nicht alles erledigen?}
+Weil reguläre Sprachen \textbf{keine rekursiven Strukturen} ausdrücken können! Ein regulärer Ausdruck kann z. B. nicht erkennen, ob eine Klammerstruktur korrekt ist:
+
+\begin{minted}{text}
+((()))  ✅ korrekt
+(()))   ❌ inkorrekt
+\end{minted}
+\uliji{➡} \textbf{Hier braucht man einen Parser}, weil Klammerpaare eine \textbf{kontextfreie Grammatik} benötigen.
+\subsection*{7. Fazit}
+\begin{itemize}
+  \begin{item}
+    \textbf{Der Tokenizer bearbeitet reguläre Strukturen} (durch \textbf{reguläre Ausdrücke} oder \textbf{endliche Automaten}).
+  \end{item}
+  \begin{item}
+    \textbf{Der Parser bearbeitet rekursive, kontextfreie Strukturen} (mithilfe einer \textbf{kontextfreien Grammatik}).
+  \end{item}
+  \begin{item}
+    \textbf{Regularität} trennt \textbf{lexikalische Analyse (Tokenizer)} von der \textbf{syntaktischen Analyse (Parser)}, da reguläre Sprachen nicht ausreichen, um verschachtelte Strukturen zu analysieren.
+  \end{item}
+\end{itemize}
+\uliji{🔹} \textbf{Merksatz:}\leavevmode\\\uliji{📝} \textbf{„Was mit regulären Ausdrücken beschreibbar ist, gehört in den Tokenizer. Alles mit verschachtelten Strukturen gehört in den Parser.“}
+
+
+\end{document}

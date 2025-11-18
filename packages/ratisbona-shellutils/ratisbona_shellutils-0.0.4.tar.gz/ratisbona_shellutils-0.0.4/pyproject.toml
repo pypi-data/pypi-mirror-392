@@ -1,0 +1,103 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ratisbona_shellutils"
+version = "0.0.4"
+authors = [
+  { name="Ulrich Schwenk", email="ulrich.schwenk@gmail.com" },
+]
+summary="A collection of shell utilities"
+description = """A python package comprising a collection of shell utilities, such as:
+ratisbona_gcalendar, a command line interface that can sync git logs and other stuff to google calendar,
+ratisbona_dialogator, a set of tools revolving around the so called dialoge markdown useful for archiving and typesetting
+whatsapp conversations or chat-gpt dialogs.
+ratisbona_paste_image, a utility that can be very useful for example for copy and pasting images into VI.
+"""
+
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "click",
+    "pathlib",
+    "markdown-it-py",
+    "mdit-py-plugins",
+    "ratisbona_utils>=0.0.4",
+    "PyQt5",
+    "google-auth",
+    "google-auth-oauthlib",
+    "google-api-python-client",
+    "gitpython",
+    "html2text",
+    "transliterate",
+    "Unidecode",
+    "pyautogui",
+    "emoji",
+    "msal",
+    "pynput",
+    "more_itertools"
+]
+
+[project.scripts]
+ratisbona_paste_image = "ratisbona_shellutils.paste_image.__main__:main"
+ratisbona_dialogator = "ratisbona_shellutils.dialogator.__main__:main"
+ratisbona_gcalendar = "ratisbona_shellutils.calendar.__main__:main"
+ratisbona_fileorga = "ratisbona_shellutils.file_organisation.__main__:main"
+ratisbona_piper = "ratisbona_shellutils.piper.__main__:main"
+ratisbona_labeldisks = "ratisbona_shellutils.labeldisks.__main__:main"
+ratisbona_projectstarter = "ratisbona_shellutils.project_starter.__main__:main"
+ratisbona_twister = "ratisbona_shellutils.twister.__main__:main"
+ratisbona_length_encode = "ratisbona_shellutils.length_encode.__main__:main"
+ratisbona_emojifind = "ratisbona_shellutils.emojifind.__main__:main"
+ratisbona_pypi_research = "ratisbona_shellutils.pypi_research.__main__:main"
+ratisbona_messysoft = "ratisbona_shellutils.messysoft.__main__:main"
+
+[project.optional-dependencies]
+dev = [
+    "pylint",
+    # Code style
+    "black[d]",
+    # Strict typing
+    "mypy",
+    # Test coverage
+    "coverage",
+    "build",
+    "poethepoet",
+    "twine",
+    "black",
+]
+
+[tool.poe.tasks]
+coverage-report = { help = "Create a html report of test-coverage", shell = "python -m coverage html" }
+coverage = { help = "Run unit tests with coverage", shell = "python -m coverage run -m unittest" }
+build-wheel = { help = "Build the wheel distribution", shell = "python -m build --wheel" }
+build = { help = "Build the wheel distribution", shell = "python -m build" }
+test-publish = { help = "Publish to TestPyPI", shell = "twine upload --verbose --repository testpypi dist/*" }
+publish = { help = "Publish to PyPI", shell = "twine upload dist/*" }
+blackd = { help = "Run black formatter daemon", shell = "blackd" }
+pylint = { help = "Run pylint", shell = "pylint src/ratisbona_shellutils" }
+
+[project.urls]
+"Homepage" = "https://github.com/pypa/sampleproject"
+"Bug Tracker" = "https://github.com/pypa/sampleproject/issues"
+
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ratisbona_shellutils"]
+include = [
+    "ratisbona_shellutils/latex/resources/*",
+    "ratisbona_shellutils/emojifind/resources/*",
+]
+
+
+[tool.hatch.metadata]
+allow-directories = ["ratisbona_shellutils/latex/resources/"]
+
+
+
