@@ -1,0 +1,13 @@
+#!/bin/bash
+
+readonly CACHE_DIR="/var/cache/surcom"
+[ ! -d $CACHE_DIR ] && mkdir $CACHE_DIR
+chown nobody $CACHE_DIR
+chmod 700 $CACHE_DIR
+
+
+# NOTE: In the [project.scripts] section of pyproject.toml,
+# we add '{{data.plugin_id}}' as a command, here we execute it.
+
+gosu nobody {{data.plugin_id}} $*
+exit $?

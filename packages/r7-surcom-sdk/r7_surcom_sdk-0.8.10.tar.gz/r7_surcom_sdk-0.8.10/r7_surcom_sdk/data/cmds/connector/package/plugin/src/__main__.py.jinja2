@@ -1,0 +1,36 @@
+#!/usr/bin/env python
+
+Name = "{{ data.conn_spec.plugin_id }}"
+Vendor = "{{ data.conn_spec.author }}"
+Version = "{{ data.conn_spec.version }}"
+Description = "PLACEHOLDER"
+
+
+def main():
+
+    import {{ data.base_module }}
+    from {{ data.conn_spec.plugin_id }} import connection, actions
+
+    class {{ data.conn_spec.plugin_id | underscore_to_camel }}({{ data.base_module }}.Plugin):
+
+        def __init__(self):
+            super(self.__class__, self).__init__(
+                name=Name,
+                vendor=Vendor,
+                version=Version,
+                description=Description,
+                connection=connection.Connection()
+            )
+
+        {% for action_name in data.action_names %}
+            self.add_action(actions.{{ action_name | underscore_to_camel }}())
+        {% endfor %}
+
+
+    # Run plugin
+    cli = {{ data.base_module }}.CLI({{ data.conn_spec.plugin_id | underscore_to_camel }}())
+    cli.run()
+
+
+if __name__ == "__main__":
+    main()

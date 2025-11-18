@@ -1,0 +1,64 @@
+# Documentation Heading
+
+Follow this documentation to setup this Connector
+
+{% if data.settings %}
+## Settings
+
+The following settings are required to enable the connector:
+
+| Name | Description | Type |
+| ---- | ----------- | ---- |
+{% for item in data.settings -%}
+| {{ item.title }} | {{ item.description }} | {% if item.format %}{{ item.format }}{% else %}{{ item.type }}{% endif %} |
+{% endfor %}{% endif %}
+
+{% if data.manifest_data.connector_deps %}
+## Dependencies
+
+Ensure that these Connectors are available on your platform prior to installing:
+
+{% for dep in data.manifest_data.connector_deps -%}
+  - {{ dep }}
+{% endfor %}
+{% endif %}
+
+{% if data.manifest_data.requirements %}
+## Setup
+
+{{ data.manifest_data.requirements }}
+{% endif %}
+
+## Components
+
+Installing this connector will add the following components to Surface Command:
+
+{% if data.types %}
+### Types
+{{ data.manifest_data.name }} defines the following entity types:
+
+| Name | Title | Extends | Correlates |
+|----------|-------|-------|-------|
+{% for t in data.types -%}
+| `{{ t.id }}` | {{ t.title }} | {{ t.extends | join(', ') }} | {{ t.correlates | join(', ') }} |
+{% endfor %}{% endif %}
+
+{% if data.import_feeds %}
+### Import Feeds
+{{ data.manifest_data.name }} includes the following import feeds:
+
+| Name | Description |
+|------|-------------|
+{% for i in data.import_feeds -%}
+| **{{ i.name }}** | {{ i.description }} |
+{% endfor %}{% endif %}
+
+{% if data.manifest_data.queries %}
+### Saved Queries
+{{ data.manifest_data.name }} defines the following saved queries:
+
+| Name | Description |
+|------|-------------|
+{% for q in data.manifest_data.queries -%}
+| **{{ q.name }}** | {{ q.description }} |
+{% endfor %}{% endif %}
