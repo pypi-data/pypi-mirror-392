@@ -1,0 +1,52 @@
+[project]
+name = "hdmi"
+version = "0.1.0"
+description = "A dependency injection framework for Python with dynamic late-binding resolution"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Romain Dorgueil", email = "romain@makersquad.fr" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "anyio>=4.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.8.0",
+    "basedpyright>=1.21.0",
+    "sphinx>=8.0.0",
+    "sphinx-autobuild>=2024.0.0",
+    "furo>=2024.0.0",
+    "sphinxcontrib-mermaid>=1.0.0",
+    "twine>=6.0.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.7,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.basedpyright]
+# Standard type checking mode - stricter than basic, not as strict as strict
+typeCheckingMode = "standard"
+pythonVersion = "3.13"
+
+# Include source code and tests
+include = ["src", "tests"]
+
+# Report missing type stubs for third-party libraries as information, not errors
+reportMissingTypeStubs = "information"
+
+# Note: Planning to migrate to Astral's 'ty' when it reaches production readiness (late 2025)
+# https://github.com/astral-sh/ty
