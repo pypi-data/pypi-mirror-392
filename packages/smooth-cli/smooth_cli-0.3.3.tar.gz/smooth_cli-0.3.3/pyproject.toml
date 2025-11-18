@@ -1,0 +1,156 @@
+[tool.poetry]
+name = "smooth-cli"
+version = "0.3.3"
+description = "CLI utility for SD README Documentation Generator"
+authors = [
+    "SmoothDev <info@smoothdev.io>",
+]
+readme = "README.md"
+package-mode = true
+packages = [{ include = "smooth" }, { include = "cli" }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+click = "8.1.7"
+gitpython = "^3.1.40"
+requests = "^2.31.0"
+pydantic = "^2.6.0"
+typer = "^0.12.5"
+dulwich = "^0.21.7"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.3"
+pytest-cov = "^4.1.0"
+ruff = "^0.1.11"
+mypy = "^1.7.1"
+bandit = "^1.7.5"
+pytest-asyncio = "^0.21.1"
+types-requests = "*"
+types-urllib3 = "*"
+coverage = "^7.6.1"
+
+[tool.poetry.scripts]
+smooth = "smooth.cli:app"
+test = "cli.tasks:test"
+"test:coverage" = "cli.tasks:test_coverage"
+lint = "cli.tasks:lint"
+format = "cli.tasks:format"
+typecheck = "cli.tasks:typecheck"
+security = "cli.tasks:security"
+check = "cli.tasks:check"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [
+    "tests/",
+]
+ 
+[tool.ruff.lint]
+select = [
+    "E", "W", "F", "I", "N", "UP", "ANN", "B", "A", "COM", "C4", "DTZ", "T10", "EM", "EXE",
+    "ISC", "ICN", "G", "INP", "PIE", "T20", "PT", "Q", "RSE", "RET", "SLF", "SIM", "TID", "TCH",
+    "ARG", "PTH", "ERA", "PD", "PGH", "PL", "TRY", "RUF", "S",
+]
+ignore = [
+    "ANN401",
+    "ISC001",
+    "COM812",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["cli"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+  "S101", "ANN201", "ANN001", "F841", "S108", "INP001",
+  "ANN202", "ANN002", "ANN003", "N806", "EM101",
+  "PLC0415", "ARG001", "ARG002", "E402", "ANN204", "PLR0915",
+  "PT004", "ANN101"
+]
+"smooth/commands/docs.py" = ["B008"]
+"smooth/commands/commit.py" = ["B008", "PLR0913", "PLR0912", "PLR0915"]  # generate command has complex logic
+"smooth/commands/pr.py" = ["B008", "PLR0913"]
+"smooth/commands/release.py" = ["B008", "PLR0913", "PLR0912", "PLR0915"]
+"smooth/commands/feedback.py" = ["B008"]
+"smooth/plugin_loader.py" = ["TCH003", "S112"]
+"cli/api_client.py" = ["TRY003"]
+"cli/gh_integration.py" = ["TRY003", "PLR0913"]
+"auth.py" = ["TRY300", "PGH003", "B904", "TRY200", "TRY003", "EM102"]
+"main.py" = ["B904", "TRY200"]
+"cli/git_context.py" = ["UP007", "RUF005", "TRY003", "EM101", "EM102", "TRY300", "S603"]
+"cli/context_resolver.py" = ["UP007", "PLR0913", "ARG001", "TRY003", "EM101"]
+"cli/config_manager.py" = ["PTH123", "UP007", "TRY003", "EM101", "EM102", "ANN101", "PTH101"]
+"cli/git_commit.py" = ["TRY003", "EM101"]
+"cli/git_tag.py" = ["TRY003", "EM101", "PLR0913", "TRY301", "TCH003"]
+"cli/github_operations.py" = ["TRY003", "EM101", "PLR0913", "S603", "S607", "S110"]
+"cli/errors.py" = ["S105"]  # NO_TOKEN constant triggers false positive
+"smooth/commands/config.py" = ["A002", "SIM108", "PLR0913", "PLR0912"]
+"smooth/commands/pr_create.py" = ["PLR0913", "PLR0912", "PLR0915", "TRY301"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+exclude = "(^|/)(tests/|.venv/)"
+explicit_package_bases = true
+# Ensure mypy can resolve imports like `src.*`, `common.*`, and `sd_common.*`
+mypy_path = "../../src"
+follow_imports = "skip"
+
+[[tool.mypy.overrides]]
+module = [
+  "git",
+  "git.*",
+  "dulwich",
+  "dulwich.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+  "common.*",
+  "sd_common.*",
+  "src.lambda_fns.*",
+  "src.agents.*",
+  "agents.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+  "ruff",
+  "ruff.*",
+  "bandit",
+  "bandit.*",
+]
+ignore_missing_imports = true
+
+[tool.bandit]
+exclude_dirs = [
+    "tests",
+    ".venv",
+]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
+python_files = "test_*.py"
+python_functions = "test_*"
+python_classes = "Test*"
+addopts = "--cov=cli --cov=smooth --cov-report=term-missing --cov-report=xml --cov-fail-under=85 --cov-config=pyproject.toml"
+
+[tool.coverage.run]
+branch = true
+source = ["cli", "smooth"]
+omit = [".venv/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "if __name__ == .__main__.:",
+]
