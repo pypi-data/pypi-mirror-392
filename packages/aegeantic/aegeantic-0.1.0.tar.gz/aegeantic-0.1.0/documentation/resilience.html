@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resilience - Aegeantic Framework</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #3b82f6; --primary-glow: rgba(59, 130, 246, 0.3); --accent: #8b5cf6;
+            --bg-primary: #0a0a0a; --bg-secondary: #1a1a1a; --bg-tertiary: #2a2a2a;
+            --text-primary: #f8f9fa; --text-secondary: #a0a0a0; --text-muted: #6b7280;
+            --border: rgba(255, 255, 255, 0.1); --sidebar-width: 280px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4); --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif; line-height: 1.7; color: var(--text-primary); background: var(--bg-primary); }
+        .container { display: flex; min-height: 100vh; }
+        .sidebar { width: var(--sidebar-width); background: var(--bg-secondary); border-right: 1px solid var(--border); position: fixed; height: 100vh; overflow-y: auto; padding: 2rem 0; }
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--bg-tertiary); border-radius: 10px; }
+        .logo { padding: 0 1.5rem 1.5rem; font-size: 1.75rem; font-weight: 700; background: linear-gradient(135deg, var(--primary), var(--accent)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.02em; margin-bottom: 1.5rem; }
+        .nav-section { margin-bottom: 2rem; }
+        .nav-section-title { padding: 0.5rem 1.5rem; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.1em; }
+        .nav-link { display: block; padding: 0.75rem 1.5rem; color: var(--text-secondary); text-decoration: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-size: 0.9rem; position: relative; }
+        .nav-link::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 0; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 0 3px 3px 0; transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .nav-link:hover { background: rgba(59, 130, 246, 0.1); color: var(--text-primary); }
+        .nav-link:hover::before { height: 60%; }
+        .nav-link.active { background: rgba(59, 130, 246, 0.15); color: var(--primary); font-weight: 500; }
+        .nav-link.active::before { height: 60%; }
+        .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 4rem 4rem 4rem 5rem; max-width: 1000px; }
+        h1 { font-size: 3.5rem; margin-bottom: 1rem; font-weight: 700; letter-spacing: -0.03em; background: linear-gradient(135deg, var(--text-primary), var(--text-secondary)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        h2 { font-size: 2rem; margin-top: 3rem; margin-bottom: 1.25rem; font-weight: 600; letter-spacing: -0.02em; color: var(--text-primary); padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); }
+        h3 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; letter-spacing: -0.01em; color: var(--text-primary); }
+        h4 { font-size: 1.2rem; margin-top: 1.5rem; margin-bottom: 0.75rem; font-weight: 600; color: var(--primary); }
+        p { margin-bottom: 1.25rem; color: var(--text-secondary); font-size: 1.05rem; }
+        .subtitle { font-size: 1.3rem; color: var(--text-secondary); margin-bottom: 2.5rem; line-height: 1.6; }
+        code { background: var(--bg-tertiary); padding: 0.3rem 0.6rem; border-radius: 8px; font-family: 'SF Mono', 'Monaco', monospace; font-size: 0.9em; color: var(--primary); border: 1px solid var(--border); }
+        pre { background: var(--bg-secondary); color: var(--text-primary); padding: 2rem; border-radius: 16px; overflow-x: auto; margin: 2rem 0; line-height: 1.6; border: 1px solid var(--border); box-shadow: var(--shadow); }
+        pre code { background: none; color: inherit; padding: 0; border: none; font-size: 0.9rem; }
+        .keyword { color: #ff79c6; } .string { color: #50fa7b; } .function { color: #8be9fd; } .comment { color: var(--text-muted); }
+        ul, ol { margin: 1.5rem 0; padding-left: 2rem; }
+        li { margin: 0.75rem 0; color: var(--text-secondary); }
+        li strong, li code { color: var(--text-primary); }
+        a { color: var(--primary); text-decoration: none; transition: color 0.2s; }
+        a:hover { color: var(--accent); }
+        .alert { padding: 1.5rem; border-radius: 16px; margin: 2rem 0; background: rgba(59, 130, 246, 0.1); border-left: 4px solid var(--primary); }
+        .alert strong { color: var(--primary); }
+        .warning { background: rgba(251, 191, 36, 0.1); border-left-color: #f59e0b; }
+        .warning strong { color: #f59e0b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">Aegeantic</div>
+            <nav>
+                <div class="nav-section">
+                    <div class="nav-section-title">Getting Started</div>
+                    <a href="index.html" class="nav-link">Overview</a>
+                    <a href="getting-started.html" class="nav-link">Quick Start</a>
+                    <a href="core-concepts.html" class="nav-link">Core Concepts</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Core Systems</div>
+                    <a href="agent-system.html" class="nav-link">Agent System</a>
+                    <a href="tools.html" class="nav-link">Tools</a>
+                    <a href="patterns.html" class="nav-link">Patterns</a>
+                    <a href="logic-flows.html" class="nav-link">Logic Flows</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Advanced</div>
+                    <a href="multi-agent.html" class="nav-link">Multi-Agent</a>
+                    <a href="events.html" class="nav-link">Events</a>
+                    <a href="resilience.html" class="nav-link active">Resilience</a>
+                    <a href="validation.html" class="nav-link">Validation</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Reference</div>
+                    <a href="api-reference.html" class="nav-link">API Reference</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <h1>Resilience</h1>
+            <p class="subtitle">Retry logic and rate limiting for robust streaming operations</p>
+
+            <h2>Overview</h2>
+            <p>Aegeantic provides universal resilience utilities that work with any async iterator (streams). These utilities wrap LLM calls, tool execution, or any async operation with automatic retry and rate limiting, making agents production-ready.</p>
+
+            <div class="alert">
+                <strong>Key Concept:</strong> All resilience functions work with <em>async iterators</em> (streams), not simple async functions. They yield events and items from the wrapped stream.
+            </div>
+
+            <h2>Retry Logic</h2>
+            <p>The <code>retry_stream</code> function wraps any async iterator with automatic retry behavior:</p>
+
+            <pre><code><span class="keyword">from</span> agentic.resilience <span class="keyword">import</span> retry_stream, RetryConfig
+<span class="keyword">from</span> agentic.events <span class="keyword">import</span> RetryEvent
+
+<span class="keyword">async def</span> <span class="function">llm_stream</span>():
+    <span class="comment"># Your streaming LLM call</span>
+    <span class="keyword">async for</span> chunk <span class="keyword">in</span> provider.stream(prompt):
+        <span class="keyword">yield</span> chunk
+
+<span class="comment"># Wrap with retry logic</span>
+config = RetryConfig(
+    max_attempts=3,
+    backoff=<span class="string">"exponential"</span>,
+    base_delay=1.0,
+    max_delay=30.0,
+    jitter=<span class="keyword">True</span>,
+    retry_on=(ConnectionError, TimeoutError)
+)
+
+<span class="keyword">async for</span> item <span class="keyword">in</span> retry_stream(
+    llm_stream,
+    config,
+    operation_name=<span class="string">"gpt-4"</span>,
+    operation_type=<span class="string">"llm"</span>
+):
+    <span class="keyword">if</span> <span class="function">isinstance</span>(item, RetryEvent):
+        <span class="function">print</span>(<span class="string">f"Retry {item.attempt}/{item.max_attempts}, waiting {item.next_delay_seconds}s"</span>)
+    <span class="keyword">else</span>:
+        <span class="comment"># Actual LLM chunk</span>
+        <span class="function">print</span>(item, end=<span class="string">""</span>)</code></pre>
+
+            <h2>RetryConfig</h2>
+            <p>Configuration for retry behavior:</p>
+
+            <pre><code><span class="keyword">from</span> agentic.resilience <span class="keyword">import</span> RetryConfig
+
+config = RetryConfig(
+    max_attempts=3,                      <span class="comment"># Maximum retry attempts (default: 3)</span>
+    backoff=<span class="string">"exponential"</span>,              <span class="comment"># "exponential" | "linear" | "constant"</span>
+    base_delay=1.0,                      <span class="comment"># Base delay in seconds (default: 1.0)</span>
+    max_delay=60.0,                      <span class="comment"># Maximum delay cap (default: 60.0)</span>
+    jitter=<span class="keyword">True</span>,                        <span class="comment"># Add random jitter ±25% (default: True)</span>
+    retry_on=(TimeoutError, ConnectionError, asyncio.TimeoutError)
+)</code></pre>
+
+            <h3>Backoff Strategies</h3>
+
+            <h4>Exponential Backoff</h4>
+            <p>Delay doubles with each retry (recommended for most cases):</p>
+            <pre><code>RetryConfig(backoff=<span class="string">"exponential"</span>, base_delay=1.0, max_delay=60.0)
+<span class="comment"># Delays: 1s, 2s, 4s, 8s, 16s, 32s, 60s (capped)</span></code></pre>
+
+            <h4>Linear Backoff</h4>
+            <p>Delay increases linearly:</p>
+            <pre><code>RetryConfig(backoff=<span class="string">"linear"</span>, base_delay=2.0, max_delay=30.0)
+<span class="comment"># Delays: 2s, 4s, 6s, 8s, 10s...</span></code></pre>
+
+            <h4>Constant Backoff</h4>
+            <p>Fixed delay between retries:</p>
+            <pre><code>RetryConfig(backoff=<span class="string">"constant"</span>, base_delay=5.0)
+<span class="comment"># Delays: 5s, 5s, 5s...</span></code></pre>
+
+            <h3>Jitter</h3>
+            <p>Adding jitter (random variation) prevents thundering herd problems:</p>
+            <pre><code>RetryConfig(jitter=<span class="keyword">True</span>)  <span class="comment"># Adds ±25% random variation to delays</span></code></pre>
+
+            <h3>Retryable Exceptions</h3>
+            <p>Specify which exceptions should trigger a retry:</p>
+            <pre><code><span class="keyword">from</span> aiohttp <span class="keyword">import</span> ClientError, ServerTimeoutError
+
+RetryConfig(
+    retry_on=(
+        ConnectionError,
+        TimeoutError,
+        asyncio.TimeoutError,
+        ClientError,
+        ServerTimeoutError
+    )
+)</code></pre>
+
+            <h2>Rate Limiting</h2>
+            <p>Token bucket rate limiting for controlling request rates:</p>
+
+            <h3>RateLimitConfig</h3>
+            <pre><code><span class="keyword">from</span> agentic.resilience <span class="keyword">import</span> RateLimitConfig, RateLimiter
+
+config = RateLimitConfig(
+    requests_per_second=10.0,   <span class="comment"># Limit to 10 requests/second</span>
+    requests_per_minute=<span class="keyword">None</span>,     <span class="comment"># Optional minute-level limit</span>
+    requests_per_hour=<span class="keyword">None</span>,       <span class="comment"># Optional hour-level limit</span>
+    burst_size=20               <span class="comment"># Allow bursts up to 20 tokens</span>
+)
+
+limiter = RateLimiter(config)</code></pre>
+
+            <h3>Using RateLimiter</h3>
+
+            <h4>Manual Token Acquisition</h4>
+            <pre><code><span class="comment"># Blocking acquire - waits until token is available</span>
+<span class="keyword">await</span> limiter.acquire(tokens=1, operation_name=<span class="string">"api_call"</span>)
+<span class="keyword">await</span> make_api_call()
+
+<span class="comment"># Non-blocking try - returns immediately</span>
+<span class="keyword">if</span> <span class="keyword">await</span> limiter.try_acquire(tokens=1):
+    <span class="keyword">await</span> make_api_call()
+<span class="keyword">else</span>:
+    <span class="function">print</span>(<span class="string">"Rate limit exceeded"</span>)
+
+<span class="comment"># Check available tokens</span>
+available = limiter.tokens_available()</code></pre>
+
+            <h4>With Streaming</h4>
+            <pre><code><span class="keyword">from</span> agentic.resilience <span class="keyword">import</span> rate_limited_stream
+<span class="keyword">from</span> agentic.events <span class="keyword">import</span> RateLimitEvent
+
+<span class="keyword">async def</span> <span class="function">my_stream</span>():
+    <span class="keyword">async for</span> item <span class="keyword">in</span> data_source:
+        <span class="keyword">yield</span> item
+
+<span class="keyword">async for</span> item <span class="keyword">in</span> rate_limited_stream(
+    my_stream,
+    limiter,
+    operation_name=<span class="string">"data_fetch"</span>
+):
+    <span class="keyword">if</span> <span class="function">isinstance</span>(item, RateLimitEvent):
+        <span class="function">print</span>(<span class="string">f"Rate limit acquired, {item.tokens_remaining} tokens left"</span>)
+    <span class="keyword">else</span>:
+        <span class="function">print</span>(item)</code></pre>
+
+            <h3>Rate Limit Strategies</h3>
+
+            <h4>Strict Rate Limiting</h4>
+            <p>Low burst size enforces even distribution:</p>
+            <pre><code>RateLimitConfig(
+    requests_per_second=10.0,
+    burst_size=1  <span class="comment"># No bursting, strict 10/sec</span>
+)</code></pre>
+
+            <h4>Bursty Rate Limiting</h4>
+            <p>High burst size allows temporary spikes:</p>
+            <pre><code>RateLimitConfig(
+    requests_per_second=10.0,
+    burst_size=100  <span class="comment"># Allow bursts, average 10/sec</span>
+)</code></pre>
+
+            <h4>Multiple Time Windows</h4>
+            <p>Combine limits at different granularities:</p>
+            <pre><code>RateLimitConfig(
+    requests_per_second=10.0,   <span class="comment"># Max 10/sec</span>
+    requests_per_minute=500.0,  <span class="comment"># Max 500/min</span>
+    requests_per_hour=20000.0,  <span class="comment"># Max 20k/hour</span>
+    burst_size=20
+)
+<span class="comment"># Uses most restrictive rate</span></code></pre>
+
+            <h2>Combined Resilience</h2>
+            <p>The <code>resilient_stream</code> function combines retry and rate limiting:</p>
+
+            <pre><code><span class="keyword">from</span> agentic.resilience <span class="keyword">import</span> (
+    resilient_stream, RetryConfig, RateLimitConfig, RateLimiter
+)
+<span class="keyword">from</span> agentic.events <span class="keyword">import</span> RetryEvent, RateLimitEvent
+
+<span class="comment"># Configure resilience</span>
+retry_config = RetryConfig(
+    max_attempts=3,
+    backoff=<span class="string">"exponential"</span>,
+    base_delay=1.0,
+    retry_on=(ConnectionError, TimeoutError)
+)
+
+rate_config = RateLimitConfig(
+    requests_per_second=10.0,
+    burst_size=20
+)
+rate_limiter = RateLimiter(rate_config)
+
+<span class="comment"># Your streaming operation</span>
+<span class="keyword">async def</span> <span class="function">llm_call</span>():
+    <span class="keyword">async for</span> chunk <span class="keyword">in</span> provider.stream(prompt):
+        <span class="keyword">yield</span> chunk
+
+<span class="comment"># Wrap with full resilience</span>
+<span class="keyword">async for</span> item <span class="keyword">in</span> resilient_stream(
+    llm_call,
+    retry_config=retry_config,
+    rate_limiter=rate_limiter,
+    operation_name=<span class="string">"gpt-4"</span>,
+    operation_type=<span class="string">"llm"</span>
+):
+    <span class="keyword">if</span> <span class="function">isinstance</span>(item, RetryEvent):
+        <span class="function">print</span>(<span class="string">f"Retrying: {item.error}"</span>)
+    <span class="keyword">elif</span> <span class="function">isinstance</span>(item, RateLimitEvent):
+        <span class="function">print</span>(<span class="string">f"Rate limited, {item.tokens_remaining} tokens left"</span>)
+    <span class="keyword">else</span>:
+        <span class="comment"># Actual data</span>
+        <span class="function">print</span>(item, end=<span class="string">""</span>)</code></pre>
+
+            <h2>Real-World Example: Production LLM Provider</h2>
+            <pre><code><span class="keyword">from</span> agentic.resilience <span class="keyword">import</span> (
+    resilient_stream, RetryConfig, RateLimitConfig, RateLimiter
+)
+<span class="keyword">import</span> logging
+
+logger = logging.getLogger(<span class="string">"llm_provider"</span>)
+
+<span class="keyword">class</span> <span class="function">ProductionLLMProvider</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, base_provider):
+        <span class="keyword">self</span>._provider = base_provider
+
+        <span class="comment"># Global rate limiter for this provider</span>
+        <span class="keyword">self</span>._rate_limiter = RateLimiter(
+            RateLimitConfig(
+                requests_per_second=50.0,
+                requests_per_minute=2000.0,
+                burst_size=100
+            )
+        )
+
+        <span class="comment"># Retry configuration</span>
+        <span class="keyword">self</span>._retry_config = RetryConfig(
+            max_attempts=5,
+            backoff=<span class="string">"exponential"</span>,
+            base_delay=1.0,
+            max_delay=30.0,
+            jitter=<span class="keyword">True</span>,
+            retry_on=(
+                ConnectionError,
+                TimeoutError,
+                asyncio.TimeoutError
+            )
+        )
+
+    <span class="keyword">async def</span> <span class="function">stream</span>(<span class="keyword">self</span>, prompt, **kwargs):
+        <span class="comment"># Define the base streaming function</span>
+        <span class="keyword">async def</span> <span class="function">_stream</span>():
+            <span class="keyword">async for</span> chunk <span class="keyword">in</span> <span class="keyword">self</span>._provider.stream(prompt, **kwargs):
+                <span class="keyword">yield</span> chunk
+
+        <span class="comment"># Wrap with resilience</span>
+        <span class="keyword">async for</span> item <span class="keyword">in</span> resilient_stream(
+            _stream,
+            retry_config=<span class="keyword">self</span>._retry_config,
+            rate_limiter=<span class="keyword">self</span>._rate_limiter,
+            operation_name=<span class="string">"llm_stream"</span>,
+            operation_type=<span class="string">"llm"</span>
+        ):
+            <span class="keyword">if</span> <span class="function">isinstance</span>(item, RetryEvent):
+                logger.warning(
+                    <span class="string">f"LLM retry {item.attempt}/{item.max_attempts}: {item.error}"</span>
+                )
+            <span class="keyword">elif</span> <span class="function">isinstance</span>(item, RateLimitEvent):
+                logger.debug(<span class="string">f"Rate limit acquired: {item.tokens_remaining} tokens"</span>)
+            <span class="keyword">else</span>:
+                <span class="keyword">yield</span> item
+
+<span class="comment"># Usage</span>
+provider = ProductionLLMProvider(base_llm_provider)
+
+<span class="keyword">async for</span> chunk <span class="keyword">in</span> provider.stream(<span class="string">"Hello, world!"</span>):
+    <span class="function">print</span>(chunk, end=<span class="string">""</span>)</code></pre>
+
+            <h2>Integration with Agent System</h2>
+            <p>The framework automatically integrates resilience into the agent system. Agents can use resilient providers transparently:</p>
+
+            <pre><code><span class="keyword">from</span> agentic <span class="keyword">import</span> Agent, AgentConfig
+
+<span class="comment"># Create agent with production provider</span>
+agent = Agent(
+    config=AgentConfig(...),
+    context=context,
+    patterns=patterns,
+    tools=tools,
+    llm_provider=ProductionLLMProvider(base_provider)
+)
+
+<span class="comment"># Agent step automatically benefits from retry + rate limiting</span>
+runner = AgentRunner(agent)
+<span class="keyword">async for</span> event <span class="keyword">in</span> runner.step_stream(user_input):
+    <span class="comment"># RetryEvent and RateLimitEvent will appear in stream</span>
+    <span class="keyword">if</span> <span class="function">isinstance</span>(event, RetryEvent):
+        <span class="function">print</span>(<span class="string">f"Retrying LLM call..."</span>)
+    <span class="keyword">elif</span> <span class="function">isinstance</span>(event, LLMChunkEvent):
+        <span class="function">print</span>(event.chunk, end=<span class="string">""</span>)</code></pre>
+
+            <h2>Tool Resilience</h2>
+            <p>Apply resilience to individual tools:</p>
+
+            <pre><code><span class="keyword">from</span> agentic <span class="keyword">import</span> tool
+<span class="keyword">from</span> agentic.resilience <span class="keyword">import</span> resilient_stream, RetryConfig
+
+<span class="keyword">class</span> <span class="function">APITool</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>):
+        <span class="keyword">self</span>._retry_config = RetryConfig(
+            max_attempts=3,
+            backoff=<span class="string">"exponential"</span>,
+            retry_on=(ConnectionError,)
+        )
+
+    <span class="keyword">@tool</span>(<span class="string">"Fetch data from external API"</span>)
+    <span class="keyword">async def</span> <span class="function">fetch_data</span>(<span class="keyword">self</span>, url: str):
+        <span class="keyword">async def</span> <span class="function">_fetch</span>():
+            <span class="keyword">async with</span> aiohttp.ClientSession() <span class="keyword">as</span> session:
+                <span class="keyword">async with</span> session.get(url) <span class="keyword">as</span> response:
+                    data = <span class="keyword">await</span> response.json()
+                    <span class="keyword">yield</span> data
+
+        <span class="keyword">async for</span> item <span class="keyword">in</span> resilient_stream(
+            _fetch,
+            retry_config=<span class="keyword">self</span>._retry_config,
+            operation_name=<span class="string">"api_fetch"</span>,
+            operation_type=<span class="string">"tool"</span>
+        ):
+            <span class="keyword">if</span> <span class="keyword">not</span> <span class="function">isinstance</span>(item, RetryEvent):
+                <span class="keyword">return</span> item</code></pre>
+
+            <h2>Event Types</h2>
+
+            <h3>RetryEvent</h3>
+            <p>Emitted when an operation is being retried:</p>
+            <pre><code><span class="keyword">class</span> <span class="function">RetryEvent</span>:
+    operation_type: str     <span class="comment"># "llm", "tool", "custom"</span>
+    operation_name: str     <span class="comment"># Name of operation</span>
+    attempt: int            <span class="comment"># Current retry attempt (1-indexed)</span>
+    max_attempts: int       <span class="comment"># Maximum attempts configured</span>
+    error: str              <span class="comment"># Error that triggered retry</span>
+    next_delay_seconds: float  <span class="comment"># Delay before next attempt</span>
+    step_id: str            <span class="comment"># Optional step correlation ID</span></code></pre>
+
+            <h3>RateLimitEvent</h3>
+            <p>Emitted when rate limit token is acquired:</p>
+            <pre><code><span class="keyword">class</span> <span class="function">RateLimitEvent</span>:
+    operation_name: str     <span class="comment"># Name of operation</span>
+    acquired_at: float      <span class="comment"># Timestamp of acquisition</span>
+    tokens_remaining: float <span class="comment"># Tokens left in bucket</span>
+    step_id: str            <span class="comment"># Optional step correlation ID</span></code></pre>
+
+            <h2>Best Practices</h2>
+            <ul>
+                <li><strong>Always use jitter</strong> - Prevents thundering herd in distributed systems</li>
+                <li><strong>Set reasonable max_delay</strong> - Cap exponential backoff to avoid excessive waits</li>
+                <li><strong>Use exponential backoff</strong> - Most effective for transient failures</li>
+                <li><strong>Retry transient errors only</strong> - Don't retry validation errors or 4xx HTTP codes</li>
+                <li><strong>Set max_attempts carefully</strong> - Too many retries amplify outages</li>
+                <li><strong>Monitor retry rates</strong> - High retry rates indicate upstream issues</li>
+                <li><strong>Combine rate limiting with retry</strong> - Rate limit first, then retry</li>
+                <li><strong>Use burst_size wisely</strong> - Match burst capacity to expected traffic patterns</li>
+                <li><strong>Share rate limiters</strong> - Use one RateLimiter instance per API/service</li>
+            </ul>
+
+            <div class="alert warning">
+                <strong>Warning:</strong> Excessive retries during outages can make problems worse. Always set <code>max_attempts</code> and use exponential backoff with jitter to spread load.
+            </div>
+
+            <h2>Monitoring and Observability</h2>
+            <p>Handle resilience events for monitoring:</p>
+
+            <pre><code><span class="keyword">from</span> agentic.events <span class="keyword">import</span> RetryEvent, RateLimitEvent
+<span class="keyword">import</span> time
+
+<span class="keyword">class</span> <span class="function">ResilienceMonitor</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>):
+        <span class="keyword">self</span>.retry_count = 0
+        <span class="keyword">self</span>.rate_limit_waits = 0
+        <span class="keyword">self</span>.total_delay = 0.0
+
+    <span class="keyword">def</span> <span class="function">handle_event</span>(<span class="keyword">self</span>, event):
+        <span class="keyword">if</span> <span class="function">isinstance</span>(event, RetryEvent):
+            <span class="keyword">self</span>.retry_count += 1
+            <span class="keyword">self</span>.total_delay += event.next_delay_seconds
+            logger.warning(
+                <span class="string">f"Retry {event.attempt}/{event.max_attempts} "</span>
+                <span class="string">f"for {event.operation_name}: {event.error}"</span>
+            )
+
+        <span class="keyword">elif</span> <span class="function">isinstance</span>(event, RateLimitEvent):
+            <span class="keyword">self</span>.rate_limit_waits += 1
+            logger.debug(
+                <span class="string">f"Rate limit for {event.operation_name}, "</span>
+                <span class="string">f"{event.tokens_remaining} tokens remaining"</span>
+            )
+
+monitor = ResilienceMonitor()
+
+<span class="keyword">async for</span> item <span class="keyword">in</span> resilient_stream(...):
+    monitor.handle_event(item)
+    <span class="comment"># Process item...</span>
+
+<span class="function">print</span>(<span class="string">f"Total retries: {monitor.retry_count}"</span>)
+<span class="function">print</span>(<span class="string">f"Total delay from retries: {monitor.total_delay}s"</span>)</code></pre>
+
+            <h2>Next Steps</h2>
+            <ul>
+                <li><a href="agent-system.html">Agent System</a> - Integrate resilience into agents</li>
+                <li><a href="tools.html">Tools</a> - Add resilience to custom tools</li>
+                <li><a href="events.html">Events</a> - Handle resilience events</li>
+                <li><a href="logic-flows.html">Logic Flows</a> - Combine with conditional loops</li>
+            </ul>
+        </main>
+    </div>
+</body>
+</html>

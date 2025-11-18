@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logic Flows - Aegeantic Framework</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #3b82f6; --primary-glow: rgba(59, 130, 246, 0.3); --accent: #8b5cf6;
+            --bg-primary: #0a0a0a; --bg-secondary: #1a1a1a; --bg-tertiary: #2a2a2a;
+            --text-primary: #f8f9fa; --text-secondary: #a0a0a0; --text-muted: #6b7280;
+            --border: rgba(255, 255, 255, 0.1); --sidebar-width: 280px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4); --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif; line-height: 1.7; color: var(--text-primary); background: var(--bg-primary); }
+        .container { display: flex; min-height: 100vh; }
+        .sidebar { width: var(--sidebar-width); background: var(--bg-secondary); border-right: 1px solid var(--border); position: fixed; height: 100vh; overflow-y: auto; padding: 2rem 0; }
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--bg-tertiary); border-radius: 10px; }
+        .logo { padding: 0 1.5rem 1.5rem; font-size: 1.75rem; font-weight: 700; background: linear-gradient(135deg, var(--primary), var(--accent)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.02em; margin-bottom: 1.5rem; }
+        .nav-section { margin-bottom: 2rem; }
+        .nav-section-title { padding: 0.5rem 1.5rem; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.1em; }
+        .nav-link { display: block; padding: 0.75rem 1.5rem; color: var(--text-secondary); text-decoration: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-size: 0.9rem; position: relative; }
+        .nav-link::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 0; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 0 3px 3px 0; transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .nav-link:hover { background: rgba(59, 130, 246, 0.1); color: var(--text-primary); }
+        .nav-link:hover::before { height: 60%; }
+        .nav-link.active { background: rgba(59, 130, 246, 0.15); color: var(--primary); font-weight: 500; }
+        .nav-link.active::before { height: 60%; }
+        .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 4rem 4rem 4rem 5rem; max-width: 1000px; }
+        h1 { font-size: 3.5rem; margin-bottom: 1rem; font-weight: 700; letter-spacing: -0.03em; background: linear-gradient(135deg, var(--text-primary), var(--text-secondary)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        h2 { font-size: 2rem; margin-top: 3rem; margin-bottom: 1.25rem; font-weight: 600; letter-spacing: -0.02em; color: var(--text-primary); padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); }
+        h3 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; letter-spacing: -0.01em; color: var(--text-primary); }
+        p { margin-bottom: 1.25rem; color: var(--text-secondary); font-size: 1.05rem; }
+        .subtitle { font-size: 1.3rem; color: var(--text-secondary); margin-bottom: 2.5rem; line-height: 1.6; }
+        code { background: var(--bg-tertiary); padding: 0.3rem 0.6rem; border-radius: 8px; font-family: 'SF Mono', 'Monaco', monospace; font-size: 0.9em; color: var(--primary); border: 1px solid var(--border); }
+        pre { background: var(--bg-secondary); color: var(--text-primary); padding: 2rem; border-radius: 16px; overflow-x: auto; margin: 2rem 0; line-height: 1.6; border: 1px solid var(--border); box-shadow: var(--shadow); }
+        pre code { background: none; color: inherit; padding: 0; border: none; font-size: 0.9rem; }
+        .keyword { color: #ff79c6; } .string { color: #50fa7b; } .function { color: #8be9fd; } .comment { color: var(--text-muted); }
+        ul, ol { margin: 1.5rem 0; padding-left: 2rem; }
+        li { margin: 0.75rem 0; color: var(--text-secondary); }
+        li strong, li code { color: var(--text-primary); }
+        a { color: var(--primary); text-decoration: none; transition: color 0.2s; }
+        a:hover { color: var(--accent); }
+        .alert { padding: 1.5rem; border-radius: 16px; margin: 2rem 0; background: rgba(59, 130, 246, 0.1); border-left: 4px solid var(--primary); }
+        .alert strong { color: var(--primary); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">Aegeantic</div>
+            <nav>
+                <div class="nav-section">
+                    <div class="nav-section-title">Getting Started</div>
+                    <a href="index.html" class="nav-link">Overview</a>
+                    <a href="getting-started.html" class="nav-link">Quick Start</a>
+                    <a href="core-concepts.html" class="nav-link">Core Concepts</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Core Systems</div>
+                    <a href="agent-system.html" class="nav-link">Agent System</a>
+                    <a href="tools.html" class="nav-link">Tools</a>
+                    <a href="patterns.html" class="nav-link">Patterns</a>
+                    <a href="logic-flows.html" class="nav-link active">Logic Flows</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Advanced</div>
+                    <a href="multi-agent.html" class="nav-link">Multi-Agent</a>
+                    <a href="events.html" class="nav-link">Events</a>
+                    <a href="resilience.html" class="nav-link">Resilience</a>
+                    <a href="validation.html" class="nav-link">Validation</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Reference</div>
+                    <a href="api-reference.html" class="nav-link">API Reference</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <h1>Logic Flows</h1>
+            <p class="subtitle">Build conditional loops and multi-step agent execution</p>
+
+            <h2>Overview</h2>
+            <p>Logic flows enable agents to execute multiple steps based on conditions. Instead of single-shot execution, agents can loop, make decisions, and execute complex workflows using the <code>LogicRunner</code> class.</p>
+
+            <h2>LogicRunner Class</h2>
+            <p>The core class for managing conditional agent loops:</p>
+
+            <pre><code><span class="keyword">from</span> agentic <span class="keyword">import</span> LogicRunner, LogicConfig, LogicCondition
+
+config = LogicConfig(
+    logic_id=<span class="string">"my_loop"</span>,
+    max_iterations=10,
+    stop_conditions=[...],  <span class="comment"># List of LogicCondition objects</span>
+    loop_until_conditions=[...]
+)
+
+runner = LogicRunner(agent_runner, context, patterns, config)
+
+<span class="comment"># Execute with streaming events</span>
+<span class="keyword">async for</span> event <span class="keyword">in</span> runner.run_stream(<span class="string">"initial input"</span>):
+    <span class="keyword">if</span> <span class="function">isinstance</span>(event, StepCompleteEvent):
+        <span class="function">print</span>(<span class="string">f"Step {event.result.iteration} done"</span>)</code></pre>
+
+            <h2>LogicConfig</h2>
+            <p>Configuration for logic flow execution:</p>
+
+            <pre><code><span class="keyword">from</span> agentic <span class="keyword">import</span> LogicConfig, ProcessingMode
+
+config = LogicConfig(
+    logic_id=<span class="string">"research_loop"</span>,
+    max_iterations=20,                    <span class="comment"># Safety limit</span>
+    stop_conditions=[...],                <span class="comment"># Conditions to stop loop</span>
+    loop_until_conditions=[...],          <span class="comment"># Loop until satisfied</span>
+    break_on_error=<span class="keyword">True</span>,                  <span class="comment"># Stop on agent errors</span>
+    processing_mode=ProcessingMode.THREAD, <span class="comment"># Default processing mode</span>
+    context_health_checks=[...]           <span class="comment"># Monitor context health</span>
+)</code></pre>
+
+            <h2>LogicCondition</h2>
+            <p>Define conditions for when to stop or continue looping:</p>
+
+            <h3>Basic Structure</h3>
+            <pre><code><span class="keyword">from</span> agentic <span class="keyword">import</span> LogicCondition
+
+condition = LogicCondition(
+    pattern_set=<span class="string">"default"</span>,       <span class="comment"># Pattern set name</span>
+    pattern_name=<span class="string">"done"</span>,         <span class="comment"># Pattern/text to match</span>
+    match_type=<span class="string">"contains"</span>,       <span class="comment"># "contains" | "equals" | "regex"</span>
+    target=<span class="string">"response"</span>,           <span class="comment"># "response" | "reasoning" | "tool_output" | "context:{key}"</span>
+    evaluation_point=<span class="string">"auto"</span>     <span class="comment"># When to evaluate (see below)</span>
+)</code></pre>
+
+            <h3>Match Types</h3>
+
+            <h4>1. Contains (Pattern Detection)</h4>
+            <p>Check if a specific pattern appears in the output:</p>
+            <pre><code><span class="comment"># Stop when "done" pattern detected in response</span>
+LogicCondition(
+    pattern_set=<span class="string">"default"</span>,
+    pattern_name=<span class="string">"done"</span>,
+    match_type=<span class="string">"contains"</span>,
+    target=<span class="string">"response"</span>
+)</code></pre>
+
+            <h4>2. Equals (Exact Match)</h4>
+            <p>Check if text exactly equals a value:</p>
+            <pre><code><span class="comment"># Stop when context key equals "complete"</span>
+LogicCondition(
+    pattern_set=<span class="string">"default"</span>,
+    pattern_name=<span class="string">"complete"</span>,
+    match_type=<span class="string">"equals"</span>,
+    target=<span class="string">"context:status"</span>
+)</code></pre>
+
+            <h4>3. Regex (Pattern Matching)</h4>
+            <p>Use regular expressions for complex pattern matching:</p>
+            <pre><code><span class="comment"># Stop when confidence score >= 95% appears</span>
+LogicCondition(
+    pattern_set=<span class="string">"default"</span>,  <span class="comment"># Not used for regex</span>
+    pattern_name=<span class="string">r"confidence:\s*(\d+)%"</span>,
+    match_type=<span class="string">"regex"</span>,
+    target=<span class="string">"response"</span>
+)</code></pre>
+
+            <h3>Target Options</h3>
+            <ul>
+                <li><code>"response"</code> - Check agent's response segment</li>
+                <li><code>"reasoning"</code> - Check reasoning segments</li>
+                <li><code>"tool_output"</code> - Check tool execution results</li>
+                <li><code>"context:key"</code> - Check specific context key (e.g., <code>"context:task_status"</code>)</li>
+            </ul>
+
+            <h3>Evaluation Points</h3>
+            <p>Control <strong>when</strong> conditions are evaluated during agent execution. This is crucial for early stopping and fine-grained control:</p>
+
+            <pre><code><span class="comment"># Common evaluation points:</span>
+<span class="string">"auto"</span>           <span class="comment"># Smart default (context → step_complete, patterns → llm_complete)</span>
+<span class="string">"llm_chunk"</span>      <span class="comment"># On every LLM chunk as it streams (real-time, for early exit)</span>
+<span class="string">"llm_complete"</span>   <span class="comment"># After LLM generation completes</span>
+<span class="string">"tool_detected"</span>  <span class="comment"># When tool pattern detected in output</span>
+<span class="string">"tool_finished"</span>  <span class="comment"># After tool execution completes</span>
+<span class="string">"step_complete"</span>  <span class="comment"># After entire agent step completes (most common)</span>
+<span class="string">"any_event"</span>      <span class="comment"># On every event (most frequent, use sparingly)</span>
+
+<span class="comment"># Advanced evaluation points (for fine-grained control):</span>
+<span class="string">"pattern_start"</span>  <span class="comment"># When a pattern starts being detected</span>
+<span class="string">"pattern_end"</span>    <span class="comment"># When a non-tool pattern completes</span>
+<span class="string">"pattern_content"</span><span class="comment"># During pattern content streaming</span>
+<span class="string">"tool_start"</span>     <span class="comment"># When tool execution begins</span>
+<span class="string">"tool_output"</span>    <span class="comment"># During tool output streaming</span>
+<span class="string">"context_write"</span>  <span class="comment"># When context is written</span>
+<span class="string">"error"</span>          <span class="comment"># When an error occurs</span>
+<span class="string">"status"</span>         <span class="comment"># On status changes</span></code></pre>
+
+            <h4>Example: Early Exit on Streaming</h4>
+            <pre><code><span class="comment"># Stop immediately when "ABORT" appears in LLM stream</span>
+LogicCondition(
+    pattern_set=<span class="string">"default"</span>,
+    pattern_name=<span class="string">r"ABORT"</span>,
+    match_type=<span class="string">"regex"</span>,
+    target=<span class="string">"response"</span>,
+    evaluation_point=<span class="string">"llm_chunk"</span>  <span class="comment"># Check during streaming!</span>
+)</code></pre>
+
+            <h2>Helper Functions</h2>
+            <p>Convenient functions for common loop patterns:</p>
+
+            <h3>Loop N Times</h3>
+            <pre><code><span class="keyword">from</span> agentic <span class="keyword">import</span> loop_n_times
+
+runner = loop_n_times(agent_runner, context, patterns, n=5)
+
+<span class="keyword">async for</span> event <span class="keyword">in</span> runner.run_stream(<span class="string">"Execute 5 iterations"</span>):
+    <span class="keyword">if</span> <span class="function">isinstance</span>(event, StepCompleteEvent):
+        result = event.result
+        <span class="function">print</span>(<span class="string">f"Iteration {result.iteration}: {result.status}"</span>)</code></pre>
+
+            <h3>Loop Until Pattern</h3>
+            <pre><code><span class="keyword">from</span> agentic <span class="keyword">import</span> loop_until_pattern
+
+runner = loop_until_pattern(
+    agent_runner,
+    context,
+    patterns,
+    pattern_set=<span class="string">"default"</span>,
+    pattern_name=<span class="string">"done"</span>,
+    target=<span class="string">"response"</span>,
+    max_iterations=20
+)
+
+<span class="keyword">async for</span> event <span class="keyword">in</span> runner.run_stream(<span class="string">"Complete task"</span>):
+    <span class="keyword">if</span> <span class="function">isinstance</span>(event, StepCompleteEvent):
+        <span class="function">print</span>(<span class="string">f"Step {event.result.iteration} done"</span>)</code></pre>
+
+            <h3>Loop Until Regex</h3>
+            <pre><code><span class="keyword">from</span> agentic <span class="keyword">import</span> loop_until_regex
+
+runner = loop_until_regex(
+    agent_runner,
+    context,
+    patterns,
+    regex_pattern=<span class="string">r"confidence:\s*([8-9]\d|100)%"</span>,  <span class="comment"># 80-100%</span>
+    target=<span class="string">"response"</span>,
+    max_iterations=10
+)
+
+<span class="keyword">async for</span> event <span class="keyword">in</span> runner.run_stream(<span class="string">"Refine until confident"</span>):
+    <span class="keyword">pass</span></code></pre>
+
+            <h3>Stop on Error</h3>
+            <pre><code><span class="keyword">from</span> agentic <span class="keyword">import</span> stop_on_error
+
+runner = stop_on_error(
+    agent_runner,
+    context,
+    patterns,
+    max_iterations=100
+)
+
+<span class="comment"># Will stop immediately on any agent error</span></code></pre>
+
+            <h2>Context Health Monitoring</h2>
+            <p>Monitor context size and prevent runaway memory usage:</p>
+
+            <pre><code><span class="keyword">from</span> agentic <span class="keyword">import</span> ContextHealthCheck, LogicConfig
+
+config = LogicConfig(
+    logic_id=<span class="string">"monitored_loop"</span>,
+    max_iterations=50,
+    context_health_checks=[
+        <span class="comment"># Warn if any context key exceeds 100KB</span>
+        ContextHealthCheck(
+            check_type=<span class="string">"size"</span>,
+            key_pattern=<span class="string">"*"</span>,
+            threshold=100_000,
+            action=<span class="string">"warn"</span>,
+            evaluation_point=<span class="string">"step_complete"</span>
+        ),
+        <span class="comment"># Stop if llm_output versions exceed 50</span>
+        ContextHealthCheck(
+            check_type=<span class="string">"version_count"</span>,
+            key_pattern=<span class="string">"llm_output:*"</span>,
+            threshold=50,
+            action=<span class="string">"stop"</span>,
+            evaluation_point=<span class="string">"step_complete"</span>,
+            max_versions_limit=10000
+        )
+    ]
+)</code></pre>
+
+            <h3>Health Check Types</h3>
+            <ul>
+                <li><code>"size"</code> - Monitor byte size of context values</li>
+                <li><code>"version_count"</code> - Monitor number of versions stored for keys</li>
+            </ul>
+
+            <h3>Key Pattern Matching</h3>
+            <ul>
+                <li><code>"*"</code> - All keys</li>
+                <li><code>"llm_output:*"</code> - All keys starting with prefix</li>
+                <li><code>"tool_result:*"</code> - Glob pattern matching</li>
+            </ul>
+
+            <h3>Actions</h3>
+            <ul>
+                <li><code>"warn"</code> - Emit ContextHealthEvent but continue</li>
+                <li><code>"stop"</code> - Stop the logic loop immediately</li>
+            </ul>
+
+            <h2>Stop vs Loop-Until Conditions</h2>
+
+            <h3>Stop Conditions</h3>
+            <p>Terminate the loop when condition is met:</p>
+            <pre><code>config = LogicConfig(
+    logic_id=<span class="string">"example"</span>,
+    stop_conditions=[
+        <span class="comment"># Stop if "ERROR" appears</span>
+        LogicCondition(
+            pattern_set=<span class="string">"default"</span>,
+            pattern_name=<span class="string">r"ERROR"</span>,
+            match_type=<span class="string">"regex"</span>,
+            target=<span class="string">"response"</span>
+        )
+    ]
+)</code></pre>
+
+            <h3>Loop-Until Conditions</h3>
+            <p>Continue looping until condition is satisfied:</p>
+            <pre><code>config = LogicConfig(
+    logic_id=<span class="string">"example"</span>,
+    loop_until_conditions=[
+        <span class="comment"># Loop until "COMPLETE" appears</span>
+        LogicCondition(
+            pattern_set=<span class="string">"default"</span>,
+            pattern_name=<span class="string">r"COMPLETE"</span>,
+            match_type=<span class="string">"regex"</span>,
+            target=<span class="string">"response"</span>
+        )
+    ]
+)</code></pre>
+
+            <h2>Real-World Example: Research Agent</h2>
+            <p>Agent that iteratively researches until comprehensive answer is found:</p>
+
+            <pre><code><span class="keyword">from</span> agentic <span class="keyword">import</span> (
+    LogicRunner, LogicConfig, LogicCondition,
+    ContextHealthCheck, ProcessingMode
+)
+
+<span class="comment"># Configure research loop</span>
+config = LogicConfig(
+    logic_id=<span class="string">"research_agent"</span>,
+    max_iterations=10,
+
+    <span class="comment"># Stop on errors</span>
+    break_on_error=<span class="keyword">True</span>,
+
+    <span class="comment"># Stop conditions</span>
+    stop_conditions=[
+        <span class="comment"># Stop if agent says DONE</span>
+        LogicCondition(
+            pattern_set=<span class="string">"default"</span>,
+            pattern_name=<span class="string">"done"</span>,
+            match_type=<span class="string">"contains"</span>,
+            target=<span class="string">"response"</span>
+        ),
+        <span class="comment"># Stop if comprehensive answer detected</span>
+        LogicCondition(
+            pattern_set=<span class="string">"default"</span>,
+            pattern_name=<span class="string">r"(?=.*sources)(?=.{500,})"</span>,  <span class="comment"># 500+ chars with "sources"</span>
+            match_type=<span class="string">"regex"</span>,
+            target=<span class="string">"response"</span>,
+            evaluation_point=<span class="string">"llm_complete"</span>
+        )
+    ],
+
+    <span class="comment"># Monitor context health</span>
+    context_health_checks=[
+        ContextHealthCheck(
+            check_type=<span class="string">"size"</span>,
+            key_pattern=<span class="string">"*"</span>,
+            threshold=500_000,  <span class="comment"># 500KB limit</span>
+            action=<span class="string">"stop"</span>
+        )
+    ],
+
+    processing_mode=ProcessingMode.THREAD
+)
+
+runner = LogicRunner(agent_runner, context, patterns, config)
+
+<span class="comment"># Execute research loop</span>
+<span class="keyword">async for</span> event <span class="keyword">in</span> runner.run_stream(<span class="string">"Research quantum computing applications"</span>):
+    <span class="keyword">if</span> <span class="function">isinstance</span>(event, StepCompleteEvent):
+        <span class="function">print</span>(<span class="string">f"Research iteration {event.result.iteration} complete"</span>)
+        <span class="function">print</span>(<span class="string">f"Response: {event.result.segments.response[:100]}..."</span>)
+    <span class="keyword">elif</span> <span class="function">isinstance</span>(event, StatusEvent):
+        <span class="function">print</span>(<span class="string">f"Status: {event.message}"</span>)
+    <span class="keyword">elif</span> <span class="function">isinstance</span>(event, ContextHealthEvent):
+        <span class="function">print</span>(<span class="string">f"Context health warning: {event.check_type}"</span>)</code></pre>
+
+            <h2>Batch Mode</h2>
+            <p>For synchronous execution without streaming:</p>
+
+            <pre><code><span class="comment"># Collect all results at once</span>
+results = runner.run(<span class="string">"Execute task"</span>)
+
+<span class="keyword">for</span> i, result <span class="keyword">in</span> <span class="function">enumerate</span>(results):
+    <span class="function">print</span>(<span class="string">f"Iteration {i + 1}: {result.status}"</span>)
+    <span class="keyword">if</span> result.segments.response:
+        <span class="function">print</span>(<span class="string">f"  Response: {result.segments.response}"</span>)</code></pre>
+
+            <div class="alert">
+                <strong>Note:</strong> The <code>run()</code> method cannot be called from an async context. Use <code>run_stream()</code> in async code.
+            </div>
+
+            <h2>Best Practices</h2>
+            <ul>
+                <li><strong>Always set max_iterations</strong> - Prevent infinite loops with reasonable limits</li>
+                <li><strong>Use evaluation_point wisely</strong> - <code>"llm_chunk"</code> for early exit, <code>"step_complete"</code> for accuracy</li>
+                <li><strong>Monitor context health</strong> - Prevent memory issues with health checks</li>
+                <li><strong>Set break_on_error=True</strong> - Stop immediately on agent errors</li>
+                <li><strong>Combine stop and loop-until</strong> - Use both for robust flow control</li>
+                <li><strong>Use specific evaluation points</strong> - Don't rely solely on "auto" for critical conditions</li>
+                <li><strong>Test conditions thoroughly</strong> - Verify regex patterns and thresholds before production</li>
+            </ul>
+
+            <h2>Event Handling</h2>
+            <p>LogicRunner emits various events during execution:</p>
+
+            <pre><code><span class="keyword">from</span> agentic.events <span class="keyword">import</span> (
+    StatusEvent, StepCompleteEvent, ContextHealthEvent,
+    LLMChunkEvent, LLMCompleteEvent, ToolEndEvent
+)
+
+<span class="keyword">async for</span> event <span class="keyword">in</span> runner.run_stream(user_input):
+    <span class="keyword">if</span> <span class="function">isinstance</span>(event, StatusEvent):
+        <span class="function">print</span>(<span class="string">f"[{event.status}] {event.message}"</span>)
+
+    <span class="keyword">elif</span> <span class="function">isinstance</span>(event, StepCompleteEvent):
+        <span class="function">print</span>(<span class="string">f"Iteration {event.result.iteration} done"</span>)
+
+    <span class="keyword">elif</span> <span class="function">isinstance</span>(event, ContextHealthEvent):
+        <span class="function">print</span>(<span class="string">f"Health: {event.key} - {event.check_type}"</span>)
+
+    <span class="keyword">elif</span> <span class="function">isinstance</span>(event, LLMChunkEvent):
+        <span class="function">print</span>(event.chunk, end=<span class="string">""</span>)  <span class="comment"># Stream LLM output</span></code></pre>
+
+            <h2>Next Steps</h2>
+            <ul>
+                <li><a href="agent-system.html">Agent System</a> - Configure agents for logic flows</li>
+                <li><a href="multi-agent.html">Multi-Agent</a> - Coordinate multiple agents with logic flows</li>
+                <li><a href="events.html">Events</a> - Handle flow events in detail</li>
+                <li><a href="patterns.html">Patterns</a> - Define patterns for conditions</li>
+            </ul>
+        </main>
+    </div>
+</body>
+</html>
