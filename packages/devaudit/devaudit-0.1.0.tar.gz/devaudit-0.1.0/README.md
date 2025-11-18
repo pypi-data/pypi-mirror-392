@@ -1,0 +1,343 @@
+# 🔍 DevAudit
+
+**Developer Environment Auditing Tool**
+
+Cross-platform CLI tool for auditing development environments, tracking dependencies, and identifying cleanup candidates. Beautiful terminal output powered by Rich.
+
+[![PyPI version](https://badge.fury.io/py/devaudit.svg)](https://pypi.org/project/devaudit/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+---
+
+## ✨ Features
+
+- 🐍 **Python Auditing** - List packages, detect frameworks (Django, Flask, FastAPI), find outdated packages
+- 📦 **Node.js/npm Auditing** - Track global packages, detect frameworks (Express, React, Vue), identify outdated packages
+- 🐳 **Docker Auditing** - List containers, images, identify large images, find dangling resources
+- 🔷 **Go Auditing** - List modules, show cache location
+- 💻 **System Auditing** - Detect Git, kubectl, Terraform, cloud CLIs, and more
+- 🎯 **Project-Specific Scanning** - Target individual projects to audit their dependencies and configuration
+- 📊 **Beautiful Reports** - Console output with Rich tables + timestamped text reports
+- 🧹 **Cleanup Suggestions** - Automatically identify outdated packages and large Docker images
+- 🔧 **Docker Desktop Fix** - Fix common Docker Desktop UI issues (Windows)
+- 🤖 **Automation Ready** - Perfect for CI/CD pipelines and batch processing multiple projects
+
+---
+
+## 🚀 Quick Start
+
+### Installation
+
+```bash
+pip install devaudit
+```
+
+### Basic Usage
+
+```bash
+# Full system audit
+devaudit scan
+
+# Audit specific tools
+devaudit scan --python
+devaudit scan --docker
+devaudit scan --node
+
+# Audit a specific project directory
+devaudit scan --target /path/to/project
+
+# Fix Docker Desktop (Windows only)
+devaudit fix-docker
+```
+
+---
+
+## 📖 Commands
+
+### `devaudit scan`
+
+Audit your development environment.
+
+**Options:**
+- `--python` - Audit Python only
+- `--node` - Audit Node.js only
+- `--docker` - Audit Docker only
+- `--go` - Audit Go only
+- `--system` - Audit system tools only
+- `--target PATH` - Target directory to audit (project-specific scan)
+- `--no-reports` - Skip generating report files
+- `--output-dir PATH` - Custom output directory for reports
+
+**Examples:**
+
+```bash
+# Full system audit (all tools)
+devaudit scan
+
+# Python only
+devaudit scan --python
+
+# Multiple tools
+devaudit scan --python --docker
+
+# Audit a specific project directory
+devaudit scan --target ~/projects/my-django-app
+
+# Audit specific tool in a project
+devaudit scan --python --target ~/projects/my-app
+
+# Custom report location
+devaudit scan --output-dir ~/audit-reports
+
+# Audit multiple projects with a script
+for dir in ~/projects/*; do
+  devaudit scan --target "$dir" --output-dir "./reports/$(basename $dir)"
+done
+```
+
+### `devaudit fix-docker`
+
+Fix common Docker Desktop issues on Windows.
+
+This command:
+1. Stops Docker Desktop processes
+2. Shuts down WSL instances
+3. Removes stale lock files
+4. Restarts Docker service
+5. Launches Docker Desktop cleanly
+
+**Example:**
+
+```bash
+devaudit fix-docker
+```
+
+---
+
+## 📊 Output
+
+### Console Output
+
+DevAudit displays beautiful tables in your terminal:
+
+- ✅ **Overview Table** - Shows which tools are installed with versions
+- 🐍 **Python Details** - Frameworks detected, outdated packages
+- 📦 **Node Details** - Global packages, frameworks
+- 🐳 **Docker Details** - Container/image statistics
+- 🧹 **Cleanup Candidates** - Suggested items to remove
+
+### Report Files
+
+Two report files are generated (timestamped):
+
+1. **Summary Report** (`summary_YYYYMMDD_HHMMSS.txt`)
+   - Quick overview of installed tools
+   - List of cleanup candidates
+   - Perfect for quick checks
+
+2. **Detailed Report** (`detailed_YYYYMMDD_HHMMSS.txt`)
+   - Complete package lists
+   - Framework detection results
+   - Full Docker container/image details
+   - Comprehensive cleanup suggestions
+
+Reports are saved to `./devaudit_reports/` by default.
+
+---
+
+## 🎯 Use Cases
+
+### 1. **Project-Specific Auditing**
+Audit individual projects to understand their dependencies and configuration.
+
+```bash
+devaudit scan --target ~/projects/my-app
+# Checks for:
+# - Python: requirements.txt, pyproject.toml, Pipfile, venv/
+# - Node: package.json, package-lock.json, node_modules/
+# - Go: go.mod, go.sum, module info
+```
+
+### 2. **Environment Cleanup**
+Identify outdated packages and large Docker images consuming disk space.
+
+```bash
+devaudit scan
+# Check the "Cleanup Candidates" section
+```
+
+### 3. **New Machine Setup Verification**
+Verify all required development tools are installed.
+
+```bash
+devaudit scan
+# Check the overview table for missing tools
+```
+
+### 4. **Team Environment Standardization**
+Compare audit reports across team members to ensure consistent environments.
+
+```bash
+devaudit scan --output-dir ~/team-audits/
+# Share the summary report with your team
+```
+
+### 5. **Docker Troubleshooting**
+When Docker Desktop won't start or containers are stuck.
+
+```bash
+devaudit fix-docker
+```
+
+### 6. **CI/CD Environment Documentation**
+Generate audit reports in CI to document build environment state.
+
+```bash
+devaudit scan --output-dir ./build-artifacts/
+```
+
+### 7. **Batch Project Auditing**
+Audit multiple projects at once with automation scripts.
+
+```bash
+# Audit all projects in a directory
+for dir in ~/projects/*; do
+  echo "Auditing $(basename $dir)..."
+  devaudit scan --target "$dir" --output-dir "./audits/$(basename $dir)"
+done
+```
+
+---
+
+## 🛠️ What Gets Audited?
+
+### Python
+**System-wide:**
+- ✅ Installed interpreters (`python`, `python3`, `py`)
+- ✅ Global packages with versions
+- ✅ Framework detection (Django, Flask, FastAPI, Pyramid)
+- ✅ Outdated packages
+
+**Project-specific (with --target):**
+- ✅ requirements.txt parsing
+- ✅ pyproject.toml detection
+- ✅ Pipfile detection
+- ✅ Virtual environment (venv/) detection and package listing
+
+### Node.js/npm
+**System-wide:**
+- ✅ Node.js and npm versions
+- ✅ Global packages
+- ✅ Framework detection (Express, React, Vue, Angular, Next.js)
+- ✅ Outdated global packages
+
+**Project-specific (with --target):**
+- ✅ package.json parsing (dependencies, devDependencies, scripts)
+- ✅ package-lock.json detection
+- ✅ node_modules/ analysis and package count
+
+### Docker
+- ✅ Docker version
+- ✅ Running/stopped containers
+- ✅ Images with sizes
+- ✅ Dangling images
+- ✅ Large images (>500MB)
+
+### Go
+**System-wide:**
+- ✅ Go version
+- ✅ Module cache location
+
+**Project-specific (with --target):**
+- ✅ go.mod parsing (module name, Go version)
+- ✅ go.sum detection
+- ✅ Module dependency listing
+
+### System
+- ✅ Git
+- ✅ Docker Compose
+- ✅ Kubectl
+- ✅ Terraform
+- ✅ AWS CLI
+- ✅ Azure CLI
+- ✅ gcloud
+- ✅ Windows installed programs (Windows only)
+
+---
+
+## 💡 Tips
+
+### Schedule Regular Audits
+
+Add to your shell profile:
+
+```bash
+# Run audit on first terminal open each week
+if [ ! -f ~/.devaudit_last_run ] || [ $(find ~/.devaudit_last_run -mtime +7) ]; then
+    devaudit scan --no-reports
+    touch ~/.devaudit_last_run
+fi
+```
+
+### Compare Audits Over Time
+
+```bash
+# Save with descriptive names
+devaudit scan --output-dir ~/audits/2025-01-pre-cleanup/
+# After cleanup
+devaudit scan --output-dir ~/audits/2025-01-post-cleanup/
+```
+
+### Integrate with Documentation
+
+Include audit reports in project documentation to show environment requirements.
+
+---
+
+## 🔒 Privacy
+
+DevAudit runs **100% locally**. No data is sent to external servers. All auditing happens on your machine.
+
+---
+
+## 📝 Requirements
+
+- Python 3.8+
+- Cross-platform (Windows, macOS, Linux)
+- Optional: Docker, Node.js, Go (only if you want to audit them)
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Submit a pull request
+
+---
+
+## 📄 License
+
+MIT License - See LICENSE file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- Inspired by PowerShell system audit scripts
+- Terminal UI powered by [Rich](https://github.com/Textualize/rich)
+- CLI framework by [Click](https://click.palletsprojects.com/)
+
+---
+
+## 📞 Support
+
+- **Issues:** [GitHub Issues](https://github.com/aramantos/devaudit/issues)
+- **Email:** john.doyle.mail@icloud.com
+
+---
+
+**DevAudit** - Because knowing your environment is the first step to mastering it. 🔍
