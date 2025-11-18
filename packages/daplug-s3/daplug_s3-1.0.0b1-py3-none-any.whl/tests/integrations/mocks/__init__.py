@@ -1,0 +1,1 @@
+"""Integration mock assets."""
