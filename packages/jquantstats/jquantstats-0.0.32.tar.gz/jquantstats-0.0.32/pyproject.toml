@@ -1,0 +1,64 @@
+# Main project metadata
+[project]
+name = 'jquantstats'
+version = "0.0.32"
+description = "Analytics for quants"
+authors = [{name='tschm', email= 'thomas.schmelzer@gmail.com'}]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.0.0",
+    "plotly>=6.0.0",
+    "polars>=1.18.0",
+    "pandas>=2.2.3",
+    "pyarrow>=22.0.0",
+    "scipy>=1.14.1"
+]
+
+# Project URLs for documentation and reference
+[project.urls]
+repository = "https://github.com/tschm/jquantstats"
+
+# Optional dependencies that can be installed with extras (e.g., pip install jquantstats[plot])
+[project.optional-dependencies]
+plot = ["kaleido==1.2.0"]
+
+dev = [
+    "pytest-cov==7.0.0",
+    "pytest==9.0.0",
+    "yfinance==0.2.66",
+    "ipython==9.7.0",
+    "quantstats==0.0.77",
+    "marimo>=0.13.15",
+]
+
+
+# Build system configuration
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# Configuration for wheel build
+[tool.hatch.build.targets.wheel]
+packages = ["src/jquantstats"]
+
+# Configuration for what files to include in the build
+[tool.hatch.build]
+include = [
+    "LICENSE",    # Ensure the LICENSE file is included in your package
+    "README.md",
+    "src/jquantstats"
+]
+
+# Bandit security linter configuration
+[tool.bandit]
+exclude_dirs = ["src/tests"]  # Exclude test directories from security scanning
+
+# Deptry dependency checker configuration
+[tool.deptry]
+# see https://deptry.com/usage/#pep-621-dev-dependency-groups
+pep621_dev_dependency_groups = ["dev"]  # Specify which groups are development dependencies
+
+# Ignore specific dependency issues
+[tool.deptry.per_rule_ignores]
+DEP002 = ["kaleido", "pyarrow"]  # DEP002: Unused direct dependencies
