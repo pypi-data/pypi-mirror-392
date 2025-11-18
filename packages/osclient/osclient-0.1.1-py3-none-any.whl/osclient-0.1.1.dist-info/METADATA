@@ -1,0 +1,196 @@
+Metadata-Version: 2.4
+Name: osclient
+Version: 0.1.1
+Summary: OpenStack client library with simplified authentication
+Home-page: https://github.com/ntoand/osclient
+Author: Toan Nguyen
+Author-email: Toan Nguyen <ntoand@gmail.com>
+License: MIT
+Keywords: openstack,cloud,client
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: keystoneauth1>=4.0.0
+Requires-Dist: python-novaclient>=17.0.0
+Requires-Dist: python-keystoneclient>=4.0.0
+Requires-Dist: python-cinderclient>=7.0.0
+Requires-Dist: python-neutronclient>=7.0.0
+Requires-Dist: nectarallocationclient>=1.0.0
+Requires-Dist: python-glanceclient>=3.0.0
+Requires-Dist: requests>=2.25.0
+Provides-Extra: dev
+Requires-Dist: pytest>=6.0; extra == "dev"
+Requires-Dist: pytest-cov>=2.0; extra == "dev"
+Requires-Dist: black>=21.0; extra == "dev"
+Requires-Dist: flake8>=3.8; extra == "dev"
+Dynamic: author
+Dynamic: home-page
+Dynamic: requires-python
+
+# osclient
+
+OpenStack client library with simplified authentication and client management.
+
+## Features
+
+- Simplified OpenStack authentication using environment variables or direct parameters
+- Support for multiple OpenStack services (Nova, Keystone, Cinder, Neutron, Glance, Allocation)
+- Two authentication approaches: `OpenStack` (using keystoneauth1) and `OpenStack2` (direct REST API)
+- Lazy loading of service clients
+
+## Installation
+
+```bash
+pip install osclient
+```
+
+## Usage
+
+### Using OpenStack class (keystoneauth1-based)
+
+```python
+from osclient import OpenStack
+
+# Using environment variables
+os_client = OpenStack()
+
+# Or with explicit parameters
+os_client = OpenStack(
+    auth_url='https://keystone.example.com:5000/v3',
+    project_id='your-project-id',
+    username='your-username',
+    password='your-password'
+)
+
+# Access service clients
+servers = os_client.nova.servers.list()
+images = os_client.glance.images.list()
+```
+
+### Using OpenStack2 class (REST API-based)
+
+```python
+from osclient import OpenStack2
+
+os_client = OpenStack2(
+    auth_url='https://keystone.example.com:5000/v3',
+    project_name='your-project-name',
+    username='your-username',
+    password='your-password'
+)
+
+# Query services directly
+servers = os_client.query('compute', 'servers')
+```
+
+## Environment Variables
+
+The library supports standard OpenStack environment variables:
+
+- `OS_AUTH_URL`
+- `OS_PROJECT_ID` or `OS_TENANT_ID`
+- `OS_PROJECT_NAME` or `OS_TENANT_NAME`
+- `OS_USERNAME`
+- `OS_PASSWORD`
+- `OS_USER_DOMAIN_ID` (defaults to 'default')
+- `OS_PROJECT_DOMAIN_ID` (defaults to 'default')
+
+## Requirements
+
+- Python 3.6+
+- keystoneauth1
+- python-novaclient
+- python-keystoneclient
+- python-cinderclient
+- python-neutronclient
+- nectarallocationclient
+- python-glanceclient
+- requests
+
+## Development
+
+### Building
+
+To build the package, install the build dependencies and run:
+
+```bash
+# Install build dependencies
+pip install build wheel
+
+# Build source and wheel distributions
+python -m build
+```
+
+This will create `dist/` directory with both source distribution (`.tar.gz`) and wheel (`.whl`) files.
+
+Alternatively, you can install the package in development mode:
+
+```bash
+pip install -e .
+```
+
+### Testing
+
+Install the development dependencies:
+
+```bash
+pip install -e ".[dev]"
+```
+
+Run the tests:
+
+```bash
+# Run all tests
+pytest
+
+# Run tests with coverage
+pytest --cov=osclient --cov-report=html
+
+# Run specific test file
+pytest test/test_v1.py
+pytest test/test_v2.py
+```
+
+### Publishing
+
+To publish the package to PyPI:
+
+1. **Build the package** (see Building section above)
+
+2. **Install twine** (if not already installed):
+   ```bash
+   pip install twine
+   ```
+
+3. **Upload to TestPyPI** (recommended for first-time publishing):
+   ```bash
+   twine upload --repository testpypi dist/*
+   ```
+
+4. **Upload to PyPI**:
+   ```bash
+   twine upload dist/*
+   ```
+
+   You will be prompted for your PyPI credentials. Alternatively, you can use an API token by setting:
+   ```bash
+   export TWINE_USERNAME=__token__
+   export TWINE_PASSWORD=your_pypi_api_token
+   ```
+
+**Note**: Make sure to update the version number in both `setup.py` and `pyproject.toml` before publishing a new release.
+
+## License
+
+MIT
+
