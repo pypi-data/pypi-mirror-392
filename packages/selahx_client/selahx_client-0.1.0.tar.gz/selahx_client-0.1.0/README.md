@@ -1,0 +1,114 @@
+# selahx_client
+- Remote Access Tool — Fast and lightweight CLI experience.
+
+- For educational purposes only.
+
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+---
+
+## Features
+
+- Basic Commands: Navigate the system (ls, cd, pwd), clear terminal, exit, or terminate sessions.
+
+- File Operations: Copy files/folders (cp, cpdir), remove files/folders (rm).
+
+- Media Commands: Capture screenshots, webcam images, record audio or screen.
+
+- System Commands: Control system functions (sleep, lock) and volume.
+
+- Internet Commands: Perform web or YouTube searches directly.
+
+![features](https://raw.githubusercontent.com/Haabiy/selahx_client/main/selahx/assets/slx_terminal.png)
+
+---
+
+## Usage
+
+### Help
+
+```bash
+slx client --help
+````
+
+![features](https://raw.githubusercontent.com/Haabiy/selahx_client/main/selahx/assets/slx_client_help.png)
+
+```bash
+slx save --help
+````
+
+![features](https://raw.githubusercontent.com/Haabiy/selahx_client/main/selahx/assets/slx_client_help.png)
+
+### Client
+
+Start a client and connect to the server:
+
+```bash
+slx client --username user --port 1221
+```
+
+**Options:**
+
+* `--username` — Username for the client session
+* `--port` — Server port to connect to
+
+---
+
+### Transfer files from EC2 to Local
+
+Start saving files:
+
+```bash
+slx save --key-file key.pem --ssh-host ubuntu@ec2-xx-xx-xx-xx.compute-1.amazonaws.com --dest ~/Downloads/test
+```
+
+**Options:**
+
+* `--key-file` — Path to the SSH private key
+* `--ssh-host` — E.g `ubuntu@ec2-xx-xx-xx-xx.compute-1.amazonaws.com`
+* `--dest` — Destination folder
+* `~/Downloads/test` — Example local destination path
+
+i.e
+
+![features](https://raw.githubusercontent.com/Haabiy/selahx_client/main/selahx/assets/ec2_ssh_host.png)
+
+---
+
+## Example Workflow
+
+1. Launch the server:
+
+- server package: https://pypi.org/project/selahx_server
+
+- github: https://github.com/Haabiy/selahx_server
+
+```bash
+slx --key-file key.pem --port 1221 --ssh-host ubuntu@ec2-xx-xx-xx-xx.compute-1.amazonaws.com
+```
+
+2. Connect a client from your local machine:
+
+```bash
+slx client --username user --port 1221
+```
+
+Once connected, a reverse SSH tunnel is automatically established.
+
+### NB: 
+- Ensure the port you configured on the target machine is open in your EC2 instance’s `inbound` and `outbound` rules, along with `SSH` for remote access.
+
+- Grant Terminal access to the file system and other necessary resources (e.g: camera).
+
+- Ensure your `.pem` file is executable. Check with `ls -l` (e.g., `-rwx------@ 1 Abiy staff 1678 Nov 15 22:36 key.pem`).
+
+- If reverse tunneling fails to forward the connection, kill any active process using the same port. (use `kill $PID`)
+
+---
+
+## Requirements
+
+* Python 3.11+
+* Dependencies are managed via Poetry (see `pyproject.toml`)
+
+---
