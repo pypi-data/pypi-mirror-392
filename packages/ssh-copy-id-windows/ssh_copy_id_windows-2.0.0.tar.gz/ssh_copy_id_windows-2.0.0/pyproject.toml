@@ -1,0 +1,44 @@
+[project]
+name = "ssh-copy-id-windows"
+version = "2.0.0"
+description = "ssh-copy-id for Windows OS."
+authors = [
+    {name = "overgodofchaos",email = "vezonzzzzzz@gmail.com"}
+]
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10,<4.0"
+keywords = [
+    "ssh-copy-id",
+    "ssh",
+    "ssh-copy-id-windows",
+    "python",
+    "exe",
+    "ssh-windows",
+    "windows"
+]
+
+dependencies = [
+    "fabric (>=3.2.2,<4.0.0)",
+    "loguru (>=0.7.3,<0.8.0)",
+    "typer (>=0.19.2,<0.20.0)",
+]
+
+packages = [
+    { include = "ssh_copy_id_windows", from = "src" }
+]
+
+[project.scripts]
+ssh-copy-id = "ssh_copy_id_windows:main"
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = true
+
+[tool.poetry.group.dev.dependencies]
+nuitka = "^2.7.16"
+
