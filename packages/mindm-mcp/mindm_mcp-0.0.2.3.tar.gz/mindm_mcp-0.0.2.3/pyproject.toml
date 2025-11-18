@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mindm_mcp"
+version = "0.0.2.3"
+authors = [
+  { name="Robert Zaufall" },
+]
+description = "Model Context Protocol (MCP) server for the mindm library, enabling AI assistants like Claude to interact with MindManager."
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS :: MacOS X",
+]
+
+dependencies = [
+  "mindm>=0.0.5.3",
+  "uvicorn>=0.22.0",
+  "aiohttp>=3.8.4",
+  "pydantic>=1.10.7",
+  "websockets>=10.4",
+  "fastmcp>=0.4.1",
+  "mcp[cli]>=1.6.0",
+  "build>=1.2.2.post1",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/robertZaufall/mindm-mcp"
+"Bug Tracker" = "https://github.com/robertZaufall/mindm-mcp/issues"
+
+[project.scripts]
+mindm-mcp = "mindm_mcp.server:main"
+
+[tool.setuptools]
+packages = ["mindm_mcp"]
