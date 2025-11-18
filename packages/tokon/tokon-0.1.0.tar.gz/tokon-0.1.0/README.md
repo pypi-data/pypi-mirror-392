@@ -1,0 +1,455 @@
+# tokon
+
+🎒 **Token-Oriented Object Notation (TOON)** – Compact, human-readable, schema-aware JSON for LLM prompts. Python implementation.
+
+[![PyPI version](https://badge.fury.io/py/tokon.svg)](https://badge.fury.io/py/tokon)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+
+Official Python implementation of the [TOON serialization format](https://github.com/toon-format/toon).
+
+## Overview
+
+TOON is a lightweight, human-readable serialization format designed for simplicity and efficiency. This package provides a Python implementation for encoding and decoding TOON-formatted data.
+
+**Note:** TOON is optimized for tabular and semi-structured data. For deeply nested or non-uniform structures, consider using JSON instead.
+
+## Installation
+
+```bash
+pip install tokon
+```
+
+For development:
+
+```bash
+pip install tokon[dev]
+```
+
+## Command Line Interface
+
+The package includes a CLI tool for encoding and decoding:
+
+```bash
+# Encode JSON to TOON
+echo '{"name": "Alice", "age": 30}' | tokon encode
+
+# Decode TOON to JSON
+echo 'name: Alice\nage: 30' | tokon decode
+
+# Encode with tab delimiter
+echo '{"items": [{"id": 1}]}' | tokon encode --delimiter tab
+
+# Decode from file
+tokon decode < data.toon
+
+# Pretty print JSON output
+tokon decode --pretty < data.toon
+```
+
+See `tokon --help` for more options.
+
+## Quick Start
+
+### Encoding
+
+Convert Python objects to TOON strings:
+
+```python
+from toon import encode
+
+# Encode a dictionary
+data = {"name": "Alice", "age": 30, "active": True}
+toon_string = encode(data)
+print(toon_string)
+# name: Alice
+# age: 30
+# active: true
+
+# Encode tabular data (list of objects with identical keys)
+data = {
+    "items": [
+        {"sku": "A1", "qty": 2, "price": 9.99},
+        {"sku": "B2", "qty": 1, "price": 14.5}
+    ]
+}
+toon_string = encode(data)
+print(toon_string)
+# items[2]{sku,qty,price}:
+#   A1,2,9.99
+#   B2,1,14.5
+```
+
+### Decoding
+
+Convert TOON strings back to Python objects:
+
+```python
+from toon import decode
+
+# Decode a TOON string
+toon_string = """name: Alice
+age: 30"""
+data = decode(toon_string)
+print(data)
+# {'name': 'Alice', 'age': 30}
+
+# Decode tabular data
+toon_string = """items[2]{sku,qty,price}:
+  A1,2,9.99
+  B2,1,14.5"""
+data = decode(toon_string)
+print(data)
+# {'items': [{'sku': 'A1', 'qty': 2, 'price': 9.99}, {'sku': 'B2', 'qty': 1, 'price': 14.5}]}
+```
+
+## API Reference
+
+### `encode(value, delimiter=",")`
+
+Converts a Python object to a TOON-formatted string.
+
+**Parameters:**
+- `value` – The Python object to encode (dict, list, str, int, float, bool, None)
+- `delimiter` – Optional delimiter character: `","` (default), `"\t"` (tab), or `"|"` (pipe)
+
+**Returns:**
+- A TOON-formatted string
+
+**Raises:**
+- `TOONEncodeError` – If the value cannot be encoded
+- `InvalidDelimiterError` – If the delimiter is invalid
+
+**Example:**
+
+```python
+from toon import encode
+
+data = {
+    "items": [
+        {"sku": "A1", "qty": 2, "price": 9.99},
+        {"sku": "B2", "qty": 1, "price": 14.5}
+    ]
+}
+
+encode(data)
+# items[2]{sku,qty,price}:
+#   A1,2,9.99
+#   B2,1,14.5
+```
+
+#### Delimiter Options
+
+The `delimiter` option allows you to choose between comma (default), tab, or pipe delimiters for array values and tabular rows. Alternative delimiters can provide additional token savings in specific contexts.
+
+##### Tab Delimiter (`\t`)
+
+Using tab delimiters instead of commas can reduce token count further, especially for tabular data:
+
+```python
+data = {
+    "items": [
+        {"sku": "A1", "name": "Widget", "qty": 2, "price": 9.99},
+        {"sku": "B2", "name": "Gadget", "qty": 1, "price": 14.5}
+    ] 
+}
+
+encode(data, delimiter="\t")
+# items[2\t]{sku\tname\tqty\tprice}:
+#   A1\tWidget\t2\t9.99
+#   B2\tGadget\t1\t14.5
+```
+
+**Benefits:**
+- Tabs are single characters and often tokenize more efficiently than commas
+- Tabs rarely appear in natural text, reducing the need for quote-escaping
+- The delimiter is explicitly encoded in the array header, making it self-descriptive
+
+**Considerations:**
+- Some terminals and editors may collapse or expand tabs visually
+- String values containing tabs will still require quoting
+
+##### Pipe Delimiter (`|`)
+
+Pipe delimiters offer a middle ground between commas and tabs:
+
+```python
+encode(data, delimiter="|")
+# items[2|]{sku|name|qty|price}:
+#   A1|Widget|2|9.99
+#   B2|Gadget|1|14.5
+```
+
+### `decode(input, delimiter=None)`
+
+Converts a TOON-formatted string back to Python values.
+
+**Parameters:**
+- `input` – A TOON-formatted string to parse
+- `delimiter` – Optional delimiter character. If `None`, the delimiter is auto-detected from the table header
+
+**Returns:**
+- A Python object (dict, list, or primitive) representing the parsed TOON data
+
+**Raises:**
+- `TOONDecodeError` – If the string cannot be decoded
+
+**Example:**
+
+```python
+from toon import decode
+
+toon = """
+items[2]{sku,qty,price}:
+  A1,2,9.99
+  B2,1,14.5
+"""
+
+data = decode(toon)
+# {
+#   'items': [
+#     {'sku': 'A1', 'qty': 2, 'price': 9.99},
+#     {'sku': 'B2', 'qty': 1, 'price': 14.5}
+#   ]
+# }
+```
+
+## Usage Examples
+
+### Primitive Types
+
+```python
+from toon import encode, decode
+
+# Strings
+assert encode("hello") == "hello"
+assert decode("hello") == "hello"
+
+# Integers
+assert encode(42) == "42"
+assert decode("42") == 42
+
+# Floats
+assert encode(3.14) == "3.14"
+assert decode("3.14") == 3.14
+
+# Booleans
+assert encode(True) == "true"
+assert encode(False) == "false"
+assert decode("true") is True
+
+# Null
+assert encode(None) == "null"
+assert decode("null") is None
+```
+
+### Objects
+
+```python
+from toon import encode, decode
+
+# Simple object
+data = {"id": 1, "name": "Ada"}
+encoded = encode(data)
+# id: 1
+# name: Ada
+
+decoded = decode(encoded)
+assert decoded == data
+
+# Nested object
+data = {"user": {"id": 1}}
+encoded = encode(data)
+# user:
+#   id: 1
+
+decoded = decode(encoded)
+assert decoded == data
+```
+
+### Arrays
+
+```python
+from toon import encode, decode
+
+# Primitive array (inline)
+data = {"tags": ["foo", "bar"]}
+encoded = encode(data)
+# tags[2]: foo,bar
+
+# Tabular array (uniform objects)
+data = {
+    "items": [
+        {"id": 1, "qty": 5},
+        {"id": 2, "qty": 3}
+    ]
+}
+encoded = encode(data)
+# items[2]{id,qty}:
+#   1,5
+#   2,3
+
+# Mixed / non-uniform (list)
+data = {"items": [1, {"a": 1}, "x"]}
+encoded = encode(data)
+# items[3]:
+#   - 1
+#   - a: 1
+#   - x
+
+# Array of arrays
+data = {"pairs": [[1, 2], [3, 4]]}
+encoded = encode(data)
+# pairs[2]:
+#   - [2]: 1,2
+#   - [2]: 3,4
+```
+
+### Special Quoting
+
+```python
+from toon import encode, decode
+
+# Strings with commas require quotes
+data = {"note": "hello, world"}
+encoded = encode(data)
+# note: "hello, world"
+
+# Strings that look like keywords
+data = {"items": ["true", True]}
+encoded = encode(data)
+# items[2]: "true",true
+```
+
+## Syntax Cheatsheet
+
+```python
+# Object
+{"id": 1, "name": "Ada"}          → id: 1
+                                    name: Ada
+
+# Nested object
+{"user": {"id": 1}}               → user:
+                                    id: 1
+
+# Primitive array (inline)
+{"tags": ["foo", "bar"]}          → tags[2]: foo,bar
+
+# Tabular array (uniform objects)
+{"items": [                       → items[2]{id,qty}:
+  {"id": 1, "qty": 5},                 1,5
+  {"id": 2, "qty": 3}                  2,3
+]}
+
+# Mixed / non-uniform (list)
+{"items": [1, {"a": 1}, "x"]}     → items[3]:
+                                    - 1
+                                    - a: 1
+                                    - x
+
+# Array of arrays
+{"pairs": [[1, 2], [3, 4]]}       → pairs[2]:
+                                    - [2]: 1,2
+                                    - [2]: 3,4
+
+# Root array
+["x", "y"]                        → [2]: x,y
+
+# Empty containers
+{}                                → (empty output)
+{"items": []}                     → items[0]:
+
+# Special quoting
+{"note": "hello, world"}          → note: "hello, world"
+{"items": ["true", True]}         → items[2]: "true",true
+```
+
+## Using TOON in LLM Prompts
+
+TOON works best when you show the format instead of describing it. The structure is self-documenting – models parse it naturally once they see the pattern.
+
+### Sending TOON to LLMs (Input)
+
+Wrap your encoded data in a fenced code block (label it `toon` for clarity). The indentation and headers are usually enough – models treat it like familiar YAML or CSV. The explicit array lengths (`[N]`) and field headers (`{field1,field2}`) help the model track structure, especially for large tables.
+
+### Generating TOON from LLMs (Output)
+
+For output, be more explicit. When you want the model to **generate** TOON:
+
+- **Show the expected header** (`users[N]{id,name,role}:`). The model fills rows instead of repeating keys, reducing generation errors.
+- **State the rules:** 2-space indent, no trailing spaces, `[N]` matches row count.
+
+Here's a prompt that works for both reading and generating:
+
+```
+Data is in TOON format (2-space indent, arrays show length and fields).
+
+```toon
+users[3]{id,name,role,lastLogin}:
+  1,Alice,admin,2025-01-15T10:30:00Z
+  2,Bob,user,2025-01-14T15:22:00Z
+  3,Charlie,user,2025-01-13T09:45:00Z
+```
+
+Task: Return only users with role "user" as TOON. Use the same header. Set [N] to match the row count. Output only the code block.
+```
+
+**Tip:** For large uniform tables, use `encode(data, delimiter="\t")` and tell the model "fields are tab-separated." Tabs often tokenize better than commas and reduce the need for quote-escaping.
+
+## Limitations
+
+- Object keys must be strings
+- Sets are not supported (convert to lists)
+- Custom classes are not supported (use dicts)
+- Circular references are not handled
+
+### Edge Cases and Known Issues
+
+**Note:** toon-python may get stuck or fail on certain edge cases:
+
+1. **Deeply nested structures** (3+ levels): TOON format is optimized for tabular data. Deeply nested or non-uniform structures may cause parsing issues or may not provide token savings compared to JSON.
+
+2. **Semi-uniform arrays** (~40-60% tabular eligibility): Token savings diminish. For these cases, consider using JSON if your pipelines already rely on it.
+
+3. **Non-tabular data**: For pure flat tables, CSV may be smaller. TOON adds minimal overhead (~5-10%) to provide structure that improves LLM reliability, but this overhead may not be worth it for simple flat data.
+
+4. **Latency-critical applications**: Benchmark on your exact setup. Some deployments may process compact JSON faster despite TOON's lower token count. Measure TTFT, tokens/sec, and total time for both formats.
+
+5. **Complex nested arrays within objects**: Arrays of objects with deeply nested properties may cause parsing issues. For best results, keep table rows flat (only primitive values).
+
+## Testing
+
+Run the test suite:
+
+```bash
+pytest
+```
+
+With coverage:
+
+```bash
+pytest --cov=toon
+```
+
+## Benchmarks
+
+See the [benchmarks](./benchmarks/) directory for performance comparisons with JSON and other formats.
+
+## Contributing
+
+Contributions are welcome! Please ensure that:
+
+1. All tests pass
+2. New features include tests
+3. Code follows Python best practices
+4. Type hints are included
+
+When implementing TOON in other languages, please follow the [specification](https://github.com/toon-format/toon/blob/main/SPEC.md) (currently v2.0) to ensure compatibility across implementations.
+
+## Related Projects
+
+- [TypeScript/JavaScript Implementation](https://github.com/toon-format/toon) - Official reference implementation
+- [TOON Format Specification](https://github.com/toon-format/toon/blob/main/SPEC.md)
+
+## License
+
+MIT License - see LICENSE file for details.
