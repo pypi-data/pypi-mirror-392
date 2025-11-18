@@ -1,0 +1,149 @@
+[project]
+name = "fasjson"
+description = "fasjson makes it possible for applications to talk to the fedora account system."
+license = "MIT"
+version = "1.7.0"
+readme = "README.md"
+authors = [{name = "Fedora Infrastructure", email = "admin@fedoraproject.org"}]
+requires-python = ">=3.9.0,<4.0.0"
+dependencies = [
+    "Flask (>=2.2.0,<4.0.0)",
+    "python-ldap (>=3.2.0,<4.0.0)",
+    "dnspython (>=2.1.0,<3.0.0)",
+    "flask-restx (>=1.2.0,<2.0.0)",
+    "flask-healthz (>=1.0.0,<2.0.0)",
+    "python-freeipa (>=1.0.5,<2.0.0)",
+    "requests-kerberos (>=0.12.0,<1.0.0)",
+    "flask-mod-auth-gssapi (>=0.2.0,<2.0.0)",
+    "requests-gssapi (>=1.2.3,<2.0.0)",
+]
+
+[project.urls]
+homepage = "https://github.com/fedora-infra/fasjson"
+repository = "https://github.com/fedora-infra/fasjson"
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "*"
+pytest = "*"
+pytest-mock = "*"
+pytest-cov = "*"
+liccheck = "*"
+bandit = "*"
+black = "*"
+isort = "*"
+safety = "*"
+pre-commit = "*"
+towncrier = "*"
+myst-parser = "*"
+
+
+[tool.black]
+line-length = 100
+
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "S", "B", "RUF"]
+ignore = ["RUF012"]
+
+[tool.ruff.lint.isort]
+lines-after-imports = 2
+order-by-type = false
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "E501"]
+"news/get-authors.py" = ["S602", "S603", "S607"]
+
+
+[tool.coverage.run]
+branch = true
+source = ["fasjson"]
+
+[tool.coverage.paths]
+source = ["fasjson"]
+
+[tool.coverage.report]
+fail_under = 100
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    # Don't complain if tests don't hit defensive assertion code
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "\\.\\.\\.",
+]
+omit = [
+    "fasjson/__init__.py",
+    "tests/*",
+]
+
+
+[tool.rstcheck]
+report_level = "WARNING"
+ignore_directives = [
+    "openapi",
+]
+ignore_roles = ["pr", "issue"]
+ignore_messages = "Duplicate implicit target name"
+
+
+[tool.towncrier]
+package = "fasjson"
+filename = "docs/release_notes.md"
+directory = "news/"
+start_string = "<!-- towncrier release notes start -->\n"
+underlines = ["", "", ""]
+template = "news/_template.md.j2"
+title_format = "## v{version}"
+issue_format = "{issue}"
+
+  [[tool.towncrier.type]]
+  directory = "bic"
+  name = "Backwards Incompatible Changes"
+  showcontent = true
+
+  [[tool.towncrier.type]]
+  directory = "dependency"
+  name = "Dependency Changes"
+  showcontent = true
+
+  [[tool.towncrier.type]]
+  directory = "feature"
+  name = "Features"
+  showcontent = true
+
+  [[tool.towncrier.type]]
+  directory = "bug"
+  name = "Bug Fixes"
+  showcontent = true
+
+  [[tool.towncrier.type]]
+  directory = "dev"
+  name = "Development Improvements"
+  showcontent = true
+
+  [[tool.towncrier.type]]
+  directory = "docs"
+  name = "Documentation Improvements"
+  showcontent = true
+
+  [[tool.towncrier.type]]
+  directory = "other"
+  name = "Other Changes"
+  showcontent = true
+
+  [[tool.towncrier.type]]
+  directory = "author"
+  name = "Contributors"
+  showcontent = true
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests/unit",
+]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
