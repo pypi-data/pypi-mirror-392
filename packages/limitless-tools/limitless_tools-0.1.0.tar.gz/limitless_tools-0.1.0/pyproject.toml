@@ -1,0 +1,76 @@
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+  "E",   # pycodestyle errors
+  "F",   # pyflakes
+  "W",   # pycodestyle warnings
+  "I",   # isort
+  "UP",  # pyupgrade
+]
+ignore = [
+  "E501",  # line length handled via formatter/editor; we keep 100 as guide
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["limitless_tools"]
+combine-as-imports = true
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "limitless-tools"
+version = "0.1.0"
+description = "Library and CLI to fetch Limitless lifelogs and store locally"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Scott Kostolni", email = "ScottKostolni@gmail.com" }]
+license = "MIT"
+license-files = ["LICENSE*"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Operating System :: OS Independent",
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Libraries",
+]
+keywords = ["cli", "limitless", "lifelog", "api", "sync"]
+dependencies = [
+  "requests>=2.31,<3",
+  "pydantic>=2.6,<3",
+  "python-dotenv>=1,<2",
+  "tzlocal>=5,<6",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8,<9",
+  "ruff>=0.6",
+  "mypy>=1.10",
+  "pip-audit>=2.7,<3",
+  "bandit>=1.7,<2",
+  "build>=1,<2",
+  "twine>=5,<7",
+  "pre-commit>=3.7,<4",
+]
+test = [
+  "pytest>=8,<9",
+]
+
+[project.scripts]
+limitless = "limitless_tools.cli.main:main"
+
+[tool.setuptools.package-data]
+limitless_tools = ["py.typed"]
+
+[tool.setuptools.packages.find]
+include = ["limitless_tools*"]
+
+[project.urls]
+Homepage = "https://github.com/ScottSucksAtProgramming/limitless_tools"
+Issues = "https://github.com/ScottSucksAtProgramming/limitless_tools/issues"
+Documentation = "https://github.com/ScottSucksAtProgramming/limitless_tools#readme"
