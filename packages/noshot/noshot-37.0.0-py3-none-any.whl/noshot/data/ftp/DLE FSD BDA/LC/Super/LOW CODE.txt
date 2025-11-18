@@ -1,0 +1,127 @@
+Create Tables according to the question
+
+Insert Datas
+
+Create separate sequence for each table:
+table1_seq, table2_seq...
+
+Create Triggers for automatic id using sequence:
+table1_trg:
+create or replace trigger "TABLE1_TRG"
+before
+insert on "TABLE1"
+for each row
+begin
+    IF :NEW.id IS NULL THEN
+    :NEW.id := table1_seq.NEXTVAL;
+  END IF;
+end;
+/
+
+Create Forms, Reports 
+
+Charts Eg:
+Bar -> SELECT source AS label, COUNT(*) AS value FROM materials GROUP BY source ORDER BY value DESC
+Pie -> SELECT NVL(fav_category,'Unknown') AS label, COUNT(*) AS value FROM children GROUP BY fav_category ORDER BY value DESC
+Line -> SELECT child_age AS label, COUNT(*) AS value FROM children GROUP BY child_age ORDER BY child_age
+
+Using Dates :
+SELECT 
+    TO_CHAR(created_date, 'YYYY-MM') AS month,
+    COUNT(*) AS total
+FROM parents
+GROUP BY TO_CHAR(created_date, 'YYYY-MM')
+ORDER BY month;
+
+SELECT 
+    to_char(created_at, 'YYYY-MM-DD') AS created_day,
+    COUNT(child_id) AS total_children
+FROM children
+GROUP BY to_char(created_at, 'YYYY-MM-DD')
+ORDER BY to_char(created_at, 'YYYY-MM-DD');
+
+Home Page:
+<h2>Eco-Friendly Toys Dashboard</h2>
+
+<p>Welcome to the application. Use the menu on the left to navigate.</p>
+
+<h3>Quick Actions</h3>
+<ul>
+  <li>View Parents</li>
+  <li>Add New Parent</li>
+  <li>View Toddlers</li>
+  <li>Add New Toddler</li>
+  <li>View Materials</li>
+  <li>View Toy Designs</li>
+  <li>Open Reports</li>
+</ul>
+
+Validations Eg:
+SQL -> REGEXP_LIKE(:P3_PARENT_NAME, '^[A-Za-z ]{2,100}$')
+SQL -> :P3_PARENT_AGE BETWEEN 18 AND 100
+SQL -> :P3_MOBILE IS NULL OR REGEXP_LIKE(:P3_MOBILE, '^[0-9]{10,10}$')
+SQL -> :P4_EMAIL is null or REGEXP_LIKE(:P4_EMAIL, '^[A-Za-z0-9]+@[A-Za-z]+\.[A-Za-z]{2,10}$')
+PL/SQL Func Returning Boolean: Unique Email
+DECLARE
+    l_count NUMBER;
+BEGIN
+    SELECT COUNT(*)
+    INTO l_count
+    FROM MEMBERS
+    WHERE LOWER(EMAIL_ID) = LOWER(:P2_EMAIL_ID);
+
+    IF l_count > 0 THEN
+        RETURN FALSE;
+    ELSE
+        RETURN TRUE;
+    END IF;
+END;
+
+PL/SQL Func Returning Boolean: Tool ID exist
+DECLARE
+  v_count NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_count 
+  FROM rec_tool
+  WHERE tool_id = :P8_TOOL_ID;  
+
+  RETURN v_count > 0;
+END;
+
+Process Eg:
+PL/SQL
+UPDATE parents
+SET num_child = NVL(num_child,0) + 1
+WHERE parent_id = :P5_PARENT_ID;
+
+Authorization, Authentication Func:
+
+create or replace FUNCTION TOOL_LIB_AUTH (
+    p_username  IN VARCHAR2,
+    p_password  IN VARCHAR2
+) RETURN BOOLEAN
+IS
+    l_password  MEMBERS.PASSWORD%TYPE;
+    l_role      MEMBERS.ROLE%TYPE;
+BEGIN
+    -- Fetch password and role of the user
+    SELECT PASSWORD, ROLE
+    INTO l_password, l_role
+    FROM MEMBERS
+    WHERE LOWER(EMAIL_ID) = LOWER(p_username);
+
+    -- Check password match
+    IF l_password = p_password THEN
+        -- Store username and role in session (APEX global items)
+        APEX_UTIL.SET_SESSION_STATE('GLOBAL_USER', p_username);
+        APEX_UTIL.SET_SESSION_STATE('GLOBAL_ROLE', l_role);
+        RETURN TRUE;
+    ELSE
+        RETURN FALSE;
+    END IF;
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN FALSE;
+END;
+/
