@@ -1,0 +1,34 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "vs-server-colab"
+version = "1.0.8"
+description = "Expose a code-server instance over ngrok"
+readme = "README.md"
+requires-python = ">=3.6"
+license = {file = "LICENSE"}
+authors = [
+    { name = "Hasinthaka" }
+]
+keywords = ["colab", "ngrok", "code-server", "vs-code"]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux"
+]
+
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/hasinthaka/vs-server-script"
+
+[project.scripts]
+vscolab = "vs_server_colab.cli:main"
+
+[tool.hatch]
+include = [
+    "vs_server_colab/**/*"
+]
