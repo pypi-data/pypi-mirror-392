@@ -1,0 +1,26 @@
+[project]
+name = "trifold"
+description = "A quick way to deploy static projects to a fast, cheap, and reliable CDN."
+authors = [
+    {name="jpt", email="dev@jpt.sh"},
+]
+version = "0.2.0"
+readme = "README.md"
+license = "AGPL-3.0-or-later"
+requires-python = ">=3.13"
+dependencies = [
+    "httpx>=0.28.1",
+    "rich>=14.2.0",
+    "typer>=0.20.0",
+]
+[project.urls]
+Repository = "https://codeberg.org/jpt/trifold.git"
+
+[project.scripts]
+trifold = "trifold.__main__:app"
+
+[tool.uv]
+package = true
+
+[tool.ruff]
+lint.select = ["ANN"]
