@@ -1,0 +1,228 @@
+from __future__ import annotations
+
+from django.core import checks
+from django.core.exceptions import FieldDoesNotExist
+from django.db.models.fields import FloatField, TextField
+from django.utils.encoding import force_str
+
+from .forms import OSMFormField
+from .validators import validate_latitude, validate_longitude
+from .widgets import OSMWidget
+
+
+class Location:
+    """
+    A wrapper class bundling the description of a location (``text``) and its
+    geo coordinates, latitude (``lat``) and longitude (``lon``).
+
+    :param float lat: The latitude
+    :param float lon: The longitude
+    :param str: The description
+    """
+
+    def __init__(self, lat, lon, text):
+        self.lat = lat
+        self.lon = lon
+        self.text = text
+
+    def __str__(self):
+        """
+        Returns a string representation of this object in the form ``text (lat,
+        lon)`` where either ``text`` or ``(lat, lon)'`` or both can be empty. In
+        that case the return value is ``''``.
+        """
+        out = []
+        if self.text is not None:
+            out.append(self.text)
+        if self.lat is not None and self.lon is not None:
+            out.append(f"({self.lat:.6f}, {self.lon:.6f})")
+        return " ".join(out)
+
+    def __repr__(self):
+        return f"<Location lat={self.lat:.6f} lon={self.lon:.6f} text={force_str(self.text)}>"
+
+    def __copy__(self):
+        return self.__class__(self.lat, self.lon, self.text)
+
+    def __eq__(self, other):
+        return (
+            isinstance(other, self.__class__)
+            and self.lat == other.lat
+            and self.lon == other.lon
+            and self.text == other.text
+        )
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+class LatitudeField(FloatField):
+    """
+    Bases: :class:`django.db.models.FloatField`
+
+    All :ref:`default field options <django:common-model-field-options>`.
+
+    The ``validators`` parameter will be appended with
+    :func:`~validate_latitude` if not already present.
+    """
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("validators", [])
+        if validate_latitude not in kwargs["validators"]:
+            kwargs["validators"].append(validate_latitude)
+        super().__init__(*args, **kwargs)
+
+    def formfield(self, **kwargs):
+        """
+        :returns: A :class:`~django.forms.FloatField` with ``max_value`` 90 and
+            ``min_value`` -90.
+        """
+        kwargs.update({"max_value": 90, "min_value": -90})
+        return super().formfield(**kwargs)
+
+
+class LongitudeField(FloatField):
+    """
+    Bases: :class:`django.db.models.FloatField`
+
+    All :ref:`default field options <django:common-model-field-options>`.
+
+    The ``validators`` parameter will be appended with
+    :func:`~validate_longitude` if not already present.
+    """
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("validators", [])
+        if validate_longitude not in kwargs["validators"]:
+            kwargs["validators"].append(validate_longitude)
+        super().__init__(*args, **kwargs)
+
+    def formfield(self, **kwargs):
+        """
+        :returns: A :class:`~django.forms.FloatField` with ``max_value`` 180 and
+            ``min_value`` -180.
+        """
+        kwargs.update({"max_value": 180, "min_value": -180})
+        return super().formfield(**kwargs)
+
+
+class OSMField(TextField):
+    """
+    Bases: :class:`django.db.models.TextField`
+
+    :param str lat_field: The name of the latitude field. ``None`` (and thus
+        standard behavior) by default.
+    :param str lon_field: The name of the longitude field. ``None`` (and thus
+        standard behavior) by default.
+
+    All :ref:`default field options <django:common-model-field-options>`.
+    """
+
+    def __init__(self, *args, **kwargs):
+        self._lat_field_name = kwargs.pop("lat_field", None)
+        self._lon_field_name = kwargs.pop("lon_field", None)
+        self.data_field_name = kwargs.pop("data_field", None)
+        super().__init__(*args, **kwargs)
+
+    def contribute_to_class(self, cls, name):
+        info_name = f"get_{name}_info"
+        if not hasattr(cls, info_name):
+
+            def _func(obj):
+                return Location(
+                    getattr(obj, self.latitude_field_name),
+                    getattr(obj, self.longitude_field_name),
+                    getattr(obj, name),
+                )
+
+            setattr(cls, info_name, _func)
+
+        super().contribute_to_class(cls, name)
+
+    def check(self, **kwargs):
+        errors = super().check(**kwargs)
+        errors.extend(self._check_latitude_field())
+        errors.extend(self._check_longitude_field())
+        return errors
+
+    def _check_latitude_field(self):
+        opts = self.model._meta
+        try:
+            opts.get_field(self.latitude_field_name)
+        except FieldDoesNotExist:
+            return [
+                checks.Error(
+                    f"The OSMField '{self.name}' references the non-existent latitude field '{self.latitude_field_name}'.",
+                    hint=None,
+                    obj=self,
+                    id="osm_field.E001",
+                )
+            ]
+        else:
+            return []
+
+    def _check_longitude_field(self):
+        opts = self.model._meta
+        try:
+            opts.get_field(self.longitude_field_name)
+        except FieldDoesNotExist:
+            return [
+                checks.Error(
+                    f"The OSMField '{self.name}' references the non-existent "
+                    f"longitude field '{self.longitude_field_name}'.",
+                    hint=None,
+                    obj=self,
+                    id="osm_field.E002",
+                )
+            ]
+        else:
+            return []
+
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        kwargs.update(
+            {
+                "lat_field": self.latitude_field_name,
+                "lon_field": self.longitude_field_name,
+            }
+        )
+        return name, path, args, kwargs
+
+    def formfield(self, **kwargs):
+        """
+        :returns: A :class:`~osm_field.forms.OSMFormField` with a
+            :class:`~osm_field.widgets.OSMWidget`.
+        """
+        widget_kwargs = {
+            "lat_field": self.latitude_field_name,
+            "lon_field": self.longitude_field_name,
+        }
+
+        if self.data_field_name:
+            widget_kwargs["data_field"] = self.data_field_name
+
+        defaults = {
+            "form_class": OSMFormField,
+            "widget": OSMWidget(**widget_kwargs),
+        }
+        defaults.update(kwargs)
+
+        return super().formfield(**defaults)
+
+    @property
+    def latitude_field_name(self):
+        """
+        The name of the related :class:`LatitudeField`.
+        """
+        if self._lat_field_name is None:
+            self._lat_field_name = self.name + "_lat"
+        return self._lat_field_name
+
+    @property
+    def longitude_field_name(self):
+        """
+        The name of the related :class:`LongitudeField`.
+        """
+        if self._lon_field_name is None:
+            self._lon_field_name = self.name + "_lon"
+        return self._lon_field_name
