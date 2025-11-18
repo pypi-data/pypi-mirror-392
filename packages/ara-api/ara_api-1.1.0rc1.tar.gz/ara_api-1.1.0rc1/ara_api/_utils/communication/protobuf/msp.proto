@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package protobuf.msp;
+
+import "messages/base_msg.proto";
+import "messages/msp_msg.proto";
+
+service MSPManager {
+	
+	// GETTER FOR RAW IMU DATA
+	rpc get_raw_imu_rpc (messages.base_msg.get_request) returns (messages.msp_msg.imu_data);
+
+	// GETTER FOR MOTOR DATA
+	rpc get_motor_rpc (messages.base_msg.get_request) returns (messages.msp_msg.motor_data);
+
+	// GETTER FOR ATTITUDE DATA
+	rpc get_attitude_rpc (messages.base_msg.get_request) returns (messages.msp_msg.attitude_data);
+
+	// GETTER FOR ALTITUDE DATA
+	rpc get_altitude_rpc (messages.base_msg.get_request) returns (messages.msp_msg.altitude_data);
+
+	// GETTER FOR SONAR DATA
+	rpc get_sonar_rpc (messages.base_msg.get_request) returns (messages.msp_msg.sonar_data);
+
+	// GETTER FOR OPTICAL FLOW DATA
+	rpc get_optical_flow_rpc (messages.base_msg.get_request) returns (messages.msp_msg.optical_flow_data);
+
+	// GETTER FOR POSITION DATA
+	rpc get_position_rpc (messages.base_msg.get_request) returns (messages.msp_msg.position_data);
+
+	// GETTER FOR VELOCITY DATA
+	rpc get_velocity_rpc (messages.base_msg.get_request) returns (messages.msp_msg.velocity_data);
+
+	// GETTER FOR ANALOG DATA
+	rpc get_analog_rpc (messages.base_msg.get_request) returns (messages.msp_msg.analog_data);
+
+	// SETTER FOR RC DATA
+	rpc cmd_send_rc_rpc (messages.msp_msg.rc_in) returns (messages.base_msg.status);
+
+    // COMMAND FOR SET ZERO POSITION
+    rpc cmd_zero_position_rpc (messages.base_msg.command) returns (messages.base_msg.status);
+}

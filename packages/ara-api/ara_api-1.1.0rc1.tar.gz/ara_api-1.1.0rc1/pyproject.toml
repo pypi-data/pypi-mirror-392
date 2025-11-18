@@ -1,0 +1,187 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[project]
+name = "ara-api"
+version = "1.1.0-pre1"
+license = {file = "LICENSE"}
+
+description = "Applied Robotics Avia API for ARA MINI, ARA EDU and ARA FPV drones"
+authors = [{name = "Alexander Kleimenov"}]
+maintainers = [
+    {name = "Alexander Kleimenov", email="nequamy@gmail.com"},
+]
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development",
+    'Topic :: Scientific/Engineering',
+    'Operating System :: Unix',
+    'Operating System :: MacOS',
+    'Operating System :: Microsoft :: Windows',
+]
+keywords = ["robotics", "drones", "API", "ARA"]
+dependencies = [
+    "requests==2.32.3",
+    "grpcio==1.69.0",
+    "grpcio-tools==1.66.2",
+    "pyserial==3.5",
+    "colorama==0.4.6",
+    "pyfiglet==1.0.2",
+    "opencv-python==4.10.0.84",
+    "opencv-contrib-python==4.10.0.84",
+    "numpy>=2.1.1",
+    "pandas==2.2.3",
+    "customtkinter==5.2.2",
+    "pillow (>=11.1.0,<12.0.0)",
+    "scipy (>=1.15.2,<2.0.0)",
+    "rich (>=14.0.0,<15.0.0)",
+    "fastapi (>=0.121.1,<0.122.0)",
+    "uvicorn (>=0.38.0,<0.39.0)",
+    "pydantic (>=2.12.4,<3.0.0)",
+]
+
+packages = [
+    { include = "__init__.py", from = "ara_api"},
+]
+
+[project.scripts]
+ara-api-core = "ara_api.__main__:main"
+msp = "ara_api._services.msp.msp_service:main"
+
+[tool.ruff]
+line-length = 79
+target-version = "py311"
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+]
+ignore = []
+exclude = [
+    "*.pb2.py",
+    "*.pb2_grpc.py",
+    "__pycache__",
+    ".venv",
+    "build",
+    "dist",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+exclude = [
+    "**/*_pb2.py",
+    "**/*_pb2_grpc.py",
+    "ara_api/_utils/communication/gRPC",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"ara_api/proto/*" = ["ALL"]
+"*_pb2.py" = ["ALL"]
+"*_pb2_grpc.py" = ["ALL"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["ara_api"]
+force-single-line = false
+combine-as-imports = true
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 72
+
+[tool.towncrier]
+filename = "doc/changelog/CHANGELOG.md"
+directory = "doc/changelog/fragments"
+title_format = "## [{version}] - {project_date}"
+start_string = "<!-- towncrier release notes start -->\n"
+template = "doc/changelog/template.md"
+
+# issue_format = ""
+
+underlines = ["=", "-"]
+
+[[tool.towncrier.type]]
+directory = "feature"      # [+] добавление
+name = "✨ New Features"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "bugfix"       # [*] исправления
+name = "🐛 Bug Fixes"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "change"       # [~] изменения
+name = "🔄 Changes"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "breaking"     # [!] важные изменения
+name = "💥 Breaking Changes"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "misc"
+name = "🔧 Miscellaneous"
+showcontent = false
+
+[tool.poetry.group.dev.dependencies]
+setproctitle = "^1.3.5"
+manim = "^0.19.0"
+
+[tool.coverage.run]
+source = ["ara_api"]
+omit = [
+    "*/tests/*",
+    "*/venv/*",
+    "*/__pycache__/*",
+    "ara_api/protos/*",  # Исключаем сгенерированные protobuf файлы
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "pass",
+]
+show_missing = true
+precision = 2
+
+[tool.coverage.html]
+directory = "tests/reports/coverage_html"
+
+[tool.poetry.group.test.dependencies]
+black = "^25.1.0"
+ruff = "^0.11.12"
+coverage = "^7.8.2"
+mypy = "^1.16.0"
+pytest = "^8.4.0"
+
+[tool.poetry.group.build.dependencies]
+mypy = "^1.16.0"
+setuptools = "^70.0.0"
+wheel = "^0.42.0"
+Cython = "^3.0.0"
+towncrier = "^24.8.0"
+
