@@ -1,0 +1,50 @@
+---
+check-dockerfile:
+  artifacts:
+    name: "$CI_JOB_NAME artifacts from $CI_PROJECT_NAME on $CI_COMMIT_REF_SLUG"
+    expire_in: 1 day
+    when: always
+    reports:
+      codequality:
+        - "reports/*"
+    paths:
+      - "reports/*"
+  image:
+    name: hadolint/hadolint:2.5.0-debian
+  stage: setup
+
+  script:
+    - mkdir -p reports
+    - |
+      hadolint \
+        -f gitlab_codeclimate \
+        "${CI_PROJECT_DIR}/docker/ci/Dockerfile" \
+        > "reports/hadolint-$(md5sum ${CI_PROJECT_DIR}/docker/ci/Dockerfile | cut -d" " -f1).json"
+
+
+construct-build-image:
+  # https://docs.gitlab.com/ee/ci/docker/using_kaniko.html
+  # Run this build on Gitlab shared runners since it is IO intensive.
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  parallel:
+    matrix:
+      - python_version: ["3.10", "3.11", "3.12"]
+  stage: setup
+  variables:
+    BUILD_IMAGE_PATH: ${CI_REGISTRY_IMAGE}/build-image:${python_version}-${CI_COMMIT_SHORT_SHA}
+    KANIKO_DOCKER_DIR: /kaniko/.docker
+
+  script:
+    - mkdir -p "${KANIKO_DOCKER_DIR}"
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > "${KANIKO_DOCKER_DIR}/config.json"
+    - |
+      /kaniko/executor \
+        --build-arg venv_path="${BUILD_IMAGE_VENV_PATH}" \
+        --build-arg project_dir="${CI_PROJECT_DIR}" \
+        --build-arg project_name="${PROJECT_NAME}" \
+        --build-arg python_version="${python_version}" \
+        --context "${CI_PROJECT_DIR}" \
+        --dockerfile "${CI_PROJECT_DIR}/docker/ci/Dockerfile" \
+        --destination "${BUILD_IMAGE_PATH}"

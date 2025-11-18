@@ -1,0 +1,128 @@
+---
+.needs-artifacts:
+  needs:
+    # package artifacts are always needed for publish jobs
+    - job: build-packages
+      artifacts: true
+
+
+.needs-tests:
+  needs:
+    - job: acceptance-tags
+      artifacts: false
+    - job: acceptance-tests
+      artifacts: false
+    - job: install-check
+      artifacts: false
+    - job: install-dependency-check
+      artifacts: false
+    - job: install-template-check
+      artifacts: false
+    - job: run-tests
+      artifacts: false
+    - job: run-tests-coverage
+      artifacts: false
+
+
+.publish-packages:
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - build_harness.log
+      - publish_flow.log
+    when: always
+  extends: .python-image
+  stage: publish
+  variables:
+    python_version: "${DEFAULT_PYTHON_VERSION}"
+
+
+.publish-before-script:
+  before_script:
+    # derive `PUBLISH_THIS` value from CI context.
+    - |
+      export PUBLISH_THIS=$(${VENV_BIN}/publish-flow \
+        --log-console-disable \
+        --log-file-enable \
+        --log-level ${BUILDHARNESS_LOG_LEVEL} \
+        --default-branch "${CI_DEFAULT_BRANCH}" \
+        --disable-pr-publish "${CI_PIPELINE_SOURCE}")
+    # log PUBLISH_THIS to pipeline log for debugging
+    - echo ${PUBLISH_THIS}
+
+
+.publish-script:
+  script:
+    # NOTE: specifically using `--password-file` option here with Gitlab-CI file
+    #       secret variable option.
+    - |
+      ${VENV_BIN}/build-harness \
+        --log-console-enable \
+        --log-file-enable \
+        --log-level ${BUILDHARNESS_LOG_LEVEL} \
+        publish \
+          --user $PYPI_API_USER \
+          --password-file $THIS_API_TOKEN \
+          --publish ${PUBLISH_THIS}
+
+
+publish-packages-released:
+  extends:
+    - .publish-packages
+  needs:
+    - !reference [ .needs-artifacts, needs ]
+    - !reference [ .needs-tests, needs ]
+  rules:
+    # NOTE: Gitlab-CI conditionals are not strictly shell compliant and must
+    #       not use curly brackets.
+    - if: '$CI_COMMIT_TAG'
+  variables:
+    THIS_API_TOKEN: $PYPI_API_TOKEN
+
+  before_script:
+    - !reference [ .publish-before-script, before_script ]
+  script:
+    - !reference [ .publish-script, script ]
+
+
+publish-packages-unreleased:
+  # NOTE: Ensure that main & features branches behave the same to minimize
+  #       publish behaviour differences between branches. Hopefully release
+  #       behaviour change is small enough that it will still work.
+  #       Ideally fix the publish-flow bug to not require separate publish jobs
+  #       and all branch related differences can be embodied within unit-tested
+  #       code.
+  extends:
+    - .publish-packages
+  needs:
+    - !reference [ .needs-artifacts, needs ]
+    - !reference [ .needs-tests, needs ]
+  rules:
+    # NOTE: Gitlab-CI conditionals are not strictly shell compliant and must
+    #       not use curly brackets.
+    - if: '$CI_COMMIT_REF_NAME =~ /feature/'
+    - if: '$CI_COMMIT_REF_NAME == "main"'
+  variables:
+    # NOTE: hard-code dryrun publish to resolve publish issue.
+    #       https://gitlab.com/ci-cd-devops/build_harness/-/issues/32
+    PUBLISH_THIS: dryrun
+    THIS_API_TOKEN: $TESTPYPI_API_TOKEN
+
+  script:
+    - !reference [ .publish-script, script ]
+
+
+publish-packages-other:
+  extends:
+    - .publish-packages
+  needs:
+    - !reference [ .needs-artifacts, needs ]
+    - !reference [ .needs-tests, needs ]
+  rules:
+    # NOTE: Gitlab-CI conditionals are not strictly shell compliant and must
+    #       not use curly brackets.
+    - if: '$CI_COMMIT_REF_NAME != "main" && $CI_COMMIT_REF_NAME !~ /feature/ && $CI_COMMIT_TAG !~ /.+/'
+      allow_failure: true
+
+  script:
+    - 'echo "FAILED: publish not defined for this pipeline" >/dev/stderr; exit 1'

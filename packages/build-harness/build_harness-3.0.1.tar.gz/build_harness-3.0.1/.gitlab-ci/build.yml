@@ -1,0 +1,75 @@
+---
+build-packages:
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - dist/
+      - build_harness.log
+      - release_flow.log
+    when: always
+  extends: .python-image
+  stage: package
+  variables:
+    python_version: "${DEFAULT_PYTHON_VERSION}"
+
+  script:
+    - ${VENV_BIN}/release-flow --version
+    - |
+      echo $(${VENV_BIN}/release-flow \
+      --log-console-disable \
+      --log-file-enable \
+      --log-level ${BUILDHARNESS_LOG_LEVEL} \
+      --default-branch "${CI_DEFAULT_BRANCH}")
+    - |
+      export THIS_VERSION=$(${VENV_BIN}/release-flow \
+      --log-console-disable \
+      --log-file-enable \
+      --log-level ${BUILDHARNESS_LOG_LEVEL} \
+      --default-branch "${CI_DEFAULT_BRANCH}")
+    # log THIS_VERSION to pipeline log for debugging
+    - echo "${THIS_VERSION}"
+    - |
+      ${VENV_BIN}/build-harness \
+      --log-console-disable \
+      --log-file-enable \
+      --log-level ${BUILDHARNESS_LOG_LEVEL} \
+      package\
+        --release-id "${THIS_VERSION}"
+
+
+install-check:
+  # Test that the build-harness project itself can be installed.
+  extends: .python-image
+  needs:
+    - job: build-packages
+      artifacts: true
+  stage: tests
+  variables:
+    python_version: "${DEFAULT_PYTHON_VERSION}"
+
+  script:
+    - ls -l dist/
+    - ${VENV_BIN}/pip install dist/${PACKAGE_NAME}*.whl
+    - |
+      [[ -d "${VENV_BIN}" ]] || \
+      (echo "FAILED: ${VENV_BIN} not created" >/dev/stderr; exit 1)
+    - |
+      [[ -f "${VENV_BIN}/${PROJECT_NAME}" ]] || \
+      (echo "FAILED: ${PROJECT_NAME} not installed" >/dev/stderr; exit 1)
+
+
+install-template-check:
+  # Test that a fresh project instantiation using build-harness can be installed.
+  extends: .python-image
+  stage: tests
+  variables:
+    python_version: "${DEFAULT_PYTHON_VERSION}"
+
+  script:
+    - python3 -m venv .venv
+    - .venv/bin/pip install . && .venv/bin/build-harness bootstrap this_project
+    - |
+      cd this_project && \
+      .venv/bin/pip install . && \
+      [[ ! -z ".venv/bin/pip list | grep this-project" ]] || \
+      (echo "FAILED: this_project not installed" >/dev/stderr; exit 1)

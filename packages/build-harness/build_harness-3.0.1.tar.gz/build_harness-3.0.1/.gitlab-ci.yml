@@ -1,0 +1,219 @@
+stages:
+  - setup
+  - static-analysis
+  - package
+  - tests
+  - publish
+
+variables:
+  BUILD_IMAGE_VENV_PATH: /venv
+
+  DEFAULT_PYTHON_VERSION: "3.12"
+
+  FLIT_ROOT_INSTALL: 1
+  GIT_STRATEGY: clone
+  GIT_DEPTH: "0"
+  BUILDHARNESS_LOG_LEVEL: debug
+
+  PROJECT_NAME: build-harness
+
+  PYPI_API_USER: __token__
+
+  # Don't forget to update the coverage threshold in .pre-commit-config.yaml
+  UNITTEST_COVERAGE_THRESHOLD: 90
+
+  VENV_BIN: /venv/bin
+
+  # python: 3.8-slim
+  PYTHON_IMAGE_ID: "@sha256:f8a12edddd4fb9c9fd38cd7147c5861a596dee5a4852b6bded3d1d6e2c8987bd"
+
+
+include:
+  - local: '.gitlab-ci/*.yml'
+
+
+workflow:
+  rules:
+    # NOTE: Gitlab-CI conditionals are not strictly shell compliant and must
+    #       not use curly brackets around environment variables.
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+
+
+.declare-artifacts: &declare-artifacts
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - dist/
+
+
+.python-image:
+  image: ${CI_REGISTRY_IMAGE}/build-image:${python_version}-${CI_COMMIT_SHORT_SHA}
+
+
+package-debug:
+  image: python${PYTHON_IMAGE_ID}
+  stage: setup
+  script:
+    - apt-get update
+    - |
+      for x in $(cat docker/ci/apt1_requirements.txt); do \
+        apt-cache policy ${x}; \
+      done
+      for x in $(cat docker/ci/apt2_requirements.txt); do \
+        apt-cache policy ${x}; \
+      done
+
+
+formatting-check:
+  extends: .python-image
+  parallel:
+    matrix:
+      - python_version: [ "3.10", "3.11" ]
+  stage: static-analysis
+  variables:
+    TARGET: formatting --check
+
+  script:
+    - !reference [ .build-harness-target, script ]
+
+
+all-check:
+  extends: .python-image
+  parallel:
+    matrix:
+      - python_version: [ "3.10", "3.11" ]
+  stage: static-analysis
+  variables:
+    TARGET: static-analysis
+
+  script:
+    - !reference [ .build-harness-target, script ]
+
+
+flake8-check:
+  extends: .python-image
+  parallel:
+    matrix:
+      - python_version: [ "3.10", "3.11" ]
+  stage: static-analysis
+  variables:
+    TARGET: static-analysis --analysis flake8
+
+  before_script:
+    - !reference [ .pyenv-setup, before_script ]
+  script:
+    - !reference [ .build-harness-target, script ]
+
+
+mypy-check:
+  extends: .python-image
+  parallel:
+    matrix:
+      - python_version: [ "3.10", "3.11" ]
+  stage: static-analysis
+  variables:
+    TARGET: static-analysis --analysis mypy
+
+  before_script:
+    - !reference [ .pyenv-setup, before_script ]
+  script:
+    - !reference [ .build-harness-target, script ]
+
+
+run-tests:
+  extends: .python-image
+  parallel:
+    matrix:
+      - python_version: [ "3.10", "3.11" ]
+  stage: tests
+  # Use Gitlab shared runners (untagged) for IO intensive test
+  tags:
+  variables:
+    TARGET: unit-test
+
+  before_script:
+    - !reference [ .pyenv-setup, before_script ]
+  script:
+    - !reference [ .build-harness-target, script ]
+
+
+run-tests-coverage:
+  extends: .python-image
+  stage: tests
+  # Use Gitlab shared runners (untagged) for IO intensive test
+  tags:
+  variables:
+    python_version: "${DEFAULT_PYTHON_VERSION}"
+    TARGET: unit-test --check ${UNITTEST_COVERAGE_THRESHOLD}
+
+  before_script:
+    - !reference [ .git-work-around, before_script ]
+  script:
+    - !reference [ .build-harness-target, script ]
+
+  <<: *declare-artifacts
+
+
+acceptance-tests:
+  extends: .python-image
+  parallel:
+    matrix:
+      - python_version: [ "3.10", "3.11" ]
+  stage: tests
+  # Use Gitlab shared runners (untagged) for IO intensive test
+  tags:
+  variables:
+    TARGET: acceptance tests --junitxml
+
+  before_script:
+    - !reference [ .pyenv-setup, before_script ]
+  script:
+    - !reference [ .build-harness-target, script ]
+
+
+acceptance-tags:
+  extends: .python-image
+  stage: tests
+  # Use Gitlab shared runners (untagged) for IO intensive test
+  tags:
+  variables:
+    python_version: "${DEFAULT_PYTHON_VERSION}"
+    TARGET: acceptance tags
+
+  script:
+    - !reference [ .build-harness-target, script ]
+
+
+install-dependency-check:
+  # Test that the `build-harness install` target works.
+  extends: .python-image
+  stage: tests
+  variables:
+    python_version: "${DEFAULT_PYTHON_VERSION}"
+    TARGET: install
+
+  script:
+    - !reference [ .build-harness-target, script ]
+
+
+sonarcloud-check:
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [ "" ]
+  only:
+    - merge_requests
+    - master
+    - main
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: "0"
+
+  script:
+    - sonar-scanner -X
