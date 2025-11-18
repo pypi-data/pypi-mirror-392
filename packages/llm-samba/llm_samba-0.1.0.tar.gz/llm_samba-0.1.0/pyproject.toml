@@ -1,0 +1,31 @@
+[project]
+name = "llm-samba"
+version = "0.1.0"
+description = "LLM plugin providing access to the free Samba models using the samba API"
+readme = "README.md"
+authors = [{name = "Samuel Dantas"}]
+license = {text = "Apache-2.0"}
+classifiers = [
+    "License :: OSI Approved :: Apache Software License"
+]
+dependencies = [
+    "llm>=0.17",
+    "httpx",
+    "httpx-sse",
+]
+
+[project.urls]
+Homepage = "https://github.com/Tatarotus/llm-samba"
+Changelog = "https://github.com/Tatarotus/llm-samba/releases"
+Issues = "https://github.com/Tatarotus/llm-samba/issues"
+CI = "https://github.com/Tatarotus/llm-samba/actions"
+
+[project.entry-points.llm]
+samba = "llm_samba.llm_samba"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project.optional-dependencies]
+test = ["pytest", "pytest-httpx"]
