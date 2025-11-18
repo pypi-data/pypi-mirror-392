@@ -1,0 +1,63 @@
+[tool.black]
+line-length = 119
+
+[tool.isort]
+force_single_line = true
+line_length       = 119
+profile           = "black"
+
+[tool.pylint]
+max-line-length = 119
+max-args        = 7                            # Default: 5
+max-locals      = 20                           # Default: 15
+max-branches    = 16                           # Default: 12
+disable         = ["missing-module-docstring"]
+
+
+[build-system]
+requires      = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyrelatics2"
+dynamic = ["version"]
+dependencies = [
+    "suds-community>=1.1.2,<1.3.0",
+    "colorama"
+]
+requires-python = ">= 3.10"
+authors = [{ name = "Rense Klinkenberg", email = "r@klinkenberg.ws" }]
+description = "Python package to interact with Relatics webservices"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+keywords = ["Relatics", "Relatics v5", "webservice", "soap-client", "oauth2"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Internet",
+    "Topic :: Software Development :: Libraries"
+]
+
+[project.optional-dependencies]
+dev  = ["black", "isort", "pylint", "wheel", "twine"]
+test = ["parameterized"]
+
+[project.urls]
+Homepage = "https://github.com/rense-k/pyrelatics2"
+# Documentation = "https://readthedocs.org"
+Repository = "https://github.com/rense-k/pyrelatics2.git"
+Issues     = "https://github.com/rense-k/pyrelatics2/issues"
+Changelog  = "https://github.com/rense-k/pyrelatics2/blob/dev/CHANGELOG.md"
+
+[tool.setuptools.dynamic]
+version = { attr = "pyrelatics2.version.__version__" }
