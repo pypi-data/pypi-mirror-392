@@ -1,0 +1,129 @@
+# AnkiHelper
+
+JSON으로 작성한 Q&A 노트 묶음을 [genanki](https://github.com/kerrickstaley/genanki)를 이용해
+한 번에 `.apkg` 파일로 변환해 주는 경량 CLI입니다. `notes/` 디렉토리(기본값) 아래에 있는
+모든 JSON 노트를 재귀적으로 찾아 하나의 덱으로 묶어 주기 때문에, 폴더 단위로 노트를 모아 두기만
+하면 바로 학습 덱을 만들 수 있습니다.
+
+---
+
+## 핵심 기능
+- **스키마 기반 노트 정의**: `anki-helper.qa.v1` 스키마(JSON) 하나로 모든 Q&A 노트를 일관된 형식으로 관리합니다.
+- **자동 파일 스캔**: `notes_dir` 아래의 모든 `*.json`을 재귀적으로 읽어 동일한 덱으로 묶습니다.
+- **스타일 지정 템플릿**: `src/anki_helper/template.py`에서 카드 HTML/CSS를 통째로 커스터마이징할 수 있습니다.
+- **간결한 CLI**: 위치 인자로 루트 덱 이름만 넘기면 되고, `--notes-dir`, `--output` 옵션으로 입출력을 제어합니다.
+
+---
+
+## 요구 사항
+- Python 3.9+
+- [PDM](https://pdm.fming.dev/latest/) (또는 `pip`/`venv` 조합)
+- Anki Desktop는 생성된 `.apkg`만 있으면 별도 설정이 필요 없습니다.
+
+---
+
+## 빠른 시작
+
+```bash
+git clone https://github.com/USER/AnkiHelper.git
+cd AnkiHelper
+pdm install          # 또는 python -m venv .venv && .venv/bin/pip install -e .
+```
+
+1. `notes/` 디렉토리를 만들고, 원하는 만큼 하위 폴더/JSON 파일을 추가합니다.
+2. 아래 예시처럼 스키마를 포함한 Q&A JSON을 작성합니다.
+3. 덱을 빌드합니다.
+
+```bash
+pdm run anki-helper "Interview Prep" \
+  --notes-dir notes \
+  --output interview_prep
+
+# 결과: ./interview_prep.apkg
+```
+
+> **참고**  
+> CLI 도우미: `pdm run anki-helper -h` 또는 `--version`
+
+---
+
+## 노트 JSON 스키마
+
+공식 정의는 `src/schema/anki_schema_qa/anki_schema_qa_v1.json`에 있습니다. 최상위 키는
+`schema`, `notes`이며 `note_type`은 선택입니다.
+
+```json
+{
+  "schema": "anki-helper.qa.v1",
+  "notes": [
+    {
+      "question": "HTTP/2의 Multiplexing이란?",
+      "answer": "하나의 TCP 연결에서 ...",
+      "tags": ["network", "http"]
+    }
+  ]
+}
+```
+
+- `schema`: 현재는 `anki-helper.qa.v1`만 지원합니다.
+- `notes`: 각 노트는 `question`, `answer`, (선택) `tags` 배열을 가집니다.
+- 추가 스키마를 만들고 싶다면 `src/anki_helper/model.py`와 `json_reader.py`를 확장하면 됩니다.
+
+---
+
+## 노트 디렉토리 구성
+
+- 프로그램은 `notes_dir` 아래의 모든 `*.json` 파일을 **재귀적으로** 탐색합니다.
+- 디렉토리 구조는 파일 정리를 돕는 용도일 뿐, 생성되는 덱은 항상 하나입니다.
+- 특정 폴더만 사용하고 싶다면 그 폴더를 `--notes-dir` 인자로 직접 넘기면 됩니다.
+
+```
+notes/
+├─ backend/http.json
+└─ os/process.json
+```
+
+위와 같은 구조라도 `pdm run anki-helper "CS"`로 실행하면 `CS`라는 하나의 덱 안에 모든 카드가 들어갑니다.
+빈 덱이 나온다면 지정한 notes 경로에 JSON 파일이 있는지 다시 확인해 주세요.
+
+---
+
+## 카드 템플릿 커스터마이징
+
+- HTML/CSS: `src/anki_helper/template.py`
+- 모델 정의: `src/anki_helper/model.py`
+- 템플릿을 수정한 뒤 다시 빌드하면 즉시 변경 사항이 적용된 덱을 얻을 수 있습니다.
+
+---
+
+## 개발/유지보수
+
+PDM 스크립트를 그대로 사용할 수 있습니다.
+
+```bash
+pdm run lint        # Ruff
+pdm run fmt-code    # Ruff formatter
+pdm run fmt-docstrings
+pdm run type-check  # mypy
+```
+
+실행 테스트는 `pdm run anki-helper ...`로 실제 덱을 만들어 보는 것이 가장 빠릅니다.
+
+---
+
+## 아키텍처 한눈에 보기
+
+![Architecture](architecture.png)
+
+1. `main.py`에서 CLI 인자를 파싱하고 JSON 파일 목록을 찾습니다.
+2. `json_reader.py`가 스키마에 맞춰 `genanki.Note` 리스트를 생성합니다.
+3. `builder.py`가 무작위 덱 ID를 생성해 `genanki.Deck`을 만들고,
+4. `save_deck_to_file`이 `.apkg` 파일로 저장합니다.
+
+---
+
+## 라이선스
+
+[MIT](LICENSE)
+
+아이디어나 개선점이 있다면 Issue/PR 모두 환영합니다. 😊
