@@ -1,0 +1,200 @@
+Metadata-Version: 2.3
+Name: aiotgbot
+Version: 0.18.2
+Summary: Asynchronous library for Telegram bot API
+Author: Gleb Chipiga
+License: MIT License
+         
+         Copyright (c) 2018-2024 Gleb Chipiga
+         
+         Permission is hereby granted, free of charge, to any person obtaining a copy
+         of this software and associated documentation files (the "Software"), to deal
+         in the Software without restriction, including without limitation the rights
+         to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+         copies of the Software, and to permit persons to whom the Software is
+         furnished to do so, subject to the following conditions:
+         
+         The above copyright notice and this permission notice shall be included in all
+         copies or substantial portions of the Software.
+         
+         THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+         IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+         FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+         AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+         LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+         OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+         SOFTWARE.
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Development Status :: 4 - Beta
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Topic :: Internet
+Classifier: Topic :: Communications :: Chat
+Classifier: Framework :: AsyncIO
+Requires-Dist: aiofreqlimit>=0.0.16
+Requires-Dist: aiohttp>=3.13.2
+Requires-Dist: aiojobs>=1.4.0
+Requires-Dist: backoff>=2.2.1
+Requires-Dist: frozenlist>=1.8.0
+Requires-Dist: msgspec>=0.19.0
+Requires-Dist: yarl>=1.22.0
+Requires-Dist: cryptography>=46.0.0 ; extra == 'passport'
+Requires-Dist: sqlalchemy ; extra == 'sqlalchemy'
+Requires-Dist: aiosqlite ; extra == 'sqlite'
+Requires-Python: >=3.11, <3.14
+Project-URL: Homepage, https://github.com/gleb-chipiga/aiotgbot
+Provides-Extra: passport
+Provides-Extra: sqlalchemy
+Provides-Extra: sqlite
+Description-Content-Type: text/x-rst
+
+=========================================
+Asynchronous library for Telegram bot API
+=========================================
+
+.. image:: https://badge.fury.io/py/aiotgbot.svg
+   :target: https://pypi.org/project/aiotgbot
+   :alt: Latest PyPI package version
+
+.. image:: https://img.shields.io/badge/license-MIT-blue.svg
+   :target: https://github.com/gleb-chipiga/aiotgbot/blob/master/LICENSE
+   :alt: License
+
+.. image:: https://img.shields.io/pypi/dm/aiotgbot
+   :target: https://pypistats.org/packages/aiotgbot
+   :alt: Downloads count
+
+Key Features
+============
+
+* Asyncio and `aiohttp <https://github.com/aio-libs/aiohttp>`_ based
+* All `Telegram Bot API <https://core.telegram.org/bots/api>`_ types and methods supported
+* Tracks Telegram Bot API 7.2 (released March 31, 2024)
+* Bot API rate limit support
+* Both long polling and webhooks supported
+* Fully type annotated (`PEP 484 <https://www.python.org/dev/peps/pep-0484/>`_)
+
+Installation
+============
+aiotgbot is available on PyPI. Use pip to install it:
+
+.. code-block:: bash
+
+    pip install aiotgbot
+
+Requirements
+============
+
+* Python >= 3.8
+* `aiohttp <https://github.com/aio-libs/aiohttp>`_
+* `aiojobs <https://github.com/aio-libs/aiojobs>`_
+* `msgspec <https://github.com/jcrist/msgspec>`_
+* `backoff <https://github.com/litl/backoff>`_
+* `frozenlist <https://github.com/aio-libs/frozenlist>`_
+* `aiofreqlimit <https://github.com/gleb-chipiga/aiofreqlimit>`_
+* `yarl <https://github.com/aio-libs/yarl>`_
+
+Using aiotgbot
+==================
+
+.. code-block:: python
+
+    from typing import AsyncIterator
+
+    from aiotgbot import (Bot, BotUpdate, BotUpdateKey, HandlerTable, PollBot,
+                          PrivateChatFilter, Runner)
+    from aiotgbot.storage_memory import MemoryStorage
+
+    handlers = HandlerTable()
+
+
+    @handlers.message(filters=[PrivateChatFilter()])
+    async def reply_private_message(bot: Bot, update: BotUpdate) -> None:
+        assert update.message is not None
+        name = (f'{update.message.chat.first_name} '
+                f'{update.message.chat.last_name}')
+        update["greeting_count"] = update.get("greeting_count", 0) + 1
+        await bot.send_message(update.message.chat.id, f'Hello, {name}!')
+
+
+    async def run_context(runner: Runner) -> AsyncIterator[None]:
+        storage = MemoryStorage()
+        await storage.connect()
+        handlers.freeze()
+        bot = PollBot(runner['token'], handlers, storage)
+        await bot.start()
+
+        yield
+
+        await bot.stop()
+        await storage.close()
+
+
+    def main() -> None:
+        runner = Runner(run_context)
+        runner['token'] = 'some:token'
+        runner.run()
+
+
+    if __name__ == '__main__':
+        main()
+
+Upgrading to 0.18.0
+===================
+
+**New features:**
+
+* **BotUpdateKey** – a dedicated typed key object for items stored on ``BotUpdate``.
+* ``BotUpdate`` exposes ``get_typed(key)``, ``set_typed(key, value)``, and ``del_typed(key)`` helpers for working with ``BotUpdateKey`` instances.
+* Each ``BotUpdateKey`` enforces runtime type checking via ``isinstance()`` so handlers only see the expected payload.
+
+``BotUpdate`` remains a regular mutable mapping so filters and handlers can stash arbitrary helper objects between each other. To keep gopher data structured, use ``BotUpdateKey`` which enforces types per slot::
+
+    from dataclasses import dataclass
+
+    from aiotgbot import BotUpdateKey
+
+
+    @dataclass
+    class Session:
+        trace_id: str
+        retries: int
+
+
+    session_key = BotUpdateKey("session", Session)
+
+
+    async def my_handler(bot: Bot, update: BotUpdate) -> None:
+        if session_key.name not in update:
+            update.set_typed(session_key, Session(trace_id="abc", retries=0))
+        session = update.get_typed(session_key)
+        ...
+
+Development
+===========
+
+We use `Prek <https://github.com/DetachHead/prek>`_ as a drop-in ``pre-commit`` replacement backed by ``uv`` so hook environments resolve quickly and reproducibly. Install it once and run the configured Ruff, ``mypy --strict``, and Basedpyright checks via:
+
+.. code-block:: bash
+
+    uv tool install prek
+    prek install
+    prek run --all-files
+
+``prek run`` reads ``.pre-commit-config.yaml``, so you can still target a subset of hooks or files during local development.
+
+``mise.toml`` at the repo root mirrors the common workflows, so you can rely on `mise <https://mise.jdx.dev/>`_ instead of remembering the raw commands. Trust the config once via ``mise trust mise.toml`` and then run, for example:
+
+.. code-block:: bash
+
+    mise run lint
+    mise run mypy
+    mise run basedpyright
+    mise run test
