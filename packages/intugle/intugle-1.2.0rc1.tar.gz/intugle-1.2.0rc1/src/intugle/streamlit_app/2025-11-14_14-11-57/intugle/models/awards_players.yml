@@ -1,0 +1,148 @@
+sources:
+- name: my_local_source
+  resource_type: source
+  description: ''
+  tags: null
+  uuid: 520eff25-4feb-4525-b18e-5b506f4810be
+  schema: ''
+  database: ''
+  table:
+    name: awards_players
+    description: Captures information about individual players who have received specific
+      awards in different leagues and seasons, including details such as award type,
+      year received, league, position, and any related notes.
+    tags: []
+    details:
+      path: 2025-11-14_14-11-57/modified_input/awards_players.csv
+      type: csv
+    columns:
+    - name: playerid
+      type: alphanumeric
+      category: dimension
+      description: Uniquely identifies an individual recipient of an award.
+      tags:
+      - Player Identifier
+      - Basketball Athlete Reference
+      - Awards Recipient Tracking
+      profiling_metrics:
+        count: 1719
+        null_count: 0
+        distinct_count: 441
+        sample_data:
+        - galemi01
+        - bradldu01
+        - bellra01
+        - calvima01
+        - muresgh01
+        - larusru01
+        - bayloel01
+        - smithra01
+        - daughbr01
+        - johnsma01
+    - name: award
+      type: close_ended_text
+      category: dimension
+      description: Identifies the type of recognition or honor granted to a player
+        for outstanding achievement or performance.
+      tags:
+      - Player Recognition
+      - Career Achievement
+      - Seasonal Awards
+      profiling_metrics:
+        count: 1719
+        null_count: 0
+        distinct_count: 21
+        sample_data:
+        - All-Defensive First Team
+        - All-Defensive Second Team
+        - All-ABA First Team
+        - J. Walter Kennedy Citizenship Award
+        - 'Finals MVP '
+        - Finals MVP
+        - Comeback
+        - All-Defensive Team
+        - Executive of the Year
+        - All-Rookie First Team
+    - name: year
+      type: date & time
+      category: dimension
+      description: Identifies the calendar period when a player received an award.
+      tags:
+      - Award Season
+      - Historical Timeline
+      - Player Achievement Year
+      profiling_metrics:
+        count: 1719
+        null_count: 0
+        distinct_count: 75
+        sample_data:
+        - '1941'
+        - '1956'
+        - '2005'
+        - '1975'
+        - '1968'
+        - '1993'
+        - '1942'
+        - '2003'
+        - '1962'
+        - '1974'
+    - name: lgid
+      type: alphanumeric
+      category: dimension
+      description: Indicates the league in which the player award was earned.
+      tags:
+      - League Identifier
+      - Competition Classification
+      - Basketball Organization
+      profiling_metrics:
+        count: 1719
+        null_count: 0
+        distinct_count: 4
+        sample_data:
+        - NBL
+        - NBA
+        - ABL1
+        - ABA
+    - name: note
+      type: close_ended_text
+      category: dimension
+      description: Explains special circumstances or remarks related to an individual's
+        recognition for an award.
+      tags:
+      - Award Annotation
+      - Player Recognition Detail
+      - Selection Status
+      profiling_metrics:
+        count: 1719
+        null_count: 1682
+        distinct_count: 1
+        sample_data:
+        - tie
+    - name: pos
+      type: close_ended_text
+      category: dimension
+      description: Indicates the on-court role assigned to a player when receiving
+        an award.
+      tags:
+      - Player Position
+      - Role Classification
+      - Team Lineup Analysis
+      profiling_metrics:
+        count: 1719
+        null_count: 886
+        distinct_count: 5
+        sample_data:
+        - F/G
+        - G
+        - F
+        - C
+        - F/C
+    profiling_metrics:
+      count: 1719
+    key:
+      columns:
+      - playerid
+      - award
+      - year
+      distinct_count: 1719
+    source_last_modified: 1763109787.1250026

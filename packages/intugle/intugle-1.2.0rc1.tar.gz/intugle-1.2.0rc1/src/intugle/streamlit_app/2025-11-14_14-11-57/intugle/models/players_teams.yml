@@ -1,0 +1,1037 @@
+sources:
+- name: my_local_source
+  resource_type: source
+  description: ''
+  tags: null
+  uuid: 8d2cac9b-cd5e-4b8f-bf7f-132124f47463
+  schema: ''
+  database: ''
+  table:
+    name: players_teams
+    description: Tracks individual player participation, team assignments, and performance
+      statistics for each season and postseason with specific teams and leagues.
+    tags: []
+    details:
+      path: 2025-11-14_14-11-57/modified_input/players_teams.csv
+      type: csv
+    columns:
+    - name: id
+      type: integer
+      category: dimension
+      description: Uniquely identifies each record linking a player to a team within
+        the system.
+      tags:
+      - Player-Team Association
+      - Roster Management
+      - Entity Identifier
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 23751
+        sample_data:
+        - '5470'
+        - '10494'
+        - '10893'
+        - '4063'
+        - '17987'
+        - '3523'
+        - '19592'
+        - '11902'
+        - '10181'
+        - '2645'
+    - name: playerid
+      type: alphanumeric
+      category: dimension
+      description: Uniquely identifies an individual associated with a team in the
+        context of player-team relationships.
+      tags:
+      - Player Identifier
+      - Roster Management
+      - Career Tracking
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 4903
+        sample_data:
+        - cableba01
+        - bluebo01
+        - obrieja01
+        - mcmicmi01
+        - wilsoot01
+        - halebr01
+        - straite01
+        - charllo01
+        - kingwi01
+        - reevekh01
+    - name: year
+      type: date & time
+      category: dimension
+      description: Indicates the season during which a player was associated with
+        a team.
+      tags:
+      - Season Year
+      - Player Team Association
+      - Historical Timeline
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 75
+        sample_data:
+        - '2008'
+        - '1962'
+        - '1967'
+        - '1947'
+        - '1973'
+        - '2006'
+        - '2003'
+        - '1991'
+        - '2010'
+        - '1948'
+    - name: stint
+      type: integer
+      category: measure
+      description: Identifies the number of separate periods a player has been associated
+        with a specific team during their career.
+      tags:
+      - Team Tenure Sequence
+      - Player Movement Tracking
+      - Seasonal Team Assignment
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 6
+        sample_data:
+        - '4'
+        - '1'
+        - '3'
+        - '5'
+        - '0'
+        - '2'
+    - name: tmid
+      type: close_ended_text
+      category: dimension
+      description: Identifies the organization or group to which an individual is
+        or was affiliated within the context of the roster.
+      tags:
+      - Team Identifier
+      - Franchise Code
+      - Roster Association
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 161
+        sample_data:
+        - TRI
+        - LAC
+        - CHG
+        - CWH
+        - LAJ
+        - KCK
+        - SAS
+        - FNT
+        - CHS
+        - DYM
+    - name: lgid
+      type: close_ended_text
+      category: dimension
+      description: Identifies the league in which the team operates.
+      tags:
+      - League Identifier
+      - Competition Affiliation
+      - Basketball Organization
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 6
+        sample_data:
+        - ABA
+        - NPBL
+        - ABL1
+        - NBL
+        - NBA
+        - PBLA
+    - name: gp
+      type: integer
+      category: measure
+      description: Indicates the total number of games a player participated in with
+        a team during a season.
+      tags:
+      - Games Played
+      - Player Participation
+      - Season Statistics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 85
+        sample_data:
+        - '68'
+        - '4'
+        - '46'
+        - '7'
+        - '9'
+        - '53'
+        - '73'
+        - '10'
+        - '12'
+        - '33'
+    - name: gs
+      type: integer
+      category: measure
+      description: Indicates the number of games a player has started for a team during
+        a season or competition.
+      tags:
+      - Games Started
+      - Player Participation
+      - Team Lineup Analysis
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 83
+        sample_data:
+        - '43'
+        - '20'
+        - '47'
+        - '5'
+        - '10'
+        - '79'
+        - '9'
+        - '49'
+        - '35'
+        - '7'
+    - name: minutes
+      type: integer
+      category: measure
+      description: Indicates the total amount of time an individual participated in
+        games for a given team during a season.
+      tags:
+      - Player Participation
+      - Game Time Allocation
+      - Performance Metrics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 3352
+        sample_data:
+        - '1234'
+        - '3319'
+        - '972'
+        - '2193'
+        - '1742'
+        - '2579'
+        - '337'
+        - '1112'
+        - '2049'
+        - '1317'
+    - name: points
+      type: integer
+      category: measure
+      description: Indicates the total number of scores made by an individual while
+        playing for a team.
+      tags:
+      - Player Performance
+      - Scoring Statistics
+      - Seasonal Achievement
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 2116
+        sample_data:
+        - '1759'
+        - '1985'
+        - '1420'
+        - '947'
+        - '636'
+        - '119'
+        - '805'
+        - '627'
+        - '2775'
+        - '149'
+    - name: orebounds
+      type: integer
+      category: measure
+      description: Counts how many times a player retrieves the ball after a missed
+        field goal attempt by their own team during games for a specific team.
+      tags:
+      - Offensive Rebounds
+      - Player Performance Metrics
+      - Game Statistics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 407
+        sample_data:
+        - '22'
+        - '278'
+        - '384'
+        - '186'
+        - '223'
+        - '245'
+        - '60'
+        - '225'
+        - '209'
+        - '219'
+    - name: drebounds
+      type: integer
+      category: measure
+      description: Quantifies the total number of times a player retrieves the ball
+        after an opponent's missed shot while playing for a team.
+      tags:
+      - Defensive Rebounds
+      - Player Performance Metrics
+      - Game Statistics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 788
+        sample_data:
+        - '436'
+        - '544'
+        - '705'
+        - '265'
+        - '20'
+        - '459'
+        - '277'
+        - '385'
+        - '276'
+        - '220'
+    - name: rebounds
+      type: integer
+      category: measure
+      description: Shows the total number of times a player successfully gains possession
+        of the ball after a missed shot during games for a particular team.
+      tags:
+      - Player Performance Metrics
+      - Game Statistics
+      - Team Contribution
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 1166
+        sample_data:
+        - '127'
+        - '1188'
+        - '179'
+        - '29'
+        - '1122'
+        - '192'
+        - '1279'
+        - '18'
+        - '589'
+        - '334'
+    - name: assists
+      type: integer
+      category: measure
+      description: Indicates the number of times a player has directly contributed
+        to a teammate scoring during their participation with a team.
+      tags:
+      - Player Performance Metrics
+      - Team Collaboration
+      - Game Playmaking
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 768
+        sample_data:
+        - '103'
+        - '420'
+        - '215'
+        - '54'
+        - '71'
+        - '508'
+        - '490'
+        - '209'
+        - '977'
+        - '62'
+    - name: steals
+      type: integer
+      category: measure
+      description: Quantifies how many times a player successfully takes possession
+        of the ball from an opponent during games for a given team.
+      tags:
+      - Defensive Performance
+      - Player Statistics
+      - Game Analytics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 245
+        sample_data:
+        - '231'
+        - '170'
+        - '243'
+        - '128'
+        - '134'
+        - '11'
+        - '244'
+        - '117'
+        - '90'
+        - '75'
+    - name: blocks
+      type: integer
+      category: measure
+      description: Indicates the total number of times a player has successfully prevented
+        an opponent's shot attempt during games for a team.
+      tags:
+      - Defensive Performance
+      - Player Statistics
+      - Game Impact Metrics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 281
+        sample_data:
+        - '262'
+        - '188'
+        - '238'
+        - '343'
+        - '181'
+        - '22'
+        - '125'
+        - '150'
+        - '277'
+        - '27'
+    - name: turnovers
+      type: integer
+      category: measure
+      description: Shows how many times a player or team lost possession of the ball
+        to the opposing side during game play.
+      tags:
+      - Player Performance Metrics
+      - Ball Possession Errors
+      - Game Efficiency Analysis
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 351
+        sample_data:
+        - '58'
+        - '17'
+        - '25'
+        - '191'
+        - '171'
+        - '3'
+        - '278'
+        - '138'
+        - '304'
+        - '10'
+    - name: pf
+      type: integer
+      category: measure
+      description: Indicates the number of personal fouls committed by a player during
+        games associated with a team.
+      tags:
+      - Personal Fouls
+      - Player Discipline
+      - Game Infractions
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 364
+        sample_data:
+        - '31'
+        - '155'
+        - '100'
+        - '116'
+        - '109'
+        - '10'
+        - '356'
+        - '320'
+        - '275'
+        - '204'
+    - name: fgattempted
+      type: integer
+      category: measure
+      description: Counts the total number of shots attempted during a period for
+        a player with a team.
+      tags:
+      - Field Goals Attempted
+      - Player Performance Metrics
+      - Game Statistics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 1742
+        sample_data:
+        - '664'
+        - '1510'
+        - '937'
+        - '69'
+        - '1321'
+        - '1837'
+        - '924'
+        - '1502'
+        - '913'
+        - '1407'
+    - name: fgmade
+      type: integer
+      category: measure
+      description: Shows how many times a player successfully scored a field goal
+        for their team during a season or competition.
+      tags:
+      - Field Goals Made
+      - Player Scoring Performance
+      - Game Statistics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 913
+        sample_data:
+        - '895'
+        - '539'
+        - '956'
+        - '435'
+        - '90'
+        - '718'
+        - '319'
+        - '552'
+        - '123'
+        - '653'
+    - name: ftattempted
+      type: integer
+      category: measure
+      description: Shows how many times a player tried to score by taking a free throw
+        during their time with a team.
+      tags:
+      - Free Throw Performance
+      - Player Scoring Opportunities
+      - Game Statistics Analysis
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 812
+        sample_data:
+        - '68'
+        - '381'
+        - '625'
+        - '457'
+        - '564'
+        - '185'
+        - '541'
+        - '560'
+        - '926'
+        - '577'
+    - name: ftmade
+      type: integer
+      category: measure
+      description: Counts successful free throw shots made by a player for a team.
+      tags:
+      - Free Throws Made
+      - Player Scoring Performance
+      - Game Statistics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 650
+        sample_data:
+        - '291'
+        - '430'
+        - '137'
+        - '202'
+        - '341'
+        - '457'
+        - '113'
+        - '255'
+        - '248'
+        - '531'
+    - name: threeattempted
+      type: integer
+      category: measure
+      description: Shows how many long-distance scoring tries a player or team has
+        taken during games.
+      tags:
+      - Three Point Shooting
+      - Player Performance Metrics
+      - Game Analytics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 514
+        sample_data:
+        - '149'
+        - '518'
+        - '301'
+        - '193'
+        - '230'
+        - '133'
+        - '125'
+        - '287'
+        - '434'
+        - '478'
+    - name: threemade
+      type: integer
+      category: measure
+      description: Indicates the total number of successful three-point shots scored
+        by an individual while associated with a specific team.
+      tags:
+      - Three Point Shooting
+      - Player Performance Metrics
+      - Game Statistics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 218
+        sample_data:
+        - '187'
+        - '257'
+        - '87'
+        - '164'
+        - '145'
+        - '103'
+        - '51'
+        - '65'
+        - '70'
+        - '121'
+    - name: postgp
+      type: integer
+      category: measure
+      description: Indicates the total number of games played by an individual with
+        a particular team after the regular season.
+      tags:
+      - Postseason Games Played
+      - Player Playoff Participation
+      - Team Performance Metrics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 27
+        sample_data:
+        - '3'
+        - '24'
+        - '15'
+        - '22'
+        - '14'
+        - '9'
+        - '4'
+        - '1'
+        - '10'
+        - '7'
+    - name: postgs
+      type: integer
+      category: measure
+      description: Indicates the specific position or role assigned to a player within
+        a team.
+      tags:
+      - Player Position Group
+      - Team Roster Classification
+      - On-Court Role Identifier
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 24
+        sample_data:
+        - '8'
+        - '13'
+        - '10'
+        - '5'
+        - '6'
+        - '7'
+        - '24'
+        - '18'
+        - '17'
+        - '11'
+    - name: postminutes
+      type: integer
+      category: measure
+      description: Indicates the total time a player spent participating after being
+        substituted into games for a specific team.
+      tags:
+      - Player Game Participation
+      - Team Contribution Analysis
+      - Performance Metrics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 862
+        sample_data:
+        - '412'
+        - '716'
+        - '517'
+        - '126'
+        - '65'
+        - '750'
+        - '273'
+        - '314'
+        - '165'
+        - '700'
+    - name: postpoints
+      type: integer
+      category: measure
+      description: Quantifies the total points scored from offensive actions executed
+        in the low-post area by an individual within a team context.
+      tags:
+      - Player Scoring Performance
+      - Post Position Contribution
+      - Game Analytics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 503
+        sample_data:
+        - '2'
+        - '133'
+        - '219'
+        - '493'
+        - '470'
+        - '519'
+        - '390'
+        - '440'
+        - '379'
+        - '370'
+    - name: postorebounds
+      type: integer
+      category: measure
+      description: Shows the number of rebounds secured by a player during post-season
+        games for their team.
+      tags:
+      - Player Performance Metrics
+      - Rebounding Statistics
+      - Game Analytics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 100
+        sample_data:
+        - '77'
+        - '49'
+        - '21'
+        - '79'
+        - '34'
+        - '103'
+        - '50'
+        - '6'
+        - '28'
+        - '95'
+    - name: postdrebounds
+      type: integer
+      category: measure
+      description: Counts the number of times a player successfully gains possession
+        of the ball after an opponent's missed shot while positioned near the basket.
+      tags:
+      - Defensive Rebounds
+      - Player Performance Metrics
+      - Game Statistics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 186
+        sample_data:
+        - '131'
+        - '128'
+        - '142'
+        - '56'
+        - '172'
+        - '11'
+        - '190'
+        - '66'
+        - '59'
+        - '125'
+    - name: postrebounds
+      type: integer
+      category: measure
+      description: Shows the total number of rebounds secured by a player or team
+        after an opponent's missed shot near the basket area.
+      tags:
+      - Rebounding Performance
+      - Player Statistics
+      - Team Contribution
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 283
+        sample_data:
+        - '114'
+        - '40'
+        - '68'
+        - '103'
+        - '66'
+        - '49'
+        - '234'
+        - '111'
+        - '77'
+        - '174'
+    - name: postassists
+      type: integer
+      category: measure
+      description: Indicates the total number of assists made by a player while participating
+        as part of a team.
+      tags:
+      - Player Passing Performance
+      - Team Playmaking Metrics
+      - Offensive Contribution
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 177
+        sample_data:
+        - '170'
+        - '163'
+        - '107'
+        - '205'
+        - '43'
+        - '75'
+        - '65'
+        - '289'
+        - '135'
+        - '38'
+    - name: poststeals
+      type: integer
+      category: measure
+      description: Counts the number of times a player or team successfully gains
+        possession of the ball immediately after an opponent's turnover.
+      tags:
+      - Defensive Performance
+      - Player Statistics
+      - Turnover Generation
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 56
+        sample_data:
+        - '23'
+        - '9'
+        - '6'
+        - '50'
+        - '24'
+        - '48'
+        - '51'
+        - '15'
+        - '13'
+        - '10'
+    - name: postblocks
+      type: integer
+      category: measure
+      description: Indicates the number of times a player successfully prevented an
+        opponent's shot attempt near the basket during a game.
+      tags:
+      - Defensive Performance
+      - Player Statistics
+      - Game Impact Metrics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 64
+        sample_data:
+        - '12'
+        - '35'
+        - '48'
+        - '23'
+        - '29'
+        - '3'
+        - '27'
+        - '8'
+        - '55'
+        - '69'
+    - name: postturnovers
+      type: integer
+      category: measure
+      description: Counts the number of times possession was lost by a player or team
+        during plays occurring in the low post area.
+      tags:
+      - Post Play Performance
+      - Turnover Analysis
+      - Player Efficiency
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 90
+        sample_data:
+        - '78'
+        - '59'
+        - '4'
+        - '77'
+        - '63'
+        - '26'
+        - '9'
+        - '76'
+        - '57'
+        - '75'
+    - name: postpf
+      type: integer
+      category: measure
+      description: Indicates the total number of personal fouls committed by a player
+        during a game.
+      tags:
+      - Player Position
+      - Team Roster Management
+      - Basketball Lineup Analysis
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 100
+        sample_data:
+        - '94'
+        - '76'
+        - '61'
+        - '85'
+        - '26'
+        - '20'
+        - '1'
+        - '92'
+        - '45'
+        - '65'
+    - name: postfgattempted
+      type: integer
+      category: measure
+      description: Indicates the total number of field goal attempts made from post-up
+        plays by a player or team.
+      tags:
+      - Post Play Performance
+      - Field Goal Attempts
+      - Player Scoring Opportunities
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 419
+        sample_data:
+        - '277'
+        - '68'
+        - '87'
+        - '345'
+        - '268'
+        - '291'
+        - '441'
+        - '264'
+        - '329'
+        - '278'
+    - name: postfgmade
+      type: integer
+      category: measure
+      description: Counts the number of successful field goals made from post moves
+        by a player for a team.
+      tags:
+      - Post Season Performance
+      - Field Goals Made
+      - Player Scoring Metrics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 219
+        sample_data:
+        - '130'
+        - '9'
+        - '89'
+        - '32'
+        - '155'
+        - '195'
+        - '136'
+        - '50'
+        - '5'
+        - '113'
+    - name: postftattempted
+      type: integer
+      category: measure
+      description: Indicates the total number of free throw attempts made by a player
+        after a specific event or play type.
+      tags:
+      - Free Throw Attempts
+      - Player Scoring Opportunities
+      - Game Performance Metrics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 201
+        sample_data:
+        - '80'
+        - '187'
+        - '97'
+        - '229'
+        - '61'
+        - '72'
+        - '71'
+        - '34'
+        - '19'
+        - '92'
+    - name: postftmade
+      type: integer
+      category: measure
+      description: Counts how many free throws were successfully made by a player
+        after a specific event or period during a game.
+      tags:
+      - Free Throws Made
+      - Player Scoring Performance
+      - Postseason Statistics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 164
+        sample_data:
+        - '45'
+        - '65'
+        - '205'
+        - '75'
+        - '23'
+        - '24'
+        - '88'
+        - '3'
+        - '129'
+        - '140'
+    - name: postthreeattempted
+      type: integer
+      category: measure
+      description: Counts the number of three-point shot attempts taken from post-up
+        plays by a player or team.
+      tags:
+      - Three-Point Shot Attempts
+      - Player Shooting Performance
+      - Offensive Metrics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 128
+        sample_data:
+        - '81'
+        - '26'
+        - '68'
+        - '72'
+        - '39'
+        - '147'
+        - '148'
+        - '53'
+        - '63'
+        - '97'
+    - name: postthreemade
+      type: integer
+      category: measure
+      description: Counts the number of successful three-point shots made after a
+        specific event or period within a game.
+      tags:
+      - Three-Point Shots Made
+      - Player Performance Metrics
+      - Game Scoring Statistics
+      profiling_metrics:
+        count: 23751
+        null_count: 0
+        distinct_count: 56
+        sample_data:
+        - '31'
+        - '2'
+        - '7'
+        - '55'
+        - '4'
+        - '46'
+        - '9'
+        - '41'
+        - '23'
+        - '37'
+    - name: note
+      type: close_ended_text
+      category: dimension
+      description: Indicates a specific status or designation related to a player's
+        association with a team.
+      tags:
+      - Player Team Status
+      - Roster Participation
+      - Team Assignment Notes
+      profiling_metrics:
+        count: 23751
+        null_count: 23708
+        distinct_count: 1
+        sample_data:
+        - C
+    profiling_metrics:
+      count: 23751
+    key:
+      columns:
+      - id
+      distinct_count: 23751
+    source_last_modified: 1763109787.0663118

@@ -1,0 +1,542 @@
+sources:
+- name: my_local_source
+  resource_type: source
+  description: ''
+  tags: null
+  uuid: ce8ddf66-7475-41d4-a6b9-ec38bbc07252
+  schema: ''
+  database: ''
+  table:
+    name: player_allstar
+    description: Captures individual player performance and participation details
+      for all-star games across different seasons and leagues.
+    tags: []
+    details:
+      path: 2025-11-14_14-11-57/modified_input/player_allstar.csv
+      type: csv
+    columns:
+    - name: playerid
+      type: alphanumeric
+      category: dimension
+      description: Uniquely identifies an individual selected as an all-star participant.
+      tags:
+      - Player Identifier
+      - All-Star Participation
+      - Basketball Athlete Profile
+      profiling_metrics:
+        count: 1608
+        null_count: 0
+        distinct_count: 443
+        sample_data:
+        - netolbo01
+        - lucasje01
+        - johnsla01
+        - paytoga01
+        - roybr01
+        - dischte01
+        - davisle01
+        - smithra01
+        - dukeswa01
+        - brownro02
+    - name: last_name
+      type: close_ended_text
+      category: dimension
+      description: Identifies the family name of an individual selected as an all-star
+        player.
+      tags:
+      - Player Identity
+      - All-Star Roster
+      - Basketball Personnel
+      profiling_metrics:
+        count: 1608
+        null_count: 0
+        distinct_count: 366
+        sample_data:
+        - Starks
+        - Wallace
+        - Knight
+        - Melchionni
+        - Barkley
+        - Jamison
+        - Harris
+        - Walton
+        - Somerset
+        - Marion
+    - name: first_name
+      type: close_ended_text
+      category: dimension
+      description: Identifies the given name of an individual selected for an all-star
+        event.
+      tags:
+      - Player Identity
+      - Roster Management
+      - All-Star Selection
+      profiling_metrics:
+        count: 1608
+        null_count: 0
+        distinct_count: 268
+        sample_data:
+        - Rashard
+        - Chris
+        - Hal
+        - Carlos
+        - Mo
+        - Lionel
+        - Dewitt
+        - Max
+        - Geoff
+        - Eddie
+    - name: season_id
+      type: date & time
+      category: dimension
+      description: Identifies the specific annual period during which the all-star
+        event participation is recorded.
+      tags:
+      - Season Tracking
+      - Historical Performance
+      - Event Timeline
+      profiling_metrics:
+        count: 1608
+        null_count: 0
+        distinct_count: 59
+        sample_data:
+        - '1959'
+        - '1989'
+        - '1969'
+        - '1987'
+        - '1995'
+        - '1976'
+        - '2000'
+        - '1997'
+        - '2008'
+        - '1988'
+    - name: conference
+      type: close_ended_text
+      category: dimension
+      description: Indicates the league grouping or division associated with a player's
+        selection for a special event.
+      tags:
+      - League Division
+      - Team Affiliation
+      - All-Star Selection Group
+      profiling_metrics:
+        count: 1608
+        null_count: 0
+        distinct_count: 5
+        sample_data:
+        - Weset
+        - West
+        - East
+        - Allstars
+        - Denver
+    - name: league_id
+      type: close_ended_text
+      category: dimension
+      description: Identifies the professional organization in which an all-star player
+        participated.
+      tags:
+      - League Classification
+      - Competition Organization
+      - Basketball Association
+      profiling_metrics:
+        count: 1608
+        null_count: 0
+        distinct_count: 2
+        sample_data:
+        - ABA
+        - NBA
+    - name: games_played
+      type: integer
+      category: measure
+      description: Indicates how many times an individual participated in all-star
+        events.
+      tags:
+      - Player Participation
+      - All-Star Game Appearance
+      - Career Milestone
+      profiling_metrics:
+        count: 1608
+        null_count: 0
+        distinct_count: 1
+        sample_data:
+        - '1'
+    - name: minutes
+      type: integer
+      category: measure
+      description: Indicates the total time a player participated in an all-star game.
+      tags:
+      - Player Participation
+      - Game Performance
+      - All-Star Event Metrics
+      profiling_metrics:
+        count: 1608
+        null_count: 0
+        distinct_count: 45
+        sample_data:
+        - '98'
+        - '30'
+        - '15'
+        - '32'
+        - '20'
+        - '21'
+        - '29'
+        - '10'
+        - '6'
+        - '7'
+    - name: points
+      type: integer
+      category: measure
+      description: Indicates the total number of scores achieved by a player during
+        an all-star event.
+      tags:
+      - Player Performance
+      - Scoring Metrics
+      - All-Star Game Statistics
+      profiling_metrics:
+        count: 1608
+        null_count: 47
+        distinct_count: 40
+        sample_data:
+        - '35.0'
+        - '25.0'
+        - '23.0'
+        - '20.0'
+        - '16.0'
+        - '11.0'
+        - '10.0'
+        - '5.0'
+        - '8.0'
+        - '12.0'
+    - name: o_rebounds
+      type: integer
+      category: measure
+      description: Shows the number of times a player retrieves the ball after an
+        opponent's missed shot during an all-star event.
+      tags:
+      - Offensive Rebounds
+      - Player Performance
+      - Game Statistics
+      profiling_metrics:
+        count: 1608
+        null_count: 1115
+        distinct_count: 10
+        sample_data:
+        - '3.0'
+        - '1.0'
+        - '8.0'
+        - '0.0'
+        - '4.0'
+        - '13.0'
+        - '5.0'
+        - '6.0'
+        - '2.0'
+        - '7.0'
+    - name: d_rebounds
+      type: integer
+      category: measure
+      description: Indicates the number of times a player retrieved the ball after
+        a missed shot during an all-star game.
+      tags:
+      - Player Performance Metrics
+      - Rebounding Statistics
+      - All-Star Game Analysis
+      profiling_metrics:
+        count: 1608
+        null_count: 1115
+        distinct_count: 14
+        sample_data:
+        - '10.0'
+        - '9.0'
+        - '11.0'
+        - '0.0'
+        - '5.0'
+        - '1.0'
+        - '2.0'
+        - '6.0'
+        - '4.0'
+        - '8.0'
+    - name: rebounds
+      type: integer
+      category: measure
+      description: Indicates the total number of times a player gained possession
+        of the ball after a missed shot during an all-star game.
+      tags:
+      - Player Performance
+      - Game Statistics
+      - All-Star Metrics
+      profiling_metrics:
+        count: 1608
+        null_count: 47
+        distinct_count: 27
+        sample_data:
+        - '0.0'
+        - '12.0'
+        - '6.0'
+        - '20.0'
+        - '8.0'
+        - '4.0'
+        - '15.0'
+        - '11.0'
+        - '9.0'
+        - '19.0'
+    - name: assists
+      type: integer
+      category: measure
+      description: Indicates how many times a player successfully passed the ball
+        to a teammate who then scored during an all-star game.
+      tags:
+      - Player Performance
+      - Game Statistics
+      - Team Playmaking
+      profiling_metrics:
+        count: 1608
+        null_count: 47
+        distinct_count: 19
+        sample_data:
+        - '7.0'
+        - '17.0'
+        - '14.0'
+        - '2.0'
+        - '13.0'
+        - '4.0'
+        - '10.0'
+        - '5.0'
+        - '9.0'
+        - '3.0'
+    - name: steals
+      type: integer
+      category: measure
+      description: Indicates how many times a player successfully took the ball away
+        from an opponent during an all-star game.
+      tags:
+      - Defensive Performance
+      - Player Statistics
+      - Game Impact Metrics
+      profiling_metrics:
+        count: 1608
+        null_count: 1210
+        distinct_count: 7
+        sample_data:
+        - '6.0'
+        - '0.0'
+        - '4.0'
+        - '5.0'
+        - '2.0'
+        - '1.0'
+        - '3.0'
+    - name: blocks
+      type: integer
+      category: measure
+      description: Shows the number of times a player prevented an opponent's shot
+        from scoring during all-star games.
+      tags:
+      - Defensive Performance
+      - Player Statistics
+      - Game Impact
+      profiling_metrics:
+        count: 1608
+        null_count: 1210
+        distinct_count: 6
+        sample_data:
+        - '1.0'
+        - '2.0'
+        - '0.0'
+        - '3.0'
+        - '4.0'
+        - '5.0'
+    - name: turnovers
+      type: integer
+      category: measure
+      description: Indicates the number of times a player lost possession of the ball
+        to the opposing team during an all-star game.
+      tags:
+      - Player Performance Metrics
+      - Ball Possession Losses
+      - Game Efficiency Analysis
+      profiling_metrics:
+        count: 1608
+        null_count: 1115
+        distinct_count: 9
+        sample_data:
+        - '5.0'
+        - '6.0'
+        - '4.0'
+        - '7.0'
+        - '3.0'
+        - '0.0'
+        - '1.0'
+        - '2.0'
+        - '8.0'
+    - name: personal_fouls
+      type: integer
+      category: measure
+      description: Indicates the total number of rule infractions committed by a player
+        during an All-Star game.
+      tags:
+      - Player Discipline
+      - Game Infractions
+      - Performance Metrics
+      profiling_metrics:
+        count: 1608
+        null_count: 1068
+        distinct_count: 8
+        sample_data:
+        - '5.0'
+        - '8.0'
+        - '1.0'
+        - '3.0'
+        - '6.0'
+        - '0.0'
+        - '4.0'
+        - '2.0'
+    - name: fg_attempted
+      type: integer
+      category: measure
+      description: Counts the number of field goal attempts made by a player during
+        an all-star event.
+      tags:
+      - Field Goal Attempts
+      - Player Performance Metrics
+      - Game Statistics
+      profiling_metrics:
+        count: 1608
+        null_count: 47
+        distinct_count: 28
+        sample_data:
+        - '27.0'
+        - '17.0'
+        - '2.0'
+        - '3.0'
+        - '4.0'
+        - '24.0'
+        - '18.0'
+        - '1.0'
+        - '20.0'
+        - '9.0'
+    - name: fg_made
+      type: integer
+      category: measure
+      description: Indicates how many shots were successfully made by a player during
+        an all-star game.
+      tags:
+      - Field Goals Made
+      - Player Performance
+      - Scoring Statistics
+      profiling_metrics:
+        count: 1608
+        null_count: 47
+        distinct_count: 18
+        sample_data:
+        - '0.0'
+        - '4.0'
+        - '12.0'
+        - '13.0'
+        - '17.0'
+        - '14.0'
+        - '11.0'
+        - '6.0'
+        - '2.0'
+        - '9.0'
+    - name: ft_attempted
+      type: integer
+      category: measure
+      description: Shows how many times a player tried to score points from free throw
+        opportunities during an all-star event.
+      tags:
+      - Free Throw Performance
+      - Player Scoring Opportunities
+      - All-Star Game Statistics
+      profiling_metrics:
+        count: 1608
+        null_count: 47
+        distinct_count: 17
+        sample_data:
+        - '5.0'
+        - '15.0'
+        - '10.0'
+        - '7.0'
+        - '16.0'
+        - '11.0'
+        - '0.0'
+        - '3.0'
+        - '8.0'
+        - '4.0'
+    - name: ft_made
+      type: integer
+      category: measure
+      description: Counts how many successful free throws a player makes during an
+        all-star event.
+      tags:
+      - Free Throws Made
+      - Player Scoring Performance
+      - All-Star Game Statistics
+      profiling_metrics:
+        count: 1608
+        null_count: 47
+        distinct_count: 13
+        sample_data:
+        - '1.0'
+        - '8.0'
+        - '3.0'
+        - '11.0'
+        - '12.0'
+        - '7.0'
+        - '4.0'
+        - '5.0'
+        - '10.0'
+        - '6.0'
+    - name: three_attempted
+      type: integer
+      category: measure
+      description: Shows the total number of long-range shot attempts made by a player
+        during an all-star event.
+      tags:
+      - Three-Point Shooting Performance
+      - Player Offensive Metrics
+      - Game Strategy Analysis
+      profiling_metrics:
+        count: 1608
+        null_count: 1068
+        distinct_count: 12
+        sample_data:
+        - '2.0'
+        - '7.0'
+        - '5.0'
+        - '6.0'
+        - '10.0'
+        - '8.0'
+        - '1.0'
+        - '4.0'
+        - '9.0'
+        - '0.0'
+    - name: three_made
+      type: integer
+      category: measure
+      description: Indicates the number of successful long-range shots made by a participant
+        during an all-star event.
+      tags:
+      - Three-Point Shooting
+      - Player Performance
+      - Game Statistics
+      profiling_metrics:
+        count: 1608
+        null_count: 1042
+        distinct_count: 7
+        sample_data:
+        - '2.0'
+        - '3.0'
+        - '6.0'
+        - '0.0'
+        - '4.0'
+        - '1.0'
+        - '5.0'
+    profiling_metrics:
+      count: 1608
+    key:
+      columns:
+      - playerid
+      - season_id
+      - conference
+      - league_id
+      distinct_count: 1608
+    source_last_modified: 1763109787.120619
