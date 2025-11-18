@@ -1,0 +1,68 @@
+[project]
+name = "mcp-csv-postgres"
+version = "0.1.0"
+description = "MCP server to load CSV files to PostgreSQL with validation and progress tracking"
+readme = "README.md"
+authors = [
+    { name = "Ravi Ramadoss", email = "ravi.ramadoss@protonmail.com" }
+]
+license = { text = "MIT" }
+keywords = ["mcp", "csv", "postgresql", "database", "loader", "model-context-protocol"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Database",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1.0.0",
+    "psycopg2-binary>=2.9.9",
+    "tqdm>=4.66.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/raviramadoss/mcp-csv-postgres"
+Repository = "https://github.com/raviramadoss/mcp-csv-postgres"
+Issues = "https://github.com/raviramadoss/mcp-csv-postgres/issues"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.23.0",
+    "pre-commit>=3.5.0",
+]
+
+[project.scripts]
+mcp-csv-postgres = "mcp_csv_postgres.server:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "--cov=src/mcp_csv_postgres --cov-report=term-missing --cov-report=html --cov-branch --cov-fail-under=90"
+
+[tool.coverage.run]
+branch = true
+source = ["src/mcp_csv_postgres"]
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.7,<0.10.0"]
+build-backend = "uv_build"
