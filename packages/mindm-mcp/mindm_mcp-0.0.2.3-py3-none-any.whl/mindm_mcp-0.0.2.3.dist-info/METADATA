@@ -1,0 +1,327 @@
+Metadata-Version: 2.4
+Name: mindm_mcp
+Version: 0.0.2.3
+Summary: Model Context Protocol (MCP) server for the mindm library, enabling AI assistants like Claude to interact with MindManager.
+Author: Robert Zaufall
+Project-URL: Homepage, https://github.com/robertZaufall/mindm-mcp
+Project-URL: Bug Tracker, https://github.com/robertZaufall/mindm-mcp/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: MacOS :: MacOS X
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: mindm>=0.0.5.3
+Requires-Dist: uvicorn>=0.22.0
+Requires-Dist: aiohttp>=3.8.4
+Requires-Dist: pydantic>=1.10.7
+Requires-Dist: websockets>=10.4
+Requires-Dist: fastmcp>=0.4.1
+Requires-Dist: mcp[cli]>=1.6.0
+Requires-Dist: build>=1.2.2.post1
+Dynamic: license-file
+
+# MindManager MCP Server
+
+A Model Context Protocol (MCP) server implementation for the `mindm` library, providing a standardized interface to interact with MindManager on Windows and macOS.  
+
+[![PyPI version](https://img.shields.io/pypi/v/mindm-mcp.svg?label=pypi%20(mindm-mcp)&style=for-the-badge&color=blue)](https://pypi.org/project/mindm-mcp/)
+[![PyPI version](https://img.shields.io/pypi/v/mindm.svg?label=pypi%20(mindm)&style=for-the-badge&color=lightblue)](https://pypi.org/project/mindm/)
+
+## Overview
+
+This server allows you to programmatically interact with MindManager through the Model Context Protocol (MCP), a standardized way to provide context and tools to LLMs. It leverages the `mindm` library to manipulate MindManager documents, topics, relationships, and other mindmap elements.
+
+### Animated examples (using Codex in VSCode on Windows)
+
+- Example
+Refining a single topic including tags, icons for the new topics: 
+
+_get the current Mindmanager mindmap as mermaid (full), refine the given topics at least two levels deep (not just topics), add a tag "Important" to the 3 top most important topics and add corresponding stock icons to every topic but the central topic and create the new MindManager mindmap_
+
+![MindManager MCP in Codex](assets/refine_map_anim2.gif) 
+ 
+- Example
+Refining a single topic including generating text in notes for the new topics: 
+![MindManager MCP in Codex](assets/refine_map_anim.gif) 
+
+- Example
+Cloning a map including all supported topic properties:
+![MindManager MCP in Codex](assets/clone_map_anim.gif) 
+ 
+## Other examples
+
+### Client
+
+`get the current MindManager mindmap, translate every topic to German and create a new MindManager mindmap (simple).` 
+ 
+`get the current MindManager mindmap, refine each topic 2 levels and create a new MindManager mindmap (simple).` 
+
+### Shell:
+
+`codex exec "get the current MindManager mindmap, add a meaningful emoji to every topic and create new MindManager mindmap (simple)"` 
+
+_remark: emojis only work on macOS._ 
+
+## Features
+
+- Retrieve mindmap structure and central topics
+- Export mindmaps to Mermaid, Markdown, JSON formats to be used in LLM chats
+- Create MindManager mindmaps directly from Mermaid (full or simplified syntax)
+- Fetch MindManager and package versions for quick diagnostics
+- Get information about MindManager installation and library folders
+- Get current selection from MindManager
+
+## Planned Features
+
+- Add, modify, and manipulate topics and subtopics without Mermaid roundtrips
+- Add relationships between topics
+- Add tags to topics
+- Set document background images
+
+## Requirements
+
+- Python 3.12 or higher
+- `mcp` package (Model Context Protocol SDK)
+- `mindm` library (included in this project)
+- MindManager (supported versions: 23-) installed on Windows or macOS
+
+## Installation macOS
+
+```bash
+# Clone the repository (if you're using it from a repository)
+git clone https://github.com/robertZaufall/mindm-mcp.git
+cd mindm-mcp
+
+# create a virtual environment for Python
+brew install uv # if needed
+uv pip install -r pyproject.toml
+
+# alternative: manual installation of modules
+uv add "mcp[cli]"
+uv add fastmcp
+uv add markdown-it-py
+uv add -U --index-url=https://test.pypi.org/simple/ --extra-index-url=https://pypi.org/simple/ mindm mindm-mcp
+```
+
+## Installation Windows
+
+```bash
+# Change to DOS command prompt
+cmd
+
+# Clone the repository (if you're using it from a repository)
+git clone https://github.com/robertZaufall/mindm-mcp.git
+cd mindm-mcp
+
+# create a virtual environment for Python
+pip install uv # if needed
+uv pip install -r pyproject.toml
+
+# install nodejs
+choco install nodejs # if you have chocolatey installed. If not install nodejs otherwise
+refreshenv
+node -v
+npm install -g npx
+```
+
+## Usage
+
+### MCP inspector
+
+```bash
+# run mcp with inspector
+uv run --with mind --with fastmcp --with markdown-it-py mcp dev mindm_mcp/server.py
+```
+
+### Claude Desktop
+
+#### Local python file
+
+Adjust the path for the local file as needed.
+```json
+{
+  "mcpServers": {
+    "mindm (MindManager)": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--with",
+        "mindm>=0.0.5.3",
+        "--with",
+        "fastmcp",
+        "--with",
+        "markdown-it-py",
+        "/Users/master/git/mindm-mcp/mindm_mcp/server.py"
+      ]
+    }
+  }
+}
+```
+
+#### Module from package repository
+
+Adjust `VIRTUAL_ENV` as needed.
+```json
+{
+    "mcpServers": {
+      "mindm (MindManager)": {
+        "command": "uv",
+        "args": [
+          "run",
+          "--with",
+          "mindm>=0.0.5.3",
+          "--with",
+          "mindm-mcp>=0.0.2.1",
+          "--with",
+          "fastmcp",
+          "--with",
+          "markdown-it-py",
+          "-m",
+          "mindm_mcp.server"
+        ],
+        "env": {
+            "VIRTUAL_ENV": "/Users/master/git/mindm-mcp/.venv"
+        }
+      }
+  }
+}
+```
+
+Hint: If the MCP server does not show up with the hammer icon on Windows, close Claude Desktop and kill all background processes.  
+
+### Codex (VSCode Extension / CLI)
+
+#### Local python file
+
+`config.toml` (adjust the path for the local file as needed).
+```
+[features]
+rmcp_client = true
+
+[mcp_servers.mindmanager]
+command = "uv"
+args = ["run", "--with", "mindm>=0.0.5.3", "--with", "fastmcp", "--with", "markdown-it-py", "/Users/master/git/mindm-mcp/mindm_mcp/server.py"]
+
+```
+
+#### Module from package repository
+
+`config.toml` 
+```
+[features]
+rmcp_client = true
+
+[mcp_servers.mindmanager]
+command = "uv"
+args = ["run", "--with", "mindm>=0.0.5.3", "--with", "fastmcp", "--with", "markdown-it-py", "--with", "mindm-mcp>=0.0.2.1", "-m", "mindm_mcp.server"]
+
+```
+
+### VSCode Chat (GitHub Copilot)
+
+#### Local python file:
+
+Adjust the path for the local file as needed.
+```
+uv run --with mindm>=0.0.5.3 --with fastmcp --with markdown-it-py /Users/master/git/mindm-mcp/mindm_mcp/server.py
+```
+ 
+or server definition in `mcp.json`:
+```
+		"Mindmanager": {
+			"type": "stdio",
+			"command": "uv",
+			"args": [
+				"run",
+				"--with",
+				"mindm>=0.0.5.3",
+				"--with",
+				"fastmcp",
+				"--with",
+				"markdown-it-py",
+				"/Users/master/git/mindm-mcp/mindm_mcp/server.py"
+			]
+		}
+```
+
+#### Module from package repository
+
+```
+uv run --with mindm>=0.0.5.3 --with fastmcp --with markdown-it-py --with mindm-mcp>=0.0.2.1 -m mindm_mcp.server
+```
+
+or server definition in `mcp.json`:
+```
+		"Mindmanager": {
+			"type": "stdio",
+			"command": "uv",
+			"args": [
+				"run",
+				"--with",
+				"mindm>=0.0.5.3",
+				"--with",
+				"fastmcp",
+				"--with",
+				"markdown-it-py",
+				"--with",
+				"mindm-mcp>=0.0.2.1",
+				"-m",
+				"mindm_mcp.server"
+			]
+		}
+```
+
+## MCP Tools
+
+The server exposes the following tools through the Model Context Protocol:
+
+### Document Interaction
+- `get_mindmap`: Retrieves the current mindmap structure from MindManager
+- `get_selection`: Retrieves the currently selected topics in MindManager
+- `get_library_folder`: Gets the path to the MindManager library folder
+- `get_mindmanager_version`: Gets the installed MindManager version
+- `get_grounding_information`: Extracts grounding information (central topic, selected subtopics) from the mindmap
+
+### Serialization
+- `serialize_current_mindmap_to_mermaid`: Serializes the currently loaded mindmap to Mermaid format
+- `serialize_current_mindmap_to_markdown`: Serializes the currently loaded mindmap to Markdown format
+- `serialize_current_mindmap_to_json`: Serializes the currently loaded mindmap to a detailed JSON object with ID mapping
+
+### Creation
+- `create_mindmap_from_mermaid`: Build a MindManager map from Mermaid (full syntax with IDs and metadata)
+- `create_mindmap_from_mermaid_simple`: Build a MindManager map from simplified Mermaid text
+
+### Versioning
+- `get_versions`: Returns the `mindm-mcp` and `mindm` package versions for debugging
+
+## Platform Support
+
+- **Windows**: Full support for topics, notes, icons, images, tags, links, relationships, and RTF formatting
+- **macOS**: Support for topics, notes, and relationships (limited support compared to Windows)
+
+## Integration with Claude and other LLMs
+
+This MCP server can be installed in Claude Desktop or other MCP-compatible applications, allowing LLMs to:
+
+1. Access mindmap content
+2. Manipulate mindmaps (coming)
+3. Create new mindmaps based on LLM-generated content (coming)
+
+## Troubleshooting
+
+- Ensure MindManager is running before starting the server
+- For macOS, make sure you allow Claude Desktop to automate MindManager
+
+## MCPHub
+
+[Certified on MCPHub](https://mcphub.com/mcp-servers/robertZaufall/mindm-mcp)
+
+## Acknowledgements
+
+This project is built upon the `mindm` library, providing Python interfaces to MindManager on Windows and macOS platforms. It uses the Model Context Protocol (MCP) SDK developed by Anthropic.
+
+## License
+
+MIT License - See LICENSE file for details
