@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "unsplash-lite-dataset-api"
+version = "0.1.1"
+description = "Utilities for building and querying an Unsplash-style OpenSearch index"
+readme = "README.md"
+authors = [{ name = "Baneet" }]
+requires-python = ">=3.9"
+dependencies = [
+    "python-dotenv>=1.0",
+    "psycopg2-binary>=2.9",
+    "opensearch-py>=2.4",
+    "requests-aws4auth>=1.2",
+    "nltk>=3.8",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+]
+
+[project.scripts]
+unsplash-lite-dataset-api = "unsplash_lite_dataset_api.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
