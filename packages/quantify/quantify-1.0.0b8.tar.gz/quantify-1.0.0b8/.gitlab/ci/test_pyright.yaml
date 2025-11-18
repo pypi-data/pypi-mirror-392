@@ -1,0 +1,33 @@
+pyright:
+  extends: .pip_cache_template
+  stage: Test
+  image: $CI_IMAGE
+  needs:
+    - job: build-ci-image
+    - job: build-package
+      artifacts: true
+  rules:
+    # Release tags
+    - if: '$CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+((rc|a|b)[0-9]+)?$/'
+      when: on_success
+
+    # Default branch
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: on_success
+
+    # MRs (conditional, only when relevant files change)
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - "**/*.py"
+        - "**/*.pyi"
+        - "pyproject.toml"
+        - "pyrightconfig.json"
+  variables:
+    PYRIGHT_PYTHON_FORCE_NODEENV: "0"
+  before_script:
+    - mkdir -p .cache/pip
+    - python -m pip install -U "pip==25.3" "setuptools==80.9.0" "wheel==0.45.1"
+    - python -m pip install dist/*.whl
+    - python -m pip install "pyright>=1.1.407"
+  script:
+    - pyright --project pyrightconfig.json
