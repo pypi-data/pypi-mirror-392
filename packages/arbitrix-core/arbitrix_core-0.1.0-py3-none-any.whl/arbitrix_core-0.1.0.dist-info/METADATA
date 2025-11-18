@@ -1,0 +1,53 @@
+Metadata-Version: 2.1
+Name: arbitrix-core
+Version: 0.1.0
+Summary: Open-core toolkit for Arbitrix backtesting, strategies, and cost models.
+Author: Arbitrix Team
+Keywords: backtesting,trading,quant,strategies
+Classifier: License :: Other/Proprietary License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Intended Audience :: Financial and Insurance Industry
+Classifier: Topic :: Office/Business :: Financial :: Investment
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: numpy>=1.23
+Requires-Dist: pandas>=1.5
+Requires-Dist: scipy>=1.9
+Requires-Dist: typing-extensions>=4.5
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: python-dateutil; extra == "dev"
+Provides-Extra: ib
+Requires-Dist: ib-insync>=0.9; extra == "ib"
+Provides-Extra: mt5
+Requires-Dist: rpyc>=6.0; extra == "mt5"
+
+# Arbitrix Core
+
+`arbitrix-core` is the open-source subset of Arbitrix that contains the
+backtesting engine, strategy abstractions, technical indicators, and cost
+models required to run local research workflows.
+
+## Installation
+
+```bash
+python -m pip install arbitrix-core
+# optional extras
+python -m pip install 'arbitrix-core[ib]'
+```
+
+## Quick start
+
+```python
+from arbitrix.core.backtest import Backtester, BTConfig
+from arbitrix.core.strategies.base import BaseStrategy, Signal
+
+cfg = BTConfig()
+bt = Backtester(cfg)
+```
+
+See the main repository's documentation under `docs/` for end-to-end guides,
+including CSV backtest and moving-average crossover examples that are mirrored
+under `open-core/examples/`.
