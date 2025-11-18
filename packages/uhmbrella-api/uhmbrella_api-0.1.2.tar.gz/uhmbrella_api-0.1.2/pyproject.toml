@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "uhmbrella-api"
+version = "0.1.2"
+description = "Uhmbrella AIMD - client SDK and CLI for the Uhmbrella AI music detection API."
+authors = [
+  { name = "Uhmbrella", email = "hello@uhmbrella.io" }
+]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "requests>=2.31.0",
+  "tqdm>=4.66.0",
+]
+
+[project.scripts]
+uhmbrella-api = "uhmbrella_api_sdk.cli:main"
+
+[project.urls]
+Homepage = "https://uhmbrella.io"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
