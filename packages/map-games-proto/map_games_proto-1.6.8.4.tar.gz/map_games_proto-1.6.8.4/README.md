@@ -1,0 +1,189 @@
+# Map Games Proto: A Framework for Reinforcement Learning in Games
+
+[![Original Project](https://img.shields.io/badge/forked%20from-OpenSpiel-blue)](https://github.com/deepmind/open_spiel)
+
+**Map Games Proto** is a fork of OpenSpiel, maintained by LogitGames. This package is available on PyPI as `map-games-proto`.
+
+OpenSpiel is a collection of environments and algorithms for research in general
+reinforcement learning and search/planning in games. OpenSpiel supports n-player
+(single- and multi- agent) zero-sum, cooperative and general-sum, one-shot and
+sequential, strictly turn-taking and simultaneous-move, perfect and imperfect
+information games, as well as traditional multiagent environments such as
+(partially- and fully- observable) grid worlds and social dilemmas. OpenSpiel
+also includes tools to analyze learning dynamics and other common evaluation
+metrics. Games are represented as procedural extensive-form games, with some
+natural extensions. The core API and games are implemented in C++ and exposed to
+Python. Algorithms and tools are written both in C++ and Python.
+
+## Installation
+
+Install from PyPI:
+```bash
+pip install map-games-proto
+```
+
+Note: The package is installed as `map-games-proto` but imported as `open_spiel`:
+```python
+import open_spiel
+```
+
+<p align="center">
+  <img src="docs/_static/OpenSpielB.png" alt="OpenSpiel visual asset">
+</p>
+
+# Index
+
+Please choose among the following options:
+
+*   [Installing OpenSpiel](docs/install.md)
+*   [Introduction to OpenSpiel](docs/intro.md)
+*   [API Overview and First Example](docs/concepts.md)
+*   [API Reference](docs/api_reference.md)
+*   [Overview of Implemented Games](docs/games.md)
+*   [Overview of Implemented Algorithms](docs/algorithms.md)
+*   [Developer Guide](docs/developer_guide.md)
+*   [Using OpenSpiel as a C++ Library](docs/library.md)
+*   [Guidelines and Contributing](docs/contributing.md)
+*   [Authors](docs/authors.md)
+
+For a longer introduction to the core concepts, formalisms, and terminology,
+including an overview of the algorithms and some results, please see
+[OpenSpiel: A Framework for Reinforcement Learning in Games](https://arxiv.org/abs/1908.09453).
+
+For an overview of OpenSpiel and example uses of the core API, please check out
+our tutorials:
+
+*   [Motivation, Core API, Brief Intro to Replictor Dynamics and Imperfect
+    Information Games](https://www.youtube.com/watch?v=8NCPqtPwlFQ) by Marc
+    Lanctot.
+    [(slides)](http://mlanctot.info/files/OpenSpiel_Tutorial_KU_Leuven_2022.pdf)
+    [(colab)](https://colab.research.google.com/github/deepmind/open_spiel/blob/master/open_spiel/colabs/OpenSpielTutorial.ipynb)
+*   [Motivation, Core API, Implementing CFR and REINFORCE on Kuhn poker, Leduc
+    poker, and Goofspiel](https://www.youtube.com/watch?v=o6JNHoGUXCo) by Edward
+    Lockhart.
+    [(slides)](http://mlanctot.info/files/open_spiel_tutorial-mar2021-comarl.pdf)
+    [(colab)](https://colab.research.google.com/github/deepmind/open_spiel/blob/master/open_spiel/colabs/CFR_and_REINFORCE.ipynb)
+
+## Citation
+
+This project is forked from OpenSpiel. If you use this framework in your research, please cite the original OpenSpiel paper:
+
+```bibtex
+@article{LanctotEtAl2019OpenSpiel,
+  title     = {{OpenSpiel}: A Framework for Reinforcement Learning in Games},
+  author    = {Marc Lanctot and Edward Lockhart and Jean-Baptiste Lespiau and
+               Vinicius Zambaldi and Satyaki Upadhyay and Julien P\'{e}rolat and
+               Sriram Srinivasan and Finbarr Timbers and Karl Tuyls and
+               Shayegan Omidshafiei and Daniel Hennes and Dustin Morrill and
+               Paul Muller and Timo Ewalds and Ryan Faulkner and J\'{a}nos Kram\'{a}r
+               and Bart De Vylder and Brennan Saeta and James Bradbury and David Ding
+               and Sebastian Borgeaud and Matthew Lai and Julian Schrittwieser and
+               Thomas Anthony and Edward Hughes and Ivo Danihelka and Jonah Ryan-Davis},
+  year      = {2019},
+  eprint    = {1908.09453},
+  archivePrefix = {arXiv},
+  primaryClass = {cs.LG},
+  journal   = {CoRR},
+  volume    = {abs/1908.09453},
+  url       = {http://arxiv.org/abs/1908.09453},
+}
+```
+
+## Original Repository
+
+This is a fork of the original [OpenSpiel repository](https://github.com/deepmind/open_spiel) by DeepMind.
+
+## Versioning
+
+We use [Semantic Versioning](https://semver.org/).
+
+## Next
+- Make CC analogs of these classes:
+class DeckStatus(PClass):
+idx = field(type=int)
+uuid = field(type=str)
+faceup_stack = field(type=(FaceupCardStack, type(None)), initial=None)
+faceup_spread = field(type=(FaceupCardSpread, type(None)), initial=None)
+facedown_stack = field(type=(FacedownCardStack, type(None)), initial=None)
+facedown_spread = field(type=(FacedownCardSpread, type(None)), initial=None)
+discard_faceup_stack = field(type=(FaceupCardStack, type(None)), initial=None)
+discard_facedown_stack = field(type=(FacedownCardStack, type(None)), initial=None)
+
+## The command to run the tests is:
+
+python open_spiel/python/tests/games_interstate_test.py
+
+You can also run specific test methods if you want:
+
+# Run just one test
+python open_spiel/python/tests/games_interstate_test.py GamesInterstateTest.test_default_parameters
+
+# Run with verbose output
+python open_spiel/python/tests/games_interstate_test.py --verbose
+
+If you want to run all Python tests in the test suite, you could do:
+
+# Run all tests (if you have pytest installed)
+pytest open_spiel/python/tests/
+
+# Or run all game tests matching a pattern
+python -m unittest discover open_spiel/python/tests/ "games_*_test.py"
+
+The test uses absltest which is Google's testing framework, so it can be run directly as a Python script as shown above.
+
+##  When you encounter a build error like "No rule to make target", follow these steps:
+
+1. Try running make games directly from the build directory:
+cd /Users/jh/Projects/map_games_proto/build
+make games
+1. This often resolves stale build state issues.
+2. If that doesn't work, try a clean rebuild:
+cd /Users/jh/Projects/map_games_proto/build
+rm -rf games/CMakeFiles/games.dir/interstate/*
+make games
+3. For more serious issues, do a full clean and reconfigure:
+cd /Users/jh/Projects/map_games_proto/build
+rm -rf *
+cmake ../open_spiel
+make games
+4. Use the build script from the project root:
+cd /Users/jh/Projects/map_games_proto
+./open_spiel/scripts/build_only.sh interstate
+
+
+## Quick Rebuild and Test Commands:
+
+Single command chain:
+./open_spiel/scripts/build_only.sh interstate && pip install -e . --no-build-isolation && python open_spiel/python/tests/games_interstate_test.py
+
+Or broken down:
+
+1. Rebuild just the interstate game (fastest C++ build):
+./open_spiel/scripts/build_only.sh interstate
+2. Update Python bindings (development install):
+pip install -e . --no-build-isolation
+3. Run the test:
+python open_spiel/python/tests/games_interstate_test.py
+
+Even Faster (if you're iterating):
+
+After the first build, you can often skip the pip install step if you're only changing C++ implementation (not headers or interfaces):
+
+./open_spiel/scripts/build_only.sh interstate && python open_spiel/python/tests/games_interstate_test.py
+
+This typically takes less than 10 seconds for rebuilding just the interstate game and running the tests!
+
+
+## Most Common Commands
+
+./open_spiel/scripts/build_only.sh interstate
+./build/examples/console --game=interstate
+python open_spiel/python/tests/games_interstate_test.py
+./open_spiel/scripts/buildpiptest.sh interstate
+./open_spiel/scripts/buildtest.sh interstate
+
+
+## TODO:
+- Figure out how to enumerate (or assign action indices) to all the ways that someone can claim a path. Maybe it means discrete actions for selecting resources? There needs to be some 1-n translation of web-site actions to granular game actions.
+- Figure out "MaxChanceOutcomes" for InterstateGame.
+- Finish implementing "DoApplyAction" for the Faceup Spot Actions
