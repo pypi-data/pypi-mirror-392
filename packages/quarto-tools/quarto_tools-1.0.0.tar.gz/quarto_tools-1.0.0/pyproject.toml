@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quarto-tools"
+dynamic = ["version"]
+description = "Utilities for working with Quarto projects (PDF TOC, trimmed BibTeX file, cross-reference audit.)"
+authors = [{name = "Stephen J Mildehall", email = "mynl@me.com" }]
+readme = {file = "README.md", content-type = "text/markdown"}
+requires-python = ">=3.13"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = [
+  "pandas>=2.2",
+  "greater-tables"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8",
+  "ruff>=0.5",
+]
+
+[project.urls]
+Homepage = "https://github.com/mynl/quarto_tools_project"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.dynamic]
+version = { attr = "quarto_tools.__version__" }
+
+[project.scripts]
+qt = "quarto_tools.cli:entry"
