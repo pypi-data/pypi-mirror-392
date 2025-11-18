@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "extracta"
+version = "0.2.2"
+description = "Modular content analysis platform for research, assessment, and academic integrity checking"
+authors = [{name = "Michael Borck", email = "michael@borck.dev"}]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.1.0",
+    "pydantic>=2.5.0",
+    "httpx>=0.25.0",
+]
+
+[project.optional-dependencies]
+audio = ["faster-whisper>=1.0.0", "librosa>=0.10.0"]
+video = ["opencv-python>=4.8.0", "ffmpeg-python>=0.2.0", "pydantic>=2.5.0"]
+text = ["spacy>=3.7.0", "nltk>=3.8.0", "textstat>=0.7.0"]
+image = ["pillow>=10.0.0", "torch>=2.0.0", "pytesseract>=0.3.0"]
+code = ["radon>=6.0.0", "ruff>=0.1.0", "ast>=3.8"]
+api = ["fastapi>=0.104.0", "uvicorn[standard]>=0.24.0"]
+documents = ["PyPDF2>=3.0.0", "pdfplumber>=0.10.0", "python-docx>=1.1.0"]
+presentations = ["python-pptx>=0.6.0", "PyMuPDF>=1.23.0"]
+conversation = ["google-generativeai>=0.3.0"]
+openai = ["openai>=1.0.0"]
+claude = ["anthropic>=0.7.0"]
+openrouter = ["openai>=1.0.0"]  # Uses OpenAI client with different base URL
+enhanced = ["extracta[text,documents,presentations]"]
+dev = ["mypy>=1.5.0", "pytest>=7.4.0", "pytest-cov>=4.1.0"]
+all = ["extracta[audio,video,text,image,code,api,documents,presentations,conversation,openai,claude,openrouter]"]
+
+[project.scripts]
+extracta = "extracta.cli:main"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 88
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
