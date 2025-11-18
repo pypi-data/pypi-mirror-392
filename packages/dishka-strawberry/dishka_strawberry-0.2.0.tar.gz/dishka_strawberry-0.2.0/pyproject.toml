@@ -1,0 +1,92 @@
+[project]
+name = "dishka-strawberry"
+version = "0.2.0"
+description = "Dishka integration for Strawberry"
+readme = "README.md"
+authors = [
+    { name = "Andrey Ryadovoy", email = "ryav.omsk@gmail.com" }
+]
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Libraries",
+    "Typing :: Typed",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "dishka>=1.4.0",
+    "strawberry-graphql>=0.263.0",
+]
+
+[project.urls]
+"Source" = "https://github.com/aryadovoy/dishka-strawberry"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/dishka_strawberry"]
+
+[dependency-groups]
+dev = [
+    "commitizen>=4.10.0",
+    "pre-commit>=4.4.0",
+    "pyright>=1.1.407",
+    "ruff>=0.14.5",
+]
+test = [
+    "asgi-lifespan>=2.1.0",
+    "fastapi>=0.121.2",
+    "httpx>=0.28.1",
+    "pytest>=9.0.1",
+    "pytest-asyncio>=1.3.0",
+]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "$version"
+version_scheme = "pep440"
+version_provider = "pep621"
+update_changelog_on_bump = true
+major_version_zero = true
+version_files = [
+    "src/dishka_strawberry/__init__.py",
+    "pyproject.toml:version"
+]
+
+[tool.ruff]
+target-version = "py310"
+src = ["src", "tests"]
+line-length = 79
+
+[tool.ruff.lint]
+select = [
+    "E",        # pycodestyle errors
+    "F",        # pyflakes errors (unused imports, variables, etc.)
+    "I",        # isort import sorting
+    "SIM",      # flake8-simplify
+    "ARG",      # flake8-unused-arguments
+    "T20",      # flake8-print (print statements)
+    "Q",        # flake8-quotes
+    "N",        # pep8-naming
+    "ANN",      # flake8-annotations
+    "RET",      # flake8-return
+    "PT",       # flake8-pytest-style
+    "C4",       # flake8-comprehensions
+    "C90",      # mccabe complexity
+]
+ignore = [
+    "ANN002",   # type annotation for *args
+    "ANN003",   # type annotation for **kwargs
+]
+
+[tool.pyright]
+typeCheckingMode = "basic"

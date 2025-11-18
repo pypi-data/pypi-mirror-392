@@ -1,0 +1,29 @@
+repos:
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: "v0.14.5"
+    hooks:
+    - id: ruff
+      args: ["--config", "pyproject.toml", "--fix-only", "--show-fixes"]
+    - id: ruff-format
+
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: "v4.10.0"
+    hooks:
+    - id: commitizen
+      stages: [commit-msg]
+    - id: commitizen-branch
+      stages: [pre-push]
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: "v8.29.0"
+    hooks:
+      - id: gitleaks
+        name: gitleaks
+
+  - repo: local
+    hooks:
+      - id: pyright
+        name: pyright
+        entry: pyright
+        language: system
+        types: [python]
