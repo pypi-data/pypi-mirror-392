@@ -1,0 +1,155 @@
+[project]
+name = "imvf"
+version = "0.1.1"
+description = "Image Visualization and Feature Extraction Library"
+readme = "README.md"
+requires-python = ">=3.10,<4.0"
+license = {text = "MIT"}
+keywords = ['image_processing', 'feature_extraction', 'visualization']
+authors = [
+    {name = "chatflip", email = "oo.chat.flip@gmail.com"}
+]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Education",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+]
+
+dependencies = [
+    "numpy",
+    "opencv-python",
+    "pydantic>=2.0.0",
+    "scikit-image",
+]
+
+[dependency-groups]
+dev = [
+    "pre-commit",
+]
+lint = [
+    "ruff==0.14.4", 
+    "ty>=0.0.1a25",
+]
+test = [
+    "pytest",
+    "pytest-cov",
+]
+docs = [
+    "mkdocs>=1.6.1",
+    "mkdocs-glightbox>=0.4.0",
+    "mkdocs-material[imaging]>=9.5.45",
+    "mkdocstrings-python>=1.12.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/chatflip/ImgVisFeat"
+Repository = "https://github.com/chatflip/ImgVisFeat"
+Documentation = "https://chatflip.github.io/ImgVisFeat"
+Issues = "https://github.com/chatflip/ImgVisFeat/issues"
+
+[project.scripts]
+ivf = "imgvisfeat.cli:main"
+
+[tool.uv]
+default-groups = []
+
+[tool.ruff]
+target-version = "py310"
+
+# Set the maximum line length to 88.
+line-length = 88
+
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+select = ["C", "E", "F", "I", "W", "D"]
+ignore = ["D100"]
+
+extend-select = []
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = ["B"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ty.src]
+include = ["src", "tests"]
+
+[tool.ty.terminal]
+error-on-warning = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = [
+    "--cov=./",
+    "--cov-report=xml",
+    "--verbose",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["src/imvf"]
+omit = [
+    "config.py",
+    "config-3.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 80
+omit = ["tests/*"]
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.markdown.lint]
+default = true
+MD004 = false    # ul-style - Unordered list style
+MD007.indent = 2 # ul-indent - Unordered list indentation
+MD013 = false    # line-length - Line length
+MD029 = false    # ol-prefix - Ordered list item prefix
+MD033 = false    # no-inline-html Inline HTML
+MD041 = false    # first-line-heading/first-line-h1
+MD046 = false    # indented-code-blocks
+MD059 = false    # descriptive-link-text
+
+[build-system]
+requires = ["uv_build>=0.9.7,<0.10.0"]
+build-backend = "uv_build"
