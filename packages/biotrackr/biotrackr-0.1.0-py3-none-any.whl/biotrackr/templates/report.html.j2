@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bioinformatics Watchdog – Weekly Digest</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; color: #333; }
+        h1 { color: #336699; }
+        h2 { border-bottom: 2px solid #ccc; padding-bottom: 5px; }
+        ul { list-style-type: none; padding: 0; }
+        li { 
+            margin: 15px 0;            /* increase spacing between li */
+            position: relative;
+            padding-left: 15px;        /* space for the dash */
+        }
+        li::before { 
+            content: "-";              /* add dash at the beginning */
+            position: absolute;
+            left: 0;
+            color: #333;
+        }
+        a { color: #0066cc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .section { margin-bottom: 40px; }
+    </style>
+</head>
+<body>
+    <h1>Bioinformatics Watchdog 🧬</h1>
+    <p>Generated on {{ date }}</p>
+
+    {% if papers %}
+    <div class="section">
+        <h2>📄 New Papers</h2>
+        <ul>
+            {% for p in papers %}
+            <li><b>{{ p.title }}</b> – published on {{ p.published_on.strftime("%Y-%m-%d") }}
+                {% if p.url %}<a href="{{ p.url }}" target="_blank">Read</a>{% endif %}
+                {% for kw in p.keywords %}
+                    <span style="background-color: {{ kw.color }};
+                                 border-radius: 5px;
+                                 color: white;
+                                 padding: 2px 6px;
+                                 margin-left: 5px;
+                                 font-size: 0.8em;">
+                        {{ kw.name }}</span>
+                {% endfor %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+   {% if bioc_releases %}
+    <div class="section">
+        <h2>🔬 New Bioconductor Releases</h2>
+        <ul>
+            {% for r in bioc_releases %}
+            <li><b>{{ r.version }}</b> – released {{ r.release_date.strftime("%Y-%m-%d") }} (<a href="{{ r.notes_url }}">release notes</a>)</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if github_releases %}
+    <div class="section">
+        <h2>🐍 New GitHub Releases</h2>
+        <ul>
+            {% for g in github_releases %}
+            <li>{{ g.name }} – <b>{{ g.tag }}</b> (<a href="{{ g.url }}" target="_blank">view</a>)</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</body>
+</html>
+
