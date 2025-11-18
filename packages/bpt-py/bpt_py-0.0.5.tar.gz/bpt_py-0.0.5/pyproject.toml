@@ -1,0 +1,43 @@
+[project]
+name = "bpt-py"
+version = "0.0.5"
+description = "A zero-configuration C & C++ build and package tool (Python implementation)"
+readme = "README.md"
+authors = [{ name = "vector-of-bool", email = "vectorofbool@gmail.com" }]
+requires-python = ">=3.13"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.405",
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
+    "pytest-xdist>=3.8.0",
+    "ruff>=0.12.12",
+]
+
+[project.scripts]
+bpt = "bpt.main:start"
+bpt-py = "bpt.main:start"
+
+[build-system]
+requires = ["uv_build>=0.9.8,<0.10.0"]
+build-backend = "uv_build"
+
+[[tool.uv.index]]
+name = "test-pypi"
+url = "https://test.pypi.org/simple/"
+publish-url = "https://test.pypi.org/legacy/"
+explicit = true
+
+[tool.uv.build-backend]
+module-name = "bpt"
+source-exclude = ["**/*_test.py"]
+
+[tool.pyright]
+include = ["src/"]
+strict = ["**"]
+pythonVersion = "3.13"
+
+[tool.ruff]
+line-length = 120
