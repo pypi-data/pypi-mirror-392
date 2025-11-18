@@ -1,0 +1,251 @@
+# TOON to PDF
+
+A lightweight Python library that converts TOON format files to PDF documents using [pdfme](https://pypi.org/project/pdfme/) as the backend PDF generation engine.
+
+## Overview
+
+TOON to PDF provides a simple, declarative way to create PDF documents using the TOON syntax. It acts as a wrapper around pdfme, allowing you to describe PDF structures in a human-readable TOON format and automatically generate professional PDF files.
+
+## Installation
+
+Install the library using pip:
+
+```bash
+pip install toon-to-pdf
+```
+
+### Dependencies
+
+The library requires:
+- `pdfme` - PDF generation engine
+
+The TOON parser is built into the library, so no additional parsing dependencies are needed. The `pdfme` package will be automatically installed when you install `toon-to-pdf`.
+
+## Quick Start
+
+### Hello World Example
+
+Create a simple TOON file (`hello_world.toon`):
+
+```toon
+(
+  schemas: [
+    (
+      content: ( type: "text", text: "Hello World" )
+      position: ( x: 50, y: 50 )
+    )
+  ]
+  basePdf: "blank"
+)
+```
+
+Generate the PDF:
+
+```python
+from toon_to_pdf import generate_from_toon_file
+
+generate_from_toon_file("hello_world.toon", "hello_world.pdf")
+```
+
+Or use a TOON string directly:
+
+```python
+from toon_to_pdf import generate_from_toon
+
+toon_content = """
+(
+  schemas: [
+    (
+      content: ( type: "text", text: "Hello World" )
+      position: ( x: 50, y: 50 )
+    )
+  ]
+  basePdf: "blank"
+)
+"""
+
+generate_from_toon(toon_content, "output.pdf")
+```
+
+## TOON Schema Design
+
+The TOON schema is designed to map directly to pdfme's JSON structure. Here's how it works:
+
+### Basic Structure
+
+Every TOON document must have:
+- `schemas`: A list of content elements (text, images, tables, etc.)
+- `basePdf`: The base PDF template (use `"blank"` for a blank page)
+
+### Text Elements
+
+Each schema entry in the `schemas` list represents a content element with:
+- `content`: The content definition (type, text, styling, etc.)
+- `position`: The position on the page (x, y coordinates)
+
+### Example: Simple Invoice
+
+```toon
+(
+  schemas: [
+    (
+      content: ( type: "text", text: "INVOICE", fontSize: 24, bold: true )
+      position: ( x: 50, y: 50 )
+    )
+    (
+      content: ( type: "text", text: "Invoice #: INV-001" )
+      position: ( x: 50, y: 100 )
+    )
+    (
+      content: ( type: "text", text: "Date: 2024-01-15" )
+      position: ( x: 50, y: 130 )
+    )
+    (
+      content: ( type: "text", text: "Total: $100.00", fontSize: 16, bold: true )
+      position: ( x: 50, y: 250 )
+    )
+  ]
+  basePdf: "blank"
+)
+```
+
+## API Reference
+
+### `generate_from_toon(toon_input: str, output_path: Union[str, Path]) -> None`
+
+Generate a PDF file from a TOON format string.
+
+**Parameters:**
+- `toon_input`: TOON format string describing the PDF structure
+- `output_path`: Path where the generated PDF file will be saved
+
+**Raises:**
+- `ImportError`: If required dependencies are not installed
+- `ValueError`: If the TOON input cannot be parsed or is invalid
+- `IOError`: If the output file cannot be written
+
+**Example:**
+```python
+from toon_to_pdf import generate_from_toon
+
+toon_content = """
+(
+  schemas: [
+    (
+      content: ( type: "text", text: "Hello World" )
+      position: ( x: 50, y: 50 )
+    )
+  ]
+  basePdf: "blank"
+)
+"""
+
+generate_from_toon(toon_content, "output.pdf")
+```
+
+### `generate_from_toon_file(toon_file_path: Union[str, Path], output_path: Union[str, Path]) -> None`
+
+Generate a PDF file from a TOON format file.
+
+**Parameters:**
+- `toon_file_path`: Path to the input TOON file
+- `output_path`: Path where the generated PDF file will be saved
+
+**Raises:**
+- `FileNotFoundError`: If the TOON file does not exist
+- `ValueError`: If the TOON input cannot be parsed or is invalid
+- `IOError`: If the output file cannot be written
+
+**Example:**
+```python
+from toon_to_pdf import generate_from_toon_file
+
+generate_from_toon_file("document.toon", "document.pdf")
+```
+
+## How It Works
+
+The library performs a simple three-step process:
+
+1. **Parse**: Converts the TOON input string into a Python dictionary using the `python-toon` parser
+2. **Transform**: Validates and normalizes the data structure to match pdfme's expected format
+3. **Generate**: Creates the PDF file using pdfme's `build_pdf` function
+
+## Mapping to pdfme Format
+
+The TOON schema directly maps to pdfme's JSON structure:
+
+**pdfme JSON:**
+```json
+{
+  "schemas": [{
+    "content": { "type": "text", "text": "Hello World" },
+    "position": { "x": 50, "y": 50 }
+  }],
+  "basePdf": "blank"
+}
+```
+
+**Equivalent TOON:**
+```toon
+(
+  schemas: [
+    (
+      content: ( type: "text", text: "Hello World" )
+      position: ( x: 50, y: 50 )
+    )
+  ]
+  basePdf: "blank"
+)
+```
+
+## Examples
+
+Check the `examples/` directory for more examples:
+- `hello_world.toon` - Basic "Hello World" example
+- `simple_invoice.toon` - A simple invoice document
+
+## Development
+
+### Setup Development Environment
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/toon-to-pdf.git
+cd toon-to-pdf
+
+# Install in development mode
+pip install -e ".[dev]"
+```
+
+### Running Tests
+
+```bash
+pytest
+```
+
+## Future Enhancements
+
+- Support for more pdfme features (tables, images, etc.)
+- Convenience functions for common PDF patterns
+- JavaScript/Node.js version using pdfmake
+- CLI tool for command-line usage
+- Advanced transformation features
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+MIT License - see LICENSE file for details
+
+## Acknowledgments
+
+- [pdfme](https://pypi.org/project/pdfme/) - The PDF generation engine
+- [python-toon](https://pypi.org/project/python-toon/) - The TOON parser
+
+## Support
+
+For issues, questions, or contributions, please visit the [GitHub repository](https://github.com/yourusername/toon-to-pdf).
+
