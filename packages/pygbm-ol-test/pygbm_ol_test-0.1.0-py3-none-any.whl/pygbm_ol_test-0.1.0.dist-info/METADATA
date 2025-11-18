@@ -1,0 +1,71 @@
+Metadata-Version: 2.4
+Name: pygbm-ol-test
+Version: 0.1.0
+Summary: A Python package for simulating Geometric Brownian Motion.
+Author-email: Your Name <your.email@example.com>, Boris <boris.bolliet@gmail.com>
+Project-URL: Documentation, https://your-readthedocs-url-here
+Project-URL: Source, https://github.com/yourusername/pygbm_package
+Project-URL: Issues, https://github.com/yourusername/pygbm_package/issues
+Keywords: Brownian Motion,simulation
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Software Development :: Libraries
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: argparse
+Requires-Dist: datetime
+Requires-Dist: importlib.resources
+
+# pygbm
+
+## Installation
+
+To install, run:
+```bash
+git clone https://github.com/yourusername/pygbm_package.git
+cd pygbm_package
+pip install -e .
+```
+
+The **pygbm** package is a Python package designed to simulate Geometric Brownian Motion.
+
+## Features
+
+- Base `GBMSimulator` class with core attributes and methods
+
+
+## Usage
+
+### Python Interface
+
+Here's a quick example of how to use the package:
+
+```python
+from pygbm.gbm_simulation import GBMSimulator
+simulator = GBMSimulator(y0=1.0, mu=0.05, sigma=0.2)
+t_values, y_values = simulator.simulate_path(T=1.0, N=100)
+simulator.plot_path(t_values, y_values, output="gbm_plot.png")
+```
+
+### Command-line Interface
+
+```bash
+pygbm  --y0 1.0 --mu 0.05 --sigma 0.2 --T 1.0 --N 100 --output gbm_plot.png
+```
+
+
+## Documentation
+
+Visit our [documentation page](https://your-readthedocs-url-here).
+
+## Contributing
+
+Contributions are welcome! Fork our repository and submit a pull request.
+
+## License
+
+This project is licensed under the MIT License - see the `LICENSE` file for details.
