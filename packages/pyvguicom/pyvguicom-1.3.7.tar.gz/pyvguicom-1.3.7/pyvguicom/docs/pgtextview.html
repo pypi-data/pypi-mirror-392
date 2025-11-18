@@ -1,0 +1,2421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>pgtextview API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>pgtextview</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#!/usr/bin/env python
+
+import os, sys, getopt, signal, random, time, warnings
+
+#from pgutil import  *
+#from pgui import  *
+
+import pgutils
+
+import gi
+gi.require_version(&#34;Gtk&#34;, &#34;3.0&#34;)
+from gi.repository import Gtk
+from gi.repository import Gdk
+from gi.repository import GLib
+from gi.repository import GObject
+from gi.repository import Pango
+
+import pgbox
+
+# Colors for editor selection. Use X11 color names.
+
+font_colors =   \
+        (
+            # Color name; RGBA for display
+            (&#34;Black&#34;,       &#34;#000000ff&#34;),  (&#34;White&#34;,       &#34;#ffffffff&#34;),
+            (&#34;Red&#34;,         &#34;#ff0000ff&#34;),  (&#34;Green&#34;,       &#34;#00ff00ff&#34;),
+            (&#34;Blue&#34;,        &#34;#0000ffff&#34;),  (&#34;Orange&#34;,      &#34;#ff8800ff&#34;),
+            (&#34;Yellow&#34;,      &#34;#ffff00ff&#34;),  (&#34;Brown&#34;,       &#34;#885500ff&#34;),
+            (&#34;Cyan&#34;   ,     &#34;#00ffffff&#34;),  (&#34;Purple&#34;,      &#34;#ff00ffff&#34;),
+            (&#34;OrangeRed&#34;,    &#34;#ff8888ff&#34;), (&#34;LightBlue&#34;,   &#34;#8888ffff&#34;),
+            (&#34;LightGreen&#34;,  &#34;#88ff88ff&#34;),  (&#34;Gray&#34;,        &#34;#888888ff&#34;),
+            (&#34;LightGray&#34;,   &#34;#aaaaaaff&#34;),  (&#34;Gold&#34;,        &#34;#FFD700FF&#34;),
+            (&#34;LightYellow&#34;, &#34;#aaaaaa99ff&#34;),  (&#34;Gold&#34;,        &#34;#FFD700FF&#34;),
+        )
+
+font_sizes =      \
+            (
+            &#34;7&#34;, &#34;8&#34;, &#34;9&#34;, &#34;10&#34;, &#34;12&#34;, &#34;14&#34;, &#34;18&#34;, &#34;22&#34;, &#34;24&#34;, &#34;32&#34;, &#34;36&#34;, &#34;48&#34;, &#34;64&#34;
+            )
+
+
+class pgTextView(Gtk.VBox):
+
+    def __init__(self, status = False):
+
+        self.statstr = None
+        Gtk.VBox.__init__(self)
+
+        self.tagtablex = []
+        self.callb = None
+        self.grid = Gtk.Grid()
+        self.add(self.grid)
+
+        self._create_textview()
+        self._create_toolbar()
+        self._create_toolbar2()
+        self._create_buttons()
+
+        # Status bar
+        self.statstr = Gtk.Label.new(&#34;Idle&#34;)
+        self.statstr.set_halign(Gtk.Align.START)
+
+        if  status:
+            hstat = Gtk.HBox()
+            hstat.pack_start(Gtk.Label.new(&#34;  Status:  &#34;), 0, 0, 0)
+            hstat.pack_start(Gtk.Label.new(&#34; &#34;), 0, 0, 0)
+            hstat.pack_start(self.statstr, 1, 1, 0)
+
+            self.grid.attach(hstat, 0, 4, 3, 1)
+
+        self.textview.connect(&#34;key-press-event&#34;, self.area_key)
+        self.textview.connect(&#34;move-cursor&#34;, self.area_curs)
+        self.connect(&#34;button-press-event&#34;, self.area_button)
+        #self.textview.connect(&#34;focus-out-event&#34;, self.focus_out)
+        self.findcall = None;
+
+    def  area_curs(self, ext_view, step, count, extend_selection):
+        #print(&#34;step&#34;, step, &#34;count&#34;, count)
+        pass
+
+    def _create_toolbar(self):
+
+        nnn = 0
+        toolbar = Gtk.Toolbar()
+        self.grid.attach(toolbar, 0, 1, 3, 1)
+
+        button_norm = Gtk.ToolButton()
+        button_norm.set_icon_name(&#34;format-text-none-symbolic&#34;)
+        button_norm.set_tooltip_text(&#34;Remove ALL Formatting&#34;)
+        toolbar.insert(button_norm, nnn) ; nnn += 1
+
+        button_bold = Gtk.ToolButton()
+        button_bold.set_icon_name(&#34;format-text-bold-symbolic&#34;)
+        button_bold.set_tooltip_text(&#34;Set Bold&#34;)
+        toolbar.insert(button_bold, nnn)  ; nnn += 1
+
+        button_italic = Gtk.ToolButton()
+        button_italic.set_icon_name(&#34;format-text-italic-symbolic&#34;)
+        button_italic.set_tooltip_text(&#34;Set Italic&#34;)
+        toolbar.insert(button_italic, nnn)   ; nnn += 1
+
+        button_underline = Gtk.ToolButton()
+        button_underline.set_icon_name(&#34;format-text-underline-symbolic&#34;)
+        button_underline.set_tooltip_text(&#34;Set Underline&#34;)
+        toolbar.insert(button_underline, nnn)   ; nnn += 1
+
+        button_sel = Gtk.ToolItem()
+
+        combo = pgbox.ComboBox(font_sizes, self.combo_sel)
+        #combo.sel_text(&#34;12&#34;)
+        #print(&#34;str(self.mysize)&#34;, str(self.mysize))
+        combo.sel_text(str(int(self.mysize)))
+        combo.set_tooltip_text(&#34;Set Font Size&#34;)
+
+        #hb = Gtk.HBox()
+        #hb.pack_start(Gtk.Label.new(&#34;Font Size:&#34;), 0, 0, 2)
+        #hb.pack_start(combo, 0, 0, 0)
+        button_sel.add(combo)
+        toolbar.insert(button_sel, nnn)  ; nnn += 1
+
+        button_sel2 = Gtk.ToolItem()
+
+        #print(&#34;mmm&#34;, mmm)
+        #hb2 = Gtk.HBox()
+        combo2 = pgbox.ColorCombo(font_colors, self.combo_sel2)
+        combo2.sel_text(&#34;Black&#34;)
+        combo2.set_tooltip_text(&#34;Set Font Color&#34;)
+
+        #hb2.pack_start(Gtk.Label.new(&#34;Font Color:&#34;), 0, 0, 2)
+        #hb2.pack_start(combo2, 0, 0, 0)
+        button_sel2.add(combo2)
+        toolbar.insert(button_sel2, nnn)  ; nnn += 1
+
+        # ----------------------------------------------------------------
+
+        button_sel3 = Gtk.ToolItem()
+        #hb3 = Gtk.HBox()
+        combo3 = pgbox.ColorCombo(font_colors, self.combo_sel3)
+        combo3.sel_text(&#34;White&#34;)
+        combo3.set_tooltip_text(&#34;Set Background Color&#34;)
+        #hb3.pack_start(Gtk.Label.new(&#34;Font Back:&#34;), 0, 0, 2)
+        #hb3.pack_start(combo3, 0, 0, 0)
+        button_sel3.add(combo3)
+        toolbar.insert(button_sel3, nnn)  ; nnn += 1
+
+        button_color = Gtk.ToolButton()
+        button_color.set_icon_name(&#34;preferences-desktop-theme&#34;)
+        button_color.set_tooltip_text(&#34;Remove Color Attributes&#34;)
+        button_color.connect(&#34;clicked&#34;, self.on_rm_color)
+        toolbar.insert(button_color, nnn)  ; nnn += 1
+
+        button_norm.connect(&#34;clicked&#34;, self.on_rm_clicked, self.tag_norm)
+        button_bold.connect(&#34;clicked&#34;, self.on_button_clicked, self.tag_bold)
+        button_italic.connect(&#34;clicked&#34;, self.on_button_clicked, self.tag_italic)
+        button_underline.connect(&#34;clicked&#34;, self.on_button_clicked, self.tag_underline)
+
+        #toolbar.insert(Gtk.SeparatorToolItem(), nnn)  ; nnn += 1
+
+    def _create_toolbar2(self):
+
+        nnn = 0
+        toolbar = Gtk.Toolbar()
+        self.grid.attach(toolbar, 0, 0, 3, 1)
+
+        radio_justifyleft = Gtk.RadioToolButton()
+        radio_justifyleft.set_icon_name(&#34;format-justify-left-symbolic&#34;)
+        toolbar.insert(radio_justifyleft, nnn)   ; nnn += 1
+
+        radio_justifycenter = Gtk.RadioToolButton.new_from_widget(radio_justifyleft)
+        radio_justifycenter.set_icon_name(&#34;format-justify-center-symbolic&#34;)
+        toolbar.insert(radio_justifycenter, nnn)   ; nnn += 1
+
+        radio_justifyright = Gtk.RadioToolButton.new_from_widget(radio_justifyleft)
+        radio_justifyright.set_icon_name(&#34;format-justify-right-symbolic&#34;)
+        toolbar.insert(radio_justifyright, nnn)   ; nnn += 1
+
+        radio_justifyfill = Gtk.RadioToolButton.new_from_widget(radio_justifyleft)
+        radio_justifyfill.set_icon_name(&#34;format-justify-fill-symbolic&#34;)
+        toolbar.insert(radio_justifyfill, nnn)   ; nnn += 1
+
+        radio_justifyleft.connect(
+            #&#34;toggled&#34;, self.on_justify_toggled, Gtk.Justification.LEFT
+            &#34;toggled&#34;, self.on_justify_toggled, self.tag_left
+        )
+        radio_justifycenter.connect(
+            #&#34;toggled&#34;, self.on_justify_toggled, Gtk.Justification.CENTER
+            &#34;toggled&#34;, self.on_justify_toggled, self.tag_center
+        )
+        radio_justifyright.connect(
+            &#34;toggled&#34;, self.on_justify_toggled, self.tag_right
+        )
+
+        radio_justifyfill.connect(
+            &#34;toggled&#34;, self.on_justify_toggled, self.tag_fill
+        )
+
+        button_big = Gtk.ToolButton()
+        button_big.set_icon_name(&#34;format-text-larger-symbolic&#34;)
+        button_big.set_tooltip_text(&#34;Set Superscript&#34;)
+        button_big.connect(&#34;clicked&#34;, self.on_super_button, self.tag_super)
+        toolbar.insert(button_big, nnn)  ; nnn += 1
+
+        button_big = Gtk.ToolButton()
+        button_big.set_icon_name(&#34;format-text-smaller-symbolic&#34;)
+        button_big.set_tooltip_text(&#34;Set Subscript&#34;)
+        button_big.connect(&#34;clicked&#34;, self.on_super_button, self.tag_sub)
+        toolbar.insert(button_big, nnn)  ; nnn += 1
+
+        button_big = Gtk.ToolButton()
+        button_big.set_icon_name(&#34;tools-check-spelling&#34;)
+        button_big.set_tooltip_text(&#34;Set XX Large font&#34;)
+        button_big.connect(&#34;clicked&#34;, self.on_button_clicked, self.tag_xbig)
+        toolbar.insert(button_big, nnn)   ; nnn += 1
+
+        button_color = Gtk.ToolButton()
+        button_color.set_icon_name(&#34;font-x-generic&#34;)
+        button_color.set_tooltip_text(&#34;Set Font&#34;)
+        #button_color.connect(&#34;clicked&#34;, self.on_color_clicked, 0)
+        toolbar.insert(button_color, nnn)  ; nnn += 1
+
+        toolbar.insert(Gtk.SeparatorToolItem(), nnn)   ; nnn += 1
+
+        button_clear = Gtk.ToolButton()
+        button_clear.set_icon_name(&#34;edit-clear-symbolic&#34;)
+        button_clear.set_tooltip_text(&#34;Remove ALL formatting&#34;)
+        button_clear.connect(&#34;clicked&#34;, self.on_clear_clicked)
+        toolbar.insert(button_clear, nnn)    ; nnn += 1
+
+        toolbar.insert(Gtk.SeparatorToolItem(), nnn)   ; nnn += 1
+
+        button_search = Gtk.ToolButton()
+        button_search.set_icon_name(&#34;system-search-symbolic&#34;)
+        button_search.set_tooltip_text(&#34;Search current text&#34;)
+        button_search.connect(&#34;clicked&#34;, self.on_search_clicked)
+        toolbar.insert(button_search, nnn)   ; nnn += 1
+
+        button_mag = Gtk.ToolButton()
+        button_mag.set_icon_name(&#34;zoom-fit-best&#34;)
+        button_mag.set_tooltip_text(&#34;Magnify Font&#34;)
+        button_mag.connect(&#34;clicked&#34;, self.on_zoom_clicked)
+        toolbar.insert(button_mag, nnn)  ; nnn += 1
+
+        button_mag = Gtk.ToolButton()
+        button_mag.set_icon_name(&#34;zoom-in-symbolic&#34;)
+        button_mag.set_tooltip_text(&#34;Set larger font&#34;)
+        button_mag.connect(&#34;clicked&#34;, self.on_zoom_clicked)
+        toolbar.insert(button_mag, nnn)   ; nnn += 1
+
+        button_mag2 = Gtk.ToolButton()
+        button_mag2.set_icon_name(&#34;zoom-out-symbolic&#34;)
+        button_mag2.set_tooltip_text(&#34;Set smaller Font&#34;)
+        button_mag2.connect(&#34;clicked&#34;, self.on_unzoom_clicked)
+        toolbar.insert(button_mag2, nnn)   ; nnn += 1
+
+    def area_key(self, widget, event):
+        #print(&#34;TextViewWin keypress&#34;, event.string, event.keyval)
+        if event.state &amp; Gdk.ModifierType.CONTROL_MASK:
+            print(&#34;TextViewWin control keypress&#34;, event.string, event.keyval)
+
+            if event.keyval == 102:
+                #print(&#34;control find&#34;)
+                if self.findcall:
+                    # Call with object argument
+                    self.findcall[0](self.findcall[1])
+
+
+    def area_button(self, but, event):
+        #print(&#34;click&#34;, event.x, event.y)
+        # textview
+        endd = self.textbuffer.get_end_iter()
+        isx, iter = self.textview.get_iter_at_location(event.x, event.y)
+        if isx:
+            txt =  self.textbuffer.get_text(iter, endd, False)
+            #print(&#34;[&#34;, txt[:4], &#34;]&#34;)
+
+            #defvals = self.textview.get_default_attributes()
+            #print(defvals.appearance.rise)
+
+            #ixy, attr = iter.get_attributes()
+            #if ixy:
+            #    #attr.ref()
+            #    #print(attr.refcount)
+            #    print(dir(attr))
+            #    #print(attr.refcount)
+            #    #print(attr.appearance.rise)
+            #    attr.unref()
+            #else:
+            #    print(&#34;no artt&#34;)
+
+            #attr.unref()
+
+
+    def on_rm_color(self, arg1):
+        print(  &#34;on_rm_color&#34;, arg1)
+
+        bounds = self.textbuffer.get_selection_bounds()
+
+        if not len(bounds):
+            if self.statstr:
+                self.statstr.set_text(&#34;No selection&#34;)
+            #print(&#34;No selection&#34;)
+            return
+        else:
+            start, end = bounds
+
+            # Clear out old colors
+            for cc in range(len(font_colors)):
+                rrr = &#34;backgr%d&#34; % cc
+                self.textbuffer.remove_tag(getattr(self, rrr), start, end)
+
+            for cc in range(len(font_colors)):
+                rrr = &#34;color%d&#34; % cc
+                self.textbuffer.remove_tag(getattr(self, rrr), start, end)
+
+            self.textbuffer.set_modified(1)
+
+    def on_combo_clicked(self, arg1, arg2):
+        #print(&#34;on_combo_clicked&#34;)
+        #cont = (&#34;12&#34;, &#34;32&#34;, &#34;64&#34;)
+        #combo_box = pgbox.ComboBox(cont)
+        #combo_box.show()
+        pass
+
+    def combo_sel(self, sel):
+        #print(&#34;combo_sel&#34;, sel)
+        bounds = self.textbuffer.get_selection_bounds()
+        if not len(bounds):
+            if self.statstr:
+                self.statstr.set_text(&#34;No selection&#34;)
+            #print(&#34;No selection&#34;)
+            return
+        else:
+            nnn = &#34;size%d&#34; % int(sel);
+            start, end = bounds
+
+            # Femove size tags from here
+            for aa in font_sizes:
+                rrr = &#34;size%d&#34; % int(aa);
+                self.textbuffer.remove_tag(getattr(self, rrr), start, end)
+            try:
+                self.textbuffer.apply_tag(getattr(self, nnn), start, end)
+                self.textbuffer.set_modified(1)
+            except:
+                print(&#34;Cannot apply size tag &#34;, nnn, sys.exc_info())
+
+    def combo_sel2(self, sel):
+        #print(&#34;combo_sel2&#34;, sel)
+        bounds = self.textbuffer.get_selection_bounds()
+
+        if not len(bounds):
+            if self.statstr:
+                self.statstr.set_text(&#34;No selection&#34;)
+            #print(&#34;No selection&#34;)
+            return
+        else:
+            # Clear out old colors
+            start, end = bounds
+            for cc in range(len(font_colors)):
+                rrr = &#34;color%d&#34; % cc
+                self.textbuffer.remove_tag(getattr(self, rrr), start, end)
+
+            # Find out the offset:
+            cnt = 0
+            for aa, bb in font_colors:
+                if aa == sel:
+                    break
+                cnt += 1
+            nnn = &#34;color%d&#34; % cnt
+            #print(&#34;nnn&#34;, nnn)
+            start, end = bounds
+            try:
+                self.textbuffer.apply_tag(getattr(self, nnn), start, end)
+                self.textbuffer.set_modified(1)
+            except:
+                print(&#34;Cannot apply size tag &#34;, nnn, sys.exc_info())
+
+    def combo_sel3(self, sel):
+        #print(&#34;combo_sel3&#34;, sel)
+        bounds = self.textbuffer.get_selection_bounds()
+
+        if not len(bounds):
+            if self.statstr:
+                self.statstr.set_text(&#34;No selection&#34;)
+            #print(&#34;No selection&#34;)
+            return
+        else:
+            start, end = bounds
+
+            # Clear out old colors
+            for cc in range(len(font_colors)):
+                rrr = &#34;backgr%d&#34; % cc
+                self.textbuffer.remove_tag(getattr(self, rrr), start, end)
+
+            # Find out the offset:
+            cnt = 0
+            for aa, bb in font_colors:
+                if aa == sel:
+                    break
+                cnt += 1
+
+            nnn = &#34;backgr%d&#34; % cnt
+            #print(&#34;nnn&#34;, nnn)
+
+            try:
+                self.textbuffer.apply_tag(getattr(self, nnn), start, end)
+                self.textbuffer.set_modified(1)
+            except:
+                print(&#34;Cannot apply size tag &#34;, nnn, sys.exc_info())
+
+
+    def on_zoom_clicked(self, arg1):
+
+        pg = Gtk.Widget.create_pango_context(self.textview)
+        myfd = pg.get_font_description()
+        mysize = myfd.get_size() / Pango.SCALE
+
+        fd = Pango.FontDescription()
+        fd.set_size((mysize + 1) * Pango.SCALE)
+        self.textview.modify_font(fd)
+
+    def on_unzoom_clicked(self, arg1):
+
+        pg = Gtk.Widget.create_pango_context(self.textview)
+        myfd = pg.get_font_description()
+        mysize = myfd.get_size() / Pango.SCALE
+
+        fd = Pango.FontDescription()
+        fd.set_size((mysize - 1) * Pango.SCALE)
+        self.textview.modify_font(fd)
+
+    def _create_textview(self):
+
+        self.textview = Gtk.TextView()
+        self.textbuffer = self.textview.get_buffer()
+
+        scrolledwindow = Gtk.ScrolledWindow()
+        scrolledwindow.set_hexpand(True)
+        scrolledwindow.set_vexpand(True)
+        self.grid.attach(scrolledwindow, 0, 2, 3, 1)
+
+        scrolledwindow.add(self.textview)
+
+        self.fd = Pango.FontDescription()
+        pg = Gtk.Widget.create_pango_context(self.textview)
+        myfd = pg.get_font_description()
+        self.mysize = myfd.get_size() / Pango.SCALE
+        self.myfam = myfd.get_family()
+        #print(self.mysize)
+
+        #self.textview.set_has_window(True)
+
+        #self.set_events(Gdk.EventMask.ALL_EVENTS_MASK )
+
+        self.tag_regular = self.textbuffer.create_tag(&#34;regular&#34;, size=self.mysize * Pango.SCALE)
+        self.tag_super   = self.textbuffer.create_tag(&#34;super&#34;, rise=5 * Pango.SCALE)
+        self.tag_sub     = self.textbuffer.create_tag(&#34;sub&#34;,   rise=-5 * Pango.SCALE)
+        self.tag_norm    = self.textbuffer.create_tag(&#34;norm&#34;, weight=14*Pango.SCALE)
+        self.tag_xbig    = self.textbuffer.create_tag(&#34;xbig&#34;, size=30*Pango.SCALE)
+        self.tag_big     = self.textbuffer.create_tag(&#34;big&#34;, size=20*Pango.SCALE)
+        #self.tag_red     = self.textbuffer.create_tag(&#34;red&#34;, foreground=&#34;red&#34;)
+        #self.tag_redbg   = self.textbuffer.create_tag(&#34;redbg&#34;, background=&#34;red&#34;)
+        self.tag_norm    = self.textbuffer.create_tag(&#34;normal&#34;, style=Pango.Style.NORMAL)
+        self.tag_bold    = self.textbuffer.create_tag(&#34;bold&#34;, weight=Pango.Weight.BOLD)
+        self.tag_italic     = self.textbuffer.create_tag(&#34;italic&#34;, style=Pango.Style.ITALIC)
+        self.tag_underline  = self.textbuffer.create_tag(&#34;underline&#34;, underline=Pango.Underline.SINGLE)
+        self.tag_found      = self.textbuffer.create_tag(&#34;found&#34;, background=&#34;yellow&#34;)
+        self.tag_left       = self.textbuffer.create_tag(&#34;justleft&#34;, justification=Gtk.Justification.LEFT)
+        self.tag_center     = self.textbuffer.create_tag(&#34;justcent&#34;, justification=Gtk.Justification.CENTER)
+        self.tag_right      = self.textbuffer.create_tag(&#34;justright&#34;, justification=Gtk.Justification.RIGHT)
+        self.tag_fill       = self.textbuffer.create_tag(&#34;justfill&#34;,  justification=Gtk.Justification.FILL)
+
+        self.textview.set_wrap_mode(Gtk.WrapMode.WORD)
+
+        # We create the attributes for all possible size tags
+        for aa in font_sizes:
+            nnn = &#34;size%d&#34; % int(aa);
+            ttt = self.textbuffer.create_tag(nnn, size=int(aa) * Pango.SCALE)
+            setattr(self, nnn, ttt)
+
+        # We create the attributes for all possible color tags
+        cnt = 0
+        for aa, bb in font_colors:
+            print
+            nnn = &#34;color%d&#34; % cnt;
+            ttt = self.textbuffer.create_tag(nnn, foreground=aa)
+            setattr(self, nnn, ttt)
+            cnt += 1
+
+        cnt = 0
+        for aa, bb in font_colors:
+            nnn = &#34;backgr%d&#34; % int(cnt);
+            ttt = self.textbuffer.create_tag(nnn, background=aa)
+            setattr(self, nnn, ttt)
+            cnt += 1
+
+        #print(dir(self))
+
+    def _create_buttons(self):
+
+        #check_editable = Gtk.CheckButton(label=&#34;Editable&#34;)
+        #check_editable.set_active(True)
+        #check_editable.connect(&#34;toggled&#34;, self.on_editable_toggled)
+        #self.grid.attach(check_editable, 0, 2, 1, 1)
+        ##
+        #check_cursor = Gtk.CheckButton(label=&#34;Cursor Visible&#34;)
+        #check_cursor.set_active(True)
+        #check_editable.connect(&#34;toggled&#34;, self.on_cursor_toggled)
+        #self.grid.attach_next_to(
+        #    check_cursor, check_editable, Gtk.PositionType.RIGHT, 1, 1)
+
+        # ---------------------------------------------------------------------------------
+
+        radio_wrapword =  Gtk.RadioButton.new_with_label_from_widget(None, &#34;Word&#34;)
+        self.grid.attach(radio_wrapword, 0, 3, 1, 1)
+
+        radio_wrapchar =  Gtk.RadioButton.new_with_label_from_widget(radio_wrapword, &#34;Character&#34;)
+        self.grid.attach_next_to(
+            radio_wrapchar, radio_wrapword, Gtk.PositionType.RIGHT, 1, 1)
+
+        radio_wrapnone = Gtk.RadioButton.new_with_label_from_widget(radio_wrapword, &#34;None&#34;)
+        self.grid.attach_next_to(
+                radio_wrapnone, radio_wrapchar, Gtk.PositionType.RIGHT, 1, 1)
+
+        radio_wrapnone.connect(&#34;toggled&#34;, self.on_wrap_toggled, Gtk.WrapMode.NONE)
+        radio_wrapchar.connect(&#34;toggled&#34;, self.on_wrap_toggled, Gtk.WrapMode.CHAR)
+        radio_wrapword.connect(&#34;toggled&#34;, self.on_wrap_toggled, Gtk.WrapMode.WORD)
+
+    def get_text(self):
+        startt = self.textbuffer.get_start_iter()
+        endd = self.textbuffer.get_end_iter()
+        txt = self.textbuffer.get_text(startt, endd, False)
+        return txt
+
+    #def get_all(self):
+    #    print(&#34;Get_all called&#34;)
+    #    startt = self.buffer.get_start_iter()
+    #    endd = self.buffer.get_end_iter()
+    #    return self.buffer.get_text(startt, endd, True)
+
+    def  get_modified(self):
+        return self.textbuffer.get_modified()
+
+    def  set_modified(self, valx):
+        return self.textbuffer.set_modified(valx)
+
+    def set_text(self, txt):
+        if self.textbuffer.get_modified():
+            startt = self.textbuffer.get_start_iter()
+            endd = self.textbuffer.get_end_iter()
+            old = self.textbuffer.get_text(startt, endd, False)
+            if self.callb:
+                self.callb(old)
+            #print(&#34;old_content&#34;, old)
+        self.textbuffer.set_text(txt)
+
+    def on_rm_clicked(self, widget, tag):
+        bounds = self.textbuffer.get_selection_bounds()
+        if len(bounds) != 0:
+            start, end = bounds
+            self.textbuffer.remove_all_tags(start, end)
+            self.textbuffer.set_modified(1)
+
+            # This was the old clear -- now clearing ALL
+            #self.textbuffer.remove_tag(self.tag_bold, start, end)
+            #self.textbuffer.remove_tag(self.tag_italic, start, end)
+            #self.textbuffer.remove_tag(self.tag_underline, start, end)
+            #self.textbuffer.remove_tag(self.tag_red, start, end)
+            #self.textbuffer.remove_tag(self.tag_redbg, start, end)
+            #self.textbuffer.remove_tag(self.tag_big, start, end)
+            #self.textbuffer.remove_tag(self.tag_xbig, start, end)
+            #self.textbuffer.remove_tag(self.tag_regular, start, end)
+
+    def on_button_clicked(self, widget, tag):
+
+        bounds = self.textbuffer.get_selection_bounds()
+        if not len(bounds):
+            if self.statstr:
+                self.statstr.set_text(&#34;No style selection.&#34;)
+        else:
+            start, end = bounds
+            #print(&#34;Apply Tag&#34;, tag, start, end)
+            self.textbuffer.apply_tag(tag, start, end)
+            self.textbuffer.set_modified(1)
+
+    def on_super_button(self, widget, tag):
+
+        bounds = self.textbuffer.get_selection_bounds()
+        if not len(bounds):
+            if self.statstr:
+                self.statstr.set_text(&#34;No style selection.&#34;)
+        else:
+            start, end = bounds
+
+            self.textbuffer.remove_tag(self.tag_super, start, end)
+            self.textbuffer.remove_tag(self.tag_sub, start, end)
+
+            #print(&#34;Apply Tag&#34;, tag, start, end)
+            self.textbuffer.apply_tag(tag, start, end)
+            self.textbuffer.set_modified(1)
+
+    def on_size_button(self, widget, tag):
+
+        bounds = self.textbuffer.get_selection_bounds()
+        if not len(bounds):
+            if self.statstr:
+                self.statstr.set_text(&#34;No style selection.&#34;)
+        else:
+            start, end = bounds
+
+            self.textbuffer.remove_tag(self.tag_super, start, end)
+            self.textbuffer.remove_tag(self.tag_sub, start, end)
+
+            #print(&#34;Apply Tag&#34;, tag, start, end)
+            self.textbuffer.apply_tag(tag, start, end)
+            self.textbuffer.set_modified(1)
+
+    def on_clear_clicked(self, widget):
+        start = self.textbuffer.get_start_iter()
+        end = self.textbuffer.get_end_iter()
+        self.textbuffer.remove_all_tags(start, end)
+        self.textbuffer.set_modified(1)
+
+    def on_editable_toggled(self, widget):
+        self.textview.set_editable(widget.get_active())
+        self.textbuffer.set_modified(1)
+
+    def on_cursor_toggled(self, widget):
+        self.textview.set_cursor_visible(widget.get_active())
+
+    def on_wrap_toggled(self, widget, mode):
+        self.textview.set_wrap_mode(mode)
+
+    def on_justify_toggled(self, widget, justification):
+        #print(&#34;on_justify_toggled&#34;, justification)
+        #self.textview.set_justification(justification)
+        #start = self.textbuffer.get_start_iter()
+        #end = self.textbuffer.get_end_iter()
+
+        bounds = self.textbuffer.get_selection_bounds()
+        if not len(bounds):
+            if self.statstr:
+                self.statstr.set_text(&#34;No selection.&#34;)
+        else:
+            start, end = bounds
+            #print(&#34;Apply Just Tag&#34;, justification, start, end)
+
+            # Remove old justification
+            self.textbuffer.remove_tag(self.tag_left, start, end)
+            self.textbuffer.remove_tag(self.tag_center, start, end)
+            self.textbuffer.remove_tag(self.tag_right, start, end)
+            self.textbuffer.remove_tag(self.tag_fill, start, end)
+
+            self.textbuffer.apply_tag(justification, start, end)
+            self.textbuffer.set_modified(1)
+
+    def on_search_clicked(self, widget):
+
+        if self.findcall:
+            # Call with object argument
+            self.findcall[0](self.findcall[1])
+
+        dialog.destroy()
+
+    def search_and_mark(self, text, start):
+        end = self.textbuffer.get_end_iter()
+        match = start.forward_search(text, 0, end)
+
+        if match is not None:
+            match_start, match_end = match
+            self.textbuffer.apply_tag(self.tag_found, match_start, match_end)
+            self.search_and_mark(text, match_end)
+
+    # --------------------------------------------------------------------
+    # Load it here
+
+    def deser_buff(self, buffx):
+
+        if not buffx:
+            return
+
+        #print(&#34;UnSer buff&#34;)
+
+        fmt = self.textbuffer.register_deserialize_tagset()
+        self.textbuffer.deserialize_set_can_create_tags(fmt, True)
+        self.textbuffer.deserialize(self.textbuffer, fmt,
+                                self.textbuffer.get_start_iter(), buffx)
+        self.textbuffer.set_modified(0)
+
+    # --------------------------------------------------------------------
+    # Save it here
+
+    def ser_buff(self):
+
+        #print(&#34;Ser buff&#34;)
+
+        startt = self.textbuffer.get_start_iter()
+        endd = self.textbuffer.get_end_iter()
+
+        fmt = self.textbuffer.register_serialize_tagset()
+        sss = self.textbuffer.serialize(self.textbuffer, fmt, startt, endd)
+        if not sss: sss = b&#34;&#34;
+        return sss
+
+    # Print TextTag  (testing)
+    def ptag(self, ttt, tt):
+
+        global cnt              # Print only one
+        if cnt: return
+        cnt += 1
+
+        print(ttt)
+        #print(dir(ttt))
+        ll = ttt.list_properties()
+        for aa in ll:
+            #print(nnnn, end= &#34; &#34;)
+            try:
+                nn = tt.lookup(aa.name)
+                if nn:
+                    #nnn = nn.get_property(&#34;size&#34;)
+                    #print(&#34;size&#34;, nnn)
+
+                    lll = nn.list_properties()
+                    for bb in lll:
+                        nnn = bb.name   #get_property(&#34;name&#34;)
+                        try:
+                            pp = nn.get_property(nnn)
+                        except:
+                            pass
+                        print(aa.name, &#34;prop&#34;, &#34;&#39;&#34; + nnn + &#34;&#39;&#34; , &#34;val =&#34;, pp)
+                    print()
+
+            except:
+                print(sys.exc_info())
+                pass
+            #print()
+
+        return
+
+    # --------------------------------------------------------------------
+
+    def print_tags(self):
+
+        #startt = self.textbuffer.get_start_iter()
+        #endd = self.textbuffer.get_end_iter()
+
+        # TagTable
+        #tt = self.textbuffer.get_property(&#34;tag-table&#34;)
+        #print(&#34;table&#34;, tt)
+
+        tt = self.textbuffer.get_tag_table()
+        print(&#34;table&#34;, tt)
+        tt.foreach(self.ptag, tt)
+        print()
+
+        return
+
+        txt = self.textbuffer.get_text(startt, endd, False)
+        lc =  self.textbuffer.get_char_count()
+        for aa in range(lc):
+            iii = self.textbuffer.get_iter_at_offset(aa)
+            eee = self.textbuffer.get_iter_at_offset(aa+1)
+            ccc = self.textbuffer.get_text(iii, eee, False)
+            #print(&#34;aa&#34;, ccc)
+
+        return txt
+
+
+        #all = self.edview.get_all()
+        #print(&#34;serialize&#34;, self.edview.textbuffer.get_deserialize_formats())
+        #print(&#34;str&#34;, self.edview.serial_str())
+        #print(&#34;serialize&#34;, self.edview.textbuffer.get_deserialize_formats())
+
+        #vv = self.edview.textbuffer
+        #startt = vv.get_start_iter(); endd = vv.get_end_iter()
+        #while True:
+        #    prev = startt.copy()
+        #    nextok = startt.forward_line()
+        #    ttt = vv.get_text(prev, startt, False)
+        #    prevc = prev.copy()
+        #    while True:
+        #        sss = prevc.get_toggled_tags(True)
+        #        if sss:
+        #            print(&#34;tags on toggle&#34;, sss)
+        #            for cc in sss:
+        #                print(&#34;cc&#34;, cc.get_property(&#34;name&#34;))
+        #            print(&#34;pos&#34;, prevc.get_line(), prevc.get_line_offset())
+        #        beg = prevc.copy()
+        #        nextokc = prevc.forward_char()
+        #        if not nextokc:
+        #            break
+        #        if startt == prevc:
+        #            break
+        #        chh = vv.get_text(beg, prevc, False)
+        #        print(chh, end=&#34;&#34;)
+        #
+        #    #print(&#34;tags&#34;, prev.get_tags())
+        #    #print(&#34;line:&#34;, ttt, end=&#34;&#34;)
+        #    if not nextok:
+        #        break
+        #
+        ##print(&#34;tags:&#34;, self.edview.textbuffer.get_tags())</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="pgtextview.pgTextView"><code class="flex name class">
+<span>class <span class="ident">pgTextView</span></span>
+<span>(</span><span>status=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>VBox(**properties)
+new(homogeneous:bool, spacing:int) -&gt; Gtk.Widget
+</code></pre>
+<p>Initializer for a GObject based classes with support for property
+sets through the use of explicit keyword arguments.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class pgTextView(Gtk.VBox):
+
+    def __init__(self, status = False):
+
+        self.statstr = None
+        Gtk.VBox.__init__(self)
+
+        self.tagtablex = []
+        self.callb = None
+        self.grid = Gtk.Grid()
+        self.add(self.grid)
+
+        self._create_textview()
+        self._create_toolbar()
+        self._create_toolbar2()
+        self._create_buttons()
+
+        # Status bar
+        self.statstr = Gtk.Label.new(&#34;Idle&#34;)
+        self.statstr.set_halign(Gtk.Align.START)
+
+        if  status:
+            hstat = Gtk.HBox()
+            hstat.pack_start(Gtk.Label.new(&#34;  Status:  &#34;), 0, 0, 0)
+            hstat.pack_start(Gtk.Label.new(&#34; &#34;), 0, 0, 0)
+            hstat.pack_start(self.statstr, 1, 1, 0)
+
+            self.grid.attach(hstat, 0, 4, 3, 1)
+
+        self.textview.connect(&#34;key-press-event&#34;, self.area_key)
+        self.textview.connect(&#34;move-cursor&#34;, self.area_curs)
+        self.connect(&#34;button-press-event&#34;, self.area_button)
+        #self.textview.connect(&#34;focus-out-event&#34;, self.focus_out)
+        self.findcall = None;
+
+    def  area_curs(self, ext_view, step, count, extend_selection):
+        #print(&#34;step&#34;, step, &#34;count&#34;, count)
+        pass
+
+    def _create_toolbar(self):
+
+        nnn = 0
+        toolbar = Gtk.Toolbar()
+        self.grid.attach(toolbar, 0, 1, 3, 1)
+
+        button_norm = Gtk.ToolButton()
+        button_norm.set_icon_name(&#34;format-text-none-symbolic&#34;)
+        button_norm.set_tooltip_text(&#34;Remove ALL Formatting&#34;)
+        toolbar.insert(button_norm, nnn) ; nnn += 1
+
+        button_bold = Gtk.ToolButton()
+        button_bold.set_icon_name(&#34;format-text-bold-symbolic&#34;)
+        button_bold.set_tooltip_text(&#34;Set Bold&#34;)
+        toolbar.insert(button_bold, nnn)  ; nnn += 1
+
+        button_italic = Gtk.ToolButton()
+        button_italic.set_icon_name(&#34;format-text-italic-symbolic&#34;)
+        button_italic.set_tooltip_text(&#34;Set Italic&#34;)
+        toolbar.insert(button_italic, nnn)   ; nnn += 1
+
+        button_underline = Gtk.ToolButton()
+        button_underline.set_icon_name(&#34;format-text-underline-symbolic&#34;)
+        button_underline.set_tooltip_text(&#34;Set Underline&#34;)
+        toolbar.insert(button_underline, nnn)   ; nnn += 1
+
+        button_sel = Gtk.ToolItem()
+
+        combo = pgbox.ComboBox(font_sizes, self.combo_sel)
+        #combo.sel_text(&#34;12&#34;)
+        #print(&#34;str(self.mysize)&#34;, str(self.mysize))
+        combo.sel_text(str(int(self.mysize)))
+        combo.set_tooltip_text(&#34;Set Font Size&#34;)
+
+        #hb = Gtk.HBox()
+        #hb.pack_start(Gtk.Label.new(&#34;Font Size:&#34;), 0, 0, 2)
+        #hb.pack_start(combo, 0, 0, 0)
+        button_sel.add(combo)
+        toolbar.insert(button_sel, nnn)  ; nnn += 1
+
+        button_sel2 = Gtk.ToolItem()
+
+        #print(&#34;mmm&#34;, mmm)
+        #hb2 = Gtk.HBox()
+        combo2 = pgbox.ColorCombo(font_colors, self.combo_sel2)
+        combo2.sel_text(&#34;Black&#34;)
+        combo2.set_tooltip_text(&#34;Set Font Color&#34;)
+
+        #hb2.pack_start(Gtk.Label.new(&#34;Font Color:&#34;), 0, 0, 2)
+        #hb2.pack_start(combo2, 0, 0, 0)
+        button_sel2.add(combo2)
+        toolbar.insert(button_sel2, nnn)  ; nnn += 1
+
+        # ----------------------------------------------------------------
+
+        button_sel3 = Gtk.ToolItem()
+        #hb3 = Gtk.HBox()
+        combo3 = pgbox.ColorCombo(font_colors, self.combo_sel3)
+        combo3.sel_text(&#34;White&#34;)
+        combo3.set_tooltip_text(&#34;Set Background Color&#34;)
+        #hb3.pack_start(Gtk.Label.new(&#34;Font Back:&#34;), 0, 0, 2)
+        #hb3.pack_start(combo3, 0, 0, 0)
+        button_sel3.add(combo3)
+        toolbar.insert(button_sel3, nnn)  ; nnn += 1
+
+        button_color = Gtk.ToolButton()
+        button_color.set_icon_name(&#34;preferences-desktop-theme&#34;)
+        button_color.set_tooltip_text(&#34;Remove Color Attributes&#34;)
+        button_color.connect(&#34;clicked&#34;, self.on_rm_color)
+        toolbar.insert(button_color, nnn)  ; nnn += 1
+
+        button_norm.connect(&#34;clicked&#34;, self.on_rm_clicked, self.tag_norm)
+        button_bold.connect(&#34;clicked&#34;, self.on_button_clicked, self.tag_bold)
+        button_italic.connect(&#34;clicked&#34;, self.on_button_clicked, self.tag_italic)
+        button_underline.connect(&#34;clicked&#34;, self.on_button_clicked, self.tag_underline)
+
+        #toolbar.insert(Gtk.SeparatorToolItem(), nnn)  ; nnn += 1
+
+    def _create_toolbar2(self):
+
+        nnn = 0
+        toolbar = Gtk.Toolbar()
+        self.grid.attach(toolbar, 0, 0, 3, 1)
+
+        radio_justifyleft = Gtk.RadioToolButton()
+        radio_justifyleft.set_icon_name(&#34;format-justify-left-symbolic&#34;)
+        toolbar.insert(radio_justifyleft, nnn)   ; nnn += 1
+
+        radio_justifycenter = Gtk.RadioToolButton.new_from_widget(radio_justifyleft)
+        radio_justifycenter.set_icon_name(&#34;format-justify-center-symbolic&#34;)
+        toolbar.insert(radio_justifycenter, nnn)   ; nnn += 1
+
+        radio_justifyright = Gtk.RadioToolButton.new_from_widget(radio_justifyleft)
+        radio_justifyright.set_icon_name(&#34;format-justify-right-symbolic&#34;)
+        toolbar.insert(radio_justifyright, nnn)   ; nnn += 1
+
+        radio_justifyfill = Gtk.RadioToolButton.new_from_widget(radio_justifyleft)
+        radio_justifyfill.set_icon_name(&#34;format-justify-fill-symbolic&#34;)
+        toolbar.insert(radio_justifyfill, nnn)   ; nnn += 1
+
+        radio_justifyleft.connect(
+            #&#34;toggled&#34;, self.on_justify_toggled, Gtk.Justification.LEFT
+            &#34;toggled&#34;, self.on_justify_toggled, self.tag_left
+        )
+        radio_justifycenter.connect(
+            #&#34;toggled&#34;, self.on_justify_toggled, Gtk.Justification.CENTER
+            &#34;toggled&#34;, self.on_justify_toggled, self.tag_center
+        )
+        radio_justifyright.connect(
+            &#34;toggled&#34;, self.on_justify_toggled, self.tag_right
+        )
+
+        radio_justifyfill.connect(
+            &#34;toggled&#34;, self.on_justify_toggled, self.tag_fill
+        )
+
+        button_big = Gtk.ToolButton()
+        button_big.set_icon_name(&#34;format-text-larger-symbolic&#34;)
+        button_big.set_tooltip_text(&#34;Set Superscript&#34;)
+        button_big.connect(&#34;clicked&#34;, self.on_super_button, self.tag_super)
+        toolbar.insert(button_big, nnn)  ; nnn += 1
+
+        button_big = Gtk.ToolButton()
+        button_big.set_icon_name(&#34;format-text-smaller-symbolic&#34;)
+        button_big.set_tooltip_text(&#34;Set Subscript&#34;)
+        button_big.connect(&#34;clicked&#34;, self.on_super_button, self.tag_sub)
+        toolbar.insert(button_big, nnn)  ; nnn += 1
+
+        button_big = Gtk.ToolButton()
+        button_big.set_icon_name(&#34;tools-check-spelling&#34;)
+        button_big.set_tooltip_text(&#34;Set XX Large font&#34;)
+        button_big.connect(&#34;clicked&#34;, self.on_button_clicked, self.tag_xbig)
+        toolbar.insert(button_big, nnn)   ; nnn += 1
+
+        button_color = Gtk.ToolButton()
+        button_color.set_icon_name(&#34;font-x-generic&#34;)
+        button_color.set_tooltip_text(&#34;Set Font&#34;)
+        #button_color.connect(&#34;clicked&#34;, self.on_color_clicked, 0)
+        toolbar.insert(button_color, nnn)  ; nnn += 1
+
+        toolbar.insert(Gtk.SeparatorToolItem(), nnn)   ; nnn += 1
+
+        button_clear = Gtk.ToolButton()
+        button_clear.set_icon_name(&#34;edit-clear-symbolic&#34;)
+        button_clear.set_tooltip_text(&#34;Remove ALL formatting&#34;)
+        button_clear.connect(&#34;clicked&#34;, self.on_clear_clicked)
+        toolbar.insert(button_clear, nnn)    ; nnn += 1
+
+        toolbar.insert(Gtk.SeparatorToolItem(), nnn)   ; nnn += 1
+
+        button_search = Gtk.ToolButton()
+        button_search.set_icon_name(&#34;system-search-symbolic&#34;)
+        button_search.set_tooltip_text(&#34;Search current text&#34;)
+        button_search.connect(&#34;clicked&#34;, self.on_search_clicked)
+        toolbar.insert(button_search, nnn)   ; nnn += 1
+
+        button_mag = Gtk.ToolButton()
+        button_mag.set_icon_name(&#34;zoom-fit-best&#34;)
+        button_mag.set_tooltip_text(&#34;Magnify Font&#34;)
+        button_mag.connect(&#34;clicked&#34;, self.on_zoom_clicked)
+        toolbar.insert(button_mag, nnn)  ; nnn += 1
+
+        button_mag = Gtk.ToolButton()
+        button_mag.set_icon_name(&#34;zoom-in-symbolic&#34;)
+        button_mag.set_tooltip_text(&#34;Set larger font&#34;)
+        button_mag.connect(&#34;clicked&#34;, self.on_zoom_clicked)
+        toolbar.insert(button_mag, nnn)   ; nnn += 1
+
+        button_mag2 = Gtk.ToolButton()
+        button_mag2.set_icon_name(&#34;zoom-out-symbolic&#34;)
+        button_mag2.set_tooltip_text(&#34;Set smaller Font&#34;)
+        button_mag2.connect(&#34;clicked&#34;, self.on_unzoom_clicked)
+        toolbar.insert(button_mag2, nnn)   ; nnn += 1
+
+    def area_key(self, widget, event):
+        #print(&#34;TextViewWin keypress&#34;, event.string, event.keyval)
+        if event.state &amp; Gdk.ModifierType.CONTROL_MASK:
+            print(&#34;TextViewWin control keypress&#34;, event.string, event.keyval)
+
+            if event.keyval == 102:
+                #print(&#34;control find&#34;)
+                if self.findcall:
+                    # Call with object argument
+                    self.findcall[0](self.findcall[1])
+
+
+    def area_button(self, but, event):
+        #print(&#34;click&#34;, event.x, event.y)
+        # textview
+        endd = self.textbuffer.get_end_iter()
+        isx, iter = self.textview.get_iter_at_location(event.x, event.y)
+        if isx:
+            txt =  self.textbuffer.get_text(iter, endd, False)
+            #print(&#34;[&#34;, txt[:4], &#34;]&#34;)
+
+            #defvals = self.textview.get_default_attributes()
+            #print(defvals.appearance.rise)
+
+            #ixy, attr = iter.get_attributes()
+            #if ixy:
+            #    #attr.ref()
+            #    #print(attr.refcount)
+            #    print(dir(attr))
+            #    #print(attr.refcount)
+            #    #print(attr.appearance.rise)
+            #    attr.unref()
+            #else:
+            #    print(&#34;no artt&#34;)
+
+            #attr.unref()
+
+
+    def on_rm_color(self, arg1):
+        print(  &#34;on_rm_color&#34;, arg1)
+
+        bounds = self.textbuffer.get_selection_bounds()
+
+        if not len(bounds):
+            if self.statstr:
+                self.statstr.set_text(&#34;No selection&#34;)
+            #print(&#34;No selection&#34;)
+            return
+        else:
+            start, end = bounds
+
+            # Clear out old colors
+            for cc in range(len(font_colors)):
+                rrr = &#34;backgr%d&#34; % cc
+                self.textbuffer.remove_tag(getattr(self, rrr), start, end)
+
+            for cc in range(len(font_colors)):
+                rrr = &#34;color%d&#34; % cc
+                self.textbuffer.remove_tag(getattr(self, rrr), start, end)
+
+            self.textbuffer.set_modified(1)
+
+    def on_combo_clicked(self, arg1, arg2):
+        #print(&#34;on_combo_clicked&#34;)
+        #cont = (&#34;12&#34;, &#34;32&#34;, &#34;64&#34;)
+        #combo_box = pgbox.ComboBox(cont)
+        #combo_box.show()
+        pass
+
+    def combo_sel(self, sel):
+        #print(&#34;combo_sel&#34;, sel)
+        bounds = self.textbuffer.get_selection_bounds()
+        if not len(bounds):
+            if self.statstr:
+                self.statstr.set_text(&#34;No selection&#34;)
+            #print(&#34;No selection&#34;)
+            return
+        else:
+            nnn = &#34;size%d&#34; % int(sel);
+            start, end = bounds
+
+            # Femove size tags from here
+            for aa in font_sizes:
+                rrr = &#34;size%d&#34; % int(aa);
+                self.textbuffer.remove_tag(getattr(self, rrr), start, end)
+            try:
+                self.textbuffer.apply_tag(getattr(self, nnn), start, end)
+                self.textbuffer.set_modified(1)
+            except:
+                print(&#34;Cannot apply size tag &#34;, nnn, sys.exc_info())
+
+    def combo_sel2(self, sel):
+        #print(&#34;combo_sel2&#34;, sel)
+        bounds = self.textbuffer.get_selection_bounds()
+
+        if not len(bounds):
+            if self.statstr:
+                self.statstr.set_text(&#34;No selection&#34;)
+            #print(&#34;No selection&#34;)
+            return
+        else:
+            # Clear out old colors
+            start, end = bounds
+            for cc in range(len(font_colors)):
+                rrr = &#34;color%d&#34; % cc
+                self.textbuffer.remove_tag(getattr(self, rrr), start, end)
+
+            # Find out the offset:
+            cnt = 0
+            for aa, bb in font_colors:
+                if aa == sel:
+                    break
+                cnt += 1
+            nnn = &#34;color%d&#34; % cnt
+            #print(&#34;nnn&#34;, nnn)
+            start, end = bounds
+            try:
+                self.textbuffer.apply_tag(getattr(self, nnn), start, end)
+                self.textbuffer.set_modified(1)
+            except:
+                print(&#34;Cannot apply size tag &#34;, nnn, sys.exc_info())
+
+    def combo_sel3(self, sel):
+        #print(&#34;combo_sel3&#34;, sel)
+        bounds = self.textbuffer.get_selection_bounds()
+
+        if not len(bounds):
+            if self.statstr:
+                self.statstr.set_text(&#34;No selection&#34;)
+            #print(&#34;No selection&#34;)
+            return
+        else:
+            start, end = bounds
+
+            # Clear out old colors
+            for cc in range(len(font_colors)):
+                rrr = &#34;backgr%d&#34; % cc
+                self.textbuffer.remove_tag(getattr(self, rrr), start, end)
+
+            # Find out the offset:
+            cnt = 0
+            for aa, bb in font_colors:
+                if aa == sel:
+                    break
+                cnt += 1
+
+            nnn = &#34;backgr%d&#34; % cnt
+            #print(&#34;nnn&#34;, nnn)
+
+            try:
+                self.textbuffer.apply_tag(getattr(self, nnn), start, end)
+                self.textbuffer.set_modified(1)
+            except:
+                print(&#34;Cannot apply size tag &#34;, nnn, sys.exc_info())
+
+
+    def on_zoom_clicked(self, arg1):
+
+        pg = Gtk.Widget.create_pango_context(self.textview)
+        myfd = pg.get_font_description()
+        mysize = myfd.get_size() / Pango.SCALE
+
+        fd = Pango.FontDescription()
+        fd.set_size((mysize + 1) * Pango.SCALE)
+        self.textview.modify_font(fd)
+
+    def on_unzoom_clicked(self, arg1):
+
+        pg = Gtk.Widget.create_pango_context(self.textview)
+        myfd = pg.get_font_description()
+        mysize = myfd.get_size() / Pango.SCALE
+
+        fd = Pango.FontDescription()
+        fd.set_size((mysize - 1) * Pango.SCALE)
+        self.textview.modify_font(fd)
+
+    def _create_textview(self):
+
+        self.textview = Gtk.TextView()
+        self.textbuffer = self.textview.get_buffer()
+
+        scrolledwindow = Gtk.ScrolledWindow()
+        scrolledwindow.set_hexpand(True)
+        scrolledwindow.set_vexpand(True)
+        self.grid.attach(scrolledwindow, 0, 2, 3, 1)
+
+        scrolledwindow.add(self.textview)
+
+        self.fd = Pango.FontDescription()
+        pg = Gtk.Widget.create_pango_context(self.textview)
+        myfd = pg.get_font_description()
+        self.mysize = myfd.get_size() / Pango.SCALE
+        self.myfam = myfd.get_family()
+        #print(self.mysize)
+
+        #self.textview.set_has_window(True)
+
+        #self.set_events(Gdk.EventMask.ALL_EVENTS_MASK )
+
+        self.tag_regular = self.textbuffer.create_tag(&#34;regular&#34;, size=self.mysize * Pango.SCALE)
+        self.tag_super   = self.textbuffer.create_tag(&#34;super&#34;, rise=5 * Pango.SCALE)
+        self.tag_sub     = self.textbuffer.create_tag(&#34;sub&#34;,   rise=-5 * Pango.SCALE)
+        self.tag_norm    = self.textbuffer.create_tag(&#34;norm&#34;, weight=14*Pango.SCALE)
+        self.tag_xbig    = self.textbuffer.create_tag(&#34;xbig&#34;, size=30*Pango.SCALE)
+        self.tag_big     = self.textbuffer.create_tag(&#34;big&#34;, size=20*Pango.SCALE)
+        #self.tag_red     = self.textbuffer.create_tag(&#34;red&#34;, foreground=&#34;red&#34;)
+        #self.tag_redbg   = self.textbuffer.create_tag(&#34;redbg&#34;, background=&#34;red&#34;)
+        self.tag_norm    = self.textbuffer.create_tag(&#34;normal&#34;, style=Pango.Style.NORMAL)
+        self.tag_bold    = self.textbuffer.create_tag(&#34;bold&#34;, weight=Pango.Weight.BOLD)
+        self.tag_italic     = self.textbuffer.create_tag(&#34;italic&#34;, style=Pango.Style.ITALIC)
+        self.tag_underline  = self.textbuffer.create_tag(&#34;underline&#34;, underline=Pango.Underline.SINGLE)
+        self.tag_found      = self.textbuffer.create_tag(&#34;found&#34;, background=&#34;yellow&#34;)
+        self.tag_left       = self.textbuffer.create_tag(&#34;justleft&#34;, justification=Gtk.Justification.LEFT)
+        self.tag_center     = self.textbuffer.create_tag(&#34;justcent&#34;, justification=Gtk.Justification.CENTER)
+        self.tag_right      = self.textbuffer.create_tag(&#34;justright&#34;, justification=Gtk.Justification.RIGHT)
+        self.tag_fill       = self.textbuffer.create_tag(&#34;justfill&#34;,  justification=Gtk.Justification.FILL)
+
+        self.textview.set_wrap_mode(Gtk.WrapMode.WORD)
+
+        # We create the attributes for all possible size tags
+        for aa in font_sizes:
+            nnn = &#34;size%d&#34; % int(aa);
+            ttt = self.textbuffer.create_tag(nnn, size=int(aa) * Pango.SCALE)
+            setattr(self, nnn, ttt)
+
+        # We create the attributes for all possible color tags
+        cnt = 0
+        for aa, bb in font_colors:
+            print
+            nnn = &#34;color%d&#34; % cnt;
+            ttt = self.textbuffer.create_tag(nnn, foreground=aa)
+            setattr(self, nnn, ttt)
+            cnt += 1
+
+        cnt = 0
+        for aa, bb in font_colors:
+            nnn = &#34;backgr%d&#34; % int(cnt);
+            ttt = self.textbuffer.create_tag(nnn, background=aa)
+            setattr(self, nnn, ttt)
+            cnt += 1
+
+        #print(dir(self))
+
+    def _create_buttons(self):
+
+        #check_editable = Gtk.CheckButton(label=&#34;Editable&#34;)
+        #check_editable.set_active(True)
+        #check_editable.connect(&#34;toggled&#34;, self.on_editable_toggled)
+        #self.grid.attach(check_editable, 0, 2, 1, 1)
+        ##
+        #check_cursor = Gtk.CheckButton(label=&#34;Cursor Visible&#34;)
+        #check_cursor.set_active(True)
+        #check_editable.connect(&#34;toggled&#34;, self.on_cursor_toggled)
+        #self.grid.attach_next_to(
+        #    check_cursor, check_editable, Gtk.PositionType.RIGHT, 1, 1)
+
+        # ---------------------------------------------------------------------------------
+
+        radio_wrapword =  Gtk.RadioButton.new_with_label_from_widget(None, &#34;Word&#34;)
+        self.grid.attach(radio_wrapword, 0, 3, 1, 1)
+
+        radio_wrapchar =  Gtk.RadioButton.new_with_label_from_widget(radio_wrapword, &#34;Character&#34;)
+        self.grid.attach_next_to(
+            radio_wrapchar, radio_wrapword, Gtk.PositionType.RIGHT, 1, 1)
+
+        radio_wrapnone = Gtk.RadioButton.new_with_label_from_widget(radio_wrapword, &#34;None&#34;)
+        self.grid.attach_next_to(
+                radio_wrapnone, radio_wrapchar, Gtk.PositionType.RIGHT, 1, 1)
+
+        radio_wrapnone.connect(&#34;toggled&#34;, self.on_wrap_toggled, Gtk.WrapMode.NONE)
+        radio_wrapchar.connect(&#34;toggled&#34;, self.on_wrap_toggled, Gtk.WrapMode.CHAR)
+        radio_wrapword.connect(&#34;toggled&#34;, self.on_wrap_toggled, Gtk.WrapMode.WORD)
+
+    def get_text(self):
+        startt = self.textbuffer.get_start_iter()
+        endd = self.textbuffer.get_end_iter()
+        txt = self.textbuffer.get_text(startt, endd, False)
+        return txt
+
+    #def get_all(self):
+    #    print(&#34;Get_all called&#34;)
+    #    startt = self.buffer.get_start_iter()
+    #    endd = self.buffer.get_end_iter()
+    #    return self.buffer.get_text(startt, endd, True)
+
+    def  get_modified(self):
+        return self.textbuffer.get_modified()
+
+    def  set_modified(self, valx):
+        return self.textbuffer.set_modified(valx)
+
+    def set_text(self, txt):
+        if self.textbuffer.get_modified():
+            startt = self.textbuffer.get_start_iter()
+            endd = self.textbuffer.get_end_iter()
+            old = self.textbuffer.get_text(startt, endd, False)
+            if self.callb:
+                self.callb(old)
+            #print(&#34;old_content&#34;, old)
+        self.textbuffer.set_text(txt)
+
+    def on_rm_clicked(self, widget, tag):
+        bounds = self.textbuffer.get_selection_bounds()
+        if len(bounds) != 0:
+            start, end = bounds
+            self.textbuffer.remove_all_tags(start, end)
+            self.textbuffer.set_modified(1)
+
+            # This was the old clear -- now clearing ALL
+            #self.textbuffer.remove_tag(self.tag_bold, start, end)
+            #self.textbuffer.remove_tag(self.tag_italic, start, end)
+            #self.textbuffer.remove_tag(self.tag_underline, start, end)
+            #self.textbuffer.remove_tag(self.tag_red, start, end)
+            #self.textbuffer.remove_tag(self.tag_redbg, start, end)
+            #self.textbuffer.remove_tag(self.tag_big, start, end)
+            #self.textbuffer.remove_tag(self.tag_xbig, start, end)
+            #self.textbuffer.remove_tag(self.tag_regular, start, end)
+
+    def on_button_clicked(self, widget, tag):
+
+        bounds = self.textbuffer.get_selection_bounds()
+        if not len(bounds):
+            if self.statstr:
+                self.statstr.set_text(&#34;No style selection.&#34;)
+        else:
+            start, end = bounds
+            #print(&#34;Apply Tag&#34;, tag, start, end)
+            self.textbuffer.apply_tag(tag, start, end)
+            self.textbuffer.set_modified(1)
+
+    def on_super_button(self, widget, tag):
+
+        bounds = self.textbuffer.get_selection_bounds()
+        if not len(bounds):
+            if self.statstr:
+                self.statstr.set_text(&#34;No style selection.&#34;)
+        else:
+            start, end = bounds
+
+            self.textbuffer.remove_tag(self.tag_super, start, end)
+            self.textbuffer.remove_tag(self.tag_sub, start, end)
+
+            #print(&#34;Apply Tag&#34;, tag, start, end)
+            self.textbuffer.apply_tag(tag, start, end)
+            self.textbuffer.set_modified(1)
+
+    def on_size_button(self, widget, tag):
+
+        bounds = self.textbuffer.get_selection_bounds()
+        if not len(bounds):
+            if self.statstr:
+                self.statstr.set_text(&#34;No style selection.&#34;)
+        else:
+            start, end = bounds
+
+            self.textbuffer.remove_tag(self.tag_super, start, end)
+            self.textbuffer.remove_tag(self.tag_sub, start, end)
+
+            #print(&#34;Apply Tag&#34;, tag, start, end)
+            self.textbuffer.apply_tag(tag, start, end)
+            self.textbuffer.set_modified(1)
+
+    def on_clear_clicked(self, widget):
+        start = self.textbuffer.get_start_iter()
+        end = self.textbuffer.get_end_iter()
+        self.textbuffer.remove_all_tags(start, end)
+        self.textbuffer.set_modified(1)
+
+    def on_editable_toggled(self, widget):
+        self.textview.set_editable(widget.get_active())
+        self.textbuffer.set_modified(1)
+
+    def on_cursor_toggled(self, widget):
+        self.textview.set_cursor_visible(widget.get_active())
+
+    def on_wrap_toggled(self, widget, mode):
+        self.textview.set_wrap_mode(mode)
+
+    def on_justify_toggled(self, widget, justification):
+        #print(&#34;on_justify_toggled&#34;, justification)
+        #self.textview.set_justification(justification)
+        #start = self.textbuffer.get_start_iter()
+        #end = self.textbuffer.get_end_iter()
+
+        bounds = self.textbuffer.get_selection_bounds()
+        if not len(bounds):
+            if self.statstr:
+                self.statstr.set_text(&#34;No selection.&#34;)
+        else:
+            start, end = bounds
+            #print(&#34;Apply Just Tag&#34;, justification, start, end)
+
+            # Remove old justification
+            self.textbuffer.remove_tag(self.tag_left, start, end)
+            self.textbuffer.remove_tag(self.tag_center, start, end)
+            self.textbuffer.remove_tag(self.tag_right, start, end)
+            self.textbuffer.remove_tag(self.tag_fill, start, end)
+
+            self.textbuffer.apply_tag(justification, start, end)
+            self.textbuffer.set_modified(1)
+
+    def on_search_clicked(self, widget):
+
+        if self.findcall:
+            # Call with object argument
+            self.findcall[0](self.findcall[1])
+
+        dialog.destroy()
+
+    def search_and_mark(self, text, start):
+        end = self.textbuffer.get_end_iter()
+        match = start.forward_search(text, 0, end)
+
+        if match is not None:
+            match_start, match_end = match
+            self.textbuffer.apply_tag(self.tag_found, match_start, match_end)
+            self.search_and_mark(text, match_end)
+
+    # --------------------------------------------------------------------
+    # Load it here
+
+    def deser_buff(self, buffx):
+
+        if not buffx:
+            return
+
+        #print(&#34;UnSer buff&#34;)
+
+        fmt = self.textbuffer.register_deserialize_tagset()
+        self.textbuffer.deserialize_set_can_create_tags(fmt, True)
+        self.textbuffer.deserialize(self.textbuffer, fmt,
+                                self.textbuffer.get_start_iter(), buffx)
+        self.textbuffer.set_modified(0)
+
+    # --------------------------------------------------------------------
+    # Save it here
+
+    def ser_buff(self):
+
+        #print(&#34;Ser buff&#34;)
+
+        startt = self.textbuffer.get_start_iter()
+        endd = self.textbuffer.get_end_iter()
+
+        fmt = self.textbuffer.register_serialize_tagset()
+        sss = self.textbuffer.serialize(self.textbuffer, fmt, startt, endd)
+        if not sss: sss = b&#34;&#34;
+        return sss
+
+    # Print TextTag  (testing)
+    def ptag(self, ttt, tt):
+
+        global cnt              # Print only one
+        if cnt: return
+        cnt += 1
+
+        print(ttt)
+        #print(dir(ttt))
+        ll = ttt.list_properties()
+        for aa in ll:
+            #print(nnnn, end= &#34; &#34;)
+            try:
+                nn = tt.lookup(aa.name)
+                if nn:
+                    #nnn = nn.get_property(&#34;size&#34;)
+                    #print(&#34;size&#34;, nnn)
+
+                    lll = nn.list_properties()
+                    for bb in lll:
+                        nnn = bb.name   #get_property(&#34;name&#34;)
+                        try:
+                            pp = nn.get_property(nnn)
+                        except:
+                            pass
+                        print(aa.name, &#34;prop&#34;, &#34;&#39;&#34; + nnn + &#34;&#39;&#34; , &#34;val =&#34;, pp)
+                    print()
+
+            except:
+                print(sys.exc_info())
+                pass
+            #print()
+
+        return
+
+    # --------------------------------------------------------------------
+
+    def print_tags(self):
+
+        #startt = self.textbuffer.get_start_iter()
+        #endd = self.textbuffer.get_end_iter()
+
+        # TagTable
+        #tt = self.textbuffer.get_property(&#34;tag-table&#34;)
+        #print(&#34;table&#34;, tt)
+
+        tt = self.textbuffer.get_tag_table()
+        print(&#34;table&#34;, tt)
+        tt.foreach(self.ptag, tt)
+        print()
+
+        return
+
+        txt = self.textbuffer.get_text(startt, endd, False)
+        lc =  self.textbuffer.get_char_count()
+        for aa in range(lc):
+            iii = self.textbuffer.get_iter_at_offset(aa)
+            eee = self.textbuffer.get_iter_at_offset(aa+1)
+            ccc = self.textbuffer.get_text(iii, eee, False)
+            #print(&#34;aa&#34;, ccc)
+
+        return txt
+
+
+        #all = self.edview.get_all()
+        #print(&#34;serialize&#34;, self.edview.textbuffer.get_deserialize_formats())
+        #print(&#34;str&#34;, self.edview.serial_str())
+        #print(&#34;serialize&#34;, self.edview.textbuffer.get_deserialize_formats())
+
+        #vv = self.edview.textbuffer
+        #startt = vv.get_start_iter(); endd = vv.get_end_iter()
+        #while True:
+        #    prev = startt.copy()
+        #    nextok = startt.forward_line()
+        #    ttt = vv.get_text(prev, startt, False)
+        #    prevc = prev.copy()
+        #    while True:
+        #        sss = prevc.get_toggled_tags(True)
+        #        if sss:
+        #            print(&#34;tags on toggle&#34;, sss)
+        #            for cc in sss:
+        #                print(&#34;cc&#34;, cc.get_property(&#34;name&#34;))
+        #            print(&#34;pos&#34;, prevc.get_line(), prevc.get_line_offset())
+        #        beg = prevc.copy()
+        #        nextokc = prevc.forward_char()
+        #        if not nextokc:
+        #            break
+        #        if startt == prevc:
+        #            break
+        #        chh = vv.get_text(beg, prevc, False)
+        #        print(chh, end=&#34;&#34;)
+        #
+        #    #print(&#34;tags&#34;, prev.get_tags())
+        #    #print(&#34;line:&#34;, ttt, end=&#34;&#34;)
+        #    if not nextok:
+        #        break
+        #
+        ##print(&#34;tags:&#34;, self.edview.textbuffer.get_tags())</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.VBox</li>
+<li>gi.overrides.Gtk.Box</li>
+<li>gi.repository.Gtk.Box</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gi.repository.Gtk.Orientable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pgtextview.pgTextView.area_button"><code class="name flex">
+<span>def <span class="ident">area_button</span></span>(<span>self, but, event)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def area_button(self, but, event):
+    #print(&#34;click&#34;, event.x, event.y)
+    # textview
+    endd = self.textbuffer.get_end_iter()
+    isx, iter = self.textview.get_iter_at_location(event.x, event.y)
+    if isx:
+        txt =  self.textbuffer.get_text(iter, endd, False)
+        #print(&#34;[&#34;, txt[:4], &#34;]&#34;)
+
+        #defvals = self.textview.get_default_attributes()
+        #print(defvals.appearance.rise)
+
+        #ixy, attr = iter.get_attributes()
+        #if ixy:
+        #    #attr.ref()
+        #    #print(attr.refcount)
+        #    print(dir(attr))
+        #    #print(attr.refcount)
+        #    #print(attr.appearance.rise)
+        #    attr.unref()
+        #else:
+        #    print(&#34;no artt&#34;)
+
+        #attr.unref()</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.area_curs"><code class="name flex">
+<span>def <span class="ident">area_curs</span></span>(<span>self, ext_view, step, count, extend_selection)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def  area_curs(self, ext_view, step, count, extend_selection):
+    #print(&#34;step&#34;, step, &#34;count&#34;, count)
+    pass</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.area_key"><code class="name flex">
+<span>def <span class="ident">area_key</span></span>(<span>self, widget, event)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def area_key(self, widget, event):
+    #print(&#34;TextViewWin keypress&#34;, event.string, event.keyval)
+    if event.state &amp; Gdk.ModifierType.CONTROL_MASK:
+        print(&#34;TextViewWin control keypress&#34;, event.string, event.keyval)
+
+        if event.keyval == 102:
+            #print(&#34;control find&#34;)
+            if self.findcall:
+                # Call with object argument
+                self.findcall[0](self.findcall[1])</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.combo_sel"><code class="name flex">
+<span>def <span class="ident">combo_sel</span></span>(<span>self, sel)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def combo_sel(self, sel):
+    #print(&#34;combo_sel&#34;, sel)
+    bounds = self.textbuffer.get_selection_bounds()
+    if not len(bounds):
+        if self.statstr:
+            self.statstr.set_text(&#34;No selection&#34;)
+        #print(&#34;No selection&#34;)
+        return
+    else:
+        nnn = &#34;size%d&#34; % int(sel);
+        start, end = bounds
+
+        # Femove size tags from here
+        for aa in font_sizes:
+            rrr = &#34;size%d&#34; % int(aa);
+            self.textbuffer.remove_tag(getattr(self, rrr), start, end)
+        try:
+            self.textbuffer.apply_tag(getattr(self, nnn), start, end)
+            self.textbuffer.set_modified(1)
+        except:
+            print(&#34;Cannot apply size tag &#34;, nnn, sys.exc_info())</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.combo_sel2"><code class="name flex">
+<span>def <span class="ident">combo_sel2</span></span>(<span>self, sel)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def combo_sel2(self, sel):
+    #print(&#34;combo_sel2&#34;, sel)
+    bounds = self.textbuffer.get_selection_bounds()
+
+    if not len(bounds):
+        if self.statstr:
+            self.statstr.set_text(&#34;No selection&#34;)
+        #print(&#34;No selection&#34;)
+        return
+    else:
+        # Clear out old colors
+        start, end = bounds
+        for cc in range(len(font_colors)):
+            rrr = &#34;color%d&#34; % cc
+            self.textbuffer.remove_tag(getattr(self, rrr), start, end)
+
+        # Find out the offset:
+        cnt = 0
+        for aa, bb in font_colors:
+            if aa == sel:
+                break
+            cnt += 1
+        nnn = &#34;color%d&#34; % cnt
+        #print(&#34;nnn&#34;, nnn)
+        start, end = bounds
+        try:
+            self.textbuffer.apply_tag(getattr(self, nnn), start, end)
+            self.textbuffer.set_modified(1)
+        except:
+            print(&#34;Cannot apply size tag &#34;, nnn, sys.exc_info())</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.combo_sel3"><code class="name flex">
+<span>def <span class="ident">combo_sel3</span></span>(<span>self, sel)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def combo_sel3(self, sel):
+    #print(&#34;combo_sel3&#34;, sel)
+    bounds = self.textbuffer.get_selection_bounds()
+
+    if not len(bounds):
+        if self.statstr:
+            self.statstr.set_text(&#34;No selection&#34;)
+        #print(&#34;No selection&#34;)
+        return
+    else:
+        start, end = bounds
+
+        # Clear out old colors
+        for cc in range(len(font_colors)):
+            rrr = &#34;backgr%d&#34; % cc
+            self.textbuffer.remove_tag(getattr(self, rrr), start, end)
+
+        # Find out the offset:
+        cnt = 0
+        for aa, bb in font_colors:
+            if aa == sel:
+                break
+            cnt += 1
+
+        nnn = &#34;backgr%d&#34; % cnt
+        #print(&#34;nnn&#34;, nnn)
+
+        try:
+            self.textbuffer.apply_tag(getattr(self, nnn), start, end)
+            self.textbuffer.set_modified(1)
+        except:
+            print(&#34;Cannot apply size tag &#34;, nnn, sys.exc_info())</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.deser_buff"><code class="name flex">
+<span>def <span class="ident">deser_buff</span></span>(<span>self, buffx)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def deser_buff(self, buffx):
+
+    if not buffx:
+        return
+
+    #print(&#34;UnSer buff&#34;)
+
+    fmt = self.textbuffer.register_deserialize_tagset()
+    self.textbuffer.deserialize_set_can_create_tags(fmt, True)
+    self.textbuffer.deserialize(self.textbuffer, fmt,
+                            self.textbuffer.get_start_iter(), buffx)
+    self.textbuffer.set_modified(0)</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.get_modified"><code class="name flex">
+<span>def <span class="ident">get_modified</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def  get_modified(self):
+    return self.textbuffer.get_modified()</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.get_text"><code class="name flex">
+<span>def <span class="ident">get_text</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_text(self):
+    startt = self.textbuffer.get_start_iter()
+    endd = self.textbuffer.get_end_iter()
+    txt = self.textbuffer.get_text(startt, endd, False)
+    return txt</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.on_button_clicked"><code class="name flex">
+<span>def <span class="ident">on_button_clicked</span></span>(<span>self, widget, tag)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_button_clicked(self, widget, tag):
+
+    bounds = self.textbuffer.get_selection_bounds()
+    if not len(bounds):
+        if self.statstr:
+            self.statstr.set_text(&#34;No style selection.&#34;)
+    else:
+        start, end = bounds
+        #print(&#34;Apply Tag&#34;, tag, start, end)
+        self.textbuffer.apply_tag(tag, start, end)
+        self.textbuffer.set_modified(1)</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.on_clear_clicked"><code class="name flex">
+<span>def <span class="ident">on_clear_clicked</span></span>(<span>self, widget)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_clear_clicked(self, widget):
+    start = self.textbuffer.get_start_iter()
+    end = self.textbuffer.get_end_iter()
+    self.textbuffer.remove_all_tags(start, end)
+    self.textbuffer.set_modified(1)</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.on_combo_clicked"><code class="name flex">
+<span>def <span class="ident">on_combo_clicked</span></span>(<span>self, arg1, arg2)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_combo_clicked(self, arg1, arg2):
+    #print(&#34;on_combo_clicked&#34;)
+    #cont = (&#34;12&#34;, &#34;32&#34;, &#34;64&#34;)
+    #combo_box = pgbox.ComboBox(cont)
+    #combo_box.show()
+    pass</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.on_cursor_toggled"><code class="name flex">
+<span>def <span class="ident">on_cursor_toggled</span></span>(<span>self, widget)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_cursor_toggled(self, widget):
+    self.textview.set_cursor_visible(widget.get_active())</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.on_editable_toggled"><code class="name flex">
+<span>def <span class="ident">on_editable_toggled</span></span>(<span>self, widget)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_editable_toggled(self, widget):
+    self.textview.set_editable(widget.get_active())
+    self.textbuffer.set_modified(1)</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.on_justify_toggled"><code class="name flex">
+<span>def <span class="ident">on_justify_toggled</span></span>(<span>self, widget, justification)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_justify_toggled(self, widget, justification):
+    #print(&#34;on_justify_toggled&#34;, justification)
+    #self.textview.set_justification(justification)
+    #start = self.textbuffer.get_start_iter()
+    #end = self.textbuffer.get_end_iter()
+
+    bounds = self.textbuffer.get_selection_bounds()
+    if not len(bounds):
+        if self.statstr:
+            self.statstr.set_text(&#34;No selection.&#34;)
+    else:
+        start, end = bounds
+        #print(&#34;Apply Just Tag&#34;, justification, start, end)
+
+        # Remove old justification
+        self.textbuffer.remove_tag(self.tag_left, start, end)
+        self.textbuffer.remove_tag(self.tag_center, start, end)
+        self.textbuffer.remove_tag(self.tag_right, start, end)
+        self.textbuffer.remove_tag(self.tag_fill, start, end)
+
+        self.textbuffer.apply_tag(justification, start, end)
+        self.textbuffer.set_modified(1)</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.on_rm_clicked"><code class="name flex">
+<span>def <span class="ident">on_rm_clicked</span></span>(<span>self, widget, tag)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_rm_clicked(self, widget, tag):
+    bounds = self.textbuffer.get_selection_bounds()
+    if len(bounds) != 0:
+        start, end = bounds
+        self.textbuffer.remove_all_tags(start, end)
+        self.textbuffer.set_modified(1)
+
+        # This was the old clear -- now clearing ALL
+        #self.textbuffer.remove_tag(self.tag_bold, start, end)
+        #self.textbuffer.remove_tag(self.tag_italic, start, end)
+        #self.textbuffer.remove_tag(self.tag_underline, start, end)
+        #self.textbuffer.remove_tag(self.tag_red, start, end)
+        #self.textbuffer.remove_tag(self.tag_redbg, start, end)
+        #self.textbuffer.remove_tag(self.tag_big, start, end)
+        #self.textbuffer.remove_tag(self.tag_xbig, start, end)
+        #self.textbuffer.remove_tag(self.tag_regular, start, end)</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.on_rm_color"><code class="name flex">
+<span>def <span class="ident">on_rm_color</span></span>(<span>self, arg1)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_rm_color(self, arg1):
+    print(  &#34;on_rm_color&#34;, arg1)
+
+    bounds = self.textbuffer.get_selection_bounds()
+
+    if not len(bounds):
+        if self.statstr:
+            self.statstr.set_text(&#34;No selection&#34;)
+        #print(&#34;No selection&#34;)
+        return
+    else:
+        start, end = bounds
+
+        # Clear out old colors
+        for cc in range(len(font_colors)):
+            rrr = &#34;backgr%d&#34; % cc
+            self.textbuffer.remove_tag(getattr(self, rrr), start, end)
+
+        for cc in range(len(font_colors)):
+            rrr = &#34;color%d&#34; % cc
+            self.textbuffer.remove_tag(getattr(self, rrr), start, end)
+
+        self.textbuffer.set_modified(1)</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.on_search_clicked"><code class="name flex">
+<span>def <span class="ident">on_search_clicked</span></span>(<span>self, widget)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_search_clicked(self, widget):
+
+    if self.findcall:
+        # Call with object argument
+        self.findcall[0](self.findcall[1])
+
+    dialog.destroy()</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.on_size_button"><code class="name flex">
+<span>def <span class="ident">on_size_button</span></span>(<span>self, widget, tag)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_size_button(self, widget, tag):
+
+    bounds = self.textbuffer.get_selection_bounds()
+    if not len(bounds):
+        if self.statstr:
+            self.statstr.set_text(&#34;No style selection.&#34;)
+    else:
+        start, end = bounds
+
+        self.textbuffer.remove_tag(self.tag_super, start, end)
+        self.textbuffer.remove_tag(self.tag_sub, start, end)
+
+        #print(&#34;Apply Tag&#34;, tag, start, end)
+        self.textbuffer.apply_tag(tag, start, end)
+        self.textbuffer.set_modified(1)</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.on_super_button"><code class="name flex">
+<span>def <span class="ident">on_super_button</span></span>(<span>self, widget, tag)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_super_button(self, widget, tag):
+
+    bounds = self.textbuffer.get_selection_bounds()
+    if not len(bounds):
+        if self.statstr:
+            self.statstr.set_text(&#34;No style selection.&#34;)
+    else:
+        start, end = bounds
+
+        self.textbuffer.remove_tag(self.tag_super, start, end)
+        self.textbuffer.remove_tag(self.tag_sub, start, end)
+
+        #print(&#34;Apply Tag&#34;, tag, start, end)
+        self.textbuffer.apply_tag(tag, start, end)
+        self.textbuffer.set_modified(1)</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.on_unzoom_clicked"><code class="name flex">
+<span>def <span class="ident">on_unzoom_clicked</span></span>(<span>self, arg1)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_unzoom_clicked(self, arg1):
+
+    pg = Gtk.Widget.create_pango_context(self.textview)
+    myfd = pg.get_font_description()
+    mysize = myfd.get_size() / Pango.SCALE
+
+    fd = Pango.FontDescription()
+    fd.set_size((mysize - 1) * Pango.SCALE)
+    self.textview.modify_font(fd)</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.on_wrap_toggled"><code class="name flex">
+<span>def <span class="ident">on_wrap_toggled</span></span>(<span>self, widget, mode)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_wrap_toggled(self, widget, mode):
+    self.textview.set_wrap_mode(mode)</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.on_zoom_clicked"><code class="name flex">
+<span>def <span class="ident">on_zoom_clicked</span></span>(<span>self, arg1)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_zoom_clicked(self, arg1):
+
+    pg = Gtk.Widget.create_pango_context(self.textview)
+    myfd = pg.get_font_description()
+    mysize = myfd.get_size() / Pango.SCALE
+
+    fd = Pango.FontDescription()
+    fd.set_size((mysize + 1) * Pango.SCALE)
+    self.textview.modify_font(fd)</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.print_tags"><code class="name flex">
+<span>def <span class="ident">print_tags</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def print_tags(self):
+
+    #startt = self.textbuffer.get_start_iter()
+    #endd = self.textbuffer.get_end_iter()
+
+    # TagTable
+    #tt = self.textbuffer.get_property(&#34;tag-table&#34;)
+    #print(&#34;table&#34;, tt)
+
+    tt = self.textbuffer.get_tag_table()
+    print(&#34;table&#34;, tt)
+    tt.foreach(self.ptag, tt)
+    print()
+
+    return
+
+    txt = self.textbuffer.get_text(startt, endd, False)
+    lc =  self.textbuffer.get_char_count()
+    for aa in range(lc):
+        iii = self.textbuffer.get_iter_at_offset(aa)
+        eee = self.textbuffer.get_iter_at_offset(aa+1)
+        ccc = self.textbuffer.get_text(iii, eee, False)
+        #print(&#34;aa&#34;, ccc)
+
+    return txt
+
+
+    #all = self.edview.get_all()
+    #print(&#34;serialize&#34;, self.edview.textbuffer.get_deserialize_formats())
+    #print(&#34;str&#34;, self.edview.serial_str())
+    #print(&#34;serialize&#34;, self.edview.textbuffer.get_deserialize_formats())
+
+    #vv = self.edview.textbuffer
+    #startt = vv.get_start_iter(); endd = vv.get_end_iter()
+    #while True:
+    #    prev = startt.copy()
+    #    nextok = startt.forward_line()
+    #    ttt = vv.get_text(prev, startt, False)
+    #    prevc = prev.copy()
+    #    while True:
+    #        sss = prevc.get_toggled_tags(True)
+    #        if sss:
+    #            print(&#34;tags on toggle&#34;, sss)
+    #            for cc in sss:
+    #                print(&#34;cc&#34;, cc.get_property(&#34;name&#34;))
+    #            print(&#34;pos&#34;, prevc.get_line(), prevc.get_line_offset())
+    #        beg = prevc.copy()
+    #        nextokc = prevc.forward_char()
+    #        if not nextokc:
+    #            break
+    #        if startt == prevc:
+    #            break
+    #        chh = vv.get_text(beg, prevc, False)
+    #        print(chh, end=&#34;&#34;)
+    #
+    #    #print(&#34;tags&#34;, prev.get_tags())
+    #    #print(&#34;line:&#34;, ttt, end=&#34;&#34;)
+    #    if not nextok:
+    #        break
+    #
+    ##print(&#34;tags:&#34;, self.edview.textbuffer.get_tags())</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.ptag"><code class="name flex">
+<span>def <span class="ident">ptag</span></span>(<span>self, ttt, tt)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ptag(self, ttt, tt):
+
+    global cnt              # Print only one
+    if cnt: return
+    cnt += 1
+
+    print(ttt)
+    #print(dir(ttt))
+    ll = ttt.list_properties()
+    for aa in ll:
+        #print(nnnn, end= &#34; &#34;)
+        try:
+            nn = tt.lookup(aa.name)
+            if nn:
+                #nnn = nn.get_property(&#34;size&#34;)
+                #print(&#34;size&#34;, nnn)
+
+                lll = nn.list_properties()
+                for bb in lll:
+                    nnn = bb.name   #get_property(&#34;name&#34;)
+                    try:
+                        pp = nn.get_property(nnn)
+                    except:
+                        pass
+                    print(aa.name, &#34;prop&#34;, &#34;&#39;&#34; + nnn + &#34;&#39;&#34; , &#34;val =&#34;, pp)
+                print()
+
+        except:
+            print(sys.exc_info())
+            pass
+        #print()
+
+    return</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.search_and_mark"><code class="name flex">
+<span>def <span class="ident">search_and_mark</span></span>(<span>self, text, start)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def search_and_mark(self, text, start):
+    end = self.textbuffer.get_end_iter()
+    match = start.forward_search(text, 0, end)
+
+    if match is not None:
+        match_start, match_end = match
+        self.textbuffer.apply_tag(self.tag_found, match_start, match_end)
+        self.search_and_mark(text, match_end)</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.ser_buff"><code class="name flex">
+<span>def <span class="ident">ser_buff</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ser_buff(self):
+
+    #print(&#34;Ser buff&#34;)
+
+    startt = self.textbuffer.get_start_iter()
+    endd = self.textbuffer.get_end_iter()
+
+    fmt = self.textbuffer.register_serialize_tagset()
+    sss = self.textbuffer.serialize(self.textbuffer, fmt, startt, endd)
+    if not sss: sss = b&#34;&#34;
+    return sss</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.set_modified"><code class="name flex">
+<span>def <span class="ident">set_modified</span></span>(<span>self, valx)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def  set_modified(self, valx):
+    return self.textbuffer.set_modified(valx)</code></pre>
+</details>
+</dd>
+<dt id="pgtextview.pgTextView.set_text"><code class="name flex">
+<span>def <span class="ident">set_text</span></span>(<span>self, txt)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_text(self, txt):
+    if self.textbuffer.get_modified():
+        startt = self.textbuffer.get_start_iter()
+        endd = self.textbuffer.get_end_iter()
+        old = self.textbuffer.get_text(startt, endd, False)
+        if self.callb:
+            self.callb(old)
+        #print(&#34;old_content&#34;, old)
+    self.textbuffer.set_text(txt)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="pgtextview.pgTextView" href="#pgtextview.pgTextView">pgTextView</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pgtextview.pgTextView.area_button" href="#pgtextview.pgTextView.area_button">area_button</a></code></li>
+<li><code><a title="pgtextview.pgTextView.area_curs" href="#pgtextview.pgTextView.area_curs">area_curs</a></code></li>
+<li><code><a title="pgtextview.pgTextView.area_key" href="#pgtextview.pgTextView.area_key">area_key</a></code></li>
+<li><code><a title="pgtextview.pgTextView.combo_sel" href="#pgtextview.pgTextView.combo_sel">combo_sel</a></code></li>
+<li><code><a title="pgtextview.pgTextView.combo_sel2" href="#pgtextview.pgTextView.combo_sel2">combo_sel2</a></code></li>
+<li><code><a title="pgtextview.pgTextView.combo_sel3" href="#pgtextview.pgTextView.combo_sel3">combo_sel3</a></code></li>
+<li><code><a title="pgtextview.pgTextView.deser_buff" href="#pgtextview.pgTextView.deser_buff">deser_buff</a></code></li>
+<li><code><a title="pgtextview.pgTextView.get_modified" href="#pgtextview.pgTextView.get_modified">get_modified</a></code></li>
+<li><code><a title="pgtextview.pgTextView.get_text" href="#pgtextview.pgTextView.get_text">get_text</a></code></li>
+<li><code><a title="pgtextview.pgTextView.on_button_clicked" href="#pgtextview.pgTextView.on_button_clicked">on_button_clicked</a></code></li>
+<li><code><a title="pgtextview.pgTextView.on_clear_clicked" href="#pgtextview.pgTextView.on_clear_clicked">on_clear_clicked</a></code></li>
+<li><code><a title="pgtextview.pgTextView.on_combo_clicked" href="#pgtextview.pgTextView.on_combo_clicked">on_combo_clicked</a></code></li>
+<li><code><a title="pgtextview.pgTextView.on_cursor_toggled" href="#pgtextview.pgTextView.on_cursor_toggled">on_cursor_toggled</a></code></li>
+<li><code><a title="pgtextview.pgTextView.on_editable_toggled" href="#pgtextview.pgTextView.on_editable_toggled">on_editable_toggled</a></code></li>
+<li><code><a title="pgtextview.pgTextView.on_justify_toggled" href="#pgtextview.pgTextView.on_justify_toggled">on_justify_toggled</a></code></li>
+<li><code><a title="pgtextview.pgTextView.on_rm_clicked" href="#pgtextview.pgTextView.on_rm_clicked">on_rm_clicked</a></code></li>
+<li><code><a title="pgtextview.pgTextView.on_rm_color" href="#pgtextview.pgTextView.on_rm_color">on_rm_color</a></code></li>
+<li><code><a title="pgtextview.pgTextView.on_search_clicked" href="#pgtextview.pgTextView.on_search_clicked">on_search_clicked</a></code></li>
+<li><code><a title="pgtextview.pgTextView.on_size_button" href="#pgtextview.pgTextView.on_size_button">on_size_button</a></code></li>
+<li><code><a title="pgtextview.pgTextView.on_super_button" href="#pgtextview.pgTextView.on_super_button">on_super_button</a></code></li>
+<li><code><a title="pgtextview.pgTextView.on_unzoom_clicked" href="#pgtextview.pgTextView.on_unzoom_clicked">on_unzoom_clicked</a></code></li>
+<li><code><a title="pgtextview.pgTextView.on_wrap_toggled" href="#pgtextview.pgTextView.on_wrap_toggled">on_wrap_toggled</a></code></li>
+<li><code><a title="pgtextview.pgTextView.on_zoom_clicked" href="#pgtextview.pgTextView.on_zoom_clicked">on_zoom_clicked</a></code></li>
+<li><code><a title="pgtextview.pgTextView.print_tags" href="#pgtextview.pgTextView.print_tags">print_tags</a></code></li>
+<li><code><a title="pgtextview.pgTextView.ptag" href="#pgtextview.pgTextView.ptag">ptag</a></code></li>
+<li><code><a title="pgtextview.pgTextView.search_and_mark" href="#pgtextview.pgTextView.search_and_mark">search_and_mark</a></code></li>
+<li><code><a title="pgtextview.pgTextView.ser_buff" href="#pgtextview.pgTextView.ser_buff">ser_buff</a></code></li>
+<li><code><a title="pgtextview.pgTextView.set_modified" href="#pgtextview.pgTextView.set_modified">set_modified</a></code></li>
+<li><code><a title="pgtextview.pgTextView.set_text" href="#pgtextview.pgTextView.set_text">set_text</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
