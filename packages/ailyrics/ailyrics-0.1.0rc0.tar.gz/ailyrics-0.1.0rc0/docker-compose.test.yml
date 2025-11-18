@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  lyrics-test:
+    build: .
+    ports:
+      - "8870:8870"
+    volumes:
+      # Mount current source code for development
+      - ./src:/app/src:ro
+      # Mount test skills directory
+      - ./test-skills:/skills:ro
+      # Mount a persistent workspace volume
+      - ./data/test-workspace:/workspace
+    environment:
+      - SKILLS_PATH=/skills
+      - WORKSPACE_PATH=/workspace
+      - PYTHONPATH=/app/src
+      - LOG_LEVEL=INFO
+    working_dir: /app
+    command: ["python3", "-m", "lyrics.server", "--host", "0.0.0.0", "--port", "8870"]
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import httpx; httpx.get('http://localhost:8870/api/v1/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
