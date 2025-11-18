@@ -1,0 +1,87 @@
+[build-system]
+requires = [
+    "setuptools>=45",
+    "wheel",
+    "setuptools_scm"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lili-logger"
+dynamic = ["version"]
+description = "一个帅气专业的彩色日志系统"
+authors = [
+    {name = "Lili", email = "tkin.l@qq.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.7"
+keywords = ["logging", "color", "logger", "lili", "colored-logs"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: System :: Logging",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    "PyYAML>=5.4",
+    "psutil>=5.8; platform_system != 'Windows'",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "black>=21.0",
+    "flake8>=3.9",
+    "mypy>=0.910",
+]
+test = [
+    "pytest>=6.0",
+    "pytest-cov>=2.0",
+]
+docs = [
+    "sphinx>=4.0",
+    "sphinx-rtd-theme>=1.0",
+]
+full = [
+    "psutil>=5.8",
+]
+
+[project.urls]
+Homepage = "https://github.com/tonkin/lili-logger"
+"Bug Reports" = "https://github.com/tonkin/lili-logger/issues"
+"Source" = "https://github.com/tonkin/lili-logger"
+
+[tool.setuptools_scm]
+write_to = "log/_version.py"
+
+# 添加包发现配置 - 这是关键！
+[tool.setuptools]
+packages = {find = {where = ["."], include = ["log*"]}}
+
+[tool.setuptools.package-data]
+"log" = ["config/*.yaml", "config/**/*.yaml"]
+
+[tool.black]
+line-length = 88
+target-version = ['py37']
+
+[tool.mypy]
+python_version = "3.7"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--verbose --color=yes"
+testpaths = ["tests"]

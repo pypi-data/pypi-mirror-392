@@ -1,0 +1,338 @@
+# =============================================
+# 彩色日志系统配置文件
+# 版本: 1.0
+# 描述: 提供分类化、彩色化的日志记录配置
+#
+# 使用说明:
+# 1. 所有路径都是相对于log包根目录的路径
+# 2. 颜色使用ANSI转义码，支持大多数终端
+# 3. 图标使用Unicode字符，确保终端支持
+# 4. 修改配置后需要重新初始化日志系统
+# =============================================
+
+# =============================================
+# 路径配置部分
+# 说明: 定义日志系统各组件的位置路径
+# =============================================
+paths:
+  # 配置文件目录 - 存放所有YAML配置文件的目录
+  config_dir: "config"
+
+  # 核心代码目录 - 存放日志系统核心实现代码的目录
+  core_dir: "core"
+
+  # API接口目录 - 存放对外提供接口的代码目录
+  api_dir: "api"
+
+  # 历史日志目录 - 存放生成的日志文件的目录
+  # 实际路径: log/his/
+  his_dir: "his"
+
+  # 当前配置文件名 - 当前正在使用的配置文件名
+  config_file: "logging.yaml"
+
+# =============================================
+# 日志系统基础配置
+# 说明: 控制logging模块的基础行为
+# =============================================
+version: 1  # logging配置版本，必须为1
+disable_existing_loggers: false  # 是否禁用已存在的日志器，建议为false
+
+# =============================================
+# 格式化器配置 (Formatters)
+# 说明: 定义日志输出的格式和样式
+# =============================================
+formatters:
+  # 彩色控制台格式化器 - 用于终端输出，包含颜色和图标
+  color_enhanced:
+    # 使用的格式化器类，必须是完整的Python路径
+    class: log.core.formatter.EnhancedColorFormatter
+    # 日志输出格式:
+    # %(asctime)s - 时间戳
+    # %(name)s - 日志器名称(分类)
+    # %(levelname)s - 日志级别
+    # %(message)s - 日志消息
+    format: "%(asctime)s | %(name)s | %(levelname)s | %(message)s"
+    # 时间格式: 年-月-日 时:分:秒
+    datefmt: "%Y-%m-%d %H:%M:%S"
+
+  # 文件格式化器 - 用于文件输出，不包含颜色代码
+  file_plain:
+    format: "%(asctime)s | %(name)-8s | %(levelname)-8s | %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+
+# =============================================
+# 处理器配置 (Handlers)
+# 说明: 定义日志输出的目的地和处理方式
+# =============================================
+handlers:
+  # 文件处理器 - 将日志输出到文件，支持文件轮转
+  file:
+    class: logging.handlers.RotatingFileHandler  # 轮转文件处理器
+    filename: "{log_dir}/log_{run_name}.log"     # 文件名模板，运行时替换
+    maxBytes: 10485760    # 单个文件最大大小: 10MB (10 * 1024 * 1024)
+    backupCount: 5        # 保留的备份文件数量
+    formatter: file_plain # 使用的格式化器
+    level: DEBUG          # 处理器的日志级别
+    encoding: utf-8       # 文件编码
+
+  # 控制台处理器 - 将日志输出到标准输出(终端)
+  console:
+    class: logging.StreamHandler      # 流处理器
+    formatter: color_enhanced         # 使用彩色格式化器
+    level: DEBUG                      # 处理器的日志级别
+
+# =============================================
+# 日志器分类配置 (Loggers)
+# 说明: 定义不同业务模块的日志器，每个分类有独立的配置
+# =============================================
+loggers:
+  # ==================== 核心AI模块 ====================
+  NET:
+    handlers: ["file", "console"]  # 使用的处理器
+    level: "DEBUG"                 # 日志级别: DEBUG < INFO < WARNING < ERROR < CRITICAL
+    propagate: false               # 是否向父日志器传播
+    description: "神经网络相关操作 - 前向传播、反向传播、网络结构等"
+
+  MODEL:
+    handlers: ["file", "console"]
+    level: "DEBUG"
+    propagate: false
+    description: "模型架构和参数 - 模型构建、参数初始化、模型保存加载等"
+
+  TRAIN:
+    handlers: ["file", "console"]
+    level: "INFO"  # 训练过程通常使用INFO级别，避免过多调试信息
+    propagate: false
+    description: "训练过程 - 训练循环、批次处理、epoch记录等"
+
+  GRAD:
+    handlers: ["file", "console"]
+    level: "DEBUG"
+    propagate: false
+    description: "梯度计算和监控 - 梯度值、梯度消失/爆炸、梯度裁剪等"
+
+  OPT:
+    handlers: ["file", "console"]
+    level: "INFO"
+    propagate: false
+    description: "优化器操作 - 参数更新、学习率调整、优化器状态等"
+
+  EVAL:
+    handlers: ["file", "console"]
+    level: "INFO"
+    propagate: false
+    description: "模型评估 - 准确率、损失值、F1分数等评估指标"
+
+  # ==================== 数据模块 ====================
+  DATA:
+    handlers: ["file", "console"]
+    level: "INFO"
+    propagate: false
+    description: "数据处理和加载 - 数据预处理、数据增强、数据集划分等"
+
+  IO:
+    handlers: ["file", "console"]
+    level: "INFO"
+    propagate: false
+    description: "文件输入输出 - 模型保存加载、检查点、文件读写等"
+
+  CACHE:
+    handlers: ["file", "console"]
+    level: "DEBUG"  # 缓存操作通常比较详细，使用DEBUG级别
+    propagate: false
+    description: "缓存操作 - 数据缓存、内存管理、缓存命中率等"
+
+  # ==================== 系统模块 ====================
+  SYS:
+    handlers: ["file", "console"]
+    level: "INFO"
+    propagate: false
+    description: "系统级操作 - 资源监控、进程管理、系统状态等"
+
+  SECURITY:
+    handlers: ["file", "console"]
+    level: "WARNING"  # 安全相关通常只关注警告和错误
+    propagate: false
+    description: "安全相关 - 权限检查、安全审计、访问控制等"
+
+  TEST:
+    handlers: ["file", "console"]
+    level: "DEBUG"  # 测试过程需要详细日志
+    propagate: false
+    description: "测试相关 - 单元测试、集成测试、性能测试等"
+
+  # ==================== 服务模块 ====================
+  WEB:
+    handlers: ["file", "console"]
+    level: "INFO"
+    propagate: false
+    description: "Web服务 - HTTP请求、响应处理、路由等"
+
+  API:
+    handlers: ["file", "console"]
+    level: "INFO"
+    propagate: false
+    description: "API接口 - API调用、参数验证、响应格式等"
+
+  DB:
+    handlers: ["file", "console"]
+    level: "INFO"
+    propagate: false
+    description: "数据库操作 - SQL查询、事务管理、连接池等"
+
+  # ==================== 通用模块 ====================
+  COM:
+    handlers: ["file", "console"]
+    level: "DEBUG"  # 通用日志使用DEBUG级别，记录详细信息
+    propagate: false
+    description: "通用日志 - 不适合其他分类的通用信息、工具函数等"
+
+# =============================================
+# 颜色配置字典
+# 说明: 使用ANSI转义码定义颜色，格式: \033[颜色码m
+# 颜色码参考:
+#   30-37: 黑色、红色、绿色、黄色、蓝色、紫色、青色、白色
+#   90-97: 亮色版本
+# =============================================
+colors:
+  # 日志级别颜色 - 不同级别使用不同颜色便于快速识别
+  level_colors:
+    DEBUG: "\033[36m"      # 青色 - 调试信息，技术细节，开发阶段使用
+    INFO: "\033[92m"       # 亮绿色 - 普通信息，正常运行状态，用户操作
+    SUCCESS: "\033[32m"    # 绿色 - 成功操作，任务完成，需要突出显示的结果
+    WARNING: "\033[93m"    # 亮黄色 - 警告信息，需要注意但不需要立即处理的情况
+    ERROR: "\033[91m"      # 亮红色 - 错误信息，操作失败，需要立即关注的问题
+    CRITICAL: "\033[95m"   # 亮紫色 - 严重错误，系统级故障，可能导致崩溃的情况
+    FIND: "\033[93m"       # 黄色 - 查找/发现操作，搜索结果，数据匹配
+    TRACE: "\033[90m"      # 灰色 - 详细跟踪信息，最详细的调试，性能分析
+    RESET: "\033[0m"       # 重置颜色 - 必须包含，用于恢复终端默认颜色设置
+
+  # 日志器分类颜色 - 不同业务模块使用不同颜色系
+  logger_colors:
+    # 核心AI模块 (蓝色系) - 表示核心技术组件
+    NET: "\033[94m"        # 亮蓝色 - 神经网络，AI核心
+    MODEL: "\033[96m"      # 亮青色 - 模型相关，数据处理
+    TRAIN: "\033[95m"      # 亮紫色 - 训练过程，学习算法
+    GRAD: "\033[93m"       # 黄色 - 梯度计算，数学运算
+    OPT: "\033[92m"        # 绿色 - 优化器，性能优化
+    EVAL: "\033[97m"       # 白色 - 评估测试，结果验证
+
+    # 数据模块 (绿色系) - 表示数据相关操作
+    DATA: "\033[32m"       # 深绿色 - 数据处理，数据流
+    IO: "\033[36m"         # 青色 - 输入输出，文件操作
+    CACHE: "\033[90m"      # 灰色 - 缓存操作，性能优化
+
+    # 系统模块 (橙色/红色系) - 表示系统级别操作
+    SYS: "\033[33m"        # 橙色 - 系统操作，资源管理
+    SECURITY: "\033[91m"   # 红色 - 安全相关，风险控制
+    TEST: "\033[35m"       # 粉紫色 - 测试验证，质量保证
+
+    # 服务模块 (紫色系) - 表示对外服务
+    WEB: "\033[95m"        # 亮紫色 - Web服务，网络通信
+    API: "\033[94m"        # 蓝色 - API接口，数据交换
+    DB: "\033[34m"         # 深蓝色 - 数据库，数据存储
+
+    # 通用模块
+    COM: "\033[37m"        # 亮灰色 - 通用功能，工具方法
+
+# =============================================
+# 图标配置字典
+# 说明: 使用Unicode字符作为图标，增加日志的可读性
+# 注意: 确保终端字体支持这些字符
+# =============================================
+icons:
+  # 日志级别图标 - 通过图标快速识别日志级别
+  level_icons:
+    DEBUG: "🔧"     # 工具 - 表示调试、技术细节
+    INFO: "ℹ️"      # 信息 - 表示普通信息、状态更新
+    SUCCESS: "✅"   # 对勾 - 表示操作成功完成
+    WARNING: "⚠️"   # 警告 - 表示需要注意的问题
+    ERROR: "❌"     # 错误 - 表示操作失败或错误
+    CRITICAL: "💀"  # 骷髅 - 表示严重错误，系统可能崩溃
+    FIND: "🔍"      # 放大镜 - 表示查找、搜索、发现操作
+    TRACE: "📋"     # 剪贴板 - 表示详细跟踪、数据记录
+
+  # 操作图标 - 用于特定操作场景的图标
+  operation_icons:
+    timer: "⏱️"     # 秒表 - 计时操作，性能监控
+    memory: "💾"    # 磁盘 - 内存使用，资源监控
+    status: "📊"    # 图表 - 状态检查，统计信息
+    file: "📁"      # 文件夹 - 文件操作，数据存储
+    network: "🌐"   # 地球 - 网络操作，通信连接
+    database: "🗄️"  # 文件柜 - 数据库操作，数据管理
+    security: "🔒"  # 锁 - 安全相关，权限控制
+    success: "🌈"   # 彩虹 - 系统成功，初始化完成
+    start: "🚀"     # 火箭 - 开始操作，启动过程
+    complete: "🎯"  # 靶心 - 完成操作，目标达成
+
+# =============================================
+# 自定义日志级别配置
+# 说明: 扩展Python标准日志级别，提供更细粒度的控制
+# 级别数值参考:
+#   CRITICAL: 50, ERROR: 40, WARNING: 30, INFO: 20, DEBUG: 10
+# =============================================
+custom_levels:
+  # 成功级别 - 介于WARNING和INFO之间，用于记录成功操作
+  SUCCESS:
+    value: 25        # 数值: 25 (在WARNING-30和INFO-20之间)
+    description: "成功操作级别 - 用于记录成功完成的操作，如训练完成、模型保存成功等"
+
+  # 查找级别 - 介于INFO和DEBUG之间，用于记录查找操作
+  FIND:
+    value: 15        # 数值: 15 (在INFO-20和DEBUG-10之间)
+    description: "查找/发现级别 - 用于记录查找和发现操作，如数据搜索、模式识别等"
+
+  # 跟踪级别 - 低于DEBUG，提供最详细的日志信息
+  TRACE:
+    value: 5         # 数值: 5 (低于DEBUG-10，最详细的级别)
+    description: "详细跟踪级别 - 用于最详细的调试信息，如函数调用栈、变量值等"
+
+# =============================================
+# 系统配置
+# 说明: 控制日志系统的运行行为
+# =============================================
+system:
+  # 默认运行名称 - 用于生成日志文件名
+  # 如果设置为"default_run"，会自动使用时间戳格式: YYYYMMDD_HHMMSS
+  default_run_name: "default_run"
+  # 文件大小限制 - 单个日志文件的最大大小(MB)
+  # 当文件达到此大小时，会自动创建新的日志文件
+  max_file_size_mb: 10
+
+  # 备份文件数量 - 保留的历史日志文件数量
+  # 当超过此数量时，最旧的日志文件会被删除
+  backup_count: 5
+
+  # 文件编码 - 日志文件使用的字符编码
+  # 推荐使用utf-8以支持中文和特殊字符
+  encoding: "utf-8"
+
+  # 自动创建目录 - 如果目录不存在是否自动创建
+  # 建议设置为true，避免因目录不存在导致的错误
+  auto_create_dirs: true
+
+  # 启用颜色 - 是否在控制台输出中使用颜色
+  # 在文件输出中颜色代码会自动被忽略
+  enable_colors: true
+
+  # 启用图标 - 是否在日志输出中使用图标
+  # 如果终端不支持Unicode，可以设置为false
+  enable_icons: true
+
+# =============================================
+# 配置验证规则
+# 说明: 用于验证配置的完整性和正确性
+# =============================================
+validation:
+  # 必需的日志器分类 - 系统必须包含这些日志器
+  required_loggers: ["NET", "MODEL", "TRAIN", "COM"]
+
+  # 必需的颜色定义 - 必须定义这些颜色
+  required_colors: ["DEBUG", "INFO", "WARNING", "ERROR", "RESET"]
+
+  # 必需的图标定义 - 必须定义这些图标
+  required_icons: ["DEBUG", "INFO", "WARNING", "ERROR"]
+
+  # 允许的日志级别 - 有效的日志级别值
+  allowed_levels: ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
