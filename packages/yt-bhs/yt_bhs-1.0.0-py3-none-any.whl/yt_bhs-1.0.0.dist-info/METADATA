@@ -1,0 +1,78 @@
+Metadata-Version: 2.4
+Name: yt-bhs
+Version: 1.0.0
+Summary: A cmdline tool to download Youtube videos as songs through BlackHole playlists.
+Author-email: neuroin <vascularsource@gmail.com>
+License-Expression: Unlicense
+Classifier: Environment :: Console
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: yt-dlp
+Requires-Dist: Pillow
+Requires-Dist: mutagen
+Requires-Dist: colorama
+Dynamic: license-file
+
+# bhs-gamma
+A simple command-line tool for downloading Youtube videos as songs, with embedded metadata and thumbnail cropping, with data taken from playlists exported by the now discontinued *BlackHole* music player.
+## INSTALL
+This package is still in **testing** phase. As such, you will find it uploaded on [test.pypi](https://test.pypi.org/project/bhs-gamma/). You may install it by specifying the test.pypi index through pip. 
+
+	pip install --index-url https://test.pypi.org/simple/ bhs-gamma
+## USAGE
+Refer to the quick steps below:
+1. Export your playlist from BlackHole, it would be a JSON file.
+2. Copy it over to your system, in a directory of your choice.
+3. Within this same directory, open up a command prompt and use the following template:
+
+		python main.py [OPTIONS] "your_playlist.json"
+
+4. The playlist will be exported to the stated output folder.
+
+Keep in mind that, if not explicitly set, two folders 'export' and 'cache' will be created for exported music and the temporary files respectively, all within the same directory.
+### OPTIONS
+The options available in bhs-gamma are:
+
+| PARAMETERS     | DESCRIPTION                                                                                                                        |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `-o --output`  | Where the final song is saved. <br>Default is under the export directory newly created in the same place where the command is run. |
+| `--cache-dir`  | Where the cache or temporary files are stored.<br>By default, cache directory is in the same place where the command is run.       |
+| `--keep-cache` | To keep all temporary files.<br>Default is to delete the respective cache files for when a song is finalized.                      |
+| `-v --verbose` | To print verbose output including yt-dlp and logs.                                                                                 |
+| `--test-run`   | To run only the first song from the playlist.                                                                                      |
+## MANUAL INSTALL
+### DEPENDENCIES
+The package is currently tested with *Python 3.11*, hence versions same as or above *Python 3.11* are recommended. For testing and running the program yourself, you will need to cover the following.
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) - A command-line Youtube music/video downloader, and sits at the core of this tool. You may install it with pip using `pip install yt-dlp`, or refer the [official page](https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#installation) for other sources. If using a standalone binary, be sure to add it to your `PATH`.
+- [PIL](https://github.com/python-pillow/Pillow) - Python Imaging Library, for processing images in Python. Used for importing and cropping the thumbnail image. Install it with pip using `pip install Pillow`.
+- [mutagen](https://github.com/quodlibet/mutagen) - A python module for managing audio metadata and formats. Also allows embedding some cover art/thumbnail to a song. Install it with pip using `pip install mutagen`
+- [colorama](https://github.com/tartley/colorama) - A simple python module that provides colored text in terminal. Purely cosmetic, you may remove it along with all of its references if you wish. Otherwise, you may install it with pip using `pip install colorma`.
+### CLONING
+If all dependencies are resolved, you may safely clone the repository into a location of your choice.
+
+	git clone https://github.com/neuroin/bhs-gamma
+
+Only the contents under `src/bhs-gamma/` directory are needed *(specifically the `cli.py` file)*. Run the script as a python program; use the available options similar to the standard usage.
+
+	python cli.py [OPTIONS] "your_playlist.json"
+
+To use the script from any location, add `cli.py` to your `PATH`.
+### BUILDING
+Make use of the source distribution file *(`.tar.gz`)* or the wheel distribution file *(`.whl`)* available inside of `dist/` directory. 
+
+For building the package using the *source distribution*, make sure you have installed the latest versions of `setuptools` and `build`. Install them with pip.
+
+	pip install setuptools build
+
+Download and store the *source distribution* file in some directory on your system. While within that directory, install the package with pip using the *source distribution file*.
+
+	pip install bhs_gamma-x.x.x.tar.gz
+
+For building the package using the *wheel distribution*, all binaries are pre-compiled. You need only run it through pip to install the package.
+
+	pip install bhs_gamma-x.x.x-py3-none-any.whl
+## LICENSE
+`bhs-gamma` is supplied under the [Unlicense](https://unlicense.org/) license, though some underlying components and dependencies may make use of other licenses that may or may not have the same conditions.
