@@ -1,0 +1,82 @@
+[project]
+name = "craftable"
+version = "0.2.1"
+description = "craftable - craft elegant tables using format strings"
+authors = [{ name = "Paul York", email = "paul@yorkfamily.com" }]
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+keywords = [
+    "table",
+    "grid",
+    "terminal",
+    "formatting",
+    "f-string",
+    "craftable",
+    "pretty",
+]
+dependencies = []
+
+[project.urls]
+homepage = "https://ptyork.github.io/craftable"
+repository = "https://github.com/ptyork/craftable"
+"Bug Tracker" = "https://github.com/ptyork/craftable/issues"
+
+
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.1",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.14.5",
+]
+docs = [
+    "mkdocs-material>=9.6.7,<10",
+    "mkdocstrings>=0.30.1",
+    "mkdocstrings-python>=1.18.2",
+]
+adapters = [
+    "numpy>=1.24.0",
+    "pandas>=2.0.0",
+    "polars>=1.35.2",
+]
+export-docx = [
+    "python-docx>=1.1.0",
+]
+export-xlsx = [
+    "openpyxl>=3.1.2",
+]
+export-odt = [
+    "odfpy>=1.4.1",
+]
+export-ods = [
+    "odfpy>=1.4.1",
+]
+export-all = [
+    {include-group = "export-docx"},
+    {include-group = "export-xlsx"},
+    {include-group = "export-odt"},
+    {include-group = "export-ods"},
+]
+
+# [tool.uv]
+# default-groups = ["dev", "docs"]
+
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/craftable",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "src/craftable",
+]
+
+[tool.hatch.build.targets.wheel.sources]
+"src/craftable" = "craftable"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
