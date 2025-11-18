@@ -1,0 +1,42 @@
+[project]
+name = "sigmf-toolkit"
+dynamic = ["version"]
+description = "Tools to work with SigMF files"
+authors = [
+  { name="Daniel Estevez", email="daniel@destevez.net" },
+]
+maintainers = [
+  { name="Daniel Estevez", email="daniel@destevez.net" },
+]
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "numpy",
+    "scapy>=2.6",
+    "sigmf>=1.2.10",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Communications :: Ham Radio",
+    "Topic :: Scientific/Engineering",
+]
+keywords = ["sigmf"]
+
+[project.scripts]
+gr_meta_to_sigmf = "sigmf_toolkit.gr_meta_to_sigmf:main"
+raw_to_sigmf = "sigmf_toolkit.raw_to_sigmf:main"
+sigmf_pcap_annotate = "sigmf_toolkit.sigmf_pcap_annotate:main"
+sigmf_time_crop = "sigmf_toolkit.sigmf_time_crop:main"
+
+[build-system]
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.uv-dynamic-versioning]
+fallback-version = "0.0.0"
