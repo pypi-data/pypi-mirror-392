@@ -1,0 +1,69 @@
+Metadata-Version: 2.4
+Name: textx-gen-vscode
+Version: 0.2.2
+Summary: A VS Code extension generator
+Keywords: VS Code,textX,language,DSL
+Author-email: Daniel Elero <danixeee@gmail.com>
+Maintainer-email: Daniel Elero <danixeee@gmail.com>, "Igor R. Dejanović" <igor.dejanovic@gmail.com>
+Requires-Python: >=3.5
+Description-Content-Type: text/markdown
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Information Technology
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Dist: click
+Requires-Dist: textx-jinja
+Requires-Dist: textx
+Requires-Dist: textx-gen-coloring
+Requires-Dist: bandit==1.6.2 ; extra == "ci"
+Requires-Dist: pytest==5.3.2 ; extra == "ci"
+Requires-Dist: pytest-cov==2.8.1 ; extra == "ci"
+Requires-Dist: pytest-azurepipelines==0.8.0 ; extra == "ci"
+Requires-Dist: bandit==1.6.2 ; extra == "dev"
+Requires-Dist: ruff ; extra == "dev"
+Requires-Dist: coverage==5.0.1 ; extra == "test"
+Requires-Dist: pytest==5.3.2 ; extra == "test"
+Requires-Dist: pytest-cov==2.8.1 ; extra == "test"
+Project-URL: Changelog, https://github.com/textX/textx-gen-vscode/blob/master/CHANGELOG.md
+Project-URL: Homepage, https://github.com/textX/textx-gen-vscode/
+Project-URL: Repository, https://github.com/textX/textx-gen-vscode/
+Provides-Extra: ci
+Provides-Extra: dev
+Provides-Extra: test
+
+# VS Code Extension Generator for textX Languages
+
+A _textX_ generator which outputs simple, installable _VS Code_ extension from a registered _textX_ language project.
+
+It is used primary by [textX-LS](https://github.com/textX/textX-LS) project when generating and installing _textX_ languages.
+
+## CLI Examples
+
+Generate a _VS Code_ extension for `tx_workflow` project packaged in archive:
+
+```bash
+textx generate examples/workflow/tx_workflow/workflow.tx -o . --target=vscode --project_name tx-workflow
+```
+
+Generate a _VS Code_ extension for `tx_workflow` project packaged in installable _vsix_ format:
+
+```bash
+textx generate examples/workflow/tx_workflow/workflow.tx -o . --target=vscode --project_name tx-workflow --vsix True
+```
+
+## Other Notes
+
+- textX language project should be registrated in order generator to find it by passed _project name_
+- path to the grammar (`examples/workflow/tx_workflow/workflow.tx`) is not used for now, but idea is to be able to create project from it
+

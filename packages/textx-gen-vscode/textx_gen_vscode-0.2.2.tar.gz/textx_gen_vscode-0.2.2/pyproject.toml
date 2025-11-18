@@ -1,0 +1,97 @@
+[project]
+name = "textx-gen-vscode"
+version = "0.2.2"
+description = "A VS Code extension generator"
+authors = [
+    {name = "Daniel Elero", email = "danixeee@gmail.com"},
+]
+maintainers = [
+    {name = "Daniel Elero", email = "danixeee@gmail.com"},
+    {name = "Igor R. Dejanović", email = "igor.dejanovic@gmail.com"},
+]
+readme = "README.md"
+license = {text = "MIT"}
+keywords = ["VS Code", "textX", "language", "DSL"]
+classifiers = [
+        "Development Status :: 2 - Pre-Alpha",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Information Technology",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+]
+
+requires-python = ">=3.5"
+dependencies = [
+    "click",
+    "textx-jinja",
+    "textx",
+    "textx-gen-coloring",
+]
+
+[project.urls]
+Homepage = "https://github.com/textX/textx-gen-vscode/"
+Repository = "https://github.com/textX/textx-gen-vscode/"
+Changelog = "https://github.com/textX/textx-gen-vscode/blob/master/CHANGELOG.md"
+
+[build-system]
+build-backend = "flit_core.buildapi"
+requires = ["flit_core >=3.8.0,<4"]
+
+[tool.flit.module]
+name = "textx_gen_vscode"
+
+[tool.flit.sdist]
+exclude = ["**/.*"]
+
+[project.optional-dependencies]
+ci = [
+    "bandit==1.6.2",
+    "pytest==5.3.2",
+    "pytest-cov==2.8.1",
+    "pytest-azurepipelines==0.8.0",
+]
+
+dev = [
+    "bandit==1.6.2",
+    "ruff",
+]
+
+test = [
+    "coverage==5.0.1",
+    "pytest==5.3.2",
+    "pytest-cov==2.8.1"
+]
+
+[project.entry-points.textx_generators]
+vscode_gen = "textx_gen_vscode:vscode_gen"
+
+[tool.ruff]
+line-length = 90
+indent-width = 4
+
+[tool.ruff.lint]
+# https://docs.astral.sh/ruff/linter/#rule-selection
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]
