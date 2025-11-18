@@ -1,0 +1,46 @@
+[project]
+name = "color-logger-utils"
+version = "0.1.0"
+description = "Dependency-injection friendly logging utilities with colorized console output."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = []
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Logging",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# src/logger_utils をパッケージとして発見させる (setuptools 側)
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# uv 用の dev 依存（uv sync --group dev で入る）
+[dependency-groups]
+dev = [
+    "mypy>=1.18.2",
+    "pytest>=9.0.1",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.14.5",
+]
+
+# pytest をこのプロジェクトから実行する前提の設定（任意だが便利）
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "--cov=logger_utils"
+
+[tool.uv]
+package = true  # 明示（既定は true だが明文化しておくと安心なので）
+link-mode = "copy"
