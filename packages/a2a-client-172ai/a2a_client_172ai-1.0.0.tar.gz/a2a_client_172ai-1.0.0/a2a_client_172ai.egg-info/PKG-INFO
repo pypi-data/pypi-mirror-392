@@ -1,0 +1,201 @@
+Metadata-Version: 2.4
+Name: a2a-client-172ai
+Version: 1.0.0
+Summary: Official Python client library for 172.ai A2A (Agent-to-Agent) communication
+Home-page: https://github.com/172ai/a2a-client-python
+Author: 172.ai
+Author-email: support@172.ai
+Keywords: 172ai a2a agent-to-agent container api-client sdlc
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Libraries
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: requests>=2.28.0
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: keywords
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+# a2a-client-172ai
+
+Official Python client library for 172.ai A2A (Agent-to-Agent) communication system.
+
+## Installation
+
+```bash
+pip install a2a-client-172ai
+```
+
+**Import as:**
+```python
+from a2a_client import A2AClient
+```
+
+## Quick Start
+
+```python
+from a2a_client import A2AClient
+
+client = A2AClient(
+    api_key='sk_your_api_key',
+    agent_id='test-runner-v1',
+    agent_type='testing'
+)
+
+# Setup test environment
+test_container = client.create_container({
+    'name': f'test-env-{int(time.time())}',
+    'dockerfile': '''
+FROM node:18-alpine
+WORKDIR /app
+COPY . .
+RUN npm install
+RUN npm install -g jest cypress
+CMD ["npm", "run", "test:all"]
+    ''',
+    'tags': ['testing', 'e2e']
+})
+
+# Build and run tests
+build_result = client.build_container(test_container['id'])
+print(f'Test build initiated: {build_result["buildLogId"]}')
+```
+
+## Configuration
+
+### Required Parameters
+
+- `api_key`: API key with A2A scope from 172.ai dashboard
+- `agent_id`: Unique identifier for your agent instance
+- `agent_type`: One of:
+  - `code-analysis` - Code quality and security analysis
+  - `testing` - Automated testing and QA
+  - `deployment` - CI/CD and orchestration
+  - `monitoring` - Observability and metrics
+  - `security` - Vulnerability scanning
+  - `documentation` - Technical documentation
+  - `integration` - API management
+  - `generic` - General purpose
+
+### Optional Parameters
+
+- `base_url`: API base URL (default: 'https://api.172.ai')
+- `timeout`: Request timeout in seconds (default: 30)
+
+## API Methods
+
+### Authentication
+
+```python
+# Test authentication
+client.authenticate()
+
+# Get platform capabilities
+capabilities = client.get_capabilities()
+
+# Health check
+health = client.health_check()
+```
+
+### Container Operations
+
+```python
+# List containers
+containers = client.list_containers(limit=10)
+
+# Get container
+container = client.get_container(container_id)
+
+# Create container
+new_container = client.create_container({
+    'name': 'my-container',
+    'dockerfile': 'FROM alpine:latest',
+    'tags': ['test'],
+    'isPrivate': True
+})
+
+# Build container
+build = client.build_container(container_id)
+
+# Update container
+client.update_container(container_id, {'name': 'new-name'})
+
+# Delete container
+client.delete_container(container_id)
+```
+
+### Build Operations
+
+```python
+# Get build status
+status = client.get_build_status(container_id, build_log_id)
+
+# Get build logs
+logs = client.get_build_logs(container_id, build_log_id)
+
+# List builds
+builds = client.list_builds(container_id)
+```
+
+### Container Execution
+
+```python
+# Get cost estimate
+estimate = client.get_execution_cost_estimate(container_id, 1)
+
+# Start execution
+execution = client.start_execution(container_id, duration_days=1)
+
+# Get execution status
+status = client.get_execution_status(container_id)
+
+# Stop execution
+client.stop_execution(container_id)
+
+# Get execution history
+history = client.get_execution_history(container_id)
+
+# List all executions
+executions = client.list_executions()
+```
+
+### File Operations
+
+```python
+import base64
+
+# Upload file
+client.upload_file(
+    container_id,
+    'config.yml',
+    base64.b64encode(b'config: value').decode('utf-8'),
+    'application/x-yaml'
+)
+
+# List files
+files = client.list_files(container_id, '/app')
+
+# Get file content
+content = client.get_file(container_id, 'config.yml')
+```
+
+## Examples
+
+See the [examples directory](./examples) for complete SDLC workflow examples.
+
+## License
+
+MIT
