@@ -1,0 +1,36 @@
+<odoo>
+  <record id="view_places_search" model="ir.ui.view">
+    <field name="name">cm.places.search.key.submissions</field>
+    <field name="model">cm.place</field>
+    <field name="inherit_id" ref="community_maps.view_places_search" />
+    <field name="type">search</field>
+    <field name="arch" type="xml">
+      <field name="name" position="after">
+        <filter
+          name="key_submissions_target_reached"
+          string="Target Key submissions reached"
+          domain="[('key_submissions_target_reached','=', True)]"
+        />
+        <filter
+          name="not_key_submissions_target_reached"
+          string="Target Key submissions NOT reached"
+          domain="[('key_submissions_target_reached','=', False)]"
+        />
+      </field>
+    </field>
+  </record>
+  <record id="view_places_form" model="ir.ui.view">
+    <field name="name">cm.places.form (key submissions)</field>
+    <field name="model">cm.place</field>
+    <field name="type">form</field>
+    <field name="inherit_id" ref="community_maps.view_places_form"/>
+    <field name="arch" type="xml">
+      <field name="form_submission_ids" position="before" >
+        <field name="key_submissions_target_reached"/>
+      </field>
+      <xpath expr="//field[@name='form_submission_ids']/tree/field[@name='partner_id']" position="after">
+        <field name="is_key_submission" />
+      </xpath>
+    </field>
+  </record>
+</odoo>
