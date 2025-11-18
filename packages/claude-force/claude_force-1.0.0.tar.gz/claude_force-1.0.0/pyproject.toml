@@ -1,0 +1,98 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "claude-force"
+version = "1.0.0"
+description = "Multi-Agent Orchestration System for Claude"
+readme = "README.md"
+authors = [
+    {name = "Claude Force Team"}
+]
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+keywords = ["claude", "anthropic", "ai", "agents", "multi-agent", "orchestration"]
+dependencies = [
+    "anthropic>=0.40.0",
+    "PyYAML>=6.0.0",
+]
+requires-python = ">=3.8"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.23.0",
+    "black>=24.0.0",
+    "pylint>=3.0.0",
+    "mypy>=1.8.0",
+    "tenacity>=8.0.0",
+    "aiofiles>=23.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/khanh-vu/claude-force"
+Documentation = "https://github.com/khanh-vu/claude-force/blob/main/README.md"
+Repository = "https://github.com/khanh-vu/claude-force"
+Issues = "https://github.com/khanh-vu/claude-force/issues"
+
+[project.scripts]
+claude-force = "claude_force.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["claude_force*"]
+exclude = ["tests*", "benchmarks*"]
+
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
+include = '\.pyi?$'
+
+[tool.pylint.messages_control]
+max-line-length = 100
+disable = ["C0103", "C0114", "C0115", "C0116"]
+
+[tool.mypy]
+# ARCH-04: Type checking configuration
+python_version = "3.9"  # Changed from 3.8 (mypy requires 3.9+)
+warn_return_any = false  # Too many warnings initially - enable gradually
+warn_unused_configs = true
+ignore_missing_imports = true
+show_error_codes = true
+disallow_untyped_defs = false  # Gradual typing approach
+check_untyped_defs = false  # Will enable after initial cleanup
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --cov=claude_force --cov-report=html --cov-report=term --cov-fail-under=50"
+
+[tool.coverage.run]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+    "*/venv/*",
+    "*/env/*"
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
