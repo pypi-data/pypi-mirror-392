@@ -1,0 +1,176 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+  pull_request:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  lint-test-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Restore telemetry history cache
+        uses: actions/cache@v3
+        with:
+          path: tmp/ci-telemetry/history
+          key: telemetry-history-${{ github.ref_name }}
+          restore-keys: |
+            telemetry-history-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+          pip install -r docs/requirements.txt
+          pip install altair
+
+      - name: Ruff format check
+        run: ruff format --check src tests
+
+      - name: Ruff lint
+        run: ruff check src tests
+
+      - name: Mypy
+        run: mypy src
+
+      - name: Pytest
+        run: pytest
+
+      - name: Pre-commit hooks
+        run: pre-commit run --all-files
+
+      - name: Telemetry tuning smoke report
+        run: |
+          mkdir -p tmp/ci-telemetry
+          python scripts/run_tuning_benchmarks.py \
+            --plan baseline-smoke \
+            --out-dir tmp/ci-telemetry \
+            --random-runs 1 \
+            --random-iters 50 \
+            --grid-iters 50 \
+            --grid-batch-size 1 \
+            --grid-preset balanced \
+            --bayes-trials 1 \
+            --bayes-iters 50 \
+            --summary-label latest
+
+      - name: Archive telemetry history snapshot
+        run: |
+          snapshot_dir=tmp/ci-telemetry/history
+          mkdir -p "$snapshot_dir"
+          snapshot_name="$(date -u +"%Y-%m-%dT%H%M%SZ")"
+          cp tmp/ci-telemetry/tuner_report.csv "$snapshot_dir/$snapshot_name.csv"
+          cp tmp/ci-telemetry/tuner_report.md "$snapshot_dir/$snapshot_name.md"
+          cp tmp/ci-telemetry/telemetry/runs.sqlite "$snapshot_dir/$snapshot_name.sqlite"
+
+      - name: Generate telemetry history comparison
+        run: |
+          python scripts/analyze_tuner_reports.py \
+            --report latest=tmp/ci-telemetry/tuner_report.csv \
+            --history-dir tmp/ci-telemetry/history \
+            --out-history-csv tmp/ci-telemetry/history_summary.csv \
+            --out-history-markdown tmp/ci-telemetry/history_summary.md \
+            --out-history-chart tmp/ci-telemetry/history_summary.html \
+            --out-summary-csv tmp/ci-telemetry/history_summary_latest.csv \
+            --out-summary-markdown tmp/ci-telemetry/history_summary_latest.md \
+            --out-history-delta-csv tmp/ci-telemetry/history_delta.csv \
+            --out-history-delta-markdown tmp/ci-telemetry/history_delta.md
+
+      - name: Upload telemetry report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: telemetry-report
+          path: tmp/ci-telemetry
+
+      - name: Analytics notebooks (light)
+        run: python scripts/run_analytics_notebooks.py --light --timeout 300
+
+      - name: Install Pandoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+
+      - name: Build documentation
+        run: sphinx-build -b html docs _build/html -W
+
+      - name: Prepare Pages bundle
+        run: |
+          site_dir=tmp/pages
+          rm -rf "$site_dir"
+          mkdir -p "$site_dir"
+          cp -R _build/html/* "$site_dir/"
+          touch "$site_dir/.nojekyll"
+
+          publish_dir="$site_dir/telemetry"
+          mkdir -p "$publish_dir"
+          cp tmp/ci-telemetry/history_summary.csv "$publish_dir/" || true
+          cp tmp/ci-telemetry/history_summary.md "$publish_dir/" || true
+          cp tmp/ci-telemetry/history_summary.html "$publish_dir/" || true
+          cp tmp/ci-telemetry/tuner_report.md "$publish_dir/latest_tuner_report.md"
+          cp tmp/ci-telemetry/tuner_summary.md "$publish_dir/latest_tuner_summary.md" || true
+          cp tmp/ci-telemetry/tuner_summary.csv "$publish_dir/latest_tuner_summary.csv" || true
+          cp tmp/ci-telemetry/history_summary_latest.md "$publish_dir/latest_history_summary.md" || true
+          cp tmp/ci-telemetry/history_summary_latest.csv "$publish_dir/latest_history_summary.csv" || true
+          cp tmp/ci-telemetry/tuner_comparison.md "$publish_dir/latest_tuner_comparison.md" || true
+          cp tmp/ci-telemetry/tuner_comparison.csv "$publish_dir/latest_tuner_comparison.csv" || true
+          cp tmp/ci-telemetry/tuner_leaderboard.md "$publish_dir/latest_tuner_leaderboard.md" || true
+          cp tmp/ci-telemetry/tuner_leaderboard.csv "$publish_dir/latest_tuner_leaderboard.csv" || true
+          cp tmp/ci-telemetry/tuner_difficulty.md "$publish_dir/tuner_difficulty.md" || true
+          cp tmp/ci-telemetry/tuner_difficulty.csv "$publish_dir/tuner_difficulty.csv" || true
+          cp tmp/ci-telemetry/history_delta.md "$publish_dir/history_delta.md" || true
+          cp tmp/ci-telemetry/history_delta.csv "$publish_dir/history_delta.csv" || true
+
+          render_md_to_html() {
+            local source_file="$1"
+            local target_file="$2"
+            if [ -f "$source_file" ]; then
+              pandoc "$source_file" -f gfm -t html5 -s -o "$target_file"
+            fi
+          }
+
+          render_md_to_html "$publish_dir/latest_history_summary.md" "$publish_dir/latest_history_summary.html"
+          render_md_to_html "$publish_dir/latest_tuner_report.md" "$publish_dir/latest_tuner_report.html"
+          render_md_to_html "$publish_dir/latest_tuner_comparison.md" "$publish_dir/latest_tuner_comparison.html"
+          render_md_to_html "$publish_dir/latest_tuner_leaderboard.md" "$publish_dir/latest_tuner_leaderboard.html"
+          render_md_to_html "$publish_dir/tuner_difficulty.md" "$publish_dir/tuner_difficulty.html"
+          render_md_to_html "$publish_dir/history_delta.md" "$publish_dir/history_delta.html"
+
+      - name: Inspect publish bundle
+        run: |
+          echo "Contents of tmp/pages:" && ls -R tmp/pages || true
+
+      - name: Upload history pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: tmp/pages
+
+  deploy-history:
+    needs: lint-test-docs
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    steps:
+      - name: Deploy history to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
