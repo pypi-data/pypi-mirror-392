@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "calico-ssg"
+dynamic = ["version"]
+description = "Django-based static site generator"
+readme = "README.md"
+authors = [
+    {name = "LevIT SCS", email = "info@levit.be"}
+]
+classifiers = [
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
+    "Framework :: Django :: 5.1",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+]
+
+dependencies = [
+    "click>=8.1.7",
+    "Django>=4.2",
+    "django-browser-reload>=1.16.0",
+    "django-distill>=3.2.4",
+    "django-markdown-deux>=1.0.6",
+    "django-templateyak>=0.0.2",
+    "djp>=0.3.1",
+    "dj_angles>=0.10.0",
+    "nanodjango>=0.9.2",
+    "pillow==10.4.0",
+    "python-dotenv>=1.0.1",
+    "python-frontmatter>=1.1.0",
+    "readtime==3.0.0",
+    "lunr>=0.6.2",  # Python port of lunr.js for building search indices
+]
+
+[project.urls]
+Homepage = "https://codeberg.org/emmaDelescolle/calico"
+Repository = "https://codeberg.org/emmaDelescolle/calico"
+"Bug Tracker" = "https://codeberg.org/emmaDelescolle/calico/issues"
+
+[project.scripts]
+calico = "calico.cmd:cli"
+
+[tool.setuptools]
+packages = [
+    "calico",
+    "calico_system_plugins.picocss",
+    "calico_system_plugins.blog",
+    "calico_system_plugins.collections",
+    "calico_system_plugins.search",
+]
+
+[tool.setuptools.dynamic]
+version = {file = "VERSION"}

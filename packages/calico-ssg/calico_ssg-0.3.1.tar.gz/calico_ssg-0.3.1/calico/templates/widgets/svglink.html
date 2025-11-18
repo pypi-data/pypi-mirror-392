@@ -1,0 +1,16 @@
+{% docstring %}
+  This widget allows to create links over embedded SVGs.
+
+  `<cc‐svglink with title="my text" link="/link/to/page.html" svg="svg.sun" />`
+
+  Attributes:
+    link: link url
+    svg: svg widget to embed
+    title: (optional) title text (show on hover)
+    class: (default `svglink`) class applied on the `<a>` tag
+    style: (default `''`) style applied on the `<a>` tag
+
+{% enddocstring %}
+<a href="{{link}}" target="_blank" title="{{title|default:link}}" class="{{class|default:'svglink'}}" style="{{style|default:''}}">
+  <cc-component svg with style=style></cc-component>
+</a>

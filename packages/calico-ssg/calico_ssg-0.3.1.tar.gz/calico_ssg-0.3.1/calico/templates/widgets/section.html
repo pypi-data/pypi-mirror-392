@@ -1,0 +1,24 @@
+{% docstring %}
+Section widgets are represented as a `<section>` block inside which their content is rendered.
+
+Additionally, sections can have "sub-widgets" passed as a list of items. Each item points to a file relative to the original section file. This is useful to represent things like grids.
+
+Attributes:
+  class: (optional) The class(es) to apply to the section
+  style: (optional) The style(s) to apply to the section
+  items: (optional) a list of markdown files without the extention, usually hidden (starting with `_`). Those will be rendered inside the section.
+{% enddocstring %}
+{% if section.anchor %}
+  <a name="{{section.anchor}}"></a>
+{% endif %}
+{% if section.header %}
+  <h2>{{section.header}}</h2>
+{% endif %}
+<section class="{{section.class|default:''}}" style="{{section.style|default:''}}">
+  {{yield}}
+  {% for item in section.items|load_items:object %}
+    <cc-component item.widget|default:'text' with section=item>
+      {{item.content|markdown}}
+    </cc-component>
+  {% endfor %}
+</section>
