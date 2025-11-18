@@ -1,0 +1,22 @@
+[project]
+name = "jenkinsenvhunter"
+version = "1.0.1"
+description = "Hunts Jenkins jobs and builds for sensitive information in Jenkins environment variables"
+readme = "README.md"
+requires-python = ">=3.7"
+keywords = [ "jenkins", "security", "environment-variables", "pentest", "infosec",]
+classifiers = [ "Development Status :: 4 - Beta", "Intended Audience :: Information Technology", "Intended Audience :: System Administrators", "Topic :: Security", "Topic :: Software Development :: Testing", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3.7", "Programming Language :: Python :: 3.8", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11",]
+dependencies = [ "requests", "alive-progress",]
+[[project.authors]]
+name = "Defensive Origins"
+
+[build-system]
+requires = [ "setuptools>=61.0",]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+jenkins-env-hunter = "JenkinsEnvHunter:main"
+jenkins-check-noauth = "CheckNoAuth:main"
+
+[tool.setuptools]
+py-modules = [ "JenkinsEnvHunter", "CheckNoAuth",]
