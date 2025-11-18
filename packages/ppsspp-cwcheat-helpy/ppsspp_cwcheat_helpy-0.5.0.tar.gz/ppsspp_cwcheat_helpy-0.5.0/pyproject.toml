@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=70", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ppsspp-cwcheat-helpy"
+dynamic = ["version"]
+description = "cwCheat address rewriter for PSP/PPSSPP memory patch lines"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [{ name = "Tim Abdiukov", email = "TAbdiukov@gmail.com" }]
+keywords = ["ppsspp", "psp", "cwcheat", "gaming"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+  "Topic :: Games/Entertainment",
+  "Topic :: Utilities",
+  "Topic :: Software Development :: Build Tools",
+  "Topic :: Software Development :: Disassemblers",
+  "Topic :: Security",
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+]
+dependencies = [
+  "pyperclip>=1.9.0,<2"
+]
+
+[project.urls]
+Homepage = "https://github.com/TAbdiukov/ppsspp-cwcheat-helpy"
+Issues = "https://github.com/TAbdiukov/ppsspp-cwcheat-helpy/issues"
+
+[project.scripts]
+ppsspp-cwcheat-helpy = "ppsspp_cwcheat_helpy.helpy:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "ppsspp_cwcheat_helpy.__version__" }
