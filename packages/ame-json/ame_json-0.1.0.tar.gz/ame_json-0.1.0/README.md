@@ -1,0 +1,119 @@
+# Progressive JSON Handler
+
+A Python package for progressively streaming JSON data with asynchronously computed fields.
+
+## Description
+
+This package provides a mechanism to define a JSON schema where some fields are computed by functions (which can be long-running). The package then streams the JSON, sending the immediately available fields first, and then sending the computed fields as they become available. This is useful for building responsive applications where you want to display partial data to the user while the rest of the data is being computed.
+
+The package is built on top of Pydantic and provides a `ProgressiveSchema` class that you can use to define your data models.
+
+## Installation
+
+To install the package, you can use pip:
+
+```bash
+pip install progressive-json-handler
+```
+
+## Usage
+
+1.  **Define your schema**: Create a class that inherits from `ProgressiveSchema` and define your fields. Use the `Computation` type for fields that need to be computed.
+
+2.  **Instantiate your schema**: Create an instance of your schema, passing the functions that will compute the values for the `Computation` fields.
+
+3.  **Stream the data**: Use the `to_streamer()` method on your schema instance to get a streamer object, and then call `stream_sync()` to get a generator that yields the JSON chunks.
+
+4.  **Assemble the JSON**: Use the `ProgressiveAssembler` to consume the generator and assemble the final JSON object.
+
+## Example
+
+Here's an example of how to use the package to stream a user profile where the `products` and `loyalty_score` fields are computed by functions:
+
+```python
+import time
+from pydantic import BaseModel
+from src.models.progressive_schema import ProgressiveSchema
+from src.models.computation import Computation
+from src.models.progressive_streamer import ProgressiveJSONStreamer
+from src.models.progressive_assembler import ProgressiveAssembler
+
+class Products(BaseModel):
+    name: str
+    price: float
+
+def get_user_products_sync() -> list[Products]:
+    """Simulates a slow, sync database call."""
+    time.sleep(2)  # Simulate 2 seconds of work
+    return [
+        Products(name="Laptop Bag", price=50.0),
+        Products(name="Monitor", price=200.0),
+        Products(name="Mechanical Keyboard", price=150.0),
+    ]
+
+def calculate_loyalty_score_sync() -> int:
+    """Simulates a slower, sync external API call or heavy computation."""
+    time.sleep(1)  # Simulate 1 second of work
+    return 95
+
+class UserAddress(BaseModel):
+    street: str
+    city: str
+
+class UserProfile(ProgressiveSchema):
+    user_id: int
+    username: str
+    email: str
+    address: UserAddress
+    products: Computation[list[Products]]
+    loyalty_score: Computation[int]
+
+# 1. Instantiate your schema
+user_data = UserProfile(
+    user_id=101,
+    username="jdoe",
+    email="john.doe@example.com",
+    address=UserAddress(street="123 Placeholder Dr", city="Streamington"),
+    products=Computation(get_user_products_sync),
+    loyalty_score=Computation(calculate_loyalty_score_sync),
+)
+
+# 2. Stream the data
+streamer = user_data.to_streamer()
+generator = streamer.stream_sync()
+
+# 3. Assemble the JSON
+assembler = ProgressiveAssembler()
+final_json = assembler.assamble(generator)
+
+print(final_json)
+```
+
+This will output:
+
+```json
+{
+  "user_id": 101,
+  "username": "jdoe",
+  "email": "john.doe@example.com",
+  "address": {
+    "street": "123 Placeholder Dr",
+    "city": "Streamington"
+  },
+  "products": [
+    {
+      "name": "Laptop Bag",
+      "price": 50.0
+    },
+    {
+      "name": "Monitor",
+      "price": 200.0
+    },
+    {
+      "name": "Mechanical Keyboard",
+      "price": 150.0
+    }
+  ],
+  "loyalty_score": 95
+}
+```
