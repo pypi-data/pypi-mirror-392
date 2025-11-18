@@ -1,0 +1,67 @@
+[workspace.package]
+authors = [
+    "Arne Beer <contact@arne.beer>",
+    "David Runge <dvzrv@archlinux.org>",
+    "Orhun Parmaksız <orhun@archlinux.org>",
+]
+edition = "2024"
+homepage = "https://alpm.archlinux.page"
+keywords = ["alpm", "arch", "linux", "packaging"]
+license = "Apache-2.0 OR MIT"
+repository = "https://gitlab.archlinux.org/archlinux/alpm/alpm"
+rust-version = "1.85.0"
+
+[workspace]
+members = ["alpm-common", "alpm-parsers", "alpm-pkgbuild", "alpm-srcinfo", "alpm-types", "python-alpm"]
+resolver = "3"
+
+[workspace.dependencies]
+alpm-buildinfo = { path = "./alpm-buildinfo", version = "0.5.0" }
+alpm-common = { path = "./alpm-common", version = "0.2.0" }
+alpm-compress = { path = "./alpm-compress", version = "0.1.1" }
+alpm-lint-config = { path = "./alpm-lint-config", version = "0.1.1" }
+alpm-mtree = { path = "./alpm-mtree", version = "0.3.0" }
+alpm-package = { path = "./alpm-package", version = "0.3.0" }
+alpm-parsers = { path = "./alpm-parsers", version = "0.4.0" }
+alpm-pkgbuild = { path = "./alpm-pkgbuild", version = "0.2.2" }
+alpm-pkginfo = { path = "./alpm-pkginfo", version = "0.5.0" }
+alpm-srcinfo = { path = "./alpm-srcinfo", version = "0.6.0" }
+alpm-types = { path = "./alpm-types", version = "0.10.0" }
+assert_cmd = "2.0.11"
+clap = { version = "4.5.19", features = [
+    "derive",
+    "env",
+    "string",
+    "wrap_help",
+] }
+clap-verbosity-flag = "3.0.4"
+colored = "3"
+flate2 = "1"
+fluent-i18n = "0.1.0"
+insta = "1.40.0"
+log = "0.4.27"
+pretty_assertions = "1.4.1"
+proptest = "1.4.0"
+rstest = "0.26.1"
+semver = "1.0.17"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_with = "3.11.0"
+simplelog = "0.12.2"
+strum = { version = "0.27.0", features = ["derive"] }
+tempfile = "3"
+testresult = "0.4.1"
+thiserror = "2.0.0"
+toml = "0.9.3"
+which = "8.0.0"
+winnow = "0.7.9"
+
+[workspace.lints.rust]
+missing_debug_implementations = "deny"
+missing_docs = "deny"
+unsafe_code = "deny"
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "z"
