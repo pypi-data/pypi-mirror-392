@@ -1,0 +1,16 @@
+from setuptools import setup, find_packages
+
+setup(
+    name="mjnf",
+    version="0.1.0",
+    packages=find_packages(),
+    install_requires=[],
+    entry_points={
+        "console_scripts": [
+            "mjnf = mjnf.main:main"
+        ]
+    },
+    author="zombyburger567777777",
+    description="Решение части 1 и полностью 2 номер из кр Сучкова линал",
+)
+
