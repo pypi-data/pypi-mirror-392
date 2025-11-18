@@ -1,0 +1,30 @@
+# Include documentation files
+include README.md
+include LICENSE
+include CHANGELOG.md
+
+# Include configuration files
+include pyproject.toml
+include setup.py
+include .flake8
+
+# Include assets
+recursive-include assets *.png *.jpg *.jpeg *.svg
+
+# Exclude unnecessary files
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude *.so
+global-exclude .DS_Store
+global-exclude *.egg-info
+
+# Exclude development and build directories
+prune .git
+prune .github
+prune docs
+prune tests
+prune experiments
+prune venv
+prune build
+prune dist
+prune misc
