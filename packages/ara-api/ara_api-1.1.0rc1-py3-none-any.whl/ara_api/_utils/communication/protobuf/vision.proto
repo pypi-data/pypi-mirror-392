@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package protobuf.vision;
+
+import "messages/base_msg.proto";
+import "messages/vision_msg.proto";
+
+service VisionManager {
+    // GETTER FOR IMAGE
+    rpc get_image_rpc (messages.base_msg.get_request) returns (messages.vision_msg.image_data);
+
+    // GETTER FOR IMAGE STREAM
+    rpc get_image_stream_rpc (messages.base_msg.get_request) returns (stream messages.vision_msg.image_data_stream);
+
+    // GETTER FOR ARUCO MARKERS 
+    rpc get_aruco_rpc (messages.base_msg.get_request) returns (messages.vision_msg.aruco_data_array);
+ 
+    // GETTER FOR QR-CODES 
+    rpc get_qr_rpc (messages.base_msg.get_request) returns (messages.vision_msg.qr_data_array);
+
+    // GETTER FOR BLOB DATA
+    rpc get_blob_rpc (messages.base_msg.get_request) returns (messages.vision_msg.blob_data_array);
+
+    // COMMAND FOR SET VISIO SETTINGS 
+    // rpc cmd_setting_rpc (SettingsData) returns (messages.base_msg.status);
+}
