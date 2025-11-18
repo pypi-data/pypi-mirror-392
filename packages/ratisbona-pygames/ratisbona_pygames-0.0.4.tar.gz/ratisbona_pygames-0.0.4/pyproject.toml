@@ -1,0 +1,69 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ratisbona_pygames"
+version = "0.0.4"
+authors = [
+  { name="Ulrich Schwenk", email="ulrich-schwenk@gmx.de" },
+]
+description = "A Collection of demos and small games for the pygame library."
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "click",
+    "numpy",
+    "pygame",
+    "ratisbona_utils>=0.0.4",
+    "PyQt6",
+    "scipy",
+    "pyserial",
+    "psutil"
+]
+
+[project.scripts]
+ratisbona_fire_demo = "ratisbona_pygames.fire_demo.__main__:main"
+ratisbona_palette_demo = "ratisbona_pygames.palette_demo.__main__:main"
+ratisbona_death_by_powerpoint = "ratisbona_pygames.death_by_powerpoint.__main__:main"
+ratisbona_etch_a_sketch = "ratisbona_pygames.etchasketch.__main__:main"
+ratisbona_fanedit = "ratisbona_pygames.fanedit.__main__:main"
+ratisbona_frenchvfd = "ratisbona_pygames.frenchvfd_display_arduino_mega.__main__:main"
+ratisbona_joystick_demo = "ratisbona_pygames.joystick_demo.__main__:main"
+ratisbona_speedometer = "ratisbona_pygames.speedometer.__main__:main"
+ratisbona_color_blindness = "ratisbona_pygames.color_blindness_cli.__main__:main"
+
+[project.optional-dependencies]
+dev = [
+    "pylint",
+    # Code style
+    "black[d]",
+    # Strict typing
+    "mypy",
+    # Test coverage
+    "coverage",
+    "poethepoet",
+    "twine"
+]
+
+
+[project.urls]
+"Homepage" =  "https://sourceforge.net/projects/kevins-pygames/"
+
+[tool.poe.tasks]
+coverage = { help = "Run unit tests with coverage", shell = "pytest --cov= --cov-report=html" }
+build-wheel = { help = "Build the wheel distribution", shell = "python -m build --wheel" }
+build = { help = "Build the wheel distribution", shell = "python -m build" }
+test-publish = { help = "Publish to TestPyPI", shell = "twine upload --verbose --repository testpypi dist/*" }
+publish = { help = "Publish to PyPI", shell = "twine upload dist/*" }
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ratisbona_pygames"]
+
+
+
