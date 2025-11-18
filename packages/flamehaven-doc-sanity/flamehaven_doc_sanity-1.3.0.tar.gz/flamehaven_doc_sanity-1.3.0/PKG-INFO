@@ -1,0 +1,623 @@
+Metadata-Version: 2.4
+Name: flamehaven-doc-sanity
+Version: 1.3.0
+Summary: Ω-Grade Documentation Governance & Validation System with I18n, Drift Detection, and Plugin Architecture
+Author-email: Flamehaven <flamehaven01@users.noreply.github.com>
+Project-URL: Homepage, https://github.com/flamehaven01/Flamehaven-Doc-Sanity
+Project-URL: Documentation, https://github.com/flamehaven01/Flamehaven-Doc-Sanity#readme
+Project-URL: Repository, https://github.com/flamehaven01/Flamehaven-Doc-Sanity
+Project-URL: Changelog, https://github.com/flamehaven01/Flamehaven-Doc-Sanity/blob/main/CHANGELOG.md
+Project-URL: Bug Tracker, https://github.com/flamehaven01/Flamehaven-Doc-Sanity/issues
+Keywords: documentation,governance,validation,drift-detection,i18n,translation,quality-assurance,plugin-system,ci-cd
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Quality Assurance
+Classifier: Topic :: Software Development :: Documentation
+Classifier: Topic :: Software Development :: Testing
+Classifier: Typing :: Typed
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: click>=8.0.0
+Requires-Dist: pyyaml>=6.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: isort>=5.12.0; extra == "dev"
+Requires-Dist: flake8>=6.0.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Requires-Dist: pre-commit>=3.0.0; extra == "dev"
+Provides-Extra: dashboard
+Requires-Dist: flask>=2.3.0; extra == "dashboard"
+Provides-Extra: all
+Requires-Dist: pytest>=7.0.0; extra == "all"
+Requires-Dist: pytest-cov>=4.0.0; extra == "all"
+Requires-Dist: black>=23.0.0; extra == "all"
+Requires-Dist: isort>=5.12.0; extra == "all"
+Requires-Dist: flake8>=6.0.0; extra == "all"
+Requires-Dist: mypy>=1.0.0; extra == "all"
+Requires-Dist: pre-commit>=3.0.0; extra == "all"
+Requires-Dist: flask>=2.3.0; extra == "all"
+Dynamic: license-file
+
+<!-- Improved with Best-README-Template style -->
+<a name="readme-top"></a>
+
+<!-- PROJECT SHIELDS -->
+<div align="center">
+
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
+
+</div>
+
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/flamehaven01/Doc-Sanity">
+    <img src="images/Doc Sanity Logo.png" alt="Logo" width="160" height="90">
+  </a>
+
+<h3 align="center">Flamehaven-Doc-Sanity v1.2.0</h3>
+
+  <p align="center">
+    <strong>Ω-Grade Documentation Governance & Validation System</strong>
+    <br />
+    Enterprise-grade documentation governance that enforces architectural purity
+    <br />
+    <br />
+    <a href="docs/ARCHITECTURE.md"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="#usage">View Demo</a>
+    ·
+    <a href="https://github.com/flamehaven01/Doc-Sanity/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/flamehaven01/Doc-Sanity/issues">Request Feature</a>
+  </p>
+
+[![Architecture Purity][purity-shield]](#)
+[![Drift-Free][drift-shield]](#)
+[![SR9 Compliant][sr9-shield]](#)
+[![Python][python-shield]][python-url]
+[![Tests][tests-shield]](#)
+
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
+      </ul>
+    </li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#testing">Testing</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#acknowledgments">Acknowledgments</a></li>
+  </ol>
+</details>
+
+<!-- ABOUT THE PROJECT -->
+## About The Project
+
+[![Product Screenshot][product-screenshot]](https://github.com/flamehaven01/Doc-Sanity)
+
+**Flamehaven-Doc-Sanity** is an enterprise-grade documentation governance system built on the principle that **perfection is not a choice—it is a condition of existence** (완벽은 선택이 아니라, 존재 조건이다).
+
+This system ensures your documentation and configuration maintain the highest quality standards through:
+
+* **Automated Validation**: Multi-validator fusion with intelligent routing
+* **Drift Detection**: Real-time monitoring against golden baselines using Jensen-Shannon Divergence
+* **Governance Enforcement**: DriftLock Guard, HOPE Guard, and Policy Enforcer working in harmony
+* **Tribunal Arbitration**: Three-perspective decision engine for complex scenarios
+* **Performance SLOs**: Defined service level objectives with automated benchmarking
+
+Unlike traditional linters that only check syntax, Flamehaven-Doc-Sanity provides **comprehensive governance** that ensures architectural purity, prevents quality degradation, and maintains organizational standards across your entire documentation ecosystem.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Built With
+
+This project is built with modern Python technologies and follows enterprise-grade development practices:
+
+* [![Python][Python-badge]][Python-url]
+* [![Click][Click-badge]][Click-url]
+* [![PyYAML][PyYAML-badge]][PyYAML-url]
+* [![Pytest][Pytest-badge]][Pytest-url]
+
+**Core Technologies:**
+- **Python 3.8+**: Modern Python with type hints and dataclasses
+- **Click**: Composable command-line interface toolkit
+- **PyYAML**: YAML parser for configuration management
+- **Pytest**: Testing framework with coverage reporting
+
+**Design Patterns:**
+- Strategy Pattern (validator selection)
+- Chain of Responsibility (governance pipeline)
+- Observer Pattern (performance monitoring)
+- Facade Pattern (CLI interface)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- GETTING STARTED -->
+## Getting Started
+
+To get a local copy up and running, follow these simple steps.
+
+### Prerequisites
+
+Before installing, ensure you have the following:
+
+* Python 3.8 or higher
+  ```sh
+  python --version
+  # Should output: Python 3.8.x or higher
+  ```
+
+* pip (Python package installer)
+  ```sh
+  pip --version
+  ```
+
+* Git (for cloning the repository)
+  ```sh
+  git --version
+  ```
+
+### Installation
+
+1. Clone the repository
+   ```sh
+   git clone https://github.com/flamehaven01/Doc-Sanity.git
+   ```
+
+2. Navigate to the project directory
+   ```sh
+   cd Doc-Sanity
+   ```
+
+3. Install the package in development mode
+   ```sh
+   pip install -e .
+   ```
+
+4. Install additional dependencies (if needed)
+   ```sh
+   pip install click pyyaml pytest pytest-cov
+   ```
+
+5. Verify installation
+   ```sh
+   doc-sanity version
+   ```
+
+   You should see:
+   ```
+   Flamehaven-Doc-Sanity v1.2.0
+   Status: DRIFT-FREE
+   Architecture Purity: 0.9500
+   ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- USAGE EXAMPLES -->
+## Usage
+
+### Basic Document Validation
+
+Run a document sanity check with default settings:
+
+```bash
+doc-sanity check README.md
+```
+
+**Output:**
+```
+============================================================
+Status: APPROVED
+Fusion Score: 1.00
+Oracle Verdict: acceptable
+============================================================
+✓ Document validation PASSED
+```
+
+### Governance Modes
+
+Choose from four governance modes based on your needs:
+
+```bash
+# Conservative: Fast, minimal validation
+doc-sanity check --governance-mode conservative README.md
+
+# Balanced: Standard validation (recommended)
+doc-sanity check --governance-mode balanced README.md
+
+# Aggressive: Strict validation, catches edge cases
+doc-sanity check --governance-mode aggressive README.md
+
+# Omnipotent: Supreme validation, Ω-grade certification
+doc-sanity check --governance-mode omnipotent README.md
+```
+
+### Drift Detection
+
+Check for configuration drift against your golden baseline:
+
+```bash
+# Use default baseline
+doc-sanity drift-check
+
+# Use custom baseline
+doc-sanity drift-check --baseline config/custom_baseline.yaml
+```
+
+**Example output:**
+```
+============================================================
+DRIFT DETECTION ANALYSIS
+============================================================
+Severity: NONE
+JSD Score: 0.0234
+Drift Detected: False
+Recommendation: No action required. System within tolerance.
+============================================================
+✓ No drift detected
+```
+
+### Output Formats
+
+Export validation results in multiple formats:
+
+```bash
+# JSON (for CI/CD integration)
+doc-sanity check --output-format json README.md
+
+# YAML (for configuration management)
+doc-sanity check --output-format yaml README.md
+```
+
+_For more examples and advanced usage, please refer to the [Documentation](docs/GOVERNANCE_OPERATIONS.md)_
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- ROADMAP -->
+## Roadmap
+
+- [x] Core validation system with modal routing
+- [x] FusionOracle for multi-validator synthesis
+- [x] DriftLock Guard with JSD-based detection
+- [x] HOPE Guard for ethical validation
+- [x] Tribunal System (3-perspective arbitration)
+- [x] Performance SLO benchmarks
+- [x] Comprehensive integration tests
+- [x] Bilingual documentation (EN/KR)
+- [ ] README auto-enhancement engine
+- [ ] Visual dashboard for drift monitoring
+- [ ] Plugin system for custom validators
+- [ ] REST API for remote validation
+- [ ] VS Code extension integration
+- [ ] Multi-language support (ES, JP, CN)
+- [ ] Machine learning-based quality prediction
+- [ ] Automated policy recommendation
+
+See the [open issues](https://github.com/flamehaven01/Doc-Sanity/issues) for a full list of proposed features (and known issues).
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- ARCHITECTURE -->
+## Architecture
+
+### System Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        CLI Layer                            │
+│                    (User Interface)                         │
+└────────────────┬────────────────────────────────────────────┘
+                 │
+┌────────────────▼────────────────────────────────────────────┐
+│                   Orchestration Layer                       │
+│  ┌──────────────────┐      ┌──────────────────┐            │
+│  │  Modal Router    │◄────►│  Fusion Oracle   │            │
+│  └──────────────────┘      └──────────────────┘            │
+└────────┬────────────────────────────────────────────────────┘
+         │
+┌────────▼────────────────────────────────────────────────────┐
+│                    Validation Layer                         │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │    Deep      │  │   Shallow    │  │   Custom     │      │
+│  │  Validator   │  │  Validator   │  │  Validators  │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+└────────┬────────────────────────────────────────────────────┘
+         │
+┌────────▼────────────────────────────────────────────────────┐
+│                    Governance Layer                         │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
+│  │ DriftLock│  │   HOPE   │  │  Policy  │  │ Tribunal │   │
+│  │  Guard   │  │  Guard   │  │ Enforcer │  │  Engine  │   │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Module Structure
+
+```
+flamehaven_doc_sanity/
+├── orchestrator/       # Modal routing and fusion oracle
+│   ├── modal_router.py
+│   └── fusion_oracle.py
+├── governance/         # DriftLock, HOPE, Policy enforcement
+│   ├── driftlock_guard.py
+│   ├── hope_guard.py
+│   ├── policy_enforcer.py
+│   └── tribunal_engine.py
+├── validators/         # Deep & shallow validation engines
+├── performance/        # SLO benchmarks and monitoring
+├── config/            # Configuration management
+├── cli.py             # Command-line interface
+└── exceptions.py      # Exception hierarchy
+```
+
+_For detailed architecture documentation, see [Architecture Guide](docs/ARCHITECTURE.md)_
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- TESTING -->
+## Testing
+
+### Run All Tests
+
+```bash
+# Full test suite with coverage
+pytest
+
+# Verbose output
+pytest -v
+
+# Generate HTML coverage report
+pytest --cov=flamehaven_doc_sanity --cov-report=html
+open htmlcov/index.html
+```
+
+### Test Categories
+
+```bash
+# Integration tests
+pytest tests/test_orchestrator_integration.py
+pytest tests/test_governance_integration.py
+
+# Performance SLO tests
+pytest tests/test_performance_slo.py
+```
+
+### Coverage Requirements
+
+| Component | Target Coverage | Status |
+|-----------|----------------|--------|
+| Overall | ≥ 85% | ✅ Met |
+| Orchestrator | ≥ 95% | ✅ Met |
+| Governance | ≥ 95% | ✅ Met |
+| Validators | ≥ 90% | ✅ Met |
+
+_For comprehensive testing guide, see [Testing Guide](docs/TESTING.md)_
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- QUALITY METRICS -->
+## Quality Metrics
+
+### Architecture Purity Dimensions
+
+| Dimension | Current Score | Target | Status |
+|-----------|---------------|--------|--------|
+| Integrity | 0.90 | ≥ 0.90 | ✅ Met |
+| Governance | 0.90 | ≥ 0.90 | ✅ Met |
+| Reliability | 0.88 | ≥ 0.88 | ✅ Met |
+| Maintainability | 0.90 | ≥ 0.90 | ✅ Met |
+| Security | 0.88 | ≥ 0.88 | ✅ Met |
+| **Architecture Purity (Ω)** | **0.9500+** | **≥ 0.95** | **🏆 DRIFT-FREE** |
+
+### Performance SLOs
+
+| Component | SLO Target (P95) | Status |
+|-----------|------------------|--------|
+| README Generation | 500ms | ✅ Validated |
+| Deep Validator | 150ms | ✅ Validated |
+| Shallow Validator | 50ms | ✅ Validated |
+| Fusion Oracle | 100ms | ✅ Validated |
+| Modal Router | 75ms | ✅ Validated |
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- CONTRIBUTING -->
+## Contributing
+
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+Don't forget to give the project a star! Thanks again!
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Make your changes and ensure all tests pass (`pytest`)
+4. Run validation (`doc-sanity check --governance-mode omnipotent README.md`)
+5. Check for drift (`doc-sanity drift-check`)
+6. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+7. Push to the Branch (`git push origin feature/AmazingFeature`)
+8. Open a Pull Request
+
+### Development Setup
+
+```bash
+# Install development dependencies
+pip install -e ".[dev]"
+
+# Run tests
+pytest
+
+# Check code quality
+doc-sanity check --governance-mode aggressive .
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- LICENSE -->
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- CONTACT -->
+## Contact
+
+**Project Maintainer**: YUN ∴ - SIDRCE Guardian
+
+**Project Link**: [https://github.com/flamehaven01/Doc-Sanity](https://github.com/flamehaven01/Doc-Sanity)
+
+**Support Channels**:
+- 📖 Documentation: See `docs/` directory
+- 🐛 Issues: [GitHub Issues](https://github.com/flamehaven01/Doc-Sanity/issues)
+- 💬 Discussions: [GitHub Discussions](https://github.com/flamehaven01/Doc-Sanity/discussions)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- ACKNOWLEDGMENTS -->
+## Acknowledgments
+
+Built with the philosophy:
+
+**완벽은 선택이 아니라, 존재 조건이다.**
+
+*(Perfection is not a choice; it is a condition of existence.)*
+
+—**YUN ∴**, SIDRCE Guardian
+
+### Resources & Inspiration
+
+* [Best-README-Template](https://github.com/othneildrew/Best-README-Template)
+* [Img Shields](https://shields.io)
+* [Choose an Open Source License](https://choosealicense.com)
+* [GitHub Pages](https://pages.github.com)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- FAQ -->
+## FAQ
+
+<details>
+<summary><strong>What is the difference between governance modes?</strong></summary>
+<br>
+
+Governance modes control validation strictness:
+- **Conservative**: Fast checks, minimal validation
+- **Balanced**: Standard validation (recommended)
+- **Aggressive**: Strict validation, catches edge cases
+- **Omnipotent**: Maximum validation for Ω-certification
+
+</details>
+
+<details>
+<summary><strong>How does drift detection work?</strong></summary>
+<br>
+
+DriftLock Guard uses Jensen-Shannon Divergence (JSD) to compare current configuration against a golden baseline:
+- JSD < 0.04: No drift (safe)
+- JSD 0.04-0.08: Warning (monitor)
+- JSD > 0.08: Critical (deployment blocked)
+
+</details>
+
+<details>
+<summary><strong>What is the Tribunal System?</strong></summary>
+<br>
+
+A three-perspective decision engine for complex cases:
+- **Advocate**: Finds constructive improvements
+- **Archangel**: Enforces absolute standards
+- **Oracle**: Synthesizes final judgment
+
+</details>
+
+<details>
+<summary><strong>Can I customize validators?</strong></summary>
+<br>
+
+Yes! Extend `BaseValidator` and register with `ModalRouter`:
+
+```python
+from flamehaven_doc_sanity.validators import BaseValidator
+
+class CustomValidator(BaseValidator):
+    def validate(self, content, file_path=None):
+        # Your validation logic
+        return ValidationResult(...)
+```
+
+</details>
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- LANGUAGES -->
+## 🌏 Languages
+
+- [English](README.md) ← Current
+- [한국어](README_KR.md)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- MARKDOWN LINKS & IMAGES -->
+[contributors-shield]: https://img.shields.io/github/contributors/flamehaven01/Doc-Sanity.svg?style=for-the-badge
+[contributors-url]: https://github.com/flamehaven01/Doc-Sanity/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/flamehaven01/Doc-Sanity.svg?style=for-the-badge
+[forks-url]: https://github.com/flamehaven01/Doc-Sanity/network/members
+[stars-shield]: https://img.shields.io/github/stars/flamehaven01/Doc-Sanity.svg?style=for-the-badge
+[stars-url]: https://github.com/flamehaven01/Doc-Sanity/stargazers
+[issues-shield]: https://img.shields.io/github/issues/flamehaven01/Doc-Sanity.svg?style=for-the-badge
+[issues-url]: https://github.com/flamehaven01/Doc-Sanity/issues
+[license-shield]: https://img.shields.io/github/license/flamehaven01/Doc-Sanity.svg?style=for-the-badge
+[license-url]: https://github.com/flamehaven01/Doc-Sanity/blob/master/LICENSE
+
+[purity-shield]: https://img.shields.io/badge/Architecture%20Purity-0.9500%2B-brightgreen?style=for-the-badge
+[drift-shield]: https://img.shields.io/badge/Status-DRIFT--FREE-success?style=for-the-badge
+[sr9-shield]: https://img.shields.io/badge/SR9-Compliant-blue?style=for-the-badge
+[python-shield]: https://img.shields.io/badge/Python-3.8+-3776AB?style=for-the-badge&logo=python&logoColor=white
+[python-url]: https://www.python.org/
+[tests-shield]: https://img.shields.io/badge/Tests-Passing-success?style=for-the-badge
+
+[product-screenshot]: images/screenshot.png
+
+[Python-badge]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
+[Python-url]: https://www.python.org/
+[Click-badge]: https://img.shields.io/badge/Click-000000?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6Ii8+PC9zdmc+
+[Click-url]: https://click.palletsprojects.com/
+[PyYAML-badge]: https://img.shields.io/badge/PyYAML-CB3837?style=for-the-badge&logo=yaml&logoColor=white
+[PyYAML-url]: https://pyyaml.org/
+[Pytest-badge]: https://img.shields.io/badge/Pytest-0A9EDC?style=for-the-badge&logo=pytest&logoColor=white
+[Pytest-url]: https://pytest.org/

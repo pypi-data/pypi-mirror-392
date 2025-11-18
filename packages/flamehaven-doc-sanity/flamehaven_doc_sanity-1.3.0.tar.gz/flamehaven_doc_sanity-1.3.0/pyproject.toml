@@ -1,0 +1,106 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flamehaven-doc-sanity"
+version = "1.3.0"
+description = "Ω-Grade Documentation Governance & Validation System with I18n, Drift Detection, and Plugin Architecture"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+    {name = "Flamehaven", email = "flamehaven01@users.noreply.github.com"}
+]
+keywords = [
+    "documentation",
+    "governance",
+    "validation",
+    "drift-detection",
+    "i18n",
+    "translation",
+    "quality-assurance",
+    "plugin-system",
+    "ci-cd",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: Software Development :: Testing",
+    "Typing :: Typed",
+]
+dependencies = [
+    "click>=8.0.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+]
+dashboard = [
+    "flask>=2.3.0",
+]
+all = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+    "flask>=2.3.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/flamehaven01/Flamehaven-Doc-Sanity"
+Documentation = "https://github.com/flamehaven01/Flamehaven-Doc-Sanity#readme"
+Repository = "https://github.com/flamehaven01/Flamehaven-Doc-Sanity"
+Changelog = "https://github.com/flamehaven01/Flamehaven-Doc-Sanity/blob/main/CHANGELOG.md"
+"Bug Tracker" = "https://github.com/flamehaven01/Flamehaven-Doc-Sanity/issues"
+
+[project.scripts]
+doc-sanity = "flamehaven_doc_sanity.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+
+[tool.coverage.run]
+source = ["flamehaven_doc_sanity"]
+omit = ["*/tests/*", "*/test_*.py"]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["flamehaven_doc_sanity*"]
+exclude = ["tests*", "docs*", "images*", "htmlcov*"]
