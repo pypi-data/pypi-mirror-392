@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ontologia-edge-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ontologia-edge-api
+  template:
+    metadata:
+      labels:
+        app: ontologia-edge-api
+    spec:
+      containers:
+        - name: api
+          image: ontologia-edge-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8001
+          env:
+            - name: EDGE_SHARED_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: edge-secrets
+                  key: shared_token
+            - name: EDGE_VERIFY_SIGNATURES
+              value: "1"
+            - name: REDIS_URL
+              value: redis://redis:6379
+            - name: EDGE_TRACING
+              value: "1"
+            - name: EDGE_OTLP_ENDPOINT
+              value: http://otel-collector:4318
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8001
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 5
+            periodSeconds: 10
