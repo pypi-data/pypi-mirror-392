@@ -1,0 +1,516 @@
+Metadata-Version: 2.4
+Name: hrcx
+Version: 1.2.4
+Summary: Split your files into encrypted fragments without needing all fragments for reconstruction!
+Author-email: Julius Pleunes <jjgpleunes@gmail.com>
+License: MIT
+Project-URL: Homepage, https://github.com/juliuspleunes4/horcrux
+Project-URL: Documentation, https://github.com/juliuspleunes4/horcrux#readme
+Project-URL: Repository, https://github.com/juliuspleunes4/horcrux
+Project-URL: Issues, https://github.com/juliuspleunes4/horcrux/issues
+Project-URL: Changelog, https://github.com/juliuspleunes4/horcrux/blob/master/docs/CHANGELOG.md
+Keywords: encryption,shamir,secret-sharing,security,cryptography,file-splitting,horcrux,threshold-cryptography,aes,cli
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: System Administrators
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Security :: Cryptography
+Classifier: Topic :: System :: Archiving :: Backup
+Classifier: Topic :: Utilities
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: cryptography>=41.0.0
+Requires-Dist: click>=8.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: ruff>=0.1.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Dynamic: license-file
+
+# 🔮 Horcrux
+
+[![PyPI version](https://img.shields.io/pypi/v/hrcx.svg)](https://pypi.org/project/hrcx/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+
+> Split your files into encrypted fragments using Shamir's Secret Sharing Scheme. No passwords to remember. Just keep your horcruxes safe :)
+
+Horcrux is a file encryption and splitting tool that divides your sensitive files into multiple encrypted fragments (horcruxes). You can configure it so that only a subset of these fragments is needed to reconstruct the original file, providing both security and redundancy.
+
+## ✨ Features
+
+- 🔐 **Secure Encryption**: AES-256-GCM encryption for your files
+- 🧩 **Threshold Scheme**: Split into N parts, require only K parts to reconstruct
+- 🎯 **No Passwords**: No need to remember complex passphrases years later
+- 📦 **Easy Distribution**: Spread horcruxes across multiple locations/media
+- 🚀 **Simple CLI**: Intuitive command-line interface
+- 🎨 **Interactive Mode**: Beautiful GUI-like interface for non-technical users
+- 🔄 **Cross-platform**: Works on Windows, macOS, and Linux
+- 📊 **Metadata Preservation**: Maintains original filename and timestamp information
+
+## 📋 Table of Contents
+
+- [Installation](#-installation)
+- [Quick Start](#-quick-start)
+- [Usage](#-usage)
+- [How It Works](#-how-it-works)
+- [Use Cases](#-use-cases)
+- [API Documentation](#-api-documentation)
+- [Development](#-development)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Acknowledgments](#-acknowledgments)
+
+## 📦 Installation
+
+### Via pip (Recommended)
+
+```bash
+pip install hrcx
+```
+
+### Via pipx (Isolated)
+
+```bash
+pipx install hrcx
+```
+
+### From Source
+
+```bash
+git clone https://github.com/juliuspleunes4/horcrux.git
+cd horcrux
+pip install -e .
+```
+
+## 🚀 Quick Start
+
+### Split a File
+
+```bash
+# Split diary.txt into 5 horcruxes (any 3 required to reconstruct)
+hrcx split diary.txt -t 5 -k 3
+
+# Output:
+# ✓ Created diary_1_of_5.hrcx
+# ✓ Created diary_2_of_5.hrcx
+# ✓ Created diary_3_of_5.hrcx
+# ✓ Created diary_4_of_5.hrcx
+# ✓ Created diary_5_of_5.hrcx
+```
+
+### Bind Horcruxes Back
+
+```bash
+# Reconstruct from horcruxes in current directory
+hrcx bind
+
+# Or specify a directory
+hrcx bind ./horcruxes
+
+# Output:
+# ✓ Found 5 horcruxes
+# ✓ Threshold met (3 required, 5 available)
+# ✓ Successfully reconstructed: diary.txt
+```
+
+## 📖 Usage
+
+### Getting Help
+
+```bash
+# Show help for main command
+hrcx --help
+
+# Show help for split command
+hrcx split --help
+
+# Show help for bind command
+hrcx bind --help
+
+# Check version
+hrcx --version
+```
+
+### Split Command
+
+Split a file into multiple encrypted horcruxes:
+
+```bash
+hrcx split <file> [options]
+```
+
+**Options:**
+
+- `-t, --total <number>` - Total number of horcruxes to create (default: prompts user)
+- `-k, --threshold <number>` - Minimum horcruxes needed to reconstruct (default: prompts user)
+- `-o, --output <directory>` - Output directory for horcruxes (default: current directory)
+
+**Examples:**
+
+```bash
+# Interactive mode (prompts for total and threshold)
+hrcx split secret.pdf
+
+# Split into 7 parts, any 4 can reconstruct
+hrcx split secret.pdf -t 7 -k 4
+
+# Specify output directory
+hrcx split secret.pdf -t 5 -k 3 -o ./vault
+```
+
+### Bind Command
+
+Reconstruct the original file from horcruxes:
+
+```bash
+hrcx bind [directory] [options]
+```
+
+**Options:**
+
+- `-o, --output <file>` - Output file path (default: original filename)
+- `-f, --force` - Overwrite existing file without prompting
+
+**Examples:**
+
+```bash
+# Bind horcruxes from current directory
+hrcx bind
+
+# Bind from specific directory
+hrcx bind ./vault
+
+# Force overwrite existing file
+hrcx bind -f
+
+# Specify output location
+hrcx bind -o ./recovered/secret.pdf
+```
+
+### Interactive Mode
+
+For non-technical users, Horcrux offers a beautiful interactive mode with a guided wizard:
+
+```bash
+hrcx interactive
+```
+
+**Features:**
+- 🎨 Beautiful ocean-blue ASCII art header
+- 🎯 Step-by-step guided workflows
+- 🌈 Color-coded prompts (green for success, red for errors, yellow for warnings)
+- ✅ Automatic validation of all inputs
+- 📁 Smart file discovery and defaults
+- 🔄 Perform multiple operations in one session
+
+**Windows Users:** Simply double-click the `horcrux.bat` file to launch interactive mode without opening a terminal!
+
+**Interactive mode walkthrough:**
+
+1. Choose between **Split** or **Bind** operations
+2. Follow the color-coded prompts:
+   - **Split**: Select file → Set total horcruxes → Set threshold → Choose output directory
+   - **Bind**: Select horcrux directory → Confirm reconstruction → Choose output location
+3. Review the summary and confirm
+4. Watch as your operation completes with visual feedback
+
+Perfect for users who prefer a GUI-like experience or are new to command-line tools!
+
+## 🔬 How It Works
+
+Horcrux uses a combination of **Shamir's Secret Sharing Scheme** and **AES-256-GCM encryption**:
+
+1. **Key Generation**: A random 256-bit encryption key is generated using a cryptographically secure random number generator
+
+2. **File Encryption**: The original file is encrypted using AES-256 in GCM (Galois/Counter Mode) for authenticated encryption
+
+3. **Secret Sharing**: The encryption key is split into N fragments using Shamir's Secret Sharing algorithm, configured so that any K fragments can reconstruct the key
+
+4. **Horcrux Creation**: Each fragment is embedded in a horcrux file along with:
+   - Encrypted file data (distributed across all horcruxes)
+   - Metadata (original filename, timestamp, index, threshold)
+   - Key fragment for reconstruction
+
+5. **Reconstruction**: When binding:
+   - Collect K or more horcruxes
+   - Reconstruct the encryption key using Shamir's algorithm
+   - Decrypt and reassemble the original file
+
+### Shamir's Secret Sharing
+
+This cryptographic algorithm allows a secret (the encryption key) to be divided into N shares, where any K shares can reconstruct the secret, but K-1 shares reveal nothing about it. This is accomplished using polynomial interpolation over a finite field.
+
+**Mathematical Foundation:**
+- Generate a random polynomial of degree K-1 with the secret as the constant term
+- Evaluate the polynomial at N different points to create N shares
+- Any K shares can reconstruct the polynomial (and thus the secret) using Lagrange interpolation
+
+## 💡 Use Cases
+
+### Personal Use
+
+- **Sensitive Documents**: Split personal records, tax documents, or legal papers
+- **Cryptocurrency Wallets**: Distribute wallet backups across multiple secure locations
+- **Password Manager Databases**: Add an extra layer of security to password vaults
+- **Photo Albums**: Protect private photos from single-point compromise
+
+### Professional Use
+
+- **Distributed Backups**: Store critical business data across multiple geographic locations
+- **Multi-party Access**: Require collaboration from multiple parties to access sensitive information
+- **Secure Transmission**: Send file fragments through different communication channels to prevent interception
+- **Disaster Recovery**: Ensure data can be recovered even if some backup locations are compromised
+
+### Who This Is For
+
+- People who need to encrypt sensitive files without remembering passwords years later
+- Organizations requiring multi-party authorization for sensitive data access
+- Users who want to distribute backups across multiple physical locations
+- Anyone named Tom Riddle 🐍
+
+## 📚 API Documentation
+
+Horcrux can also be used as a library in your Python projects:
+
+### Installation
+
+```bash
+pip install hrcx
+```
+
+### Usage
+
+```python
+from hrcx import split, bind
+
+# Split a file
+split(
+    file_path='./secret.txt',
+    total=5,
+    threshold=3,
+    output_dir='./horcruxes'
+)
+
+# Bind horcruxes
+bind(
+    horcrux_paths=['./horcruxes/secret_1_of_5.hrcx', './horcruxes/secret_2_of_5.hrcx', './horcruxes/secret_3_of_5.hrcx'],
+    output_path='./recovered.txt'
+)
+```
+
+### API Reference
+
+#### `split(file_path: str, total: int, threshold: int, output_dir: Optional[str] = None) -> None`
+
+Splits a file into encrypted horcruxes.
+
+**Parameters:**
+- `file_path` (str): Path to the file to split
+- `total` (int): Total number of horcruxes to create (must be >= threshold)
+- `threshold` (int): Minimum number of horcruxes needed to reconstruct (must be >= 2)
+- `output_dir` (Optional[str]): Output directory for horcruxes (default: same directory as input file)
+
+**Raises:**
+- `FileNotFoundError`: If the input file doesn't exist
+- `ValueError`: If total < threshold or threshold < 2
+- `PermissionError`: If unable to write to output directory
+
+**Example:**
+```python
+from hrcx import split
+
+split('secret.pdf', total=7, threshold=4, output_dir='./vault')
+```
+
+#### `bind(horcrux_paths: Optional[List[str]] = None, output_path: Optional[str] = None, overwrite: bool = False) -> None`
+
+Reconstructs the original file from horcruxes.
+
+**Parameters:**
+- `horcrux_paths` (Optional[List[str]]): List of paths to horcrux files. If None, auto-discovers horcruxes in current directory
+- `output_path` (Optional[str]): Output file path (default: original filename from horcrux metadata)
+- `overwrite` (bool): Whether to overwrite existing file without prompting (default: False)
+
+**Raises:**
+- `FileNotFoundError`: If no horcrux files found
+- `ValueError`: If insufficient horcruxes or incompatible horcruxes provided
+- `RuntimeError`: If decryption fails or file integrity check fails
+
+**Example:**
+```python
+from hrcx import bind
+
+# Auto-discover horcruxes in current directory
+bind()
+
+# Specify horcruxes explicitly
+bind(
+    horcrux_paths=['./vault/secret_1_of_7.hrcx', './vault/secret_4_of_7.hrcx', './vault/secret_6_of_7.hrcx', './vault/secret_7_of_7.hrcx'],
+    output_path='./recovered.pdf',
+    overwrite=True
+)
+```
+
+## 🛠 Development
+
+### Prerequisites
+
+- Python >= 3.8
+- pip >= 21.0
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/juliuspleunes4/horcrux.git
+cd horcrux
+
+# Create virtual environment (recommended)
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install in editable mode with dev dependencies
+pip install -e ".[dev]"
+
+# Run tests
+pytest
+
+# Run linter
+ruff check src/
+
+# Format code
+black src/ tests/
+
+# Type checking
+mypy src/
+```
+
+### Project Structure
+
+```
+horcrux/
+├── src/hrcx/
+│   ├── cli.py         # Command-line interface
+│   ├── crypto/        # Encryption and key management
+│   ├── shamir/        # Shamir's Secret Sharing implementation
+│   ├── horcrux/       # Horcrux file handling
+│   └── utils/         # Utility functions
+├── tests/             # Test files
+├── docs/              # Documentation
+└── pyproject.toml     # Package configuration
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=hrcx --cov-report=html
+
+# Run specific test file
+pytest tests/test_api.py
+
+# Run with verbose output
+pytest -v
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+### Guidelines
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+Please make sure to:
+- Update tests as appropriate
+- Follow the existing code style
+- Update documentation for API changes
+- Add entries to CHANGELOG.md
+
+## 🔒 Security
+
+### Reporting Vulnerabilities
+
+If you discover a security vulnerability, please email jjgpleunes@gmail.com instead of using the issue tracker.
+
+### Security Considerations
+
+- Horcruxes are encrypted with AES-256-GCM, providing strong confidentiality and authenticity
+- The encryption key is generated using `crypto.randomBytes()` for cryptographic security
+- Shamir's Secret Sharing is implemented over GF(256) using standard polynomial interpolation
+- Each horcrux contains metadata in plaintext (filename, timestamp, indices) for convenience
+- The threshold scheme ensures that K-1 horcruxes reveal no information about the original file
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+This project was inspired by and adapted from the excellent [**horcrux**](https://github.com/jesseduffield/horcrux) project by [Jesse Duffield](https://github.com/jesseduffield), originally written in Go. The core concepts, including the use of Shamir's Secret Sharing Scheme and the creative Harry Potter theming, are credited to the original project.
+
+**Original Project:**
+- Repository: [jesseduffield/horcrux](https://github.com/jesseduffield/horcrux)
+- Author: Jesse Duffield
+- License: MIT
+
+**Additional Credits:**
+- Shamir's Secret Sharing implementation adapted from [Hashicorp Vault](https://github.com/hashicorp/vault)
+- Inspired by the Harry Potter universe created by J.K. Rowling
+
+### Other Projects by Jesse Duffield
+
+Check out Jesse's other amazing projects:
+- [Lazygit](https://github.com/jesseduffield/lazygit) - Simple terminal UI for git commands
+- [Lazydocker](https://github.com/jesseduffield/lazydocker) - Terminal UI for Docker and docker-compose
+- [OK? Programming Language](https://github.com/jesseduffield/ok) - An experimental programming language
+
+## 📞 Support
+
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/juliuspleunes4/horcrux/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/juliuspleunes4/horcrux/discussions)
+- 📖 **Documentation**: [Wiki](https://github.com/juliuspleunes4/horcrux/wiki)
+
+## 🗺 Roadmap
+
+- [ ] GUI application for non-technical users
+- [ ] Support for streaming large files
+- [ ] Cloud storage integration (AWS S3, Google Drive, etc.)
+- [ ] Mobile app (iOS/Android)
+- [ ] Verification mode to check horcrux integrity
+- [ ] Compression before encryption
+- [ ] Custom encryption algorithms support
+
+## ⚠️ Disclaimer
+
+This software is provided "as is" without warranty of any kind. While Horcrux uses industry-standard encryption and secret sharing algorithms, the security of your data ultimately depends on how you store and protect your horcruxes. Always keep backups of important data.
+
+---
+
+<div align="center">
+
+**Made with ❤️**
+
+If you find this project useful, please consider giving it a ⭐️ on GitHub!
+
+</div>
