@@ -1,0 +1,171 @@
+Metadata-Version: 2.4
+Name: maldatagen
+Version: 0.1.1
+Summary: MalDataGen - Tabular Data Generator
+Author-email: Kayuã <kayuaolequesp@gmail.com>
+License: MIT
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: absl-py>=1.4.0
+Requires-Dist: astunparse>=1.6.3
+Requires-Dist: pyfiglet
+Requires-Dist: cachetools>=5.3.1
+Requires-Dist: certifi>=2023.7.22
+Requires-Dist: charset-normalizer>=3.2.0
+Requires-Dist: contourpy>=1.1.0
+Requires-Dist: cycler>=0.11.0
+Requires-Dist: flatbuffers>=1.12
+Requires-Dist: fonttools>=4.41.1
+Requires-Dist: gast>=0.4.0
+Requires-Dist: google-auth>=2.22.0
+Requires-Dist: google-auth-oauthlib>=0.4.6
+Requires-Dist: google-pasta>=0.2.0
+Requires-Dist: grpcio>=1.56.2
+Requires-Dist: h5py>=3.9.0
+Requires-Dist: idna>=3.4
+Requires-Dist: importlib-metadata>=6.8.0; python_version < "3.10"
+Requires-Dist: importlib-resources>=6.0.0; python_version < "3.10"
+Requires-Dist: joblib>=1.3.1
+Requires-Dist: kaleido>=0.2.1
+Requires-Dist: keras>=2.9.0
+Requires-Dist: keras-preprocessing>=1.1.2
+Requires-Dist: kiwisolver>=1.4.4
+Requires-Dist: libclang>=16.0.6
+Requires-Dist: markdown>=3.4.4
+Requires-Dist: markupsafe>=2.1.3
+Requires-Dist: matplotlib>=3.7.2
+Requires-Dist: numpy<2.0.0,>=1.21.5
+Requires-Dist: numpy<1.25.0,>=1.21.5; python_version < "3.9"
+Requires-Dist: oauthlib>=3.2.2
+Requires-Dist: opt-einsum>=3.3.0
+Requires-Dist: packaging>=23.1
+Requires-Dist: pandas>=2.0.0
+Requires-Dist: pillow>=10.0.0
+Requires-Dist: plotly>=5.0.0
+Requires-Dist: protobuf<4.0.0,>=3.19.6
+Requires-Dist: pyasn1>=0.5.0
+Requires-Dist: pyasn1-modules>=0.3.0
+Requires-Dist: pyparsing>=3.0.9
+Requires-Dist: python-dateutil>=2.8.2
+Requires-Dist: pytz>=2023.3
+Requires-Dist: requests>=2.31.0
+Requires-Dist: requests-oauthlib>=1.3.1
+Requires-Dist: rsa>=4.9
+Requires-Dist: scikit-learn>=1.1.1
+Requires-Dist: scipy<2.0.0,>=1.10.1
+Requires-Dist: setuptools>=68.0.0
+Requires-Dist: six>=1.16.0
+Requires-Dist: tenacity>=8.2.2
+Requires-Dist: tensorboard>=2.9.1
+Requires-Dist: tensorboard-data-server>=0.6.1
+Requires-Dist: tensorboard-plugin-wit>=1.8.1
+Requires-Dist: tensorflow<3.0.0,>=2.9.1
+Requires-Dist: tensorflow-estimator>=2.9.0
+Requires-Dist: tensorflow-io-gcs-filesystem>=0.32.0
+Requires-Dist: termcolor>=2.3.0
+Requires-Dist: threadpoolctl>=3.2.0
+Requires-Dist: typing-extensions>=4.7.1
+Requires-Dist: urllib3>=1.26.16
+Requires-Dist: werkzeug<2.4.0,>=2.3.6; python_version < "3.9"
+Requires-Dist: werkzeug>=2.3.6
+Requires-Dist: wheel>=0.41.0
+Requires-Dist: wrapt>=1.15.0
+Requires-Dist: zipp>=3.16.2; python_version < "3.10"
+Requires-Dist: xgboost<2.1.0,>=2.0.3; python_version < "3.9"
+Requires-Dist: aim>=3.17.5
+Requires-Dist: mlflow>=2.12.1
+Requires-Dist: neptune>=1.10.2
+Requires-Dist: xgboost>=2.0.3
+Requires-Dist: seaborn>=0.12.0
+Requires-Dist: sdv>=1.2.1
+Requires-Dist: gputil==1.4.0
+Requires-Dist: psutil==5.9.5
+Dynamic: license-file
+
+# MalDataGen
+
+**Version 1.0.0 (Jellyfish)**
+
+MalDataGen is an advanced Python framework for generating and evaluating synthetic tabular datasets using modern generative models. Designed specifically for cybersecurity researchers and malware detection practitioners, it provides reproducible pipelines with fine-grained control over model configuration and integrated evaluation metrics for realistic data synthesis.
+
+The framework supports state-of-the-art generative architectures including GANs (CGAN, WGAN, WGAN-GP), Variational Autoencoders (VAE, TVAE, VQ-VAE), Diffusion Models (Denoising and Latent), and traditional methods like SMOTE. It also integrates with the Synthetic Data Vault (SDV) library to provide additional models such as CTGAN and Copula-based generators.
+
+## Installation
+
+Install from source:
+
+```bash
+git clone https://github.com/SBSeg25/MalDataGen.git
+cd MalDataGen
+pip install -r requirements.txt
+```
+
+Or use pip directly:
+
+```bash
+pip install maldatagen
+```
+
+**Requirements:** Python 3.8+, pip. Optional: CUDA 11+ for GPU acceleration.
+
+Docker execution is also supported via `run_demo_docker.sh` or `run_experiments_docker.sh` scripts. Note that Docker execution requires sudo permissions for the Docker engine, while local execution has no security concerns.
+
+## Features and Capabilities
+
+MalDataGen provides a comprehensive toolkit for synthetic data generation and evaluation. The framework implements cross-validation with stratified k-fold splitting, fully customizable model configurations, and built-in metrics for assessing data quality. All models and experiments can be persisted for reproducibility, and the system includes graphing utilities for generating publication-ready visualizations including clustering plots, heatmaps comparing synthetic and real samples, confusion matrices, and performance bar graphs.
+
+The evaluation strategy supports two complementary approaches: TS-TR (Train Synthetic, Test Real) which measures generalization ability by training on synthetic data and testing on real data, and TR-TS (Train Real, Test Synthetic) which assesses generative realism by training on real samples and testing on synthetic ones. Both methods use comprehensive metrics including Accuracy, Precision, Recall, F1-score, Specificity, ROC-AUC, MSE, MAE, FNR, and TNR, as well as secondary metrics like Euclidean Distance, Hellinger Distance, Log-Likelihood, and Manhattan Distance.
+
+## Supported Models
+
+The framework includes nine native generative models and three third-party models via SDV integration. Native models include CGAN for conditional generation with class balancing, WGAN and WGAN-GP for stable training on imbalanced datasets using Wasserstein distance, standard and Variational Autoencoders for latent space learning, Denoising and Latent Diffusion models for high-quality sample generation, VQ-VAE for discrete latent representations, and SMOTE for traditional interpolation-based oversampling. Third-party models from SDV include TVAE optimized for tabular data, Copula for preserving statistical dependencies, and CTGAN with mode-specific normalization for mixed-type data.
+
+## Output Structure
+
+After execution, the framework generates a comprehensive output structure organized by model. Each model folder contains five subdirectories: Data Generated (synthetic datasets and partitioned real data subsets), Evaluation Results (clustering visualizations, heatmaps, confusion matrices, and metric bar graphs), Logs (execution logs), Monitor (raw monitoring data), and Models Saved (serialized models for each fold if saving is enabled). Additionally, a comparative PDF report for SVM classifier performance across all models is generated in the project root.
+
+## System Requirements
+
+The framework runs on Linux (Ubuntu 22.04+ preferred) with Python 3.8.10 or higher. Minimum requirements are any x86_64 CPU with 4 GB RAM and 10 GB storage. Recommended configuration includes a multi-core CPU (Intel i5 or AMD Ryzen 5+), 8 GB+ RAM, and 20 GB SSD storage. GPU acceleration via NVIDIA cards with CUDA 11+ is optional but recommended for faster training. Docker 27.2.1+ is optional for containerized execution.
+
+## Documentation and Resources
+
+Complete documentation is available in the repository. The `Docs/` directory contains API reference documentation, `Docs/Diagrams/` provides eight comprehensive architecture diagrams created with Mermaid notation, and `Docs/Overview.md` explains model architectures in detail. The project website at https://kayua.github.io/SyntheticDataGen.github.io/ provides additional resources, and demonstration videos are available at https://drive.google.com/file/d/1sbPZ1x5Np6zolhFvCBWoMzqNqrthlUe3/view (backup: https://youtu.be/t-AZtsLJUlQ).
+
+## Citation
+
+If you use MalDataGen in your research, please cite:
+
+```bibtex
+@inproceedings{sbseg25_maldatagen,
+ author = {Kayuã Paim and Angelo Nogueira and Diego Kreutz and Weverton Cordeiro and Rodrigo Mansilha},
+ title = {MalDataGen: A Modular Framework for Synthetic Tabular Data Generation in Malware Detection},
+ booktitle = {Companion Proceedings of the 25th Brazilian Symposium on Cybersecurity},
+ location = {Foz do Iguaçu/PR},
+ year = {2025},
+ pages = {38--47},
+ publisher = {SBC},
+ address = {Porto Alegre, RS, Brasil},
+ doi = {10.5753/sbseg_estendido.2025.12113},
+ url = {https://sol.sbc.org.br/index.php/sbseg_estendido/article/view/36739}
+}
+```
+
+## Awards and Recognition
+
+MalDataGen received the Highlighted Artifact award at SBSEG 25 and was recognized as the Best Tool of SBSEG 2025. Award details available at https://doc-artefatos.github.io/sbseg2025/results.html and https://sbseg2025.ppgia.pucpr.br/wp-content/uploads/2025/09/PremiacaoSBSEG-2025.pdf.
+
+## Key References
+
+The framework builds upon foundational work in generative modeling including Kingma & Welling (2013) on Variational Autoencoders, Goodfellow et al. (2014) on Generative Adversarial Networks, Ho et al. (2020) on Denoising Diffusion Probabilistic Models, Arjovsky et al. (2017) on Wasserstein GANs, and van den Oord et al. (2017) on VQ-VAE. SDV integration is based on Patki et al. (2016) and Xu et al. (2019). Complete references available in the repository documentation.
+
+## License
+
+Distributed under the MIT License. See LICENSE file for details.
+
+## Links
+
+- Repository: https://github.com/SBSeg25/MalDataGen
+- Documentation: https://github.com/SBSeg25/MalDataGen/tree/main/Docs
+- Issues: https://github.com/SBSeg25/MalDataGen/issues
