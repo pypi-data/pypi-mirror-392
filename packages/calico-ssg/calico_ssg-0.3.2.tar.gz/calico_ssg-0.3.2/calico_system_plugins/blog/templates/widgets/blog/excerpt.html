@@ -1,0 +1,77 @@
+{% docstring %}
+Displays a post excerpt.
+Expects to recieve a page metadata as `post`.
+
+Attributes:
+  exclude_date: (default: `False`) If `True` do not display date information (`post.published_date`, `post.published_at`)
+  exclude_readtime: (default: `False`) If `True` do not display read time information (`post.readtime`)
+  exclude_author: (default: `False`) If `True` do not display author information (extracted from `post.author`)
+  exclude_tags: (default: `False`) If `True` do not display tags information (`post.tags`)
+  exclude_read_more: (default: `False`) If `True` do not display "read more..." link at the bottom of the excerpt
+  post.image: (optional) if an image is present, it will be displayed alongside the text of the excerpt (using sourceset)
+  post.published_date: (optional) if set, will override `post.published_at` which is computed from the timestamp of the file
+  post.tags: (optional) A list of tags
+  post.excerpt: (optional) A paragraph or more that will be rendered from Markdown. If omitted, the excerpt will be extracted from `post.content` (rendered from Markdown)
+{% enddocstring %}
+{% if post.image %}
+  <div class="grid excerpt">
+    <div>
+{% endif %}
+
+<a href="{{post.url}}"><h3>{{post.title}}</h3></a>
+<section class="post-meta">
+  {% if not exclude_date %}
+    {% if post.published_date %}
+      <time class="post-date text-muted" datetime="{{section.published_date|date:'Y-m-d'}}">
+        {{post.published_date|date:'d F Y'}}
+      </time>
+    {% elif post.published_at %}
+      <time class="post-date text-muted" datetime="{{section.published_at|date_from_str|date:'Y-m-d'}}">
+        {{post.published_at|date_from_str|date:'d F Y'}}
+      </time>
+    {% endif %}
+  {% endif %}
+  {% if not exclude_readtime %}
+    <small>- {{post.readtime}}</small>
+  {% endif %}
+
+  {% if not exclude_author %}
+    {% with author=post.author|author_details %}
+      <a href="{{post.author|author_link}}"><small>{{author.title}}</small></a>
+    {% endwith %}
+  {% endif %}
+</section>
+<div>
+  {% for tag in post.tags %}
+    {% if tag != exclude_tag %}
+      <a href="{{tag|tag_link}}">
+        <small><span class="badge bg-primary">#{{tag}}</span></small>
+      </a>&nbsp;
+    {% endif %}
+  {% endfor %}
+</div>
+{% if include_read_full %}
+  <div class="d-flex justify-content-center mt-2">
+    <a href="{{post.url}}">Read full article here!</a>
+  </div>
+{% endif %}
+<div class="excerpt blog-article">
+  {% if 'excerpt' in post %}
+    {{post.excerpt|markdown}}
+  {% else %}
+    {{post.content|markdown|truncatewords_html:80}}
+  {% endif %}
+  {% if not exclude_read_more %}
+    <div class="d-flex flex-row-reverse">
+      <a href="{{post.url}}">Read more...</a>
+    </div>
+  {% endif %}
+</div>
+{% if post.image %}
+    </div>
+    <div>
+      {% sourceset post.image 3 %}
+    </div>
+  </div>
+{% endif %}
+
