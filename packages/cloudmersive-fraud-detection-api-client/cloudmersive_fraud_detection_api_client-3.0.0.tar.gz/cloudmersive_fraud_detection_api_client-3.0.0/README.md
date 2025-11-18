@@ -1,0 +1,102 @@
+# cloudmersive_fraud_detection_api_client
+Easily and directly scan and block fraudulent security threats in input.
+
+This Python package provides a native API client for [Cloudmersive Fraud Detection API](https://cloudmersive.com/ai-fraud-detection-api)
+
+- API version: v1
+- Package version: 3.0.0
+- Build package: io.swagger.codegen.languages.PythonClientCodegen
+
+## Requirements.
+
+Python 2.7 and 3.4+
+
+## Installation & Usage
+### pip install
+
+If the python package is hosted on Github, you can install directly from Github
+
+```sh
+pip install git+https://github.com/GIT_USER_ID/GIT_REPO_ID.git
+```
+(you may need to run `pip` with root permission: `sudo pip install git+https://github.com/GIT_USER_ID/GIT_REPO_ID.git`)
+
+Then import the package:
+```python
+import cloudmersive_fraud_detection_api_client 
+```
+
+### Setuptools
+
+Install via [Setuptools](http://pypi.python.org/pypi/setuptools).
+
+```sh
+python setup.py install --user
+```
+(or `sudo python setup.py install` to install the package for all users)
+
+Then import the package:
+```python
+import cloudmersive_fraud_detection_api_client
+```
+
+## Getting Started
+
+Please follow the [installation procedure](#installation--usage) and then run the following:
+
+```python
+from __future__ import print_function
+import time
+import cloudmersive_fraud_detection_api_client
+from cloudmersive_fraud_detection_api_client.rest import ApiException
+from pprint import pprint
+
+# Configure API key authorization: Apikey
+configuration = cloudmersive_fraud_detection_api_client.Configuration()
+configuration.api_key['Apikey'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['Apikey'] = 'Bearer'
+
+# create an instance of the API class
+api_instance = cloudmersive_fraud_detection_api_client.FraudDetectionApi(cloudmersive_fraud_detection_api_client.ApiClient(configuration))
+input_file = '/path/to/file.txt' # file | Input document, or photos of a document, to perform fraud detection on (optional)
+
+try:
+    # AI Fraud Detection for Documents
+    api_response = api_instance.document_detect_fraud(input_file=input_file)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling FraudDetectionApi->document_detect_fraud: %s\n" % e)
+
+```
+
+## Documentation for API Endpoints
+
+All URIs are relative to *https://localhost*
+
+Class | Method | HTTP request | Description
+------------ | ------------- | ------------- | -------------
+*FraudDetectionApi* | [**document_detect_fraud**](docs/FraudDetectionApi.md#document_detect_fraud) | **POST** /fraud-ai/detection/document | AI Fraud Detection for Documents
+*FraudDetectionApi* | [**document_detect_fraud_advanced**](docs/FraudDetectionApi.md#document_detect_fraud_advanced) | **POST** /fraud-ai/detection/document/advanced | Advanced AI Fraud Detection for Documents
+
+
+## Documentation For Models
+
+ - [AdvancedFraudDetectionResult](docs/AdvancedFraudDetectionResult.md)
+ - [FraudDetectionResult](docs/FraudDetectionResult.md)
+
+
+## Documentation For Authorization
+
+
+## Apikey
+
+- **Type**: API key
+- **API key parameter name**: Apikey
+- **Location**: HTTP header
+
+
+## Author
+
+
+
