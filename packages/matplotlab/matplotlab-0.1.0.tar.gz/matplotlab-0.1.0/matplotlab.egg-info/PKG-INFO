@@ -1,0 +1,137 @@
+Metadata-Version: 2.4
+Name: matplotlab
+Version: 0.1.0
+Summary: Extended plotting and ML utilities library
+Home-page: https://github.com/Sohail-Creates/matplotlab
+Author: Sohail-Creates
+Author-email: your.email@example.com
+License: MIT
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Education
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+Requires-Dist: numpy>=1.21.0
+Provides-Extra: rl
+Requires-Dist: numpy>=1.21.0; extra == "rl"
+Requires-Dist: matplotlib>=3.4.0; extra == "rl"
+Requires-Dist: gymnasium>=0.28.0; extra == "rl"
+Requires-Dist: google-generativeai>=0.3.0; extra == "rl"
+Provides-Extra: ann
+Requires-Dist: numpy>=1.21.0; extra == "ann"
+Requires-Dist: matplotlib>=3.4.0; extra == "ann"
+Provides-Extra: speech
+Requires-Dist: numpy>=1.21.0; extra == "speech"
+Requires-Dist: matplotlib>=3.4.0; extra == "speech"
+Provides-Extra: all
+Requires-Dist: numpy>=1.21.0; extra == "all"
+Requires-Dist: matplotlib>=3.4.0; extra == "all"
+Requires-Dist: gymnasium>=0.28.0; extra == "all"
+Requires-Dist: google-generativeai>=0.3.0; extra == "all"
+Requires-Dist: numpy>=1.21.0; extra == "all"
+Requires-Dist: matplotlib>=3.4.0; extra == "all"
+Requires-Dist: numpy>=1.21.0; extra == "all"
+Requires-Dist: matplotlib>=3.4.0; extra == "all"
+Provides-Extra: dev
+Requires-Dist: pytest>=6.0; extra == "dev"
+Requires-Dist: black>=21.0; extra == "dev"
+Requires-Dist: flake8>=3.9; extra == "dev"
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: license
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+# Sohail ML Suite
+
+A comprehensive Machine Learning library containing implementations from university coursework covering:
+- **Reinforcement Learning (RL)** - Monte Carlo, TD Learning, Policy/Value Iteration
+- **Artificial Neural Networks (ANN)** - Deep Learning implementations
+- **Speech Processing (SP)** - Audio signal processing and analysis
+
+## Installation
+
+### Option 1: Install Only What You Need (Recommended)
+
+```bash
+# For Reinforcement Learning only (installs numpy, matplotlib, gymnasium)
+pip install -e .[rl]
+
+# For Artificial Neural Networks only (installs numpy, matplotlib, + ANN deps)
+pip install -e .[ann]
+
+# For Speech Processing only (installs numpy, matplotlib, + Speech deps)
+pip install -e .[speech]
+
+# Install everything (all modules)
+pip install -e .[all]
+```
+
+### Option 2: Minimal Installation (Only numpy)
+
+```bash
+# Just the base package with numpy
+pip install -e .
+```
+
+## Quick Start
+
+### Reinforcement Learning
+```python
+from sohail_mlsuite.rl import policy_iteration
+import gymnasium as gym
+
+env = gym.make('FrozenLake-v1')
+policy, V, iterations = policy_iteration(env, gamma=0.9)
+print(f"Converged in {iterations} iterations")
+```
+
+### Artificial Neural Networks
+```python
+# Coming soon
+```
+
+### Speech Processing
+```python
+# Coming soon
+```
+
+## Modules
+
+### 1. Reinforcement Learning (`rl`)
+- **Environments**: GridWorld, FrozenLake, Taxi
+- **Algorithms**: Monte Carlo, TD(0), Policy Iteration, Value Iteration
+- **Visualization**: Convergence plots, policy visualization
+
+### 2. Artificial Neural Networks (`ann`)
+- Coming soon
+
+### 3. Speech Processing (`speech`)
+- Coming soon
+
+## Requirements
+
+- Python >= 3.7
+- NumPy >= 1.21.0
+- Matplotlib >= 3.4.0
+- Gymnasium >= 0.28.0 (for RL module)
+
+## License
+
+MIT License - Educational purposes
+
+## Author
+
+Sohail - University Coursework 2025
