@@ -1,0 +1,60 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "python-sb"
+version = "0.0.0"  # Set with git tag
+description = "Invoke python code in a sandbox"
+requires-python = ">=3.13,<4.0"
+authors = [{ name = "Philippe PRADOS", email = "github@prados.fr" }]
+license = "Apache-2.0"
+readme = "README.md"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "pysandboxes",
+]
+
+
+#[project.urls]
+#repository = "https://www.github.com/pprados/pysandboxes"
+#homepage = "https://www.github.com/pprados/pysandboxes"
+#
+#[tool.hatch.build.targets.wheel]
+#packages = ["pysandboxes"]
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "python-sb"
+]
+
+[project.scripts]
+python-sb = "python_sb.__init__:main"
+python3-sb = "python_sb.__init__:main"
+ipython-sb = "python_sb.__init__:main"
+ipython3-sb = "python_sb.__init__:main"
+
+
+#[tool.setuptools.packages.find]
+#packages = [
+##    { include = "pysandboxes" },
+#    { include = "empty" },
+#]
+
+#[tool.hatch.build.targets.python-sb]
+
+[tool.uv]
+package = true
+#executable-path = "~/workspace.bda/langgraph-codeagent/.venv/bin/python-sb"
+#executable-name = "python-sb"
+# dev-dependencies = ["pysandboxes"] # TODO
