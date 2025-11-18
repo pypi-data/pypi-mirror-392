@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=67", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cxr-sdk"
+version = "0.1.0"
+description = "Official Python SDK for the CXR SaaS API - Claim Reasoning Engine"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "CXR Platform Team", email = "platform@cxrlabs.org" }]
+license = { text = "Proprietary" }
+keywords = ["cxr", "claims", "healthcare", "medicare", "denials", "sdk"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+  "httpx>=0.28",
+  "pydantic>=2.5",
+]
+
+[project.scripts]
+cxr-sdk = "cxr_sdk.cli:main"
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.4",
+  "pytest-asyncio>=0.20",
+  "respx>=0.22",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = ["."]
+addopts = "-q"
