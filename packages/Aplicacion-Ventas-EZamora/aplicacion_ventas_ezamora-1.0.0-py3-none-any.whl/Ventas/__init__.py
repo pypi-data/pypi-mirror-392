@@ -1,0 +1,1 @@
+# Aplicacion vacia de inicialización para el paquete Ventas
