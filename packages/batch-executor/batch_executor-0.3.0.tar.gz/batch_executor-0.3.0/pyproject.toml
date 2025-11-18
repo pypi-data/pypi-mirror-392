@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "batch_executor"
+description = "A high-performance batch executor supporting async, threading, multiprocessing, and hybrid execution modes with progress bars and logging."
+readme = "README.rst"
+authors = [{name = "Rex Wang", email = "1073853456@qq.com"}]
+maintainers = [{name = "Rex Wang", email = "1073853456@qq.com"}]
+classifiers = []
+license = {text = "MIT license"}
+dependencies = [
+    "click",
+    "tqdm",
+    "func_timeout",
+    "psutil",
+    "colorama",
+    "httpx"
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+    "coverage",  # testing
+    "pytest",  # testing
+    "pytest-asyncio", # testing for async code
+    "asyncio",  
+    "pytest-cov",  # coverage reporting
+    "pytest-mock",  # mocking in tests
+    "pytest-xdist",  # parallel test execution
+    "pytest-pythonpath",  # Python path manipulation in tests
+]
+docs = [
+    "mkdocs>=1.4.0",
+    "mkdocs-material>=9.0.0",
+    "mkdocs-static-i18n>=0.5.0",
+    "pymdown-extensions",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["tests*"]
+
+# 如果没有数据文件，可以删除这个配置
+# [tool.setuptools.package-data]
+# "*" = ["*.*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "batch_executor.__version__"}
+
+
