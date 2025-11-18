@@ -1,0 +1,97 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "snapinfra"
+version = "1.1.0"
+description = "AI-powered CLI that generates infrastructure code and architecture diagrams from natural language. Features interactive progress tracking, syntax-highlighted previews, and automated architecture-first workflow. Supports Terraform, Kubernetes, Docker with multi-provider AI backends."
+readme = "README.md"
+authors = [
+    {name = "Manoj Maheshwar Jagadeesan", email = "manojmaheshwarjg@gmail.com"},
+]
+keywords = [
+    "ai", "infrastructure", "iac", "terraform", "kubernetes", 
+    "docker", "architecture", "cloudformation", "llm", "openai", 
+    "groq", "bedrock", "ollama", "code-generation", "devops",
+    "automation", "cli-tool", "infrastructure-automation", "cloud",
+    "aws", "azure", "gcp", "diagrams", "mermaid", "chat-based",
+    "natural-language", "ai-powered", "production-ready"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Code Generators",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "click>=8.0.0",
+    "rich>=13.0.0",
+    "openai>=1.0.0",
+    "groq>=0.4.0",
+    "boto3>=1.34.0",
+    "httpx>=0.25.0",
+    "tomli>=2.0.0;python_version<'3.11'",
+    "toml>=0.10.2",
+    "pydantic>=2.0.0",
+    "pyperclip>=1.8.0",
+    "python-dotenv>=1.0.0",
+    "platformdirs>=3.0.0",
+    "aiofiles>=23.0.0",
+    "typing-extensions>=4.5.0",
+    "autogen-agentchat>=0.2.0",
+    "autogen-ext[openai]>=0.2.0",
+    "diagrams>=0.23.0",
+    "graphviz>=0.20.0",
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "jinja2>=3.1.0",
+    "websockets>=12.0",
+    "python-multipart>=0.0.6",
+]
+
+[project.urls]
+Homepage = "https://github.com/manojmaheshwarjg/snapinfra-cli"
+Documentation = "https://github.com/manojmaheshwarjg/snapinfra-cli#readme"
+Repository = "https://github.com/manojmaheshwarjg/snapinfra-cli.git"
+"Bug Reports" = "https://github.com/manojmaheshwarjg/snapinfra-cli/issues"
+
+[project.scripts]
+snapinfra = "snapinfra.cli.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["snapinfra*"]
+namespaces = false
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.setuptools.package-data]
+snapinfra = ["diagram/templates/*.html", "diagram/static/**/*"]
+
+[project.optional-dependencies]
+viewer = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "jinja2>=3.1.0",
+    "websockets>=12.0",
+]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+]
