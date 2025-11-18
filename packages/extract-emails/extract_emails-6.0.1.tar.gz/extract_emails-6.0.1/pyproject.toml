@@ -1,0 +1,71 @@
+[project]
+name = "extract-emails"
+version = "6.0.1"
+requires-python = ">=3.10,<3.14"
+description = "Extract email addresses and linkedin profiles from given URL."
+authors = [
+  {name = "Dmitrii K", email = "dmitriik@proton.me"}
+]
+readme = "README.md"
+keywords = ["parser", "email", "linkedin"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: MacOS",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: Unix",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Topic :: Utilities",
+]
+dependencies = [
+    "aiocsv>=1.3.2",
+    "aiofiles>=24.1.0",
+    "loguru>=0.7.3",
+    "pydantic>=2.11.7",
+]
+
+[project.urls]
+repository = "https://github.com/dmitriiweb/extract-emails"
+documentation = "https://dmitriiweb.github.io/extract-emails"
+
+[project.optional-dependencies]
+all = [
+    "httpx>=0.28.1",
+    "playwright>=1.52.0",
+] 
+httpx = [
+    "httpx>=0.28.1",
+]
+playwright = [
+    "playwright>=1.52.0",
+]
+dev = [
+    "jinja2>=3.1.6",
+    "mkdocs>=1.6.1",
+    "mkdocs-autorefs>=1.4.2",
+    "mkdocs-copy-to-llm>=0.2.6",
+    "mkdocs-material>=9.6.14",
+    "mkdocstrings[python]>=0.29.1",
+    "mypy>=1.16.1",
+    "pygments>=2.19.1",
+    "pytest>=8.4.1",
+    "pytest-async>=0.1.1",
+    "pytest-asyncio>=1.3.0",
+    "pytest-cov>=6.2.1",
+    "ruff>=0.12.0",
+    "tox>=4.27.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+extract-emails = "extract_emails.console.application:main"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
