@@ -1,0 +1,247 @@
+# Go or NO GO
+
+<div align="center">
+
+[![pre-commit Badge][badge1]][burl1]
+
+<!-- Project details -->
+[![Python support][badge2]][burl2]
+[![PyPI Release][badge2a]][burl2]
+[![Repository][badge3]][burl3]
+[![Releases][badge4]][burl4]
+[![Licence][blic1]][blic2]
+[![Expand your project structure from atoms of code to galactic dimensions.][badge5]][burl5]
+
+<!-- Information on development -->
+[![Project type][badge6]][burl6]
+[![Project stage][badge7]][burl7]
+[![Contributions Welcome][badge8]][burl8]
+[![Open issues][badge9]][burl9]
+[![Merge Requests][badge10]][burl10]
+
+<!-- Styling policies -->
+[![BDD][bbbd1]][bbbd2]
+[![Code style: Ruff][badge11]][burl11]
+[![Docstrings][bdocstr1]][bdocstr2]
+[![Gitmoji][badge12]][burl12]
+[![Semantic Line Breaks][badge13]][burl13]
+
+<!-- Development utilities -->
+[![Poetry][badge14]][burl14]
+[![Pre-commit][badge15]][burl15]
+[![Bandit][badge16]][burl16]
+[![isort][badge17]][burl17]
+[![Editorconfig][badge18]][burl18]
+
+<!-- Open Source benchmarks -->
+<!-- UPDATEME by toggling this comment off after replacing your project's index in both anchors below
+[![OpenSSF Best Practices][bossf1]][bossf2] -->
+<!-- UPDATEME by toggling this comment off after replacing your project's index in both anchors below
+[![OSSRank][bossf3]][bossf4] -->
+
+<!-- Quality assurance -->
+[![Intended Effort Versioning][badge19]][burl19]
+[![Code Quality][bqa1]][bqa2]
+[![Coverage][badge20]][burl20]
+[![Pipelines][badge21]][burl21]
+
+_Pre-commit hooks to check that your contributions meet project guidelines and the mission to merge is good to go! :saluting_face:_
+
+---
+
+**POWERED BY**
+
+[![Powered by Typer][btyper]][ltyper]
+
+</div>
+
+## :sunrise_over_mountains: Purpose & Function
+
+Go or NO GO
+(`gng` for short)
+is a simple Python application
+designed to validate
+compliance to your project's guidelines.
+
+## :star_struck: Standout Features
+
+We are currently in the
+**Planning** stage
+of the project,
+still defining the scope
+of the first milestones
+and our development plan.
+However, we anticipate
+the following features
+to be delivered
+for users
+at some point in the future:
+
+- :snake: Configuration via `pyproject.toml`;
+- :warning: A pre-commit hook
+  to validate the size of changes
+  in your branch;
+- :fox: Check if your
+  Git trailers comply
+  with your GitLab
+  `changelog_config.yml` categories.
+
+## :inbox_tray: Installation
+
+Use [`pipx`][install1] to install Go or NO GO
+in an isolated environment:
+
+```bash
+pipx install go-or-no-go
+```
+
+Then you can run it from the command line:
+
+```bash
+gng --help
+```
+
+## :black_joker: How to Use It
+
+The top-level command
+is the entry point
+for additional
+operations:
+
+> _`gng [--version | -v]`_
+>> **`--version`**
+>>
+>> **`-v`**
+>>
+>> Print
+>> the current version of the program
+>> and exit.
+
+## :reminder_ribbon: Contributing
+
+There are several ways
+to contribute to Go or NO GO.
+Refer to our [`CONTRIBUTING` guide][burl8]
+for all relevant details.
+
+Currently,
+we are seeking help
+to tackle areas of focus
+that are more pressing
+to our project's progress
+and would make an immediate difference
+in helping us achieve our [mission][contributing1].
+
+Here are some key contributions
+your can help us with
+right now:
+
+- Provide input in [design discussions][contributing2]
+  to define the desired features of Go or NO GO.
+<!-- DEFINE additional areas of assistance as development progresses -->
+
+## :ship: Releases
+
+You can see
+the list of available releases
+on the [GitLab Releases][release1] page.
+
+We follow [Intended Effort Versioning][release2] specification,
+details can be found in our [`CONTRIBUTING` guide][burl19].
+
+## :shield: Licence
+
+[![Licence][blic1]][blic2]
+
+This project is licenced
+under the terms of the **MIT License**.
+See [LICENCE][blic2] for more details.
+
+## :page_with_curl: Citation
+
+We provide a [`CITATION.cff`][cite1] file
+to make it easier to cite this project
+in your paper.
+
+## Credits [![Expand your project structure from atoms of code to galactic dimensions.][badge5]][burl5]
+
+This project was generated with [Galactipy][burl5].
+
+<!-- Anchors -->
+
+[badge1]: https://img.shields.io/badge/pre--commit-FAB040?logo=precommit&logoColor=white&style=for-the-badge
+[badge2]: https://img.shields.io/pypi/pyversions/go-or-no-go?style=for-the-badge
+[badge2a]: https://img.shields.io/pypi/v/go-or-no-go?style=for-the-badge&logo=pypi&color=3775a9
+[badge3]: https://img.shields.io/badge/GitLab-0B2640?style=for-the-badge&logo=gitlab&logoColor=white
+[badge4]: https://img.shields.io/gitlab/v/release/galactipy%2Fgo-no-go?style=for-the-badge&logo=semantic-release&color=FFCA28
+[badge5]: https://img.shields.io/badge/made%20with-galactipy%20%F0%9F%8C%8C-179287?style=for-the-badge&labelColor=193A3E
+[badge6]: https://img.shields.io/badge/project%20type-toy-blue?style=for-the-badge
+[badge7]: https://img.shields.io/pypi/status/go-or-no-go?style=for-the-badge&logo=theplanetarysociety&label=stage
+[badge8]: https://img.shields.io/static/v1.svg?label=Contributions&message=Welcome&color=0059b3&style=for-the-badge
+[badge9]: https://img.shields.io/gitlab/issues/open/galactipy%2Fgo-no-go?style=for-the-badge&color=fca326
+[badge10]: https://img.shields.io/gitlab/merge-requests/open/galactipy%2Fgo-no-go?style=for-the-badge&color=6fdac9
+[badge11]: https://img.shields.io/badge/code%20style-ruff-261230?style=for-the-badge&labelColor=grey
+[badge12]: https://img.shields.io/badge/%F0%9F%98%9C_gitmoji-ffdd67?style=for-the-badge
+[badge13]: https://img.shields.io/badge/sembr-FF6441?style=for-the-badge&logo=apmterminals&logoColor=white
+[badge14]: https://img.shields.io/endpoint?url=https://python-poetry.org/badge/v0.json&style=for-the-badge
+[badge15]: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white&style=for-the-badge
+[badge16]: https://img.shields.io/badge/security-bandit-yellow?style=for-the-badge
+[badge17]: https://img.shields.io/badge/imports-isort-1674b1?style=for-the-badge&labelColor=ef8336
+[badge18]: https://img.shields.io/badge/Editorconfig-E0EFEF?style=for-the-badge&logo=editorconfig&logoColor=000
+[badge19]: https://img.shields.io/badge/effver-0097a7?style=for-the-badge&logo=semver
+[badge20]: https://img.shields.io/codacy/coverage/c3324bb9f76a429a91b42cba51caf113?style=for-the-badge&logo=codacy
+[badge21]: https://img.shields.io/gitlab/pipeline-status/galactipy%2Fgo-no-go?branch=master&style=for-the-badge&logo=gitlab&logoColor=white&label=master
+
+[burl1]: https://pre-commit.com/
+[burl2]: https://pypi.org/project/go-no-go/
+[burl3]: https://gitlab.com/galactipy/go-no-go
+[burl4]: https://gitlab.com/galactipy/go-no-go/-/releases
+[burl5]: https://kutt.it/7fYqQl
+[burl6]: https://project-types.github.io/#toy
+[burl7]: https://gitlab.com/galactipy/go-no-go/-/blob/master/ROADMAP.md#development-stages
+[burl8]: https://gitlab.com/galactipy/go-no-go/-/blob/master/CONTRIBUTING.md
+[burl9]: https://gitlab.com/galactipy/go-no-go/-/issues
+[burl10]: https://gitlab.com/galactipy/go-no-go/-/merge_requests
+[burl11]: https://gitlab.com/galactipy/go-no-go/-/blob/master/CONTRIBUTING.md#codestyle
+[burl12]: https://gitlab.com/galactipy/go-no-go/-/blob/master/CONTRIBUTING.md#commit-customs
+[burl13]: https://gitlab.com/galactipy/go-no-go/-/blob/master/CONTRIBUTING.md#semantic-line-breaks
+[burl14]: https://python-poetry.org/
+[burl15]: https://gitlab.com/galactipy/go-no-go/-/blob/master/.pre-commit-config.yaml
+[burl16]: https://bandit.readthedocs.io/en/latest/
+[burl17]: https://pycqa.github.io/isort/
+[burl18]: https://gitlab.com/galactipy/go-no-go/-/blob/master/.editorconfig
+[burl19]: https://gitlab.com/galactipy/go-no-go/-/blob/master/CONTRIBUTING.md#versioning-customs
+[burl20]: https://app.codacy.com/gl/galactipy/go-no-go/coverage
+[burl21]: https://gitlab.com/galactipy/go-no-go/-/pipelines
+
+[blic1]: https://img.shields.io/gitlab/license/galactipy/go-no-go?style=for-the-badge
+[blic2]: https://gitlab.com/galactipy/go-no-go/-/blob/master/LICENCE
+
+<!-- TODO Replace the `100` ID with your project's index at https://www.bestpractices.dev/en
+[bossf1]: https://img.shields.io/cii/level/100?style=for-the-badge&logo=linux-foundation&label=openssf%20best%20practices
+[bossf2]: https://www.bestpractices.dev/en/projects/100 -->
+<!-- TODO Replace the `200` ID with your project's index at https://ossrank.com/
+[bossf3]: https://shields.io/endpoint?url=https://ossrank.com/shield/200&style=for-the-badge
+[bossf4]: https://ossrank.com/p/200 -->
+
+[bqa1]: https://img.shields.io/codacy/grade/c3324bb9f76a429a91b42cba51caf113?style=for-the-badge&logo=codacy
+[bqa2]: https://app.codacy.com/gl/galactipy/go-no-go/dashboard
+
+[btyper]: https://img.shields.io/badge/Typer-black?style=for-the-badge&logo=typer
+[ltyper]: https://typer.tiangolo.com/
+
+[install1]: https://pipx.pypa.io/latest/installation/
+
+[contributing1]: https://gitlab.com/galactipy/go-no-go/-/blob/master/ROADMAP.md#project-mission
+[contributing2]: https://gitlab.com/galactipy/go-no-go/-/issues?state=opened&label_name%5B%5D=design%3A%3A%2A&type%5B%5D=issue
+
+[release1]: https://gitlab.com/galactipy/go-no-go/-/releases
+[release2]: https://jacobtomlinson.dev/effver/
+
+[bdocstr1]: https://img.shields.io/badge/docstrings-numpydoc-4dabcf?style=for-the-badge&labelColor=4d77cf
+[bdocstr2]: https://gitlab.com/galactipy/go-no-go/-/blob/master/CONTRIBUTING.md#docstring-convention
+
+[bbbd1]: https://img.shields.io/badge/BDD-23D96C?style=for-the-badge&logo=cucumber&logoColor=white
+[bbbd2]: https://gitlab.com/galactipy/go-no-go/-/blob/master/CONTRIBUTING.md#behaviour-driven-development
+
+[cite1]: https://gitlab.com/galactipy/go-no-go/-/blob/master/CITATION.cff
