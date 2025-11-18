@@ -1,0 +1,28 @@
+name: Cyclic Imports
+on:
+  workflow_call:
+  workflow_dispatch:  # to trigger manually
+
+permissions:
+  contents: read
+
+jobs:
+  cyclic-imports:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup python environment
+        uses: ./.github/actions/setup-env
+
+      - name: check objectory
+        run: |
+          python -c "import objectory"
+          python -c "from objectory import factory"
+          python -c "from objectory import AbstractFactory"
+
+      - name: check objectory.utils
+        run: |
+          python -c "from objectory import utils"
