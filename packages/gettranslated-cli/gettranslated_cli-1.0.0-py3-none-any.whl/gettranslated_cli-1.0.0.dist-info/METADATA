@@ -1,0 +1,235 @@
+Metadata-Version: 2.4
+Name: gettranslated-cli
+Version: 1.0.0
+Summary: Command-line tool for syncing translations with GetTranslated.ai
+Home-page: https://www.gettranslated.ai
+Author: GetTranslated
+Author-email: GetTranslated <support@gettranslated.ai>
+License: MIT
+Project-URL: Documentation, https://www.gettranslated.ai/developers/cli-quickstart/
+Keywords: translation,localization,i18n,l10n,cli,android,ios,react-native
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Localization
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: requests>=2.25.0
+Dynamic: author
+Dynamic: home-page
+Dynamic: license-file
+Dynamic: requires-python
+
+# GetTranslated CLI
+
+Command-line tool for syncing translation files with [GetTranslated.ai](https://www.gettranslated.ai).
+
+## Installation
+
+```bash
+pip install gettranslated-cli
+```
+
+## Quick Start
+
+1. **Get your API key** from [GetTranslated.ai Project Settings](https://www.gettranslated.ai/)
+
+2. **Configure your API using the server key** (choose one method):
+   ```bash
+   # Option 1: Environment variable
+   export GETTRANSLATED_KEY="your-api-key-here"
+   
+   # Option 2: Project config file (recommended)
+   echo "your-api-key-here" > .gettranslated
+   
+   # Option 3: Command line (not recommended for production)
+   translate sync -k your-api-key-here
+   ```
+
+3. **Run a sync** from your project directory:
+   ```bash
+   cd /path/to/your/project
+   translate sync
+   ```
+
+That's it! The CLI will:
+- Upload your base language files
+- Translate any new or untranslated strings
+- Download all translated files to your project
+
+## Usage
+
+### Basic Commands
+
+```bash
+# Full sync (upload → translate → download)
+translate sync
+
+# Upload only
+translate upload
+
+# Download only
+translate download
+
+# Translate only
+translate translate
+
+# Grammar check
+translate grammar
+```
+
+### Options
+
+```bash
+# Specify working directory (default: current directory)
+translate sync /path/to/project
+
+# Verbose output
+translate sync -v
+
+# Force re-upload even if files haven't changed
+translate sync -f
+
+# Custom server URL
+translate sync -s https://custom-server.com
+```
+
+## Supported Platforms
+
+- **Android**: Automatically finds `strings.xml` files in `values/` and `values-XX/` directories
+- **iOS**: Automatically finds `Localizable.strings` files in `XX.lproj/` directories
+- **React Native**: Searches for JSON files in common locations:
+  - `locales/`
+  - `src/locales/`
+  - `assets/locales/`
+  - `translations/`
+  - `i18n/`
+  - Root directory
+
+## API Key Configuration
+
+The CLI looks for your API key in the following order (first match wins):
+
+1. Command line argument (`-k` or `--key`)
+2. Environment variable (`GETTRANSLATED_KEY`)
+3. Project config file (`.gettranslated` in project directory)
+
+### Security Note
+
+⚠️ **Important**: Add `.gettranslated` to your `.gitignore` to avoid committing your API key:
+
+```bash
+echo ".gettranslated" >> .gitignore
+```
+
+## Examples
+
+### First-time Setup
+
+```bash
+# 1. Install the CLI
+pip install gettranslated-cli
+
+# 2. Set your API key
+export GETTRANSLATED_KEY="your-key-here"
+
+# 3. Navigate to your project
+cd ~/projects/my-app
+
+# 4. Run your first sync
+translate sync
+```
+
+### CI/CD Integration
+
+```yaml
+# GitHub Actions example
+name: Sync Translations
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'  # Daily at midnight
+
+jobs:
+  sync-translations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      
+      - name: Install GetTranslated CLI
+        run: pip install gettranslated-cli
+      
+      - name: Run translation sync
+        env:
+          GETTRANSLATED_KEY: ${{ secrets.GETTRANSLATED_KEY }}
+        run: translate sync .
+```
+
+## Troubleshooting
+
+### "No API key found" error
+
+Make sure you've configured your API key using one of the methods above. Check that:
+- Environment variables are set correctly
+- Config files exist and contain the key
+- You're running the command from the correct directory
+
+### "No [Platform] files found to upload"
+
+Ensure your project structure matches the expected format:
+- **Android**: `app/src/main/res/values/strings.xml`
+- **iOS**: `XX.lproj/Localizable.strings`
+- **React Native**: JSON files in one of the common locations
+
+### Connection errors
+
+- Verify your internet connection
+- Check that the server URL is correct (default: `https://www.gettranslated.ai`)
+- Ensure your API key is valid and has access to the project
+
+## Command Reference
+
+```
+translate <mode> [working_directory] [options]
+
+Modes:
+  upload      Upload base language files to server
+  download    Download translated files from server
+  translate   Trigger translation of untranslated strings
+  sync        Run upload → translate → download (recommended)
+  grammar     Run grammar check on project strings
+
+Options:
+  -k, --key KEY       Server API key
+  -v, --verbose       Verbose output mode
+  -f, --force         Force processing even if unchanged
+  -s, --server URL    Server URL (default: https://www.gettranslated.ai)
+  -h, --help          Show help message
+```
+
+## License
+
+MIT License
+
+## Support
+
+- Documentation: https://www.gettranslated.ai/docs
+- Issues: https://github.com/gettranslated/cli/issues
+- Email: support@gettranslated.ai
+
