@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nodcast"
+version = "0.1.19"
+description = "NodCast, a text-based article reader and manager"
+readme = "README.md"
+
+authors = [
+    { name = "A Pouramini", email = "pouramini@gmail.com" }
+]
+
+# Optional but recommended
+license = "MIT"
+license-files = [
+    "LICENSE",
+]
+
+requires-python = ">=3.6"
+keywords = ["text", "reader", "cli", "article", "tts"]
+
+dependencies = [
+    "requests",
+    "appdirs",
+    "PyYAML",
+    "gtts",
+    "python-vlc",
+    "importlib_resources"
+]
+
+[project.optional-dependencies]
+windows = ["windows-curses"]
+
+[project.urls]
+Homepage = "https://puraminy.github.io/nodcast/"
+Repository = "https://github.com/puraminy/nodcast"
+Issues = "https://github.com/puraminy/nodcast/issues"
+
+[project.scripts]
+nodcast = "nodcast.nodcast:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools.package-data]
+nodcast = ["docs/examples/*", "docs/**/*"]
+
