@@ -1,0 +1,143 @@
+"""
+Guard system manager for coordinating multiple guards.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import List
+import logging
+
+from .base import GuardCheck, GuardResult
+from .system_guards import DeviceGuard, CameraGuard, PhysicalSetupGuard
+from .job_guards import ChecklistGuard, PaperSessionGuard, PenLayerGuard
+
+logger = logging.getLogger(__name__)
+
+
+class GuardSystem:
+    """Manages and coordinates multiple guards."""
+
+    def __init__(self, config, workspace: Path):
+        self.config = config
+        self.workspace = workspace
+        self.guards = {
+            "device_idle": DeviceGuard(config),
+            "camera_health": CameraGuard(config),
+            "physical_setup": PhysicalSetupGuard(config),
+            "checklist_complete": ChecklistGuard(config),
+            "paper_session_valid": PaperSessionGuard(config),
+            "pen_layer_compatible": PenLayerGuard(config),
+        }
+
+    def check_all(self, job_id: str) -> List[GuardCheck]:
+        """Run all guards and return results."""
+        results = []
+
+        for guard_name, guard in self.guards.items():
+            try:
+                if guard_name == "checklist_complete":
+                    result = guard.check(job_id, self.workspace)
+                else:
+                    result = guard.check(job_id)
+                results.append(result)
+
+                # Log guard results
+                if result.result == GuardResult.FAIL:
+                    logger.error(f"Guard {guard_name} failed: {result.message}")
+                elif result.result == GuardResult.SOFT_FAIL:
+                    logger.warning(f"Guard {guard_name} soft-failed: {result.message}")
+                else:
+                    logger.info(f"Guard {guard_name} passed: {result.message}")
+
+            except Exception as e:
+                logger.error(f"Guard {guard_name} threw exception: {e}")
+                results.append(
+                    GuardCheck(
+                        guard_name,
+                        GuardResult.FAIL,
+                        f"Guard execution failed: {str(e)}",
+                        {"error": str(e)},
+                    )
+                )
+
+        return results
+
+    def check_guard(self, guard_name: str, job_id: str) -> GuardCheck:
+        """Check a specific guard."""
+        if guard_name not in self.guards:
+            return GuardCheck(
+                guard_name,
+                GuardResult.FAIL,
+                f"Unknown guard: {guard_name}",
+                {"error": "unknown_guard"},
+            )
+
+        guard = self.guards[guard_name]
+        try:
+            if guard_name == "checklist_complete":
+                return guard.check(job_id, self.workspace)
+            else:
+                return guard.check(job_id)
+        except Exception as e:
+            return GuardCheck(
+                guard_name,
+                GuardResult.FAIL,
+                f"Guard execution failed: {str(e)}",
+                {"error": str(e)},
+            )
+
+    def evaluate_guards(
+        self, job_id: str, target_state: str, current_state: str | None = None
+    ) -> List[GuardCheck]:
+        """Evaluate guards for a state transition."""
+        guards = []
+
+        # Determine which guards to check based on target state
+        if target_state in ["ARMED", "PLOTTING"]:
+            # Device must be idle for armed/plotting states
+            guards.append(self.guards["device_idle"].check(job_id))
+
+            # Checklist must be complete for armed state
+            if target_state == "ARMED":
+                guards.append(
+                    self.guards["checklist_complete"].check(job_id, self.workspace)
+                )
+
+                # Paper session guard - one paper per session
+                if (
+                    hasattr(self.config, "paper")
+                    and hasattr(self.config.paper, "require_one_per_session")
+                    and self.config.paper.require_one_per_session
+                ):
+                    guards.append(self.guards["paper_session_valid"].check(job_id))
+
+                # Pen layer guard - one pen per layer
+                guards.append(self.guards["pen_layer_compatible"].check(job_id))
+
+                # Physical setup guard - validate paper and pen setup
+                guards.append(self.guards["physical_setup"].check(job_id))
+
+        # Camera health check (soft-fail allowed) for plotting states
+        if target_state == "PLOTTING":
+            guards.append(self.guards["camera_health"].check(job_id))
+
+        return guards
+
+    def can_transition(
+        self, job_id: str, target_state: str, current_state: str | None = None
+    ) -> tuple[bool, List[GuardCheck]]:
+        """Check if transition is allowed by guards."""
+        guard_checks = self.evaluate_guards(job_id, target_state, current_state)
+
+        # Check for any hard failures
+        hard_failures = [g for g in guard_checks if g.result == GuardResult.FAIL]
+
+        can_transition = len(hard_failures) == 0
+
+        return can_transition, guard_checks
+
+
+def create_guard_system(config, workspace: Path):
+    """Factory function to create guard system."""
+    return GuardSystem(config, workspace)

@@ -1,0 +1,50 @@
+# workspace: (default: XDG data directory)
+# database: (default: SQLite in XDG data directory)
+camera: { mode: ip, url: "", enabled: false, timelapse_fps: 1 }
+device: { preferred: "axidraw:auto", pause_ink_swatch: true, penlift: 3 }
+vpype:  { preset: default, presets_file: "vpype-presets.yaml" }
+paper: { default_size: A4, default_margin_mm: 10, default_orientation: portrait, require_one_per_session: true, track_usage: true, auto_detect_size: true }
+
+optimization:
+  default_level: "default"
+  interactive_mode: false
+  fallback_preset: "default"
+
+recovery:
+  interrupt_grace_minutes: 5
+  auto_detect_enabled: true
+  max_resume_attempts: 3
+
+logging:
+  level: "INFO"
+  # file: (default: XDG data directory logs/plotty.log)
+
+websocket:
+  enabled: true
+  host: "localhost"
+  port: 8765
+  authenticate: false
+
+hooks:
+  NEW:
+    - command: "notify-send 'ploTTY: Job {job_id} created - starting analysis'"
+  ANALYZED:
+    - command: "echo '🔍 Analyzing layers for job {job_id}'"
+  OPTIMIZED:
+    - command: "echo '⚡ Optimization completed for job {job_id}'"
+  READY:
+    - command: "echo '🎯 Job {job_id} processing complete, ready to queue'"
+  QUEUED:
+    - command: "notify-send 'ploTTY: Job {job_id} added to plotting queue'"
+  ARMED:
+    - command: "echo '🎯 Job {job_id} armed - starting camera recording'"
+  PLOTTING:
+    - command: "echo '📊 Job {job_id} now plotting'"
+  PAUSED:
+    - command: "notify-send 'ploTTY: Job {job_id} paused - resume available'"
+  COMPLETED:
+    - command: "notify-send 'ploTTY: Job {job_id} completed successfully 🎉'"
+  ABORTED:
+    - command: "notify-send 'ploTTY: Job {job_id} aborted by user'"
+  FAILED:
+    - command: "notify-send 'ploTTY: Job {job_id} failed: {error} ❌'"
