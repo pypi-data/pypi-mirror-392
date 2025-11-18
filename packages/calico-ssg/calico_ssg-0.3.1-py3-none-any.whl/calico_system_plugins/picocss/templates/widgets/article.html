@@ -1,0 +1,20 @@
+{% docstring %}
+  Renders a `section` wrapped in an `<article>` tag with optional `<header>`.
+  Markdown from that section will be yielded as the body of the article.
+
+  Attributes:
+    class: (optional) Adds `class` to `<article>`
+    style: (optional) Adds `style` to `<article>`
+    title: (optional) Will be rendered as `<header>`
+    title_tag: (defaults to `h2`) which tag to wrap the `title` with inside `<header>` 
+{% enddocstring %}
+<article class="{{section.class|default:''}}" style="{{section.style|default:''}}">
+  {% if section.title %}
+    <header>
+      <{{section.title_tag|default:'h2'}}>
+        {{section.title}}
+      </{{section.title_tag|default:'h2'}}>
+    </header>
+  {% endif %}
+  {{yield}}
+</article>
