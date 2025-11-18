@@ -1,0 +1,399 @@
+commands:
+
+  # === STRUCTURE / DEFINITION ===
+  defin:
+    section: structure
+    aliases: ["define"]
+    python: "def {name}():"
+    desc: "Define a function"
+
+  decla:
+    section: structure
+    aliases: ["declare"]
+    python: "class {name}:"
+    desc: "Declare a class"
+
+  creat:
+    section: structure
+    aliases: ["create", "make"]
+    python: "{name} = {type}()"
+    desc: "Create an object"
+
+  initi:
+    section: structure
+    aliases: ["init", "start"]
+    python: "__init__(self)"
+    desc: "Initialize a class"
+
+  retur:
+    section: structure
+    aliases: ["return", "yield"]
+    python: "return {value}"
+    desc: "Return a value"
+
+  exitp:
+    section: structure
+    aliases: ["exit", "quit"]
+    python: "exit()"
+    desc: "Exit program"
+
+  # === DATA HANDLING ===
+  setva:
+    section: data
+    aliases: ["assign", "setto"]
+    python: "{var} = {value}"
+    desc: "Assign variable"
+
+  delet:
+    section: data
+    aliases: ["remove"]
+    python: "del {var}"
+    desc: "Delete variable"
+
+  appen:
+    section: data
+    aliases: ["append", "addto"]
+    python: "{list}.append({value})"
+    desc: "Append to list"
+
+  remov:
+    section: data
+    aliases: ["remove", "delet"]
+    python: "{list}.remove({value})"
+    desc: "Remove from list"
+
+  merge:
+    section: data
+    aliases: ["merge", "combine"]
+    python: "{dict1}.update({dict2})"
+    desc: "Merge two dictionaries"
+
+  getit:
+    section: data
+    aliases: ["retrieve"]
+    python: "{dict}.get({key})"
+    desc: "Get dictionary value"
+
+  setit:
+    section: data
+    aliases: ["modify"]
+    python: "{dict}[{key}] = {value}"
+    desc: "Set dictionary value"
+
+  clear:
+    section: data
+    aliases: ["reset"]
+    python: "{obj}.clear()"
+    desc: "Clear list or dict"
+
+  copyv:
+    section: data
+    aliases: ["duplicate"]
+    python: "{new} = {old}.copy()"
+    desc: "Copy structure"
+
+  # === IO ===
+  showw:
+    section: io
+    aliases: ["show", "displ"]
+    python: "print({text})"
+    desc: "Display output"
+
+  input:
+    section: io
+    aliases: ["read", "ask"]
+    python: "input({prompt})"
+    desc: "Get user input"
+
+  write:
+    section: io
+    aliases: ["writi", "savef"]
+    python: "open({file}, 'w').write({text})"
+    desc: "Write to file"
+
+  readf:
+    section: io
+    aliases: ["readfile", "loadf"]
+    python: "open({file}).read()"
+    desc: "Read file contents"
+
+  loggi:
+    section: io
+    aliases: ["log"]
+    python: "logging.info({msg})"
+    desc: "Log information"
+
+  pausi:
+    section: io
+    aliases: ["wait"]
+    python: "time.sleep({sec})"
+    desc: "Pause for seconds"
+
+  # === SYSTEM ===
+  libra:
+    section: system
+    aliases: ["library", "import"]
+    python: "import {module}"
+    desc: "Import a Python library"
+
+  inclu:
+    section: system
+    aliases: ["include"]
+    python: "from {pkg} import {name}"
+    desc: "Include module content"
+
+  conne:
+    section: system
+    aliases: ["connect"]
+    python: "socket.connect({addr})"
+    desc: "Connect to server"
+
+  disco:
+    section: system
+    aliases: ["disconnect"]
+    python: "socket.close()"
+    desc: "Disconnect socket"
+
+  uploa:
+    section: system
+    aliases: ["sendf"]
+    python: "requests.post({url}, data={data})"
+    desc: "Upload data"
+
+  downl:
+    section: system
+    aliases: ["fetchf"]
+    python: "requests.get({url})"
+    desc: "Download file"
+
+  listd:
+    section: system
+    aliases: ["dirls"]
+    python: "os.listdir({path})"
+    desc: "List directory"
+
+  maked:
+    section: system
+    aliases: ["mkdir"]
+    python: "os.mkdir({path})"
+    desc: "Create directory"
+
+  remov:
+    section: system
+    aliases: ["rmdir"]
+    python: "os.remove({file})"
+    desc: "Remove file"
+
+  execa:
+    section: system
+    aliases: ["system"]
+    python: "os.system({cmd})"
+    desc: "Execute shell command"
+
+  # === LOGIC / FLOW ===
+  check:
+    section: logic
+    aliases: ["if", "condi"]
+    python: "if {condition}:"
+    desc: "Conditional check"
+
+  elifi:
+    section: logic
+    aliases: ["elseif"]
+    python: "elif {condition}:"
+    desc: "Else-if branch"
+
+  other:
+    section: logic
+    aliases: ["else"]
+    python: "else:"
+    desc: "Else branch"
+
+  loopf:
+    section: logic
+    aliases: ["repeat"]
+    python: "for i in range({count}):"
+    desc: "For loop"
+
+  while:
+    section: logic
+    aliases: ["until"]
+    python: "while {condition}:"
+    desc: "While loop"
+
+  break:
+    section: logic
+    aliases: ["stop"]
+    python: "break"
+    desc: "Break loop"
+
+  conti:
+    section: logic
+    aliases: ["skip"]
+    python: "continue"
+    desc: "Continue loop"
+
+  handl:
+    section: logic
+    aliases: ["tryex"]
+    python: "try:"
+    desc: "Try block start"
+
+  catch:
+    section: logic
+    aliases: ["except"]
+    python: "except Exception as e:"
+    desc: "Catch error"
+
+  final:
+    section: logic
+    aliases: ["finally"]
+    python: "finally:"
+    desc: "Finally block"
+
+  # === MATH / NUMERIC ===
+  plus:
+    section: math
+    aliases: ["+"]
+    python: "{a} + {b}"
+    desc: "Add numbers"
+
+  minus:
+    section: math
+    aliases: ["-"]
+    python: "{a} - {b}"
+    desc: "Subtract numbers"
+
+  multi:
+    section: math
+    aliases: ["*"]
+    python: "{a} * {b}"
+    desc: "Multiply numbers"
+
+  divid:
+    section: math
+    aliases: ["/"]
+    python: "{a} / {b}"
+    desc: "Divide numbers"
+
+  expon:
+    section: math
+    aliases: ["^", "pow"]
+    python: "{a} ** {b}"
+    desc: "Exponentiation"
+
+  modul:
+    section: math
+    aliases: ["mod", "mod()"]
+    python: "{a} % {b}"
+    desc: "Modulo remainder"
+
+  perce:
+    section: math
+    aliases: ["%"]
+    python: "{value} / 100"
+    desc: "Convert to percent"
+
+  floor:
+    section: math
+    aliases: ["lowes"]
+    python: "math.floor({x})"
+    desc: "Floor value"
+
+  ceili:
+    section: math
+    aliases: ["highv"]
+    python: "math.ceil({x})"
+    desc: "Ceiling value"
+
+  absof:
+    section: math
+    aliases: ["abslt"]
+    python: "abs({x})"
+    desc: "Absolute value"
+
+  sumup:
+    section: math
+    aliases: ["total"]
+    python: "sum({data})"
+    desc: "Sum of list"
+
+  avera:
+    section: math
+    aliases: ["mean"]
+    python: "sum({data})/len({data})"
+    desc: "Average of list"
+
+  # === STRINGS ===
+  strip:
+    section: string
+    aliases: ["trim"]
+    python: "{text}.strip()"
+    desc: "Trim spaces"
+
+  lower:
+    section: string
+    aliases: ["downc"]
+    python: "{text}.lower()"
+    desc: "Lowercase string"
+
+  upper:
+    section: string
+    aliases: ["uppec"]
+    python: "{text}.upper()"
+    desc: "Uppercase string"
+
+  replc:
+    section: string
+    aliases: ["replace"]
+    python: "{text}.replace({a},{b})"
+    desc: "Replace text"
+
+  findt:
+    section: string
+    aliases: ["search"]
+    python: "{text}.find({word})"
+    desc: "Find substring"
+
+  joinc:
+    section: string
+    aliases: ["merge"]
+    python: "' '.join({list})"
+    desc: "Join list into string"
+
+  formt:
+    section: string
+    aliases: ["format"]
+    python: "f'{text}'"
+    desc: "Format string"
+
+  lengt:
+    section: string
+    aliases: ["count"]
+    python: "len({text})"
+    desc: "String length"
+
+  # === LIBRA STATISTICS ===
+  meanv:
+    section: libra
+    aliases: ["mean", "average"]
+    python: "statistics.mean({data})"
+    desc: "Calculate mean"
+
+  modev:
+    section: libra
+    aliases: ["mode"]
+    python: "statistics.mode({data})"
+    desc: "Calculate mode"
+
+  rangev:
+    section: libra
+    aliases: ["range"]
+    python: "max({data}) - min({data})"
+    desc: "Calculate range"
+
+  outli:
+    section: libra
+    aliases: ["outlier"]
+    python: "[x for x in {data} if abs((x - statistics.mean({data})) / statistics.stdev({data})) > 2]"
+    desc: "Find outliers (Z-score)"
