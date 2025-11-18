@@ -1,0 +1,32 @@
+[project]
+name = "webshotapi"
+dynamic = ["version", "dependencies"]
+description = "Api client for WebShotApi.com. Website screenshot api client, extract html from rendered website extract words with coordinates from website, extract styles from HTML selectors(elements)"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+authors = [
+    { name = "WebShotApi.com", email = "contact@webshotapi.com" }
+]
+keywords = ["screenshot", "api", "webshotapi", "html", "extract", "ocr", "scrolling video", "video", "cookie remove"]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://webshotapi.com"
+Issues = "https://github.com/webshotapi/python-client/issues"
+Documentation = "https://webshotapi.com/docs/sdk/python/"
+Repository = "https://github.com/webshotapi/python-client"
+
+[tool.setuptools.packages.find]
+exclude = ["tests", "tests.*"]
+
+# Automatyczne pobieranie wersji z webshotapi/version.py (__version__)
+[tool.setuptools.dynamic]
+version = { attr = "webshotapi.version.__version__" }
+
+# Wczytywanie dependencies z requirements.txt
+dependencies = { file = ["requirements.txt"] }
