@@ -1,0 +1,214 @@
+Error: [31mdewy.errors.E1234 (link)[0m
+
+  [31m×[0m Unable to juxtapose identifier and string
+    ╭─[path/to/file.dewy:1:7]
+  [38;5;245m1[0m | printl'Hello, World'
+    ·      [95m╱[0m[95m╲[0m
+    ·      [95m╰[0m[95m─ tried to juxtapose printl (string:>void) and 'Hello, World' (string)[0m
+    · [95m        expected whitespace or operator between identifier and string[0m
+    ╰───
+  [38;5;245mhelp:[0m insert a space or an operator
+
+Error: [31mdewy.errors.E2234 (link)[0m
+
+  [31m×[0m Token needs additional context
+    ╭─[path/to/file.dewy:1:1]
+  [38;5;245m1[0m | printl'Hello, World'
+    · [95m─[0m[95m─[0m[95m┬[0m[95m─[0m[95m─[0m[95m─[0m
+    ·   [95m╰[0m[95m─ <per token message>[0m
+    ╰───
+  [38;5;245mhelp:[0m <some helpful hint>
+
+Error: [31mdewy.errors.E2234 (link)[0m
+
+  [31m×[0m Highlight multiple adjacent tokens
+    ╭─[path/to/file.dewy:1:1]
+  [38;5;245m1[0m | printl'Hello, World'
+    · [95m─[0m[95m─[0m[95m┬[0m[95m─[0m[95m─[0m[96m╱[0m[96m╲[0m[92m─[0m[92m─[0m[92m─[0m[92m─[0m[92m─[0m[92m┬[0m[92m─[0m[92m─[0m[92m─[0m[92m─[0m[92m─[0m[92m─[0m[92m─[0m
+    ·   [95m│[0m  [96m│[0m      [92m╰[0m[92m─ <message about the string token>[0m
+    ·   [95m│[0m  [96m╰[0m[96m─ <message about the juxtapose token>[0m
+    ·   [95m╰[0m[95m─ <message about the identifier token>[0m
+    ╰───
+  [38;5;245mhelp:[0m <some helpful hint>
+
+Error: [31mdewy.errors.E3234 (link)[0m
+
+  [31m×[0m Dealing with tightly packed tokens
+    ╭─[path/to/file.dewy:1:1]
+    ·  [95m╭[0m[95m─ <message about the 10x juxtaposition>[0m
+    ·  [95m│[0m[96m╭[0m[96m─ <message about the x(y) juxtaposition>[0m
+    ·  [95m╲[0m[96m╳[0m[96m╱[0m
+  [38;5;245m1[0m | 10x(y)
+    · [95m┬[0m[95m─[0m[96m┬[0m[92m┬[0m[93m┬[0m[94m┬[0m
+    · [95m│[0m [96m│[0m[92m│[0m[93m│[0m[94m╰[0m[94m─ <message about the `)` token>[0m
+    · [95m│[0m [96m│[0m[92m│[0m[93m╰[0m[93m─ <message about the `y` token>[0m
+    · [95m│[0m [96m│[0m[92m╰[0m[92m─ <message about the `(` token>[0m
+    · [95m│[0m [96m╰[0m[96m─ <message about the `x` token>[0m
+    · [95m╰[0m[95m─ <message about the `10` token>[0m
+    ╰───
+  [38;5;245mhelp:[0m <some helpful hint>
+
+Error: [31mdewy.errors.E3234 (link)[0m
+
+  [31m×[0m Flipping pointer directions
+    ╭─[path/to/file.dewy:1:1]
+    ·  [95m╭[0m[95m─ <message about the 10x juxtaposition>[0m
+    ·  [95m│[0m[96m╭[0m[96m─ <message about the x(y) juxtaposition>[0m
+    ·  [95m╲[0m[96m╳[0m[96m╱[0m
+  [38;5;245m1[0m | 10x(y)
+    · [92m┬[0m[92m─[0m[93m┬[0m[94m┬[0m[95m┬[0m[96m┬[0m
+    · [92m│[0m [93m│[0m[94m│[0m[95m│[0m[96m╰[0m[96m─ <message about the `)` token>[0m
+    · [92m│[0m [93m│[0m[94m│[0m[95m╰[0m[95m─ <message about the `y` token>[0m
+    · [92m│[0m [93m│[0m[94m╰[0m[94m─ <message about the `(` token>[0m
+    · [92m│[0m [93m╰[0m[93m─ <message about the `x` token>[0m
+    · [92m╰[0m[92m─ <message about the `10` token>[0m
+    ╰───
+  [38;5;245mhelp:[0m <some helpful hint>
+
+Error: [31mdewy.errors.E3234 (link)[0m
+
+  [31m×[0m Multi-line expression pointers
+    ╭─[path/to/file.dewy:1:1]
+    ·  [95m╭[0m[95m─ <message about the 10x juxtaposition>[0m
+    ·  [95m│[0m[96m╭[0m[96m─ <message about the x(y) juxtaposition>[0m
+    ·  [95m╲[0m[96m╳[0m[96m╱[0m
+  [38;5;245m1[0m | 10x(y)
+    · [92m┬[0m[92m─[0m[93m┬[0m[94m┬[0m[95m┬[0m[96m┬[0m
+    · [92m│[0m [93m│[0m[94m│[0m[95m│[0m[96m╰[0m[96m─ <message about the `)` token>[0m
+    · [92m│[0m [93m│[0m[94m│[0m[95m╰[0m[95m─ <message about the `y` token>[0m
+    · [92m│[0m [93m│[0m[94m╰[0m[94m─ <message about the `(` token>[0m
+    · [92m│[0m [93m╰[0m[93m─ <message about the `x` token>[0m
+    · [92m╰[0m[92m─ <message about the `10` token>[0m
+  [38;5;245m2[0m | * 42 + 3^x
+    · [92m┬[0m [93m┬[0m[93m─[0m [94m┬[0m [95m┬[0m[96m┬[0m[92m┬[0m
+    · [92m│[0m [93m│[0m  [94m│[0m [95m│[0m[96m│[0m[92m╰[0m[92m─ <message about the `x` token>[0m
+    · [92m│[0m [93m│[0m  [94m│[0m [95m│[0m[96m╰[0m[96m─ <message about the `^` token>[0m
+    · [92m│[0m [93m│[0m  [94m│[0m [95m╰[0m[95m─ <message about the `3` token>[0m
+    · [92m│[0m [93m│[0m  [94m╰[0m[94m─ <message about the `+` token>[0m
+    · [92m│[0m [93m╰[0m[93m─ <message about the `42` token>[0m
+    · [92m╰[0m[92m─ <message about the `*` token>[0m
+    ╰───
+  [38;5;245mhelp:[0m <some helpful hint>
+
+Error: [31mdewy.errors.E3234 (link)[0m
+
+  [31m×[0m Upper line pointers above, lower line below
+    ╭─[path/to/file.dewy:1:1]
+    · [95m╭[0m[95m─ <message about the `10` token>[0m
+    · [95m│[0m [96m╭[0m[96m─ <message about the `x` token>[0m
+    · [95m│[0m [96m│[0m[92m╭[0m[92m─ <message about the `(` token>[0m
+    · [95m│[0m [96m│[0m[92m│[0m[93m╭[0m[93m─ <message about the `y` token>[0m
+    · [95m│[0m [96m│[0m[92m│[0m[93m│[0m[94m╭[0m[94m─ <message about the `)` token>[0m
+    · [95m┴[0m[95m─[0m[96m┴[0m[92m┴[0m[93m┴[0m[94m┴[0m
+  [38;5;245m1[0m | 10x(y)
+  [38;5;245m2[0m | * 42 + 3^x
+    · [95m┬[0m [96m┬[0m[96m─[0m [92m┬[0m [93m┬[0m[94m┬[0m[95m┬[0m
+    · [95m│[0m [96m│[0m  [92m│[0m [93m│[0m[94m│[0m[95m╰[0m[95m─ <message about the `x` token>[0m
+    · [95m│[0m [96m│[0m  [92m│[0m [93m│[0m[94m╰[0m[94m─ <message about the `^` token>[0m
+    · [95m│[0m [96m│[0m  [92m│[0m [93m╰[0m[93m─ <message about the `3` token>[0m
+    · [95m│[0m [96m│[0m  [92m╰[0m[92m─ <message about the `+` token>[0m
+    · [95m│[0m [96m╰[0m[96m─ <message about the `42` token>[0m
+    · [95m╰[0m[95m─ <message about the `*` token>[0m
+    ╰───
+  [38;5;245mhelp:[0m <some helpful hint>
+
+Error: [31mdewy.errors.E3234 (link)[0m
+
+  [31m×[0m Triple tightly packed tokens
+    ╭─[path/to/file.dewy:1:1]
+    ·   [93m╭[0m[93m─ <message about the `[a]5` juxtaposition>[0m
+    ·   [93m│[0m[94m╭[0m[94m─ <message about the `5x` juxtaposition>[0m
+    ·   [93m│[0m[94m│[0m[95m╭[0m[95m─ <message about the `x(y)` juxtaposition>[0m
+    ·   [93m╲[0m[94m╳[0m[95m╳[0m[95m╱[0m
+  [38;5;245m1[0m | [a]5x(y)
+    · [95m┬[0m[96m┬[0m[92m┬[0m[93m┬[0m[94m┬[0m[95m┬[0m[96m┬[0m[92m┬[0m
+    · [95m│[0m[96m│[0m[92m│[0m[93m│[0m[94m│[0m[95m│[0m[96m│[0m[92m╰[0m[92m─ <message about the `)` token>[0m
+    · [95m│[0m[96m│[0m[92m│[0m[93m│[0m[94m│[0m[95m│[0m[96m╰[0m[96m─ <message about the `y` token>[0m
+    · [95m│[0m[96m│[0m[92m│[0m[93m│[0m[94m│[0m[95m╰[0m[95m─ <message about the `(` token>[0m
+    · [95m│[0m[96m│[0m[92m│[0m[93m│[0m[94m╰[0m[94m─ <message about the `x` token>[0m
+    · [95m│[0m[96m│[0m[92m│[0m[93m╰[0m[93m─ <message about the `5` token>[0m
+    · [95m│[0m[96m│[0m[92m╰[0m[92m─ <message about the `]` token>[0m
+    · [95m│[0m[96m╰[0m[96m─ <message about the `a` token>[0m
+    · [95m╰[0m[95m─ <message about the `[` token>[0m
+    ╰───
+  [38;5;245mhelp:[0m <some helpful hint>
+
+Error: [31mdewy.errors.E3234 (link)[0m
+
+  [31m×[0m Unpositioned triple tightly packed tokens
+    ╭─[path/to/file.dewy:1:1]
+    ·   [93m╭[0m[93m─ <message about the `[a]5` juxtaposition>[0m
+    ·   [93m│[0m[94m╭[0m[94m─ <message about the `5x` juxtaposition>[0m
+    ·   [93m│[0m[94m│[0m[95m╭[0m[95m─ <message about the `x(y)` juxtaposition>[0m
+    ·   [93m╲[0m[94m╳[0m[95m╳[0m[95m╱[0m
+  [38;5;245m1[0m | [a]5x(y)
+    · [95m┬[0m[96m┬[0m[92m┬[0m[93m┬[0m[94m┬[0m[95m┬[0m[96m┬[0m[92m┬[0m
+    · [95m│[0m[96m│[0m[92m│[0m[93m│[0m[94m│[0m[95m│[0m[96m│[0m[92m╰[0m[92m─ <message about the `)` token>[0m
+    · [95m│[0m[96m│[0m[92m│[0m[93m│[0m[94m│[0m[95m│[0m[96m╰[0m[96m─ <message about the `y` token>[0m
+    · [95m│[0m[96m│[0m[92m│[0m[93m│[0m[94m│[0m[95m╰[0m[95m─ <message about the `(` token>[0m
+    · [95m│[0m[96m│[0m[92m│[0m[93m│[0m[94m╰[0m[94m─ <message about the `x` token>[0m
+    · [95m│[0m[96m│[0m[92m│[0m[93m╰[0m[93m─ <message about the `5` token>[0m
+    · [95m│[0m[96m│[0m[92m╰[0m[92m─ <message about the `]` token>[0m
+    · [95m│[0m[96m╰[0m[96m─ <message about the `a` token>[0m
+    · [95m╰[0m[95m─ <message about the `[` token>[0m
+    ╰───
+  [38;5;245mhelp:[0m <some helpful hint>
+
+Error: [31mdewy.errors.E4000 (link)[0m
+
+  [31m×[0m Three-line spanning diagnostic
+    ╭─[path/to/file.dewy:1:1]
+    ·   [95m╭[0m[95m─ <message about alpha>[0m
+    ·   [95m│[0m    [96m╭[0m[96m─ <message about beta>[0m
+    · [95m─[0m[95m─[0m[95m┴[0m[95m─[0m[95m─[0m [96m─[0m[96m┴[0m[96m─[0m[96m─[0m
+  [38;5;245m1[0m | alpha beta
+  [38;5;245m2[0m | gamma + delta
+    · [92m─[0m[92m─[0m[92m┬[0m[92m─[0m[92m─[0m [93m┬[0m [94m─[0m[94m─[0m[94m┬[0m[94m─[0m[94m─[0m
+    ·   [92m│[0m   [93m│[0m   [94m╰[0m[94m─ <message about delta>[0m
+    ·   [92m│[0m   [93m╰[0m[93m─ <message about `+`>[0m
+    ·   [92m╰[0m[92m─ <message about gamma>[0m
+  [38;5;245m3[0m | epsilon & zeta
+    · [95m─[0m[95m─[0m[95m─[0m[95m┬[0m[95m─[0m[95m─[0m[95m─[0m [96m┬[0m [92m─[0m[92m┬[0m[92m─[0m[92m─[0m
+    ·    [95m│[0m    [96m│[0m  [92m╰[0m[92m─ <message about zeta>[0m
+    ·    [95m│[0m    [96m╰[0m[96m─ <message about `&`>[0m
+    ·    [95m╰[0m[95m─ <message about epsilon>[0m
+    ╰───
+  [38;5;245mhelp:[0m defaults to showing all markers below for 3+ lines
+
+Error: [31mdewy.errors.E6000 (link)[0m
+
+  [31m×[0m Illustrate multi-line span pointer
+    ╭─[path/to/block.dewy:1:1]
+  [38;5;245m1[0m | block start {
+  [38;5;245m2[0m |   inner stuff
+  [38;5;245m3[0m | } block end
+    · [95m─[0m[95m─[0m[95m─[0m[95m─[0m[95m─[0m[95m─[0m[95m┬[0m[95m─[0m[95m─[0m[95m─[0m[95m─[0m[95m─[0m[95m─[0m
+    ·       [95m╰[0m[95m─ <message covering the entire block>[0m
+    ╰───
+  [38;5;245mhelp:[0m multi-line spans draw a single pointer after the block
+
+Error: [31mdewy.errors.E5000 (link)[0m
+
+  [31m×[0m Demonstrate multi-digit line numbers
+     ╭─[path/to/long_example.dewy:9:10]
+     ·             [95m╭[0m[95m─ <message on line 9>[0m
+     ·          [95m─[0m[95m─[0m[95m─[0m[95m┴[0m[95m─[0m[95m─[0m[95m─[0m[95m─[0m
+  [38;5;245m 9[0m | step 09: finalize partial sum
+  [38;5;245m10[0m | step 10: verify outputs
+     ·          [96m─[0m[96m─[0m[96m─[0m[96m─[0m[96m─[0m[96m─[0m[96m┬[0m[96m─[0m[96m─[0m[96m─[0m[96m─[0m[96m─[0m[96m─[0m[96m─[0m
+     ·                [96m╰[0m[96m─ <message on line 10>[0m
+  [38;5;245m12[0m | step 12: shutdown services
+     ·          [92m─[0m[92m─[0m[92m─[0m[92m─[0m[92m─[0m[92m─[0m[92m─[0m[92m─[0m[92m┬[0m[92m─[0m[92m─[0m[92m─[0m[92m─[0m[92m─[0m[92m─[0m[92m─[0m[92m─[0m
+     ·                  [92m╰[0m[92m─ <message on line 12>[0m
+     ╰───
+  [38;5;245mhelp:[0m line numbers stay aligned even after 9
+
+Error: [31mtype mismatch for argument `times`[0m
+
+    ╭─[path/to/py_example.py:4:10]
+  [38;5;245m4[0m | result = repeat("hello", "3")
+    ·          [95m─[0m[95m─[0m[95m┬[0m[95m─[0m[95m─[0m[95m─[0m          [96m─[0m[96m┬[0m[96m─[0m
+    ·            [95m│[0m              [96m╰[0m[96m─ argument given is type 'str'[0m
+    ·            [95m╰[0m[95m─ `repeat` function's second argument `times` expects an 'int'[0m
+    ╰───
+  [38;5;245mhelp:[0m Consider changing string literal "3" to integer 3
