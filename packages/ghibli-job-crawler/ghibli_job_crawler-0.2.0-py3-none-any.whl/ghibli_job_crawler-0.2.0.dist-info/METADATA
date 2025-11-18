@@ -1,0 +1,137 @@
+Metadata-Version: 2.4
+Name: ghibli_job_crawler
+Version: 0.2.0
+Summary: Add your description here
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: beautifulsoup4>=4.14.2
+Requires-Dist: google-genai>=1.50.1
+Requires-Dist: mysql-connector-python>=9.5.0
+Requires-Dist: playwright>=1.56.0
+Requires-Dist: psycopg2>=2.9.11
+Requires-Dist: python-dotenv>=1.2.1
+Requires-Dist: requests>=2.32.5
+
+# Job Crawler: Thư viện hỗ trợ cào data về các ngành nghề
+
+### Cách cài đặt
+
+Cách 1: tải từ repo
+<pre>
+git clone repo_url
+pip install -e .
+</pre>
+
+Cách 2: từ PyPi
+<pre>pip install ghibli_job_crawler</pre>
+
+### Một số yêu cầu trước
+Có thể cài playwright và chronium theo hướng dẫn trong docs
+
+### Cài đặt environment variables
+
+Thư viên hỗ trợ 3 thư viện Sqlite, MySQL, PostgresSQL
+
+Để kết nối với Sqlite, đặt trong file .env như ví dụ dưới:
+<pre>
+DB_TYPE="sqlite"
+DB_PATH="data/test.sqlite"
+</pre>
+
+Còn với MySQL và PostgreSQL:
+<pre>
+# MySQL
+DB_TYPE=YOUR_DB_TYPE
+DB_HOST=YOUR_DB_HOST
+DB_USERNAME=YOUR_DB_USERNAME
+DB_PASSWORD=YOUR_DB_PASSWORD
+DB_NAME=YOUR_DB_NAME
+DB_PORT=YOUR_DB_PORT
+
+# PostgresSQL
+DB_TYPE=YOUR_DB_TYPE
+DB_HOST=YOUR_DB_HOST
+DB_USERNAME=YOUR_DB_USERNAME
+DB_PASSWORD=YOUR_DB_PASSWORD
+DB_NAME=YOUR_DB_NAME
+DB_PORT=YOUR_DB_PORT
+</pre>
+
+Với DB_PORT thì có thể có hoặc không, mặc sẽ cấu hình đúng với port của database.
+
+### Cách sử dụng đơn giản
+
+Đầu tiên, bạn phải khởi tạo database, thư viện hỗ trợ tạo database mặc định để hỗ trợ cào, để làm vậy thì xem bên dưới:
+
+<pre>
+from job_crawler.database import init_database
+
+init_database()
+</pre>
+
+Nếu bạn có sẵn data thì có thể import vào.
+
+Trong module job_crawler.database.handler có chứa các hàm hỗ trợ truy vấn cơ sở dữ liệu, bạn có thể tham khảo các hàm đó trong code.
+
+Để gọi đối tượng cào, thì bạn có thể gọi như sau:
+
+<strong>Cào TopCV</strong>
+<pre>
+from job_crawler.topcv import TopCVCrawler
+
+print("TopCV Job Crawler (Optimized)")
+crawler = TopCVCrawler(max_workers=3)
+try:
+    crawler.crawl_jobs(start_page=1, end_page=1)
+    print("\nHoàn thành crawl từ TopCV!")
+except KeyboardInterrupt:
+    crawler.stop()
+    print("\nĐã dừng crawler theo yêu cầu người dùng.")
+except Exception as e:
+    print(f"\nLỗi trong quá trình crawl: {str(e)}")
+</pre>
+
+<strong>Cào VietnamWorks</strong>
+<pre>
+from job_crawler.vietnamworks import VietnamWorksCrawler
+
+print("VietnamWorks Job Crawler (Optimized)")
+crawler = VietnamWorksCrawler(max_workers=3)
+try:
+    crawler.crawl_jobs(start_page=0, end_page=1)
+    print("\nHoàn thành crawl từ TopCV!")
+except KeyboardInterrupt:
+    crawler.stop()
+    print("\nĐã dừng crawler theo yêu cầu người dùng.")
+except Exception as e:
+    print(f"\nLỗi trong quá trình crawl: {str(e)}")
+</pre>
+
+<strong>Cào trang tuy chỉnh</strong>
+Trước tiên bạn cần phải tạo file configuration trước, ví dụ mình để trong thư mục configs.
+Sau đó gọi:
+<pre>
+from job_crawler.generic_job import GenericJobCrawler
+
+crawler = GenericJobCrawler(config_path, max_workers=max_workers)
+try:
+    crawler.crawl_jobs(start_page=start_page, end_page=end_page)
+    print("\nHoàn thành crawl!")
+except KeyboardInterrupt:
+    crawler.stop()
+    print("\nĐã dừng crawler theo yêu cầu người dùng.")
+</pre>
+
+<strong>Cào bằng Gemini</strong>
+Để cào bằng gemini thì phải bỏ API key vào file .env trước
+<pre>
+GOOOGLE_API_KEY=YOUR_GOOGLE_API_KEY
+</pre>
+
+### Sử dụng cli
+<pre>
+job-crawler crawl --type topcv --max-workers 3 --start-page 0 --end-page 1
+job-crawler crawl --type generic_job --config config/config.json --max-workers 3 --start-page 0 --end-page 1
+job-crawler export --type csv --save-path data/test_csv --table-name Job Company
+job-crawler export --type json --save-path data/test_csv --table-name Job Company
+</pre>
