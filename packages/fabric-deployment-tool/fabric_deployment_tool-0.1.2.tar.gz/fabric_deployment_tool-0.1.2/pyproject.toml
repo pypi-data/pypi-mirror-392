@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fabric-deployment-tool"
+version = "0.1.2"
+description = "Project for building distributable Fabric deployment tooling wheels."
+readme = "README.md"
+authors = [{ name = "Edgar Cotte", email = "e@e.com" }]
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+keywords = ["fabric", "deployment", "template", "wheel"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "typer>=0.12",
+    "rich>=13",
+    "ms-fabric-cli==1.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-cov>=5",
+    "ruff>=0.6",
+    "build>=1",
+]
+cli = [
+    "click>=8",
+]
+
+[project.urls]
+Homepage = "https://github.com/ecotte/fabric-deployment-tool"
+Issues = "https://github.com/ecotte/fabric-deployment-tool/issues"
+
+[project.scripts]
+fabric-deployment-tool = "fabric_deployment_tool.cli:app"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --cov=fabric_deployment_tool"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+indent-width = 4
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "ASYNC"]
+ignore = []
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
