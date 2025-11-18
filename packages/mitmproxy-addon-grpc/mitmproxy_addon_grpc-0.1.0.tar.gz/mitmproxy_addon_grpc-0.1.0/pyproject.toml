@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mitmproxy_addon_grpc"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "connect-python",
+    "protobuf>=6.33.1",
+    "mitmproxy>=12.2.0",
+]
+
+[tool.setuptools]
+py-modules = ["grpc_addon"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["gen*"]
+exclude = ["proto*", "__pycache__"]
+
+[tool.ruff]
+exclude = ["gen/*"]
