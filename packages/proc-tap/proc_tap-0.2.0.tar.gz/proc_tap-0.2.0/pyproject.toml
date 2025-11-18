@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "proc-tap"
+version = "0.2.0"
+description = "Cross-platform process-level audio capture library"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "m96-chan", email = "y_harada@technologies.moe"}
+]
+keywords = ["audio", "capture", "wasapi", "windows", "linux", "macos", "pulseaudio", "coreaudio", "process", "loopback"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+    "Operating System :: Microsoft :: Windows :: Windows 11",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Operating System :: MacOS :: MacOS X",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: C++",
+    "Topic :: Multimedia :: Sound/Audio :: Capture/Recording",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+# Platform-specific dependencies (automatically installed based on OS)
+dependencies = [
+    "pulsectl>=23.5.0; sys_platform == 'linux'",
+]
+
+[project.urls]
+Homepage = "https://github.com/m96-chan/ProcTap"
+Repository = "https://github.com/m96-chan/ProcTap"
+Issues = "https://github.com/m96-chan/ProcTap/issues"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "mypy",
+    "types-setuptools"
+]
+docs = [
+    "mkdocs-material>=9.0.0",
+    "mkdocstrings[python]>=0.24.0",
+]
+linux = [
+    "pulsectl>=23.5.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["proctap*"]
