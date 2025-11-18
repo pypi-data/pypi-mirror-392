@@ -1,0 +1,129 @@
+Metadata-Version: 2.4
+Name: trifold
+Version: 0.3.0
+Summary: A quick way to deploy static websites to a fast, cheap, and reliable CDN.
+Author-email: jpt <dev@jpt.sh>
+License-Expression: AGPL-3.0-or-later
+Project-URL: Repository, https://codeberg.org/jpt/trifold.git
+Requires-Python: >=3.13
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: httpx>=0.28.1
+Requires-Dist: rich>=14.2.0
+Requires-Dist: typer>=0.20.0
+Dynamic: license-file
+
+# trifold
+
+A quick way to deploy static websites to a fast, cheap, and reliable CDN.
+
+## How it works
+
+`trifold` is a tool to host & serve static websites with bunny.net.
+
+It provides a simple CLI that allows:
+
+- initializing new projects without touching the bunny.net web interface
+- syncing local HTML/CSS/JS/etc. to the bunny.net storage & CDN
+- configuring a custom domain name to point at your files, with SSL enabled
+
+This project grew out of my frustration with services making their free tier less friendly to indie devs & students that just need a cheap & reliable place they can host things.
+
+Instead of relying on a free service it is hopefully going to be more stable to rely on a paid service with a reasonable price point (and the ability to set billing limits).
+
+Like most hosts, bunny.net charges for storage & bandwidth.
+Storage starts at $0.01/GB/mo. bandwidth also starts at $0.01/GB/mo.
+
+The typical static webpage is under 1GB, meaning storage costs will be negligible unless you decide to host audio/video. (And if you do, the rates are *far* cheaper than most competitors, see their [pricing](https://bunny.net/pricing/) for details).
+
+In terms of bandwidth, let's say your page size is 2MB (a moderate-sized page) and hits the front page of a popular website, driving a surge of 25,000 hits. (*Congrats!*)
+
+Not only will your site handle the traffic just fine, your total bill will be
+$0.50 for the 50GB of bandwidth used.
+(You could serve a million hits (~2TB) for $20.)
+
+Of course, most sites will only get a fraction of this traffic.
+
+It is possible to host dozens of low-traffic sites for the bunny.net $1/monthly minimum bill.
+
+## 0. Create a bunny.net account & obtain your API key
+
+If you'd like to [sign up for bunny.net with the project's affiliate link](https://bunny.net?ref=h2lzic0ige), when you pay to host your site, we'll earn a commission at no extra cost to you.
+
+Once you have an account, visit <https://dash.bunny.net/account/api-key> to obtain your API key.
+
+To use `trifold` you'll need to set the `BUNNY_API_KEY` environment variable:
+
+```sh
+$ export BUNNY_API_KEY=1234...    # replace with your key & be sure to keep it safe!
+```
+
+## 1. Initialize Project
+
+First, your project needs a bunny.net storage & pull zone, and a local `trifold.toml`.
+
+Generate one with:
+
+```sh
+$ uvx trifold init
+```
+
+This command will ask you a few questions:
+
+- **storage zone name**: the name of the bunny.net storage bucket, must be unique. (example: `trifold-website`)
+- **region**: primary region for file storage (default: Frankfurt, Germany)
+- **replication region(s)**: for an additional cost per region
+- **monthly bandwidth limit**: avoid runaway costs by setting a bandwidth limit (default: 10GB)
+- **remote path**: if you'd like to serve files under a subdirectory enter the name here (example: `docs`)
+- **local path**: enter the (relative) local path to sync to the site (example: `build/html`)
+
+**a note about costs**
+
+Pricing starts at $0.01/GB, but additional replication or serving regions will increase this cost.
+ See [bunny.net's pricing page](https://bunny.net/pricing/) for details.
+
+ The default behavior is to only serve data from North America, which costs $0.01/GB in bandwidth.
+ Other regions are available at an additional cost, and can be configured via the web interface (CDN->General->Pricing & routing).
+
+## 2. Publish Your Files
+
+With a zone created, we're ready to publish, but it's always a good idea to look before you leap-- let's check the status:
+
+```sh
+$ uvx trifold status -v
+```
+
+This shows us the files that will be uploaded or deleted.
+
+As long as it shows what you're expecting, you're ready to publish:
+
+```sh
+$ uvx trifold publish
+```
+
+After a few seconds, your files are uploaded to the CDN.
+
+They will be available at `your-zone-name.b-cdn.net`.
+
+Whenever you want to publish changes, just repeat this step!
+
+### optional deletion
+
+By default, for safety, this will only create or update files.
+If you'd like it to delete remote files that are no longer in your local directory add `--delete`.
+
+*This command will never modify your local files!*
+
+## 3. Custom Domain with SSL
+
+If you have your own domain that you'd like to point at the hosted files, there's one more command to run:
+
+Before you run this command, log in to your registrar and create a DNS CNAME or ALIAS record pointing your domain at `your-zone-name.b-cdn.net`.
+
+Wait 5-10 minutes for DNS propagation, then:
+
+```sh
+$ uvx trifold domain-add example.com
+```
+
+This will configure an SSL certificate and force SSL.
