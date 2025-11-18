@@ -1,0 +1,166 @@
+from ..render import FPS
+
+
+FLOOR = {
+    "amethyst dirt",
+    "amethyst rune",
+    "brick floor",
+    "citrine rune",
+    "coal mineable",
+    "copper brick floor",
+    "copper door",
+    "copper door open",
+    "copper mineable",
+    "copper pit",
+    "dirt",
+    "ice",
+    "log floor",
+    "moist dirt",
+    "mushroom door",
+    "mushroom door open",
+    "mushroom floor",
+    "pebble",
+    "rail 0",
+    "rail 1",
+    "rail 2",
+    "rail 3",
+    "rail 4",
+    "rail 5",
+    "sand",
+    "slime door",
+    "slime door open",
+    "slime floor",
+    "stone brick floor",
+    "stone floor",
+    "void",
+    "water",
+    "wood door",
+    "wood door open",
+    "wood floor",
+}
+FLOOR_TYPE = {
+    "copper pit": "tile",
+    "ice": "block",
+    "void": "block",
+    "water": "fluid",
+}
+SOIL_STRENGTH = {
+    "dirt": 1,
+    "moist dirt": 1.25,
+    "amethyst dirt": 1.4,
+}
+GROW_TIME = {
+    "bluebell": 400,
+    "carrot": 160,
+    "coal sapling": 200,
+    "coal treeling": 250,
+    "copper pit": 600,
+    "copper sapling": 300,
+    "copper treeling": 375,
+    "furless rabbit": 120,
+    "potato": 240,
+    "quartz child": 40,
+    "rabbit child": 200,
+    "sapling": 80,
+    "slime summon": 40,
+    "spore": 120,
+    "tin sapling": 400,
+    "tin treeling": 500,
+    "treeling": 100,
+    "water": 60,
+}
+GROW_TILES = {
+    "bluebell": {"kind": "bluebell grown", "inventory": {"bluebell": 2}},
+    "carrot": {"kind": "carrot grown", "inventory": {"carrot": 2}},
+    "coal sapling": {"kind": "coal treeling", "inventory": {"coal": 1, "coal sapling": 1, "log": 1}},
+    "coal treeling": {"kind": "coal tree", "inventory": {"coal": 3, "coal sapling": 1, "log": 1}},
+    "copper pit": {"kind": "copper pit grown", "inventory": {"copper ingot": 1}},
+    "copper sapling": {"kind": "copper treeling", "inventory": {"raw copper": 1, "copper sapling": 1, "log": 1}},
+    "copper treeling": {"kind": "copper tree", "inventory": {"raw copper": 2, "copper ingot": 1, "copper sapling": 1, "log": 2}},
+    "furless rabbit": {"kind": "rabbit adult", "inventory": {"rabbit fur": 1, "rabbit meat": 1}},
+    "potato": {"kind": "potato grown", "inventory": {"potato": 2}},
+    "quartz child": {"kind": "quartz adult"},
+    "rabbit child": {"kind": "rabbit adult", "inventory": {"rabbit fur": 1, "rabbit meat": 1}},
+    "sapling": {"kind": "treeling", "inventory": {"sapling": 1, "log": 1}},
+    "slime summon": {"kind": "slime prince", "inventory": {"slife crystal": 1, "slime shaper": 1}},
+    "spore": {"kind": "mushroom", "inventory": {"spore": 2}},
+    "tin sapling": {"kind": "tin treeling", "inventory": {"raw tin": 1, "tin sapling": 1, "log": 1}},
+    "tin treeling": {"kind": "tin tree", "inventory": {"raw tin": 2, "tin ingot": 1, "tin sapling": 1, "log": 2}},
+    "treeling": {"kind": "tree", "inventory": {"sapling": 2, "log": 2}},
+    "water": {"floor": "ice"},
+}
+GROW_REQUIREMENT = {
+    "bluebell": 1.25,
+    "copper treeling": 1.25,
+    "tin sapling": 1.25,
+    "tin treeling": 1.4,
+}
+GROW_DIRT_IGNORE = {
+    "furless rabbit",
+    "quartz child",
+    "rabbit child",
+    "slime summon",
+}
+MULTI_TILES = {
+    "amethyst": (3, 2),
+    "copper boiler": (3, 2),
+    "copper constructor": (2, 2),
+    "destroyed obelisk": (1, 2),
+    "furnace": (2, 2),
+    "manual press": (2, 1),
+    "masonry bench": (2, 1),
+    "obelisk": (1, 2),
+    "packager bench": (2, 1),
+    "sawbench": (2, 1),
+    "sewbench": (2, 1),
+    "wooden bed": (1, 2),
+}
+PROCESSING_TIME = {
+    "amethyst boiler": 5 * FPS,
+    "burner drill": 30 * FPS,
+    "composter": 2 * FPS,
+    "copper boiler": 5 * FPS,
+    "copper press": 20 * FPS,
+    "furnace": 10 * FPS,
+    "mana converter": 15 * FPS,
+    "obelisk piece": 10 * FPS,
+    "wood crucible": 60 * FPS,
+    "wooden sieve": 15 * FPS,
+}
+STORAGE = {
+    "destroyed void crate": (6, 64),
+    "small barrel": (1, 512),
+    "small crate": (8, 64),
+    "void crate": (8, 64),
+}
+UNBREAK = {
+    "coal mineable",
+    "copper mineable",
+    "copper pit",
+    "destroyed obelisk",
+    "destroyed void crate",
+    "glass lock",
+    "left",
+    "obelisk",
+    "slime summon",
+    "up",
+    "void",
+    "void converter",
+    "void crate",
+}
+MODIFICATIONS = {"rail": 6}
+SHEARABLE = {
+    "obelisk": ("obelisk piece", 1, {"kind": "destroyed obelisk"}),
+    "quartz adult": ("quartz", 1, {"kind": "quartz child"}),
+    "rabbit adult": ("rabbit fur", 1, {"kind": "furless rabbit", "inventory": {"rabbit meat": 1}}),
+    "tree": ("leaf", 1, {"kind": "log", "inventory": {"log": 1}}),
+    "void crate": ("obelisk piece", 1, {"kind": "destroyed void crate"}),
+}
+RUNES = {
+    "amethyst rune": (0, 1),
+    "citrine rune": (0, 2),
+}
+RUNES_USER = {
+    "mana converter": 2,
+    "obelisk piece": 1,
+}
