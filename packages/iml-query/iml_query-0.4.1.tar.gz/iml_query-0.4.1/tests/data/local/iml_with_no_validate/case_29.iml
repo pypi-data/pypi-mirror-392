@@ -1,0 +1,94 @@
+let check_sum_of_three (arr : int list) (target : int) (exclude_idx : int) : bool =
+  let rec outer_loop i seen =
+    if i >= List.length arr then
+      false
+    else if i = exclude_idx then
+      outer_loop (i + 1) seen
+    else
+      match List.nth i arr with
+      | None -> false
+      | Some arr_i ->
+          let rec inner_loop j seen_inner =
+            if j >= List.length arr then
+              outer_loop (i + 1) (Set.add arr_i seen)
+            else if j = exclude_idx then
+              inner_loop (j + 1) seen_inner
+            else
+              match List.nth j arr with
+              | None -> false
+              | Some arr_j ->
+                  let needed = target - arr_i - arr_j in
+                  if Set.mem needed seen_inner then
+                    let rec find_needed_idx k =
+                      if k >= List.length arr then
+                        None
+                      else
+                        match List.nth k arr with
+                        | None -> None
+                        | Some arr_k ->
+                            if arr_k = needed then Some k
+                            else find_needed_idx (k + 1)
+                    in
+                    match find_needed_idx 0 with
+                    | Some needed_idx ->
+                        if needed_idx <> exclude_idx then
+                          true
+                        else
+                          inner_loop (j + 1) (Set.add arr_i (Set.add arr_j seen_inner))
+                    | None -> inner_loop (j + 1) (Set.add arr_i (Set.add arr_j seen_inner))
+                  else
+                    inner_loop (j + 1) (Set.add arr_i (Set.add arr_j seen_inner))
+          in
+          inner_loop (i + 1) seen
+  in
+  outer_loop 0 Set.empty
+[@@no_validate]
+
+let solve (nums : int list) : int =
+  let sorted_nums = List.sort ~leq:(fun a b -> a <= b) nums in
+  let n = List.length sorted_nums in
+  
+  let rec outer_loop idx =
+    if idx < 0 then
+      -1
+    else
+      match List.nth idx sorted_nums with
+      | None -> -1
+      | Some val_num ->
+          let temp = (List.take idx sorted_nums) @ (List.drop (idx + 1) sorted_nums) in
+          let temp_n = List.length temp in
+          let rec loop_a a =
+            if a >= temp_n then
+              outer_loop (idx - 1)
+            else
+              match List.nth a temp with
+              | None -> outer_loop (idx - 1)
+              | Some temp_a ->
+                  let rec loop_b b =
+                    if b >= temp_n then
+                      loop_a (a + 1)
+                    else
+                      match List.nth b temp with
+                      | None -> loop_a (a + 1)
+                      | Some temp_b ->
+                          let target = val_num - temp_a - temp_b in
+                          let rec loop_c c =
+                            if c >= temp_n then
+                              loop_b (b + 1)
+                            else
+                              match List.nth c temp with
+                              | None -> loop_b (b + 1)
+                              | Some temp_c ->
+                                  if temp_c = target then
+                                    val_num
+                                  else
+                                    loop_c (c + 1)
+                          in
+                          loop_c (b + 1)
+                  in
+                  loop_b (a + 1)
+          in
+          loop_a 0
+  in
+  outer_loop (n - 1)
+[@@no_validate]

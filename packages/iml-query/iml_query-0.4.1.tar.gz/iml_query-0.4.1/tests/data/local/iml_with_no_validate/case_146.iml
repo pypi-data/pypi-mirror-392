@@ -1,0 +1,13 @@
+let rec binary_to_decimal_helper (remaining : int) (decimal : int) (multiplier : int) : int =
+  if remaining = 0 then
+    decimal
+  else
+    let digit = remaining mod 10 in
+    let new_remaining = remaining / 10 in
+    let new_decimal = decimal + digit * multiplier in
+    let new_multiplier = multiplier * 2 in
+    binary_to_decimal_helper new_remaining new_decimal new_multiplier
+[@@no_validate]
+
+let binary_to_decimal (num : int) : int =
+  binary_to_decimal_helper num 0 1

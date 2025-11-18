@@ -1,0 +1,34 @@
+let max_substring_len_bounded_by_same_char (s : LString.t) : int =
+  let n = LString.length s in
+  
+  let rec find_max_for_char target_char acc i =
+    if i >= n then acc
+    else
+      match List.nth i s with
+      | Some ch when ch = target_char ->
+          let rec check_later_positions acc j =
+            if j >= n then acc
+            else
+              match List.nth j s with
+              | Some ch2 when ch2 = target_char ->
+                  let inner_len = j - i - 1 in
+                  check_later_positions (max acc inner_len) (j + 1)
+              | _ -> check_later_positions acc (j + 1)
+          in
+          let new_acc = check_later_positions acc (i + 1) in
+          find_max_for_char target_char new_acc (i + 1)
+      | _ -> find_max_for_char target_char acc (i + 1)
+  in
+  
+  let rec process_all_chars acc i =
+    if i >= n then acc
+    else
+      match List.nth i s with
+      | Some ch ->
+          let max_for_this_char = find_max_for_char ch (-1) 0 in
+          process_all_chars (max acc max_for_this_char) (i + 1)
+      | None -> process_all_chars acc (i + 1)
+  in
+  
+  process_all_chars (-1) 0
+[@@no_validate]

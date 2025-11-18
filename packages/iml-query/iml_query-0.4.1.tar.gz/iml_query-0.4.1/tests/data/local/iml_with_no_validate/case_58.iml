@@ -1,0 +1,69 @@
+(* Helper function to calculate next index in circular array *)
+let next_index (current : int) (value : int) (size : int) : int =
+  (current + value + 1) mod size
+
+(* Trace path and mark ancestry *)
+let rec trace_path 
+    (current : int) 
+    (start_idx : int) 
+    (values : int list) 
+    (size : int) 
+    (ancestry : int list) 
+    : int list * int =
+  match List.nth current ancestry with
+  | Some (-1) ->
+      let new_ancestry = List.mapi (fun idx x -> if idx = current then start_idx else x) ancestry in
+      let next = next_index current (Option.get_or ~default:0 (List.nth current values)) size in
+      trace_path next start_idx values size new_ancestry
+  | _ -> (ancestry, current)
+[@@no_validate]
+
+(* Count cycle nodes starting from a position *)
+let rec count_cycle_from 
+    (current : int) 
+    (start_idx : int) 
+    (values : int list) 
+    (size : int) 
+    (marked : int list) 
+    (count : int) 
+    : int list * int =
+  match List.nth current marked with
+  | Some 0 ->
+      let new_marked = List.mapi (fun idx x -> if idx = current then 1 else x) marked in
+      let next = next_index current (Option.get_or ~default:0 (List.nth current values)) size in
+      count_cycle_from next start_idx values size new_marked (count + 1)
+  | _ -> (marked, count)
+[@@no_validate]
+
+(* Process a single starting index *)
+let process_start_index 
+    (start_idx : int) 
+    (values : int list) 
+    (size : int) 
+    (ancestry : int list) 
+    (marked : int list) 
+    (cycle_count : int) 
+    : int list * int list * int =
+  match List.nth start_idx ancestry with
+  | Some (-1) ->
+      let (new_ancestry, end_pos) = trace_path start_idx start_idx values size ancestry in
+      (match List.nth end_pos new_ancestry with
+       | Some anc when anc = start_idx ->
+           let (new_marked, added_count) = count_cycle_from end_pos start_idx values size marked 0 in
+           (new_ancestry, new_marked, cycle_count + added_count)
+       | _ -> (new_ancestry, marked, cycle_count))
+  | _ -> (ancestry, marked, cycle_count)
+
+(* Main function *)
+let count_cycle_nodes (values : int list) (size : int) : int =
+  let initial_ancestry = List.map (fun _ -> -1) (0 -- size) in
+  let initial_marked = List.map (fun _ -> 0) (0 -- size) in
+  
+  let (_, _, result) = 
+    List.fold_left 
+      (fun (ancestry, marked, count) start_idx ->
+        process_start_index start_idx values size ancestry marked count)
+      (initial_ancestry, initial_marked, 0)
+      (0 -- (size - 1))
+  in
+  result

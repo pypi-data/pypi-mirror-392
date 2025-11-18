@@ -1,0 +1,9 @@
+let rec mod7 (x : int) : bool =
+  let x = abs x in
+  if x = 0 || x = 7 then
+    true
+  else if x < 10 then
+    false
+  else
+    mod7 (x / 10 - 2 * (x mod 10))
+[@@no_validate]

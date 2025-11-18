@@ -1,0 +1,14 @@
+let rec solve_helper (x : int) (y : int) (count : int) : int =
+  if y = 0 then
+    count
+  else
+    let new_count = count + x / y in
+    let r = x mod y in
+    solve_helper y r new_count
+[@@no_validate]
+
+let solve (x : int) (y : int) : int =
+  if x < y then
+    solve_helper y x 0
+  else
+    solve_helper x y 0

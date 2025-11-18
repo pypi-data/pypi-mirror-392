@@ -1,0 +1,32 @@
+let decode (encoded : LString.t) : LString.t =
+  let n = LString.length encoded in
+  let even_length = (n mod 2 = 0) in
+  
+  let rec decode_helper idx result =
+    if idx >= n then
+      result
+    else
+      let new_result =
+        if even_length then
+          let char_at_idx = LString.sub encoded idx 1 in
+          let prepended = LString.append char_at_idx result in
+          if idx + 1 < n then
+            let char_at_idx_plus_1 = LString.sub encoded (idx + 1) 1 in
+            LString.append prepended char_at_idx_plus_1
+          else
+            prepended
+        else
+          if n - idx > 1 then
+            let char_at_idx = LString.sub encoded idx 1 in
+            let char_at_idx_plus_1 = LString.sub encoded (idx + 1) 1 in
+            let appended = LString.append result char_at_idx in
+            LString.append char_at_idx_plus_1 appended
+          else
+            let char_at_idx = LString.sub encoded idx 1 in
+            LString.append result char_at_idx
+      in
+      decode_helper (idx + 2) new_result
+  in
+  
+  decode_helper 0 LString.empty
+[@@no_validate]

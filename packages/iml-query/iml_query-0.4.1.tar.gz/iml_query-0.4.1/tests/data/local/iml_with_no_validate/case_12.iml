@@ -1,0 +1,42 @@
+let update_frequency (sum: int) (freq_map: (int * int) list) : (int * int) list =
+  match List.assoc sum freq_map with
+  | None -> (sum, 1) :: freq_map
+  | Some count ->
+      (sum, count + 1) :: (List.filter (fun (k, _) -> k <> sum) freq_map)
+
+let rec calculate_subarray_sums_helper 
+    (numbers: int list) 
+    (length: int) 
+    (start_idx: int) 
+    (freq_map: (int * int) list) 
+    : (int * int) list =
+  if start_idx >= length then
+    freq_map
+  else
+    let rec inner_loop 
+        (end_idx: int) 
+        (cumulative: int) 
+        (freq_map: (int * int) list) 
+        : (int * int) list =
+      if end_idx >= length then
+        freq_map
+      else
+        let current = match List.nth end_idx numbers with
+          | Some x -> x
+          | None -> 0
+        in
+        let new_cumulative = cumulative + current in
+        let new_freq_map = update_frequency new_cumulative freq_map in
+        inner_loop (end_idx + 1) new_cumulative new_freq_map
+    in
+    let new_freq_map = inner_loop start_idx 0 freq_map in
+    calculate_subarray_sums_helper numbers length (start_idx + 1) new_freq_map
+[@@no_validate]
+
+let calculate_unique_subarray_sums (numbers: int list) (length: int) : int =
+  let freq_map = calculate_subarray_sums_helper numbers length 0 [] in
+  let unique_sums = List.filter_map
+    (fun (sum, freq) -> if freq = 1 then Some sum else None)
+    freq_map
+  in
+  List.fold_left (+) 0 unique_sums

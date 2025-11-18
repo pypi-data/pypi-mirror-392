@@ -1,0 +1,18 @@
+(* Bitwise operations are not available in IML, so we use [@@opaque] *)
+let bit_and : int -> int -> int = fun _ _ -> 0 [@@opaque]
+let bit_shift_right : int -> int -> int = fun _ _ -> 0 [@@opaque]
+
+let to_binary_bitwise (num : int) : string =
+  if num = 0 then
+    "0"
+  else
+    let rec helper n acc =
+      if n <= 0 then
+        acc
+      else
+        let bit = if bit_and n 1 = 0 then "0" else "1" in
+        let new_result = bit ^ acc in
+        helper (bit_shift_right n 1) new_result
+    in
+    helper num ""
+[@@no_validate]

@@ -1,0 +1,8 @@
+let rec check_divisibility (num : int) : bool =
+  if num >= 100 then
+    let digit = num mod 10 in
+    let num = (num / 10) + (digit * 3) in
+    check_divisibility num
+  else
+    num mod 29 = 0
+[@@no_validate]

@@ -1,0 +1,11 @@
+let rec compute_pyramid_sum (current : int) (total : int) (target : int) : int * int =
+  if total >= target then
+    (current - 1, total)
+  else
+    let new_total = total + current * current in
+    compute_pyramid_sum (current + 1) new_total target
+[@@no_validate]
+
+let find_pyramid_base (target : int) : int =
+  let (n, total) = compute_pyramid_sum 1 0 target in
+  if total = target then n else ~-1

@@ -1,0 +1,70 @@
+open Option
+
+let initialize_dp_matrix (text_len : int) (pattern_len : int) : int list list =
+  List.mapi
+    (fun i _ ->
+      List.mapi
+        (fun j _ ->
+          if i = 0 then 0
+          else if j = 0 then 1
+          else 0)
+        (0 -- pattern_len))
+    (0 -- text_len)
+
+let fill_dp_cell
+    (dp : int list list)
+    (text : LString.t)
+    (pattern : LString.t)
+    (i : int)
+    (j : int) : int option =
+  let* text_char = List.nth (i - 1) text in
+  let* pattern_char = List.nth (j - 1) pattern in
+  let* prev_row = List.nth (i - 1) dp in
+  let* diag_val = List.nth (j - 1) prev_row in
+  let* prev_val = List.nth j prev_row in
+  
+  if text_char = pattern_char then
+    Some (diag_val + prev_val)
+  else
+    Some prev_val
+
+let update_matrix (mat : int list list) (i : int) (j : int) (new_val : int) : int list list =
+  List.mapi
+    (fun row_idx row ->
+      if row_idx = i then
+        List.mapi
+          (fun col_idx val_ ->
+            if col_idx = j then new_val else val_)
+          row
+      else row)
+    mat
+
+let rec fill_matrix_helper
+    (mat : int list list)
+    (text : LString.t)
+    (pattern : LString.t)
+    (indices : (int * int) list) : int list list =
+  match indices with
+  | [] -> mat
+  | (i, j) :: rest ->
+      match fill_dp_cell mat text pattern i j with
+      | None -> mat
+      | Some new_val ->
+          let new_mat = update_matrix mat i j new_val in
+          fill_matrix_helper new_mat text pattern rest
+[@@no_validate]
+
+let count_subsequence_occurrences (text : LString.t) (pattern : LString.t) : int =
+  let text_len = LString.length text in
+  let pattern_len = LString.length pattern in
+  
+  let dp = initialize_dp_matrix text_len pattern_len in
+  let indices = List.monoid_product (1 -- text_len) (1 -- pattern_len) in
+  let filled_dp = fill_matrix_helper dp text pattern indices in
+  
+  match List.nth text_len filled_dp with
+  | None -> 0
+  | Some last_row ->
+      match List.nth pattern_len last_row with
+      | None -> 0
+      | Some result -> result

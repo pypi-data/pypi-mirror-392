@@ -1,0 +1,14 @@
+let rec check_pow2 (v : int) : bool =
+  if v = 1 then
+    true
+  else if v mod 2 <> 0 then
+    false
+  else
+    check_pow2 (v / 2)
+[@@no_validate]
+
+let is_pow2 (v : int) : bool =
+  if v = 0 then
+    false
+  else
+    check_pow2 v

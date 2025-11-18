@@ -1,0 +1,60 @@
+open Option
+
+type window_state = {
+  running_sum: int;
+  shortest: int;
+  left: int;
+  right: int
+}
+
+let rec expand_window (numbers: int list) (total: int) (threshold: int) (state: window_state) : window_state =
+  if state.running_sum > threshold || state.right >= total then
+    state
+  else
+    match List.nth state.right numbers with
+    | None -> state
+    | Some curr_val ->
+        let new_state =
+          if state.running_sum <= 0 && threshold > 0 then
+            {state with left = state.right; running_sum = curr_val; right = state.right + 1}
+          else
+            {state with running_sum = state.running_sum + curr_val; right = state.right + 1}
+        in
+        expand_window numbers total threshold new_state
+[@@no_validate]
+
+let rec contract_window (numbers: int list) (total: int) (threshold: int) (state: window_state) : window_state =
+  if state.running_sum <= threshold || state.left >= total then
+    state
+  else
+    match List.nth state.left numbers with
+    | None -> state
+    | Some left_val ->
+        let window_len = state.right - state.left in
+        let new_shortest = if window_len < state.shortest then window_len else state.shortest in
+        let new_state = {
+          state with 
+          running_sum = state.running_sum - left_val;
+          left = state.left + 1;
+          shortest = new_shortest
+        } in
+        contract_window numbers total threshold new_state
+[@@no_validate]
+
+let rec process_windows (numbers: int list) (total: int) (threshold: int) (state: window_state) : int =
+  if state.right >= total then
+    state.shortest
+  else
+    let expanded = expand_window numbers total threshold state in
+    let contracted = contract_window numbers total threshold expanded in
+    process_windows numbers total threshold contracted
+[@@no_validate]
+
+let find_min_subarray_length (numbers: int list) (total: int) (threshold: int) : int =
+  let initial_state = {
+    running_sum = 0;
+    shortest = total + 1;
+    left = 0;
+    right = 0
+  } in
+  process_windows numbers total threshold initial_state

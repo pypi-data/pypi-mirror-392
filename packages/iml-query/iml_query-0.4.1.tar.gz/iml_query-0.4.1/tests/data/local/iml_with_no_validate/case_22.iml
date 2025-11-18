@@ -1,0 +1,79 @@
+open Option
+
+(* Build the DP table for longest repeating subsequence *)
+let build_lrs_table (s : LString.t) : int list list =
+  let n = LString.length s in
+  let init_table = List.map (fun _ -> List.map (fun _ -> 0) (0 -- n)) (0 -- n) in
+  
+  let get_table_value table i j =
+    List.nth i table 
+    |> Option.flat_map (fun row -> List.nth j row)
+    |> Option.get_or ~default:0
+  in
+  
+  let update_table table i j new_val =
+    List.mapi (fun row_idx row ->
+      if row_idx = i then
+        List.mapi (fun col_idx val_ ->
+          if col_idx = j then new_val else val_
+        ) row
+      else row
+    ) table
+  in
+  
+  let compute_cell table i j =
+    let char_i = List.nth (i - 1) s in
+    let char_j = List.nth (j - 1) s in
+    match (char_i, char_j) with
+    | (Some ci, Some cj) ->
+        if ci = cj && i <> j then
+          let prev_val = get_table_value table (i - 1) (j - 1) in
+          update_table table i j (1 + prev_val)
+        else
+          let left_val = get_table_value table i (j - 1) in
+          let top_val = get_table_value table (i - 1) j in
+          update_table table i j (max left_val top_val)
+    | _ -> table
+  in
+  
+  let process_row table i =
+    List.fold_left (fun acc_table j -> compute_cell acc_table i j) table (1 -- n)
+  in
+  
+  List.fold_left process_row init_table (1 -- n)
+
+(* Helper function to reconstruct the LRS - extracted to top level *)
+let rec backtrack_lrs (s : LString.t) (table : int list list) (i : int) (j : int) (acc : LString.t) : LString.t =
+  if i <= 0 || j <= 0 then
+    acc
+  else
+    let get_table_value row col =
+      List.nth row table 
+      |> Option.flat_map (fun r -> List.nth col r)
+      |> Option.get_or ~default:0
+    in
+    let current_val = get_table_value i j in
+    let diag_val = get_table_value (i - 1) (j - 1) in
+    let top_val = get_table_value (i - 1) j in
+    
+    if current_val = diag_val + 1 then
+      let char_opt = List.nth (i - 1) s in
+      let new_acc = match char_opt with
+        | Some ch -> ch :: acc
+        | None -> acc
+      in
+      backtrack_lrs s table (i - 1) (j - 1) new_acc
+    else if current_val = top_val then
+      backtrack_lrs s table (i - 1) j acc
+    else
+      backtrack_lrs s table i (j - 1) acc
+[@@no_validate]
+
+(* Reconstruct the longest repeating subsequence from the DP table *)
+let reconstruct_lrs (s : LString.t) (table : int list list) : LString.t =
+  let n = LString.length s in
+  backtrack_lrs s table n n []
+
+let lrs (s : LString.t) : LString.t =
+  let table = build_lrs_table s in
+  reconstruct_lrs s table

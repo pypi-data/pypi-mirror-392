@@ -1,0 +1,16 @@
+let is_symmetric (text : LString.t) : bool =
+  let len = LString.length text in
+  let rec check_pairs left_ptr right_ptr =
+    if left_ptr > right_ptr then 
+      true
+    else
+      match (List.nth left_ptr text, List.nth right_ptr text) with
+      | Some left_char, Some right_char -> 
+          if left_char = right_char then
+            check_pairs (left_ptr + 1) (right_ptr - 1)
+          else
+            false
+      | _, _ -> false
+  in
+  check_pairs 0 (len - 1)
+[@@no_validate]

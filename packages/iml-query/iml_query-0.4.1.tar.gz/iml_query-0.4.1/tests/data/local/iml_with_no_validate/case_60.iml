@@ -1,0 +1,54 @@
+let generate_substrings (s: LString.t) : LString.t list =
+  let len = LString.length s in
+  let rec generate_from_start start_idx =
+    if start_idx >= len then
+      []
+    else
+      let rec generate_with_length substr_len =
+        if substr_len > len - start_idx then
+          []
+        else
+          let substring = LString.sub s start_idx substr_len in
+          substring :: generate_with_length (substr_len + 1)
+      in
+      let substrs_from_start = generate_with_length 1 in
+      List.append substrs_from_start (generate_from_start (start_idx + 1))
+  in
+  generate_from_start 0
+[@@no_validate]
+
+let compare_lchars (ca: LChar.t) (cb: LChar.t) : bool =
+  match (ca, cb) with
+  | (LChar.Char(a7,a6,a5,a4,a3,a2,a1,a0), LChar.Char(b7,b6,b5,b4,b3,b2,b1,b0)) ->
+      if a7 <> b7 then not a7
+      else if a6 <> b6 then not a6
+      else if a5 <> b5 then not a5
+      else if a4 <> b4 then not a4
+      else if a3 <> b3 then not a3
+      else if a2 <> b2 then not a2
+      else if a1 <> b1 then not a1
+      else not a0 || b0
+
+let compare_lstrings (a: LString.t) (b: LString.t) : bool =
+  let len_a = LString.length a in
+  let len_b = LString.length b in
+  let min_len = min len_a len_b in
+  let rec compare_chars i =
+    if i >= min_len then
+      len_a <= len_b
+    else
+      match (List.nth i a, List.nth i b) with
+      | (Some ca, Some cb) ->
+          if ca = cb then
+            compare_chars (i + 1)
+          else
+            compare_lchars ca cb
+      | _ -> len_a <= len_b
+  in
+  compare_chars 0
+[@@no_validate]
+
+let concat_sorted_substrings (input_str: LString.t) : LString.t =
+  let substrings = generate_substrings input_str in
+  let sorted_substrings = List.sort ~leq:compare_lstrings substrings in
+  List.fold_left LString.append LString.empty sorted_substrings

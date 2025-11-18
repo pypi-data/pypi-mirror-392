@@ -1,0 +1,16 @@
+let rec get_octal_digits (num : int) : int list =
+  if num = 0 then []
+  else
+    let digit = num mod 10 in
+    let rest = num / 10 in
+    digit :: get_octal_digits rest
+[@@no_validate]
+
+let base8_to_base10 (octal_num : int) : int =
+  let digits = get_octal_digits octal_num in
+  let rec helper acc power = function
+    | [] -> acc
+    | digit :: rest ->
+        helper (acc + digit * Int.pow 8 power) (power + 1) rest
+  in
+  helper 0 0 digits

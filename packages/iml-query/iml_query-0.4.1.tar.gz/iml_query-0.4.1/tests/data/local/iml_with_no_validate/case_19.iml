@@ -1,0 +1,84 @@
+let max_int: int = () [@@opaque]
+
+let is_palindrome (text : LString.t) (left : int) (right : int) (is_pal : bool list list) : bool =
+  let span = right - left + 1 in
+  if span = 1 then true
+  else if span = 2 then
+    match (List.nth left text, List.nth right text) with
+    | (Some char_left, Some char_right) -> char_left = char_right
+    | _ -> false
+  else
+    match (List.nth left text, List.nth right text, List.nth (left + 1) is_pal) with
+    | (Some char_left, Some char_right, Some row) ->
+        (match List.nth (right - 1) row with
+        | Some inner_pal -> char_left = char_right && inner_pal
+        | None -> false)
+    | _ -> false
+
+let build_palindrome_table (text : LString.t) (length : int) : bool list list =
+  let initial_is_pal = 
+    List.map 
+      (fun i -> List.map (fun j -> i = j) (0 -- length))
+      (0 -- length)
+  in
+  
+  let rec build_table is_pal span left =
+    if span > length then is_pal
+    else if left > length - span then build_table is_pal (span + 1) 0
+    else
+      let right = left + span - 1 in
+      let new_is_pal = 
+        List.mapi 
+          (fun row_idx row ->
+            if row_idx = left then
+              List.mapi 
+                (fun col_idx val_ ->
+                  if col_idx = right then 
+                    is_palindrome text left right is_pal
+                  else val_)
+                row
+            else row)
+          is_pal
+      in
+      build_table new_is_pal span (left + 1)
+  in
+  build_table initial_is_pal 2 0
+[@@no_validate]
+
+let calculate_min_cuts (length : int) (is_pal : bool list list) : int list =
+  let rec calc_cuts idx cuts =
+    if idx >= length then cuts
+    else
+      let new_cuts = 
+        match List.nth 0 is_pal with
+        | None -> cuts
+        | Some first_row ->
+            match List.nth idx first_row with
+            | Some true -> 
+                List.mapi (fun i val_ -> if i = idx then 0 else val_) cuts
+            | _ ->
+                let rec find_min_cut k min_val =
+                  if k >= idx then min_val
+                  else
+                    match (List.nth (k + 1) is_pal, List.nth k cuts) with
+                    | (Some row, Some cuts_at_k) ->
+                        (match List.nth idx row with
+                        | Some true -> find_min_cut (k + 1) (min min_val (1 + cuts_at_k))
+                        | _ -> find_min_cut (k + 1) min_val)
+                    | _ -> find_min_cut (k + 1) min_val
+                in
+                let min_cut = find_min_cut 0 max_int in
+                List.mapi (fun i val_ -> if i = idx then min_cut else val_) cuts
+      in
+      calc_cuts (idx + 1) new_cuts
+  in
+  calc_cuts 0 (List.map (fun _ -> 0) (0 -- length))
+[@@no_validate]
+
+let min_cuts (text : LString.t) : int =
+  let length = LString.length text in
+  let is_pal = build_palindrome_table text length in
+  let cuts = calculate_min_cuts length is_pal in
+  match List.nth (length - 1) cuts with
+  | Some x -> x
+  | None -> max_int

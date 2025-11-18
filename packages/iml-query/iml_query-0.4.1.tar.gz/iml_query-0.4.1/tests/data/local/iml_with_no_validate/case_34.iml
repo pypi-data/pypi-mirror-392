@@ -1,0 +1,27 @@
+let count_triplets_divisible (arr : int list) (n : int) (m : int) : int =
+  let rec process_triplets acc i j k =
+    if i >= n - 2 then
+      acc
+    else if j >= n - 1 then
+      process_triplets acc (i + 1) (i + 2) (i + 3)
+    else if k >= n then
+      process_triplets acc i (j + 1) (j + 2)
+    else
+      let triplet_sum_opt =
+        match (List.nth i arr, List.nth j arr, List.nth k arr) with
+        | (Some elem_i, Some elem_j, Some elem_k) -> Some (elem_i + elem_j + elem_k)
+        | _ -> None
+      in
+      let new_acc = 
+        match triplet_sum_opt with
+        | Some triplet_sum when triplet_sum mod m = 0 -> acc + 1
+        | _ -> acc
+      in
+      process_triplets new_acc i j (k + 1)
+  in
+  
+  if n < 3 then
+    0
+  else
+    process_triplets 0 0 1 2
+[@@no_validate]

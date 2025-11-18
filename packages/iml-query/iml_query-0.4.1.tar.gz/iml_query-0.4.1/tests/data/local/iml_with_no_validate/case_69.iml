@@ -1,0 +1,14 @@
+let rec calculate_min_turns_helper (start_config : int) (target_config : int) (acc : int) : int =
+  if start_config <= 0 && target_config <= 0 then
+    acc
+  else
+    let current_digit = start_config mod 10 in
+    let target_digit = target_config mod 10 in
+    let direct_dist = abs (current_digit - target_digit) in
+    let wrap_dist = 10 - direct_dist in
+    let min_dist = min direct_dist wrap_dist in
+    calculate_min_turns_helper (start_config / 10) (target_config / 10) (acc + min_dist)
+[@@no_validate]
+
+let calculate_min_turns (start_config : int) (target_config : int) : int =
+  calculate_min_turns_helper start_config target_config 0

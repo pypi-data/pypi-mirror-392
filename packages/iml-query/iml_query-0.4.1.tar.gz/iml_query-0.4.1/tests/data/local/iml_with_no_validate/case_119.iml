@@ -1,0 +1,38 @@
+let swap_elements lst i j =
+  List.mapi 
+    (fun idx x -> 
+      if idx = i then 
+        List.nth j lst |> Option.get_or ~default:x
+      else if idx = j then 
+        List.nth i lst |> Option.get_or ~default:x
+      else x) 
+    lst
+
+let rec find_misplaced_positive (arr : int list) (n : int) (ptr : int) : int =
+  if ptr >= n then
+    ptr
+  else
+    match List.nth ptr arr with
+    | Some x when x >= 0 -> find_misplaced_positive arr n (ptr + 2)
+    | _ -> ptr
+[@@measure Ordinal.of_int (n - ptr)]
+
+let rec find_misplaced_negative (arr : int list) (n : int) (ptr : int) : int =
+  if ptr >= n then
+    ptr
+  else
+    match List.nth ptr arr with
+    | Some x when x <= 0 -> find_misplaced_negative arr n (ptr + 2)
+    | _ -> ptr
+[@@measure Ordinal.of_int (n - ptr)]
+
+let rec rearrange_by_sign_parity (arr : int list) (n : int) (even_ptr : int) (odd_ptr : int) : int list =
+  let new_even_ptr = find_misplaced_positive arr n even_ptr in
+  let new_odd_ptr = find_misplaced_negative arr n odd_ptr in
+  
+  if new_even_ptr < n && new_odd_ptr < n then
+    let swapped_arr = swap_elements arr new_even_ptr new_odd_ptr in
+    rearrange_by_sign_parity swapped_arr n new_even_ptr new_odd_ptr
+  else
+    arr
+[@@no_validate]

@@ -1,0 +1,29 @@
+(* Process a single number and update counts *)
+let process_number (counts : (int, int) Map.t) (num : int) : (int, int) Map.t =
+  let abs_num = abs num in
+  if num >= 0 then
+    Map.add abs_num ((Map.get abs_num counts) + 1) counts
+  else
+    Map.add abs_num ((Map.get abs_num counts) - 1) counts
+
+(* Calculate counts for all numbers in array *)
+let calculate_counts (data : int list) : (int, int) Map.t =
+  List.fold_left process_number (Map.const 0) data
+
+(* Find first value with both signs present *)
+let find_first_paired_value 
+    (data : int list) 
+    (length : int) : int =
+  let counts = calculate_counts data in
+  let rec helper remaining =
+    match remaining with
+    | [] -> -1
+    | x :: rest ->
+        let abs_val = abs x in
+        if Map.get abs_val counts > 0 then
+          abs_val
+        else
+          helper rest
+  in
+  helper data
+[@@no_validate]

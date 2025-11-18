@@ -1,0 +1,18 @@
+let bitwise_and : int -> int -> int = fun a b -> 1 [@@opaque]
+let bitwise_shift_left : int -> int -> int = fun a b -> 1 [@@opaque]
+
+let is_power_of_two (x : int) : bool =
+  x <> 0 && bitwise_and x (x - 1) = 0
+
+let rec find_next_power_of_two (r : int) (x : int) : int =
+  if r >= x then
+    r
+  else
+    find_next_power_of_two (bitwise_shift_left r 1) x
+[@@no_validate]
+
+let round_up (x : int) : int =
+  if is_power_of_two x then
+    x
+  else
+    find_next_power_of_two 1 x

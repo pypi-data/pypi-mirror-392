@@ -1,0 +1,34 @@
+let sqrt : real -> real = () [@@opaque]
+
+let rec remove_even_factors (n : int) : int =
+  if n mod 2 = 0 then
+    remove_even_factors (n / 2)
+  else
+    n
+[@@no_validate]
+
+let rec process_factor_powers (n : int) (factor : int) (power_term : int) (factor_sum : int) : int * int =
+  if n mod factor = 0 then
+    let new_power_term = power_term * factor in
+    let new_factor_sum = factor_sum + new_power_term in
+    process_factor_powers (n / factor) factor new_power_term new_factor_sum
+  else
+    (n, factor_sum)
+[@@no_validate]
+
+let rec process_odd_factors (n : int) (factor : int) (limit : int) (result : int) : int * int =
+  if factor >= limit then
+    (n, result)
+  else
+    let (new_n, factor_sum) = process_factor_powers n factor 1 1 in
+    process_odd_factors new_n (factor + 1) limit (result * factor_sum)
+[@@no_validate]
+
+let sum_of_odd_divisors (num : int) : int =
+  let n = remove_even_factors num in
+  let limit = Real.to_int (sqrt (Real.of_int n)) + 1 in
+  let (remaining, result) = process_odd_factors n 3 limit 1 in
+  if remaining >= 2 then
+    result * (1 + remaining)
+  else
+    result

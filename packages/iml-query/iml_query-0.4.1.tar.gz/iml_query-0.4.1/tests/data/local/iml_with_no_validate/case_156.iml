@@ -1,0 +1,30 @@
+let compute_matrix_sum n =
+  let rec process_multiples i threshold quotient n acc =
+    if threshold >= n then
+      acc
+    else
+      let term = 
+        if threshold + i <= n then
+          i * quotient
+        else
+          (n - threshold) * quotient
+      in
+      process_multiples i (threshold + i) (quotient + 1) n (acc + term)
+  in
+  
+  let rec compute_helper i acc =
+    if i > n then
+      acc
+    else
+      let threshold = i - 1 in
+      let row_sum = 
+        if threshold < n then
+          process_multiples i threshold 1 n 0
+        else
+          0
+      in
+      compute_helper (i + 1) (acc + row_sum)
+  in
+  
+  compute_helper 1 0
+[@@no_validate]

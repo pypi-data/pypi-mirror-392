@@ -1,0 +1,16 @@
+open Option
+
+let rec search_missing (arr : int list) (lo : int) (hi : int) : int =
+  if lo > hi then
+    hi + 1
+  else
+    match List.nth lo arr with
+    | Some lo_val when lo <> lo_val -> lo
+    | _ ->
+        let pivot = (lo + hi) / 2 in
+        match List.nth pivot arr with
+        | Some pivot_val when pivot_val = pivot ->
+            search_missing arr (pivot + 1) hi
+        | _ ->
+            search_missing arr lo pivot
+[@@no_validate]

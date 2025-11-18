@@ -1,0 +1,20 @@
+let modulo = 1000000007
+
+let compute_next_value (prev : int) (prev_prev : int) : int =
+  let term1 = (prev * prev) mod modulo in
+  let term2 = (prev * 2 * prev_prev) mod modulo in
+  (term1 + term2) mod modulo
+
+let count_trees_at_height (target_height : int) : int =
+  if target_height = 0 || target_height = 1 then
+    1
+  else
+    let rec helper level prev prev_prev =
+      if level > target_height then
+        prev
+      else
+        let next_value = compute_next_value prev prev_prev in
+        helper (level + 1) next_value prev
+    in
+    helper 2 1 1
+[@@no_validate]

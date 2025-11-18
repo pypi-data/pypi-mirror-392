@@ -1,0 +1,21 @@
+let newton_approx (target : real) : real =
+  let tol = 0.000001 in
+  let initial_guess = target in
+  let initial_improvement = 
+    if target >. 1.0 then target /. 2.0 
+    else 1.0 
+  in
+  
+  let rec iterate (guess : real) (improvement : real) : real =
+    let diff = guess -. improvement in
+    let abs_diff = if diff <. 0.0 then Real.(~-) diff else diff in
+    if abs_diff <=. tol then
+      improvement
+    else
+      let new_guess = improvement in
+      let new_improvement = (new_guess +. target /. new_guess) /. 2.0 in
+      iterate new_guess new_improvement
+  in
+  
+  iterate initial_guess initial_improvement
+[@@no_validate]

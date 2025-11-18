@@ -1,0 +1,18 @@
+let count_missing (arr : int list) (n : int) : int =
+  let sorted_arr = List.sort ~leq:(fun a b -> a <= b) arr in
+  
+  let rec count_gaps acc idx =
+    if idx >= n - 1 then
+      acc
+    else
+      match List.nth idx sorted_arr, List.nth (idx + 1) sorted_arr with
+      | Some curr, Some next ->
+        if curr <> next && curr <> next - 1 then
+          count_gaps (acc + (next - curr - 1)) (idx + 1)
+        else
+          count_gaps acc (idx + 1)
+      | _, _ -> acc
+  in
+  
+  count_gaps 0 0
+[@@no_validate]

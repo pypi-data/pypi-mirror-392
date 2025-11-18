@@ -1,0 +1,25 @@
+let rec count_consecutive (current : int) (num_set : int list) (max_num : int) : int =
+  if current > max_num || not (List.mem current num_set) then
+    0
+  else
+    1 + count_consecutive (current + 1) num_set max_num
+[@@no_validate]
+
+let find_longest_sequence (numbers : int list) (size : int) : int =
+  let num_set = 
+    List.fold_left 
+      (fun acc x -> if List.mem x acc then acc else x :: acc) 
+      [] 
+      numbers 
+  in
+  let max_num = List.fold_left max 0 numbers in
+  List.fold_left 
+    (fun longest current_num ->
+      if List.mem current_num num_set then
+        let sequence_length = count_consecutive current_num num_set max_num in
+        max sequence_length longest
+      else
+        longest
+    ) 
+    0 
+    numbers

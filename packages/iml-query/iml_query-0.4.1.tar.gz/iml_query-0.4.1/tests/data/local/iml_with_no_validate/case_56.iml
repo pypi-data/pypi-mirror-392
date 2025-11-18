@@ -1,0 +1,28 @@
+open Option
+
+let step a1 a2 target (left, right, matches) =
+  let* left_val = List.nth left a1 in
+  let* right_val = List.nth right a2 in
+  let current_sum = left_val + right_val in
+  
+  if current_sum = target then
+    Some (left + 1, right - 1, matches + 1)
+  else if current_sum < target then
+    Some (left + 1, right, matches)
+  else
+    Some (left, right - 1, matches)
+
+let pairs_with_sum (a1 : int list) (a2 : int list) (len1 : int) (len2 : int) (target : int) : int =
+  let rec process_pairs state i =
+    let (left, right, matches) = state in
+    if left >= len1 || right < 0 then
+      state
+    else
+      match step a1 a2 target state with
+      | Some new_state -> process_pairs new_state (i + 1)
+      | None -> state
+  in
+  
+  let (_, _, final_matches) = process_pairs (0, len2 - 1, 0) 0 in
+  final_matches
+[@@no_validate]

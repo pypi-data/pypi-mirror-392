@@ -1,0 +1,40 @@
+let char_z : LChar.t = List.hd {l|z|l}
+
+let find_rightmost_nonz_measure (chars : LString.t) (pos : int) : Ordinal.t =
+  Ordinal.of_int (pos + 1)
+
+let rec find_rightmost_nonz (chars : LString.t) (pos : int) : int =
+  if pos < 0 then
+    -1
+  else
+    match List.nth pos chars with
+    | Some ch -> if ch <> char_z then pos else find_rightmost_nonz chars (pos - 1)
+    | None -> find_rightmost_nonz chars (pos - 1)
+[@@measure find_rightmost_nonz_measure chars pos]
+
+let increment_char (ch : LChar.t) : LChar.t =
+  let alphabet = {l|abcdefghijklmnopqrstuvwxyz|l} in
+  let rec find_next prev rest =
+    match rest with
+    | [] -> List.hd alphabet
+    | x :: xs -> if prev = ch then x else find_next x xs
+  in
+  match alphabet with
+  | [] -> ch
+  | first :: rest -> find_next first rest
+[@@no_validate]
+
+let next_string (text : LString.t) : LString.t =
+  if List.is_empty text then
+    {l|a|l}
+  else
+    let chars = text in
+    let pos = find_rightmost_nonz chars (LString.length chars - 1) in
+    if pos = -1 then
+      LString.append text {l|a|l}
+    else
+      let char_at_pos = Option.get_or ~default:(List.hd {l|a|l}) (List.nth pos chars) in
+      let new_char = increment_char char_at_pos in
+      let prefix = LString.take pos chars in
+      let suffix = LString.drop (pos + 1) chars in
+      LString.append prefix (LString.append (LString.of_list [new_char]) suffix)

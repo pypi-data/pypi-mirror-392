@@ -1,0 +1,11 @@
+let rec is_perfect_square_via_odd_sum (num : int) : bool =
+  let rec helper accumulated odd_increment =
+    if accumulated > num then
+      false
+    else if accumulated = num then
+      true
+    else
+      helper (accumulated + odd_increment) (odd_increment + 2)
+  in
+  helper 0 1
+[@@no_validate]

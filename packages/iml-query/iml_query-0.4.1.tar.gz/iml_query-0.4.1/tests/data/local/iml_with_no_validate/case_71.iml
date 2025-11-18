@@ -1,0 +1,13 @@
+let rec largest_fib_not_exceeding_helper (num : int) (prev_prev : int) (prev : int) (curr : int) : int =
+  if curr > num then
+    prev
+  else
+    let next = prev + curr in
+    largest_fib_not_exceeding_helper num prev curr next
+[@@no_validate]
+
+let largest_fib_not_exceeding (num : int) : int =
+  if num = 0 || num = 1 then
+    num
+  else
+    largest_fib_not_exceeding_helper num 0 1 1

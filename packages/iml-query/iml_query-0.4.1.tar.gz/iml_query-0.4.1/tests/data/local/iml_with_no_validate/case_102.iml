@@ -1,0 +1,44 @@
+let calculate_factorial_array (n : int) : int list =
+  let rec helper acc i =
+    if i > n then 
+      List.rev acc
+    else if i = 0 then
+      helper [1] 1
+    else
+      helper ((List.hd acc) * i :: acc) (i + 1)
+  in
+  helper [] 0
+[@@no_validate]
+
+let calculate_coefficient (factorials : int list) (total_len : int) 
+                         (red_total : int) (blue_total : int) (green_total : int) : real =
+  match List.nth total_len factorials, List.nth red_total factorials,
+        List.nth blue_total factorials, List.nth green_total factorials with
+  | Some n_fact, Some r_fact, Some b_fact, Some g_fact ->
+      let denominator = r_fact * b_fact * g_fact in
+      Real.of_int n_fact /. Real.of_int denominator
+  | _, _, _, _ -> 0.0
+
+let compute_arrangements (total_len : int) (min_red : int) (min_blue : int) (min_green : int) : real =
+  let factorials = calculate_factorial_array total_len in
+  let remaining_slots = total_len - (min_red + min_green + min_blue) in
+  
+  let combinations = 
+    List.flat_map
+      (fun extra_red ->
+        List.flat_map
+          (fun extra_blue ->
+            let extra_green = remaining_slots - (extra_red + extra_blue) in
+            if extra_green >= 0 then [(extra_red, extra_blue, extra_green)] else [])
+          (0 -- (remaining_slots - extra_red)))
+      (0 -- remaining_slots)
+  in
+  
+  List.fold_left
+    (fun acc (extra_red, extra_blue, extra_green) ->
+      let red_total = extra_red + min_red in
+      let blue_total = extra_blue + min_blue in
+      let green_total = extra_green + min_green in
+      acc +. calculate_coefficient factorials total_len red_total blue_total green_total)
+    0.0
+    combinations

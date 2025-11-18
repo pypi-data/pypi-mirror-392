@@ -1,0 +1,44 @@
+let sqrt : real -> real = () [@@opaque]
+
+(* Divide out all occurrences of a divisor from temp *)
+let rec divide_out (temp : int) (divisor : int) : int =
+  if temp mod divisor = 0 then
+    divide_out (temp / divisor) divisor
+  else
+    temp
+[@@no_validate]
+
+(* Handle the even case: divide out all 2s *)
+let handle_even_case (temp : int) : int * int =
+  if temp mod 2 = 0 then
+    let new_temp = divide_out temp 2 in
+    (new_temp, 1)
+  else
+    (temp, 0)
+
+(* Process odd factors iteratively using fold_left *)
+let count_distinct_prime_factors (num : int) : int =
+  let (temp_after_even, distinct_count) = handle_even_case num in
+  let limit = Real.to_int (sqrt (Real.of_int temp_after_even)) in
+  
+  (* Generate list of odd factors to check: 3, 5, 7, ..., limit *)
+  let odd_factors = List.filter (fun x -> x mod 2 = 1) (3 -- (limit + 1)) in
+  
+  (* Process each odd factor *)
+  let (final_temp, final_count) = 
+    List.fold_left 
+      (fun (curr_temp, curr_count) factor ->
+        if curr_temp mod factor = 0 then
+          let new_temp = divide_out curr_temp factor in
+          (new_temp, curr_count + 1)
+        else
+          (curr_temp, curr_count))
+      (temp_after_even, distinct_count)
+      odd_factors
+  in
+  
+  (* Check if there's a remaining prime > sqrt *)
+  if final_temp > 2 then
+    final_count + 1
+  else
+    final_count

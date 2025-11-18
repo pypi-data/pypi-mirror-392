@@ -1,0 +1,42 @@
+open Option
+
+let calculate_max_as_for_keystroke (i : int) (memo : int list) : int =
+  let multipliers = [2; 3; 4] in
+  let offsets = [4; 5; 6] in
+  let pairs = List.monoid_product multipliers offsets in
+  List.fold_left 
+    (fun acc (m, o) -> 
+      Option.fold
+        (fun _ prev_value -> max acc (m * prev_value))
+        acc
+        (List.nth (i - o) memo)
+    )
+    0
+    pairs
+
+let initialize_memo (keystrokes : int) : int list =
+  let base_length = min 6 keystrokes in
+  let base_cases = List.map (fun x -> x + 1) (0 -- (base_length - 1)) in
+  let remaining = max 0 (keystrokes - 6) in
+  List.append base_cases (List.map (fun _ -> 0) (0 -- (remaining - 1)))
+
+let rec fill_memo (memo : int list) (i : int) (keystrokes : int) : int list =
+  if i > keystrokes then
+    memo
+  else
+    let new_value = calculate_max_as_for_keystroke i memo in
+    let new_memo = 
+      List.mapi 
+        (fun idx x -> if idx = i - 1 then new_value else x) 
+        memo
+    in
+    fill_memo new_memo (i + 1) keystrokes
+[@@no_validate]
+
+let max_a_count (keystrokes : int) : int =
+  if keystrokes <= 6 then 
+    keystrokes
+  else
+    let memo = initialize_memo keystrokes in
+    let final_memo = fill_memo memo 7 keystrokes in
+    Option.get_or ~default:0 (List.nth (keystrokes - 1) final_memo)

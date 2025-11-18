@@ -1,0 +1,54 @@
+(* Helper function to get sequence length for a value *)
+let get_memo_value (value : int) (memo : (int, int) Map.t) : int =
+  Map.get (value - 1) memo
+
+(* Forward pass: compute LIS ending at each position *)
+let rec compute_lis_forward (seq : int list) (n : int) (idx : int) 
+    (memo : (int, int) Map.t) (lis_len : int list) : (int, int) Map.t * int list =
+  if idx >= n then
+    (memo, lis_len)
+  else
+    let curr_val = Option.get_or ~default:0 (List.nth idx seq) in
+    let prev_val = curr_val - 1 in
+    let curr_len = get_memo_value curr_val memo in
+    let new_len = curr_len + 1 in
+    let new_memo = Map.add curr_val new_len memo in
+    let new_lis_len = List.mapi (fun i x -> if i = idx then new_len else x) lis_len in
+    compute_lis_forward seq n (idx + 1) new_memo new_lis_len
+[@@no_validate]
+
+(* Backward pass: compute LDS starting at each position *)
+let rec compute_lds_backward (seq : int list) (n : int) (idx : int)
+    (memo : (int, int) Map.t) (lds_len : int list) : (int, int) Map.t * int list =
+  if idx < 0 then
+    (memo, lds_len)
+  else
+    let curr_val = Option.get_or ~default:0 (List.nth idx seq) in
+    let prev_val = curr_val - 1 in
+    let curr_len = get_memo_value curr_val memo in
+    let new_len = curr_len + 1 in
+    let new_memo = Map.add curr_val new_len memo in
+    let new_lds_len = List.mapi (fun i x -> if i = idx then new_len else x) lds_len in
+    compute_lds_backward seq n (idx - 1) new_memo new_lds_len
+[@@no_validate]
+
+(* Find maximum bitonic length *)
+let rec find_max_bitonic (lis_len : int list) (lds_len : int list) (idx : int) (n : int) (max_so_far : int) : int =
+  if idx >= n then
+    max_so_far
+  else
+    let lis_val = Option.get_or ~default:0 (List.nth idx lis_len) in
+    let lds_val = Option.get_or ~default:0 (List.nth idx lds_len) in
+    let bitonic_at_idx = lis_val + lds_val - 1 in
+    let new_max = max max_so_far bitonic_at_idx in
+    find_max_bitonic lis_len lds_len (idx + 1) n new_max
+[@@no_validate]
+
+let longest_strict_bitonic_subseq (seq : int list) (n : int) : int =
+  let init_memo = Map.const 0 in
+  let init_len = List.map (fun _ -> 0) (0 -- (n - 1)) in
+  
+  let (_, lis_len) = compute_lis_forward seq n 0 init_memo init_len in
+  let (_, lds_len) = compute_lds_backward seq n (n - 1) init_memo init_len in
+  
+  find_max_bitonic lis_len lds_len 0 n 0

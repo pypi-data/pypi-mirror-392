@@ -1,0 +1,22 @@
+let can_transform_strings (s1 : LString.t) (s2 : LString.t) (ops : int) : bool =
+  let total_len = LString.length s1 + LString.length s2 in
+  if total_len < ops then
+    true
+  else
+    let min_len = min (LString.length s1) (LString.length s2) in
+    let rec find_shared idx =
+      if idx >= min_len then
+        idx
+      else
+        match (List.nth idx s1, List.nth idx s2) with
+        | (Some c1, Some c2) ->
+            if c1 = c2 then
+              find_shared (idx + 1)
+            else
+              idx
+        | _ -> idx
+    in
+    let shared = find_shared 0 in
+    let remaining = ops - total_len + 2 * shared in
+    remaining mod 2 = 0
+[@@no_validate]

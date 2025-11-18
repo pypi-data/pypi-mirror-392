@@ -1,0 +1,28 @@
+let count_unique_subarrays (data : int list) (size : int) : int =
+  let rec process_left left right seen total =
+    if left >= size then
+      total
+    else
+      let (new_right, new_seen) = expand_right data right size seen in
+      let window_size = new_right - left in
+      let new_total = total + (window_size * (window_size + 1)) / 2 in
+      let updated_seen = 
+        match List.nth left data with
+        | None -> new_seen
+        | Some x -> Set.remove x new_seen
+      in
+      process_left (left + 1) new_right updated_seen new_total
+  and expand_right data right size seen =
+    if right >= size then
+      (right, seen)
+    else
+      match List.nth right data with
+      | None -> (right, seen)
+      | Some x ->
+          if Set.mem x seen then
+            (right, seen)
+          else
+            expand_right data (right + 1) size (Set.add x seen)
+  in
+  process_left 0 0 Set.empty 0
+[@@no_validate]

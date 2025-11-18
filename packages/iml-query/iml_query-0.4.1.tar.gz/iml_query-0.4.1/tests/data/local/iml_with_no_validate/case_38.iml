@@ -1,0 +1,12 @@
+let rec next_power_of_two_helper (current : int) (x : int) : int =
+  if current >= x then
+    current
+  else
+    next_power_of_two_helper (current * 2) x
+[@@no_validate]
+
+let next_power_of_two (x : int) : int =
+  if x <= 1 then
+    1
+  else
+    next_power_of_two_helper 1 x

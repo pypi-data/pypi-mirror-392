@@ -1,0 +1,41 @@
+let mark_duplicates (data : int list) (idx : int) (size : int) : int list =
+  let current_value = List.nth idx data |> Option.get_or ~default:0 in
+  let rec check_rest k acc =
+    if k >= size then
+      acc
+    else
+      match List.nth k acc with
+      | None -> check_rest (k + 1) acc
+      | Some value ->
+          if current_value = value && current_value <> 0 then
+            List.mapi (fun i x -> if i = idx || i = k then 0 else x) acc
+          else
+            check_rest (k + 1) acc
+  in
+  check_rest (idx + 1) data
+[@@no_validate]
+
+let process_element (data : int list) (idx : int) (size : int) (sum_a : int) (sum_b : int) : int list * int * int =
+  let marked_data = mark_duplicates data idx size in
+  let current_value = List.nth idx marked_data |> Option.get_or ~default:0 in
+  let original_value = List.nth idx data |> Option.get_or ~default:0 in
+  
+  if current_value = original_value && current_value <> 0 then
+    if current_value > 0 then
+      (marked_data, sum_a + current_value, sum_b)
+    else
+      (marked_data, sum_a, sum_b + current_value)
+  else
+    (marked_data, sum_a, sum_b)
+
+let rec process_all_elements (data : int list) (idx : int) (size : int) (sum_a : int) (sum_b : int) : int * int =
+  if idx >= size then
+    (sum_a, sum_b)
+  else
+    let new_data, new_sum_a, new_sum_b = process_element data idx size sum_a sum_b in
+    process_all_elements new_data (idx + 1) size new_sum_a new_sum_b
+[@@no_validate]
+
+let compute_max_diff (data : int list) (size : int) : int =
+  let sum_a, sum_b = process_all_elements data 0 size 0 0 in
+  abs (sum_a - sum_b)

@@ -1,0 +1,67 @@
+let char_0: LChar.t = List.hd {l|0|l}
+
+let update_buffer_cell
+    (text : LString.t)
+    (reverse_idx : int)
+    (forward_idx : int)
+    (buffer : int list)
+    (saved_val : int) : int list * int =
+  let get_char idx = Option.get_or ~default:char_0 (List.nth idx text) in
+  let get_buffer idx = Option.get_or ~default:0 (List.nth idx buffer) in
+  
+  if forward_idx = reverse_idx then
+    let new_buffer = 
+      List.mapi (fun idx x -> if idx = forward_idx then 1 else x) buffer
+    in
+    (new_buffer, saved_val)
+  else if get_char reverse_idx = get_char forward_idx then
+    let temp = get_buffer forward_idx in
+    let new_buffer = 
+      List.mapi (fun idx x -> if idx = forward_idx then saved_val + 2 else x) buffer
+    in
+    (new_buffer, temp)
+  else
+    let new_saved_val = get_buffer forward_idx in
+    let prev_val = get_buffer (forward_idx - 1) in
+    let curr_val = get_buffer forward_idx in
+    let new_val = if prev_val > curr_val then prev_val else curr_val in
+    let new_buffer = 
+      List.mapi (fun idx x -> if idx = forward_idx then new_val else x) buffer
+    in
+    (new_buffer, new_saved_val)
+
+let process_forward_loop
+    (text : LString.t)
+    (reverse_idx : int)
+    (size : int)
+    (buffer : int list)
+    (init_saved : int) : int list =
+  let rec helper forward_idx (buf, saved) =
+    if forward_idx >= size then buf
+    else
+      let (new_buf, new_saved) = 
+        update_buffer_cell text reverse_idx forward_idx buf saved
+      in
+      helper (forward_idx + 1) (new_buf, new_saved)
+  in
+  helper reverse_idx (buffer, init_saved)
+[@@no_validate]
+
+let process_reverse_loop
+    (text : LString.t)
+    (size : int)
+    (buffer : int list) : int list =
+  let rec helper reverse_idx buf =
+    if reverse_idx < 0 then buf
+    else
+      let new_buf = process_forward_loop text reverse_idx size buf 0 in
+      helper (reverse_idx - 1) new_buf
+  in
+  helper (size - 1) buffer
+[@@no_validate]
+
+let find_longest_palindrome_length (text : LString.t) : int =
+  let size = LString.length text in
+  let buffer = List.map (fun _ -> 0) (0 -- (size - 1)) in
+  let final_buffer = process_reverse_loop text size buffer in
+  Option.get_or ~default:0 (List.nth (size - 1) final_buffer)

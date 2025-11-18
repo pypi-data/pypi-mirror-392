@@ -1,0 +1,36 @@
+open Option
+
+let update_dp_and_cur_max (seq1_val : int) (seq2_val : int) (dp_val : int) (cur_max : int) : int * int =
+  let new_dp_val = 
+    if seq1_val = seq2_val && cur_max + 1 > dp_val 
+    then cur_max + 1 
+    else dp_val 
+  in
+  let new_cur_max = 
+    if seq1_val > seq2_val && dp_val > cur_max 
+    then dp_val 
+    else cur_max 
+  in
+  (new_dp_val, new_cur_max)
+
+let process_inner_loop (seq1_val : int) (seq2 : int list) (dp : int list) : int list =
+  let rec process_cells cur_max acc remaining_seq2 remaining_dp =
+    match remaining_seq2, remaining_dp with
+    | [], [] -> List.rev acc
+    | seq2_val :: seq2_rest, dp_val :: dp_rest ->
+        let (new_dp_val, new_cur_max) = update_dp_and_cur_max seq1_val seq2_val dp_val cur_max in
+        process_cells new_cur_max (new_dp_val :: acc) seq2_rest dp_rest
+    | _, _ -> List.rev acc
+  in
+  process_cells 0 [] seq2 dp
+[@@no_validate]
+
+let lcis_length (seq1 : int list) (len1 : int) (seq2 : int list) (len2 : int) : int =
+  let initial_dp = List.map (fun _ -> 0) (0 -- (len2 - 1)) in
+  let final_dp = 
+    List.fold_left 
+      (fun dp seq1_val -> process_inner_loop seq1_val seq2 dp)
+      initial_dp
+      seq1
+  in
+  List.fold_left max 0 final_dp

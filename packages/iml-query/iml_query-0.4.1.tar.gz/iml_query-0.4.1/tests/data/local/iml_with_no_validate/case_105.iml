@@ -1,0 +1,16 @@
+let is_palindrome_rotation (text : LString.t) : bool =
+  let len = LString.length text in
+  let rec check_pairs left right =
+    if right <= left then
+      true
+    else
+      match (List.nth (left - 1) text, List.nth (right + 1) text) with
+      | Some left_char, Some right_char ->
+          if left_char = right_char then
+            check_pairs (left + 1) (right - 1)
+          else
+            false
+      | _, _ -> false
+  in
+  check_pairs 1 (len - 2)
+[@@no_validate]

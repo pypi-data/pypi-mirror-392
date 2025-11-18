@@ -1,0 +1,46 @@
+let swap_elements (arr : int list) (pos1 : int) (pos2 : int) : int list =
+  List.mapi 
+    (fun i x ->
+      if i = pos1 then 
+        List.nth pos2 arr |> Option.get_or ~default:x
+      else if i = pos2 then 
+        List.nth pos1 arr |> Option.get_or ~default:x
+      else x) 
+    arr
+
+let find_smallest_in_range (data : int list) (start : int) (size : int) (max_swaps : int) : int =
+  let rec helper search_idx smallest_pos =
+    if search_idx >= size || search_idx - start > max_swaps then
+      smallest_pos
+    else
+      match (List.nth search_idx data, List.nth smallest_pos data) with
+      | (Some curr_val, Some min_val) ->
+          if curr_val < min_val then
+            helper (search_idx + 1) search_idx
+          else
+            helper (search_idx + 1) smallest_pos
+      | _ -> smallest_pos
+  in
+  helper (start + 1) start
+[@@no_validate]
+
+let rec bubble_to_position (data : int list) (target_idx : int) (current_idx : int) : int list =
+  if current_idx <= target_idx then
+    data
+  else
+    let swapped = swap_elements data current_idx (current_idx - 1) in
+    bubble_to_position swapped target_idx (current_idx - 1)
+[@@no_validate]
+
+let sort_with_limited_swaps (data : int list) (size : int) (max_swaps : int) : int list =
+  let rec process_position curr_data idx remaining_swaps =
+    if idx >= size - 1 || remaining_swaps <= 0 then
+      curr_data
+    else
+      let smallest_pos = find_smallest_in_range curr_data idx size remaining_swaps in
+      let bubbled_data = bubble_to_position curr_data idx smallest_pos in
+      let swaps_used = smallest_pos - idx in
+      process_position bubbled_data (idx + 1) (remaining_swaps - swaps_used)
+  in
+  process_position data 0 max_swaps
+[@@no_validate]

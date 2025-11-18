@@ -1,0 +1,32 @@
+open Option
+
+let rec adjust_window (arr : int list) (window_sum : int) (target : int) (left : int) (right : int) : int * int =
+  if window_sum > target && left < right - 1 then
+    match List.nth left arr with
+    | Some left_val -> adjust_window arr (window_sum - left_val) target (left + 1) right
+    | None -> (left, window_sum)
+  else
+    (left, window_sum)
+[@@no_validate]
+
+let rec find_contiguous_helper (arr : int list) (window_sum : int) (target : int) (left : int) (right : int) (n : int) : bool =
+  if right > n then
+    false
+  else
+    let (new_left, adjusted_sum) = adjust_window arr window_sum target left right in
+    if adjusted_sum = target then
+      true
+    else if right < n then
+      match List.nth right arr with
+      | Some right_val -> find_contiguous_helper arr (adjusted_sum + right_val) target new_left (right + 1) n
+      | None -> false
+    else
+      false
+[@@no_validate]
+
+let find_contiguous_sum (arr : int list) (target : int) : bool =
+  match arr with
+  | [] -> false
+  | first :: _ ->
+      let n = List.length arr in
+      find_contiguous_helper arr first target 0 1 n

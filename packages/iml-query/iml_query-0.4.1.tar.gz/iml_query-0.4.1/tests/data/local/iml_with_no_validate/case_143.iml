@@ -1,0 +1,44 @@
+(* Helper function to find pivot index where arr[i] > arr[i+1] *)
+let find_pivot_index (arr : int list) (n : int) : int =
+  let rec find_pivot i =
+    if i >= n - 1 then
+      0
+    else
+      match (List.nth i arr, List.nth (i + 1) arr) with
+      | (Some curr, Some next) -> if curr > next then i else find_pivot (i + 1)
+      | _ -> find_pivot (i + 1)
+  in
+  find_pivot 0
+[@@no_validate]
+
+(* Helper function to count pairs with two-pointer technique *)
+let rec count_pairs_helper arr n target left right count iterations =
+  if iterations >= n || left = right then
+    count
+  else
+    match (List.nth left arr, List.nth right arr) with
+    | (Some left_val, Some right_val) ->
+        let current_sum = left_val + right_val in
+        if current_sum = target then
+          let new_count = count + 1 in
+          if left = (right - 1 + n) mod n then
+            new_count
+          else
+            let new_left = (left + 1) mod n in
+            let new_right = (right - 1 + n) mod n in
+            count_pairs_helper arr n target new_left new_right new_count (iterations + 1)
+        else if current_sum < target then
+          let new_left = (left + 1) mod n in
+          count_pairs_helper arr n target new_left right count (iterations + 1)
+        else
+          let new_right = (n + right - 1) mod n in
+          count_pairs_helper arr n target left new_right count (iterations + 1)
+    | _ -> count
+[@@no_validate]
+
+(* Main function to count pairs with target sum *)
+let count_pairs_with_target_sum (arr : int list) (n : int) (target : int) : int =
+  let pivot_idx = find_pivot_index arr n in
+  let left_ptr = (pivot_idx + 1) mod n in
+  let right_ptr = pivot_idx in
+  count_pairs_helper arr n target left_ptr right_ptr 0 0

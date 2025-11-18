@@ -1,0 +1,38 @@
+let count_elements_leq_k (arr : int list) (n : int) (k : int) : int =
+  List.fold_left 
+    (fun acc x -> if x <= k then acc + 1 else acc) 
+    0 
+    arr
+
+let count_bad_in_window (arr : int list) (window_size : int) (k : int) : int =
+  let window = List.take window_size arr in
+  List.fold_left 
+    (fun acc x -> if x > k then acc + 1 else acc) 
+    0 
+    window
+
+let rec slide_window_helper 
+    (arr : int list) 
+    (n : int) 
+    (k : int) 
+    (idx : int) 
+    (window_end : int) 
+    (bad_count : int) 
+    (result : int) : int =
+  if window_end >= n then
+    result
+  else
+    let left_elem = List.nth idx arr |> Option.get_or ~default:0 in
+    let right_elem = List.nth window_end arr |> Option.get_or ~default:0 in
+    let bad_count' = if left_elem > k then bad_count - 1 else bad_count in
+    let bad_count'' = if right_elem > k then bad_count' + 1 else bad_count' in
+    let result' = min result bad_count'' in
+    slide_window_helper arr n k (idx + 1) (window_end + 1) bad_count'' result'
+[@@no_validate]
+
+let min_swaps_to_group (arr : int list) (n : int) (k : int) : int =
+  let window_size = count_elements_leq_k arr n k in
+  let bad_count = count_bad_in_window arr window_size k in
+  let result = bad_count in
+  let window_end = window_size in
+  slide_window_helper arr n k 0 window_end bad_count result

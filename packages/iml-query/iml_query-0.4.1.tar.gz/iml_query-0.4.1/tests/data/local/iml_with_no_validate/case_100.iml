@@ -1,0 +1,18 @@
+let rec find_first_duplicate_helper (text : LString.t) (x : int) (n : int) : int =
+  if x >= n - 1 then
+    -1
+  else
+    let rec check_rest (y : int) : int =
+      if y >= n then
+        find_first_duplicate_helper text (x + 1) n
+      else
+        match List.nth x text, List.nth y text with
+        | Some c1, Some c2 when c1 = c2 -> x
+        | _ -> check_rest (y + 1)
+    in
+    check_rest (x + 1)
+[@@no_validate]
+
+let check (text : LString.t) : int =
+  let n = LString.length text in
+  find_first_duplicate_helper text 0 n

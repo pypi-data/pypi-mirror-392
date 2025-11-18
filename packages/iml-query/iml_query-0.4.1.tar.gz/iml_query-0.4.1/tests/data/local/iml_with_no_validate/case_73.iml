@@ -1,0 +1,33 @@
+let rec calc_sum_even_divisors_helper (num : int) (p : int) (result : int) : int =
+  if p * p > num then
+    if num > 1 then
+      result * (1 + num)
+    else
+      result
+  else if num mod p = 0 then
+    let rec process_prime (n : int) (exp : int) (geo_sum : int) (pk : int) : int * int =
+      if n mod p <> 0 then
+        (geo_sum, n)
+      else
+        let new_exp = exp + 1 in
+        let new_n = n / p in
+        let new_pk = pk * p in
+        let new_geo_sum = 
+          if p = 2 && new_exp = 1 then
+            new_pk
+          else
+            geo_sum + new_pk
+        in
+        process_prime new_n new_exp new_geo_sum new_pk
+    in
+    let (geo_sum, new_num) = process_prime num 0 1 1 in
+    calc_sum_even_divisors_helper new_num (p + 1) (result * geo_sum)
+  else
+    calc_sum_even_divisors_helper num (p + 1) result
+[@@no_validate]
+
+let calc_sum_even_divisors (num : int) : int =
+  if num mod 2 <> 0 then
+    0
+  else
+    calc_sum_even_divisors_helper num 2 1

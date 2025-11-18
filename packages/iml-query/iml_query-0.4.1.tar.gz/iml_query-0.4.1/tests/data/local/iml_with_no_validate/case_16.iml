@@ -1,0 +1,48 @@
+let compute_prefix_sums (data : int list) : int list =
+  let rec helper acc remaining =
+    match remaining with
+    | [] -> List.rev acc
+    | x :: xs ->
+        let new_sum = (List.hd acc) + x in
+        helper (new_sum :: acc) xs
+  in
+  helper [0] data
+
+let update_heap (heap : int list) (value : int) (k : int) : int list =
+  let sorted_heap = List.sort ~leq:(fun a b -> a <= b) heap in
+  if List.length heap < k then
+    List.insert_sorted ~leq:(fun a b -> a <= b) value sorted_heap
+  else
+    let min_elem = List.hd sorted_heap in
+    if value > min_elem then
+      List.insert_sorted ~leq:(fun a b -> a <= b) value (List.tl sorted_heap)
+    else
+      sorted_heap
+
+let process_subarrays (prefix : int list) (length : int) (k : int) : int list =
+  let rec process_start heap start =
+    if start > length then
+      heap
+    else
+      let rec process_end heap_inner end_idx =
+        if end_idx > length then
+          heap_inner
+        else
+          let subarray_sum = 
+            match List.nth end_idx prefix, List.nth (start - 1) prefix with
+            | Some p_end, Some p_start -> p_end - p_start
+            | _ -> 0
+          in
+          let new_heap = update_heap heap_inner subarray_sum k in
+          process_end new_heap (end_idx + 1)
+      in
+      let heap_after_end = process_end heap start in
+      process_start heap_after_end (start + 1)
+  in
+  process_start [] 1
+[@@no_validate]
+
+let find_kth_largest_subarray_sum (data : int list) (length : int) (k : int) : int =
+  let prefix = compute_prefix_sums data in
+  let min_heap = process_subarrays prefix length k in
+  List.hd min_heap

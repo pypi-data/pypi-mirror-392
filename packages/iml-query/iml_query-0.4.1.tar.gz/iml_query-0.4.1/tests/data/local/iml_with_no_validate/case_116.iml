@@ -1,0 +1,21 @@
+(* Helper function to calculate sum of digits *)
+let rec sum_digits (n : int) (acc : int) : int =
+  if n <= 0 then acc
+  else sum_digits (n / 10) (acc + (n mod 10))
+[@@measure Ordinal.of_int n]
+
+(* Main function to find nth number whose digit sum is 10 *)
+let rec find_nth_number_helper (target_position : int) (matches : int) (number : int) : int =
+  let digit_sum = sum_digits number 0 in
+  let new_matches = if digit_sum = 10 then matches + 1 else matches in
+  if new_matches = target_position then
+    number
+  else
+    find_nth_number_helper target_position new_matches (number + 9)
+[@@no_validate]
+
+let find_nth_number (target_position : int) : int =
+  if target_position <= 0 then
+    -1
+  else
+    find_nth_number_helper target_position 0 19

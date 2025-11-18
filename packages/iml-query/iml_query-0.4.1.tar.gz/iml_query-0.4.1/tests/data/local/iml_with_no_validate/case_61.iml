@@ -1,0 +1,29 @@
+open Option
+
+let rec search_in_lookup (arr : int list) (first_idx : int) (second_idx : int) (remainder : int) (lookup : int Set.t) (length : int) : (int * int * int) option =
+  if second_idx >= length then
+    None
+  else
+    let needed = remainder - (List.nth second_idx arr |> get_or ~default:0) in
+    if Set.mem needed lookup then
+      Some (List.nth first_idx arr |> get_or ~default:0, List.nth second_idx arr |> get_or ~default:0, needed)
+    else
+      let new_lookup = Set.add (List.nth second_idx arr |> get_or ~default:0) lookup in
+      search_in_lookup arr first_idx (second_idx + 1) remainder new_lookup length
+[@@no_validate]
+
+let rec search_with_first_idx (arr : int list) (first_idx : int) (target : int) (length : int) : (int * int * int) option =
+  if first_idx >= length - 1 then
+    None
+  else
+    let remainder = target - (List.nth first_idx arr |> get_or ~default:0) in
+    let lookup = Set.empty in
+    match search_in_lookup arr first_idx (first_idx + 1) remainder lookup length with
+    | Some result -> Some result
+    | None -> search_with_first_idx arr (first_idx + 1) target length
+[@@no_validate]
+
+let search_triplet_with_target_sum (numbers : int list) (length : int) (target : int) : bool =
+  match search_with_first_idx numbers 0 target length with
+  | Some _ -> true
+  | None -> false

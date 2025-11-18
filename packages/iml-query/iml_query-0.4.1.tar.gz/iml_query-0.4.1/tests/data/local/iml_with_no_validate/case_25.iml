@@ -1,0 +1,44 @@
+open Option
+
+let rec find_pair_sum 
+    (sorted_data : int list) 
+    (first_elem : int) 
+    (lo : int) 
+    (hi : int) 
+    (target : int) : bool =
+  if lo >= hi then
+    false
+  else
+    match List.nth lo sorted_data, List.nth hi sorted_data with
+    | Some lo_val, Some hi_val ->
+        let s = first_elem + lo_val + hi_val in
+        if s = target then
+          true
+        else if s < target then
+          find_pair_sum sorted_data first_elem (lo + 1) hi target
+        else
+          find_pair_sum sorted_data first_elem lo (hi - 1) target
+    | _, _ -> false
+[@@no_validate]
+
+let rec find_triplet_helper 
+    (sorted_data : int list) 
+    (n : int) 
+    (i : int) 
+    (target : int) : bool =
+  if i >= n - 2 then
+    false
+  else
+    match List.nth i sorted_data with
+    | None -> false
+    | Some first_elem ->
+        if find_pair_sum sorted_data first_elem (i + 1) (n - 1) target then
+          true
+        else
+          find_triplet_helper sorted_data n (i + 1) target
+[@@no_validate]
+
+let triplet_sum (data : int list) (target : int) : bool =
+  let sorted_data = List.sort ~leq:(fun a b -> a <= b) data in
+  let n = List.length data in
+  find_triplet_helper sorted_data n 0 target

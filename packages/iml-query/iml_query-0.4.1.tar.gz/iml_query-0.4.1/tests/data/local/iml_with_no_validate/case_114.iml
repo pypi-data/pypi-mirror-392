@@ -1,0 +1,15 @@
+let log10 : real -> real = fun x -> 1.0 [@@opaque]
+
+let rec sum_logs acc i num =
+  if i > num then acc
+  else 
+    let acc' = acc +. log10 (Real.of_int i) in
+    sum_logs acc' (i + 1) num
+[@@no_validate]
+
+let factorial_digit_count (num : int) : int =
+  if num < 0 then 0
+  else if num <= 1 then 1
+  else
+    let log_sum = sum_logs 0.0 2 num in
+    Real._to_int_round_down log_sum + 1

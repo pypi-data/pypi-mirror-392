@@ -1,0 +1,21 @@
+(* Helper function to compute cube of a number *)
+let cube (x : int) : int = x * x * x
+
+(* Helper function to compute sum of cubes from 1 to n *)
+let rec sum_cubes_to (n : int) : int =
+  if n <= 0 then 0
+  else cube n + sum_cubes_to (n - 1)
+[@@no_validate]
+
+(* Main function to find n where sum of first n cubes equals target *)
+let check_if_triangular_sum (target : int) : int =
+  let rec find_idx idx =
+    if idx > target then ~-1
+    else 
+      let acc = sum_cubes_to idx in
+      if acc > target then ~-1
+      else if acc = target then idx
+      else find_idx (idx + 1)
+  in
+  find_idx 1
+[@@no_validate]

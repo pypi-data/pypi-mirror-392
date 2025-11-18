@@ -1,0 +1,28 @@
+let calculate_min_time_for_count (count : int) (memo : int list) (insert_cost : int) (delete_cost : int) (copy_cost : int) : int =
+  if count mod 2 = 0 then
+    let prev_val = Option.get_or ~default:0 (List.nth (count - 1) memo) in
+    let half_val = Option.get_or ~default:0 (List.nth (count / 2) memo) in
+    min (prev_val + insert_cost) (half_val + copy_cost)
+  else
+    let prev_val = Option.get_or ~default:0 (List.nth (count - 1) memo) in
+    let half_val = Option.get_or ~default:0 (List.nth ((count + 1) / 2) memo) in
+    min (prev_val + insert_cost) (half_val + copy_cost + delete_cost)
+
+let build_memo (target : int) (insert_cost : int) (delete_cost : int) (copy_cost : int) : int list =
+  let initial_memo = List.map (fun _ -> 0) (0 -- target) in
+  let rec helper count memo =
+    if count > target then memo
+    else
+      let min_time = calculate_min_time_for_count count memo insert_cost delete_cost copy_cost in
+      let new_memo = List.mapi (fun idx x -> if idx = count then min_time else x) memo in
+      helper (count + 1) new_memo
+  in
+  helper 1 initial_memo
+[@@no_validate]
+
+let min_time_chars (target : int) (insert_cost : int) (delete_cost : int) (copy_cost : int) : int =
+  if target = 0 then 0
+  else if target = 1 then insert_cost
+  else
+    let memo = build_memo target insert_cost delete_cost copy_cost in
+    Option.get_or ~default:0 (List.nth target memo)

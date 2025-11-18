@@ -1,0 +1,26 @@
+let char_space: LChar.t = List.hd {l| |l}
+let char_asterisk: LChar.t = List.hd {l|*|l}
+
+let rec split_by_space_helper acc current text =
+  match text with
+  | [] -> 
+      if current = [] then List.rev acc
+      else List.rev (List.cons (List.rev current) acc)
+  | ch :: remaining ->
+      if ch = char_space then
+        if current = [] then
+          split_by_space_helper acc [] remaining
+        else
+          split_by_space_helper (List.cons (List.rev current) acc) [] remaining
+      else
+        split_by_space_helper acc (ch :: current) remaining
+[@@no_validate]
+
+let split_by_space (text : LString.t) : LString.t list =
+  split_by_space_helper [] [] text
+
+let censor (sentence : LString.t) (target : LString.t) : LString.t =
+  let words = split_by_space sentence in
+  let stars = List.map (fun _ -> char_asterisk) target in
+  let censored = List.map (fun w -> if w = target then stars else w) words in
+  LString.concat {l| |l} censored

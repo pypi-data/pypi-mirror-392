@@ -1,0 +1,14 @@
+let rec find_ceiling_helper (data : int list) (idx : int) (end_ : int) (target : int) : int =
+  if idx >= end_ then
+    -1
+  else
+    match List.nth idx data, List.nth (idx + 1) data with
+    | Some curr, _ when curr = target -> idx
+    | Some curr, Some next when curr < target && next >= target -> idx + 1
+    | _, _ -> find_ceiling_helper data (idx + 1) end_ target
+[@@no_validate]
+
+let find_ceiling (data : int list) (start : int) (end_ : int) (target : int) : int =
+  match List.nth start data with
+  | Some start_val when target <= start_val -> start
+  | _ -> find_ceiling_helper data start end_ target

@@ -1,0 +1,43 @@
+let rec lcs_k 
+    (memo : int list list list)
+    (s1 : LString.t)
+    (i : int)
+    (s2 : LString.t)
+    (j : int)
+    (changes : int) : int =
+  if changes < 0 then
+    -10000000
+  else if i < 0 || j < 0 then
+    0
+  else
+    let cached = 
+      match List.nth i memo with
+      | None -> None
+      | Some row -> 
+          match List.nth j row with
+          | None -> None
+          | Some col -> List.nth changes col
+    in
+    match cached with
+    | Some v when v <> -1 -> v
+    | _ ->
+        let rec_i_1_j = lcs_k memo s1 (i - 1) s2 j changes in
+        let rec_i_j_1 = lcs_k memo s1 i s2 (j - 1) changes in
+        let rec_i_1_j_1_changes_1 = lcs_k memo s1 (i - 1) s2 (j - 1) (changes - 1) in
+        
+        let s1_char = Option.get_or ~default:(List.hd {l|x|l}) (List.nth (i - 1) s1) in
+        let s2_char = Option.get_or ~default:(List.hd {l|y|l}) (List.nth (j - 1) s2) in
+        
+        let matching_case = 
+          if s1_char = s2_char then
+            1 + lcs_k memo s1 (i - 1) s2 (j - 1) changes
+          else
+            -10000000
+        in
+        
+        let result = List.fold_left max 
+                      (-10000000)
+                      [rec_i_1_j; rec_i_j_1; rec_i_1_j_1_changes_1; matching_case]
+        in
+        result
+[@@no_validate]

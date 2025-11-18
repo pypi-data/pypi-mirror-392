@@ -1,0 +1,13 @@
+(* Bitwise operations are not available in IML, declare as opaque *)
+let bitwise_and : int -> int -> int = fun x y -> 0 [@@opaque]
+let left_shift : int -> int -> int = fun x y -> 0 [@@opaque]
+
+let find_rightmost_bit_pos (num : int) : int =
+  let rec helper pos mask =
+    if bitwise_and num mask <> 0 then
+      pos
+    else
+      helper (pos + 1) (left_shift mask 1)
+  in
+  helper 1 1
+[@@no_validate]

@@ -1,0 +1,11 @@
+let bitwise_and : int -> int -> int = fun x y -> 0 [@@opaque]
+
+let rec popcount_helper (num : int) (bits : int) : int =
+  if num = 0 then
+    bits
+  else
+    popcount_helper (bitwise_and num (num - 1)) (bits + 1)
+[@@no_validate]
+
+let popcount (num : int) : int =
+  popcount_helper num 0

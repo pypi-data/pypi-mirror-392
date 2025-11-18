@@ -1,0 +1,30 @@
+(* Count total number of set bits across all integers from 0 to upper_bound.
+   Uses bit position analysis with period detection. *)
+
+let rec process_range (upper_bound : int) (num : int) (toggle : int) (countdown : int) (period : int) (acc : int) : int =
+  if num > upper_bound then
+    acc
+  else
+    let new_acc = acc + toggle in
+    let new_countdown = countdown - 1 in
+    if new_countdown = 0 then
+      process_range upper_bound (num + 1) (1 - toggle) period period new_acc
+    else
+      process_range upper_bound (num + 1) toggle new_countdown period new_acc
+[@@measure Ordinal.of_int (upper_bound - num + 1)]
+
+let count_bits_at_position_total (upper_bound : int) (bit_pos : int) : int =
+  let period = Int.pow 2 bit_pos in
+  process_range upper_bound 0 0 period period 0
+
+let rec count_all_positions (upper_bound : int) (bit_pos : int) (acc : int) : int =
+  let power = Int.pow 2 bit_pos in
+  if power > upper_bound then
+    acc
+  else
+    let bits = count_bits_at_position_total upper_bound bit_pos in
+    count_all_positions upper_bound (bit_pos + 1) (acc + bits)
+[@@no_validate]
+
+let total_set_bits (upper_bound : int) : int =
+  count_all_positions upper_bound 0 0

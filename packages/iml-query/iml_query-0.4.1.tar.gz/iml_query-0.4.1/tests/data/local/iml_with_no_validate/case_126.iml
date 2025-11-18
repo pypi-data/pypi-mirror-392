@@ -1,0 +1,81 @@
+(* Helper function to get matrix value safely *)
+let get_dp_value (dp : int list list) (row : int) (col : int) : int =
+  match List.nth row dp with
+  | Some row_list -> 
+      (match List.nth col row_list with
+       | Some v -> v
+       | None -> 0)
+  | None -> 0
+
+(* Helper function to update matrix at specific position *)
+let update_dp_matrix (dp : int list list) (row : int) (col : int) (value : int) : int list list =
+  List.mapi 
+    (fun i r ->
+      if i = row then
+        List.mapi (fun j v -> if j = col then value else v) r
+      else r)
+    dp
+
+(* Calculate cell value based on palindrome conditions *)
+let calculate_palindrome_cell 
+    (sequence : LString.t) 
+    (dp : int list list) 
+    (start : int) 
+    (end_ : int) 
+    (substr_len : int) : int =
+  let start_char = List.nth start sequence in
+  let end_char = List.nth end_ sequence in
+  
+  match (start_char, end_char) with
+  | (Some sc, Some ec) ->
+      if sc = ec && substr_len = 2 then
+        2
+      else if sc = ec then
+        get_dp_value dp (start + 1) (end_ - 1) + 2
+      else
+        max (get_dp_value dp start (end_ - 1)) (get_dp_value dp (start + 1) end_)
+  | _ -> 0
+
+(* Process all starting positions for a given substring length *)
+let process_substring_length 
+    (sequence : LString.t) 
+    (dp : int list list) 
+    (length : int) 
+    (substr_len : int) : int list list =
+  let rec helper dp_acc start =
+    if start > length - substr_len then
+      dp_acc
+    else
+      let end_ = start + substr_len - 1 in
+      let new_value = calculate_palindrome_cell sequence dp_acc start end_ substr_len in
+      let new_dp = update_dp_matrix dp_acc start end_ new_value in
+      helper new_dp (start + 1)
+  in
+  helper dp 0
+[@@no_validate]
+
+(* Initialize diagonal of DP table *)
+let initialize_dp_diagonal (length : int) : int list list =
+  List.map 
+    (fun i ->
+      List.map (fun j -> if i = j then 1 else 0) (0 -- (length - 1)))
+    (0 -- (length - 1))
+
+(* Process all substring lengths *)
+let fill_dp_table (sequence : LString.t) (dp : int list list) (length : int) : int list list =
+  let rec helper dp_acc substr_len =
+    if substr_len > length then
+      dp_acc
+    else
+      let new_dp = process_substring_length sequence dp_acc length substr_len in
+      helper new_dp (substr_len + 1)
+  in
+  helper dp 2
+[@@no_validate]
+
+(* Main function *)
+let longest_palindrome_subseq (sequence : LString.t) : int =
+  let length = LString.length sequence in
+  let dp = initialize_dp_diagonal length in
+  let final_dp = fill_dp_table sequence dp length in
+  get_dp_value final_dp 0 (length - 1)

@@ -1,0 +1,12 @@
+let rec is_valid_number (value : int) : bool =
+  if value / 10 = 0 then
+    true
+  else
+    let d1 = value mod 10 in
+    let d2 = (value / 10) mod 10 in
+    let difference = abs (d2 - d1) in
+    if difference > 1 then
+      false
+    else
+      is_valid_number (value / 10)
+[@@no_validate]

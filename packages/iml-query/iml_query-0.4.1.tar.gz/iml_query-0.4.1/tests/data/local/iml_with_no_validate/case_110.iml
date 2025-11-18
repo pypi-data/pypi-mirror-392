@@ -1,0 +1,16 @@
+let rec process_divisor (number : int) (divisor : int) (total : int) : int =
+  if divisor * divisor > number then
+    total + number
+  else
+    let rec divide_by_divisor (n : int) (d : int) (acc : int) : int * int =
+      if n mod d = 0 then
+        divide_by_divisor (n / d) d (acc + d)
+      else
+        (n, acc)
+    in
+    let new_number, new_total = divide_by_divisor number divisor total in
+    process_divisor new_number (divisor + 1) new_total
+[@@no_validate]
+
+let calculate_factor_sum (number : int) : int =
+  process_divisor number 2 0

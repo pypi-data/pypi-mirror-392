@@ -1,0 +1,44 @@
+(* Helper function to swap elements in a list *)
+let swap_elements lst i j =
+  List.mapi 
+    (fun idx x -> 
+      if idx = i then 
+        List.nth j lst |> Option.get_or ~default:x
+      else if idx = j then 
+        List.nth i lst |> Option.get_or ~default:x
+      else x) 
+    lst
+
+(* Partition: move all negatives to the left side *)
+let partition_negatives (arr : int list) (n : int) : int list * int =
+  let rec helper result left_ptr right_ptr =
+    if right_ptr >= n then
+      (result, left_ptr)
+    else
+      match List.nth right_ptr result with
+      | Some x when x < 0 ->
+          let new_result = swap_elements result (left_ptr + 1) right_ptr in
+          helper new_result (left_ptr + 1) (right_ptr + 1)
+      | _ -> 
+          helper result left_ptr (right_ptr + 1)
+  in
+  helper arr (~-1) 0
+[@@no_validate]
+
+(* Alternate between negatives and positives *)
+let alternate_pattern (arr : int list) (n : int) (left_ptr : int) : int list =
+  let pos_start = left_ptr + 1 in
+  let rec helper result pos neg =
+    match (pos < n && neg < pos, List.nth neg result) with
+    | (true, Some x) when x < 0 ->
+        let new_result = swap_elements result neg pos in
+        helper new_result (pos + 1) (neg + 2)
+    | _ -> result
+  in
+  helper arr pos_start 0
+[@@no_validate]
+
+(* Main function to reorder array *)
+let reorder_array (arr : int list) (n : int) : int list =
+  let partitioned_arr, left_ptr = partition_negatives arr n in
+  alternate_pattern partitioned_arr n left_ptr

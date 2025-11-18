@@ -1,0 +1,20 @@
+let rec skip_consecutive_chars (text : LString.t) (ch : LChar.t) : LString.t =
+  match text with
+  | [] -> []
+  | c :: rest when c = ch -> skip_consecutive_chars rest ch
+  | _ -> text
+
+let rec all_together_helper (text : LString.t) (ch : LChar.t) (seen_group : bool) : bool =
+  match text with
+  | [] -> true
+  | c :: rest when c = ch ->
+      if seen_group then
+        false
+      else
+        let remaining = skip_consecutive_chars rest ch in
+        all_together_helper remaining ch true
+  | _ :: rest -> all_together_helper rest ch seen_group
+[@@no_validate]
+
+let all_together (text : LString.t) (ch : LChar.t) : bool =
+  all_together_helper text ch false
