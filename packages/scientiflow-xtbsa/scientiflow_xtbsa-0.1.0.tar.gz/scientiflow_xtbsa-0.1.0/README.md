@@ -1,0 +1,91 @@
+# scientiflow-xtbsa
+
+ScientiFlow xTB-SA: Automated selection of representative MD snapshots and semi-empirical QM/MM ONIOM single-point evaluations to estimate protein-ligand interaction energies.
+
+Maintained by Scientiflow. For end-to-end automated protein-ligand MD workflows integrated with GROMACS and deployment at scale, see https://scientiflow.com/.
+
+Overview
+- Input: MD topology+trajectory (e.g., GROMACS .tpr/.xtc).
+- Sampling: PCA on protein CÎ± coordinates, KMeans clustering to select N representative frames.
+- Extraction: For each selected frame, write XYZ for complex, protein, and ligand.
+- QM/MM region: Define a QM inner region around the ligand using a cutoff (Ã). You can include either whole residues within the cutoff or only those atoms within the cutoff.
+- Energetics: Run xTB with ONIOM (gfn2:gfnff) and ALPB implicit solvent for complex, protein, and ligand, then compute a per-frame interaction energy proxy:
+  dG â E_complex â (E_protein + E_ligand)
+- Reporting: Write scientiflow_xtbsa_report.csv (kcal/mol) and plots into the output directory.
+
+Does the equation and explanation match?
+- What we compute is an interaction/binding free energy proxy from single-point ONIOM energies in implicit solvent:
+  ÎG_bind,proxy â E_complex â (E_protein + E_ligand)
+- Sign convention: negative values suggest favorable binding; positive values can occur for certain frames and are expected. The meaningful quantity is the ensemble average (mean over many frames) with its variation (std/SEM).
+- This proxy omits vibrational/rotational/translational entropies and standard-state corrections. If you need absolute ÎGÂ°, consider adding these corrections. As implemented, this is closer to an MM/PBSA-style interaction energy but with QM/MM for the inner region.
+
+Key assumptions and notes
+- ALPB water used for solvation; consistency of charge and spin across complex/protein/ligand runs is essential.
+- ONIOM partition: QM layer = atoms defined by cutoff rule; MM layer = remainder of write_selection.
+- Using full ligand as QM is supported and common.
+- Single-point energies are computed; no geometry optimization is performed.
+
+Installation
+- Requires Python 3.9+ and the following Python packages: typer, rich, MDAnalysis, numpy, scikit-learn, matplotlib.
+- Requires xTB executable on PATH.
+- Optional: GROMACS only for generating the input trajectories.
+
+Usage
+Basic example (defaults used where possible):
+poetry run scientiflow-xtbsa --top path/to/topology.tpr --traj path/to/trajectory.xtc --outdir frames
+
+Customize ligand residue name (default LIG):
+poetry run scientiflow-xtbsa --top samples/md_0_10.tpr --traj samples/md_0_10_5ns.xtc --lig-resname LIG --outdir frames
+
+Disable whole-residue rule (only atoms within cutoff):
+poetry run scientiflow-xtbsa --top samples/md_0_10.tpr --traj samples/md_0_10_5ns.xtc --no-whole-residue
+
+Choose number of frames and cutoff; control xTB threading and stack:
+poetry run scientiflow-xtbsa --top samples/md_0_10.tpr --traj samples/md_0_10_5ns.xtc -n 20 --qm-cutoff 6 --omp-threads 1 --omp-stacksize 8G --kmp-stacksize 8G
+
+Turn off plot generation:
+poetry run scientiflow-xtbsa --top samples/md_0_10.tpr --traj samples/md_0_10_5ns.xtc --no-display-plots
+
+CLI flags and defaults
+| Flag | Type | Default | Description |
+|------|------|---------|-------------|
+| --top | Path | required | Topology file (.tpr/.top/.gro/.pdb). |
+| --traj | Path | required | Trajectory file (.xtc/.trr/.dcd). |
+| --lig-resname | str | LIG | Ligand residue name used in selections. |
+| --nframes, -n | int | 15 | Number of representative frames (PCA+KMeans). |
+| --outdir, -o | Path | frames | Output directory for frames/plots. |
+| --qm-cutoff | float | 6.0 | Cutoff (Ã) to define QM inner region around ligand. |
+| --whole-residue / --no-whole-residue | bool | True | Include entire residues if any atom within cutoff; if false, include only atoms within cutoff. |
+| --omp-threads | int | 1 | OMP_NUM_THREADS for xTB subprocesses. |
+| --omp-stacksize | str | 8G | OMP_STACKSIZE for xTB. |
+| --kmp-stacksize | str | 8G | KMP_STACKSIZE for xTB. |
+| --stack-unlimited / --no-stack-unlimited | bool | True | Attempt to raise process stack limit (POSIX). |
+| --display-plots / --no-display-plots | bool | True | Generate plots (timeseries, histogram, box) into outdir. |
+| --force, -f | bool | False | Overwrite outdir if it exists. |
+| --verbose, -v | bool | False | Stream xTB output and print progress. |
+
+Derived selections (no flags needed)
+- PCA selection: "protein and name CA" (protein backbone CÎ±).
+- Write selection: "(protein or resname LIGAND)" where LIGAND is the provided --lig-resname (default LIG).
+
+Outputs
+- outdir/frame_XXX_complex.xyz, frame_XXX_protein.xyz, frame_XXX_ligand.xyz: per-frame structures.
+- outdir/qm_region.json: indices for ONIOM QM region (1-based, matching each respective XYZ numbering rules described in code).
+- scientiflow_xtbsa_report.csv: per-frame energies (kcal/mol) and ÎG proxy.
+- outdir/xtbsa_dg_timeseries.png: per-frame ÎG.
+- outdir/xtbsa_dg_hist.png: distribution of ÎG across frames.
+- outdir/xtbsa_dg_box.png: box plot with mean starred.
+
+Best practices
+- Use many frames (e.g., 20â100) to stabilize the average; report mean Â± SEM.
+- Ensure protonation states and net charges are consistent across complex/protein/ligand systems.
+- Consider testing both whole-residue and atom-level cutoff schemes to assess sensitivity.
+- Negative ÎG (proxy) on average indicates favorable binding; individual frames can be positive.
+
+Limitations and extensions
+- The current ÎG is a single-point interaction proxy in ALPB; it does not include explicit entropy or standard-state corrections.
+- For absolute binding free energies, consider entropy approximations and 1 M standard-state corrections, or rigorous alchemical methods.
+- The method can be extended to different QM levels (e.g., gfn1/gfn2) or different MM force fields via xTB options.
+
+Attribution
+This package is maintained by Scientiflow. For integrated solutions with GROMACS and production pipelines, visit https://scientiflow.com/.
