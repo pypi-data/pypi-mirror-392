@@ -1,0 +1,41 @@
+{% extends "pretixpresale/base.html" %}
+{% load i18n %}
+{% load static %}
+{% block thetitle %}    
+    {% trans "Redirect to Cashfree" %} :: {{ event.name }}
+{% endblock %}
+{% block custom_header %}
+    {{ block.super }}
+    <script type="text/javascript" src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>    
+{% endblock %}
+{% block page %}
+    <div class="text-center">
+        <i class="fa fa-cog big-rotating-icon"></i>
+    </div>
+    <div class="text-center item-center">
+        <h2>{% trans "You are being redirected to the Cashfree payment page..." %}</h2>
+        <p>{% trans "If you are not redirected automatically after 3 seconds, click the button below" %}</p>
+        <button id="redirect-btn" class="btn btn-primary btn-lg">Pay Now</button>        
+    </div>
+    <script>
+        const cashfree = Cashfree({
+            mode: "{{ mode }}",
+        });
+
+        $(document).ready(() => {
+            function doRedirect() {
+                let checkoutOptions = {
+                    paymentSessionId: "{{ payment_session_id }}",
+                    redirectTarget: "_self",
+                };
+                cashfree.checkout(checkoutOptions);
+            }
+            setTimeout(doRedirect, 3000);
+            $("#redirect-btn").on("click", (event) => {
+                event.preventDefault();
+                doRedirect();
+            });
+        });                
+    </script>
+{% endblock %}
+
