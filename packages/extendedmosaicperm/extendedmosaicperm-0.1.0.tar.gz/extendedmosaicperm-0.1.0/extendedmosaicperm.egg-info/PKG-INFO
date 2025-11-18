@@ -1,0 +1,151 @@
+Metadata-Version: 2.4
+Name: extendedmosaicperm
+Version: 0.1.0
+Summary: Extensions to mosaicperm: sign-flip inference, ridge-regularized residuals, and adaptive tiling for factor models.
+Author-email: Kacper Skonieczka <k.skonieczka01@gmail.com>
+License: MIT
+Project-URL: Homepage, https://github.com/skonieczkak/extendedmosaicperm
+Project-URL: Documentation, https://extendedmosaicperm.readthedocs.io/en/latest/
+Project-URL: Source, https://github.com/skonieczkak/extendedmosaicperm
+Project-URL: Issues, https://github.com/skonieczkak/extendedmosaicperm/issues
+Keywords: statistics,econometrics,factor models,permutation tests
+Classifier: Development Status :: 3 - Alpha
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Scientific/Engineering :: Mathematics
+Classifier: License :: OSI Approved :: MIT License
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy>=1.22
+Requires-Dist: pandas>=1.5
+Requires-Dist: scipy>=1.10
+Requires-Dist: scikit-learn>=1.2
+Requires-Dist: mosaicperm>=0.1.5
+Requires-Dist: tqdm>=4.65
+Requires-Dist: matplotlib>=3.7
+Provides-Extra: docs
+Requires-Dist: sphinx>=7.0; extra == "docs"
+Requires-Dist: sphinx-rtd-theme>=2.0; extra == "docs"
+Requires-Dist: myst-parser>=2.0; extra == "docs"
+Requires-Dist: sphinxcontrib-napoleon>=0.7; extra == "docs"
+Requires-Dist: sphinx-autodoc-typehints>=2.0; extra == "docs"
+Provides-Extra: dev
+Requires-Dist: black>=24.0; extra == "dev"
+Requires-Dist: ruff>=0.6; extra == "dev"
+Requires-Dist: pytest>=7.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0; extra == "dev"
+Provides-Extra: notebooks
+Requires-Dist: jupyter>=1.0; extra == "notebooks"
+Requires-Dist: ipykernel>=6.0; extra == "notebooks"
+Requires-Dist: seaborn>=0.12; extra == "notebooks"
+Requires-Dist: notebook>=7.0; extra == "notebooks"
+Dynamic: license-file
+
+# extendedmosaicperm
+
+Extended tools for Mosaic Permutation Tests — including:
+
+- ✓ sign-flip inference  
+- ✓ ridge-regularized residuals  
+- ✓ adaptive tiling  
+- ✓ experiment utilities  
+
+All built as a thin, clean extension on top of the original `mosaicperm` package.
+
+The goal is to explore faster, more robust, and more flexible randomization inference procedures for high-dimensional factor models.
+
+---
+
+## Installation
+
+### Stable version (PyPI)
+```
+pip install extendedmosaicperm
+```
+
+### Development version (GitHub)
+```
+pip install git+https://github.com/skonieczkak/extendedmosaicperm.git
+```
+
+---
+
+## Usage Examples
+
+### Basic — Sign-flip test
+```python
+import numpy as np
+from extendedmosaicperm.factor import ExtendMosaicFactorTest
+import mosaicperm as mp
+
+rng = np.random.default_rng(0)
+T, p, k = 200, 50, 3
+
+Y = rng.normal(size=(T, p))
+L = rng.normal(size=(p, k))
+
+test = ExtendMosaicFactorTest(
+    outcomes=Y,
+    exposures=L,
+    test_stat=mp.statistics.mean_maxcorr_stat,
+    sign_flipping=True,
+)
+
+test.fit(nrand=500)
+print("p-value:", test.pval)
+```
+
+### Adaptive tiling
+```python
+from extendedmosaicperm.tilings import build_adaptive_tiling
+
+tiling = build_adaptive_tiling(
+    outcomes=Y,
+    exposures=L,
+    batch_size=20,
+    seed=0
+)
+
+print(len(tiling.tiles))
+```
+
+### Monte Carlo experiment
+```python
+from extendedmosaicperm.experiments.sign_flip import SignFlipExperiment
+
+exp = SignFlipExperiment(
+    n_sims=100,
+    nrand=200,
+    seed=123
+)
+
+exp.run()
+df = exp.summarize()
+print(df.head())
+```
+
+---
+
+## Documentation
+
+Full documentation, including the API reference, usage examples, and theoretical background, is available at:
+
+https://extendedmosaicperm.readthedocs.io
+
+---
+
+## Testing
+
+Run the unit tests:
+```
+pytest extendedmosaicperm/tests
+```
+
+
+## License
+
+MIT License — same as the parent `mosaicperm` project.
+
+---
