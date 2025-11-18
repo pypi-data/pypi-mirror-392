@@ -1,0 +1,546 @@
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump_level:
+        description: "Version bump level (major, minor, patch, release, rc, beta, alpha)"
+        required: true
+        default: "minor"
+
+jobs:
+  version_bump:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Configure Git Identity
+        run: |
+          git config --global user.email "release-bot@example.com"
+          git config --global user.name "Release Bot"
+
+      - name: Set Up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo-release binary
+        id: cache-cargo-release
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CARGO_HOME }}/bin/cargo-release
+          # Stable primary key (bump the suffix if you ever need to bust the cache)
+          key: cargo-release-${{ runner.os }}-v1
+          # Fallback so future key bumps still reuse older archives
+          restore-keys: |
+            cargo-release-${{ runner.os }}-
+
+      - name: Install Cargo Release
+        if: steps.cache-cargo-release.outputs.cache-hit != 'true'
+        run: cargo install cargo-release
+
+      - name: Get Next Version
+        id: get_version
+        run: |
+          out=$(cargo release ${{ github.event.inputs.bump_level }} --dry-run --no-confirm --no-publish --no-tag 2>&1)
+          echo "Output: $out"
+          next_version=$(printf '%s\n' "$out" \
+            | grep -Eo -- 'to [0-9]+\.[0-9]+\.[0-9]+.*$' \
+            | awk '{print $2}' \
+            | tail -n1)
+          echo "Next version: $next_version"
+          echo "next_version=$next_version" >> "$GITHUB_OUTPUT"
+          echo "NEXT_VERSION=$next_version" >> "$GITHUB_ENV"
+
+      - name: Create Release Branch
+        id: create_branch
+        run: |
+          git fetch origin main
+          branch="release/v${{ steps.get_version.outputs.next_version }}"
+          echo "Creating branch $branch"
+          git checkout -b "$branch" origin/main
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          echo "BRANCH=$branch" >> "$GITHUB_ENV"
+
+      - name: Bump Version
+        run: |
+          cargo release ${{ github.event.inputs.bump_level }} --execute --no-confirm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_TOKEN }}
+
+      - name: Create PR
+        id: create_pr
+        run: |
+          gh pr create --base main \
+                      --head "$BRANCH" \
+                      --title "Release $NEXT_VERSION" \
+                      --body  "This PR releases version $NEXT_VERSION"
+          # extract the PR number via `gh pr view`
+          pr_number=$(gh pr view "$BRANCH" --json number --jq '.number')
+          echo "pr_number=$pr_number" >> "$GITHUB_OUTPUT"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      next_version: ${{ steps.get_version.outputs.next_version }}
+      release_branch: ${{ steps.create_branch.outputs.branch }}
+      pr_number: ${{ steps.create_pr.outputs.pr_number }}
+
+  linux:
+    runs-on: ${{ matrix.platform.runner }}
+    needs: version_bump
+    strategy:
+      fail-fast: true
+      matrix:
+        platform:
+          - runner: ubuntu-22.04
+            target: x86_64
+          - runner: ubuntu-22.04
+            target: x86
+          - runner: ubuntu-22.04
+            target: aarch64
+          - runner: ubuntu-22.04
+            target: armv7
+          - runner: ubuntu-22.04
+            target: ppc64le
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: refs/tags/v${{ needs.version_bump.outputs.next_version }}
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          args: --release --out dist
+          sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
+          before-script-linux: |
+            # Debian/Ubuntu runners or custom Ubuntu containers
+            if command -v apt-get >/dev/null 2>&1; then
+              apt-get -qq update
+              apt-get install -y \
+                perl libssl-dev pkg-config
+            # CentOS-based manylinux images (yum) ─ default path for maturin builds
+            elif command -v yum >/dev/null 2>&1; then
+              yum install -y \
+                perl-core perl-IPC-Cmd openssl-devel pkgconfig
+            # Fedora/RHEL 9 manylinux_2_28 images (dnf)
+            elif command -v dnf >/dev/null 2>&1; then
+              dnf install -y \
+                perl-core perl-IPC-Cmd openssl-devel pkgconfig
+            else
+              echo "No known package manager found; skipping system-deps install"
+            fi
+          manylinux: auto
+      - name: Upload wheels
+        uses: actions/upload-artifact@v5
+        with:
+          name: wheels-linux-${{ matrix.platform.target }}
+          path: dist
+
+  musllinux:
+    runs-on: ${{ matrix.platform.runner }}
+    needs: version_bump
+    strategy:
+      fail-fast: true
+      matrix:
+        platform:
+          - runner: ubuntu-22.04
+            target: x86_64
+          - runner: ubuntu-22.04
+            target: x86
+          - runner: ubuntu-22.04
+            target: aarch64
+          - runner: ubuntu-22.04
+            target: armv7
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: refs/tags/v${{ needs.version_bump.outputs.next_version }}
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          args: --release --out dist
+          sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
+          before-script-linux: |
+            # Debian/Ubuntu runners or custom Ubuntu containers
+            if command -v apt-get >/dev/null 2>&1; then
+              apt-get -qq update
+              apt-get install -y \
+                perl libssl-dev pkg-config
+            # CentOS-based manylinux images (yum) ─ default path for maturin builds
+            elif command -v yum >/dev/null 2>&1; then
+              yum install -y \
+                perl-core perl-IPC-Cmd openssl-devel pkgconfig
+            # Fedora/RHEL 9 manylinux_2_28 images (dnf)
+            elif command -v dnf >/dev/null 2>&1; then
+              dnf install -y \
+                perl-core perl-IPC-Cmd openssl-devel pkgconfig
+            else
+              echo "No known package manager found; skipping system-deps install"
+            fi
+          manylinux: musllinux_1_2
+      - name: Upload wheels
+        uses: actions/upload-artifact@v5
+        with:
+          name: wheels-musllinux-${{ matrix.platform.target }}
+          path: dist
+
+  windows:
+    runs-on: ${{ matrix.platform.runner }}
+    needs: version_bump
+    strategy:
+      fail-fast: true
+      matrix:
+        platform:
+          - runner: windows-latest
+            target: x64
+          - runner: windows-latest
+            target: x86
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: refs/tags/v${{ needs.version_bump.outputs.next_version }}
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          args: --release --out dist
+          sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
+      - name: Upload wheels
+        uses: actions/upload-artifact@v5
+        with:
+          name: wheels-windows-${{ matrix.platform.target }}
+          path: dist
+
+  macos:
+    runs-on: ${{ matrix.platform.runner }}
+    needs: version_bump
+    strategy:
+      fail-fast: true
+      matrix:
+        platform:
+          - runner: macos-15-intel
+            target: x86_64
+          - runner: macos-14
+            target: aarch64
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: refs/tags/v${{ needs.version_bump.outputs.next_version }}
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          args: --release --out dist
+          sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
+      - name: Upload wheels
+        uses: actions/upload-artifact@v5
+        with:
+          name: wheels-macos-${{ matrix.platform.target }}
+          path: dist
+
+  sdist:
+    runs-on: ubuntu-latest
+    needs: version_bump
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: refs/tags/v${{ needs.version_bump.outputs.next_version }}
+      - name: Build sdist
+        uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: --out dist
+      - name: Upload sdist
+        uses: actions/upload-artifact@v5
+        with:
+          name: wheels-sdist
+          path: dist
+
+  smoke_test:
+    name: Smoke Test - ${{ matrix.os }} Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    needs: [linux, musllinux, windows, macos]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        exclude:
+          # Python 3.13 might not be available on all platforms yet
+          - os: windows-latest
+            python-version: "3.13"
+          - os: macos-latest
+            python-version: "3.13"
+
+    steps:
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Download all wheel artifacts
+        uses: actions/download-artifact@v6
+
+      - name: Organize wheels in common directory
+        shell: bash
+        run: |
+          # Create a common wheels directory
+          mkdir -p wheels
+
+          # Move all wheels to the common directory
+          find . -name "*.whl" -type f -exec mv {} wheels/ \;
+
+          echo "All wheels organized in common directory:"
+          ls -la wheels/
+
+      - name: Find compatible wheel
+        shell: bash
+        run: |
+          # Find the appropriate wheel for this platform and architecture
+          python_version="${{ matrix.python-version }}"
+
+          echo "Looking for wheel compatible with Python $python_version on ${{ runner.os }} ${{ runner.arch }}"
+
+          # Determine platform-specific wheel name pattern
+          case "${{ runner.os }}" in
+            "Linux")
+              if [[ "${{ runner.arch }}" == "X64" ]]; then
+                wheel_pattern="*manylinux*x86_64*.whl"
+              else
+                wheel_pattern="*manylinux*.whl"
+              fi
+              ;;
+            "Windows")
+              if [[ "${{ runner.arch }}" == "X64" ]]; then
+                wheel_pattern="*win_amd64.whl"
+              else
+                wheel_pattern="*win32.whl"
+              fi
+              ;;
+            "macOS")
+              if [[ "${{ runner.arch }}" == "ARM64" ]]; then
+                wheel_pattern="*macosx*arm64.whl"
+              else
+                wheel_pattern="*macosx*x86_64.whl"
+              fi
+              ;;
+          esac
+
+          # Find the first matching wheel in the wheels directory
+          wheel_file=$(find wheels/ -name "$wheel_pattern" -type f | head -1)
+
+          if [ -z "$wheel_file" ]; then
+            echo "No compatible wheel found for pattern: $wheel_pattern"
+            echo "Available wheels:"
+            ls -la wheels/
+            exit 1
+          fi
+
+          echo "Found wheel: $wheel_file"
+          echo "WHEEL_FILE=$wheel_file" >> $GITHUB_ENV
+
+      - name: Create test environment
+        shell: bash
+        run: |
+          python -m venv test_env
+
+          # Activate virtual environment
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            source test_env/Scripts/activate
+          else
+            source test_env/bin/activate
+          fi
+
+          # Upgrade pip
+          python -m pip install --upgrade pip
+
+          echo "Virtual environment created with Python $(python --version)"
+
+      - name: Install and test wheel
+        shell: bash
+        run: |
+          # Activate virtual environment
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            source test_env/Scripts/activate
+          else
+            source test_env/bin/activate
+          fi
+
+          # Install the wheel
+          echo "Installing wheel: $WHEEL_FILE"
+          pip install "$WHEEL_FILE"
+
+          # Verify installation
+          echo "✅ Wheel installed successfully"
+
+          # Test that the binary is available and works
+          echo "Testing CLI availability..."
+          rusty-todo-md --help > /dev/null
+          echo "✅ CLI help command works"
+
+          # Test version command if available
+          rusty-todo-md --version || echo "ℹ️  --version flag not available"
+
+      - name: Functional smoke test
+        shell: bash
+        run: |
+          # Activate virtual environment
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            source test_env/Scripts/activate
+          else
+            source test_env/bin/activate
+          fi
+
+          # Create a temporary test directory
+          mkdir smoke_test_dir
+          cd smoke_test_dir
+
+          # Initialize git repo
+          git init
+          git config user.email "smoke-test@example.com"
+          git config user.name "Smoke Test"
+
+          # Create test files with TODO comments
+          cat > test.py << 'EOF'
+          # TODO: This is a smoke test
+          def smoke_test():
+              # FIXME: Add real implementation
+              pass
+          EOF
+
+          cat > test.rs << 'EOF'
+          // TODO: Smoke test for Rust
+          fn main() {
+              // HACK: Just a test
+              println!("smoke test");
+          }
+          EOF
+
+          # Add files to git
+          git add .
+          git commit -m "Smoke test files"
+
+          # Run rusty-todo-md
+          echo "Running rusty-todo-md smoke test..."
+          rusty-todo-md test.py test.rs
+
+          # Verify TODO.md was created
+          if [ ! -f "TODO.md" ]; then
+            echo "❌ TODO.md was not created"
+            exit 1
+          fi
+
+          # Verify content
+          if ! grep -q "TODO" TODO.md; then
+            echo "❌ TODO.md does not contain expected TODO markers"
+            echo "Content of TODO.md:"
+            cat TODO.md
+            exit 1
+          fi
+
+          echo "✅ Functional smoke test passed"
+          echo "TODO.md content:"
+          cat TODO.md
+
+      - name: Test with different markers
+        shell: bash
+        run: |
+          # Activate virtual environment
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            source test_env/Scripts/activate
+          else
+            source test_env/bin/activate
+          fi
+
+          cd smoke_test_dir
+
+          # Test with custom markers
+          echo "Testing custom markers..."
+          rusty-todo-md --markers TODO FIXME HACK NOTE test.py test.rs
+
+          if [ ! -f "TODO.md" ]; then
+            echo "❌ TODO.md was not created with custom markers"
+            exit 1
+          fi
+
+          echo "✅ Custom markers test passed"
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: [linux, musllinux, windows, macos, sdist, version_bump, smoke_test]
+    permissions:
+      # Use to sign the release artifacts
+      id-token: write
+      # Used to upload release artifacts
+      contents: write
+      # Used to generate artifact attestation
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@v6
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: "wheels-*/*"
+      - name: Create Release and Upload Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.version_bump.outputs.next_version }}
+          name: Release ${{ needs.version_bump.outputs.next_version }}
+          body: Automated release generated by GitHub Actions.
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          append_body: true
+          files: |
+            wheels-*/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish to PyPI
+        uses: PyO3/maturin-action@v1
+        env:
+          MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        with:
+          command: upload
+          args: --non-interactive --skip-existing wheels-*/*
+
+  merge_release_pr:
+    permissions:
+      contents: write
+      pull-requests: write
+    needs: [release, version_bump]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Merge the release PR
+        run: |
+          echo "Merging release PR #${{ needs.version_bump.outputs.pr_number }}"
+          echo "Next version: ${{ needs.version_bump.outputs.next_version }}"
+          gh pr merge ${{ needs.version_bump.outputs.pr_number }} \
+            --merge --delete-branch --admin \
+            --body "Merged release ${{ needs.version_bump.outputs.next_version }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  trigger_pre_commit_update:
+    runs-on: ubuntu-latest
+    needs: [merge_release_pr, version_bump]
+
+    steps:
+      - name: Trigger mirror via workflow_dispatch
+        env:
+          GH_TOKEN: ${{ secrets.PRE_COMMIT_PAT }}
+        run: |
+          gh workflow run main.yaml \
+            -R simone-viozzi/rusty-todo-md-pre-commit \
+            --ref main \
+            -f version="${{ needs.version_bump.outputs.next_version }}"
