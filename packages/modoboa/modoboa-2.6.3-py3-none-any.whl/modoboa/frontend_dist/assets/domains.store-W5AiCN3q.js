@@ -1,0 +1,1 @@
+import{E as i,h as e}from"./index-WQ41F5VK.js";import{d as r}from"./domains-DGdr9Equ.js";const m=i("domains",()=>{const a=e(!1),s=e([]);async function o(){a.value=!1,s.value={}}async function n(){a.value=!1;try{const t=await r.getDomains({page_size:0});s.value=t.data.results}finally{a.value=!1}}return{domainsLoaded:a,domains:s,getDomains:n,$reset:o}});export{m as u};
