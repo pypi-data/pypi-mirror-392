@@ -1,0 +1,155 @@
+## Quicky — zero-config async web framework
+
+Quicky — асинхронный микрофреймворк на Python 3.12+ для сервисов, которым нужны типобезопасные хендлеры, нативная валидация и «боевой» стек middleware без дополнительной конфигурации. Цели проекта:
+
+
+- производительность выше типового FastAPI-сервиса за счёт uvloop + httptools + orjson;
+- архитектура «type-first» (PEP 695, Annotated, TypedDict, `typing.get_type_hints`);
+- встроенный DI, метрики Prometheus, структурированное логирование и gzip out-of-the-box;
+- минимальный код для запуска: `app = Quicky()` уже готов принимать трафик.
+
+---
+
+## Возможности
+
+- **Декларативная маршрутизация**: `@app.get("/items/{item_id}")` с поддержкой подстановок и HEAD/OPTIONS по умолчанию.
+- **DSL для параметров**: `Path[T]`, `Query[T]`, `Body[T]`, `Header[T]` — аннотации превращаются в схему валидации через Pydantic TypeAdapter.
+- **Dependency Injection**: контейнер с app/request scope, резолвит зависимости по типам или ключам без классов и метакодирования.
+- **Zero-config middleware**: request-id, gzip, структурное логирование (JSON), latency/throughput-метрики на `/metrics`.
+- **Минимум зависимостей**: uvicorn, httptools, orjson, pydantic v2.
+- **CLI и рантайм**: `python -m quicky.cli module:app --reload` запускает uvicorn с httptools и uvloop.
+
+---
+
+## Установка
+
+```bash
+python -m pip install quicky
+```
+
+Требуется Python 3.12+.
+
+---
+
+## Быстрый старт
+
+```python
+from typing import TypedDict
+
+from quicky import Body, Path, Quicky
+
+app = Quicky()
+
+
+class Item(TypedDict):
+    id: int
+    name: str
+    price: float
+
+
+@app.get("/items/{item_id}")
+async def get_item(item_id: Path[int]) -> Item:
+    return {"id": item_id, "name": "example", "price": 42.0}
+
+
+@app.post("/items")
+async def create_item(payload: Body[Item]) -> tuple[Item, int]:
+    return payload, 201
+```
+
+Запуск:
+
+```bash
+python -m quicky.cli examples.app:app --reload
+```
+
+---
+
+## Архитектура и ключевые модули
+
+```
+quicky/
+├── app.py         # объект Quicky, роутинг, middleware, /metrics
+├── routing.py     # сопоставление путей и HTTP-методов
+├── types.py       # Request/Response + DSL Path/Query/Body/Header
+├── handlers.py    # анализ сигнатур, построение схем, вызов DI
+├── di.py          # контейнер зависимостей с app/request scope
+├── serializers.py # orjson, tuple/stream ответы, content negotiation
+├── middleware.py  # request-id, логирование, метрики, gzip
+├── metrics.py     # in-memory Prometheus registry
+├── runtime.py     # обёртка над uvicorn (serve/run)
+└── cli.py         # `quicky run module:app`
+```
+
+### Маршрутизация
+
+- соответствие метода и пути хранится в `routing.Router`;
+- паттерны компилируются в сегменты, PEP 634 разрешает match/case поверх HTTP-метода;
+- поддерживается автоматическая обработка HEAD → GET.
+
+### Типовая система и валидация
+
+- `Path[T]`, `Query[T]`, `Body[T]`, `Header[T]` — это `typing.Annotated` с `ParameterInfo`;
+- `handlers.build_handler_spec` вызывает `TypeAdapter` для каждой аннотации и кеширует спецификацию;
+- тело запроса читается один раз, JSON парсится через `orjson`, значения прокидываются в адаптер;
+- отсутствие значения приводит к `422 ValidationError` с uniform JSON.
+
+### Dependency Injection
+
+- `DependencyContainer` регистрирует фабрики по ключу (тип или произвольный hashable);
+- scope `app` кеширует значение, `request` пересоздаёт на каждый запрос;
+- при отсутствии зависимости фреймворк вернёт 500, либо используйте дефолт в сигнатуре.
+
+### Middleware и метрики
+
+- pipeline собирается в `Quicky.middleware`, можно добавлять кастомные функции;
+- дефолтный стек: request-id, Prometheus observer, JSON-логирование, gzip (≥512 B);
+- `/metrics` отдаёт текст в формате Prometheus (сумма, count, max, avg).
+
+### Сериализация
+
+- `serializers.normalize_response` принимает `Response`, tuple `(body, status, headers)` или любой сериализуемый объект;
+- для генераторов поддерживается streaming через `Response.stream`;
+- `orjson.OPT_SERIALIZE_NUMPY` включён по умолчанию.
+
+### Runtime и CLI
+
+- `quicky.runtime.run` и `serve` конфигурируют uvicorn (loop=uvloop, http=httptools);
+- CLI умеет читать параметры из переменных окружения (`QUICKY_HOST`, `..._PORT`, `..._WORKERS`).
+
+---
+
+## Пример DI и middleware
+
+```python
+from collections.abc import AsyncIterator
+from quicky import Quicky, Query, Request
+
+app = Quicky()
+
+
+async def get_db():
+    yield {"conn": "stub"}  # request scope
+
+
+app.dependency("db", get_db, scope="request")
+
+
+@app.get("/ping")
+async def ping(q: Query[str], db = "db", request: Request | None = None):
+    return {"q": q, "db": db["conn"], "rid": request.state["request_id"]}
+```
+
+---
+
+## Roadmap
+
+- **v0.1.0 (MVP)** — реализовано: маршрутизация, type-first валидация, DI, JSON-сериализация, middleware, gzip, метрики Prometheus.
+- **v1.0.0** — запланировано: WebSocket API, GraphQL-декоратор, OpenAPI-генерация, rate limiting (`@app.limit`), расширенные плагины DI.
+- **Дальше** — плагины `quicky-db`, `quicky-auth`, `quicky-testing`, встроенные клиенты Observability и инструменты бенчмаркинга.
+
+---
+
+## Лицензия
+
+MIT License (см. `LICENSE`).
