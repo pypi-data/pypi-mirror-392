@@ -1,0 +1,62 @@
+Metadata-Version: 2.4
+Name: audiozen
+Version: 2025.11.17
+Summary: Audio ZEN is a library for audio/speech signal processing.
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: einops
+Requires-Dist: librosa
+Requires-Dist: simple_parsing
+Requires-Dist: torchinfo
+Requires-Dist: pyyaml
+Requires-Dist: numpy
+Requires-Dist: rich
+Requires-Dist: numba>=0.60
+Requires-Dist: ipykernel
+Requires-Dist: tqdm
+Requires-Dist: pandas
+Requires-Dist: tabulate
+Requires-Dist: matplotlib
+Requires-Dist: joblib
+Requires-Dist: psutil
+Requires-Dist: torch==2.5.1
+Requires-Dist: torchaudio
+Requires-Dist: pesq>=0.0.4
+Requires-Dist: pystoi>=0.4.1
+Requires-Dist: deprecated>=1.2.18
+Requires-Dist: tensorboard>=2.19.0
+Requires-Dist: colorlog>=6.9.0
+Requires-Dist: omegaconf>=2.3.0
+Requires-Dist: pyloudnorm>=0.1.1
+Requires-Dist: silero-vad>=6.0.0
+Requires-Dist: onnxruntime-gpu==1.20
+
+# AudioZEN
+
+## Documentation
+
+- [Release a new audiozen version](./docs/release.md)
+- [How to manage data files](./docs/how_to_manage_data_files.md)
+- [How to split the repo into read-only standalone repos?](./docs/how_to_distribute_monorepo.md)
+- [How to manage experiment configurations](./docs/how_to_manage_exp_config.md)
+
+## Prerequisites
+
+```bash
+# Install uv for speed up virtual environment creation and management
+uv venv -p 3.12 venv/torch251_cu124_py312
+source venv/torch251_cu124_py312/bin/activate
+
+# Install the package
+uv pip install -e .
+
+# cd to the model directory
+uv pip install -r /path/to/requirements.txt
+```
+
+## Prerequisites
+
+```shell
+rsync -avPxH --no-g --chmod=Dg+ /home/xhao/proj/audiozen xhao@10.21.4.91:/home/xhao/proj/audiozen --exclude="*.git" --exclude="*.egg-info" --exclude="*.egg" --exclude="*.pyc" --exclude="*.log" --exclude="*.npy"
+```
+
