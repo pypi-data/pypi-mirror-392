@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data=true
+packages = ["lisien", "lisien.examples", "lisien.proxy", "lisien.server", "lisien.tests", "lisien.tests.data"]
+
+
+[project]
+name = "lisien"
+version = "0.23.1"
+authors = [
+	{ name="Zachary Spector", email="public@zacharyspector.com" },
+]
+description = "Life Simulator Engine"
+readme = "README.md"
+license = "AGPL-3.0-only"
+license-files = ["LICENSE"]
+requires-python = "~=3.12"
+classifiers = [
+	"Programming Language :: Python :: 3",
+	"Operating System :: OS Independent",
+	"Topic :: Software Development :: Libraries",
+	"Intended Audience :: Developers",
+	"Development Status :: 3 - Alpha"
+]
+dependencies = [
+	"reslot~=0.10",
+	"blinker~=1.4",
+	"msgpack~=1.1.0",
+	"u-msgpack-python~=2.8.0",
+	"networkx~=3.5",
+	"sqlalchemy~=2.0",
+	"numpy~=2.3.4",
+	"tblib~=3.2.0",
+	"parquetdb",
+	"annotated-types~=0.7.0",
+	"lxml~=6.0",
+]
+
+[project.urls]
+"Homepage" = "https://codeberg.org/clayote/Lisien"
+"Bug Tracker" = "https://codeberg.org/clayote/Lisien/issues"
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+	"big: marks tests as too big to diagnose specific bugs with",
+	"sqlite: marks tests that exercise the SQLite database backend",
+	"parquetdb: marks tests that exercise the ParquetDB database backend",
+	"parallel: marks tests that use some form of parallelism, though possibly just a thread pool",
+	"proxy: marks tests on the proxy objects that do not start any subprocess for the proxy object to refer to",
+	"subprocess: marks tests that use the process pool",
+	"subthread: marks tests that use the thread pool",
+	"subinterpreter: marks tests that use the interpreter pool; Python 3.14+ required",
+]
