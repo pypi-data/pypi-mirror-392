@@ -1,0 +1,35 @@
+[project]
+name = "jogo-da-adivinhacao-renan-martins"
+version = "0.1.7"
+description = ""
+authors = [
+    {name = "Renan Martins",email = "renanrodm@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13,<4.0"
+dependencies = [
+]
+
+[tool.poetry]
+packages = [{include = "jogo_da_adivinhacao_renan_martins", from = "src"}]
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^9.0.1"
+pytest-cov = "^7.0.0"
+flake8 = "^7.3.0"
+black = "^25.11.0"
+isort = "^7.0.0"
+taskipy = "^1.14.1"
+
+[tool.poetry.scripts]
+jogo-adivinha = "jogo_da_adivinhacao_renan_martins.main:main"
+
+[tool.taskipy.tasks]
+test = "pytest --cov=src/jogo_da_adivinhacao_renan_martins --cov-report html"
+format = "black src/ tests/"
+lint = "flake8 src/ tests/"
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
