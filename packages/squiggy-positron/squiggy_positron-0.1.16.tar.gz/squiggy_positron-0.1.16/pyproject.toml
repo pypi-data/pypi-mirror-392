@@ -1,0 +1,123 @@
+[project]
+name = "squiggy-positron"
+version = "0.1.16"
+description = "Python backend for Squiggy Positron extension - Nanopore squiggle visualization. Not recommended for standalone use."
+readme = "docs/PYPI_README.md"
+requires-python = ">=3.12"
+license = "MIT"
+authors = [{ name = "Jay Hesselberth", email = "jay.hesselberth@gmail.com" }]
+keywords = ["nanopore", "oxford-nanopore", "pod5", "squiggle", "visualization", "positron", "ide-extension"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+dependencies = [
+  "bokeh>=3.1.1",
+  "numpy>=1.20.0",
+  "pod5>=0.3.0",
+  "pysam>=0.20.0",
+]
+
+[project.urls]
+Homepage = "https://rnabioco.github.io/squiggy-positron/"
+Issues = "https://github.com/rnabioco/squiggy-positron/issues"
+Repository = "https://github.com/rnabioco/squiggy-positron"
+
+# No CLI entry point - use as library in Jupyter/Positron
+# or via Positron extension
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.0",
+  "pytest-cov>=4.0",
+  "ruff>=0.1.0",
+  "mkdocs>=1.5.0",
+  "mkdocs-material>=9.0.0",
+  "jupyter>=1.0.0",  # For testing in notebooks
+]
+export = [
+  "selenium>=4.6",  # Selenium Manager (auto-downloads geckodriver) requires 4.6+
+  "pillow>=9.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+addopts = "-v --tb=short --cov=squiggy --cov-report=html --cov-report=term --cov-report=json"
+filterwarnings = [
+  "ignore:Saving.*in image:UserWarning",
+  "ignore:Filename.*BytesIO:UserWarning",
+]
+python_classes = ["Test*"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["squiggy"]
+omit = [
+  "squiggy/data/*",
+  "tests/*",
+  "*/__pycache__/*",
+  "*/.pytest_cache/*",
+]
+branch = true
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+# Coverage thresholds - Adjusted for current coverage (64.94%)
+fail_under = 60
+
+[tool.coverage.html]
+directory = "coverage_html"
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+  "E",  # pycodestyle errors
+  "W",  # pycodestyle warnings
+  "F",  # pyflakes
+  "I",  # isort
+  "B",  # flake8-bugbear
+  "C4",  # flake8-comprehensions
+  "UP",  # pyupgrade
+]
+ignore = [
+  "E501",  # line too long (handled by formatter)
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.setuptools]
+# Package imports as 'squiggy' even though PyPI name is 'squiggy-positron'
+# This maintains compatibility with existing code
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["squiggy*"]
+
+[tool.setuptools.package-data]
+squiggy = [
+  "data/*.pod5",
+  "data/*.bam",
+  "data/*.bai",
+  "data/*.fa",
+  "data/*.fai",
+  "data/*.fasta",
+  "data/*.png",
+  "data/*.ico",
+  "data/*.icns",
+  "data/README.md"
+]
