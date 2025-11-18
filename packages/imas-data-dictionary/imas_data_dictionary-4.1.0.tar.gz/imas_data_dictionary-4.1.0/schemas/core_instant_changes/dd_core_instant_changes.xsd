@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?modxslt-stylesheet type="text/xsl" media="fuffa, screen and $GET[stylesheet]" href="./%24GET%5Bstylesheet%5D" alternate="no" title="Translation using provided stylesheet" charset="UTF-8" ?>
+<?modxslt-stylesheet type="text/xsl" media="screen" alternate="no" title="Show raw instant_change of the XML file" charset="UTF-8" ?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by USER USER (CEA - CENTRE DE CADARACHE) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:include schemaLocation="../utilities/dd_support.xsd"/>
+	<xs:complexType name="core_instant_changes_change_profiles">
+		<xs:annotation>
+			<xs:documentation>instant_change terms for a given time slice</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="grid" type="core_radial_grid">
+				<xs:annotation>
+					<xs:documentation>Radial grid</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="electrons" type="core_profiles_profiles_1d_electrons">
+				<xs:annotation>
+					<xs:documentation>Change of electrons-related quantities</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="t_i_average">
+				<xs:annotation>
+					<xs:documentation>change of average ion temperature</xs:documentation>
+					<xs:appinfo>
+						<coordinate1>../grid/rho_tor_norm</coordinate1>
+						<units>eV</units>
+						<type>dynamic</type>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="FLT_1D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="momentum_tor">
+				<xs:annotation>
+					<xs:documentation>change of total toroidal momentum</xs:documentation>
+					<xs:appinfo>
+						<coordinate1>../grid/rho_tor_norm</coordinate1>
+						<units>kg.m^2.s^-1</units>
+						<type>dynamic</type>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="FLT_1D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ion" type="core_profile_ions" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>changes related to the different ions species</xs:documentation>
+					<xs:appinfo>
+						<coordinate1>1...N</coordinate1>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="neutral" type="core_profile_neutral" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>changes related to the different neutral species</xs:documentation>
+					<xs:appinfo>
+						<coordinate1>1...N</coordinate1>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="time" type="flt_type">
+				<xs:annotation>
+					<xs:documentation>Time</xs:documentation>
+					<xs:appinfo>
+						<units>s</units>
+						<type>dynamic</type>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="core_instant_changes_change">
+		<xs:annotation>
+			<xs:documentation>instant_change terms for a given instant_change</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="identifier" type="identifier">
+				<xs:annotation>
+					<xs:documentation>Instant change term identifier</xs:documentation>
+					<xs:appinfo>
+						<doc_identifier>core_instant_changes/core_instant_changes_identifier.xml</doc_identifier>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="profiles_1d" type="core_profiles_profiles_1d" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Changes in 1D core profiles for various time slices. This structure mirrors core_profiles/profiles_1d and describes instant changes to each of these physical quantities (i.e. a signed difference quantity after change - quantity before change)</xs:documentation>
+					<xs:appinfo>
+						<coordinate1>time</coordinate1>
+						<type>dynamic</type>
+						<cocos_alias>IDSPATH</cocos_alias>
+						<cocos_replace>core_instant_changes.change{i}.profiles_1d{j}</cocos_replace>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="core_instant_changes">
+		<xs:annotation>
+			<xs:documentation>Instant changes of the radial core plasma profiles due to pellet, MHD, ... </xs:documentation>
+			<xs:appinfo>
+				<lifecycle_status>active</lifecycle_status>
+				<lifecycle_version>3.10.0</lifecycle_version>
+				<lifecycle_last_change>3.15.0</lifecycle_last_change>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ids_properties"/>
+				<xs:element name="vacuum_toroidal_field" type="b_tor_vacuum_1">
+					<xs:annotation>
+						<xs:documentation>Characteristics of the vacuum toroidal field (used in Rho_Tor definition and in the normalization of current densities)</xs:documentation>
+						<xs:appinfo>
+							<cocos_alias>IDSPATH</cocos_alias>
+							<cocos_replace>core_instant_changes.vacuum_toroidal_field</cocos_replace>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="change" type="core_instant_changes_change" maxOccurs="10">
+					<xs:annotation>
+						<xs:documentation>Set of instant change terms (each being due to a different phenomenon)</xs:documentation>
+						<xs:appinfo>
+							<coordinate1>1...N</coordinate1>
+							<appendable_by_appender_actor>yes</appendable_by_appender_actor>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:element>
+				<xs:element ref="code"/>
+				<xs:element ref="time"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

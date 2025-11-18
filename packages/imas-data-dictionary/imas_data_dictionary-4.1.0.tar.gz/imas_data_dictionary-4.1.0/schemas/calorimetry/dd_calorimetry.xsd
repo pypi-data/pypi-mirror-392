@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by USER USER (CEA - CENTRE DE CADARACHE) -->
+<?modxslt-stylesheet type="text/xsl" media="fuffa, screen and $GET[stylesheet]" href="./%24GET%5Bstylesheet%5D" alternate="no" title="Translation using provided stylesheet" charset="UTF-8" ?>
+<?modxslt-stylesheet type="text/xsl" media="screen" alternate="no" title="Show raw source of the XML file" charset="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:include schemaLocation="../utilities/dd_support.xsd"/>
+	<xs:complexType name="calorimetry_cooling_loop">
+		<xs:annotation>
+			<xs:documentation>Cooling loop</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="name">
+				<xs:annotation>
+					<xs:documentation>Short string identifier (unique for a given device)</xs:documentation>
+					<xs:appinfo>
+						<type>static</type>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="description">
+				<xs:annotation>
+					<xs:documentation>Description, e.g. “channel viewing the upper divertor”</xs:documentation>
+					<xs:appinfo>
+						<type>static</type>
+						<introduced_after_version>3</introduced_after_version>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="temperature_in" type="signal_flt_1d_validity">
+				<xs:annotation>
+					<xs:documentation>Temperature of the coolant when entering the loop</xs:documentation>
+					<xs:appinfo>
+						<units>K</units>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="temperature_out" type="signal_flt_1d_validity">
+				<xs:annotation>
+					<xs:documentation>Temperature of the coolant when exiting the loop</xs:documentation>
+					<xs:appinfo>
+						<units>K</units>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="mass_flow" type="signal_flt_1d_validity">
+				<xs:annotation>
+					<xs:documentation>Mass flow of the coolant going through the loop</xs:documentation>
+					<xs:appinfo>
+						<units>kg.s^-1</units>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="calorimetry_group_component">
+		<xs:annotation>
+			<xs:documentation>Component</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="name">
+				<xs:annotation>
+					<xs:documentation>Short string identifier (unique for a given device)</xs:documentation>
+					<xs:appinfo>
+						<type>static</type>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="description">
+				<xs:annotation>
+					<xs:documentation>Description, e.g. “channel viewing the upper divertor”</xs:documentation>
+					<xs:appinfo>
+						<type>static</type>
+						<introduced_after_version>3</introduced_after_version>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="power" type="signal_flt_1d_validity">
+				<xs:annotation>
+					<xs:documentation>Power extracted from the component</xs:documentation>
+					<xs:appinfo>
+						<units>W</units>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="energy_cumulated" type="signal_flt_1d_validity">
+				<xs:annotation>
+					<xs:documentation>Energy extracted from the component since the start of the pulse</xs:documentation>
+					<xs:appinfo>
+						<units>J</units>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="energy_total" type="data_flt_0d_constant_validity">
+				<xs:annotation>
+					<xs:documentation>Energy extracted from the component on the whole plasma discharge, including the return to thermal equilibrium of the component in the post-pulse phase</xs:documentation>
+					<xs:appinfo>
+						<units>J</units>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="temperature_in" type="signal_flt_1d_validity">
+				<xs:annotation>
+					<xs:documentation>Temperature of the coolant when entering the component</xs:documentation>
+					<xs:appinfo>
+						<units>K</units>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="temperature_out" type="signal_flt_1d_validity">
+				<xs:annotation>
+					<xs:documentation>Temperature of the coolant when exiting the component</xs:documentation>
+					<xs:appinfo>
+						<units>K</units>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="mass_flow" type="signal_flt_1d_validity">
+				<xs:annotation>
+					<xs:documentation>Mass flow of the coolant going through the component</xs:documentation>
+					<xs:appinfo>
+						<units>kg.s^-1</units>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="transit_time" type="signal_flt_1d_validity">
+				<xs:annotation>
+					<xs:documentation>Transit time for the coolant to go from the input to the output of the component</xs:documentation>
+					<xs:appinfo>
+						<units>s</units>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="calorimetry_group">
+		<xs:annotation>
+			<xs:documentation>Group of components on which calorimetry measurements are carried out</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="name">
+				<xs:annotation>
+					<xs:documentation>Short string identifier (unique for a given device)</xs:documentation>
+					<xs:appinfo>
+						<type>static</type>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="description">
+				<xs:annotation>
+					<xs:documentation>Description, e.g. “channel viewing the upper divertor”</xs:documentation>
+					<xs:appinfo>
+						<type>static</type>
+						<introduced_after_version>3</introduced_after_version>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="component" type="calorimetry_group_component" maxOccurs="40">
+				<xs:annotation>
+					<xs:documentation>Set of components on which calorimetry measurements are carried out</xs:documentation>
+					<xs:appinfo>
+						<coordinate1>1...N</coordinate1>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="calorimetry">
+		<xs:annotation>
+			<xs:documentation>Calometry measurements on various tokamak subsystems</xs:documentation>
+			<xs:appinfo>
+				<lifecycle_status>alpha</lifecycle_status>
+				<lifecycle_version>3.23.4</lifecycle_version>
+				<lifecycle_last_change>3.33.0</lifecycle_last_change>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ids_properties"/>
+				<xs:element name="group" type="calorimetry_group" maxOccurs="25">
+					<xs:annotation>
+						<xs:documentation>Set of groups of components on which calorimetry measurements are carried out (grouped by tokamak subsystems or localization on the machine)</xs:documentation>
+						<xs:appinfo>
+							<coordinate1>1...N</coordinate1>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="cooling_loop" type="calorimetry_cooling_loop" maxOccurs="8">
+					<xs:annotation>
+						<xs:documentation>Set of cooling loops</xs:documentation>
+						<xs:appinfo>
+							<coordinate1>1...N</coordinate1>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="latency">
+					<xs:annotation>
+						<xs:documentation>Upper bound of the delay between physical information received by the detector and data available on the real-time (RT) network.</xs:documentation>
+						<xs:appinfo>
+							<type>static</type>
+							<units>s</units>
+							<introduced_after_version>3.32.1</introduced_after_version>
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:group ref="FLT_0D"/>
+					</xs:complexType>
+				</xs:element>
+				<xs:element ref="code"/>
+				<xs:element ref="time"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

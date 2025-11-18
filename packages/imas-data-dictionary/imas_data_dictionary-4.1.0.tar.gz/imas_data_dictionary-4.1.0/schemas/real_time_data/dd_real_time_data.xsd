@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by USER USER (CEA - CENTRE DE CADARACHE) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:include schemaLocation="../utilities/dd_support.xsd"/>
+	<xs:complexType name="rtd_topic">
+		<xs:annotation>
+			<xs:documentation>List of the topics</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="name">
+				<xs:annotation>
+					<xs:documentation>Topic name</xs:documentation>
+					<xs:appinfo>
+						<type>constant</type>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="signal" type="rtd_allocatable_signals" maxOccurs="100">
+				<xs:annotation>
+					<xs:documentation>List of signals that are allocated to the PCS interface</xs:documentation>
+					<xs:appinfo>
+						<coordinate1>1...N</coordinate1>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="time_stamp">
+				<xs:annotation>
+					<xs:documentation>Time of creation for all signals belonging to this topic. A set of time stamps can be recorded if needed</xs:documentation>
+					<xs:appinfo>
+						<type>constant</type>
+						<units>s</units>
+						<introduced_after_version>3.39.0</introduced_after_version>
+						<coordinate1>1...N</coordinate1>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="FLT_1D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="sample">
+				<xs:annotation>
+					<xs:documentation>Index of sample (time stamp counter)</xs:documentation>
+					<xs:appinfo>
+						<type>constant</type>
+						<introduced_after_version>3.39.0</introduced_after_version>
+						<coordinate1>../time_stamp</coordinate1>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="INT_1D"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="rtd_allocatable_signals">
+		<xs:annotation>
+			<xs:documentation>List of signals which can be allocated to the SDN</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="name">
+				<xs:annotation>
+					<xs:documentation>Signal name</xs:documentation>
+					<xs:appinfo>
+						<type>constant</type>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="data_type">
+				<xs:annotation>
+					<xs:documentation>Signal data type</xs:documentation>
+					<xs:appinfo>
+						<type>constant</type>
+						<introduced_after_version>3.39.0</introduced_after_version>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="allocated_position">
+				<xs:annotation>
+					<xs:documentation>Allocation of signal to a position in the SDN (1..N), or several positions in case of signal reshaping; this will be implementation specific</xs:documentation>
+					<xs:appinfo>
+						<type>constant</type>
+						<coordinate1>1...N</coordinate1>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="INT_1D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="data_str">
+				<xs:annotation>
+					<xs:documentation>Signal data (e.g. diagnostic signal or PCS command), serialized as a string</xs:documentation>
+					<xs:appinfo>
+						<type>constant</type>
+						<introduced_after_version>3.39.0</introduced_after_version>
+						<coordinate1>../../time_stamp</coordinate1>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_1D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="quality">
+				<xs:annotation>
+					<xs:documentation>Indicator of the quality of the signal. Following ITER PCS documentation (https://user.iter.org/?uid=354SJ3&amp;action=get_document), possible values are: 1 - GOOD (the nominal state); 2 - INVALID (data no usable); 3 - DATA INTEGRITY ERROR (e.g. out of bounds with respect to expectations, calibration error,...)</xs:documentation>
+					<xs:appinfo>
+						<type>constant</type>
+						<introduced_after_version>3.39.0</introduced_after_version>
+						<coordinate1>../../time_stamp</coordinate1>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="INT_1D"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="real_time_data">
+		<xs:annotation>
+			<xs:documentation>Description of the data bus circulating on the real time data network of the machine. This is typically used (but not only) as an interface to the Plasma Control System (PCS)</xs:documentation>
+			<xs:appinfo>
+				<lifecycle_status>alpha</lifecycle_status>
+				<lifecycle_version>3.34.0</lifecycle_version>
+				<lifecycle_last_change>3.40.0</lifecycle_last_change>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ids_properties"/>
+				<xs:element name="topic" type="rtd_topic" maxOccurs="20">
+					<xs:annotation>
+						<xs:documentation>List of topics. Signals are grouped by topic</xs:documentation>
+						<xs:appinfo>
+							<coordinate1>1...N</coordinate1>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="code" type="code_constant">
+					<xs:annotation>
+						<xs:documentation>Generic decription of the code-specific parameters for the code that has produced this IDS</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

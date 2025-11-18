@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by USER USER (CEA - CENTRE DE CADARACHE) -->
+<?modxslt-stylesheet type="text/xsl" media="fuffa, screen and $GET[stylesheet]" href="./%24GET%5Bstylesheet%5D" alternate="no" title="Translation using provided stylesheet" charset="UTF-8" ?>
+<?modxslt-stylesheet type="text/xsl" media="screen" alternate="no" title="Show raw source of the XML file" charset="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:include schemaLocation="../utilities/dd_support.xsd"/>
+	<xs:complexType name="mse_channel_resolution">
+		<xs:annotation>
+			<xs:documentation>In case of active spectroscopy, spatial resolution of the measurement</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="centre" type="rphiz0d_dynamic_aos3">
+				<xs:annotation>
+					<xs:documentation>Position of the centre of the spatially resolved zone</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="width" type="rphiz0d_dynamic_aos3">
+				<xs:annotation>
+					<xs:documentation>Full width of the spatially resolved zone in the R, Z and phi directions</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="geometric_coefficients">
+				<xs:annotation>
+					<xs:documentation>Set of 9 geometric coefficients providing the MSE polarization angle as a function of the local electric and magnetic field components (these are related to the angle between beam and line of sight). The list is ordered as follows : coefficients of BZ, BR, Bphi, ER (numerator of the MSE angle expression); coefficients of BZ, BR, Bphi, ER, EZ (denominator)</xs:documentation>
+					<xs:appinfo>
+						<type>dynamic</type>
+						<coordinate1>1...9</coordinate1>
+						<units>mixed</units>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="FLT_1D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="time" type="flt_type">
+				<xs:annotation>
+					<xs:documentation>Time</xs:documentation>
+					<xs:appinfo>
+						<units>s</units>
+						<type>dynamic</type>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="mse_channel_intersection">
+		<xs:annotation>
+			<xs:documentation>MSE beam-los intersection</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="r">
+				<xs:annotation>
+					<xs:documentation>Major radius</xs:documentation>
+					<xs:appinfo>
+						<type>static</type>
+						<units>m</units>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="FLT_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="z">
+				<xs:annotation>
+					<xs:documentation>Height</xs:documentation>
+					<xs:appinfo>
+						<type>static</type>
+						<units>m</units>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="FLT_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="phi">
+				<xs:annotation>
+					<xs:documentation>Toroidal angle</xs:documentation>
+					<xs:appinfo>
+						<type>static</type>
+						<units>rad</units>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="FLT_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="delta_r">
+				<xs:annotation>
+					<xs:documentation>Full width along major radius </xs:documentation>
+					<xs:appinfo>
+						<type>static</type>
+						<units>m</units>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="FLT_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="delta_z">
+				<xs:annotation>
+					<xs:documentation>Full width in height</xs:documentation>
+					<xs:appinfo>
+						<type>static</type>
+						<units>m</units>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="FLT_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="delta_phi">
+				<xs:annotation>
+					<xs:documentation>Full width in toroidal angle</xs:documentation>
+					<xs:appinfo>
+						<type>static</type>
+						<units>rad</units>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="FLT_0D"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="mse_channel">
+		<xs:annotation>
+			<xs:documentation>MSE channel</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="name">
+				<xs:annotation>
+					<xs:documentation>Name of the channel</xs:documentation>
+					<xs:appinfo>
+						<type>static</type>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="detector" type="detector_aperture">
+				<xs:annotation>
+					<xs:documentation>Detector description</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="aperture" type="detector_aperture" maxOccurs="5">
+				<xs:annotation>
+					<xs:documentation>Description of a set of collimating apertures</xs:documentation>
+					<xs:appinfo>
+						<coordinate1>1...N</coordinate1>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="line_of_sight" type="line_of_sight_2points">
+				<xs:annotation>
+					<xs:documentation>Description of the line of sight of the channel, given by 2 points</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="active_spatial_resolution" type="mse_channel_resolution" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Spatial resolution of the measurement, calculated as a convolution of the atomic smearing, magnetic and beam geometry smearing and detector projection, for a set of time slices (use a single time slice for the whole pulse if the beam and the line of sight are not moving during the pulse)</xs:documentation>
+					<xs:appinfo>
+						<coordinate1>time</coordinate1>
+						<type>dynamic</type>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="polarization_angle" type="signal_flt_1d_validity">
+				<xs:annotation>
+					<xs:documentation>MSE polarization angle</xs:documentation>
+					<xs:appinfo>
+						<units>rad</units>
+						<change_nbc_version>4.0.0</change_nbc_version>
+						<change_nbc_description>structure_renamed</change_nbc_description>
+						<change_nbc_previous_name>polarisation_angle</change_nbc_previous_name>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="mse">
+		<xs:annotation>
+			<xs:documentation>Motional Stark Effect diagnostic</xs:documentation>
+			<xs:appinfo>
+				<lifecycle_status>alpha</lifecycle_status>
+				<lifecycle_version>3.16.0</lifecycle_version>
+				<lifecycle_last_change>3.33.0</lifecycle_last_change>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ids_properties"/>
+				<xs:element name="channel" type="mse_channel" maxOccurs="30">
+					<xs:annotation>
+						<xs:documentation>Set of channels (lines of sight)</xs:documentation>
+						<xs:appinfo>
+							<coordinate1>1...N</coordinate1>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="latency">
+					<xs:annotation>
+						<xs:documentation>Upper bound of the delay between physical information received by the detector and data available on the real-time (RT) network.</xs:documentation>
+						<xs:appinfo>
+							<type>static</type>
+							<units>s</units>
+							<introduced_after_version>3.32.1</introduced_after_version>
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:group ref="FLT_0D"/>
+					</xs:complexType>
+				</xs:element>
+				<xs:element ref="code"/>
+				<xs:element ref="time"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by USER USER (CEA - CENTRE DE CADARACHE) -->
+<?modxslt-stylesheet type="text/xsl" media="fuffa, screen and $GET[stylesheet]" href="./$GET[stylesheet]" alternate="no" title="Translation using provided stylesheet" charset="UTF-8" ?>
+<?modxslt-stylesheet type="text/xsl" media="screen" alternate="no" title="Show raw source of the XML file" charset="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:include schemaLocation="../utilities/dd_support.xsd"/>
+	<xs:complexType name="workflow_component">
+		<xs:annotation>
+			<xs:documentation>Control parameters for the set of participting components defined in ../../component_list</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="index">
+				<xs:annotation>
+					<xs:documentation>Index of the component in the ../../../component array</xs:documentation>
+					<xs:appinfo>
+						<type>dynamic</type>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="INT_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="execution_mode">
+				<xs:annotation>
+					<xs:documentation>Component execution mode for current workflow cycle. 0 means the component is not executed and the workflow uses results from previous workflow cycle. 1 means the component is executed for this workflow cycle.</xs:documentation>
+					<xs:appinfo>
+						<type>dynamic</type>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="INT_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="time_interval_request">
+				<xs:annotation>
+					<xs:documentation>Simulation time interval for which this component is requested to compute its results</xs:documentation>
+					<xs:appinfo>
+						<type>dynamic</type>
+						<units>s</units>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="FLT_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="time_interval_elapsed">
+				<xs:annotation>
+					<xs:documentation>Simulation time interval for which this component has last computed its results</xs:documentation>
+					<xs:appinfo>
+						<type>dynamic</type>
+						<units>s</units>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="FLT_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="control_float">
+				<xs:annotation>
+					<xs:documentation>Array of real workflow control parameters used by this component (component specific)</xs:documentation>
+					<xs:appinfo>
+						<type>dynamic</type>
+						<units>mixed</units>
+						<coordinate1>1...N</coordinate1>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="FLT_1D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="control_integer">
+				<xs:annotation>
+					<xs:documentation>Array of integer workflow control parameters used by this component (component specific)</xs:documentation>
+					<xs:appinfo>
+						<type>dynamic</type>
+						<coordinate1>1...N</coordinate1>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="INT_1D"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="workflow_cycle">
+		<xs:annotation>
+			<xs:documentation>Control structure for the time associated with the workflow cycle</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="component" type="workflow_component" maxOccurs="20">
+				<xs:annotation>
+					<xs:documentation>Control parameters for the set of participting components defined in ../../component</xs:documentation>
+					<xs:appinfo>
+						<coordinate1>1...N</coordinate1>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="time" type="flt_type">
+				<xs:annotation>
+					<xs:documentation>Time</xs:documentation>
+					<xs:appinfo>
+						<units>s</units>
+						<type>dynamic</type>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="workflow_time_loop">
+		<xs:annotation>
+			<xs:documentation>Description of a workflow with a main time loop</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="component" type="code_constant" maxOccurs="20">
+				<xs:annotation>
+					<xs:documentation>List of components partcipating in the workflow </xs:documentation>
+					<xs:appinfo>
+						<coordinate1>1...N</coordinate1>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="time_end">
+				<xs:annotation>
+					<xs:documentation>Termination time for the workflow main time loop</xs:documentation>
+					<xs:appinfo>
+						<type>constant</type>
+						<units>s</units>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="FLT_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="workflow_cycle" type="workflow_cycle" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Set of time slices corresponding to the beginning of workflow cycles (main time loop of the workflow). During each workflow cycle, active components compute their result during their given time_interval. Components having completed their computation are frozen until the end of the workflow cycle. The next workflow cycle begins when the maximum time_interval (over the components) has been reached.</xs:documentation>
+					<xs:appinfo>
+						<coordinate1>time</coordinate1>
+						<type>dynamic</type>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="workflow">
+		<xs:annotation>
+			<xs:documentation>Description of the workflow that has produced this data entry. The workflow IDS can also be used to communicate information about workflow state between workflow components.</xs:documentation>
+			<xs:appinfo>
+				<lifecycle_status>alpha</lifecycle_status>
+				<lifecycle_version>3.34.0</lifecycle_version>
+				<lifecycle_last_change>3.41.0</lifecycle_last_change>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ids_properties"/>
+				<xs:element name="time_loop" type="workflow_time_loop">
+					<xs:annotation>
+						<xs:documentation>Description of a workflow based on a time loop which calls components defined in component_list sequentially  during each cycle of the loop (workflow_cycle).</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element ref="code"/>
+				<xs:element ref="time"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

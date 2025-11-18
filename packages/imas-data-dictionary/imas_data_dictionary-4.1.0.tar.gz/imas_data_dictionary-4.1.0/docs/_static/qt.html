@@ -1,0 +1,125 @@
+<!DOCTYPE HTML>
+<html xmlns:fn="http://www.w3.org/2005/02/xpath-functions">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>Data Dictionary HTML documentation</title>
+  <link rel="stylesheet" type="text/css" href="qt.css">
+  <base target="_parent">
+</head>
+
+<body>
+  <div class="loading_screen">
+    <div class="loader"></div>
+  </div>
+  <aside>
+    <div id="search_fields">
+      <div id="keywords_search_field" class="search_field">
+        <label for="search">Search: </label>
+        <input id="search_input" type="text" name="search" onkeyup="onSearchChanged(event)">
+        <div class="tooltip" for="search_input">
+          <p class="instruction">
+            Keywords (of length &gt; 1) separated by spaces
+          </p>
+          <p class="returns">
+            Returns elements with a path matching all keywords or a description matching most keywords
+          </p>
+          <div class="examples">
+            <p class="title">
+              Ex:
+            </p>
+            <div class="content">
+              <p class="highlight">bar code desc</p>
+              <p class="match">
+                <span class="icon">➔</span><span class="highlight">bar</span>ometry/<span
+                class="highlight">code</span>/<span class="highlight">description</span>
+              </p>
+              <p class="match">
+                <span class="icon">➔</span><span class="highlight">bar</span>ometry/<span
+                class="highlight">code</span>/library/<span class="highlight">description</span>
+              </p>
+              <p class="unmatch">
+                <span class="icon">✕</span>barometry/code
+              </p>
+              <p class="unmatch">
+                <span class="icon">✕</span>barometry/gauge/type/description
+              </p>
+            </div>
+          </div>
+        </div>
+        <span class="toggle" onclick="toggleAdvancedSearch()">▼</span>
+      </div>
+      <div class="search_field advanced">
+        <label for="data_type">Data type: </label>
+        <input id="data_type_input" type="text" name="data_type" onkeyup="onDataTypeChanged(event)"
+          onchange="onDataTypeChanged(event)" list="occuring_data_types">
+        <div class="tooltip" for="data_type_input">
+          <p class="instruction">One keyword</p>
+          <p class="returns">Returns elements with a type matching whole or part of keyword</p>
+          <div class="examples">
+            <p class="title">
+              Ex:
+            </p>
+            <div class="content">
+              <p class="highlight">2D</p>
+              <p class="match"><span class="icon">➔</span>FLT_<span class="highlight">2D</span></p>
+              <p class="match"><span class="icon">➔</span>INT_<span class="highlight">2D</span></p>
+              <p class="match">
+                ...
+              </p>
+            </div>
+          </div>
+        </div><datalist id="occuring_data_types"></datalist>
+      </div>
+      <div class="search_field advanced">
+        <label for="coords">Coords: </label>
+        <input id="coords_input" type="text" name="coords" onkeyup="onCoordsChanged(event)">
+        <div class="tooltip" for="coords_input">
+          <p class="instruction">
+            Keywords separated by spaces indicating either the coordinate followed by ':', its value, or both.
+          </p>
+          <p class="returns">
+            Returns elements having coordinates matching all conditions
+          </p>
+          <div class="examples">
+            <p class="title">
+              Ex:
+            </p>
+            <div class="content">
+              <p class="highlight">3:</p>
+              <p class="match">
+                <span class="icon">➔</span>All elements with at least <span class="highlight">3</span> coordinates
+              </p>
+              <p class="highlight">phi</p>
+              <p class="match">
+                <span class="icon">➔</span>All elements with a coordinate same as some element
+                <span class="highlight">phi</span>
+              </p>
+              <p class="highlight">1:voltage/time</p>
+              <p class="match">
+                <span class="icon">➔</span>All elements where <span class="highlight">1</span>st coordinate same as
+                some element <span class="highlight">voltage/time</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="search_results_container">
+      <div id="search_results_dropdown" style="display: none">
+        <div id="search_results"></div>
+      </div>
+    </div>
+  </aside>
+  <!--
+    @EPSYL: the `parseFromString` argument needs to be populated by the XML you generate.
+    
+    To avoid committing a very large file I've only copied the `dataset_fair` IDS from your ZIPfile.
+  -->
+  <script type="text/javascript" src="IDSDefxml.js"></script>
+  <script type="text/javascript">
+    	const parser = new DOMParser();
+    	const xmlDoc = parser.parseFromString(xmlString, "application/xml");    
+  </script>
+  <script type="text/javascript" src="qt.js"></script>
+</body>

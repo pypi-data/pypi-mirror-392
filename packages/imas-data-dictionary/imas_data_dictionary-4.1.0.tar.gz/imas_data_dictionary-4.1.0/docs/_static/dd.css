@@ -1,0 +1,192 @@
+#dd-reference-toc ul,
+#dd-reference-toc-util ul,
+#dd-reference-toc-identifiers ul,
+#dd-index-reference-toc ul ul {
+    column-count: 2;
+}
+
+#dd-reference-toc ul,
+#dd-index-reference-toc ul li:first-of-type ul {
+    list-style-type: none;
+}
+
+/* [Reference] Lifecycle status icons in front of IDS names */
+.ids-icon {
+    cursor: help;
+    position: relative;
+    display: inline-block;
+}
+.ids-icon::before {
+    background-color: var(--md-primary-fg-color);
+}
+.ids-icon:hover::after {
+    position: absolute;
+    width: max-content;
+    font-size: 0.8rem;
+    left: 90%;
+    top: 90%;
+    padding: 0.2em;
+    border: 1px #aaa solid;
+    background-color: #fff;
+    color: #000;
+    z-index: 1;
+}
+.ids-icon.material_star:hover::after {
+    content: "This IDS is active.";
+}
+.ids-icon.material_alpha:hover::after {
+    content: "This IDS is in alpha status.";
+}
+
+/* [Reference] Expand / collapse buttons */
+.dd-toggle {
+    float: right;
+    font-size: 0.7rem;
+    font-weight: 400;
+    padding-left: 0.5rem;
+}
+.dd-expand, .dd-collapse {
+    display: block;
+    cursor: pointer;
+}
+.dd-toggle span {
+    font-family: monospace;
+}
+
+/* [Reference] Coordinate tables */
+table.dd-coordinates {
+    margin: 0.5em 0;
+}
+table.dd-coordinates th, table.dd-coordinates td {
+    padding: 0.5em !important;
+}
+table.dd-coordinates th:first-child, table.dd-coordinates td:first-child {
+    min-width: 0 !important;
+}
+
+/* [Reference] Summary of DD node contents */
+details .dd-summary {
+    color: var(--md-default-fg-color--light);
+    font-style: italic;
+    display: block;
+}
+/* Hide the summary when a node is uncollapsed
+details[open] > * > .dd-summary {
+    display: none;
+}
+*/
+/* Add more spacing after an opened node */
+details.dd[open] {
+    margin-bottom: 2.5rem;
+}
+
+/* [Reference] Overwrite admonition styles from theme */
+details.dd {
+    padding-right: 0;
+    border-radius: 0;
+    border-width: 0 0 0 0.05rem;
+    box-shadow: 0 0;
+    font-size: 0.7rem;
+}
+details.dd details.dd:last-child {
+    margin-bottom: 0;
+}
+summary.dd {
+    margin-right: 0;
+    font-weight: normal;
+    padding-right: 0.6rem !important; /* Move collapse icon left */
+    padding-left: 1.8rem !important; /* Remove admonition icon */
+}
+summary.dd .name {
+    font-weight: bold;
+}
+summary.dd::before {
+    width: 0; /* Remove admonition icon */
+}
+summary.dd::after {
+    left: 0.4rem;
+}
+
+/* [Reference] Style units, data_type and type elements */
+span.dd_unit {
+    cursor: help;
+    font-weight: normal;
+    font-style: italic;
+    margin-left: 0.5em
+}
+span.dd_unit:hover {
+    text-decoration: underline;
+}
+
+.errorbar {
+    font-weight: bold;
+}
+
+.dd_data_type {
+    float: right;
+    font-weight: bold;
+}
+
+.dd-constant::before {
+    content: " {constant}";
+    font-weight: 300;
+}
+.dd-static::before {
+    content: " {static}";
+    font-weight: 300;
+}
+.dd-dynamic::before {
+    content: " {dynamic}";
+    font-weight: 300;
+}
+
+/* Tooltips */
+.errorbar,
+.dd_unit,
+.dd_data_type,
+.dd-constant,
+.dd-static,
+.dd-dynamic {
+    position: relative;
+}
+.errorbar:hover::after,
+.dd_unit:hover::after,
+.dd_data_type:hover::after,
+.dd-constant:hover::after,
+.dd-static:hover::after,
+.dd-dynamic:hover::after {
+    position: absolute;
+    left: 0em;
+    top: 1.5em;
+    width: max-content;
+    padding: 0.4em;
+    text-align: center;
+    font-weight: normal;
+    font-style: italic;
+    border-radius: 0.4em;
+    background-color: #555;
+    color: #fff;
+    z-index: 1;
+}
+.errorbar:hover::after { content: "This data node has errorbars.";}
+.dd_unit:hover::after { content: "Unit of this data node."; }
+.dd_data_type:hover::after { content: "Data type of this node."; }
+.dd-constant:hover::after { content: "Data is not time dependent."; }
+.dd-static:hover::after { content: "Data is not time dependent."; }
+.dd-dynamic:hover::after { content: "Data is time dependent."; }
+
+
+/**
+ * GGD guide uses guilabel elements for emphasising elements
+ * Though guilabel is not originally meant for this, it is only
+ * used here, so let's style them similar to the original docs.
+ */
+.guilabel {
+    font-size: 80%;
+    font-weight: 700;
+    background-color: rgba(68,138,255,.1);
+    border: .05rem solid #448aff;
+    padding: 0.1em 0.2em;
+    border-radius: 0.2em;
+}
+

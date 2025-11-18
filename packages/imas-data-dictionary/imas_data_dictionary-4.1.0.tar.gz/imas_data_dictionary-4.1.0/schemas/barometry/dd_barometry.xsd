@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by USER USER (CEA - CENTRE DE CADARACHE) -->
+<?modxslt-stylesheet type="text/xsl" media="fuffa, screen and $GET[stylesheet]" href="./%24GET%5Bstylesheet%5D" alternate="no" title="Translation using provided stylesheet" charset="UTF-8" ?>
+<?modxslt-stylesheet type="text/xsl" media="screen" alternate="no" title="Show raw source of the XML file" charset="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:include schemaLocation="../utilities/dd_support.xsd"/>
+	<xs:complexType name="barometry_gauge">
+		<xs:annotation>
+			<xs:documentation>Pressure gauge</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="name">
+				<xs:annotation>
+					<xs:documentation>Name of the gauge</xs:documentation>
+					<xs:appinfo>
+						<type>static</type>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="type" type="identifier_static">
+				<xs:annotation>
+					<xs:documentation>Type of the gauge (index = 1: Penning; index = 2: Baratron)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="position" type="rphiz0d_static">
+				<xs:annotation>
+					<xs:documentation>Position of the measurements</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="pressure" type="signal_flt_1d">
+				<xs:annotation>
+					<xs:documentation>Pressure</xs:documentation>
+					<xs:appinfo>
+						<units>Pa</units>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="calibration_coefficient">
+				<xs:annotation>
+					<xs:documentation>Coefficient used for converting raw signal into absolute pressure</xs:documentation>
+					<xs:appinfo>
+						<type>static</type>
+						<units>Pa</units>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="FLT_0D"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="barometry">
+		<xs:annotation>
+			<xs:documentation>Pressure measurements in the vacuum vessel. NB will need to change the type of the pressure node to signal_1d when moving to the new LL.</xs:documentation>
+			<xs:appinfo>
+				<lifecycle_status>alpha</lifecycle_status>
+				<lifecycle_version>3.17.2</lifecycle_version>
+				<lifecycle_last_change>3.33.0</lifecycle_last_change>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ids_properties"/>
+				<xs:element name="gauge" type="barometry_gauge" maxOccurs="20">
+					<xs:annotation>
+						<xs:documentation>Set of gauges</xs:documentation>
+						<xs:appinfo>
+							<coordinate1>1...N</coordinate1>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="latency">
+					<xs:annotation>
+						<xs:documentation>Upper bound of the delay between physical information received by the detector and data available on the real-time (RT) network.</xs:documentation>
+						<xs:appinfo>
+							<type>static</type>
+							<units>s</units>
+							<introduced_after_version>3.32.1</introduced_after_version>
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:group ref="FLT_0D"/>
+					</xs:complexType>
+				</xs:element>
+				<xs:element ref="code"/>
+				<xs:element ref="time"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

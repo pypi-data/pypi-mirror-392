@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by USER USER (CEA - CENTRE DE CADARACHE) -->
+<?modxslt-stylesheet type="text/xsl" media="fuffa, screen and $GET[stylesheet]" href="./$GET[stylesheet]" alternate="no" title="Translation using provided stylesheet" charset="UTF-8" ?>
+<?modxslt-stylesheet type="text/xsl" media="screen" alternate="no" title="Show raw source of the XML file" charset="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:include schemaLocation="../utilities/dd_support.xsd"/>
+	<xs:element name="dataset_fair">
+		<xs:annotation>
+			<xs:documentation>FAIR metadata related to the dataset, providing inforrmation on licensing, annotations, references using this dataset, versioning and validity, provenance. This IDS is using Dublin Core metadata standard whenever possible</xs:documentation>
+			<xs:appinfo>
+				<lifecycle_status>alpha</lifecycle_status>
+				<lifecycle_version>3.30.0</lifecycle_version>
+				<lifecycle_last_change>3.30.0</lifecycle_last_change>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ids_properties"/>
+				<xs:element name="identifier">
+					<xs:annotation>
+						<xs:documentation>Persistent identifier allowing to cite this data in a public and persistent way, should be provided as HTTP URIs</xs:documentation>
+						<xs:appinfo>
+							<type>constant</type>
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:group ref="STR_0D"/>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="replaces">
+					<xs:annotation>
+						<xs:documentation>Persistent identifier referencing the previous version of this data</xs:documentation>
+						<xs:appinfo>
+							<type>constant</type>
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:group ref="STR_0D"/>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="is_replaced_by">
+					<xs:annotation>
+						<xs:documentation>Persistent identifier referencing the new version of this data (replacing the present version)</xs:documentation>
+						<xs:appinfo>
+							<type>constant</type>
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:group ref="STR_0D"/>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="valid">
+					<xs:annotation>
+						<xs:documentation>Date range during which the data is or was valid. Expressed as YYYY-MM-DD/YYYY-MM-DD, where the former (resp. latter) date is the data at which the data started (resp. ceased) to be valid. If the data is still valid, the slash should still be present, i.e. indicate the validity start date with YYYY-MM-DD/. If the data ceased being valid but there is no information on the validity start date, indicate /YYYY-MM-DD.</xs:documentation>
+						<xs:appinfo>
+							<type>constant</type>
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:group ref="STR_0D"/>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="rights_holder">
+					<xs:annotation>
+						<xs:documentation>The organization owning or managing rights over this data</xs:documentation>
+						<xs:appinfo>
+							<type>constant</type>
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:group ref="STR_0D"/>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="license">
+					<xs:annotation>
+						<xs:documentation>License(s) under which the data is made available (license description or, more convenient, publicly accessible URL pointing to the full license text)</xs:documentation>
+						<xs:appinfo>
+							<type>constant</type>
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:group ref="STR_0D"/>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="is_referenced_by">
+					<xs:annotation>
+						<xs:documentation>List of documents (e.g. publications) or datasets making use of this data entry (e.g. PIDs of other datasets using this data entry as input)</xs:documentation>
+						<xs:appinfo>
+							<type>constant</type>
+							<coordinate1>1...N</coordinate1>
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:group ref="STR_1D"/>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

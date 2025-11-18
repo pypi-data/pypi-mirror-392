@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by USER USER (CEA - CENTRE DE CADARACHE) -->
+<?modxslt-stylesheet type="text/xsl" media="fuffa, screen and $GET[stylesheet]" href="./%24GET%5Bstylesheet%5D" alternate="no" title="Translation using provided stylesheet" charset="UTF-8" ?>
+<?modxslt-stylesheet type="text/xsl" media="screen" alternate="no" title="Show raw source of the XML file" charset="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:include schemaLocation="../utilities/dd_support.xsd"/>
+	<xs:complexType name="reflectometer_channel">
+		<xs:annotation>
+			<xs:documentation>Reflectometer channel</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="name">
+				<xs:annotation>
+					<xs:documentation>Short string identifier (unique for a given device)</xs:documentation>
+					<xs:appinfo>
+						<type>static</type>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="description">
+				<xs:annotation>
+					<xs:documentation>Description, e.g. “channel viewing the upper divertor”</xs:documentation>
+					<xs:appinfo>
+						<type>static</type>
+						<introduced_after_version>3</introduced_after_version>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="mode">
+				<xs:annotation>
+					<xs:documentation>Detection mode "X" or "O"</xs:documentation>
+					<xs:appinfo>
+						<type>static</type>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="line_of_sight_emission" type="line_of_sight_2points">
+				<xs:annotation>
+					<xs:documentation>Description of the line of sight of the emission antenna. The first point corresponds to the centre of the antenna mouth. The second point correspond to the interception of the line of sight with the reflection surface on the inner wall.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="line_of_sight_detection" type="line_of_sight_2points">
+				<xs:annotation>
+					<xs:documentation>Description of the line of sight of the detection antenna, to be filled only if its position is distinct from the emission antenna. The first point corresponds to the centre of the antenna mouth. The second point correspond to the interception of the line of sight with the reflection surface on the inner wall.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="antenna_emission" type="detector_aperture">
+				<xs:annotation>
+					<xs:documentation>Geometry of the emission antenna</xs:documentation>
+					<xs:appinfo>
+						<introduced_after_version>3.38.1</introduced_after_version>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="antenna_detection" type="detector_aperture">
+				<xs:annotation>
+					<xs:documentation>Geometry of the detection antenna, to be filled only if it is distinct from the emission antenna.</xs:documentation>
+					<xs:appinfo>
+						<introduced_after_version>3.38.1</introduced_after_version>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="sweep_time">
+				<xs:annotation>
+					<xs:documentation>Duration of a sweep</xs:documentation>
+					<xs:appinfo>
+						<type>static</type>
+						<units>s</units>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="FLT_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="frequencies">
+				<xs:annotation>
+					<xs:documentation>Array of frequencies scanned during a sweep</xs:documentation>
+					<xs:appinfo>
+						<type>static</type>
+						<units>Hz</units>
+						<coordinate1>1...N</coordinate1>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="FLT_1D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="phase" type="signal_flt_2d">
+				<xs:annotation>
+					<xs:documentation>Measured phase of the probing wave for each frequency and time slice (corresponding to the begin time of a sweep), relative to the phase at launch</xs:documentation>
+					<xs:appinfo>
+						<coordinate1>../frequencies</coordinate1>
+						<coordinate2>time</coordinate2>
+						<units>rad</units>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="amplitude" type="signal_flt_2d">
+				<xs:annotation>
+					<xs:documentation>Measured amplitude of the detected probing wave for each frequency and time slice (corresponding to the begin time of a sweep)</xs:documentation>
+					<xs:appinfo>
+						<coordinate1>../frequencies</coordinate1>
+						<coordinate2>time</coordinate2>
+						<units>V</units>
+						<introduced_after_version>3.38.1</introduced_after_version>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="position" type="reflectometer_profile_position_2d">
+				<xs:annotation>
+					<xs:documentation>Position of the density measurements</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="n_e" type="signal_flt_2d">
+				<xs:annotation>
+					<xs:documentation>Electron density</xs:documentation>
+					<xs:appinfo>
+						<coordinate1>1...N</coordinate1>
+						<coordinate2>time</coordinate2>
+						<units>m^-3</units>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="cut_off_frequency">
+				<xs:annotation>
+					<xs:documentation>Cut-off frequency as a function of measurement position and time</xs:documentation>
+					<xs:appinfo>
+						<type>dynamic</type>
+						<coordinate1>1...N</coordinate1>
+						<coordinate1_same_as>../n_e/data</coordinate1_same_as>
+						<coordinate2>../n_e/time</coordinate2>
+						<units>Hz</units>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="FLT_2D"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="reflectometer_profile">
+		<xs:annotation>
+			<xs:documentation>Profile reflectometer diagnostic. Multiple reflectometers are considered as independent diagnostics to be handled with different occurrence numbers</xs:documentation>
+			<xs:appinfo>
+				<lifecycle_status>alpha</lifecycle_status>
+				<lifecycle_version>3.11.0</lifecycle_version>
+				<lifecycle_last_change>3.39.0</lifecycle_last_change>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ids_properties"/>
+				<xs:element name="type">
+					<xs:annotation>
+						<xs:documentation>Type of reflectometer (frequency_swept, radar, ...)</xs:documentation>
+						<xs:appinfo>
+							<type>static</type>
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:group ref="STR_0D"/>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="channel" type="reflectometer_channel" maxOccurs="5">
+					<xs:annotation>
+						<xs:documentation>Set of channels, e.g. different reception antennas or frequency bandwidths of the reflectometer</xs:documentation>
+						<xs:appinfo>
+							<coordinate1>1...N</coordinate1>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="position" type="reflectometer_profile_position_2d">
+					<xs:annotation>
+						<xs:documentation>Position associated to the density reconstruction from multiple channels</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="n_e" type="signal_flt_2d">
+					<xs:annotation>
+						<xs:documentation>Electron density reconstructed from multiple channels</xs:documentation>
+						<xs:appinfo>
+							<coordinate1>1...N</coordinate1>
+							<coordinate2>time</coordinate2>
+							<units>m^-3</units>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="psi_normalization" type="psi_normalization">
+					<xs:annotation>
+						<xs:documentation>Quantities to use to normalize psi, as a function of time</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="latency">
+					<xs:annotation>
+						<xs:documentation>Upper bound of the delay between physical information received by the detector and data available on the real-time (RT) network.</xs:documentation>
+						<xs:appinfo>
+							<type>static</type>
+							<units>s</units>
+							<introduced_after_version>3.32.1</introduced_after_version>
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:group ref="FLT_0D"/>
+					</xs:complexType>
+				</xs:element>
+				<xs:element ref="code"/>
+				<xs:element ref="time"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

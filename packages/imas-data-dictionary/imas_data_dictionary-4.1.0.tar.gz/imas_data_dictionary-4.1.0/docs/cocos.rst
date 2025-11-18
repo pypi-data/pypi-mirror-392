@@ -1,0 +1,41 @@
+Coordinate conventions
+======================
+
+Cylindrical coordinate convention
+---------------------------------
+
+For conversion between cylindrical :math:`(R,\phi,Z)` and Cartesian
+:math:`(X,Y,Z)` coordinates, IMAS follows the `ISO 31-11 standard
+<https://en.wikipedia.org/wiki/ISO_31-11>`_: the origin and Z axis align
+and the X axis corresponds to :math:`\phi=0`.
+
+Sign convention
+---------------------------------
+
+:math:`(R,\phi,Z)` is a right-handed coordinate system, so :math:`\phi` is counter-clockwise when seen from above.
+
+:math:`(\rho,\theta,\phi)` is a right-handed coordinate system, so :math:`\theta` is clockwise when looking at the righthand poloidal cross-section from the front.
+
+    
+COCOS
+---------------------------------
+
+This version of the IMAS Data Dictionary corresponds to COCOS = |cocos| coordinate convention.
+
+.. caution::
+     Major version 4 corresponds to COCOS = 17, while major version 3 corresponds to COCOS = 11.
+
+The COCOS (Coordinate COnvetionS for 3D current and magnetic fields) conventions
+are described in detail in: `O. Sauter and S.Yu. Medvedev, Computer Physics
+Communications 184 (2013) 293
+<https://crppwww.epfl.ch/~sauter/COCOS/Sauter_COCOS_Tokamak_Coordinate_Conventions.pdf>`_.
+
+More information is also available on `the web page of O. Sauter
+<https://crppwww.epfl.ch/~sauter/COCOS/>`_.
+
+
+Flux surface average
+---------------------------------
+
+Flux-surface average is defined as described `here
+<https://wiki.fusion.ciemat.es/wiki/Flux_coordinates#Flux_Surface_Average>`_.

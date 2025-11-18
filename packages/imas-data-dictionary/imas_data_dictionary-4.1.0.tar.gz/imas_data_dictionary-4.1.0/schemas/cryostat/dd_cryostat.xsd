@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?modxslt-stylesheet type="text/xsl" media="fuffa, screen and $GET[stylesheet]" href="./%24GET%5Bstylesheet%5D" alternate="no" title="Translation using provided stylesheet" charset="UTF-8" ?>
+<?modxslt-stylesheet type="text/xsl" media="screen" alternate="no" title="Show raw source of the XML file" charset="UTF-8" ?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by USER USER (CEA - CENTRE DE CADARACHE) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:include schemaLocation="../utilities/dd_support.xsd"/>
+	<xs:complexType name="cryostat_2d">
+		<xs:annotation>
+			<xs:documentation>2D cryostat description</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="cryostat" type="vessel_2d">
+				<xs:annotation>
+					<xs:documentation>Mechanical structure of the cryostat. It is described as a set of nested layers with given physics properties; Two representations are admitted for each vessel unit : annular (two contours) or block elements.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="thermal_shield" type="vessel_2d">
+				<xs:annotation>
+					<xs:documentation>Mechanical structure of the cryostat thermal shield. It is described as a set of nested layers with given physics properties; Two representations are admitted for each vessel unit : annular (two contours) or block elements.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="cryostat">
+		<xs:annotation>
+			<xs:documentation>Description of the cryostat surrounding the machine (if any)</xs:documentation>
+			<xs:appinfo>
+				<lifecycle_status>alpha</lifecycle_status>
+				<lifecycle_version>3.28.0</lifecycle_version>
+				<lifecycle_last_change>3.28.0</lifecycle_last_change>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ids_properties"/>
+				<xs:element name="description_2d" type="cryostat_2d" maxOccurs="3">
+					<xs:annotation>
+						<xs:documentation>Set of 2D cryostat descriptions, for each type of possible physics or engineering configurations necessary</xs:documentation>
+						<xs:appinfo>
+							<coordinate1>1...N</coordinate1>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:element>
+				<xs:element ref="code"/>
+				<xs:element ref="time"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

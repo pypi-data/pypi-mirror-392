@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by USER USER (CEA - CENTRE DE CADARACHE) -->
+<?modxslt-stylesheet type="text/xsl" media="fuffa, screen and $GET[stylesheet]" href="./$GET[stylesheet]" alternate="no" title="Translation using provided stylesheet" charset="UTF-8" ?>
+<?modxslt-stylesheet type="text/xsl" media="screen" alternate="no" title="Show raw source of the XML file" charset="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:include schemaLocation="../utilities/dd_support.xsd"/>
+	<xs:complexType name="controllers_statespace">
+		<xs:annotation>
+			<xs:documentation>type for a statespace controller</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="state_names">
+				<xs:annotation>
+					<xs:documentation>Names of the states</xs:documentation>
+					<xs:appinfo>
+						<type>constant</type>
+						<coordinate1>1...N</coordinate1>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_1D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="a" type="signal_flt_3d">
+				<xs:annotation>
+					<xs:documentation>A matrix</xs:documentation>
+					<xs:appinfo>
+						<coordinate1>../state_names</coordinate1>
+						<coordinate2>../state_names</coordinate2>
+						<coordinate3>time</coordinate3>
+						<units>mixed</units>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="b" type="signal_flt_3d">
+				<xs:annotation>
+					<xs:documentation>B matrix</xs:documentation>
+					<xs:appinfo>
+						<coordinate1>../state_names</coordinate1>
+						<coordinate2>../../input_names</coordinate2>
+						<coordinate3>time</coordinate3>
+						<units>mixed</units>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="c" type="signal_flt_3d">
+				<xs:annotation>
+					<xs:documentation>C matrix</xs:documentation>
+					<xs:appinfo>
+						<units>mixed</units>
+						<coordinate1>../state_names</coordinate1>
+						<coordinate2>../../output_names</coordinate2>
+						<coordinate3>time</coordinate3>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="d" type="signal_flt_3d">
+				<xs:annotation>
+					<xs:documentation>D matrix, normally proper and D=0</xs:documentation>
+					<xs:appinfo>
+						<units>mixed</units>
+						<coordinate1>../state_names</coordinate1>
+						<coordinate2>../../output_names</coordinate2>
+						<coordinate3>time</coordinate3>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="deltat" type="signal_flt_1d">
+				<xs:annotation>
+					<xs:documentation>Discrete time sampling interval ; if less than 1e-10, the controller is considered to be expressed in continuous time</xs:documentation>
+					<xs:appinfo>
+						<units>s</units>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="controllers_pid">
+		<xs:annotation>
+			<xs:documentation>type for a MIMO PID controller</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="p" type="signal_flt_3d">
+				<xs:annotation>
+					<xs:documentation>Proportional term</xs:documentation>
+					<xs:appinfo>
+						<units>mixed</units>
+						<coordinate1>../../output_names</coordinate1>
+						<coordinate2>../../input_names</coordinate2>
+						<coordinate3>time</coordinate3>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="i" type="signal_flt_3d">
+				<xs:annotation>
+					<xs:documentation>Integral term</xs:documentation>
+					<xs:appinfo>
+						<units>mixed</units>
+						<coordinate1>../../output_names</coordinate1>
+						<coordinate2>../../input_names</coordinate2>
+						<coordinate3>time</coordinate3>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="d" type="signal_flt_3d">
+				<xs:annotation>
+					<xs:documentation>Derivative term</xs:documentation>
+					<xs:appinfo>
+						<units>mixed</units>
+						<coordinate1>../../output_names</coordinate1>
+						<coordinate2>../../input_names</coordinate2>
+						<coordinate3>time</coordinate3>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="tau" type="signal_flt_1d">
+				<xs:annotation>
+					<xs:documentation>Filter time-constant for the D-term</xs:documentation>
+					<xs:appinfo>
+						<units>s</units>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="controllers_linear_controller">
+		<xs:annotation>
+			<xs:documentation>type for a linear controller</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="name">
+				<xs:annotation>
+					<xs:documentation>Name of this controller</xs:documentation>
+					<xs:appinfo>
+						<type>constant</type>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="description">
+				<xs:annotation>
+					<xs:documentation>Description of this controller</xs:documentation>
+					<xs:appinfo>
+						<type>constant</type>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="controller_class">
+				<xs:annotation>
+					<xs:documentation>One of a known class of controllers</xs:documentation>
+					<xs:appinfo>
+						<type>constant</type>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="input_names">
+				<xs:annotation>
+					<xs:documentation>Names of the input signals, following the SDN convention</xs:documentation>
+					<xs:appinfo>
+						<type>constant</type>
+						<coordinate1>1...N</coordinate1>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_1D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="output_names">
+				<xs:annotation>
+					<xs:documentation>Names of the output signals following the SDN convention</xs:documentation>
+					<xs:appinfo>
+						<type>constant</type>
+						<coordinate1>1...N</coordinate1>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_1D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="statespace" type="controllers_statespace">
+				<xs:annotation>
+					<xs:documentation>Statespace controller in discrete or continuous time</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="pid" type="controllers_pid">
+				<xs:annotation>
+					<xs:documentation>Filtered PID controller</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="inputs" type="signal_flt_2d">
+				<xs:annotation>
+					<xs:documentation>Input signals; the timebase is common to inputs and outputs for any particular controller</xs:documentation>
+					<xs:appinfo>
+						<units>mixed</units>
+						<coordinate1>../input_names</coordinate1>
+						<coordinate2>time</coordinate2>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="outputs" type="signal_flt_2d">
+				<xs:annotation>
+					<xs:documentation>Output signals; the timebase is common to inputs and outputs for any particular controller</xs:documentation>
+					<xs:appinfo>
+						<units>mixed</units>
+						<coordinate1>../output_names</coordinate1>
+						<coordinate2>time</coordinate2>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="controllers_nonlinear_controller">
+		<xs:annotation>
+			<xs:documentation>Type for a nonlinear controller</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="name">
+				<xs:annotation>
+					<xs:documentation>Name of this controller</xs:documentation>
+					<xs:appinfo>
+						<type>constant</type>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="description">
+				<xs:annotation>
+					<xs:documentation>Description of this controller</xs:documentation>
+					<xs:appinfo>
+						<type>constant</type>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="controller_class">
+				<xs:annotation>
+					<xs:documentation>One of a known class of controllers</xs:documentation>
+					<xs:appinfo>
+						<type>constant</type>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="input_names">
+				<xs:annotation>
+					<xs:documentation>Names of the input signals, following the SDN convention</xs:documentation>
+					<xs:appinfo>
+						<type>constant</type>
+						<coordinate1>1...N</coordinate1>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_1D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="output_names">
+				<xs:annotation>
+					<xs:documentation>Output signal names following the SDN convention</xs:documentation>
+					<xs:appinfo>
+						<type>constant</type>
+						<coordinate1>1...N</coordinate1>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_1D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="function">
+				<xs:annotation>
+					<xs:documentation>Method to be defined</xs:documentation>
+					<xs:appinfo>
+						<type>constant</type>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:group ref="STR_0D"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="inputs" type="signal_flt_2d">
+				<xs:annotation>
+					<xs:documentation>Input signals; the timebase is common  to inputs and outputs for any particular controller</xs:documentation>
+					<xs:appinfo>
+						<units>mixed</units>
+						<coordinate1>../input_names</coordinate1>
+						<coordinate2>time</coordinate2>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="outputs" type="signal_flt_2d">
+				<xs:annotation>
+					<xs:documentation>Output signals; the timebase is common  to inputs and outputs for any particular controller</xs:documentation>
+					<xs:appinfo>
+						<units>mixed</units>
+						<coordinate1>../output_names</coordinate1>
+						<coordinate2>time</coordinate2>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="controllers">
+		<xs:annotation>
+			<xs:documentation>Feedback and feedforward controllers</xs:documentation>
+			<xs:appinfo>
+				<lifecycle_status>alpha</lifecycle_status>
+				<lifecycle_version>3.0.0</lifecycle_version>
+				<lifecycle_last_change>3.15.1</lifecycle_last_change>
+			</xs:appinfo>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ids_properties"/>
+				<xs:element name="linear_controller" type="controllers_linear_controller" maxOccurs="20">
+					<xs:annotation>
+						<xs:documentation>A linear controller, this is rather conventional</xs:documentation>
+						<xs:appinfo>
+							<coordinate1>1...N</coordinate1>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="nonlinear_controller" type="controllers_nonlinear_controller" maxOccurs="20">
+					<xs:annotation>
+						<xs:documentation>A non-linear controller, this is less conventional and will have to be developed</xs:documentation>
+						<xs:appinfo>
+							<coordinate1>1...N</coordinate1>
+						</xs:appinfo>
+					</xs:annotation>
+				</xs:element>
+				<xs:element ref="time"/>
+				<xs:element ref="code"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

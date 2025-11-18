@@ -1,0 +1,57 @@
+# find the absolute path of the directory that contains this file
+export DD_BUILD ?= $(realpath $(CURDIR)/$(dir $(lastword $(MAKEFILE_LIST))))
+
+# If no IMAS_INSTALL_DIR is set, stage install here
+export IMAS_INSTALL_DIR ?= $(DD_BUILD)/install
+
+# Discover operating system environment
+UNAME_S:=$(shell uname -s)
+# Example values are plenty:
+# Linux linux linux-*
+# MSYS_NT-6.1 MINGW64_NT-6.1 MINGW32_NT-6.1
+# Darwin darwin*
+# SunOS solaris
+# AIX
+# So instead of this, use a simplified string in Makefiles and in
+# 'include Makefile.$(SYSTEM)' statements throughout.
+ifneq (,$(findstring inux,$(UNAME_S)))
+SYSTEM:=Linux
+endif
+ifneq (,$(findstring _NT,$(UNAME_S)))
+SYSTEM:=Windows
+endif
+ifneq (,$(findstring arwin,$(UNAME_S)))
+SYSTEM:=MacOS
+endif
+ifneq (,$(VERBOSE))
+$(info INFO: $(UNAME_S) SYSTEM=$(SYSTEM))
+endif
+
+ifndef DD_GIT_DESCRIBE
+DD_GIT_DESCRIBE:=$(shell git describe) # not sure we want a fallback with IMAS_VERSION: || echo $(IMAS_VERSION))
+endif
+# export variables for child programs (if not already)
+export DD_GIT_DESCRIBE UAL_GIT_DESCRIBE
+
+# Standard GNU/Linux installation directory variables
+prefix = $(IMAS_INSTALL_DIR)
+exec_prefix = $(prefix)
+bindir = $(exec_prefix)/bin
+sbindir = $(bindir)
+libexecdir = $(exec_prefix)/libexec
+datarootdir = $(prefix)/share
+datadir = $(datarootdir)
+sysconfdir = $(prefix)/etc
+includedir = $(prefix)/include
+docdir = $(datarootdir)/doc
+htmldir = $(docdir)
+libdir = $(exec_prefix)/lib
+srcdir = $(DD_BUILD)
+
+# Standard GNU Make command variables
+mkdir_p = mkdir -p --
+INSTALL = install
+INSTALL_DATA = ${INSTALL} -m 644
+INSTALL_PROGRAM = ${INSTALL}
+
+JAVA = java
