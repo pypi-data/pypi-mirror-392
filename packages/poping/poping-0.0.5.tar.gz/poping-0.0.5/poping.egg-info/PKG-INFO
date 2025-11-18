@@ -1,0 +1,257 @@
+Metadata-Version: 2.4
+Name: poping
+Version: 0.0.5
+Summary: Simple AI agent framework with cloud tool support
+Author-email: Poping Team <info@poping.ai>
+License: MIT
+Project-URL: Homepage, https://github.com/poping/poping
+Project-URL: Documentation, https://docs.poping.ai
+Project-URL: Repository, https://github.com/poping/poping
+Project-URL: Bug Tracker, https://github.com/poping/poping/issues
+Keywords: ai,agent,llm,tools,rag,memory
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: requests>=2.28.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0; extra == "dev"
+Requires-Dist: black>=23.0; extra == "dev"
+Requires-Dist: mypy>=1.0; extra == "dev"
+Requires-Dist: ruff>=0.1.0; extra == "dev"
+Dynamic: license-file
+
+## Poping SDK v2
+
+Pythonic AI agent framework with cloud tool support.
+
+## Architecture
+
+```
+poping/ (SDK)
+├── __init__.py          # Public API
+├── client.py            # Backend API client
+├── agent.py             # Agent builder + session
+├── tool.py              # @tool decorator + registry
+├── exceptions.py        # Custom exceptions
+└── README.md
+
+backend/api/ (Backend)
+└── server.py            # FastAPI server
+```
+
+## Quick Start
+
+### 1. Install Dependencies
+
+```bash
+pip install requests  # SDK only needs requests
+pip install fastapi uvicorn pydantic  # Backend server
+```
+
+### 2. Start Backend API
+
+```bash
+cd backend/api
+python server.py
+```
+
+Backend runs on `http://localhost:8000`
+
+### 3. Use SDK
+
+```python
+import poping
+
+# Define local tool
+@poping.tool(name="calc.add")
+def add(a: float, b: float) -> float:
+    """Add two numbers"""
+    return a + b
+
+# Build agent with local + cloud tools
+agent = (
+    poping.agent(llm="claude-3-5-sonnet-20241022")
+    .with_memory(session={"strategy": "summary"}, toolset=True)
+    .with_knowledge(["kb_docs"], toolset=True)
+    .with_tool(
+        local=[add],  # Local tools
+        cloud=["memory.add", "knowledge.search"]  # Cloud tools
+    )
+    .build(api_key="your_api_key")
+)
+
+# Chat
+with agent.session(user_id="user_123") as conv:
+    response = conv.chat("Remember that I like Python")
+    # → Agent auto-detects and executes cloud tool 'memory.add'
+    print(response)
+```
+
+## Key Features
+
+### 1. Local + Cloud Tools
+
+**Local tools** - Python functions decorated with `@tool`:
+```python
+@poping.tool(name="search.web")
+def search_web(query: str) -> str:
+    """Search the web"""
+    return f"Results for: {query}"
+```
+
+**Cloud tools** - Backend-hosted services:
+- `memory.add` - Add memory item
+- `memory.search` - Search memory
+- `knowledge.search` - Search knowledge base
+- `knowledge.query` - RAG query
+- `data.query` - Query dataset
+- `data.search` - Semantic search
+
+**Auto-detection**: When LLM decides to use a tool, SDK automatically:
+1. Checks if tool is local → executes Python function
+2. Checks if tool is cloud → calls backend API
+3. Returns result to LLM
+
+### 2. Backend Integration
+
+SDK communicates with backend via REST API:
+
+```
+SDK Tool Execution Flow:
+1. Agent receives message from user
+2. LLM decides to use tool (e.g., "memory.add")
+3. SDK checks tool registry:
+   - Local? Execute function directly
+   - Cloud? Call POST /api/v1/tools/execute
+4. Backend routes to appropriate module (memory, knowledge, data)
+5. Backend executes and returns result
+6. SDK sends result back to LLM
+7. LLM generates final response
+```
+
+### 3. Toolset Strategies
+
+When you enable `toolset=True` on modules:
+
+```python
+agent = (
+    poping.agent(llm="...")
+    .with_memory(toolset=True)  # Adds: memory.add, memory.search
+    .with_knowledge(["kb_docs"], toolset=True)  # Adds: knowledge.search, knowledge.query
+    .with_data(["ds_users"], toolset=True)  # Adds: data.query, data.search
+    .build()
+)
+```
+
+SDK automatically registers corresponding cloud tools.
+
+### 4. Tool Override
+
+Control tool availability per message:
+
+```python
+with agent.session(user_id="user_123") as conv:
+    # Use all configured tools
+    conv.chat("Search the docs")
+
+    # Use specific tools only
+    conv.chat("Search memory", tool=["memory.search"])
+
+    # Disable all tools
+    conv.chat("Just answer", tool=False)
+```
+
+## API Endpoints
+
+Backend exposes these endpoints:
+
+### Tools
+- `GET /api/v1/tools/list` - List cloud tools
+- `POST /api/v1/tools/execute` - Execute cloud tool
+
+### LLM
+- `POST /api/v1/llm/create` - Single LLM call (SDK owns tool loop)
+
+### Memory
+- `POST /api/v1/memory/{memory_id}/items` - Add memory
+- `GET /api/v1/memory/{memory_id}/search` - Search memory
+
+### Knowledge
+- `GET /api/v1/knowledge/{kb_id}/search` - Search KB
+- `POST /api/v1/knowledge/{kb_id}/query` - RAG query
+
+### Data
+- `POST /api/v1/data/{dataset_id}/records` - Insert record
+- `POST /api/v1/data/{dataset_id}/query` - Query dataset
+- `GET /api/v1/data/{dataset_id}/search` - Semantic search
+
+## Environment Variables
+
+```bash
+export POPING_API_KEY="your_api_key"
+export POPING_BASE_URL="http://localhost:8000"  # Optional
+```
+
+Then SDK automatically picks up credentials:
+
+```python
+agent = poping.agent(llm="...").build()  # No api_key needed
+```
+
+## Example
+
+See `examples/sdk_example.py` for complete example with:
+- Local tools (@tool decorator)
+- Cloud tools (memory, knowledge)
+- Session management
+- Tool overrides
+- Direct tool execution
+
+## Implementation Status
+
+**✅ Complete:**
+- SDK structure (client, agent, tool, exceptions)
+- @tool decorator for local tools
+- Agent builder pattern
+- Session management with context manager
+- Tool registry (local + cloud)
+- Backend API server structure
+- Cloud tool endpoints
+
+**🔲 TODO:**
+- Connect backend API to actual backend modules
+- Implement LLM integration (Claude API)
+- Implement tool call detection and execution loop
+- Add streaming support
+- Add async/await support
+- Add proper authentication/authorization
+- Add rate limiting
+- Add comprehensive error handling
+
+## Design Principles
+
+1. **Simple API** - Pythonic, intuitive, minimal boilerplate
+2. **Cloud tool auto-detection** - SDK handles local vs cloud transparently
+3. **Flexible tool strategies** - Mix local and cloud tools as needed
+4. **Backend integration** - Clean separation between SDK and backend
+5. **Session-based** - Context manager for automatic cleanup
+
+## Next Steps
+
+1. **Backend implementation**: Connect API endpoints to backend modules
+2. **LLM integration**: Add Anthropic Claude API calls
+3. **Tool execution**: Implement complete tool call loop
+4. **Testing**: Add unit and integration tests
+5. **Documentation**: API reference and guides
