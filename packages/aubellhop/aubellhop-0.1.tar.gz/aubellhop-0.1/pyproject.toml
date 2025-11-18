@@ -1,0 +1,177 @@
+
+####### PROJECT #######
+
+[project]
+name = "aubellhop"
+version = "0.1"
+
+description = "Bellhop underwater acoustic propagation model"
+readme = "README.md"
+license = "GPL-3.0-or-later"
+
+dependencies = [
+    "matplotlib",
+    "numpy",
+    "scipy",
+    "pandas",
+    "bokeh",
+]
+
+requires-python = ">=3.12, <3.14"
+
+authors = [
+  {name = "Will Robertson", email = "wspr81@gmail.com"},
+]
+maintainers = [
+  {name = "Will Robertson", email = "wspr81@gmail.com"},
+]
+
+classifiers = [
+  "Development Status :: 4 - Beta", #   5 - Production/Stable
+  "Programming Language :: Python :: 3.12",
+]
+
+
+[project.urls]
+Homepage = "https://github.com/avc-adelaide/bellhoppe"
+Documentation = "https://avc-adelaide.github.io/bellhoppe/"
+Repository = "https://github.com/avc-adelaide/bellhoppe.git"
+Issues = "https://github.com/avc-adelaide/bellhoppe/issues"
+Changelog = "https://github.com/avc-adelaide/bellhoppe/blob/master/CHANGES.md"
+
+####### BUILD #######
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+####### RUFF #######
+
+[tool.ruff]
+output-format = "github"
+
+
+####### MYPY #######
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+exclude = ["plotutils.py"]
+
+[[tool.mypy.overrides]]
+module = [
+    "numpy.*",
+    "scipy.*",
+    "pandas.*",
+    "matplotlib.*",
+    "bokeh.*",
+    "IPython.*"
+]
+ignore_missing_imports = true
+
+####### COVERAGE #######
+
+[tool.coverage.run]
+source = ["python/bellhop"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.coverage.html]
+directory = "_coverage_python"
+
+
+
+####### HATCH #######
+
+[tool.hatch.build.targets.wheel]
+packages = ["bellhop","python/bellhop"]
+
+[tool.hatch.build]
+sources = [".", "python"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "gcovr",
+    "ruff",
+    "coverage",
+    "mypy",
+    "jupyter",
+    "nbformat",
+    "sphinxcontrib-mermaid",
+]
+
+[tool.hatch.envs.default]
+features = ["dev"]  # includes pytest
+
+[tool.hatch.envs.default.env-vars]
+PATH = "{root}/bin:{env:PATH}"
+PYTHONPATH = "{root}/python:{env:PYTHONPATH:}"
+
+[tool.hatch.envs.default.scripts]
+install-dev = "pip install -e ."
+test = [
+    "install-dev",
+    "pytest tests/"
+]
+testv = [
+    "install-dev",
+    "pytest --capture=tee-sys --exitfirst"
+]
+covf = [
+    "install-dev",
+    "make coverage-full"
+]
+covp = [
+    "install-dev",
+    "python3 -m coverage run -m pytest tests/ --tb=short",
+    "python3 -m coverage html"
+]
+debug = [
+    "install-dev",
+    "echo PWD: `pwd`; echo PATH: $PATH; python -c 'import bellhop; print(\"bellhop:\", bellhop.__file__)'"
+]
+
+[tool.hatch.build.targets.sdist]
+ignore-vcs = true
+include = [
+  "/tests/*.py",
+]
+exclude = [
+  "/docs/*",
+]
+
+
+####### SETUPTOOLS #######
+
+[tool.setuptools]
+py-modules = []
+
+[tool.setuptools.packages.find]
+where = ["python"]
+include = ["bellhop*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+bellhop = ["bin/*"]
+
