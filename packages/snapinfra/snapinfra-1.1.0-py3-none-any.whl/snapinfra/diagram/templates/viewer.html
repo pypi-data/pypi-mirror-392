@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnapInfra Diagram Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #1e1e1e;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            height: 100vh;
+        }
+
+        .sidebar {
+            background: #252526;
+            border-right: 1px solid #3e3e42;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #3e3e42;
+        }
+
+        .sidebar-header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            color: #cccccc;
+        }
+
+        .diagram-list {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .diagram-item {
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .diagram-item:hover {
+            background: #2a2d2e;
+        }
+
+        .diagram-item.active {
+            background: #094771;
+            border-color: #0e639c;
+        }
+
+        .diagram-item-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .diagram-item-type {
+            font-size: 12px;
+            color: #cccccc;
+        }
+
+        .main-area {
+            display: flex;
+            flex-direction: column;
+            background: #1e1e1e;
+        }
+
+        .toolbar {
+            background: #2d2d30;
+            padding: 12px 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            border-bottom: 1px solid #3e3e42;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .toolbar-separator {
+            width: 1px;
+            height: 24px;
+            background: #3e3e42;
+            margin: 0 4px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: #0e639c;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #1177bb;
+        }
+
+        button:active {
+            background: #0d5a8f;
+        }
+
+        button.secondary {
+            background: #3e3e42;
+        }
+
+        button.secondary:hover {
+            background: #505050;
+        }
+
+        select {
+            padding: 8px 12px;
+            background: #3e3e42;
+            border: 1px solid #5a5a5a;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #0e639c;
+        }
+
+        .viewer-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+            padding: 40px;
+            background: #1e1e1e;
+        }
+
+        .diagram-container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 100%;
+            max-height: 100%;
+            overflow: auto;
+            transition: transform 0.2s;
+        }
+
+        #diagram-content {
+            max-width: 100%;
+            height: auto;
+        }
+
+        #diagram-content svg {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        #diagram-content img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #cccccc;
+        }
+
+        .loading-spinner {
+            border: 3px solid #3e3e42;
+            border-top: 3px solid #0e639c;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #f443364d;
+            border: 1px solid #f44336;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px;
+            color: #ffffff;
+        }
+
+        .error-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 40px;
+            color: #cccccc;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-state-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .empty-state-text {
+            font-size: 14px;
+            color: #999999;
+        }
+
+        .zoom-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2d2d30;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #cccccc;
+            border: 1px solid #3e3e42;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1>SnapInfra Diagrams</h1>
+                <p id="diagram-count">0 diagrams</p>
+            </div>
+            <div class="diagram-list" id="diagram-list">
+                <!-- Diagrams will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Main Area -->
+        <div class="main-area">
+            <div class="toolbar">
+                <div class="toolbar-group">
+                    <button onclick="zoomIn()" title="Zoom In">+</button>
+                    <button onclick="zoomOut()" title="Zoom Out">−</button>
+                    <button onclick="resetZoom()" class="secondary" title="Reset Zoom">100%</button>
+                </div>
+
+                <div class="toolbar-separator"></div>
+
+                <div class="toolbar-group">
+                    <select id="format-selector" onchange="changeFormat()">
+                        <option value="svg">SVG</option>
+                        <option value="png">PNG</option>
+                        <option value="pdf">PDF</option>
+                    </select>
+                </div>
+
+                <div class="toolbar-separator"></div>
+
+                <div class="toolbar-group">
+                    <button onclick="exportDiagram('svg')" class="secondary">Export SVG</button>
+                    <button onclick="exportDiagram('png')" class="secondary">Export PNG</button>
+                    <button onclick="exportDiagram('pdf')" class="secondary">Export PDF</button>
+                </div>
+
+                <div class="toolbar-separator"></div>
+
+                <div class="toolbar-group">
+                    <button onclick="refreshDiagram()" class="secondary" title="Refresh">↻</button>
+                </div>
+            </div>
+
+            <div class="viewer-area">
+                <div id="viewer-content">
+                    <!-- Diagram will be loaded here -->
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📊</div>
+                        <div class="empty-state-title">No Diagram Selected</div>
+                        <div class="empty-state-text">Select a diagram from the sidebar to view</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="zoom-indicator" id="zoom-indicator" style="display: none;">
+                Zoom: <span id="zoom-level">100</span>%
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDiagramId = null;
+        let currentZoom = 1.0;
+        let currentFormat = 'svg';
+        let diagrams = {{ diagrams | tojson }};
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDiagramList();
+            if (diagrams.length > 0) {
+                selectDiagram(diagrams[0].id);
+            }
+        });
+
+        function loadDiagramList() {
+            const listElement = document.getElementById('diagram-list');
+            const countElement = document.getElementById('diagram-count');
+
+            countElement.textContent = `${diagrams.length} diagram${diagrams.length !== 1 ? 's' : ''}`;
+
+            if (diagrams.length === 0) {
+                listElement.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No diagrams available</div>';
+                return;
+            }
+
+            listElement.innerHTML = diagrams.map(diagram => `
+                <div class="diagram-item ${diagram.id === currentDiagramId ? 'active' : ''}"
+                     onclick="selectDiagram('${diagram.id}')"
+                     id="diagram-item-${diagram.id}">
+                    <div class="diagram-item-name">${diagram.name}</div>
+                    <div class="diagram-item-type">${diagram.type.toUpperCase()}</div>
+                </div>
+            `).join('');
+        }
+
+        async function selectDiagram(diagramId) {
+            currentDiagramId = diagramId;
+
+            // Update active state in sidebar
+            document.querySelectorAll('.diagram-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.getElementById(`diagram-item-${diagramId}`)?.classList.add('active');
+
+            // Load diagram
+            await loadDiagram(diagramId);
+        }
+
+        async function loadDiagram(diagramId) {
+            const viewerContent = document.getElementById('viewer-content');
+
+            // Show loading state
+            viewerContent.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div>Rendering diagram...</div>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`/render/${diagramId}/${currentFormat}`);
+
+                if (!response.ok) {
+                    throw new Error(`Failed to render diagram: ${response.statusText}`);
+                }
+
+                const contentType = response.headers.get('content-type');
+
+                if (currentFormat === 'svg' || contentType.includes('svg')) {
+                    const svgText = await response.text();
+                    viewerContent.innerHTML = `
+                        <div class="diagram-container">
+                            <div id="diagram-content">${svgText}</div>
+                        </div>
+                    `;
+                } else {
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    viewerContent.innerHTML = `
+                        <div class="diagram-container">
+                            <div id="diagram-content">
+                                <img src="${url}" alt="Diagram">
+                            </div>
+                        </div>
+                    `;
+                }
+
+                resetZoom();
+
+            } catch (error) {
+                viewerContent.innerHTML = `
+                    <div class="error">
+                        <div class="error-title">Failed to Load Diagram</div>
+                        <div>${error.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        function zoomIn() {
+            currentZoom = Math.min(currentZoom + 0.1, 3.0);
+            applyZoom();
+        }
+
+        function zoomOut() {
+            currentZoom = Math.max(currentZoom - 0.1, 0.1);
+            applyZoom();
+        }
+
+        function resetZoom() {
+            currentZoom = 1.0;
+            applyZoom();
+        }
+
+        function applyZoom() {
+            const content = document.getElementById('diagram-content');
+            const indicator = document.getElementById('zoom-indicator');
+            const zoomLevel = document.getElementById('zoom-level');
+
+            if (content) {
+                content.style.transform = `scale(${currentZoom})`;
+                content.style.transformOrigin = 'center center';
+                content.style.transition = 'transform 0.2s';
+
+                indicator.style.display = 'block';
+                zoomLevel.textContent = Math.round(currentZoom * 100);
+            }
+        }
+
+        function changeFormat() {
+            const selector = document.getElementById('format-selector');
+            currentFormat = selector.value;
+
+            if (currentDiagramId) {
+                loadDiagram(currentDiagramId);
+            }
+        }
+
+        async function exportDiagram(format) {
+            if (!currentDiagramId) {
+                alert('No diagram selected');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/export/${currentDiagramId}/${format}`);
+
+                if (!response.ok) {
+                    throw new Error('Export failed');
+                }
+
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `diagram.${format}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                URL.revokeObjectURL(url);
+
+            } catch (error) {
+                alert(`Export failed: ${error.message}`);
+            }
+        }
+
+        function refreshDiagram() {
+            if (currentDiagramId) {
+                loadDiagram(currentDiagramId);
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                if (e.key === '=' || e.key === '+') {
+                    e.preventDefault();
+                    zoomIn();
+                } else if (e.key === '-') {
+                    e.preventDefault();
+                    zoomOut();
+                } else if (e.key === '0') {
+                    e.preventDefault();
+                    resetZoom();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
