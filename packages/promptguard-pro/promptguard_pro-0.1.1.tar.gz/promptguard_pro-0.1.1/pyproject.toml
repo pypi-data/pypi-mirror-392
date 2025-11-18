@@ -1,0 +1,114 @@
+[tool.poetry]
+name = "promptguard-pro"
+version = "0.1.1"
+description = "Production-ready framework for reliable LLM orchestration"
+authors = ["PromptGuard Team <team@promptguard.dev>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "promptguard_pro"}]
+homepage = "https://promptguard.dev"
+repository = "https://github.com/promptguard/promptguard"
+documentation = "https://promptguard.dev/docs"
+keywords = ["llm", "ai", "prompt", "reliability", "orchestration"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pydantic = "^2.5.0"
+anthropic = "^0.21.0"
+openai = "^1.12.0"
+aiohttp = "^3.9.0"
+tiktoken = "^0.6.0"
+structlog = "^24.1.0"
+redis = {version = "^5.0.0", optional = true}
+sentence-transformers = {version = "^2.3.0", optional = true}
+prometheus-client = {version = "^0.19.0", optional = true}
+groq = {version = "^0.9.0", optional = true}
+cohere = {version = "^5.0.0", optional = true}
+google-generativeai = {version = "^0.3.0", optional = true}
+pydantic-settings = "^2.0.0"
+
+[tool.poetry.extras]
+cache = ["redis"]
+validation = ["sentence-transformers"]
+metrics = ["prometheus-client"]
+providers = ["groq", "cohere", "google-generativeai"]
+all = ["redis", "sentence-transformers", "prometheus-client", "groq", "cohere", "google-generativeai"]
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+pytest-asyncio = "^0.23.0"
+pytest-cov = "^4.1.0"
+black = "^23.12.0"
+ruff = "^0.1.0"
+mypy = "^1.8.0"
+pre-commit = "^3.6.0"
+ipython = "^8.0.0"
+jupyter = "^1.0.0"
+httpx = "^0.25.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ["py39", "py310", "py311", "py312"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # Pyflakes
+    "I",      # isort
+    "C",      # flake8-comprehensions
+    "B",      # flake8-bugbear
+    "UP",     # pyupgrade
+]
+ignore = [
+    "E501",   # line too long
+    "W191",   # indentation contains tabs
+]
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "--cov=promptguard_pro --cov-report=html --cov-report=term-missing"
+markers = [
+    "asyncio: marks tests as async (deselect with '-m \"not asyncio\"')",
+    "integration: marks tests as integration tests",
+    "slow: marks tests as slow",
+]
