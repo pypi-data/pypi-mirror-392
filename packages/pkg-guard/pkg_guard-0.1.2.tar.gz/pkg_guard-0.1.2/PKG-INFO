@@ -1,0 +1,139 @@
+Metadata-Version: 2.4
+Name: pkg-guard
+Version: 0.1.2
+Summary: Safe, typo-aware package installer for Python.
+Author: Prasad
+License: MIT
+Project-URL: Homepage, https://github.com/Prasad2357/pkg-guard
+Project-URL: Repository, https://github.com/Prasad2357/pkg-guard
+Project-URL: BugTracker, https://github.com/Prasad2357/pkg-guard/issues
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: typer
+Requires-Dist: requests
+Requires-Dist: rich
+Requires-Dist: InquirerPy
+Requires-Dist: rapidfuzz
+Dynamic: license-file
+
+#  pkg-guard
+
+[![PyPI version](https://badge.fury.io/py/pkg-guard.svg)](https://pypi.org/project/pkg-guard/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+**pkg-guard** is a smart, typo-aware CLI wrapper for `pip install` — designed to prevent installing the wrong packages (e.g., `reqeusts` instead of `requests`).
+
+It checks PyPI before installing, offers fuzzy suggestions, and lets you interactively choose the correct package with arrow keys — just like `vite` or `npm init`.
+
+---
+
+##  Features
+
+✅ Detects misspelled packages before install  
+✅ Fuzzy matching & intelligent suggestions (powered by [RapidFuzz](https://github.com/maxbachmann/RapidFuzz))  
+✅ Interactive selection with arrow keys ([InquirerPy](https://github.com/kazhala/InquirerPy))  
+✅ Spinner feedback using [Rich](https://github.com/Textualize/rich)  
+✅ Caching for faster lookups  
+✅ Extensible architecture (future support for npm, cargo, etc.)
+
+---
+
+##  Installation
+
+### From PyPI (after release)
+```bash
+pip install pkg-guard
+```
+
+### From source (for developers)
+```bash
+git clone https://github.com/Prasad2357/pkg-guard
+cd pkg-guard
+pip install -e .
+```
+
+### Usage
+```bash
+pkg-guard install reqeusts
+```
+
+### Example 
+```bash
+pkg-guard → checking PyPI for package: reqeusts ...
+✖ Not found on PyPI: reqeusts
+
+? Select package to install instead of 'reqeusts':
+  ▸ requests
+    request
+    regex
+    flask
+    Other (type manually)
+    Skip
+```
+
+- Arrow keys to navigate
+- Press Enter to confirm
+- Type manually if your package isn’t listed
+
+### How it Works
+- Checks if the given package exists on PyPI
+
+- If not found, loads a local list of popular packages
+
+- Uses fuzzy matching (WRatio) to find closest matches
+
+- Presents them interactively via InquirerPy
+
+- Safely installs the chosen package with pip
+
+## Project Structure
+```bash
+
+pkg_guard/
+├── __main__.py          # Entry point for `python -m pkg_guard
+├── cli.py               # CLI definitions (Typer app)
+│
+├── core/
+│   ├── installer.py     # Main install workflow
+│   └── pypi_utils.py    # PyPI querying, caching, suggestions
+│
+└── ui/
+    ├── console.py       # Rich-based spinner & console
+    └── prompts.py       # Interactive fuzzy selection
+
+```
+
+
+##  Tech Stack
+
+| Component | Library/Framework |
+| :--- | :--- |
+| **CLI Framework** | [Typer](https://typer.tiangolo.com/) |
+| **Interactive Prompts** | [InquirerPy](https://inquirerpy.readthedocs.io/en/latest/) |
+| **Fuzzy Matching** | [RapidFuzz](https://github.com/maxbachmann/RapidFuzz) |
+| **Console UI** | [Rich](https://github.com/Textualize/rich) |
+| **HTTP Requests** | [Requests](https://requests.readthedocs.io/en/latest/) |
+
+## Development
+
+Run in dev mode:
+```bash
+python -m pkg_guard install flask
+```
+Run linting (optional):
+```bash
+pip install black
+black pkg_guard
+```
+
+
+## Contributing
+```bash
+Contributions are welcome!
+Feel free to fork this repo, open issues, or submit PRs.
+```
+
+##  License
+
+This project is licensed under the terms of the MIT License — see the `LICENSE` file for details.

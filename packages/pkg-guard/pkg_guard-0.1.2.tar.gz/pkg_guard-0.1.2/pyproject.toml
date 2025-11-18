@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pkg-guard"
+version = "0.1.2"
+description = "Safe, typo-aware package installer for Python."
+authors = [{ name = "Prasad" }]
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = ["typer", "requests", "rich", "InquirerPy", "rapidfuzz"]
+
+[project.urls]
+Homepage = "https://github.com/Prasad2357/pkg-guard"
+Repository = "https://github.com/Prasad2357/pkg-guard"
+BugTracker = "https://github.com/Prasad2357/pkg-guard/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pkg_guard*"]
+
+[project.scripts]
+pkg-guard = "pkg_guard.cli:app"
+
+[tool.setuptools.package-data]
+pkg_guard = ["popular_packages.txt"]
+
