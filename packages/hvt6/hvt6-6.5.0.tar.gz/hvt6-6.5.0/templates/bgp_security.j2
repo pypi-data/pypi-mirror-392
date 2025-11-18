@@ -1,0 +1,198 @@
+{#
+BGP Security Template - Displays BGP neighbor security status
+
+Metadata structure expected:
+- as_number: BGP AS number
+- total_neighbors: Total count of BGP neighbors
+- secured_count: Count of neighbors with security
+- unsecured_count: Count of neighbors without security
+- security_percentage: Percentage of secured neighbors
+- neighbors: List of neighbor dictionaries:
+  - ip: Neighbor IP address
+  - md5: Boolean - has MD5 authentication
+  - ttl_security: Boolean - has TTL security
+  - status: 'secured' or 'unsecured'
+#}
+
+<div class="check-detail">
+    <h4>BGP Neighbor Security Status</h4>
+
+    {% if metadata.total_neighbors == 0 %}
+        <p class="not-applicable">BGP AS {{ metadata.as_number }} configured but no neighbors defined.</p>
+    {% else %}
+        <div class="summary-stats">
+            <p><strong>BGP AS Number:</strong> {{ metadata.as_number }}</p>
+            <p><strong>Total Neighbors:</strong> {{ metadata.total_neighbors }}</p>
+            <p><strong>Secured:</strong>
+                <span class="{% if metadata.security_percentage == 100 %}pass-status{% elif metadata.security_percentage > 50 %}partial-status{% else %}fail-status{% endif %}">
+                    {{ metadata.secured_count }} ({{ metadata.security_percentage }}%)
+                </span>
+            </p>
+            <p><strong>Unsecured:</strong>
+                <span class="{% if metadata.unsecured_count > 0 %}fail-status{% else %}pass-status{% endif %}">
+                    {{ metadata.unsecured_count }}
+                </span>
+            </p>
+        </div>
+
+        {% if metadata.neighbors %}
+        <table class="detail-table">
+            <thead>
+                <tr>
+                    <th>Neighbor IP</th>
+                    <th>MD5 Auth</th>
+                    <th>TTL Security</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for neighbor in metadata.neighbors %}
+                <tr class="{% if neighbor.status == 'secured' %}pass-row{% else %}fail-row{% endif %}">
+                    <td><code>{{ neighbor.ip }}</code></td>
+                    <td class="centered">
+                        {% if neighbor.md5 %}
+                            <span class="status-icon pass">✓</span>
+                        {% else %}
+                            <span class="status-icon fail">✗</span>
+                        {% endif %}
+                    </td>
+                    <td class="centered">
+                        {% if neighbor.ttl_security %}
+                            <span class="status-icon pass">✓</span>
+                        {% else %}
+                            <span class="status-icon fail">✗</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if neighbor.status == 'secured' %}
+                            <span class="pass-status">Secured</span>
+                        {% else %}
+                            <span class="fail-status">Unsecured</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        <div class="recommendation-box">
+            <h5>Security Recommendations:</h5>
+            <ul>
+                <li><strong>MD5 Authentication:</strong> Configure <code>neighbor &lt;ip&gt; password &lt;md5-password&gt;</code> under BGP process</li>
+                <li><strong>TTL Security (GTSM):</strong> Configure <code>neighbor &lt;ip&gt; ttl-security hops &lt;hop-count&gt;</code> (typically 1 for eBGP)</li>
+                <li><strong>Best Practice:</strong> Use BOTH MD5 and TTL security for maximum protection</li>
+                <li><strong>eBGP Peers:</strong> TTL security is especially critical for external BGP peers</li>
+            </ul>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.summary-stats {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 15px 0;
+}
+
+.summary-stats p {
+    margin: 5px 0;
+}
+
+.detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+}
+
+.detail-table th,
+.detail-table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #dee2e6;
+}
+
+.detail-table th {
+    background-color: #1e3a8a;
+    color: white;
+    font-weight: 600;
+}
+
+.detail-table td.centered {
+    text-align: center;
+}
+
+.pass-row {
+    background-color: #d4edda;
+}
+
+.fail-row {
+    background-color: #f8d7da;
+}
+
+.status-icon {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.status-icon.pass {
+    color: #28a745;
+}
+
+.status-icon.fail {
+    color: #dc3545;
+}
+
+.pass-status {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.fail-status {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.partial-status {
+    color: #ffc107;
+    font-weight: 600;
+}
+
+.not-applicable {
+    color: #6c757d;
+    font-style: italic;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.recommendation-box {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 5px;
+}
+
+.recommendation-box h5 {
+    margin-top: 0;
+    color: #856404;
+}
+
+.recommendation-box ul {
+    margin: 10px 0 0 0;
+    padding-left: 20px;
+}
+
+.recommendation-box li {
+    margin: 8px 0;
+}
+
+.recommendation-box code {
+    background-color: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+}
+</style>

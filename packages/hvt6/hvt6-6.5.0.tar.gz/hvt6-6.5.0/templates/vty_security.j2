@@ -1,0 +1,577 @@
+{#
+VTY Line Security Template - Displays comprehensive VTY line security status
+
+Actual metadata structure from vty_security.py:
+- ssh_v2_configured: Boolean (SSHv2 prerequisite status - CRITICAL)
+- total_lines: Integer (VTY lines found)
+- ssh_only_count: Integer
+- timeout_count: Integer
+- acl_count: Integer
+- telnet_count: Integer
+- timeout_reasonable_count: Integer
+- ssh_percentage: Float
+- timeout_percentage: Float
+- acl_percentage: Float
+- vty_lines: List of VTY line dicts
+  - name: String
+  - transport: Dict (ssh_only, telnet_found, protocols)
+  - timeout: Dict (configured, minutes, seconds, reasonable)
+  - acl: Dict (configured, acl_name)
+- score_details: Dict
+  - ssh_score: Integer (0-10)
+  - timeout_score: Integer (0-6)
+  - acl_score: Integer (0-5)
+  - timeout_validation_score: Integer (0-2)
+  - no_telnet_score: Integer (0-2)
+  - issues: List of strings
+- achieved_score: Integer (0-25)
+- percentage: Float
+#}
+
+<div class="check-detail">
+    <h4>VTY Line Comprehensive Security Status</h4>
+
+    <div class="summary-stats">
+        <p><strong>Overall Score:</strong>
+            <span class="{% if metadata.percentage >= 90 %}pass-status{% elif metadata.percentage >= 70 %}partial-status{% else %}fail-status{% endif %}">
+                {{ metadata.achieved_score }}/{{ result.max_score }} points ({{ metadata.percentage }}%)
+            </span>
+        </p>
+        <p><strong>VTY Lines Detected:</strong>
+            <span class="info-status">{{ metadata.total_lines }}</span>
+            {% if metadata.total_lines == 0 %}
+                <span class="fail-status">(No VTY lines found in running-config)</span>
+            {% endif %}
+        </p>
+        <p><strong>Issues Found:</strong>
+            <span class="{% if metadata.score_details.issues|length == 0 %}pass-status{% elif metadata.score_details.issues|length <= 3 %}partial-status{% else %}fail-status{% endif %}">
+                {{ metadata.score_details.issues|length }}
+            </span>
+        </p>
+    </div>
+
+    {% if not metadata.ssh_v2_configured %}
+    {# SSHv2 Prerequisite Failure - Critical Alert #}
+    <div class="critical-section" style="margin: 20px 0;">
+        <h5><span class="status-icon fail">✗</span> CRITICAL PREREQUISITE FAILURE</h5>
+        <p style="color: #721c24; font-weight: 600; font-size: 1.1em;">
+            ❌ SSHv2 is NOT configured globally on this device
+        </p>
+        <p style="margin: 10px 0;">
+            The command <code style="background-color: #f8f9fa; padding: 3px 8px; border-radius: 3px; color: #dc3545; font-weight: 600;">ip ssh version 2</code>
+            is <strong>REQUIRED</strong> for VTY line security validation.
+        </p>
+        <div style="background-color: #fff5f5; padding: 12px; border-left: 3px solid #dc3545; margin: 15px 0;">
+            <p style="margin: 5px 0;"><strong>Why This is Critical:</strong></p>
+            <ul style="margin: 5px 0; padding-left: 20px;">
+                <li>VTY lines may accept SSHv1 connections (cryptographically weak)</li>
+                <li>SSHv1 has known security vulnerabilities</li>
+                <li>Violates DISA STIG V-215818 security requirement</li>
+                <li>Non-compliant with modern security standards</li>
+            </ul>
+        </div>
+        <div style="background-color: #fffacd; padding: 12px; border-left: 3px solid #ffc107; margin: 15px 0;">
+            <p style="margin: 5px 0; color: #856404;"><strong>Required Action:</strong></p>
+            <pre style="background-color: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;"><code>configure terminal
+ip ssh version 2
+end
+write memory</code></pre>
+        </div>
+        <p style="color: #721c24; font-weight: 600; margin-top: 15px;">
+            ⚠️ This check scores <span style="font-size: 1.2em;">0/25 points</span> until SSHv2 is properly configured.
+        </p>
+    </div>
+    {% endif %}
+
+    <h5>Weighted Scoring Breakdown</h5>
+    <table class="detail-table">
+        <thead>
+            <tr>
+                <th>Criterion</th>
+                <th>Weight</th>
+                <th>Score</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="{% if metadata.score_details.ssh_score == 10 %}pass-row{% elif metadata.score_details.ssh_score >= 5 %}warn-row{% else %}fail-row{% endif %}">
+                <td><strong>SSH-Only Transport</strong></td>
+                <td>10 points</td>
+                <td class="centered">{{ metadata.score_details.ssh_score }}/10</td>
+                <td>
+                    {% if metadata.score_details.ssh_score == 10 %}
+                        <span class="status-icon pass">✓</span> <span class="pass-status">All lines SSH-only</span>
+                    {% elif metadata.score_details.ssh_score >= 5 %}
+                        <span class="status-icon warn">⚠</span> <span class="partial-status">{{ metadata.ssh_percentage|round(0)|int }}% SSH-only</span>
+                    {% else %}
+                        <span class="status-icon fail">✗</span> <span class="fail-status">{{ metadata.ssh_percentage|round(0)|int }}% SSH-only</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr class="{% if metadata.score_details.timeout_score == 6 %}pass-row{% elif metadata.score_details.timeout_score >= 3 %}warn-row{% else %}fail-row{% endif %}">
+                <td><strong>Exec-Timeout Configured</strong></td>
+                <td>6 points</td>
+                <td class="centered">{{ metadata.score_details.timeout_score }}/6</td>
+                <td>
+                    {% if metadata.score_details.timeout_score == 6 %}
+                        <span class="status-icon pass">✓</span> <span class="pass-status">All lines configured</span>
+                    {% elif metadata.score_details.timeout_score >= 3 %}
+                        <span class="status-icon warn">⚠</span> <span class="partial-status">{{ metadata.timeout_percentage|round(0)|int }}% configured</span>
+                    {% else %}
+                        <span class="status-icon fail">✗</span> <span class="fail-status">{{ metadata.timeout_percentage|round(0)|int }}% configured</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr class="{% if metadata.score_details.acl_score == 5 %}pass-row{% elif metadata.score_details.acl_score >= 2 %}warn-row{% else %}fail-row{% endif %}">
+                <td><strong>Access-Class ACL</strong></td>
+                <td>5 points</td>
+                <td class="centered">{{ metadata.score_details.acl_score }}/5</td>
+                <td>
+                    {% if metadata.score_details.acl_score == 5 %}
+                        <span class="status-icon pass">✓</span> <span class="pass-status">All lines protected</span>
+                    {% elif metadata.score_details.acl_score >= 2 %}
+                        <span class="status-icon warn">⚠</span> <span class="partial-status">{{ metadata.acl_percentage|round(0)|int }}% protected</span>
+                    {% else %}
+                        <span class="status-icon fail">✗</span> <span class="fail-status">{{ metadata.acl_percentage|round(0)|int }}% protected</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr class="{% if metadata.score_details.timeout_validation_score == 2 %}pass-row{% else %}warn-row{% endif %}">
+                <td><strong>Timeout ≤ 10 Minutes</strong></td>
+                <td>2 points</td>
+                <td class="centered">{{ metadata.score_details.timeout_validation_score }}/2</td>
+                <td>
+                    {% if metadata.score_details.timeout_validation_score == 2 %}
+                        <span class="status-icon pass">✓</span> <span class="pass-status">All timeouts reasonable</span>
+                    {% else %}
+                        <span class="status-icon warn">⚠</span> <span class="fail-status">Some timeouts excessive</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr class="{% if metadata.score_details.no_telnet_score == 2 %}pass-row{% else %}fail-row{% endif %}">
+                <td><strong>No Telnet Protocol</strong></td>
+                <td>2 points</td>
+                <td class="centered">{{ metadata.score_details.no_telnet_score }}/2</td>
+                <td>
+                    {% if metadata.score_details.no_telnet_score == 2 %}
+                        <span class="status-icon pass">✓</span> <span class="pass-status">Telnet not found</span>
+                    {% else %}
+                        <span class="status-icon fail">✗</span> <span class="fail-status">Telnet detected - CRITICAL</span>
+                    {% endif %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h5>VTY Lines Overview ({{ metadata.total_lines }} detected in running-config)</h5>
+    <table class="detail-table">
+        <thead>
+            <tr>
+                <th>Security Feature</th>
+                <th>Compliant Lines</th>
+                <th>Percentage</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="{% if metadata.ssh_percentage == 100 %}pass-row{% elif metadata.ssh_percentage >= 75 %}warn-row{% else %}fail-row{% endif %}">
+                <td><strong>SSH-Only Transport</strong></td>
+                <td class="centered">{{ metadata.ssh_only_count }}/{{ metadata.total_lines }}</td>
+                <td class="centered">{{ metadata.ssh_percentage|round(1) }}%</td>
+                <td class="centered">
+                    {% if metadata.ssh_percentage == 100 %}
+                        <span class="status-icon pass">✓</span>
+                    {% elif metadata.ssh_percentage >= 75 %}
+                        <span class="status-icon warn">⚠</span>
+                    {% else %}
+                        <span class="status-icon fail">✗</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr class="{% if metadata.timeout_percentage == 100 %}pass-row{% elif metadata.timeout_percentage >= 75 %}warn-row{% else %}fail-row{% endif %}">
+                <td><strong>Exec-Timeout</strong></td>
+                <td class="centered">{{ metadata.timeout_count }}/{{ metadata.total_lines }}</td>
+                <td class="centered">{{ metadata.timeout_percentage|round(1) }}%</td>
+                <td class="centered">
+                    {% if metadata.timeout_percentage == 100 %}
+                        <span class="status-icon pass">✓</span>
+                    {% elif metadata.timeout_percentage >= 75 %}
+                        <span class="status-icon warn">⚠</span>
+                    {% else %}
+                        <span class="status-icon fail">✗</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr class="{% if metadata.acl_percentage == 100 %}pass-row{% elif metadata.acl_percentage >= 75 %}warn-row{% else %}fail-row{% endif %}">
+                <td><strong>Access-Class ACL</strong></td>
+                <td class="centered">{{ metadata.acl_count }}/{{ metadata.total_lines }}</td>
+                <td class="centered">{{ metadata.acl_percentage|round(1) }}%</td>
+                <td class="centered">
+                    {% if metadata.acl_percentage == 100 %}
+                        <span class="status-icon pass">✓</span>
+                    {% elif metadata.acl_percentage >= 75 %}
+                        <span class="status-icon warn">⚠</span>
+                    {% else %}
+                        <span class="status-icon fail">✗</span>
+                    {% endif %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    {% if metadata.vty_lines %}
+    <details class="collapsible-section">
+        <summary><h5>Per-Line VTY Security Details ({{ metadata.total_lines }})</h5></summary>
+        <div class="vty-details-container">
+            {% for vty in metadata.vty_lines %}
+            <div class="vty-line-card">
+                <h6>{{ vty.name }}</h6>
+                <table class="detail-table">
+                    <tbody>
+                        <tr class="{% if vty.ssh_only %}pass-row{% else %}fail-row{% endif %}">
+                            <td><strong>Transport Input</strong></td>
+                            <td class="centered">
+                                {% if vty.ssh_only %}
+                                    <span class="status-icon pass">✓</span>
+                                {% else %}
+                                    <span class="status-icon fail">✗</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if vty.ssh_only %}
+                                    <span class="pass-status">SSH Only</span>
+                                {% elif vty.transport %}
+                                    <span class="fail-status">{{ vty.transport|join(', ') }}</span>
+                                {% else %}
+                                    <span class="fail-status">Not configured (default: all)</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr class="{% if vty.has_timeout and vty.timeout_reasonable %}pass-row{% elif vty.has_timeout %}warn-row{% else %}fail-row{% endif %}">
+                            <td><strong>Exec-Timeout</strong></td>
+                            <td class="centered">
+                                {% if vty.has_timeout %}
+                                    {% if vty.timeout_reasonable %}
+                                        <span class="status-icon pass">✓</span>
+                                    {% else %}
+                                        <span class="status-icon warn">⚠</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="status-icon fail">✗</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if vty.has_timeout %}
+                                    <code>{{ vty.timeout_minutes }} minutes</code>
+                                    {% if not vty.timeout_reasonable %}
+                                        <span class="fail-status">(> 10 minutes - excessive)</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="fail-status">Not configured</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr class="{% if vty.has_acl %}pass-row{% else %}warn-row{% endif %}">
+                            <td><strong>Access-Class</strong></td>
+                            <td class="centered">
+                                {% if vty.has_acl %}
+                                    <span class="status-icon pass">✓</span>
+                                {% else %}
+                                    <span class="status-icon warn">⚠</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if vty.has_acl %}
+                                    <code>{{ vty.acl_name }}</code>
+                                {% else %}
+                                    <span class="fail-status">Not configured</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        </div>
+    </details>
+    {% endif %}
+
+    {% if metadata.score_details.issues %}
+    <div class="critical-section">
+        <h5><span class="status-icon fail">✗</span> Security Issues Found ({{ metadata.score_details.issues|length }})</h5>
+        <ul class="issue-list">
+            {% for issue in metadata.score_details.issues %}
+            <li>{{ issue }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="recommendation-box">
+        <h5>Configuration Recommendations:</h5>
+        <ul>
+            <li><strong>SSH-Only Transport:</strong> Configure <code>transport input ssh</code> under ALL VTY lines to disable Telnet
+                <pre><code>line vty 0 4
+ transport input ssh
+line vty 5 15
+ transport input ssh</code></pre>
+            </li>
+            <li><strong>Exec-Timeout:</strong> Configure <code>exec-timeout 10 0</code> (10 minutes, 0 seconds) under ALL VTY lines
+                <pre><code>line vty 0 4
+ exec-timeout 10 0
+line vty 5 15
+ exec-timeout 10 0</code></pre>
+            </li>
+            <li><strong>Access-Class ACL:</strong> Restrict VTY access by source IP using ACLs
+                <pre><code>! Define ACL permitting management networks
+ip access-list standard VTY-ACCESS
+ permit 10.1.1.0 0.0.0.255
+ deny   any log
+
+! Apply to VTY lines
+line vty 0 15
+ access-class VTY-ACCESS in</code></pre>
+            </li>
+        </ul>
+    </div>
+
+    <div class="info-box">
+        <h5>VTY Line Security Best Practices:</h5>
+        <ul>
+            <li><strong>Auto-Detection:</strong> This check automatically detects ALL VTY lines present in your running-config (default: <code>line vty 0 4</code> and <code>line vty 5 15</code>). Only configured lines are scored.</li>
+            <li><strong>Weighted Scoring:</strong> Criteria are weighted by security impact: SSH transport (10 pts) > Timeout (6 pts) > ACL (5 pts) > Validation (2 pts) > No Telnet (2 pts)</li>
+            <li><strong>SSH-Only:</strong> Telnet transmits passwords in cleartext - always use SSH for remote management</li>
+            <li><strong>Exec-Timeout:</strong> Sessions without timeout can be hijacked if administrators walk away from terminals. Cisco recommends ≤ 10 minutes (STIG V-220689)</li>
+            <li><strong>Access-Class ACLs:</strong> Restrict VTY access to known management networks/jump hosts. Limit attack surface by blocking unauthorized source IPs (STIG V-220690)</li>
+            <li><strong>Additional VTY Lines:</strong> If devices support more than 16 VTY lines (e.g., <code>line vty 16 31</code>), configure security consistently across ALL lines</li>
+            <li><strong>STIG References:</strong>
+                <ul>
+                    <li>V-220689: VTY exec-timeout configuration</li>
+                    <li>V-220690: VTY access-class ACL restriction</li>
+                    <li>V-215825: SSH-only transport (no Telnet)</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<style>
+.summary-stats {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 15px 0;
+}
+
+.summary-stats p {
+    margin: 5px 0;
+}
+
+.info-status {
+    color: #0c5460;
+    font-weight: 600;
+}
+
+.detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+}
+
+.detail-table th,
+.detail-table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #dee2e6;
+}
+
+.detail-table th {
+    background-color: #1e3a8a;
+    color: white;
+    font-weight: 600;
+}
+
+.detail-table td.centered {
+    text-align: center;
+}
+
+.pass-row {
+    background-color: #d4edda;
+}
+
+.fail-row {
+    background-color: #f8d7da;
+}
+
+.warn-row {
+    background-color: #fff3cd;
+}
+
+.status-icon {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.status-icon.pass {
+    color: #28a745;
+}
+
+.status-icon.fail {
+    color: #dc3545;
+}
+
+.status-icon.warn {
+    color: #ffc107;
+}
+
+.pass-status {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.fail-status {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.partial-status {
+    color: #ffc107;
+    font-weight: 600;
+}
+
+.collapsible-section {
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 20px 0;
+}
+
+.collapsible-section summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: #1e3a8a;
+}
+
+.collapsible-section summary:hover {
+    color: #3b82f6;
+}
+
+.vty-details-container {
+    margin-top: 15px;
+}
+
+.vty-line-card {
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 15px 0;
+    background-color: #f8f9fa;
+}
+
+.vty-line-card h6 {
+    margin-top: 0;
+    color: #1e3a8a;
+    font-size: 1.1em;
+    border-bottom: 2px solid #1e3a8a;
+    padding-bottom: 5px;
+}
+
+.vty-line-card .detail-table {
+    margin: 10px 0 0 0;
+}
+
+.critical-section {
+    background-color: #fff5f5;
+    border: 2px solid #dc3545;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 20px 0;
+}
+
+.critical-section h5 {
+    color: #721c24;
+    margin-top: 0;
+}
+
+.issue-list {
+    margin: 10px 0 0 20px;
+    padding: 0;
+}
+
+.issue-list li {
+    margin: 8px 0;
+    color: #721c24;
+}
+
+.recommendation-box {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 5px;
+}
+
+.recommendation-box h5 {
+    margin-top: 0;
+    color: #856404;
+}
+
+.recommendation-box ul {
+    margin: 10px 0 0 0;
+    padding-left: 20px;
+}
+
+.recommendation-box li {
+    margin: 12px 0;
+}
+
+.recommendation-box code {
+    background-color: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+}
+
+.recommendation-box pre {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+    margin: 5px 0;
+}
+
+.recommendation-box pre code {
+    padding: 0;
+}
+
+.info-box {
+    background-color: #d1ecf1;
+    border-left: 4px solid #0c5460;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 5px;
+}
+
+.info-box h5 {
+    margin-top: 0;
+    color: #0c5460;
+}
+
+.info-box ul {
+    margin: 10px 0 0 0;
+    padding-left: 20px;
+}
+
+.info-box li {
+    margin: 8px 0;
+}
+
+h5 {
+    margin-top: 20px;
+    color: #1e3a8a;
+}
+
+h6 {
+    color: #1e3a8a;
+}
+</style>

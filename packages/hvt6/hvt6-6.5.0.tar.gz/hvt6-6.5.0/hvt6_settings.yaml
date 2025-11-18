@@ -1,0 +1,77 @@
+# HVT6 Application Settings
+# Configuration for the Hardening Verification Tool
+
+# Directories
+repo_dir: './repo'                    # Directory containing device configuration files
+reports_dir: './reports'              # Output directory for HTML reports
+results_dir: './results'              # Output directory for CSV/JSON results
+templates_dir: './templates'          # Jinja2 template directory
+
+# File Patterns
+config_file_pattern: '*.cfg'          # Pattern to match configuration files
+config_file_suffix: '_sh_run.cfg'     # Expected suffix for config files
+
+# Processing
+num_workers: 100                      # Number of parallel workers for Nornir
+timeout: 300                          # Timeout in seconds for device processing
+
+# Version Requirements (Cisco Recommended Baselines)
+min_ios_version: '12.4.6'            # Minimum recommended IOS version (plain IOS)
+min_ios_xe_version: '16.6.4'         # Minimum recommended IOS-XE version
+min_nxos_version: '9.3.10'           # Minimum recommended NX-OS version
+
+# Report Generation
+generate_charts: true                 # Generate donut and radar charts
+generate_csv: true                    # Generate CSV results file
+generate_html: true                   # Generate HTML reports
+generate_json: false                  # Generate JSON results (optional)
+
+# Chart Settings
+chart_dpi: 100                        # DPI for chart images
+chart_figsize: [8, 8]                # Figure size for charts [width, height]
+donut_colors:                         # Colors for donut chart segments
+  - '#2ecc71'  # Green for high scores
+  - '#f39c12'  # Orange for medium scores
+  - '#e74c3c'  # Red for low scores
+
+# Logging
+log_level: 'INFO'                     # Log level (DEBUG, INFO, WARNING, ERROR)
+log_file: 'config_analyzer.log'      # Log file name
+log_rotation: '10 MB'                 # Log file rotation size
+log_retention: '7 days'               # Log retention period
+
+# Customer Information
+customer_name: 'Customer'             # Default customer name (override with .env)
+
+# Template Settings
+template_encoding: 'utf-8'            # Template file encoding
+template_autoescape: true             # Enable autoescaping in templates
+
+# Scoring
+enable_weighted_scoring: true         # Use weighted scoring by category
+normalize_scores: true                # Normalize scores to 0-100 scale
+
+# Category Weights (if enable_weighted_scoring is true)
+# These determine the relative importance of each category in total score
+category_weights:
+  general: 1.0
+  operativa: 1.0
+  control: 1.5      # Higher weight for control plane security
+  acceso: 1.5       # Higher weight for access control
+  monitoreo: 1.0
+
+# Check Execution
+stop_on_error: false                  # Continue processing if a check fails
+retry_failed_checks: false            # Retry checks that encounter errors
+max_retries: 3                        # Maximum retry attempts
+
+# Output Formatting
+html_theme: 'default'                 # Theme for HTML reports
+include_timestamps: true              # Include timestamps in reports
+include_device_info: true             # Include device metadata in reports
+include_recommendations: true         # Include remediation recommendations
+
+# Advanced Options
+cache_parsed_configs: false           # Cache CiscoConfParse objects (experimental)
+validate_checks_config: true          # Validate checks.yaml on startup
+strict_mode: false                    # Fail on any validation error

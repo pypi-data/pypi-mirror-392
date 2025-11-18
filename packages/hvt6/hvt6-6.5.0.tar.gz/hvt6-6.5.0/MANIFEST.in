@@ -1,0 +1,87 @@
+# MANIFEST.in
+# Specifies additional files to include in source distributions
+
+# Essential documentation
+include README.md
+include LICENSE
+include CHANGELOG.md
+include GETTING_STARTED.md
+include CLAUDE.md
+include SECURITY.md
+include .env.example
+
+# Core Python files (CLI entry points)
+include hvt6.py
+include collect.py
+
+# Dependencies
+include requirements.txt
+
+# YAML configuration files (core application)
+include checks.yaml
+include hvt6_settings.yaml
+
+# Nornir/Collector configuration files
+include config.yaml
+include collection_config.yaml
+
+# Include all Jinja2 templates
+recursive-include templates *.j2
+recursive-include templates *.jinja2
+
+# Include collector inventory examples
+recursive-include inventory *.yaml
+recursive-include inventory *.yml
+
+# Include package metadata
+include pyproject.toml
+include MANIFEST.in
+
+# Exclude session summaries and internal docs
+exclude SESSION_SUMMARY*.md
+exclude PRD.md
+exclude TODO.md
+
+# Exclude Excel and backup files
+exclude *.xlsx
+exclude *.bkp
+exclude *.backup
+
+# Exclude generated HTML/CSS (will be regenerated)
+exclude index.html
+exclude styles.css
+exclude favicon.ico
+exclude icon.jpg
+exclude *.png
+exclude *.jpg
+
+# Exclude test/debug files
+exclude *.csv
+exclude config_patron.txt
+exclude __init__.py
+global-exclude =3.1.2
+
+# Exclude directories
+prune venv
+prune .venv
+prune .git
+prune .github
+prune .vscode
+prune legacy
+prune examples
+prune docs
+prune tests
+prune repo
+prune reports
+prune results
+prune CIS
+prune "diagramas de flujo"
+
+# Exclude cache and build artifacts
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * .DS_Store
+recursive-exclude * *.swp
+recursive-exclude * *~
+exclude .gitignore
+exclude .gitattributes

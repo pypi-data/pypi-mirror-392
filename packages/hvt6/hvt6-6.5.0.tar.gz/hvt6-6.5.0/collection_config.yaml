@@ -1,0 +1,112 @@
+# Collection Configuration
+# Configuration file for the HVT6 collection system
+#
+# This file controls how device data is collected, validated, and stored.
+# All settings are optional - defaults will be used if not specified.
+
+collection:
+  # Parallel Execution Settings
+  # --------------------------
+  # Number of concurrent worker threads for parallel collection
+  # Higher values = faster collection, but more resource usage
+  # Range: 1-100 (default: 20)
+  max_workers: 20
+
+  # SSH connection timeout in seconds
+  # Range: 5-300 (default: 30)
+  timeout: 30
+
+  # Number of retry attempts for failed operations
+  # Range: 0-10 (default: 3)
+  retry_attempts: 3
+
+  # Directory Settings
+  # ------------------
+  # Where to save collected device files
+  # Files will be named: {hostname}_sh_run.cfg, {hostname}_sh_ver.txt, etc.
+  output_directory: './repo'
+
+  # Where to save analysis results (CSV, reports)
+  results_directory: './results'
+
+  # Where to save collection logs
+  logs_directory: './logs'
+
+  # Command Customization
+  # ---------------------
+  # Cisco IOS/IOS-XE commands to execute during collection
+  # You can modify these if your devices use different syntax
+  commands:
+    version: 'show version'
+    inventory: 'show inventory'
+    # Add custom commands as needed:
+    # interfaces: 'show ip interface brief'
+    # routes: 'show ip route summary'
+
+  # File Naming
+  # -----------
+  # Suffixes appended to hostname when saving files
+  # Format: {hostname}{suffix}
+  file_suffixes:
+    version: '_sh_ver.txt'
+    inventory: '_sh_inv.txt'
+    config: '_sh_run.cfg'
+
+  # Validation Settings
+  # -------------------
+  validation:
+    # Enable validation of collected outputs
+    # Checks for required keywords and minimum file sizes
+    enabled: true
+
+    # Fail collection if validation errors occur
+    # If false, warnings are logged but collection continues
+    fail_on_invalid: false
+
+  # Logging Settings
+  # ----------------
+  # Log level: DEBUG, INFO, WARNING, ERROR
+  log_level: 'INFO'
+
+  # Save logs to file (in logs_directory)
+  log_to_file: true
+
+  # Nornir Configuration
+  # --------------------
+  # Path to Nornir config.yaml file
+  # Used when collecting from Nornir inventory
+  nornir_config_file: 'config.yaml'
+
+# Example: Minimal Configuration
+# -------------------------------
+# If you only need to change a few settings, you can use a minimal config:
+#
+# collection:
+#   max_workers: 50
+#   timeout: 60
+#   output_directory: './my_devices'
+#
+# All other settings will use defaults from CollectionConfig class.
+
+# Example: High-Performance Configuration
+# ----------------------------------------
+# For large-scale collection (100+ devices):
+#
+# collection:
+#   max_workers: 50
+#   timeout: 45
+#   retry_attempts: 5
+#   log_level: 'WARNING'  # Reduce log verbosity
+#   validation:
+#     enabled: true
+#     fail_on_invalid: false  # Don't stop on validation errors
+
+# Example: Conservative Configuration
+# ------------------------------------
+# For unreliable networks or slow devices:
+#
+# collection:
+#   max_workers: 5
+#   timeout: 120
+#   retry_attempts: 5
+#   log_level: 'DEBUG'  # Detailed logging for troubleshooting
