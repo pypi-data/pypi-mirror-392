@@ -1,0 +1,4 @@
+
+# geosdevpy module
+
+::: geosdevpy.geosdevpy
