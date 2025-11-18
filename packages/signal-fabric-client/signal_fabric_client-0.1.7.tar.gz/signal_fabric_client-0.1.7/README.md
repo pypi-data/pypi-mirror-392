@@ -1,0 +1,160 @@
+# Signal Fabric Client
+
+Official Python client library for [Signal Fabric](https://github.com/phasequant/signal-fabric) - a lightweight handler-based framework for generating market signals on demand.
+
+## Installation
+
+```bash
+pip install signal-fabric-client
+```
+
+## Quick Start
+
+```python
+from signal_fabric import GrpcClient, SignalOutcome
+import json
+
+with GrpcClient(host='localhost', port=9090,
+                ca_cert_path='../../certs/client/test.pem') as client:
+    outcome : SignalOutcome = client.process_signal(
+        target='spot:BTC/USDT',
+        signal_name='binance_rsi',
+        signal_op='compute_rsi',
+        handler_request={
+            "period":  14,
+            "timeframe": "1h"
+        }
+    )
+    # Check for errors first
+    if outcome.errors:
+        print('We got errors:')
+        for err_id, err_message in outcome.errors.items():
+            print(f"  - {err_id}: {err_message}")
+        print(f"\nResult: {outcome.result}")
+        print(f"Computation: {outcome.computation}")
+    else:
+        # No errors, parse the result
+        raw_result = outcome.result
+        if not raw_result:
+            print("Error: Empty result received")
+        else:
+            try:
+                resultObj = json.loads(raw_result)
+                print(f"""market: {resultObj['market']}
+symbol: {resultObj['symbol']}
+latest_rsi: {resultObj['latest_rsi']}
+regime: {resultObj['regime']}
+computed_at: {outcome.computed_at}
+""")
+            except json.JSONDecodeError as e:
+                print(f"Error parsing result as JSON: {e}")
+                print(f"Raw result: {raw_result}")
+```
+
+## API Reference
+
+### GrpcClient
+
+#### Constructor
+
+```python
+GrpcClient(host: str = 'localhost', port: int = 50051, timeout: int = 30, ca_cert_path: str = None)
+```
+
+**Parameters:**
+- `host` (str): Server hostname or IP address (default: 'localhost')
+- `port` (int): Server port number (default: 50051)
+- `timeout` (int): Request timeout in seconds (default: 30)
+- `ca_cert_path` (str): Path to CA certificate for server verification (PEM format)
+
+#### Methods
+
+**`connect()`**
+
+Establish connection to the server.
+
+**`disconnect()`**
+
+Close the connection to the server.
+
+**`is_connected() -> bool`**
+
+Check if client is currently connected.
+
+**`process_signal(target, signal_name, signal_op, handler_request=None) -> SignalOutcome`**
+
+Process a signal request.
+
+**Parameters:**
+- `target` (str): Target for signal computation (e.g., 'BTC', 'ETH', 'AAPL')
+- `signal_name` (str): Signal handler name or profile name
+- `signal_op` (str): Operation to perform (e.g., 'analyze', 'greet')
+- `handler_request` (dict, optional): Request parameters as dictionary
+
+**Returns:** `SignalOutcome` object
+
+### SignalOutcome
+
+Result object containing the signal computation outcome.
+
+#### Attributes
+
+- `result` (str): Signal result value
+- `computation` (str): Description of computation performed
+- `computed_at` (float): Unix timestamp when computed
+- `errors` (Dict[str, str]): Error codes and messages (or empty)
+- `details` (Dict[str, str]): Additional computation details (or empty)
+
+#### Methods
+
+**`has_errors() -> bool`**
+
+Returns `True` if the outcome contains errors.
+
+**`is_detailed() -> bool`**
+
+Returns `True` if the outcome has errors or additional details.
+
+## Requirements
+
+- Python 3.8+
+- grpcio >= 1.76.0
+- protobuf >= 4.0.0
+
+## Server Setup
+
+This client requires a running Signal Fabric server. To set up the server:
+
+1. Clone the Signal Fabric repository:
+   ```bash
+   git clone https://github.com/phasequant/signal-fabric.git
+   cd signal-fabric
+   ```
+
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Start the server:
+   ```bash
+   python src/server/server.py --config config.yaml
+   ```
+
+## Version
+
+Current version: **0.1.7**
+
+## License
+
+See LICENSE file for details.
+
+## Links
+
+- [Signal Fabric Repository](https://github.com/phasequant/signal-fabric)
+- [Documentation](https://github.com/phasequant/signal-fabric/docs)
+- [Issue Tracker](https://github.com/phasequant/signal-fabric/issues)
+
+## Support
+
+For questions, issues, or contributions, please visit the [GitHub repository](https://github.com/phasequant/signal-fabric).
