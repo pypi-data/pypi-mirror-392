@@ -1,0 +1,64 @@
+Metadata-Version: 2.4
+Name: auto-rename-ai
+Version: 1.0.0
+Summary: AI image renamer using EfficientNetB0
+Author-email: Shadi Remawi <shadiremawi7@gmail.com>
+License: MIT
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: numpy
+Requires-Dist: pillow
+Requires-Dist: tensorflow>=2.10.0
+
+## auto_rename_ai
+
+<<Auto Rename AI>> is a Python package for automatically renaming images using the EfficientNetB0 model. Each image is classified, and its filename is updated to include the class label, confidence percentage, and a counter.
+
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+## Features
+- Automatically renames images in the format 'label(confidence%)(counter).ext'
+- Supports '.jpg', '.jpeg', and '.png' image formats
+- Handles corrupted images without stopping the program
+- Processes an entire folder of images in one batch
+
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+
+## Installation
+The package can be installed via pip after local build or publishing:
+
+```bash
+pip install .
+
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+##Usage
+
+from auto_rename_ai import rename_images
+
+# Specify input and output folders
+input_folder = "path/to/images"
+output_folder = "path/to/output"
+
+# Automatically rename images
+rename_images(input_folder, output_folder)
+
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+##Result
+Each image will be renamed in the following format::
+
+label(confidence%)(counter).ext
+
+-->> for example: 
+golden_retriever(97.00%)(1).jpg
+sports_car(88.12%)(1).png
+keyboard(91.03%)(2).jpeg
+
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+##Requirements::
+
+Python 3.8+
+TensorFlow 2.x
