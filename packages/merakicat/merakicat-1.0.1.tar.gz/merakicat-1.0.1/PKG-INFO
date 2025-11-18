@@ -1,0 +1,410 @@
+Metadata-Version: 2.4
+Name: merakicat
+Version: 1.0.1
+Summary: An app to check and translate Catalyst switch configs to Meraki.
+Home-page: https://github.com/ecoen66/merakicat
+Author: Ed Coen
+Author-email: ecoen@cisco.com
+License: MIT license
+Keywords: merakicat,catalyst,meraki,cisco,migration,webexteamsbot
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3 :: Only
+Description-Content-Type: text/markdown
+License-File: LICENSE
+License-File: AUTHORS.rst
+Requires-Dist: webex-bot==0.4.7
+Requires-Dist: webexteamssdk==1.6.1
+Requires-Dist: Flask>=0.12.1
+Requires-Dist: netmiko==4.3.0
+Requires-Dist: tabulate==0.9.0
+Requires-Dist: ciscoconfparse2==0.7.50
+Requires-Dist: meraki==1.46.0
+Requires-Dist: python-docx==1.1.2
+Requires-Dist: docx2pdf==0.1.8
+Requires-Dist: requests==2.31.0
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: keywords
+Dynamic: license
+Dynamic: license-file
+Dynamic: requires-dist
+Dynamic: summary
+
+[![published](https://static.production.devnetcloud.com/codeexchange/assets/images/devnet-published.svg)](https://developer.cisco.com/codeexchange/github/repo/ecoen66/merakicat)
+# ![merakicat](https://github.com/ecoen66/merakicat/raw/main/images/merakicat.png) merakicat
+
+This package makes migrating [Cisco](https://www.cisco.com) Catalyst switches to [Meraki](https:www.meraki.com) Dashboard much easier. #merakicat
+
+![merakicat](https://github.com/ecoen66/merakicat/raw/main/images/mc_quick.gif)
+
+This Python app can be run in Webex Teams [Bot mode](#Bot) or in [command-line mode](#command-line).  It can also be called from shell scripts for [bulk-mode](#bulk-mode).
+
+Below is the list of configurations the tool can currently translate:
+
+switch:
+ - Hostname
+ - Spanning Tree RSTP
+ - Stack
+ - Static Routing
+
+port:
+ - Port Description
+ - Port Status
+ - Port Speed
+ - Port Duplex
+ - Port Type
+ - PoE Enabled
+ - Allowed VLANs
+ - Data VLAN
+ - Voice VLAN
+ - Private VLAN
+ - Layer 3 Interface
+ - STP RootGuard
+ - STP Loop Guard
+ - STP BPDU Guard
+ - Etherchannel LACP
+ - NM Ports
+
+
+Once installed, you can print the entire index of the feature encyclopedia, or to print the index based on either supported and translatable items or both, enter:
+```
+cd src/merakicat
+python mc_pedia [support] [translatable]
+```
+
+# Prerequisites for using in Bot mode
+
+If you don't already have a [Webex Teams](https://www.webex.com/products/teams/index.html) account, go ahead and [register](https://www.webex.com/pricing/free-trial.html) for one.  They are free.
+
+1. You'll need to start by adding your Bot to the Webex Teams website.
+
+    [https://developer.webex.com/my-apps](https://developer.webex.com/my-apps)
+
+1. Click **Create a New App**
+
+    ![add-app](https://github.com/ecoen66/merakicat/raw/main/images/newapp.jpg)
+
+1. Click **Create a Bot**.
+
+    ![create-bot](https://github.com/ecoen66/merakicat/raw/main/images/createbot.jpg)
+
+2. Fill out all the details about your Bot.  You'll need to set a name, username, icon (either upload one or choose a sample), and provide a description.
+
+    ![add-bot](https://github.com/ecoen66/merakicat/raw/main/images/newbot.jpg)
+
+3. Click **Add Bot**.
+
+1. On the Congratulations screen, make sure to copy the *Bot's Access Token*, you will need this in a second.
+
+    ![enter-details](https://github.com/ecoen66/merakicat/raw/main/images/botcongrats.jpg)
+
+# Installation
+
+> Python 3.11 is recommended.
+
+ - Clone the github repository and install the requirements
+
+```
+git clone https://github.com/ecoen66/merakicat
+cd merakicat
+pip install -r requirements_dev.txt
+```
+
+# Usage
+
+ - The easiest way to use this module is to set a few environment variables
+
+    > Note: As an alternative, you may edit the variables in mc_user_info.py.  Although more convenient, it is less secure.
+
+    ```
+    # These exports are used for Webex bot mode:
+    export TEAMS_BOT_TOKEN=<your bot's token>
+    export TEAMS_BOT_EMAIL=<your bot's email>
+    export TEAMS_BOT_APP_NAME=<your bot's name>
+    export TEAMS_EMAILS=<a comma delimited list of email addresses the bot will respond to>
+
+    # These exports are required regardless of mode:
+    export IOS_USERNAME=<the ssh username for the Catalyst switches>
+    export IOS_PASSWORD=<the ssh password for the Catalyst switches>
+    export IOS_SECRET=<the CLI secret password for the Catalyst switches>
+    export IOS_PORT=<the ssh port number for the Catalyst switches - usually 22>
+    export MERAKI_API_KEY=<your meraki dashboard API key>
+    export MERAKI_ORG_NAME =<your meraki organization name>
+    ```
+In addition to these settings, various debugs and a choice of PDF vs. DOCX report format can be enabled in the mc_user_info.py file.
+
+    > Note: For PDF report generation, MS Word must be installed on the host with merakicat.
+
+# Bot
+
+To run merakicat as a Bot, just start it without any parameters:
+
+```
+cd src/merakicat
+python merakicat.py
+```
+**Bot commands include the following:**
+
+Check a Catalyst switch config for both translatable and possible Meraki features:
+```
+check [host <FQDN or IP address> | file <filespec>] [with timing] [with details]
+```
+Check one or more Catalyst switch config files for both translatable and possible Meraki features:
+```
+check <drag-and-drop files> [with timing] [with details]
+```
+Check the configs of cloud monitored Catalyst switches for both translatable and possible Meraki features:
+```
+check network <Meraki network name> [with timing] [with details]
+```
+Register a Catalyst switch to the Meraki Dashboard:
+```
+register [host <FQDN or IP address>] [with timing]
+```
+Claim Catalyst switches to a Meraki Network:
+```
+claim [<Meraki serial numbers>] [to <Meraki network name>] [with timing]
+```
+Translate a Catalyst switch config from a file or host to claimed Meraki serial numbers:
+```
+translate [host <FQDN or IP address> | file <filespec>] [to <Meraki serial numbers>] [with timing]
+```
+Migrate a Catalyst switch to a Meraki switch - register, claim & translate:
+```
+migrate [host <FQDN or IP address>] [to <Meraki network name>] [with timing]
+```
+Create a demo report for all features currently in the feature encyclopedia:
+```
+demo report
+```
+
+
+# Command-line
+
+To run merakicat from the command-line (or from a shell script), enter any of the following:
+
+Check a Catalyst switch config for both translatable and possible Meraki features:
+```
+cd src/merakicat
+python merakicat.py check host <FQDN or IP address> | file <filespec> [with timing] [with details]
+```
+Check the configs of cloud monitored Catalyst switches for both translatable and possible Meraki features:
+```
+cd src/merakicat
+python merakicat.py check network <Meraki network name> [with timing] [with details]
+```
+Register a Catalyst switch or stack to the Meraki Dashboard:
+```
+cd src/merakicat
+python merakicat.py register host <FQDN or IP address> [with timing]
+```
+Claim Catalyst switches to a Meraki Network:
+```
+cd src/merakicat
+python merakicat.py claim <Meraki serial numbers> to <Meraki network name> [with timing]
+```
+Translate a Catalyst switch or stack config from a file or host to claimed Meraki serial numbers:
+```
+cd src/merakicat
+python merakicat.py translate host <FQDN or IP address> | file <filespec> to <Meraki serial numbers> [with timing]
+```
+Migrate a Catalyst switch to a Meraki switch - register, claim & translate:
+```
+cd src/merakicat
+python merakicat.py migrate host <FQDN or IP address> to <Meraki network name> [with timing]
+```
+Create a demo report for all features currently in the feature encyclopedia:
+```
+cd src/merakicat
+python merakicat.py demo report
+```
+
+
+# Bulk-mode
+
+To run merakicat in bulk-mode, create a shell script to call merakicat in command line mode.  Example scripts included in the repo are:
+
+Generate Check config reports for a list of Catalyst switches, 20 switches at a time, until the entire list is exhausted. The list is provided in an input file, one hostname/fqdn/IP address per line:
+```
+cd src/merakicat
+bulk_check.sh <input file>
+```
+Migrate a list of Catalyst switches to a Meraki network, 20 switches at a time, until the entire list is exhausted. The list is provided in an input file, one hostname/fqdn/IP address per line:
+```
+cd src/merakicat
+bulk_migrate.sh <input file> <Meraki network name>
+```
+
+
+# Donations
+
+If you found this repo to be useful, please consider donating to Life Decisions, Rockford, IL through a purchase from the [Merakicat store](https://bonfire.com/store/merakicat).
+
+
+# Credits
+**This project is _heavily_ based on the work of others:**
+
+`Catalyst_to_Meraki_Migration_Tool` by [Fady Sharobeem](https://github.com/fadysharobeem).
+
+`Catalyst_2_Meraki_Config_Checker` by [Fady Sharobeem](https://github.com/fadysharobeem).
+
+The bot functionality is using `webex_bot` by [Finbarr Brady](https://github.com/fbradyirl).
+
+
+# History
+
+## 1.0.1 (11-16-2025)
+
+  - Fixed issue with single switch "stacks".
+  - Fixed issue where switches on unified versions of IOS XE would automatically reboot into Meraki mode.
+  - Added compatibility with Early Adopters version of Meraki Dashboard API for unified IOS XE onboarding.
+  - Fixed issue with special versions of IOS XE.
+  - Reformatted the encyclopedia for easier updates and readability.
+  - Renamed the new encyclopedia, as it is no longer compatible with earlier versions of Merakicat.
+  - Updated requirements
+
+## 0.2.7 (03-23-2025)
+
+  - Resolved issue with C9K Uplink after API change.
+  - mc_pedia version 0.1.78
+
+## 0.2.6 (05-07-2024)
+
+  - Resolved Issue #6.
+  - Fixed issue with unclaiming switches before removing switch stack.
+  - Updated requirements.
+
+## 0.2.5 (04-25-2024)
+
+  - Reverted back to Finbarr Brady's webex-bot after a pull merge.
+
+## 0.2.4 (04-12-2024)
+
+  - Added Private VLAN -> Port Isolation to encyclopedia.
+  - Removed older bot code.
+  - Updated AUTHORS.rst.
+  - Updated .gitignore
+
+## 0.2.3 (04-10-2024)
+
+  - Translate now checks to make sure that the target switches have the same number of ports as the sources.
+
+## 0.2.2 (04-10-2024)
+
+  - Added environment variable to specify a Meraki Oragnization name.
+
+## 0.2.1 (04-10-2024)
+
+  - Added support for ip default-gateway as a static route.
+
+## 0.2.0 (04-10-2024)
+
+  - Changed BOT libraries to enable websockets and remove ngrok for security.
+  - Began adding logic for Catalyst Cloud Monitoring onboarding.
+
+## 0.1.8 (04-03-2024)
+
+  - Edited README.
+  - Renamed mc_user_sample.py to mc_user_info.py and commented out possible environment variables.
+  - Added logic to merakicat.py to handle missing variables on import from mc_user_info.py.
+
+## 0.1.7 (04-01-2024)
+
+  - Added the ability to Check the configs of cloud monitored Catalyst switches for both translatable and possible Meraki features.
+  - Included "with timing" and "with details" options on check drag-n-drop.
+  - Renamed some called functions in external modules.
+
+## 0.1.6 (03-26-2024)
+
+  - Updated encyclopedia.
+  - Migrated batch helper code for cleaner installation.
+
+## 0.1.5 (03-23-2024)
+
+  - Supports NM ports.
+  - Merged nm-specifics into the encyclopedia.
+
+## 0.1.4 (03-21-2024)
+
+  - Downloads a fresh copy of the encyclopedia from my repo if the local copy is over 24 hours old.
+
+## 0.1.3 (03-21-2024)
+
+  - Code beautification with flake8.
+  - Setting up for publishing automation.
+  - Changed directory structure for publishing.
+  - Released on PyPI.
+
+## 0.0.14 (03-19-2024)
+
+  - Option added for check with drag and drop files in bot mode.
+  - Added missing timing in check report in bot mode.
+  - Still not yet released on PyPI.
+
+## 0.0.13 (03-18-2024)
+
+  - Option added for detailed check report "with detail".
+
+## 0.0.12 (03-15-2024)
+
+  - Option for PDF vs. DOCX reporting in checker.
+  - Layer 3 Interfaces (interface VLAN) supported.
+  - Static routes supported.
+  - Command added for "demo report".
+
+## 0.0.11 (03-12-2024)
+
+  - New reporting in checker.
+  - Port-channel LACP is working and fast.
+
+## 0.0.10 (03-08-2024)
+
+  - Using a single mc_pedia.
+
+## 0.0.9 (03-07-2024)
+
+  - Using both config_pedia and check_pedia.
+  - Changed to ngrok API for bot functionality
+
+## 0.0.8 (03-01-2024)
+
+  - Lots of comment blocks added.
+
+## 0.0.7 (03-01-2024)
+
+  - Now using batch port updates to Meraki dashboard.
+
+## 0.0.6 (03-01-2024)
+
+  - Some light refactoring of mc_translate module.
+  - More prep work for Uplink config.
+
+## 0.0.5 (02-29-2024)
+
+  - Added Catalyst NM module recognition and prep work for Uplink config.
+
+## 0.0.4 (02-28-2024)
+
+  - Removed external data fetch for list of unsupported features in prep for adding display of features that are semi-supported.
+  - Added command line help **python merakicat.py help**.
+
+## 0.0.3 (02-27-2024)
+
+  - Created command line option vs BOT.
+  - Just try **python merakicat.py convert host <host or ip address> to <meraki network>**.
+
+## 0.0.2 (02-26-2024)
+
+  - Not yet released on PyPI.
+
+## 0.0.1 (02-26-2024)
+
