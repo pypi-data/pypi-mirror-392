@@ -1,0 +1,98 @@
+Metadata-Version: 2.4
+Name: python-can-cvector
+Version: 1.5.0
+Summary: A partly cythonized version of the python-can VectorBus
+Author-email: Artur Drogunow <artur.drogunow@zf.com>
+License: LGPL v3
+Project-URL: Documentation, https://github.com/zariiii9003/python-can-cvector#readme
+Project-URL: Issues, https://github.com/zariiii9003/python-can-cvector/issues
+Project-URL: Source, https://github.com/zariiii9003/python-can-cvector
+Project-URL: Homepage, https://github.com/zariiii9003/python-can-cvector
+Keywords: python-can,CAN,vector,cython
+Classifier: Programming Language :: Cython
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Intended Audience :: Developers
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: python-can==4.*
+Provides-Extra: dev
+Requires-Dist: black==24.4.*; extra == "dev"
+Requires-Dist: cibuildwheel; extra == "dev"
+Requires-Dist: mypy==1.10.*; extra == "dev"
+Dynamic: license-file
+
+# python-can-cvector
+
+[![PyPI - Version](https://img.shields.io/pypi/v/python-can-cvector.svg)](https://pypi.org/project/python-can-cvector)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/python-can-cvector.svg)](https://pypi.org/project/python-can-cvector)
+
+-----
+
+**Table of Contents**
+
+- [Description](#description)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Test](#test)
+- [Build](#build)
+- [License](#license)
+
+## Description
+
+This package provides a Cython based version of the [python-can](https://github.com/hardbyte/python-can) `VectorBus`.
+`can_cvector.CVectorBus` is a subclass of `can.interfaces.vector.VectorBus` which reimplements the
+`send()` and `recv()` methods for improved performance.
+
+
+## Installation
+
+```console
+pip install python-can-cvector
+```
+
+## Usage
+
+The class can be used either through the python-can API
+```python3
+from can import Bus
+bus = Bus(interface="cvector", serial=100, channel=0)
+```
+
+or instantiated directly
+```python3
+from can_cvector import CVectorBus
+bus = CVectorBus(serial=100, channel=0)
+```
+
+Read the [python-can documentation](https://python-can.readthedocs.io/en/stable/interfaces/vector.html#vector) to learn more.
+
+## Test
+
+```console
+pip install pytest
+pytest ./tests
+```
+
+## Build
+
+To build `python-can-cvector` from source you need to set the environment 
+variable `VXLAPI_DIR` which points to the directory which Vector XL Driver Library 
+(e.g. C:\Users\Public\Documents\Vector\XL Driver Library 20.30.14\bin).
+```console
+pip install build
+python -m build .
+```
+
+## License
+
+`python-can-cvector` is distributed under the terms of the [LGPL-3.0-or-later](https://spdx.org/licenses/LGPL-3.0-or-later.html) license.
