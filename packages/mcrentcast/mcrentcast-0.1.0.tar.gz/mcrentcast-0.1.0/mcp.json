@@ -1,0 +1,75 @@
+{
+  "name": "mcrentcast",
+  "version": "0.1.0",
+  "description": "Rentcast API MCP Server with intelligent caching and rate limiting",
+  "author": "Your Name",
+  "license": "MIT",
+  "main": "src/mcrentcast/server.py",
+  "command": "uv",
+  "args": ["run", "python", "-m", "mcrentcast.server"],
+  "env": {
+    "PYTHONPATH": "${workspaceFolder}/src:${PYTHONPATH}",
+    "USE_MOCK_API": "false",
+    "RENTCAST_API_KEY": "${RENTCAST_API_KEY}",
+    "RENTCAST_BASE_URL": "https://api.rentcast.io/v1",
+    "DATABASE_URL": "sqlite:///${workspaceFolder}/data/mcrentcast.db",
+    "CACHE_TTL_HOURS": "24",
+    "DAILY_API_LIMIT": "100",
+    "MONTHLY_API_LIMIT": "1000",
+    "REQUESTS_PER_MINUTE": "3"
+  },
+  "tools": [
+    {
+      "name": "set_api_key",
+      "description": "Set or update the Rentcast API key"
+    },
+    {
+      "name": "search_properties",
+      "description": "Search for property records by location"
+    },
+    {
+      "name": "get_property",
+      "description": "Get detailed information for a specific property by ID"
+    },
+    {
+      "name": "get_value_estimate",
+      "description": "Get property value estimate for an address"
+    },
+    {
+      "name": "get_rent_estimate",
+      "description": "Get rent estimate for a property"
+    },
+    {
+      "name": "search_sale_listings",
+      "description": "Search for properties for sale"
+    },
+    {
+      "name": "search_rental_listings",
+      "description": "Search for rental properties"
+    },
+    {
+      "name": "get_market_statistics",
+      "description": "Get market statistics for a location"
+    },
+    {
+      "name": "expire_cache",
+      "description": "Expire cache entries to force fresh API calls"
+    },
+    {
+      "name": "get_cache_stats",
+      "description": "Get cache statistics including hit/miss rates"
+    },
+    {
+      "name": "get_usage_stats",
+      "description": "Get API usage statistics including costs"
+    },
+    {
+      "name": "set_api_limits",
+      "description": "Update API rate limits and usage quotas"
+    },
+    {
+      "name": "get_api_limits",
+      "description": "Get current API rate limits and usage"
+    }
+  ]
+}
