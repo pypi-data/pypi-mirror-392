@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "myl-discovery"
+authors = [
+  {name = "Philipp Schmitt", email = "philipp@schmitt.co"},
+]
+description = "email autodiscovery"
+readme = "README.md"
+requires-python = ">=3.8"
+keywords = ["email-discovery", "autodiscover", "autoconfig",  "smtp", "imap", "email", "discovery"]
+license = {file = "LICENSE"}
+classifiers = [
+  "Programming Language :: Python :: 3",
+]
+dependencies = [
+  "dnspython >= 2.0.0, < 3.0.0",
+  "exchangelib >= 5.0.0, < 6.0.0",
+  "requests >= 2.0.0, < 3.0.0",
+  "rich >= 13.0.0, < 15.0.0",
+  "xmltodict >= 0.13.0, < 2.0.0"
+]
+dynamic = ["version"]
+
+[tool.setuptools_scm]
+version_file = "version.txt"
+version_scheme = "only-version"
+local_scheme = "no-local-version"
+
+[tool.setuptools]
+packages = ["myldiscovery"]
+
+[project.urls]
+homepage = "https://github.com/pschmitt/myl-discovery"
+documentation = "https://github.com/pschmitt/myl-discovery/blob/head/readme.md"
+repository = "https://github.com/pschmitt/myl-discovery"
+issues = "https://github.com/pschmitt/myl-discovery/issues"
+
+[project.scripts]
+myl-discovery = "myldiscovery:main"
+
+[tool.black]
+line-length = 79
