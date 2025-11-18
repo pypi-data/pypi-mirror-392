@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mask-env"
+version = "1.0.0"
+description = "Create safe .example files from secret config files by masking sensitive values"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text = "MIT"}
+authors = [
+    {name = "mask-env contributors"},
+    {name = "Vishnu Prasad", email = "vishnuprasadapp@gmail.com"}
+]
+keywords = ["env", "environment", "secrets", "security", ".env"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.urls]
+Homepage = "https://github.com/VishApp/mask-env"
+Repository = "https://github.com/VishApp/mask-env.git"
+Issues = "https://github.com/VishApp/mask-env/issues"
+
+[project.scripts]
+mask-env = "mask_env.cli:main"
+
+[tool.setuptools]
+packages = ["mask_env"]
+
+[project.optional-dependencies]
+yaml = ["pyyaml>=6.0"]
+toml = ["tomli>=2.0; python_version < '3.11'", "toml>=0.10; python_version >= '3.7'"]
+
