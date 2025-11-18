@@ -1,0 +1,28 @@
+{# templates/user.j2 #}
+<div style="border-bottom: 1px solid #ddd; padding: 10px 0; margin: 15px 0;"><h3 style="margin: 0; color: #1e3a8a; font-size: 18px;"><i class="fas fa-cog" style="margin-right: 8px;"></i> Usuarios locales </h3></div>
+<div class="annex-grid">
+{% if check %}
+        <span class="status-icon status-fail">⚠</span>
+        <div class="cell">No hay usuarios locales definidos. Considerar crear un usuario de emergencia con 
+        "privilege 1" y que luego pasen a modo "enable" bajo demanda.</div> 
+{% else %}
+        <span class="status-icon status-fail">⚠</span>
+        <div class="cell">
+            Es recomendable que los usuarios locales tengan "privilege 1" y que luego pasen a modo "enable" bajo demanda.
+            <br /><br />
+            Los siguientes usuarios locales tienen "privilege 15", tomar acción correctiva inmediata de ser necesario:
+            <ul style="margin: 5px 0; padding-left: 20px;">
+            {% for result in value2 %}
+                <li>{{ result }}</li>
+            {% endfor %}
+            </ul>
+            <br />
+            Los siguientes usuarios locales están configurados:
+            <ul style="margin: 5px 0; padding-left: 20px;">
+            {% for result in value1 %}
+                <li>{{ result }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+{% endif %}
+</div>

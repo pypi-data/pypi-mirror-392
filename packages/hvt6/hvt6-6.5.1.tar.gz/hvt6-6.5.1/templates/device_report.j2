@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="favicon.ico" />
+    <title>Reporte de Hardening - {{ device.hostname }}</title>
+    <link rel="stylesheet" type="text/css" href="../styles.css">
+    <script src="https://kit.fontawesome.com/3d494dc40d.js" crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+        .header h2 {
+            margin: 10px 0 0 0;
+            font-weight: normal;
+            opacity: 0.9;
+        }
+        .summary-box {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .score-display {
+            text-align: center;
+            padding: 20px;
+        }
+        .score-number {
+            font-size: 72px;
+            font-weight: bold;
+            color: #1e3a8a;
+            margin: 0;
+        }
+        .score-label {
+            font-size: 18px;
+            color: #666;
+            margin-top: 10px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #1e3a8a;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-top: 5px;
+        }
+        /* Filter buttons */
+        .filter-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .filter-label {
+            font-weight: bold;
+            color: #333;
+        }
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #1e3a8a;
+            background: white;
+            color: #1e3a8a;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .filter-btn:hover {
+            background: #eff6ff;
+        }
+        .filter-btn.active {
+            background: #1e3a8a;
+            color: white;
+        }
+        /* Category section */
+        .category-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            cursor: pointer;
+            user-select: none;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+        .category-header:hover {
+            background: #f8f9fa;
+        }
+        .category-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .category-toggle {
+            font-size: 20px;
+            transition: transform 0.3s ease;
+            color: #1e3a8a;
+        }
+        .category-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+        .category-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .category-score {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+        .category-content {
+            max-height: 10000px;
+            overflow: hidden;
+            transition: max-height 0.5s ease, opacity 0.3s ease;
+            opacity: 1;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+            margin-top: 15px;
+        }
+        .category-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+            padding-top: 0;
+            margin-top: 0;
+            border-top: none;
+        }
+        /* Check results */
+        .check-result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #ccc;
+            transition: transform 0.2s ease;
+        }
+        .check-result:hover {
+            transform: translateX(4px);
+        }
+        .check-result.pass {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        .check-result.fail {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        .check-result.warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        .check-result.hidden {
+            display: none;
+        }
+        /* Status icons */
+        .annex-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 15px;
+            align-items: start;
+        }
+        .status-icon {
+            font-size: 24px;
+            font-weight: bold;
+            padding: 5px 10px;
+            text-align: center;
+            min-width: 40px;
+        }
+        .status-icon.status-pass {
+            color: #28a745;
+        }
+        .status-icon.status-fail {
+            color: #ffc107;
+        }
+        .cell-strong {
+            font-weight: bold;
+            padding: 5px 10px;
+        }
+        .cell {
+            padding: 5px 10px;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 14px;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Reporte de Verificación de Hardening</h1>
+        <h2>{{ device.hostname }}</h2>
+        <p style="margin-top: 15px; opacity: 0.9;">
+            Cliente: {{ customer }} | Generado: {{ timestamp }}
+        </p>
+    </div>
+
+    {% if device.version_warning %}
+    <div class="warning-box" style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; margin: 20px 0; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3 style="color: #856404; margin-top: 0;">
+            <i class="fas fa-exclamation-triangle"></i> Advertencia de Versión
+        </h3>
+        <p style="color: #856404; margin: 0;">
+            {{ device.version_warning_message }}
+        </p>
+    </div>
+    {% endif %}
+
+    <div class="summary-box">
+        <div class="score-display">
+            <div class="score-number">{{ "%.1f"|format(report.total_percentage) }}%</div>
+            <div class="score-label">Puntuación Global de Seguridad</div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Dispositivo</div>
+                <div class="stat-value">{{ device.device_type.value|capitalize }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Modelo</div>
+                <div class="stat-value">{{ device.model }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Sistema Operativo</div>
+                <div class="stat-value">
+                    {{ device.os }} {{ device.version }}
+                    {% if device.version_warning %}
+                    <i class="fas fa-exclamation-triangle" style="color: #ffc107; margin-left: 8px; font-size: 16px;" title="{{ device.version_warning_message }}"></i>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Verificaciones</div>
+                <div class="stat-value">{{ report.passed_checks }}/{{ report.total_checks }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Puntos Obtenidos</div>
+                <div class="stat-value">{{ report.total_achieved }}/{{ report.total_max_score }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="filter-container">
+        <span class="filter-label">Filtrar resultados:</span>
+        <div class="filter-buttons">
+            <button class="filter-btn active" onclick="filterResults('all')">
+                <i class="fas fa-list"></i> Mostrar Todos
+            </button>
+            <button class="filter-btn" onclick="filterResults('pass')">
+                <i class="fas fa-check-circle"></i> Solo Aprobados
+            </button>
+            <button class="filter-btn" onclick="filterResults('fail')">
+                <i class="fas fa-exclamation-triangle"></i> Solo Fallidos
+            </button>
+        </div>
+    </div>
+
+    <h2>Resultados por Categoría</h2>
+
+    {% for category_name, checks in results_by_category.items() %}
+    {% if checks %}
+    <div class="category-section">
+        <div class="category-header" onclick="toggleCategory('{{ category_name }}')">
+            <div class="category-header-left">
+                <span class="category-toggle" id="toggle-{{ category_name }}">▼</span>
+                <div class="category-title">
+                    {% if category_name == 'general' %}
+                    <i class="fas fa-cog" style="color: #1e3a8a; margin-right: 8px;"></i>General
+                    {% elif category_name == 'operativa' %}
+                    <i class="fas fa-tasks" style="color: #1e3a8a; margin-right: 8px;"></i>Operativa
+                    {% elif category_name == 'control' %}
+                    <i class="fas fa-shield-alt" style="color: #1e3a8a; margin-right: 8px;"></i>Plano de Control
+                    {% elif category_name == 'acceso' %}
+                    <i class="fas fa-lock" style="color: #1e3a8a; margin-right: 8px;"></i>Control de Acceso
+                    {% elif category_name == 'monitoreo' %}
+                    <i class="fas fa-chart-line" style="color: #1e3a8a; margin-right: 8px;"></i>Monitoreo
+                    {% endif %}
+                </div>
+            </div>
+            <div class="category-score">
+                {% set cat_score = report.category_scores[category_name] %}
+                {{ cat_score.achieved }}/{{ cat_score.max_score }} pts ({{ "%.1f"|format(cat_score.percentage) }}%)
+            </div>
+        </div>
+
+        <div class="category-content" id="content-{{ category_name }}">
+
+        {% for result in checks %}
+            {% if rendered_checks.get(result.check_id) %}
+                {# Use specific template if available - wrap in check-result for filtering #}
+                <div class="check-result {{ 'pass' if result.passed else 'fail' }}">
+                    {{ rendered_checks[result.check_id]|safe }}
+                </div>
+            {% else %}
+                {# Fallback if no specific template #}
+                <div class="check-result {{ 'pass' if result.passed else 'fail' }}">
+                    <h4>{{ result.check_name }}</h4>
+                    <div class="annex-grid">
+                        {% if result.passed %}
+                        <span class="status-icon status-pass">✓</span>
+                        <div class="cell">{{ result.description }}</div>
+                        {% else %}
+                        <span class="status-icon status-fail">⚠</span>
+                        <div class="cell">{{ result.description }}</div>
+                        {% endif %}
+                    </div>
+                    {% if result.evidence %}
+                    <p><strong>Evidencia:</strong></p>
+                    <ul>
+                        {% for evidence_item in result.evidence[:5] %}
+                        <li><code>{{ evidence_item }}</code></li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    {% if not result.passed and result.recommendation %}
+                    <p><strong>Recomendación:</strong> {{ result.recommendation }}</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <div class="footer">
+        <p>Generado por Hardening Verification Tool v6.0</p>
+        <p>{{ customer }} - {{ timestamp }}</p>
+    </div>
+
+    <script>
+        // Toggle collapsible category sections
+        function toggleCategory(categoryName) {
+            const content = document.getElementById('content-' + categoryName);
+            const toggle = document.getElementById('toggle-' + categoryName);
+
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed');
+                toggle.classList.remove('collapsed');
+            } else {
+                content.classList.add('collapsed');
+                toggle.classList.add('collapsed');
+            }
+        }
+
+        // Filter check results by status
+        function filterResults(filterType) {
+            // Update active button state
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.filter-btn').classList.add('active');
+
+            // Filter check results
+            const checkResults = document.querySelectorAll('.check-result');
+            checkResults.forEach(check => {
+                if (filterType === 'all') {
+                    check.classList.remove('hidden');
+                } else if (filterType === 'pass') {
+                    if (check.classList.contains('pass')) {
+                        check.classList.remove('hidden');
+                    } else {
+                        check.classList.add('hidden');
+                    }
+                } else if (filterType === 'fail') {
+                    if (check.classList.contains('fail') || check.classList.contains('warning')) {
+                        check.classList.remove('hidden');
+                    } else {
+                        check.classList.add('hidden');
+                    }
+                }
+            });
+
+            // Update category visibility based on filtered results
+            updateCategoryVisibility();
+        }
+
+        // Update category section visibility (hide if all checks are filtered out)
+        function updateCategoryVisibility() {
+            const categorySections = document.querySelectorAll('.category-section');
+            categorySections.forEach(section => {
+                const visibleChecks = section.querySelectorAll('.check-result:not(.hidden)');
+                if (visibleChecks.length === 0) {
+                    section.style.display = 'none';
+                } else {
+                    section.style.display = 'block';
+                }
+            });
+        }
+
+        // Expand all categories by default on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // All sections are expanded by default (no action needed)
+            console.log('HVT6 Report loaded successfully');
+        });
+    </script>
+</body>
+</html>

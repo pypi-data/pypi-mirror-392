@@ -1,0 +1,281 @@
+{#
+EIGRP Authentication Template - Displays EIGRP key chain and interface authentication status
+
+Metadata structure expected:
+- key_chains: List of key chain dictionaries:
+  - name: Key chain name
+  - key_count: Number of keys in the chain
+- processes: List of EIGRP process dictionaries:
+  - as_number: EIGRP AS number
+- total_interfaces: Total count of EIGRP interfaces
+- interfaces_with_auth: Count of interfaces with complete authentication
+- interfaces: List of interface dictionaries:
+  - name: Interface name
+  - has_auth: Boolean - has both MD5 mode and key-chain
+  - auth_mode: Authentication mode (MD5 or None)
+  - key_chain: Key chain name (if configured)
+  - as_number: EIGRP AS number
+- interfaces_percentage: Percentage of interfaces with authentication
+#}
+
+<div class="check-detail">
+    <h4>EIGRP MD5 Authentication Status</h4>
+
+    {% if metadata.processes|length == 0 %}
+        <p class="not-applicable">EIGRP not configured on device.</p>
+    {% else %}
+        <div class="summary-stats">
+            <p><strong>EIGRP Processes:</strong> {{ metadata.processes|length }}</p>
+            {% for proc in metadata.processes %}
+                <p style="margin-left: 20px;">AS {{ proc.as_number }}</p>
+            {% endfor %}
+            <p><strong>Key Chains Defined:</strong>
+                <span class="{% if metadata.key_chains|length > 0 %}pass-status{% else %}fail-status{% endif %}">
+                    {{ metadata.key_chains|length }}
+                </span>
+            </p>
+            <p><strong>Total EIGRP Interfaces:</strong> {{ metadata.total_interfaces }}</p>
+            <p><strong>Interfaces with Authentication:</strong>
+                <span class="{% if metadata.interfaces_percentage == 100 %}pass-status{% elif metadata.interfaces_percentage > 50 %}partial-status{% else %}fail-status{% endif %}">
+                    {{ metadata.interfaces_with_auth }} ({{ metadata.interfaces_percentage }}%)
+                </span>
+            </p>
+        </div>
+
+        {% if metadata.key_chains %}
+        <h5>Key Chains</h5>
+        <table class="detail-table">
+            <thead>
+                <tr>
+                    <th>Key Chain Name</th>
+                    <th>Keys Defined</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for kc in metadata.key_chains %}
+                <tr class="{% if kc.key_count > 0 %}pass-row{% else %}fail-row{% endif %}">
+                    <td><code>{{ kc.name }}</code></td>
+                    <td class="centered">{{ kc.key_count }}</td>
+                    <td>
+                        {% if kc.key_count > 0 %}
+                            <span class="status-icon pass">✓</span> Configured
+                        {% else %}
+                            <span class="status-icon fail">✗</span> Empty
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="warning-box">
+            <p><strong>⚠ Warning:</strong> No key chains defined. EIGRP authentication requires key chains.</p>
+        </div>
+        {% endif %}
+
+        {% if metadata.interfaces %}
+        <h5>EIGRP Interfaces</h5>
+        <table class="detail-table">
+            <thead>
+                <tr>
+                    <th>Interface</th>
+                    <th>AS</th>
+                    <th>Auth Mode</th>
+                    <th>Key Chain</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for interface in metadata.interfaces %}
+                <tr class="{% if interface.has_auth %}pass-row{% else %}fail-row{% endif %}">
+                    <td><code>{{ interface.name }}</code></td>
+                    <td class="centered">
+                        {% if interface.as_number %}
+                            {{ interface.as_number }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td class="centered">
+                        {% if interface.auth_mode %}
+                            <code>{{ interface.auth_mode }}</code>
+                        {% else %}
+                            <span class="fail-status">None</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if interface.key_chain %}
+                            <code>{{ interface.key_chain }}</code>
+                        {% else %}
+                            <span class="fail-status">Not configured</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if interface.has_auth %}
+                            <span class="status-icon pass">✓</span> Secured
+                        {% else %}
+                            <span class="status-icon fail">✗</span> Unsecured
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% elif metadata.processes|length > 0 %}
+        <div class="warning-box">
+            <p><strong>⚠ Warning:</strong> EIGRP processes configured but no EIGRP interfaces found.</p>
+        </div>
+        {% endif %}
+
+        <div class="recommendation-box">
+            <h5>Configuration Recommendations:</h5>
+            <ul>
+                <li><strong>Step 1 - Create Key Chain:</strong>
+                    <pre>key chain EIGRP-KEYS
+  key 1
+    key-string &lt;password&gt;</pre>
+                </li>
+                <li><strong>Step 2 - Enable MD5 on Interfaces:</strong>
+                    <pre>interface &lt;interface&gt;
+  ip authentication mode eigrp &lt;as&gt; md5
+  ip authentication key-chain eigrp &lt;as&gt; EIGRP-KEYS</pre>
+                </li>
+                <li><strong>Key Management:</strong> Use unique keys per EIGRP AS and rotate keys periodically</li>
+                <li><strong>Best Practice:</strong> Both authentication mode AND key-chain must be configured on all EIGRP interfaces</li>
+            </ul>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.summary-stats {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 15px 0;
+}
+
+.summary-stats p {
+    margin: 5px 0;
+}
+
+.detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+}
+
+.detail-table th,
+.detail-table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #dee2e6;
+}
+
+.detail-table th {
+    background-color: #1e3a8a;
+    color: white;
+    font-weight: 600;
+}
+
+.detail-table td.centered {
+    text-align: center;
+}
+
+.pass-row {
+    background-color: #d4edda;
+}
+
+.fail-row {
+    background-color: #f8d7da;
+}
+
+.status-icon {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.status-icon.pass {
+    color: #28a745;
+}
+
+.status-icon.fail {
+    color: #dc3545;
+}
+
+.pass-status {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.fail-status {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.partial-status {
+    color: #ffc107;
+    font-weight: 600;
+}
+
+.not-applicable {
+    color: #6c757d;
+    font-style: italic;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.warning-box {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 5px;
+    color: #856404;
+}
+
+.recommendation-box {
+    background-color: #d1ecf1;
+    border-left: 4px solid #0c5460;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 5px;
+}
+
+.recommendation-box h5 {
+    margin-top: 0;
+    color: #0c5460;
+}
+
+.recommendation-box ul {
+    margin: 10px 0 0 0;
+    padding-left: 20px;
+}
+
+.recommendation-box li {
+    margin: 8px 0;
+}
+
+.recommendation-box pre {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    margin: 5px 0;
+    overflow-x: auto;
+}
+
+.recommendation-box code {
+    background-color: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+}
+
+h5 {
+    margin-top: 20px;
+    color: #1e3a8a;
+}
+</style>

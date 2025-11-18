@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="favicon.ico" />
+    <title>Resumen de Auditoría de Seguridad - {{ customer }}</title>
+    <script src="https://kit.fontawesome.com/3d494dc40d.js" crossorigin="anonymous"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+        .header .generated {
+            margin-top: 15px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        .summary-section {
+            padding: 40px;
+            background: #f8f9fa;
+        }
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .summary-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            border-top: 4px solid #667eea;
+        }
+        .summary-card .label {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+        .summary-card .value {
+            font-size: 42px;
+            font-weight: bold;
+            color: #333;
+        }
+        .summary-card .subvalue {
+            font-size: 16px;
+            color: #999;
+            margin-top: 5px;
+        }
+        .devices-section {
+            padding: 40px;
+        }
+        .devices-section h2 {
+            font-size: 2em;
+            margin-bottom: 30px;
+            color: #333;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .device-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .device-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .device-table th {
+            padding: 18px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 14px;
+        }
+        .device-table td {
+            padding: 15px 18px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .device-table tbody tr:hover {
+            background: #f8f9fa;
+            transition: background 0.3s;
+        }
+        .device-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .score-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .score-excellent {
+            background: #d4edda;
+            color: #155724;
+        }
+        .score-good {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .score-fair {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .score-poor {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .device-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        .device-link:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+        .category-section {
+            padding: 40px;
+            background: #f8f9fa;
+        }
+        .category-section h2 {
+            font-size: 2em;
+            margin-bottom: 30px;
+            color: #333;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .category-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .category-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        .category-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        .category-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            transition: width 0.5s ease;
+        }
+        .best-worst {
+            padding: 40px;
+        }
+        .best-worst h2 {
+            font-size: 2em;
+            margin-bottom: 30px;
+            color: #333;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .best-worst-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+        }
+        .performance-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .performance-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+        .performance-card.best h3 {
+            color: #28a745;
+        }
+        .performance-card.worst h3 {
+            color: #dc3545;
+        }
+        .performance-device {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .performance-score {
+            font-size: 3em;
+            font-weight: bold;
+        }
+        .performance-card.best .performance-score {
+            color: #28a745;
+        }
+        .performance-card.worst .performance-score {
+            color: #dc3545;
+        }
+        .footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+        .footer p {
+            margin: 5px 0;
+        }
+        .icon {
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-shield-alt icon"></i>Auditoría de Seguridad - Hardening IOS-XE</h1>
+            <div class="subtitle">{{ customer }}</div>
+            <div class="generated">Generado: {{ generated }}</div>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="summary-section">
+            <h2><i class="fas fa-chart-bar icon"></i>Resumen General</h2>
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="label">Dispositivos Auditados</div>
+                    <div class="value">{{ statistics.num_devices }}</div>
+                </div>
+                <div class="summary-card">
+                    <div class="label">Puntuación Promedio</div>
+                    <div class="value">{{ "%.1f"|format(statistics.average_score) }}%</div>
+                </div>
+                <div class="summary-card">
+                    <div class="label">Total de Verificaciones</div>
+                    <div class="value">{{ statistics.total_checks }}</div>
+                </div>
+                <div class="summary-card">
+                    <div class="label">Puntos Globales</div>
+                    <div class="value">{{ statistics.total_achieved }}/{{ statistics.total_max_score }}</div>
+                    <div class="subvalue">{{ "%.1f"|format((statistics.total_achieved / statistics.total_max_score * 100) if statistics.total_max_score > 0 else 0) }}%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Best and Worst Performers -->
+        {% if best_worst.best and best_worst.worst %}
+        <div class="best-worst">
+            <h2><i class="fas fa-trophy icon"></i>Rendimiento Destacado</h2>
+            <div class="best-worst-grid">
+                <div class="performance-card best">
+                    <h3><i class="fas fa-star icon"></i>Mejor Puntuación</h3>
+                    <div class="performance-device">{{ best_worst.best.hostname }}</div>
+                    <div class="performance-score">{{ "%.1f"|format(best_worst.best.percentage) }}%</div>
+                </div>
+                <div class="performance-card worst">
+                    <h3><i class="fas fa-exclamation-triangle icon"></i>Requiere Atención</h3>
+                    <div class="performance-device">{{ best_worst.worst.hostname }}</div>
+                    <div class="performance-score">{{ "%.1f"|format(best_worst.worst.percentage) }}%</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Category Breakdown -->
+        {% if statistics.by_category %}
+        <div class="category-section">
+            <h2><i class="fas fa-layer-group icon"></i>Resultados por Categoría</h2>
+            <div class="category-grid">
+                {% for category_name, category_data in statistics.by_category.items() %}
+                <div class="category-card">
+                    <h3>
+                        {% if category_name == 'general' %}
+                            <i class="fas fa-cog icon"></i>General
+                        {% elif category_name == 'operativa' %}
+                            <i class="fas fa-tasks icon"></i>Operativa
+                        {% elif category_name == 'control' %}
+                            <i class="fas fa-shield-alt icon"></i>Plano de Control
+                        {% elif category_name == 'acceso' %}
+                            <i class="fas fa-lock icon"></i>Control de Acceso
+                        {% elif category_name == 'monitoreo' %}
+                            <i class="fas fa-chart-line icon"></i>Monitoreo
+                        {% endif %}
+                    </h3>
+                    <div>Puntos: {{ category_data.achieved }}/{{ category_data.max_score }}</div>
+                    <div class="category-bar">
+                        <div class="category-bar-fill" style="width: {{ category_data.percentage }}%">
+                            {{ "%.1f"|format(category_data.percentage) }}%
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Devices Table -->
+        <div class="devices-section">
+            <h2><i class="fas fa-network-wired icon"></i>Dispositivos Auditados</h2>
+            <table class="device-table">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-server icon"></i>Dispositivo</th>
+                        <th><i class="fas fa-tag icon"></i>Modelo</th>
+                        <th><i class="fas fa-code-branch icon"></i>Versión</th>
+                        <th><i class="fas fa-percentage icon"></i>Puntuación</th>
+                        <th><i class="fas fa-check-circle icon"></i>Verificaciones</th>
+                        <th><i class="fas fa-file-alt icon"></i>Reporte</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for device in device_reports %}
+                    <tr>
+                        <td><strong>{{ device['hostname'] }}</strong></td>
+                        <td>{{ device['model'] }}</td>
+                        <td>
+                            {{ device['os'] }} {{ device['version'] }}
+                            {% if device.get('version_warning') %}
+                            <i class="fas fa-exclamation-triangle" style="color: #ffc107; margin-left: 8px;" title="{{ device.get('version_warning_message', 'Versión no recomendada') }}"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% set percentage = device['total_percentage'] %}
+                            {% if percentage >= 90 %}
+                                <span class="score-badge score-excellent">{{ "%.1f"|format(percentage) }}%</span>
+                            {% elif percentage >= 75 %}
+                                <span class="score-badge score-good">{{ "%.1f"|format(percentage) }}%</span>
+                            {% elif percentage >= 50 %}
+                                <span class="score-badge score-fair">{{ "%.1f"|format(percentage) }}%</span>
+                            {% else %}
+                                <span class="score-badge score-poor">{{ "%.1f"|format(percentage) }}%</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ device['passed_checks'] }}/{{ device['total_checks'] }}</td>
+                        <td>
+                            <a href="reports/{{ device['hostname'] }}.html" class="device-link">
+                                <i class="fas fa-file-pdf icon"></i>Ver Reporte
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Hardening Verification Tool v6.0</strong></p>
+            <p>{{ customer }}</p>
+            <p>Generado: {{ generated }}</p>
+            <p style="margin-top: 15px; opacity: 0.7;">
+                <i class="fas fa-info-circle"></i>
+                Este reporte fue generado automáticamente basado en las mejores prácticas de Cisco para IOS-XE
+            </p>
+        </div>
+    </div>
+</body>
+</html>

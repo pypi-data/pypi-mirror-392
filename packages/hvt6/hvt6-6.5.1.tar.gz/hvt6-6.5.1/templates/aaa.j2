@@ -1,0 +1,141 @@
+{# templates/aaa.j2 #}
+<div style="border-bottom: 1px solid #ddd; padding: 10px 0; margin: 15px 0;">
+    <h3 style="margin: 0; color: #1e3a8a; font-size: 18px;">
+        <i class="fas fa-shield-alt" style="margin-right: 8px;"></i>AAA (Authentication, Authorization, Accounting)
+    </h3>
+</div>
+<div class="annex-grid">
+{% if not check %}
+	<span class="status-icon status-fail">⚠</span>
+        <div class="cell">No se está utilizando AAA en ninguna de sus formas 
+		(local, TACACS+ o RADIUS). Es imperativo implementar AAA ya sea local 
+		en el dispositivo o centralizado con TACACS+ o RADIUS para llevar 
+		registro de actividades relacionadas al acceso a los mismos. <br/>
+		Bajo esta condición tenga en cuenta que:
+		<ul>
+  			<li>El comando <strong>login</strong> se utiliza para indicar al 
+			VTY que solicite credenciales cuando se intenta iniciar sesión.</li>
+			<li>Si el comando es simplemente <strong>login</strong>, entonces usa 
+			la contraseña configurada con el comando <strong>password</strong> 
+			bajo la configuración VTY. </li>
+			<li>Tenga en cuenta que si se utiliza <strong>login</strong> y no 
+			se configra <strong>password</strong>, aún pedirá una contraseña, 
+			pero nunca se concederá el acceso.</li>
+			<li>Si el comando es <strong>login local</strong>, entonces pide un 
+			nombre de usuario y una contraseña basados en la base de datos de 
+			usuarios local, sin importar si se usó o no <strong>password</strong>.</li>
+		</ul>
+	</div>
+{% else %}
+	{% if not check1 %}
+		{% if not check2 %}
+			<span class="status-icon status-fail">⚠</span>
+        	<div class="cell">No se está utilizando TACACS+.</div>
+		{% endif %}	
+	{% else %}
+		<span class="status-icon status-pass">✓</span>
+		<div class="cell">El direccionamiento IP del TACACS+ server es: </div>
+		{% for result in tser %}
+			<span style="display: inline-block; width: 40px;"></span><div class="cell">• {{ result }}</div>
+		{% endfor %}
+		{% if not check1_1 %}
+			<span class="status-icon status-fail">⚠</span>
+			<div class="cell">TACACS+ no está utilizando una interfaz de origen.
+			Es importante que el dispositivo sea reconocido por una interfaz estable 
+			y única como una interfaz Loopback, sin importar la interfaz de salida 
+			del servicio.</div>
+		{% else %}
+			<span class="status-icon status-pass">✓</span>
+			<div class="cell">TACACS+ está utilizando la interfaz de origen 
+			{{ tsint }}. </div>
+		{% endif %}
+	{% endif %}
+	{% if not check2 %}
+		{% if not check1 %}	
+			<span class="status-icon status-fail">⚠</span>
+        	<div class="cell">No se está utilizando RADIUS.</div>
+		{% endif %}
+	{% else %}
+		<span class="status-icon status-pass">✓</span>
+		<div class="cell">El direccionamiento IP del RADIUS server es: </div>
+		{% for result in rser %}
+			<span style="display: inline-block; width: 40px;"></span><div class="cell">• {{ result }}</div>
+		{% endfor %}
+		{% if not check2_1 %}
+			<span class="status-icon status-fail">⚠</span>
+			<div class="cell">RADIUS no está utilizando una interfaz de origen.
+			Es importante que el dispositivo sea reconocido por una interfaz estable 
+			y única como una interfaz Loopback, sin importar la interfaz de salida 
+			del servicio.</div>
+		{% else %}
+			<span class="status-icon status-pass">✓</span>
+			<div class="cell">RADIUS está utilizando la interfaz de origen 
+			{{ rsint }}. </div>
+		{% endif %}
+	{% endif %}
+	{% if not check3 %}
+		<span class="status-icon status-fail">⚠</span>
+        <div class="cell">No se está autenticando el login de usuario.
+			Dado que alguno de los métodos (TACACS+, RADIUS o local) está configurado,
+			se recomienda habilitar esta funcionalidad inmediatamente.</div>
+	{% else %}
+		<span class="status-icon status-pass">✓</span>
+        <div class="cell">Los siguientes métodos de autenticación de usuario están
+		configurados en el siguiente orden:</div>
+		{% for result in ldef %}
+			<span style="display: inline-block; width: 40px;"></span><div class="cell">{{ loop.index }}. {{ result }}</div>
+		{% endfor %}
+		{% if check3_2 %}
+			<span class="status-icon status-pass">✓</span>
+			<div class="cell">El tipo de método es con la lista <strong>default</strong>, por ende, viene
+			configurado en todas las "line vty" del dispositivo.</div>
+		{% else %}
+			{% if not check3_1 %}
+				<span class="status-icon status-fail">⚠</span>
+				<div class="cell">El método de autenticación de usuario está habilitado 
+				pero falta especificar la lista <strong>{{ ldef_type }}</strong> en las Line VTY 
+				para que surja efecto.</div>
+			{% else %}
+				<span class="status-icon status-pass">✓</span>
+				<div class="cell">Las siguientes Line VTYs tienen habilitada la lista de 
+				autenticación {{ ldef_type }} de usuario: </div>
+				{% for key, value in ldef_vty.items() %}
+					<span style="display: inline-block; width: 40px;"></span><div class="cell">• {{ key }} --> {{ value }}</div>
+				{% endfor %}
+			{% endif %}
+		{% endif %}
+	{% endif %}
+	{% if check1 %}
+		{% if not check4 %}
+			<span class="status-icon status-fail">⚠</span>
+        	<div class="cell">Dado que el servidor TACACS+ está configurado, no se está autenticando 
+			la contraseña de ENABLE contra él. Se recomienda habilitar esta funcionalidad inmediatamente.</div>
+		{% else %}
+			<span class="status-icon status-pass">✓</span>
+    	    <div class="cell">La autenticación de la contraseña de ENABLE contra el servidor 
+			TACACS+, está configurada.</div>
+		{% endif %}
+	{% endif %}
+	{% if not check5 %}
+		<span class="status-icon status-fail">⚠</span>
+        <div class="cell">No se está autenticando si el usurio puede acceder al modo EXEC.
+			Dado que alguno de los métodos (TACACS+, RADIUS o local) está configurado,
+			se recomienda habilitar esta funcionalidad inmediatamente.</div>
+	{% else %}
+		<span class="status-icon status-pass">✓</span>
+        <div class="cell">Los siguientes métodos de autenticación a modo EXEC están
+		configurados en el siguiente orden:</div>
+		{% for result in aexec %}
+			<span style="display: inline-block; width: 40px;"></span><div class="cell">{{ loop.index }}. {{ result }}</div>
+		{% endfor %}
+	{% endif %}
+	{% if fail|int <= 3 %}
+		<span class="status-icon status-pass">✓</span>
+        <div class="cell">La cantidad de reintentos de login fallidos es menor o igual a 3.</div>
+	{% else %}
+		<span class="status-icon status-fail">⚠</span>
+        <div class="cell">Lo cantidad de reintntentos de login fallidos es de {{ fail }}. 
+		Se recomienda reducirlo a 3.</div>
+	{% endif %}
+{% endif %}
+</div>
