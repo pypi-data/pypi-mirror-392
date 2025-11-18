@@ -1,0 +1,197 @@
+Metadata-Version: 2.4
+Name: napari-ome-arrow
+Version: 0.0.2
+Summary: A Napari plugin for OME-Arrow and OME-Parquet bioimage data
+License: 
+        Copyright (c) 2025, Dave Bunten
+        All rights reserved.
+        
+        Redistribution and use in source and binary forms, with or without
+        modification, are permitted provided that the following conditions are met:
+        
+        * Redistributions of source code must retain the above copyright notice, this
+          list of conditions and the following disclaimer.
+        
+        * Redistributions in binary form must reproduce the above copyright notice,
+          this list of conditions and the following disclaimer in the documentation
+          and/or other materials provided with the distribution.
+        
+        * Neither the name of copyright holder nor the names of its
+          contributors may be used to endorse or promote products derived from
+          this software without specific prior written permission.
+        
+        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+        AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+        IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+        DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+        FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+        DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+        SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+        CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+        OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+        OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+        
+Project-URL: Bug Tracker, https://github.com/wayscience/napari-ome-arrow/issues
+Project-URL: Documentation, https://github.com/wayscience/napari-ome-arrow#README.md
+Project-URL: Source Code, https://github.com/wayscience/napari-ome-arrow
+Project-URL: User Support, https://github.com/wayscience/napari-ome-arrow/issues
+Classifier: Framework :: napari
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Classifier: Topic :: Scientific/Engineering :: Image Processing
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: magicgui
+Requires-Dist: numpy
+Requires-Dist: ome-arrow>=0.0.2
+Requires-Dist: qtpy>=2.4
+Requires-Dist: scikit-image
+Provides-Extra: all
+Requires-Dist: napari; extra == "all"
+Requires-Dist: qtpy>=2.4; extra == "all"
+Provides-Extra: pyqt6
+Requires-Dist: napari[pyqt6]; extra == "pyqt6"
+Requires-Dist: pyqt6>=6.6; extra == "pyqt6"
+Requires-Dist: qtpy>=2.4; extra == "pyqt6"
+Provides-Extra: pyside6
+Requires-Dist: napari[pyside6]; extra == "pyside6"
+Requires-Dist: pyside6>=6.6; extra == "pyside6"
+Requires-Dist: qtpy>=2.4; extra == "pyside6"
+Dynamic: license-file
+
+# napari-ome-arrow
+
+[![License BSD-3](https://img.shields.io/pypi/l/napari-ome-arrow.svg?color=green)](https://github.com/wayscience/napari-ome-arrow/raw/main/LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/napari-ome-arrow.svg?color=green)](https://pypi.org/project/napari-ome-arrow)
+[![Python Version](https://img.shields.io/pypi/pyversions/napari-ome-arrow.svg?color=green)](https://python.org)
+[![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/napari-ome-arrow)](https://napari-hub.org/plugins/napari-ome-arrow)
+[![npe2](https://img.shields.io/badge/plugin-npe2-blue?link=https://napari.org/stable/plugins/index.html)](https://napari.org/stable/plugins/index.html)
+
+`napari-ome-arrow` is a minimal plugin for [napari](https://napari.org) that opens image data through the [OME-Arrow](https://github.com/wayscience/ome-arrow) toolkit.
+
+It provides a single, explicit pathway for loading OME-style bioimage data:
+
+- **OME-TIFF** (`.ome.tif`, `.ome.tiff`, `.tif`, `.tiff`)
+- **OME-Zarr** (`.ome.zarr`, `.zarr` stores and URLs)
+- **OME-Parquet** (`.ome.parquet`, `.parquet`, `.pq`)
+- **Bio-Formats–style stack patterns** (paths containing `<`, `>`, or `*`)
+- A simple **`.npy` fallback** for quick testing / ad-hoc arrays
+
+## Key features
+
+- ✅ **Unified reader via OMEArrow**
+  All supported formats are loaded through `OME-Arrow`, which normalizes data into a common **TCZYX**-like representation.
+
+- ✅ **Explicit image vs labels mode**
+  This plugin never guesses whether your data are intensities or segmentation masks. You must tell it:
+
+  - via the GUI prompt when you drop/open a file in napari, or
+  - via an environment variable for scripted/CLI usage.
+
+- ✅ **Interactive choice in the GUI**
+  When `NAPARI_OME_ARROW_LAYER_TYPE` is not set and you open a supported file, napari shows a small dialog:
+
+  > *How should `my_data.ome.tif` be loaded?*
+  > `[Image]   [Labels]   [Cancel]`
+
+  This makes the “image vs labels” choice explicit at load time without relying on file naming conventions.
+
+- ✅ **Image mode**
+
+  - Returns a napari **image layer**
+  - Preserves channels and sets `channel_axis` when appropriate
+    (e.g. multi-channel OME-TIFF or stack patterns)
+  - Works for 2D, 3D (Z-stacks), and higher-dimensional data (T, C, Z, Y, X)
+
+- ✅ **Labels mode**
+
+  - Returns a napari **labels layer**
+  - Converts data to an integer dtype (suitable for labels)
+  - Applies a reasonable default opacity for overlaying on images
+
+- ✅ **Automatic 3D for Z-stacks**
+  If the loaded data include a true Z dimension (`Z > 1`, assuming a TCZYX subset), the plugin asks the current viewer to switch to **3D** (`viewer.dims.ndisplay = 3`) so z-stacks open directly in volume mode.
+
+- ✅ **Headless / scripted friendly**
+  When Qt is not available (e.g., in headless or purely programmatic contexts), the reader:
+
+  - respects `NAPARI_OME_ARROW_LAYER_TYPE`, and
+  - defaults to `"image"` if the variable is not set.
+
+______________________________________________________________________
+
+This [napari] plugin was generated with [copier] using the [napari-plugin-template] (None).
+
+## Installation
+
+You can install `napari-ome-arrow` via [pip]:
+
+```
+pip install napari-ome-arrow
+```
+
+If napari is not already installed, you can install `napari-ome-arrow` with napari and Qt via:
+
+```
+pip install "napari-ome-arrow[all]"
+```
+
+To install latest development version :
+
+```
+pip install git+https://github.com/wayscience/napari-ome-arrow.git
+```
+
+## Usage
+
+### From the napari GUI
+
+1. Install the plugin (see above).
+1. Start napari.
+1. Drag and drop an OME-TIFF, OME-Zarr, OME-Parquet file, or stack pattern into the viewer.
+1. When prompted, choose **Image** or **Labels**.
+
+The plugin will:
+
+- load the data through `OMEArrow`,
+- map channels and axes appropriately, and
+- automatically switch to 3D if there is a Z-stack.
+
+### From the command line
+
+You can control the mode via an environment variable:
+
+```bash
+# Load as regular images
+NAPARI_OME_ARROW_LAYER_TYPE=image napari my_data.ome.tif
+
+# Load as labels (segmentation)
+NAPARI_OME_ARROW_LAYER_TYPE=labels napari my_labels.ome.parquet
+```
+
+## Contributing
+
+Contributions are very welcome.
+Please reference our [CONTRIBUTING.md](CONTRIBUTING.md) guide.
+
+## License
+
+Please see the [LICENSE](LICENSE) file for more information.
+
+## Issues
+
+If you encounter any problems, please [file an issue] along with a detailed description.
+
+[copier]: https://copier.readthedocs.io/en/stable/
+[file an issue]: https://github.com/wayscience/napari-ome-arrow/issues
+[napari]: https://github.com/napari/napari
+[napari-plugin-template]: https://github.com/napari/napari-plugin-template
+[pip]: https://pypi.org/project/pip/
