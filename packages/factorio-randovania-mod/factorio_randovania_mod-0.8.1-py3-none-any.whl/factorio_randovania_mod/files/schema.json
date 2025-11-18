@@ -1,0 +1,163 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "type": "string",
+            "format": "uri"
+        },
+        "configuration_identifier": {
+            "type": "string",
+            "description": "An unique identifier for this configuration. Only save files created with this identifier can be loaded."
+        },
+        "layout_uuid": {
+            "description": "An UUID exposed via a global lua variable",
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "optional_modifications": {
+            "description": "Optionally change certain parts of the game",
+            "type": "object",
+            "properties": {
+                "can_send_fish_to_space": {
+                    "description": "Allow sending a fish to space in a Rocket",
+                    "type": "boolean",
+                    "default": false
+                },
+                "stronger_solar": {
+                    "description": "Makes Solar Panels and Accumulators 4 times better",
+                    "type": "boolean",
+                    "default": true
+                },
+                "productivity_everywhere": {
+                    "description": "Allow usage of Productivity Modules in all recipes",
+                    "type": "boolean",
+                    "default": true
+                },
+                "single_item_freebie": {
+                    "description": "When set, freebies are always just one item instead of a stack",
+                    "type": "boolean",
+                    "default": false
+                },
+                "strict_multiplayer_freebie": {
+                    "description": "When set, multiplayer will never generate more freebies due to more players",
+                    "type": "boolean",
+                    "default": false
+                }
+            },
+            "default": {},
+            "additionalProperties": false
+        },
+        "technologies": {
+            "description": "List of custom technologies to create.",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "tech_name": {
+                        "description": "Internal name of the technology",
+                        "type": "string"
+                    },
+                    "locale_name": {
+                        "description": "Name of the technology",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Description of the technology",
+                        "type": "string"
+                    },
+                    "icon": {
+                        "description": "Factorio filepath for the icon to use",
+                        "type": "string"
+                    },
+                    "icon_size": {
+                        "description": "Set the size of the icon image",
+                        "type": "integer",
+                        "default": 256
+                    },
+                    "cost_reference": {
+                        "description": "The technology to use for research cost and prerequisites",
+                        "type": "string"
+                    },
+                    "prerequisites": {
+                        "description": "List of which technologies must be researched before",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "unlocks": {
+                        "description": "List of which technologies are granted when this is researched.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false,
+                "required": ["locale_name", "description", "icon","prerequisites", "unlocks"]
+            }
+        },
+        "recipes": {
+            "description": "Modify given recipes",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "recipe_name": {
+                        "type": "string",
+                        "description": "Name of the recipe to modify"
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "New crafting category to use for the recipe"
+                    },
+                    "ingredients": {
+                        "type": "array",
+                        "description": "The new costs of the recipe",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "description": "Item name of this ingredient"
+                                },
+                                "amount": {
+                                    "type": "integer",
+                                    "description": "How many copies of the ingredient are used"
+                                },
+                                "type": {
+                                    "type": "string",
+                                    "description": "What kind of ingredient it is",
+                                    "enum": ["item", "fluid"],
+                                    "default": "item"
+                                }
+                            },
+                            "additionalProperties": false,
+                            "required": ["name", "amount"]
+                        }
+                    }
+                },
+                "additionalProperties": false,
+                "required": ["recipe_name", "category", "ingredients"]
+            }
+        },
+        "starting_tech": {
+            "description": "List of technologies that you start the game with",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        }
+    },
+    "required": [
+        "configuration_identifier",
+        "layout_uuid",
+        "technologies",
+        "recipes",
+        "starting_tech"
+    ],
+    "additionalProperties": false,
+    "$defs": {
+    }
+}
