@@ -1,0 +1,316 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags like v0.1.0, v1.2.3, etc.
+
+permissions:
+  contents: write  # Required for creating releases
+
+jobs:
+  test:
+    name: Run tests before release
+    uses: ./.github/workflows/test.yml
+
+  build-executables:
+    needs: test
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: mmdc-linux-x86_64
+            asset_extension: .tar.gz
+          - os: windows-latest
+            artifact_name: mmdc-windows-x86_64
+            asset_extension: .zip
+          - os: macos-latest
+            artifact_name: mmdc-macos-universal
+            asset_extension: .zip
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --group build
+
+      - name: Build executable with PyInstaller
+        run: uv run pyinstaller mmdc.spec --clean --noconfirm
+
+      - name: Test executable (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          ./dist/mmdc/mmdc --version
+          ./dist/mmdc/mmdc compile examples/00_basics/01_hello_world.mmd -o /tmp/test.mid
+
+      - name: Test executable (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          .\dist\mmdc\mmdc.exe --version
+          .\dist\mmdc\mmdc.exe compile examples\00_basics\01_hello_world.mmd -o test.mid
+
+      - name: Create archive (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          cd dist
+          tar -czf ${{ matrix.artifact_name }}${{ matrix.asset_extension }} mmdc/
+          cd ..
+          mv dist/${{ matrix.artifact_name }}${{ matrix.asset_extension }} .
+
+      - name: Create archive (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          cd dist
+          7z a ../${{ matrix.artifact_name }}${{ matrix.asset_extension }} mmdc\
+          cd ..
+
+      - name: Create archive (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          cd dist
+          zip -r ../${{ matrix.artifact_name }}${{ matrix.asset_extension }} mmdc/
+          cd ..
+
+      - name: Calculate checksums (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          shasum -a 256 ${{ matrix.artifact_name }}${{ matrix.asset_extension }} > ${{ matrix.artifact_name }}.sha256
+
+      - name: Calculate checksums (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          certutil -hashfile ${{ matrix.artifact_name }}${{ matrix.asset_extension }} SHA256 > ${{ matrix.artifact_name }}.sha256
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: |
+            ${{ matrix.artifact_name }}${{ matrix.asset_extension }}
+            ${{ matrix.artifact_name }}.sha256
+          retention-days: 7
+
+  create-release:
+    name: Create GitHub Release
+    needs: build-executables
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R artifacts
+
+      - name: Move artifacts to release directory
+        run: |
+          mkdir -p release
+          find artifacts -type f \( -name "*.tar.gz" -o -name "*.zip" -o -name "*.sha256" \) -exec mv {} release/ \;
+          ls -lh release/
+
+      - name: Extract version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Package Claude Skills
+        run: |
+          python scripts/package_claude_skills.py \
+            --source . \
+            --output release \
+            --version ${{ steps.get_version.outputs.VERSION }}
+          ls -lh release/claude-skills-mmd-*
+
+      - name: Extract changelog for this version
+        id: changelog
+        run: |
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          # Extract the section for this version from CHANGELOG.md
+          CHANGELOG_SECTION=$(sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | sed '$d' | tail -n +2)
+          # Save to file and output
+          echo "$CHANGELOG_SECTION" > /tmp/release_notes.md
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG_SECTION" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
+          generate_release_notes: true
+          body: |
+            ## MIDI Markdown Compiler ${{ github.ref_name }}
+
+            ### What's New
+
+            ${{ steps.changelog.outputs.CHANGELOG }}
+
+            ### Installation
+
+            #### MMDC Compiler
+
+            **Download standalone executables** (no Python required):
+
+            - **Linux**: `mmdc-linux-x86_64.tar.gz`
+            - **Windows**: `mmdc-windows-x86_64.zip`
+            - **macOS**: `mmdc-macos-universal.zip`
+
+            Extract the archive and run the `mmdc` executable.
+
+            **Verify checksums** using the `.sha256` files to ensure download integrity.
+
+            #### Claude Code Skills (Optional)
+
+            **For Claude Code users**, download the skills package for enhanced MMD development:
+
+            - **All platforms**: `claude-skills-mmd-${{ steps.get_version.outputs.VERSION }}.tar.gz` or `.zip`
+
+            The skills package includes:
+            - **mmd-writing** - Help writing MMD files with correct syntax
+            - **mmdc-cli-usage** - Help using the mmdc CLI effectively
+
+            See [Claude Skills documentation](https://cjgdev.github.io/midi-markdown/getting-started/claude-skills/) for installation instructions.
+
+            ### Installation via pip/pipx (Python users)
+
+            ```bash
+            # Using pipx (recommended - isolated environment)
+            pipx install midi-markdown==${{ steps.get_version.outputs.VERSION }}
+
+            # Or using pip
+            pip install midi-markdown==${{ steps.get_version.outputs.VERSION }}
+            ```
+
+            ### Platform-Specific Notes
+
+            **Windows Security Warning**: Windows SmartScreen may show a warning for unsigned executables. Click "More info" then "Run anyway" to proceed. This is normal for open-source software without expensive code signing certificates.
+
+            **macOS Gatekeeper**: macOS may block the executable. Right-click the app and select "Open" to bypass Gatekeeper, or run:
+            ```bash
+            xattr -cr mmdc
+            ```
+
+            ### Quick Start
+
+            ```bash
+            # Check installation
+            mmdc --version
+
+            # Compile your first MML file
+            mmdc compile song.mmd -o song.mid
+
+            # Play back in real-time (requires MIDI device)
+            mmdc play song.mmd --port 0
+
+            # See all commands
+            mmdc --help
+            ```
+
+            ### Documentation
+
+            - **User Guide**: https://github.com/cjgdev/midi-markdown#readme
+            - **Examples**: https://github.com/cjgdev/midi-markdown/tree/main/examples
+            - **Language Spec**: https://github.com/cjgdev/midi-markdown/blob/main/spec.md
+
+            ### Full Changelog
+
+            See below for complete changelog generated by GitHub.
+
+          files: |
+            release/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: create-release
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/midi-markdown
+    permissions:
+      id-token: write  # Required for Trusted Publishing
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install build dependencies
+        run: uv sync
+
+      - name: Verify version consistency
+        run: |
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          uv pip install tomli
+          PKG_VERSION=$(uv run python -c "import tomli; print(tomli.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "❌ Version mismatch: tag=$TAG_VERSION, package=$PKG_VERSION"
+            echo "Please update pyproject.toml version to match the git tag"
+            exit 1
+          fi
+          echo "✅ Version consistency verified: $TAG_VERSION"
+
+      - name: Build distributions
+        run: uv build
+
+      - name: Display built distributions
+        run: |
+          ls -lh dist/
+          echo "=== Package contents ==="
+          tar -tzf dist/*.tar.gz | head -20
+
+      - name: Check distributions
+        run: |
+          uv tool install twine
+          uv tool run twine check dist/*
+
+      - name: Publish to PyPI (Trusted Publishing)
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          print-hash: true
+          verbose: true
+
+      - name: Verify PyPI upload
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "✅ Published midi-markdown $VERSION to PyPI"
+          echo "📦 View at: https://pypi.org/project/midi-markdown/$VERSION/"
+          echo ""
+          echo "Install with:"
+          echo "  pip install midi-markdown==$VERSION"
+          echo "  pipx install midi-markdown==$VERSION"

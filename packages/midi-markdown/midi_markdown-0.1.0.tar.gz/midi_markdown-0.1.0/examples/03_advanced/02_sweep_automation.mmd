@@ -1,0 +1,306 @@
+---
+title: "Sweep Automation"
+description: "Demonstrates @sweep for smooth parameter automation"
+author: "MML Examples"
+tempo: 120
+time_signature: [4, 4]
+ppq: 480
+---
+
+# ============================================================================
+# Example 11: Sweep Automation
+# ============================================================================
+#
+# This example demonstrates the @sweep feature which creates smooth
+# parameter automation over time. Perfect for:
+# - Fades (volume in/out)
+# - Filter sweeps
+# - Panning automation
+# - Gradual parameter changes
+#
+# @sweep syntax:
+#   @sweep from [START_TIME] to [END_TIME] every INTERVAL
+#     - cc CHANNEL.CONTROLLER.ramp(START_VALUE, END_VALUE, TYPE)
+#   @end
+#
+# Ramp types (supported in grammar):
+# - linear: Constant rate (default if not specified)
+# - exponential: Accelerates (gets faster)
+# - logarithmic: Decelerates (gets slower)
+# - ease-in: Slow start, fast finish (acceleration curve)
+# - ease-out: Fast start, slow finish (deceleration curve)
+# - ease-in-out: S-curve (smooth acceleration and deceleration)
+#
+# ============================================================================
+
+
+# ============================================================================
+# Linear Sweep: Volume Fade In
+# ============================================================================
+
+[00:00.000]
+- marker "Linear Fade In"
+- text "Volume 0 to 127 over 4 seconds (linear)"
+- note_on 1.60 100 4s
+
+@sweep from [00:00.000] to [00:04.000] every 100ms
+  - cc 1.7.ramp(0, 127, linear)
+@end
+
+
+# ============================================================================
+# Exponential Sweep: Filter Opening
+# ============================================================================
+
+[00:04.500]
+- marker "Exponential Filter Sweep"
+- text "Filter cutoff 0 to 127 (accelerating)"
+- note_on 1.48 100 4s
+
+@sweep from [00:04.500] to [00:08.500] every 50ms
+  - cc 1.74.ramp(0, 127, exponential)
+@end
+
+
+# ============================================================================
+# Logarithmic Sweep: Pan Movement
+# ============================================================================
+
+[00:09.000]
+- marker "Logarithmic Pan"
+- text "Pan hard left to center (decelerating)"
+- note_on 1.64 90 4s
+
+@sweep from [00:09.000] to [00:13.000] every 75ms
+  - cc 1.10.ramp(0, 64, logarithmic)
+@end
+
+
+# ============================================================================
+# Volume Fade Out
+# ============================================================================
+
+[00:13.500]
+- marker "Linear Fade Out"
+- text "Volume 127 to 0 (linear fade out)"
+- cc 1.7.127
+- note_on 1.72 100 4s
+
+@sweep from [00:13.500] to [00:17.500] every 100ms
+  - cc 1.7.ramp(127, 0, linear)
+@end
+
+
+# ============================================================================
+# Multiple Concurrent Sweeps
+# ============================================================================
+
+[00:18.000]
+- marker "Concurrent Sweeps"
+- text "Pan and expression simultaneously"
+- note_on 1.65 100 4s
+
+# Pan from left to right (linear)
+@sweep from [00:18.000] to [00:22.000] every 75ms
+  - cc 1.10.ramp(0, 127, linear)
+@end
+
+# Expression swell (exponential)
+@sweep from [00:18.000] to [00:22.000] every 80ms
+  - cc 1.11.ramp(0, 127, exponential)
+@end
+
+
+# ============================================================================
+# Dramatic Build-Up
+# ============================================================================
+
+[00:23.000]
+- marker "Dramatic Build-Up"
+- text "Multi-parameter automation for impact"
+- note_on 1.60 95 4s
+- note_on 1.64 95 4s
+- note_on 1.67 95 4s
+
+# Volume swell
+@sweep from [00:23.000] to [00:27.000] every 100ms
+  - cc 1.7.ramp(20, 127, linear)
+@end
+
+# Filter opens
+@sweep from [00:23.000] to [00:27.000] every 80ms
+  - cc 1.74.ramp(0, 127, exponential)
+@end
+
+# Modulation increases
+@sweep from [00:23.000] to [00:27.000] every 90ms
+  - cc 1.1.ramp(0, 100, linear)
+@end
+
+# Impact hit
+[00:27.000]
+- note_on 10.36 127 0.1s
+
+
+# ============================================================================
+# Ramp Type Comparison
+# ============================================================================
+
+[00:28.000]
+- marker "Ramp Type Comparison"
+
+# Linear
+[00:28.000]
+- text "Linear"
+- note_on 1.60 100 1s
+
+@sweep from [00:28.000] to [00:29.000] every 50ms
+  - cc 1.7.ramp(0, 127, linear)
+@end
+
+# Exponential
+[00:29.500]
+- text "Exponential"
+- note_on 1.62 100 1s
+
+@sweep from [00:29.500] to [00:30.500] every 50ms
+  - cc 1.7.ramp(0, 127, exponential)
+@end
+
+# Logarithmic
+[00:31.000]
+- text "Logarithmic"
+- note_on 1.64 100 1s
+
+@sweep from [00:31.000] to [00:32.000] every 50ms
+  - cc 1.7.ramp(0, 127, logarithmic)
+@end
+
+# Ease-In (gradual acceleration)
+[00:32.500]
+- text "Ease-In (slow start, accelerating)"
+- note_on 1.65 100 1s
+
+@sweep from [00:32.500] to [00:33.500] every 50ms
+  - cc 1.7.ramp(0, 127, ease-in)
+@end
+
+# Ease-Out (gradual deceleration)
+[00:34.000]
+- text "Ease-Out (fast start, decelerating)"
+- note_on 1.67 100 1s
+
+@sweep from [00:34.000] to [00:35.000] every 50ms
+  - cc 1.7.ramp(0, 127, ease-out)
+@end
+
+# Ease-In-Out (S-curve)
+[00:35.500]
+- text "Ease-In-Out (smooth S-curve)"
+- note_on 1.69 100 1s
+
+@sweep from [00:35.500] to [00:36.500] every 50ms
+  - cc 1.7.ramp(0, 127, ease-in-out)
+@end
+
+
+# ============================================================================
+# Advanced: Bezier Curve Comparison
+# ============================================================================
+# Note: For even more control, use curve() instead of sweep with ramp()
+# curve() allows custom bezier curves in addition to presets
+
+[00:37.000]
+- marker "Curves vs Sweeps"
+- text "For custom curves, use curve() expressions"
+
+# Example: Filter sweep with custom bezier curve
+# (This would require curve() expression, not @sweep)
+# [00:37.000]
+# - cc 1.74.curve(0, 127, bezier(0, 40, 80, 127))
+
+
+# ============================================================================
+# Practical Applications
+# ============================================================================
+
+[00:38.000]
+- marker "Practical Applications"
+- text "Real-world use cases for different ramp types"
+
+# USE CASE 1: Smooth fade-in (ease-out for natural start)
+[00:38.000]
+- text "Natural volume fade-in (ease-out)"
+- note_on 1.60 100 4s
+
+@sweep from [00:38.000] to [00:42.000] every 100ms
+  - cc 1.7.ramp(0, 110, ease-out)
+@end
+
+# USE CASE 2: Build-up (ease-in for tension)
+[00:42.500]
+- text "Filter build-up (ease-in creates tension)"
+- note_on 1.48 100 4s
+
+@sweep from [00:42.500] to [00:46.500] every 80ms
+  - cc 1.74.ramp(20, 127, ease-in)
+@end
+
+# USE CASE 3: Professional cross-fade (ease-in-out)
+[00:47.000]
+- text "Cross-fade (ease-in-out for smooth transition)"
+- note_on 1.64 100 4s
+
+@sweep from [00:47.000] to [00:51.000] every 75ms
+  - cc 1.10.ramp(0, 127, ease-in-out)
+@end
+
+
+# ============================================================================
+# When to Use Which Ramp Type
+# ============================================================================
+#
+# LINEAR:
+#   ✓ Technical fades (video sync)
+#   ✓ Mathematical accuracy required
+#   ✓ Constant rate changes
+#   ✗ Can sound mechanical/unnatural
+#
+# EXPONENTIAL:
+#   ✓ Filter opens (more dramatic at end)
+#   ✓ Crescendos (volume builds)
+#   ✓ Excitement/energy builds
+#   ✗ Too aggressive for subtle changes
+#
+# LOGARITHMIC:
+#   ✓ Natural decays
+#   ✓ Reverb tails
+#   ✓ Filter closes (gentle finish)
+#   ✗ Too gentle for impactful changes
+#
+# EASE-IN:
+#   ✓ Tension builds (gradual acceleration)
+#   ✓ Filter sweeps that build intensity
+#   ✓ Leading into drops/hits
+#   ✗ Not ideal for natural fades
+#
+# EASE-OUT:
+#   ✓ Natural fade-ins (smooth entry)
+#   ✓ Volume swells
+#   ✓ Gentle arrivals
+#   ✓ Most natural-sounding for fades
+#
+# EASE-IN-OUT:
+#   ✓ Professional transitions
+#   ✓ Cross-fades
+#   ✓ Smooth automation
+#   ✓ Musical parameter changes
+#   ✓ Best for general-purpose automation
+#
+# ============================================================================
+# End
+# ============================================================================
+
+[00:52.000]
+- text "Sweep automation with all ramp types demonstrated"
+- end_of_track

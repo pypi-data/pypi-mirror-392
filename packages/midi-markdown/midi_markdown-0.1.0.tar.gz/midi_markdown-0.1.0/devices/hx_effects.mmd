@@ -1,0 +1,195 @@
+---
+device: Line 6 HX Effects
+manufacturer: Line 6
+version: 3.80
+default_channel: 1
+documentation: https://line6.com/support/manuals/hxeffects
+firmware_notes: |
+  HX EFFECTS: EFFECTS-ONLY PROCESSOR
+  - 4 SNAPSHOTS per preset (same as HX Stomp XL)
+  - 6 FOOTSWITCHES (FS1-6)
+  - 2 EXPRESSION PEDALS (EXP1, EXP2)
+  - 5-PIN DIN MIDI (full MIDI In/Out/Thru) - ADVANTAGE over HX Stomp/XL
+  - Full Command Center (no CV/Ext Amp - effects only)
+  - Effects processing only (no amp/cab modeling)
+
+  UNIQUE PRESET ADDRESSING:
+  - 128 presets organized as 32 Banks × 4 Presets (A-D)
+  - PC 0-3   = Bank 1 Presets A-D
+  - PC 4-7   = Bank 2 Presets A-D
+  - PC 124-127 = Bank 32 Presets A-D
+  - Sequential addressing (no Bank Select needed)
+
+  TIMING REQUIREMENTS:
+  - Same as other Helix: 350ms after PC (firmware 3.5x), 50ms for 3.10+
+---
+
+# Import common Line 6 Helix family aliases
+@import "devices/line6_common.mmd"
+
+# ============================================
+# HX EFFECTS-SPECIFIC FEATURES
+# ============================================
+#
+# This library extends line6_common.mmd with HX Effects-specific features:
+# - Sequential preset addressing (32 banks × 4 presets)
+# - 4 snapshots (0-3)
+# - 6 footswitches
+# - 5-pin DIN MIDI with Thru
+# - Effects-only focus (amp integration macros)
+#
+
+# ============================================
+# PRESET MANAGEMENT (HX EFFECTS SEQUENTIAL ADDRESSING)
+# ============================================
+
+# HX Effects uses SEQUENTIAL PRESET ADDRESSING
+# Formula: PC = ((Bank - 1) × 4) + Preset_Offset
+# Where Preset_Offset: A=0, B=1, C=2, D=3
+
+# Direct preset addressing
+@alias hxfx_preset pc.{ch}.{preset:0-127} "Load preset (0-127)"
+
+# Named preset shortcuts for first bank (commonly used)
+@alias hxfx_bank1_a pc.{ch}.0 "Bank 1 Preset A"
+@alias hxfx_bank1_b pc.{ch}.1 "Bank 1 Preset B"
+@alias hxfx_bank1_c pc.{ch}.2 "Bank 1 Preset C"
+@alias hxfx_bank1_d pc.{ch}.3 "Bank 1 Preset D"
+
+# Combined preset + snapshot load
+@alias hxfx_load_snapshot {ch} {preset:0-127} {snapshot:0-3} "Load preset and switch to snapshot"
+  - pc {ch}.{preset}
+  [+350ms]
+  - cc {ch}.69.{snapshot}
+@end
+
+# ============================================
+# PRESET ADDRESSING CALCULATOR
+# ============================================
+
+# Quick reference for calculating PC numbers:
+# Bank 1:  PC 0-3    (Presets A-D)
+# Bank 2:  PC 4-7
+# Bank 3:  PC 8-11
+# Bank 5:  PC 16-19
+# Bank 10: PC 36-39
+# Bank 32: PC 124-127
+
+# Formula: PC = ((Bank - 1) × 4) + Preset_Offset
+# Examples:
+# Bank 5 Preset C  = ((5-1) × 4) + 2 = 18
+# Bank 10 Preset A = ((10-1) × 4) + 0 = 36
+
+# ============================================
+# SNAPSHOT CONTROL (HX EFFECTS: 4 SNAPSHOTS)
+# ============================================
+
+@alias hxfx_snapshot cc.{ch}.69.{snap:0-3} "Switch to snapshot (0=Snap1...3=Snap4)"
+
+# Named snapshot shortcuts
+@alias hxfx_snap_1 cc.{ch}.69.0 "Snapshot 1"
+@alias hxfx_snap_2 cc.{ch}.69.1 "Snapshot 2"
+@alias hxfx_snap_3 cc.{ch}.69.2 "Snapshot 3"
+@alias hxfx_snap_4 cc.{ch}.69.3 "Snapshot 4"
+
+# ============================================
+# COMMAND CENTER FOR AMP INTEGRATION
+# ============================================
+
+# HX Effects excels at controlling external amps via MIDI
+# Full Command Center without amp modeling means focus on integration
+
+# Example: Change preset and switch amp channel simultaneously
+@alias hxfx_preset_with_amp {ch} {preset:0-127} {amp_channel} "Load HX Effects preset and switch amp channel"
+  - pc {ch}.{preset}
+  [+350ms]
+  # Switch external amp (example: Mesa Boogie on channel 2)
+  - pc 2.{amp_channel}
+@end
+
+# Example: Snapshot change with amp channel switch
+@alias hxfx_snapshot_with_amp {ch} {snapshot:0-3} {amp_channel} "Change snapshot and amp channel"
+  - cc {ch}.69.{snapshot}
+  [+50ms]
+  # Switch amp channel
+  - pc 2.{amp_channel}
+@end
+
+# Example: Toggle external pedal on snapshot change
+@alias hxfx_snapshot_with_pedal {ch} {snapshot:0-3} {pedal_cc} {pedal_state} "Snapshot + external pedal control"
+  - cc {ch}.69.{snapshot}
+  [+50ms]
+  - cc 2.{pedal_cc}.{pedal_state}
+@end
+
+# ============================================
+# 4-SNAPSHOT EFFECTS COMBINATIONS
+# ============================================
+
+# Pattern 1: Dry → Subtle → Wet → Ambient
+@alias hxfx_wetness_progression {ch} {preset} "Progressive wetness: dry to ambient"
+  - pc {ch}.{preset}
+  # Snapshot 1: Dry (minimal FX, amp tone focus)
+  # Snapshot 2: Subtle (light delay/reverb)
+  # Snapshot 3: Wet (moderate FX mix)
+  # Snapshot 4: Ambient (heavy delay/reverb/mod)
+@end
+
+# Pattern 2: Song section presets
+@alias hxfx_song_sections {ch} {preset} "Song section presets"
+  - pc {ch}.{preset}
+  # Snapshot 1: Verse FX
+  # Snapshot 2: Chorus FX
+  # Snapshot 3: Bridge FX
+  # Snapshot 4: Solo FX
+@end
+
+# ============================================
+# 5-PIN DIN MIDI ADVANTAGES
+# ============================================
+
+# HX Effects has 5-pin DIN MIDI (unlike HX Stomp/XL)
+# This enables:
+# - Hardware MIDI Thru for daisy-chaining devices
+# - Lower jitter for MIDI Clock (vs USB)
+# - Optical isolation (no ground loops)
+# - Standard MIDI controller compatibility
+# - No computer/USB host required
+
+# Typical MIDI chain:
+# MIDI Controller → HX Effects → External Amp → External Pedals
+#     (5-pin DIN)      THRU         THRU            END
+
+# Configure MIDI Thru in Global Settings > MIDI/Tempo > MIDI Thru
+
+# ============================================
+# USAGE EXAMPLES
+# ============================================
+
+# Example 1: Load specific bank/preset
+# [00:00.000]
+# - hxfx_preset 1 18              // Bank 5 Preset C: ((5-1)×4)+2 = 18
+
+# Example 2: Song with snapshots
+# [00:00.000]
+# - hxfx_preset 1 8               // Bank 3 Preset A
+# [00:16.000]
+# - hxfx_snap_2                   // Verse
+# [00:32.000]
+# - hxfx_snap_3                   // Chorus
+
+# Example 3: Expression automation with modulation
+# [00:00.000]
+# - line6_exp_swell 1 1 0 127     // Smooth EXP1 swell
+# [00:04.000]
+# - line6_exp_vibrato 1 1 64 3.0 25   // EXP1 vibrato effect
+
+# Example 4: Preset with amp channel change
+# [01:00.000]
+# - hxfx_preset_with_amp 1 12 2  // Bank 4 Preset A, Amp Channel 2
+
+# Example 5: Looper workflow (using common library)
+# [02:00.000]
+# - line6_looper_start_recording 1
+# [02:08.000]
+# - line6_looper_playback 1

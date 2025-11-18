@@ -1,0 +1,223 @@
+---
+device: Line 6 HX Stomp XL
+manufacturer: Line 6
+version: 3.80
+default_channel: 1
+documentation: https://line6.com/support/manuals/hxstompxl
+firmware_notes: |
+  HX STOMP XL: THE MIDDLE GROUND
+  - 4 SNAPSHOTS per preset (vs 3 on HX Stomp, 8 on full Helix)
+  - 8 FOOTSWITCHES (FS1-8) - double the HX Stomp
+  - 2 EXPRESSION PEDALS (EXP1, EXP2)
+  - NO 5-PIN DIN MIDI - USB MIDI ONLY
+  - Enhanced Command Center vs HX Stomp
+  - Single DSP path (same as HX Stomp)
+
+  TIMING REQUIREMENTS:
+  - Firmware 3.5x: 350ms delay required after PC
+  - Firmware 3.10+: CC69 buffered during preset load
+
+  PRESET CAPACITY: Direct PC 0-127 addressing (128 presets)
+  NO BANK SELECT NEEDED
+---
+
+# Import common Line 6 Helix family aliases
+@import "devices/line6_common.mmd"
+
+# ============================================
+# HX STOMP XL-SPECIFIC FEATURES
+# ============================================
+#
+# This library extends line6_common.mmd with HX Stomp XL-specific features:
+# - Direct PC addressing (like HX Stomp)
+# - 4 snapshots (0-3) - better than HX Stomp
+# - 8 footswitches (double HX Stomp)
+# - USB MIDI only
+# - All Bypass and Mode switching
+#
+
+# ============================================
+# PRESET MANAGEMENT (HX STOMP XL-SPECIFIC)
+# ============================================
+
+# Direct Program Change addressing - no Bank Select needed
+@alias hxstompxl_preset pc.{ch}.{preset:0-127} "Load preset (0-127)"
+
+# Combined preset + snapshot load
+@alias hxstompxl_load_snapshot {ch} {preset:0-127} {snapshot:0-3} "Load preset and switch to snapshot"
+  - pc {ch}.{preset}
+  [+350ms]
+  - cc {ch}.69.{snapshot}
+@end
+
+# ============================================
+# SNAPSHOT CONTROL (HX STOMP XL: 4 SNAPSHOTS)
+# ============================================
+
+# HX Stomp XL has 4 SNAPSHOTS (0-3)
+# Better than HX Stomp (3), less than full Helix (8)
+# This is often enough for verse/chorus/bridge/solo arrangements
+
+@alias hxstompxl_snapshot cc.{ch}.69.{snap:0-3} "Switch to snapshot (0=Snap1...3=Snap4)"
+
+# Named snapshot shortcuts
+@alias hxstompxl_snap_1 cc.{ch}.69.0 "Snapshot 1"
+@alias hxstompxl_snap_2 cc.{ch}.69.1 "Snapshot 2"
+@alias hxstompxl_snap_3 cc.{ch}.69.2 "Snapshot 3"
+@alias hxstompxl_snap_4 cc.{ch}.69.3 "Snapshot 4"
+
+# ============================================
+# HX STOMP XL UNIQUE FEATURES
+# ============================================
+
+# All Bypass Control (same as HX Stomp)
+@alias hxstompxl_all_bypass cc.{ch}.70.{state=off:0,on:127} "Global bypass (all effects)"
+@alias hxstompxl_all_bypass_on cc.{ch}.70.127 "Bypass all effects"
+@alias hxstompxl_all_bypass_off cc.{ch}.70.0 "Un-bypass all effects"
+
+# Footswitch Mode Control (same as HX Stomp)
+@alias hxstompxl_mode cc.{ch}.71.{mode=stomp:0,scroll:1,preset:2,snapshot:3,next:4,prev:5} "Change footswitch mode"
+@alias hxstompxl_mode_stomp cc.{ch}.71.0 "Switch to Stomp mode"
+@alias hxstompxl_mode_scroll cc.{ch}.71.1 "Switch to Scroll mode"
+@alias hxstompxl_mode_preset cc.{ch}.71.2 "Switch to Preset mode"
+@alias hxstompxl_mode_snapshot cc.{ch}.71.3 "Switch to Snapshot mode"
+@alias hxstompxl_mode_next cc.{ch}.71.4 "Cycle to next footswitch mode"
+@alias hxstompxl_mode_prev cc.{ch}.71.5 "Cycle to previous footswitch mode"
+
+# ============================================
+# 4-SNAPSHOT SONG ARRANGEMENT STRATEGIES
+# ============================================
+
+# 4 snapshots provides good flexibility for most songs
+
+# Pattern 1: Verse/Chorus/Bridge/Solo
+@alias hxstompxl_song_standard {ch} {preset} "Standard 4-part song structure"
+  - pc {ch}.{preset}
+  # Snapshot 1: Verse (clean/mild)
+  # Snapshot 2: Chorus (driven/wet)
+  # Snapshot 3: Bridge (ambient/different)
+  # Snapshot 4: Solo (lead tone)
+@end
+
+# Pattern 2: Clean/Crunch/Drive/Lead (gain staging)
+@alias hxstompxl_gain_stages {ch} {preset} "4 gain stages in one preset"
+  - pc {ch}.{preset}
+  # Snapshot 1: Clean
+  # Snapshot 2: Light crunch
+  # Snapshot 3: Medium drive
+  # Snapshot 4: High gain lead
+@end
+
+# ============================================
+# ENHANCED FOOTSWITCH CONTROL
+# ============================================
+
+# With 8 footswitches, HX Stomp XL provides excellent live control
+# This is a major advantage over HX Stomp's 5 switches
+
+# Example: Toggle multiple effects in sequence
+@alias hxstompxl_effect_build {ch} "Progressive effect build using multiple footswitches"
+  # Start with basic tone
+  # [00:00.000]
+  - cc {ch}.70.0              # Un-bypass all
+
+  # Add compression
+  # [00:04.000]
+  - line6_fs1 {ch}            # Toggle FS1 (compressor)
+
+  # Add delay
+  # [00:08.000]
+  - line6_fs2 {ch}            # Toggle FS2 (delay)
+
+  # Add reverb
+  # [00:12.000]
+  - line6_fs3 {ch}            # Toggle FS3 (reverb)
+
+  # Add modulation
+  # [00:16.000]
+  - line6_fs4 {ch}            # Toggle FS4 (chorus/phaser)
+@end
+
+# ============================================
+# COMMAND CENTER EXAMPLES
+# ============================================
+
+# HX Stomp XL has enhanced Command Center vs regular HX Stomp
+# More footswitch assignments available
+
+@alias hxstompxl_preset_with_amp {ch} {preset} {amp_channel} "Load preset and control external amp"
+  - pc {ch}.{preset}
+  [+350ms]
+  # Switch external amp channel
+  - pc {ch}.{amp_channel}
+@end
+
+@alias hxstompxl_snapshot_with_external {ch} {snapshot:0-3} {ext_cc} {ext_value} "Snapshot + external gear control"
+  - cc {ch}.69.{snapshot}
+  [+50ms]
+  - cc {ch}.{ext_cc}.{ext_value}
+@end
+
+# ============================================
+# COMPARISON: HX STOMP XL VS OTHERS
+# ============================================
+
+# HX STOMP (3 snapshots):
+#   - Most limited for complex arrangements
+#   - 5 footswitches
+#   - Best for simple songs or heavy preset switching
+#   - Smallest footprint
+
+# HX STOMP XL (4 snapshots): ← YOU ARE HERE
+#   - Good balance for most songs
+#   - 8 footswitches (excellent live control)
+#   - Verse/Chorus/Bridge/Solo fits naturally
+#   - Larger footprint than HX Stomp
+
+# HELIX FLOOR/LT/RACK (8 snapshots):
+#   - Maximum flexibility
+#   - 11 footswitches (Floor/LT)
+#   - Complex songs, multiple variations
+#   - Full-size pedalboard footprint
+#   - 5-pin DIN MIDI (hardware chaining)
+
+# ============================================
+# USAGE EXAMPLES
+# ============================================
+
+# Example 1: Standard song with 4 parts
+# [00:00.000]
+# - hxstompxl_preset 1 5
+# - hxstompxl_snap_1              # Intro
+# [00:16.000]
+# - hxstompxl_snap_2              # Verse
+# [00:32.000]
+# - hxstompxl_snap_3              # Chorus
+
+# Example 2: Expression automation with modulation
+# [00:00.000]
+# - line6_exp_swell 1 1 0 127     // Smooth swell
+# [00:04.000]
+# - line6_exp_envelope 1 1        // ADSR envelope
+
+# Example 3: Footswitch effect build
+# [01:00.000]
+# - line6_fs1 1                   # Add delay
+# [01:04.000]
+# - line6_fs2 1                   # Add reverb
+
+# Example 4: Mode switching
+# [01:30.000]
+# - hxstompxl_mode_snapshot 1     # Switch to Snapshot mode
+# [01:30.050]
+# - hxstompxl_snap_4 1            # Change to snapshot 4
+
+# Example 5: All bypass (mute)
+# [02:00.000]
+# - hxstompxl_all_bypass_on 1     # Mute for tuning
+
+# Example 6: Looper workflow (using common library)
+# [02:10.000]
+# - line6_looper_start_recording 1
+# [02:18.000]
+# - line6_looper_playback 1
