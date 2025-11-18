@@ -1,0 +1,28 @@
+[build-system]
+requires = [ "hatchling>=1.27",]
+build-backend = "hatchling.build"
+
+[project]
+name = "subnethostcount"
+version = "0.1.1"
+description = "Count usable IPv4 hosts across CIDR subnets and individual IP addresses."
+readme = "README.md"
+requires-python = ">=3.8"
+keywords = [ "cidr", "subnet", "ipv4", "networking", "host count", "defensive origins",]
+classifiers = [ "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only", "Programming Language :: Python :: 3.8", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12", "Environment :: Console", "Intended Audience :: System Administrators", "Topic :: System :: Networking", "Topic :: Utilities",]
+dependencies = []
+[[project.authors]]
+name = "Defensive Origins"
+email = "info@defensiveorigins.com"
+
+[project.urls]
+Homepage = "https://github.com/DefensiveOrigins/SubnetHostCount"
+Source = "https://github.com/DefensiveOrigins/SubnetHostCount"
+"Issue Tracker" = "https://github.com/DefensiveOrigins/SubnetHostCount/issues"
+
+[project.scripts]
+subnethostcount = "HostCount:main"
+cidr-host-count = "HostCount:main"
+
+[tool.hatch.build]
+include = [ "HostCount.py", "README.md",]
