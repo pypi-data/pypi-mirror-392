@@ -1,0 +1,782 @@
+Metadata-Version: 2.4
+Name: aiagent-2025
+Version: 0.1.2
+Summary: AI-powered CLI agent for codebase analysis and documentation generation using Databricks AI models
+Project-URL: Homepage, https://github.com/HossamTabana/aiagent-cli-releases
+Project-URL: Repository, https://github.com/HossamTabana/aiagent-cli-releases
+Project-URL: Issues, https://github.com/HossamTabana/aiagent-cli-releases/issues
+Author: Hossam Tabana
+License: MIT
+License-File: LICENSE
+Keywords: ai,cli,code-analysis,databricks,documentation
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Code Generators
+Classifier: Topic :: Software Development :: Documentation
+Requires-Python: >=3.11
+Requires-Dist: click>=8.1.0
+Requires-Dist: keyring>=24.0.0
+Requires-Dist: openai>=1.0.0
+Requires-Dist: pathspec>=0.11.0
+Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: pyyaml>=6.0.0
+Requires-Dist: rich>=13.0.0
+Provides-Extra: dev
+Requires-Dist: black>=23.0.0; extra == 'dev'
+Requires-Dist: mypy>=1.0.0; extra == 'dev'
+Requires-Dist: pytest-cov>=4.0.0; extra == 'dev'
+Requires-Dist: pytest>=7.0.0; extra == 'dev'
+Requires-Dist: ruff>=0.1.0; extra == 'dev'
+Description-Content-Type: text/markdown
+
+# AI Agent CLI
+
+An AI-powered CLI tool for codebase analysis and documentation generation using Databricks AI models. Inspired by GitHub's [spec-kit](https://github.com/github/spec-kit), this tool helps you understand existing projects and create comprehensive technical and business documentation.
+
+**Developed by Hossam Tabana**
+
+## Features
+
+### Core Features
+- 🎨 **Interactive Menu Mode**: Beautiful, user-friendly menu for easy navigation
+- 🤖 **AI-Powered Analysis**: Uses Databricks native AI models (Claude, GPT, Gemini)
+- 🎯 **Model Selection**: Easily switch between AI models with persistent default model configuration
+- 📊 **Deep Codebase Understanding**: Recursively analyzes project structure, components, and relationships
+- 📝 **Technical Documentation**: Generates comprehensive docs with Mermaid diagrams
+- 💼 **Business Documentation**: Creates stakeholder-friendly docs with no technical jargon
+- 🔒 **Secure Token Management**: Stores Databricks credentials securely using OS keyring
+- 🌍 **Cross-Platform**: Works on macOS, Windows, and Linux
+- 🚀 **Two Modes**: Interactive menu for beginners, direct commands for experts
+
+### Performance & Scalability (NEW!)
+- ⚡ **Parallel File Processing**: Analyzes multiple files concurrently using ThreadPoolExecutor for 4x faster analysis
+- 🎯 **Smart File Prioritization**: Automatically detects entry points, configs, and skips test/generated files
+- 💾 **Incremental Analysis with SQLite Caching**: Re-analyzes only changed files, dramatically speeding up subsequent runs
+- 🧠 **Semantic Code Chunking**: AST-based parsing for Python, regex for JavaScript/TypeScript - chunks by function/class boundaries
+- 📈 **Large Codebase Support**: Efficiently handles projects with 1000+ files and complex dependency trees
+- 🔍 **Intelligent Test Detection**: Automatically identifies and deprioritizes test files for focused analysis
+
+## Distribution
+
+This is the **private development repository**. The tool is distributed via **PyPI (Python Package Index)**.
+
+**PyPI Package**: https://pypi.org/project/aiagent-2025/
+
+**End-user installation** (recommended for users):
+```bash
+uv tool install aiagent-2025
+```
+
+That's it! Just 3 words - no long URLs needed.
+
+### Distribution Model
+
+This project uses **PyPI distribution** to protect source code while enabling public distribution:
+
+- **Private repo** (this one): Contains all source code, development work, and stays 100% private
+- **PyPI** (public): Receives only wheel files (compiled bytecode), NEVER source code
+- **Optional**: Public docs repo ([aiagent-cli-releases](https://github.com/HossamTabana/aiagent-cli-releases)) for documentation
+
+**Key files:**
+- `pyproject.toml`: Package name (`aiagent`) and version (line 3)
+- `PYPI_SETUP_GUIDE.md`: One-time PyPI account setup and first upload
+- `PYPI_RELEASE_GUIDE.md`: Workflow for releasing new versions to PyPI
+- `github_public/`: Optional documentation files for public GitHub repo
+  - `README.md`: User-facing documentation
+  - `CHANGELOG.md`: Version history
+
+**For releasing new versions**, see [PYPI_RELEASE_GUIDE.md](PYPI_RELEASE_GUIDE.md).
+
+**For initial PyPI setup**, see [PYPI_SETUP_GUIDE.md](PYPI_SETUP_GUIDE.md).
+
+## Installation (Development)
+
+### Using `uvx` (Recommended for one-time use)
+
+```bash
+# Run directly without installation
+uvx aiagent-cli understand
+
+# Or install from source
+uvx --from /path/to/aiagent_claude aiagent understand
+```
+
+### Using `uv` (For persistent installation)
+
+```bash
+# Install as a tool
+uv tool install aiagent-cli
+
+# Or install from source
+uv tool install /path/to/aiagent_claude
+
+# Then use it
+aiagent understand
+```
+
+### From Source (Development)
+
+```bash
+# Clone the repository
+cd /path/to/aiagent_claude
+
+# Install dependencies with uv
+uv pip install -e .
+
+# Run the CLI
+python -m aiagent_cli.main --help
+```
+
+## Requirements
+
+- **Python 3.11+**
+- **Operating System**: macOS, Windows, or Linux
+- **Databricks Account** with:
+  - Personal Access Token (PAT)
+  - Workspace with serving endpoints enabled
+  - Access to at least one AI model (Advanced Model, Creative Model, or Analytics Model)
+
+## Getting Started
+
+### Two Ways to Use AI Agent CLI
+
+**🎨 Interactive Menu Mode (Recommended for beginners)**
+
+Simply run `aiagent` without any arguments to launch an interactive menu:
+
+```bash
+aiagent
+```
+
+You'll see a beautiful menu where you can:
+- Select commands by number (1-6)
+- Configure authentication interactively
+- Create a project brief for better analysis (option 2)
+- Change your default AI model (option 6)
+- See current default model in the menu header
+- Choose project paths
+- Navigate through all features easily
+
+**⚡ Direct Command Mode (For advanced users and automation)**
+
+Run specific commands directly:
+
+```bash
+aiagent configure
+aiagent project-brief                    # Optional but recommended
+aiagent understand
+aiagent create-documentation
+aiagent create-business-documentation
+```
+
+---
+
+### 1. First-Time Setup (Configure Authentication)
+
+You can configure Databricks authentication in three ways:
+
+**Option 1: Interactive Menu (Easiest)**
+
+```bash
+aiagent  # Select option 1 from the menu
+```
+
+**Option 2: Run `configure` command explicitly**
+
+```bash
+aiagent configure
+```
+
+**Option 3: Let the tool prompt you automatically on first use**
+
+```bash
+aiagent understand  # Will prompt for credentials if not configured
+```
+
+You'll be asked to provide:
+- **Databricks Personal Access Token**: Get yours at https://docs.databricks.com/en/dev-tools/auth/pat.html
+- **Workspace URL**: Your Databricks serving endpoints URL (e.g., `https://your-workspace.cloud.databricks.com/serving-endpoints`)
+
+**Credential Storage (Cross-Platform)**:
+- **Token**: Stored securely in your system's keyring
+  - macOS: Keychain
+  - Windows: Windows Credential Locker
+  - Linux: Secret Service API (gnome-keyring, kwallet, etc.)
+- **Workspace URL**: Stored in config file
+  - macOS/Linux: `~/.config/aiagent/config.json`
+  - Windows: `%USERPROFILE%\.config\aiagent\config.json`
+
+### 2. Create Project Brief (Optional but Recommended)
+
+Provide context about your project to improve analysis accuracy and prevent hallucination:
+
+```bash
+# Create brief for current directory
+aiagent project-brief
+
+# Create brief for specific project
+aiagent project-brief --project-path /path/to/project
+```
+
+**What is a Project Brief?**
+
+A project brief answers 3 quick questions about your project:
+1. **What is this project about?** - High-level overview
+2. **What problem does it solve or what business value does it provide?** - Purpose and WHY
+3. **Who are the target users or stakeholders?** - Audience and context
+
+**Why is it important?**
+- ✅ **Prevents Hallucination**: AI knows what the project is SUPPOSED to do
+- ✅ **Improves Accuracy**: AI can validate code against stated intent
+- ✅ **Better Documentation**: Generated docs align with actual project goals
+- ✅ **Context-Aware Analysis**: AI understands business value, not just code structure
+
+**Example Brief:**
+```
+What is this project about?
+→ A web application for tracking customer orders and inventory
+
+What problem does it solve?
+→ Reduces manual order processing time by 80% and prevents inventory errors
+
+Who are the target users?
+→ Warehouse staff, inventory managers, and customer service teams
+```
+
+The brief is stored in `.aiagent/project-brief.json` and automatically used by all analysis and documentation commands.
+
+**Tips:**
+- You can skip any question by pressing Enter
+- You can update the brief anytime by running the command again
+- The brief is optional, but highly recommended for enterprise projects
+
+### 3. Understanding Your Codebase
+
+Analyze your project and build a knowledge base:
+
+```bash
+# Analyze current directory
+aiagent understand
+
+# Analyze specific project
+aiagent understand --project-path /path/to/project
+
+# The tool uses your default AI model
+# To change the model, use the interactive menu (option 5) or change it via configuration
+```
+
+This command:
+- Scans all relevant source files
+- Analyzes project structure and architecture
+- Identifies key components and relationships
+- Uses project brief context if available (shows tip if not)
+- Saves results to `.aiagent/knowledge.md`
+
+### 4. Generate Technical Documentation
+
+Create comprehensive technical documentation with architecture diagrams:
+
+```bash
+# Generate technical docs (uses your default AI model)
+aiagent create-documentation
+```
+
+Generates:
+- `.aiagent/technical-documentation.md` - Detailed technical documentation
+- `.aiagent/architecture.md` - Architecture-focused documentation
+- Both include Mermaid diagrams for visualization
+- Uses project brief context if available
+
+### 5. Generate Business Documentation
+
+Create business-friendly documentation for stakeholders with **intelligent questioning**:
+
+```bash
+# Generate business docs
+aiagent create-business-documentation
+```
+
+This command uses **smart AI reasoning** to:
+- Use project brief context if available for better business alignment
+- Analyze your codebase and identify terms that are unclear from context
+- **Intelligently decide** which questions to ask (0-7 questions, not always the same)
+- Prioritize questions by business importance
+- Show you **why** each question is being asked
+- Translate technical concepts into business language
+- Creates documentation focused on business value and capabilities
+- Saves results to `.aiagent/business-documentation.md`
+- Stores term mappings in `.aiagent/business-mappings.json`
+
+**Smart Features:**
+- ✅ **Context-aware**: Skips terms that can be understood from your code
+- ✅ **Variable questions**: Asks 0-7 questions based on actual need (not fixed 5)
+- ✅ **Reasoning shown**: See why each question matters
+- ✅ **No duplicates**: AI reasoning prevents asking about the same concept twice
+
+## Commands
+
+### `aiagent configure`
+
+Configure or update Databricks authentication credentials.
+
+**Usage:**
+```bash
+aiagent configure
+```
+
+This command:
+- Prompts for your Databricks Personal Access Token (PAT)
+- Prompts for your Databricks workspace serving endpoints URL
+- Stores credentials securely in system keyring (cross-platform)
+- Can be re-run to update expired or changed credentials
+
+**When to use:**
+- First-time setup before running other commands
+- When your token expires or is rotated
+- When switching to a different Databricks workspace
+
+### `aiagent project-brief`
+
+Create or update a project brief to improve analysis accuracy and prevent AI hallucination.
+
+**Usage:**
+```bash
+aiagent project-brief
+aiagent project-brief --project-path /path/to/project
+```
+
+**Options:**
+- `--project-path, -p PATH`: Path to project directory (default: current directory)
+
+**What it does:**
+- Asks 3 quick questions about your project (all optional):
+  1. What is this project about?
+  2. What problem does it solve or what business value does it provide?
+  3. Who are the target users or stakeholders?
+- Saves responses to `.aiagent/project-brief.json`
+- Automatically used by `understand`, `create-documentation`, and `create-business-documentation`
+
+**Why it's important:**
+- **Prevents Hallucination**: AI knows what the project is SUPPOSED to do
+- **Improves Accuracy**: AI validates code against stated project intent
+- **Better Documentation**: Generated docs align with actual project goals
+- **Context-Aware**: AI understands business value, not just code structure
+
+**When to use:**
+- After `configure`, before `understand` (recommended)
+- When starting analysis of a new project
+- When project goals or scope change
+- To update outdated project context
+
+**Note:** This is optional but highly recommended for enterprise projects.
+
+### `aiagent understand`
+
+Perform deep analysis of the project and build internal knowledge base.
+
+**Options:**
+- `--project-path, -p PATH`: Path to project directory (default: current directory)
+- `--model, -m MODEL`: AI model to use (optional - uses your configured default)
+
+**Available AI Models:**
+- **Advanced Model** (default) - Best for sophisticated code analysis
+- **Creative Model** - Optimized for creative documentation tasks
+- **Analytics Model** - Specialized for analytical work
+
+**Note:** Change your default model anytime via the interactive menu (option 5) or using `aiagent` and selecting "Change Model"
+
+### `aiagent create-documentation`
+
+Generate comprehensive technical documentation with Mermaid diagrams.
+
+**Options:**
+- `--project-path, -p PATH`: Path to project directory (default: current directory)
+- `--model, -m MODEL`: AI model to use (optional - uses your configured default)
+
+**Prerequisites:** Must run `aiagent understand` first.
+
+### `aiagent create-business-documentation`
+
+Generate business-level documentation with no technical jargon using **intelligent questioning**.
+
+**Options:**
+- `--project-path, -p PATH`: Path to project directory (default: current directory)
+- `--model, -m MODEL`: AI model to use (optional - uses your configured default)
+
+**Prerequisites:** Must run `aiagent understand` first.
+
+**Smart Interactive Process:**
+- Uses AI reasoning to determine which terms truly need clarification
+- May ask **0-7 questions** (variable, based on need - not always 5)
+- Shows **reasoning** for each question ("Why asking: ...")
+- Context-aware: Skips terms that are clear from codebase
+- Prioritizes questions by business importance
+
+## Project Structure After Running
+
+```
+your-project/
+├── .aiagent/
+│   ├── project-brief.json              # Project context (from 'project-brief') - OPTIONAL
+│   ├── knowledge.md                    # Codebase analysis (from 'understand')
+│   ├── technical-documentation.md      # Technical docs (from 'create-documentation')
+│   ├── architecture.md                 # Architecture docs (from 'create-documentation')
+│   ├── business-documentation.md       # Business docs (from 'create-business-documentation')
+│   ├── business-mappings.json          # Term mappings (from 'create-business-documentation')
+│   └── analysis_cache.db               # Cache for incremental analysis
+├── src/
+├── ... (your code)
+```
+
+## Configuration
+
+### Authentication and Model Selection
+
+Credentials and settings are stored in:
+- **Token**: System keyring (service: `aiagent-cli`, key: `databricks-token`)
+  - Cross-platform support via `keyring` library
+  - macOS: Keychain, Windows: Credential Locker, Linux: Secret Service
+- **Configuration File** (workspace URL and default model):
+  - macOS/Linux: `~/.config/aiagent/config.json`
+  - Windows: `%USERPROFILE%\.config\aiagent\config.json`
+  - Contains: `workspace_url` and `default_model`
+  - Default model: **Advanced Model** (set on first configuration)
+
+You can change the default model:
+- **Interactive Menu**: Select option 5 "Change Model" to choose between Advanced, Creative, or Analytics models
+- The selected model will be used automatically for all subsequent operations
+- No need to specify technical model names or use the `--model` flag
+
+### File Scanning
+
+The tool automatically:
+- Respects `.gitignore` patterns
+- Excludes common directories: `node_modules`, `venv`, `.git`, `build`, etc.
+- Filters relevant source files by extension
+- Limits file size to 1MB per file
+
+**Supported file types:**
+- Programming: `.py`, `.js`, `.ts`, `.java`, `.go`, `.rs`, `.c`, `.cpp`, etc.
+- Web: `.html`, `.css`, `.scss`, `.vue`, `.svelte`
+- Config: `.json`, `.yaml`, `.toml`, `.xml`
+- Documentation: `.md`, `.rst`
+- Database: `.sql`
+- And more...
+
+### Performance & Scalability Features
+
+**Smart File Prioritization:**
+The tool automatically prioritizes files for analysis:
+- **Priority 0 (Highest)**: Entry points (`main.py`, `app.py`, `index.js`, etc.)
+- **Priority 1**: Configuration files (`setup.py`, `package.json`, `Dockerfile`, etc.)
+- **Priority 2**: Regular source files
+- **Priority 3**: Test files (included but deprioritized)
+- **Priority 4**: Documentation files (lowest priority)
+
+**Skipped Files:**
+- Generated code (`.generated.`, `_pb2.`, protobuf files)
+- Database migrations
+- Test snapshots
+
+**Parallel Processing:**
+- Uses ThreadPoolExecutor with 4 workers
+- Analyzes multiple files concurrently
+- 4x faster than sequential analysis on large projects
+- Automatic fallback to sequential for small projects (< 5 files)
+
+**Incremental Analysis with Caching:**
+- SQLite cache stored in `.aiagent/analysis_cache.db`
+- Caches file analysis results with content hashing
+- Only re-analyzes files that have changed since last run
+- Dramatically speeds up subsequent analysis (10x+ faster)
+- Cache statistics shown after analysis
+
+**Semantic Code Chunking:**
+- **Python files**: AST-based parsing to chunk by function/class definitions
+- **JavaScript/TypeScript**: Regex-based parsing for functions and classes
+- **Other files**: Intelligent line-based chunking with context preservation
+- Keeps related code together for better AI comprehension
+
+**Large Codebase Handling:**
+- Efficiently processes 1000+ files
+- Prioritizes top 130 files (10 entry points + 20 configs + 100 source files)
+- Parallel analysis of top 50 files in detail
+- Skips test files by default to focus on core logic
+
+## Examples
+
+### Interactive Menu Mode (Easiest)
+
+```bash
+# Launch interactive menu
+aiagent
+
+# You'll see:
+# ╭──────────────────────────────────────────────────────╮
+# │  🤖 AI Agent CLI                                     │
+# │  Version 0.1.0                                      │
+# │                                                      │
+# │  AI-powered codebase analysis and documentation     │
+# │  Current Model: Advanced Model                      │
+# │                                                      │
+# │  Developed by Hossam                                │
+# ╰──────────────────────────────────────────────────────╯
+#
+#    1      ⚙️  Configure          Set up Databricks authentication
+#    2      📋 Project Brief      Describe your project for better analysis
+#    3      🔍 Understand         Analyze codebase and build knowledge base
+#    4      📝 Create Docs        Generate technical documentation
+#    5      💼 Business Docs      Generate business documentation
+#    6      🎯 Change Model       Select default AI model
+#
+#    0      🚪 Exit              Quit the application
+#
+# Select an option (0-6):
+```
+
+### Complete Workflow (Direct Commands)
+
+```bash
+# 0. First-time setup: Configure authentication
+aiagent configure
+
+# 1. Provide project context (optional but recommended)
+cd my-project
+aiagent project-brief
+# Answer 3 quick questions about your project
+
+# 2. Analyze your codebase
+aiagent understand
+
+# 3. Generate technical documentation
+aiagent create-documentation
+
+# 4. Generate business documentation
+aiagent create-business-documentation
+
+# 5. Review generated docs
+ls -la .aiagent/
+cat .aiagent/technical-documentation.md
+```
+
+### Changing AI Models
+
+```bash
+# Launch interactive menu
+aiagent
+
+# Select option 5 "Change Model"
+# Choose from:
+#   1. Advanced Model (best for sophisticated analysis)
+#   2. Creative Model (optimized for creative tasks)
+#   3. Analytics Model (specialized for analytical work)
+
+# Your choice persists across all subsequent operations
+```
+
+### Analyzing External Projects
+
+```bash
+# Analyze a different project
+aiagent understand --project-path ~/other-project
+
+# Generate docs for it
+aiagent create-documentation --project-path ~/other-project
+```
+
+## Troubleshooting
+
+### "Authentication failed: 401"
+
+Your Databricks token may be expired. The tool will prompt you to reconfigure. Or manually update by deleting credentials and running again:
+
+```bash
+# On macOS/Linux
+rm ~/.config/aiagent/config.json
+# Token will be cleared from keyring on next run
+
+aiagent understand  # Will prompt for new credentials
+```
+
+### "Knowledge file not found"
+
+You need to run `aiagent understand` before generating documentation:
+
+```bash
+aiagent understand
+aiagent create-documentation
+```
+
+### Rate Limiting
+
+If you hit rate limits, the tool will automatically retry with exponential backoff (3 attempts). If issues persist, wait a few minutes before trying again.
+
+### Large Projects
+
+The tool is optimized for large codebases (1000+ files):
+- **Smart Prioritization**: Analyzes entry points and core files first
+- **Parallel Processing**: Processes multiple files concurrently (4x faster)
+- **Semantic Chunking**: Uses AST parsing to intelligently chunk code
+- **Incremental Analysis**: Only re-analyzes changed files on subsequent runs
+- **Caching**: Stores analysis results in `.aiagent/analysis_cache.db`
+
+**Performance Tips:**
+- First run may take longer as cache is being built
+- Subsequent runs are 10x+ faster with caching
+- Cache is automatically invalidated when files change
+- To clear cache: `rm .aiagent/analysis_cache.db`
+
+### Cache Issues
+
+If you experience issues with cached analysis:
+
+```bash
+# Clear analysis cache
+rm -f .aiagent/analysis_cache.db
+
+# Re-run analysis
+aiagent understand
+```
+
+The cache stores file analysis results and is safe to delete. It will be automatically rebuilt on the next run.
+
+### Enterprise-Grade Reliability & Accuracy
+
+The tool is built for professional use with enterprise-grade features to ensure complete, accurate documentation:
+
+#### 🔄 **Automatic Response Continuation**
+
+Prevents documentation truncation through intelligent continuation:
+- **Finish Reason Detection**: Automatically detects when AI response hits token limits (`finish_reason='length'`)
+- **Seamless Continuation**: Makes follow-up API calls to complete the response (up to 5 continuations)
+- **Progress Tracking**: Shows "Response truncated. Continuing... (part N)" messages during generation
+- **No Manual Intervention**: Completely automatic - handles truncation transparently
+
+#### 🎯 **Model-Aware Token Management**
+
+Optimized for Databricks API limits:
+- **Claude Models**: 4,000 tokens per chunk (OTPM: 5,000/min)
+- **GPT Models**: 8,000 tokens per chunk (OTPM: 5,000/min)
+- **Gemini Models**: 12,000 tokens per chunk (OTPM: 20,000/min)
+
+These conservative limits ensure reliability and enable seamless continuation without rate limiting.
+
+#### ⏱️ **Smart Rate Limit Handling**
+
+Professional retry logic with exponential backoff:
+- **retry_after Header**: Respects Databricks' retry timing from 429 responses
+- **Exponential Backoff**: 2^attempt seconds for connection errors
+- **Visual Feedback**: Shows wait time and attempt count: "⏳ Rate limit hit. Waiting 30 seconds... (attempt 2/3)"
+- **Automatic Recovery**: Transparently retries after rate limit cooldown
+
+#### 🛡️ **Anti-Hallucination Grounding**
+
+Prevents AI from inventing details not present in your code:
+- **Strict Grounding Instructions**: Explicitly forbids mentioning tools/frameworks not in the code
+- **No Assumptions**: AI cannot assume orchestration (Airflow, schedulers) unless present in imports
+- **Source-Based Only**: Only describes what's actually visible in code structure and files
+- **Clarity on Uncertainty**: States "Not visible in the provided codebase" rather than guessing
+
+**Example**: If you provide a SQL file, the AI will only describe the SQL logic - it won't hallucinate about Apache Airflow orchestration or Databricks Workflows unless those appear in your actual codebase.
+
+#### ✅ **Completion Verification**
+
+Every generated document includes a verification footer:
+```markdown
+---
+
+**Document completed by AI Agent CLI developed by Hossam. Thank you for using it!**
+```
+
+**What Completion Means:**
+- With continuation: Document generated successfully (possibly across multiple API calls)
+- Continuation count shown: "Technical doc generated with 2 continuation(s)"
+- Footer present: All content delivered, no truncation
+
+**Enterprise Benefits:**
+- ✅ Handles projects with **1000+ files** and complex architectures
+- ✅ Generates **complete** documentation for large codebases (no truncation)
+- ✅ **Accurate** analysis grounded strictly in your actual code
+- ✅ **Resilient** to rate limits with automatic retry and continuation
+- ✅ **Professional** output suitable for enterprise documentation standards
+
+## Development
+
+### Setup Development Environment
+
+```bash
+# Clone and install
+git clone <repo-url>
+cd aiagent_claude
+
+# Install with dev dependencies
+uv pip install -e ".[dev]"
+
+# Run tests
+pytest
+
+# Format code
+black src/ tests/
+
+# Lint
+ruff check src/ tests/
+```
+
+### Project Structure
+
+```
+aiagent_claude/
+├── src/
+│   └── aiagent_cli/
+│       ├── __init__.py          # Package initialization
+│       ├── main.py              # CLI entry point
+│       ├── auth.py              # Authentication & token management
+│       ├── databricks.py        # Databricks AI client wrapper
+│       ├── scanner.py           # File scanning with .gitignore support
+│       ├── analyzer.py          # Codebase analysis
+│       └── generator.py         # Documentation generation
+├── tests/                       # Test suite
+├── pyproject.toml              # Project configuration
+├── README.md                   # This file
+└── LICENSE                     # MIT License
+```
+
+## Inspiration
+
+This tool is inspired by GitHub's [spec-kit](https://github.com/github/spec-kit), which pioneered spec-driven development. We've adapted those principles for AI-powered codebase analysis and documentation generation.
+
+Key design principles borrowed from spec-kit:
+- Template-driven quality constraints
+- Phase-based workflow with quality gates
+- Separation of concerns (understanding → documentation)
+- Markdown as the primary artifact format
+- Extensible command architecture
+
+## License
+
+MIT License - See [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Contributions are welcome! This is an initial implementation with room for expansion:
+
+- Additional AI model support
+- More documentation formats
+- Custom templates
+- Integration with CI/CD
+- Multi-language support
+- And more...
+
+## Support
+
+- **Documentation**: See this README
+- **Issues**: Report bugs or request features via GitHub Issues
+- **Databricks Auth**: https://docs.databricks.com/en/dev-tools/auth/pat.html
+
+---
+
+Built with ❤️ using Databricks AI, inspired by spec-kit's vision of executable specifications.
