@@ -1,0 +1,165 @@
+Metadata-Version: 2.4
+Name: scrollstats
+Version: 0.1.2
+Summary: An open-source python library to calculate and extract morphometrics from scroll bar floodplains
+Project-URL: Homepage, https://github.com/tamu-edu/scrollstats
+Project-URL: Bug Tracker, https://github.com/tamu-edu/scrollstats/issues
+Project-URL: Discussions, https://github.com/tamu-edu/scrollstats/discussions
+Project-URL: Changelog, https://github.com/tamu-edu/scrollstats/releases
+Author-email: Andrew Vanderheiden <andrewloyd19@gmail.com>
+License-File: LICENSE
+Classifier: Development Status :: 1 - Planning
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Scientific/Engineering
+Classifier: Typing :: Typed
+Requires-Python: >=3.10
+Requires-Dist: geopandas
+Requires-Dist: matplotlib
+Requires-Dist: nptyping
+Requires-Dist: numba
+Requires-Dist: rasterio
+Requires-Dist: scipy
+Requires-Dist: tqdm
+Provides-Extra: dev
+Requires-Dist: nox; extra == 'dev'
+Requires-Dist: pytest-cov>=3; extra == 'dev'
+Requires-Dist: pytest>=6; extra == 'dev'
+Provides-Extra: docs
+Requires-Dist: furo>=2023.08.17; extra == 'docs'
+Requires-Dist: ipykernel; extra == 'docs'
+Requires-Dist: myst-parser>=0.13; extra == 'docs'
+Requires-Dist: nbsphinx; extra == 'docs'
+Requires-Dist: sphinx-autodoc-typehints; extra == 'docs'
+Requires-Dist: sphinx-copybutton; extra == 'docs'
+Requires-Dist: sphinx>=7.0; extra == 'docs'
+Provides-Extra: test
+Requires-Dist: pytest-cov>=3; extra == 'test'
+Requires-Dist: pytest>=6; extra == 'test'
+Description-Content-Type: text/markdown
+
+# ScrollStats
+
+[![Actions Status][actions-badge]][actions-link]
+[![Documentation Status][rtd-badge]][rtd-link]
+
+[![PyPI version][pypi-version]][pypi-link]
+[![Conda-Forge][conda-badge]][conda-link]
+[![PyPI platforms][pypi-platforms]][pypi-link]
+
+[![GitHub Discussion][github-discussions-badge]][github-discussions-link]
+
+<!-- SPHINX-START -->
+
+<!-- prettier-ignore-start -->
+[actions-badge]:            https://github.com/tamu-edu/scrollstats/workflows/CI/badge.svg
+[actions-link]:             https://github.com/tamu-edu/scrollstats/actions
+[conda-badge]:              https://img.shields.io/conda/vn/conda-forge/scrollstats
+[conda-link]:               https://github.com/conda-forge/scrollstats-feedstock
+[github-discussions-badge]: https://img.shields.io/static/v1?label=Discussions&message=Ask&color=blue&logo=github
+[github-discussions-link]:  https://github.com/tamu-edu/scrollstats/discussions
+[pypi-link]:                https://pypi.org/project/scrollstats/
+[pypi-platforms]:           https://img.shields.io/pypi/pyversions/scrollstats
+[pypi-version]:             https://img.shields.io/pypi/v/scrollstats
+[rtd-badge]:                https://readthedocs.org/projects/scrollstats/badge/?version=latest
+[rtd-link]:                 https://scrollstats.readthedocs.io/en/latest/?badge=latest
+
+<!-- prettier-ignore-end -->
+
+An open-source python library to calculate and extract morphometrics from
+scrollbar floodplains.
+
+## Getting Started
+
+If you intend to use ScrollStats for your own analysis, follow the User
+Installation instructions.
+
+If you intend to develop or contribute to ScrollStats, follow the Developer
+Installation instructions.
+
+### User Installation
+
+Simply install ScrollStats to your python environment with `pip`
+
+```shell
+python -m pip install scrollstats
+```
+
+### Developer Installation
+
+First, clone the repo locally, create a virtual environment for the project,
+then install the `[dev]` optional dependencies listed in
+[pyproject.toml](pyproject.toml).
+
+```shell
+git clone https://github.com/tamu-edu/scrollstats
+
+python -m venv venv/
+source venv/bin/activate
+
+(venv) python -m pip install -e ".[dev]"
+```
+
+## The ScrollStats Workflow
+
+The ScrollStats Workflow can be broken up into the 3 major steps listed below.
+Each of these steps is covered in detail in [docs](docs/) with code examples
+using datasets generated from
+[a bend on the Lower Brazos River, TX](https://www.google.com/maps/@30.614411,-96.499508,16z).
+
+### 1. [Delineate Ridge Areas](docs/DelineateRidgeAreas.md)
+
+Delineate ridge areas from a DEM to create the ridge area raster. This is
+achieved by:
+
+1. applying the profile curvature and residual topography transforms to the DEM
+2. applying a threshold at 0 to these transformed rasters to create binary
+   rasters
+3. finding the union of these binary rasters
+4. denoising the union raster
+
+### 2. [Create Vector Datasets](docs/CreateVectorDatasets.md)
+
+Create the following vector datasets to define key morphological features of the
+bend.
+
+- bend boundary
+- packet boundaries
+- channel centerline
+- ridge lines
+- migration pathways
+
+Some of these datasets are digitized manually, while others are generated by
+ScrollStats. Details of the vector data creation process can be found in the doc
+linked above.
+
+### 3. [Calculate Ridge Metrics](docs/CalculateRidgeMetrics.md)
+
+Once all of the vector datasets are created and the raster areas are delineated,
+you can now calculate ridge metrics across the entire bend.
+
+These metrics include ridge amplitude, width, and migration distance for every
+intersection of a ridge and migration pathway.
+
+## Contributing
+
+Contribution to ScrollStats is welcome. There will forever be a "frozen" branch
+that contains the code exactly as it was at the time of publication, but it is
+the intent of the maintainer to accept community feedback and suggestions to the
+project.
+
+**Submitting Feedback** To submit feedback, please open an issue on this
+repository with the appropriate label. Currently used labels are:
+
+- `documentation`: issues concerning the workflow or clarity of instructions
+- `feature`: issues requesting or proposing new features for scrollstats
+- `bug`: issues concerning errors in the code itself
