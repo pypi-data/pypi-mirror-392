@@ -1,0 +1,97 @@
+Metadata-Version: 2.4
+Name: autowt
+Version: 0.5.0.dev2
+Summary: Customizable git worktree manager
+Author-email: Steve <steve@example.com>
+License-Expression: MIT
+License-File: LICENSE
+Keywords: development,git,workflow,worktree
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Software Development :: Version Control
+Classifier: Topic :: System :: Shells
+Requires-Python: >=3.10
+Requires-Dist: automate-terminal==0.1.7
+Requires-Dist: click-aliases>=1.0.0
+Requires-Dist: click>=8.0.0
+Requires-Dist: rich>=13.0.0
+Requires-Dist: textual>=0.50.0
+Requires-Dist: toml>=0.10.0
+Description-Content-Type: text/markdown
+
+# autowt: a better git worktree experience
+
+**autowt** is a layer of convenience over [git worktree](https://git-scm.com/docs/git-worktree). It automates the creation, management, and cleanup of git worktrees, giving each branch its own dedicated directory and terminal tab or window.
+
+[**Full documentation**](https://steveasleep.com/autowt/)
+
+Consider what it takes to set up a fresh worktree in a typical workflow:
+
+1. Make a decision about where to put the worktree
+2. `git worktree add <worktree_path> -b <branch>`
+3. Open a new terminal tab
+4. `cd <worktree path>`
+5. `uv sync` or `npm install` or whatever your dependency setup is
+6. `cp <repo_dir>/.env .` to copy secrets
+
+Congrats, you're done! Type type type, open a PR, and merge it. Now you need to clean up:
+
+1. `git worktree rm .`
+2. Close the tab
+
+Of course, you might close the tab and forget to clean up the worktree, and your set of worktrees will grow.
+
+On the other hand, with autowt, it looks like this:
+
+```sh
+autowt <branch>
+# there is no step 2
+```
+
+And deleting branches that have been merged or are associated with closed PRs looks like this:
+
+```sh
+autowt cleanup
+```
+
+A lot nicer, right?
+
+**Type less**
+
+The built-in worktree commands are verbose. `autowt` makes them shorter, and adds automation hooks.
+
+**Terminal program automation**
+
+If you like to keep multiple tabs open, `autowt` can create tabs for new worktrees, and switch to the correct tab for a worktree if you already have it open.
+
+## Getting started
+
+You'll need Python 3.10+ and a version of `git` released less than ten years ago (2.5+).
+
+First, install autowt:
+
+```bash
+pip install autowt
+```
+
+Then, make a new worktree for a new or existing branch in your current repo:
+
+```bash
+autowt my-new-feature
+```
+
+Watch as `autowt` creates a new worktree and opens it in a new terminal tab or window.
+
+## Contributing
+
+PRs, GitHub issues, discussion topics, bring 'em on!
+
+## License
+
+This project is licensed under the MIT License.
