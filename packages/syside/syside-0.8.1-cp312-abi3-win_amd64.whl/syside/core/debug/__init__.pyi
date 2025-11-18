@@ -1,0 +1,3 @@
+
+
+def set_leak_warnings(arg: bool, /) -> None: ...
