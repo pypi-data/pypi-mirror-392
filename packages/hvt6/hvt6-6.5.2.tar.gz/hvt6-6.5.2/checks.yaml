@@ -1,0 +1,1076 @@
+# Security Checks Configuration for HVT6
+# Migrated from test3.csv with improved structure and validation
+#
+# Each check defines:
+#   - check_id: Unique identifier
+#   - check_name: Human-readable name
+#   - check_type: Type of validation (typed, parent, objects, interface, logging, aaa)
+#   - category: Security category (control, acceso, operativa, monitoreo, general)
+#   - security_plane: Security plane (management, control, data)
+#   - max_score: Maximum points for this check
+#   - template_name: Jinja2 template file
+#   - regex_pattern: Regex for matching (if applicable)
+#   - parent_pattern: Parent line regex for parent/child checks
+#   - child_pattern: Child line regex for parent/child checks
+#   - default_value: Default/expected value
+#   - negated: Whether to check for absence (true) or presence (false)
+#   - description: What this check validates
+#   - recommendation: How to fix if check fails
+#   - enabled: Whether to run this check
+
+checks:
+  # AAA Security Checks
+  - check_id: aaa_001
+    check_name: AAA Configuration
+    check_type: aaa
+    category: control
+    security_plane: control
+    max_score: 41
+    template_name: aaa2.j2
+    description: Validates comprehensive AAA configuration including new-model, TACACS+/RADIUS servers, and authentication methods
+    recommendation: Configure AAA according to Cisco hardening guidelines
+    enabled: true
+
+  # Service Configuration Checks
+  - check_id: service_001
+    check_name: service password-encryption
+    check_type: typed
+    category: control
+    security_plane: management
+    max_score: 3
+    template_name: spe.j2
+    regex_pattern: '^service\s+password[-]encryption($)'
+    default_value: 'True'
+    negated: false
+    description: Ensures password encryption service is enabled
+    recommendation: Configure 'service password-encryption'
+    enabled: true
+
+  - check_id: enable_001
+    check_name: enable secret
+    check_type: typed
+    category: control
+    security_plane: management
+    max_score: 5
+    template_name: ensec.j2
+    regex_pattern: '^enable\s+secret\s([\d]\s\S+)'
+    default_value: 'True'
+    negated: false
+    description: Validates enable secret is configured with type 5 or higher encryption
+    recommendation: Configure 'enable secret 9 <password>' for type 9 encryption
+    enabled: true
+
+  - check_id: service_002
+    check_name: no service password-recovery
+    check_type: typed
+    category: control
+    security_plane: management
+    max_score: 2
+    template_name: nof.j2
+    regex_pattern: '^no\s+service\s+password[-]recovery()'
+    default_value: 'True'
+    negated: false
+    description: Disables password recovery to prevent unauthorized password resets
+    recommendation: Configure 'no service password-recovery'
+    enabled: true
+
+  # VTY Line Comprehensive Security (v6.3.2 - Replaces vty_001 through vty_009)
+  # DEPRECATED (2025-11-12): Replaced by ssh_vty_unified_001 (merged SSH & VTY security)
+  - check_id: vty_security_001
+    check_name: VTY Line Comprehensive Security
+    check_type: vty_security_001
+    category: acceso
+    security_plane: management
+    max_score: 25
+    template_name: vty_security.j2
+    description: |
+      Validates comprehensive VTY line security across ALL VTY lines detected in running-config.
+      Auto-detects VTY ranges (0 4, 5 15, 16 31, etc.) and validates:
+      - SSH-only transport (10 points)
+      - Exec-timeout configuration (6 points)
+      - Access-class ACL restriction (5 points)
+      - Timeout reasonableness <= 10 minutes (2 points)
+      - No Telnet protocol (2 points)
+      Uses weighted scoring based on percentage compliance.
+    recommendation: |
+      Configure comprehensive VTY security on all lines:
+      - transport input ssh (SSH-only, no Telnet)
+      - exec-timeout 10 0 (10 minutes maximum)
+      - access-class <ACL> in (restrict source IPs)
+      - login authentication <method> (centralized AAA)
+    enabled: false  # DEPRECATED: Merged into ssh_vty_unified_001
+
+  # SSH & VTY Unified Comprehensive Security (v6.4.0 - Replaces ssh_security_001 & vty_security_001)
+  - check_id: ssh_vty_unified_001
+    check_name: SSH & VTY Comprehensive Security
+    check_type: ssh_vty_unified_001
+    category: acceso
+    security_plane: management
+    max_score: 40
+    template_name: ssh_vty_unified.j2
+    description: |
+      Unified comprehensive security validation for SSH configuration and VTY line security.
+      Merges ssh_security_001 (20 pts) and vty_security_001 (25 pts) into single check.
+
+      CRITICAL PREREQUISITE: SSHv2 must be configured globally ('ip ssh version 2').
+      Without SSHv2, this check returns 0/45 points (FAIL status).
+
+      Core SSH Configuration (17 points):
+      - SSHv2 configured (5 pts - prerequisite but counted)
+      - SSH timeout ≤120s (2 pts)
+      - SSH source interface (2 pts)
+      - Domain name (1 pt)
+      - RSA keypair (2 pts)
+      - KEX algorithms (2 pts)
+      - SSH logging (2 pts)
+      - Authentication retries (1 pt)
+
+      VTY Line Security (23 points - weighted):
+      - SSH-only transport: 9 pts (100%:9, ≥75%:6, ≥50%:4, <50%:0)
+      - Exec-timeout presence: 6 pts (weighted)
+      - Access-class ACL: 5 pts (weighted)
+      - Timeout validation ≤10min: 2 pts
+      - No telnet access: 1 pt
+
+      Advanced Security (5 bonus points - can exceed 100%):
+      - Strong ciphers: 2 pts
+      - Strong MACs: 2 pts
+      - Strong KEX: 1 pt
+
+      Total: 40 base points + 5 bonus points = 45 maximum
+      Devices can score up to 45/40 (112.5%)
+    recommendation: |
+      Complete SSH and VTY security configuration:
+
+      Core SSH Configuration:
+      1. ip ssh version 2                           (MANDATORY prerequisite)
+      2. ip ssh time-out 60                          (≤120 seconds recommended)
+      3. ip ssh source-interface Loopback0
+      4. ip domain-name <your-domain>
+      5. crypto key generate rsa modulus 2048
+      6. ip ssh server algorithm key-exchange group14-sha1
+      7. ip ssh logging events
+      8. ip ssh authentication-retries 3
+
+      VTY Line Configuration (all VTY lines):
+      9. line vty 0 15
+         - transport input ssh                     (SSH-only, no telnet)
+         - exec-timeout 10 0                        (≤10 minutes recommended)
+         - access-class <acl-name> in               (restrict source IPs)
+         - login authentication <method>
+
+      Advanced Security (bonus - optional):
+      10. ip ssh server algorithm encryption aes128-ctr aes192-ctr aes256-ctr
+      11. ip ssh server algorithm mac hmac-sha2-256 hmac-sha2-512
+      12. ip ssh server algorithm key-exchange diffie-hellman-group14-sha1
+    enabled: true
+
+  # VTY Line Security - VTY 0 4 (DEPRECATED - replaced by vty_security_001)
+  - check_id: vty_001
+    check_name: line vty 0 4 - SSH only
+    check_type: parent
+    category: acceso
+    security_plane: management
+    max_score: 5
+    template_name: vty_ssh.j2
+    parent_pattern: 'line vty 0 4'
+    child_pattern: '^\s+transport\s+input\s+ssh$'
+    default_value: 'SSH'
+    description: Ensures VTY lines only accept SSH connections
+    recommendation: Configure 'transport input ssh' under line vty 0 4
+    enabled: false
+
+  - check_id: vty_002
+    check_name: line vty 0 4 - access-class
+    check_type: parent
+    category: acceso
+    security_plane: management
+    max_score: 3
+    template_name: vty_acl.j2
+    parent_pattern: 'line vty 0 4'
+    child_pattern: '^\s+access[-]class\s\S+'
+    default_value: 'access-class'
+    description: Validates ACL is applied to restrict VTY access
+    recommendation: Configure 'access-class <acl> in' under line vty 0 4
+    enabled: false
+
+  - check_id: vty_003
+    check_name: line vty 0 4 - exec-timeout
+    check_type: parent
+    category: acceso
+    security_plane: management
+    max_score: 3
+    template_name: vty_to.j2
+    parent_pattern: 'line vty 0 4'
+    child_pattern: '^\s+exec[-]timeout\s\S+'
+    default_value: 'exec-timout'
+    description: Ensures session timeout is configured
+    recommendation: Configure 'exec-timeout 5 0' under line vty 0 4
+    enabled: false
+
+  # VTY Line Security - VTY 5 15 (DEPRECATED - replaced by vty_security_001)
+  - check_id: vty_004
+    check_name: line vty 5 15 - SSH only
+    check_type: parent
+    category: acceso
+    security_plane: management
+    max_score: 5
+    template_name: vty_ssh.j2
+    parent_pattern: 'line vty 5 15'
+    child_pattern: '^\s+transport\s+input\s+ssh$'
+    default_value: 'SSH'
+    description: Ensures VTY lines only accept SSH connections
+    recommendation: Configure 'transport input ssh' under line vty 5 15
+    enabled: false
+
+  - check_id: vty_005
+    check_name: line vty 5 15 - access-class
+    check_type: parent
+    category: acceso
+    security_plane: management
+    max_score: 3
+    template_name: vty_acl.j2
+    parent_pattern: 'line vty 5 15'
+    child_pattern: '^\s+access[-]class\s\S+'
+    default_value: 'access-class'
+    description: Validates ACL is applied to restrict VTY access
+    recommendation: Configure 'access-class <acl> in' under line vty 5 15
+    enabled: false
+
+  - check_id: vty_006
+    check_name: line vty 5 15 - exec-timeout
+    check_type: parent
+    category: acceso
+    security_plane: management
+    max_score: 3
+    template_name: vty_to.j2
+    parent_pattern: 'line vty 5 15'
+    child_pattern: '^\s+exec[-]timeout\s\S+'
+    default_value: 'exec-timout'
+    description: Ensures session timeout is configured
+    recommendation: Configure 'exec-timeout 5 0' under line vty 5 15
+    enabled: false
+
+  # VTY Line Security - VTY 16 31 (DEPRECATED - replaced by vty_security_001)
+  - check_id: vty_007
+    check_name: line vty 16 31 - SSH only
+    check_type: parent
+    category: acceso
+    security_plane: management
+    max_score: 5
+    template_name: vty_ssh.j2
+    parent_pattern: 'line vty 16 31'
+    child_pattern: '^\s+transport\s+input\s+ssh$'
+    default_value: 'SSH'
+    description: Ensures VTY lines only accept SSH connections
+    recommendation: Configure 'transport input ssh' under line vty 16 31
+    enabled: false
+
+  - check_id: vty_008
+    check_name: line vty 16 31 - access-class
+    check_type: parent
+    category: acceso
+    security_plane: management
+    max_score: 3
+    template_name: vty_acl.j2
+    parent_pattern: 'line vty 16 31'
+    child_pattern: '^\s+access[-]class\s\S+'
+    default_value: 'access-class'
+    description: Validates ACL is applied to restrict VTY access
+    recommendation: Configure 'access-class <acl> in' under line vty 16 31
+    enabled: false
+
+  - check_id: vty_009
+    check_name: line vty 16 31 - exec-timeout
+    check_type: parent
+    category: acceso
+    security_plane: management
+    max_score: 3
+    template_name: vty_to.j2
+    parent_pattern: 'line vty 16 31'
+    child_pattern: '^\s+exec[-]timeout\s\S+'
+    default_value: 'exec-timout'
+    description: Ensures session timeout is configured
+    recommendation: Configure 'exec-timeout 5 0' under line vty 16 31
+    enabled: false
+
+  # AUX Line Security
+  - check_id: aux_001
+    check_name: line aux 0 - transport none
+    check_type: parent
+    category: acceso
+    security_plane: management
+    max_score: 5
+    template_name: aux_con.j2
+    parent_pattern: 'line aux 0'
+    child_pattern: '^\s+transport\s+input\s+none$'
+    default_value: 'none'
+    description: Disables all transport on auxiliary port
+    recommendation: Configure 'transport input none' under line aux 0
+    enabled: true
+
+  - check_id: aux_002
+    check_name: line aux 0 - no exec
+    check_type: parent
+    category: acceso
+    security_plane: management
+    max_score: 3
+    template_name: aux_con_exec.j2
+    parent_pattern: 'line aux 0'
+    child_pattern: '^\s+no\s+exec'
+    default_value: 'no exec'
+    description: Disables EXEC process on auxiliary line
+    recommendation: Configure 'no exec' under line aux 0
+    enabled: true
+
+  - check_id: aux_003
+    check_name: line aux 0 - exec-timeout
+    check_type: parent
+    category: acceso
+    security_plane: management
+    max_score: 3
+    template_name: vty_to.j2
+    parent_pattern: 'line aux 0'
+    child_pattern: '^\s+exec[-]timeout\s\S+'
+    default_value: 'exec-timeout'
+    description: Ensures session timeout is configured
+    recommendation: Configure 'exec-timeout 1 0' under line aux 0
+    enabled: true
+
+  # Console Line Security
+  - check_id: con_001
+    check_name: line con 0 - exec-timeout
+    check_type: parent
+    category: acceso
+    security_plane: management
+    max_score: 3
+    template_name: vty_to.j2
+    parent_pattern: 'line con 0'
+    child_pattern: '^\s+exec[-]timeout\s\S+'
+    default_value: 'exec-timout'
+    description: Ensures console session timeout is configured
+    recommendation: Configure 'exec-timeout 5 0' under line con 0
+    enabled: true
+
+  # HTTP/HTTPS Server Security
+  - check_id: http_001
+    check_name: no ip http server
+    check_type: objects
+    category: acceso
+    security_plane: management
+    max_score: 3
+    template_name: not.j2
+    regex_pattern: '^no\s+ip\s+http\s+server()'
+    negated: true
+    description: Ensures HTTP server is disabled
+    recommendation: Configure 'no ip http server'
+    enabled: true
+
+  - check_id: http_002
+    check_name: no ip http secure-server
+    check_type: objects
+    category: acceso
+    security_plane: management
+    max_score: 3
+    template_name: not.j2
+    regex_pattern: '^no\s+ip\s+http\s+secure[-]server()'
+    negated: true
+    description: Ensures HTTPS server is disabled if not required
+    recommendation: Configure 'no ip http secure-server' or properly secure it
+    enabled: true
+
+  # Banner Configuration
+  - check_id: banner_001
+    check_name: banner exec
+    check_type: objects
+    category: operativa
+    security_plane: management
+    max_score: 4
+    template_name: nof.j2
+    regex_pattern: '^banner\s+exec\s+(\S+)'
+    negated: true
+    description: Validates EXEC banner is configured
+    recommendation: Configure 'banner exec' with appropriate legal notice
+    enabled: true
+
+  - check_id: banner_002
+    check_name: banner login
+    check_type: objects
+    category: operativa
+    security_plane: management
+    max_score: 4
+    template_name: nof.j2
+    regex_pattern: '^banner\s+login\s+(\S+)'
+    negated: true
+    description: Validates login banner is configured
+    recommendation: Configure 'banner login' with appropriate legal notice
+    enabled: true
+
+  # SNMP Security
+  - check_id: snmp_001
+    check_name: SNMP community strings
+    check_type: snmp_001
+    category: monitoreo
+    security_plane: management
+    max_score: 6
+    template_name: snmp.j2
+    description: Validates SNMP community strings are properly configured with ACLs
+    recommendation: Use SNMPv3 or configure community strings with access lists
+    enabled: true
+
+  - check_id: snmp_002
+    check_name: SNMP trap host
+    check_type: snmp_002
+    category: monitoreo
+    security_plane: management
+    max_score: 3
+    template_name: snmp_hte.j2
+    description: Validates SNMP trap host is configured
+    recommendation: Configure 'snmp-server host <ip> version 3'
+    enabled: true
+
+  - check_id: snmp_003
+    check_name: SNMP trap source
+    check_type: snmp_003
+    category: monitoreo
+    security_plane: management
+    max_score: 3
+    template_name: snmp_hte.j2
+    description: Validates SNMP trap source interface is configured
+    recommendation: Configure 'snmp-server trap-source Loopback0'
+    enabled: true
+
+  - check_id: snmp_004
+    check_name: SNMP enable traps
+    check_type: snmp_004
+    category: monitoreo
+    security_plane: management
+    max_score: 3
+    template_name: snmp_hte.j2
+    description: Validates SNMP traps are enabled
+    recommendation: Configure 'snmp-server enable traps snmp'
+    enabled: true
+
+  # Loopback Interface
+  - check_id: interface_001
+    check_name: Loopback 0
+    check_type: interface
+    category: operativa
+    security_plane: management
+    max_score: 5
+    template_name: loop0.j2
+    parent_pattern: '^interface\s+Loopback0$'
+    child_pattern: 'ip\saddress\s(\S.*)'
+    default_value: 'ip address'
+    description: Validates Loopback0 interface is configured with IP address
+    recommendation: Configure 'interface Loopback0' with IP address for management
+    enabled: true
+
+  # SSH Configuration
+  - check_id: ssh_001
+    check_name: ip domain name
+    check_type: typed
+    category: acceso
+    security_plane: management
+    max_score: 5
+    template_name: nof.j2
+    regex_pattern: '^ip\s+domain\s+name()'
+    default_value: 'True'
+    negated: false
+    description: Validates domain name is configured (required for SSH)
+    recommendation: Configure 'ip domain name <domain>'
+    enabled: true
+
+  - check_id: ssh_002
+    check_name: ip ssh source-interface
+    check_type: typed
+    category: acceso
+    security_plane: management
+    max_score: 3
+    template_name: nof.j2
+    regex_pattern: '^ip\s+ssh\s+source-interface()'
+    default_value: 'True'
+    negated: false
+    description: Validates SSH source interface is configured
+    recommendation: Configure 'ip ssh source-interface Loopback0'
+    enabled: true
+
+  - check_id: ssh_003
+    check_name: ip ssh version 2
+    check_type: typed
+    category: acceso
+    security_plane: management
+    max_score: 5
+    template_name: nof.j2
+    regex_pattern: '^ip\s+ssh\s+version\s+2()'
+    default_value: 'True'
+    negated: false
+    description: Ensures only SSHv2 is enabled
+    recommendation: Configure 'ip ssh version 2'
+    enabled: false  # DEPRECATED: Replaced by ssh_security_001 (comprehensive SSH check) and enforced as prerequisite in vty_security_001
+
+  - check_id: ssh_004
+    check_name: ip ssh timeout
+    check_type: typed_value
+    category: acceso
+    security_plane: management
+    max_score: 3
+    template_name: ssh_timeout.j2
+    regex_pattern: '^ip\s+ssh\s+time[-]out\s+(\d+)'
+    default_value: '999'
+    negated: false
+    description: Validates SSH timeout is configured
+    recommendation: Configure 'ip ssh time-out 60' or appropriate value
+    enabled: false  # Disabled - replaced by comprehensive ssh_security_001
+
+  # SSH Comprehensive Security Check
+  # DEPRECATED (2025-11-12): Replaced by ssh_vty_unified_001 (merged SSH & VTY security)
+  - check_id: ssh_security_001
+    check_name: SSH Comprehensive Security
+    check_type: ssh_security_001
+    category: acceso
+    security_plane: management
+    max_score: 20
+    template_name: ssh_security.j2
+    description: |
+      Comprehensive SSH security validation covering:
+      - SSH version 2 enforcement
+      - SSH timeout configuration
+      - SSH source interface
+      - Domain name and RSA keypair
+      - VTY line security (SSH-only, timeouts, ACLs)
+    recommendation: |
+      Configure complete SSH security:
+      1. ip ssh version 2
+      2. ip ssh time-out 60
+      3. ip ssh source-interface Loopback0
+      4. ip domain-name <domain>
+      5. crypto key generate rsa modulus 2048
+      6. line vty 0 15: transport input ssh, exec-timeout 10 0, access-class <acl> in
+    enabled: false  # DEPRECATED: Merged into ssh_vty_unified_001
+
+  # PKI Configuration
+  - check_id: pki_001
+    check_name: RSA keypair
+    check_type: parent
+    category: acceso
+    security_plane: management
+    max_score: 5
+    template_name: nof.j2
+    parent_pattern: '^crypto\s+pki\s+trustpoint\s+TP-self-signed-(?:.*)'
+    child_pattern: '^\s+rsakeypair\s+\S+'
+    default_value: 'rsa'
+    description: Validates RSA keypair is configured for PKI
+    recommendation: Generate RSA keys with 'crypto key generate rsa modulus 2048'
+    enabled: true
+
+  # Discovery Protocols
+  - check_id: cdp_001
+    check_name: no cdp run
+    check_type: objects
+    category: operativa
+    security_plane: data
+    max_score: 2
+    template_name: not.j2
+    regex_pattern: '^no\s+cdp\s+run()'
+    negated: true
+    description: Ensures CDP is disabled on untrusted networks
+    recommendation: Configure 'no cdp run' or 'no cdp enable' per interface
+    enabled: true
+
+  - check_id: lldp_001
+    check_name: lldp run
+    check_type: objects
+    category: operativa
+    security_plane: data
+    max_score: 2
+    template_name: not.j2
+    regex_pattern: '^lldp\s+run()'
+    negated: false
+    description: Validates LLDP configuration
+    recommendation: Configure 'lldp run' if needed, otherwise disable with 'no lldp run'
+    enabled: true
+
+  # Unnecessary Services
+  - check_id: service_003
+    check_name: no ip finger
+    check_type: typed
+    category: operativa
+    security_plane: management
+    max_score: 2
+    template_name: nof.j2
+    regex_pattern: '^ip\s+finger()'
+    default_value: 'True'
+    negated: true
+    description: Ensures finger service is disabled
+    recommendation: Configure 'no ip finger'
+    enabled: true
+
+  - check_id: service_004
+    check_name: no ip domain lookup
+    check_type: objects
+    category: operativa
+    security_plane: management
+    max_score: 2
+    template_name: not.j2
+    regex_pattern: '^no\s+ip\s+domain\s+lookup($)'
+    negated: true
+    description: Disables DNS lookups to prevent command delays
+    recommendation: Configure 'no ip domain lookup'
+    enabled: true
+
+  - check_id: service_005
+    check_name: no service config
+    check_type: typed
+    category: operativa
+    security_plane: management
+    max_score: 2
+    template_name: nof.j2
+    regex_pattern: '^service\s+config()'
+    default_value: 'True'
+    negated: true
+    description: Disables autoloading of config from network
+    recommendation: Configure 'no service config'
+    enabled: true
+
+  - check_id: service_006
+    check_name: no ip bootp server
+    check_type: typed
+    category: operativa
+    security_plane: management
+    max_score: 2
+    template_name: nof.j2
+    regex_pattern: '^ip\s+bootp\s+server()'
+    default_value: 'True'
+    negated: true
+    description: Disables BOOTP server
+    recommendation: Configure 'no ip bootp server'
+    enabled: true
+
+  # TCP Keepalives
+  - check_id: service_007
+    check_name: service tcp-keepalives-in
+    check_type: objects
+    category: operativa
+    security_plane: management
+    max_score: 2
+    template_name: sif.j2
+    regex_pattern: '^service\s+tcp[-]keepalives[-]in()'
+    negated: false
+    description: Enables TCP keepalives for inbound connections
+    recommendation: Configure 'service tcp-keepalives-in'
+    enabled: true
+
+  - check_id: service_008
+    check_name: service tcp-keepalives-out
+    check_type: objects
+    category: operativa
+    security_plane: management
+    max_score: 2
+    template_name: sif.j2
+    regex_pattern: '^service\s+tcp[-]keepalives[-]out()'
+    negated: false
+    description: Enables TCP keepalives for outbound connections
+    recommendation: Configure 'service tcp-keepalives-out'
+    enabled: true
+
+  # Logging Configuration
+  - check_id: logging_001
+    check_name: logging host
+    check_type: logging
+    category: monitoreo
+    security_plane: management
+    max_score: 2
+    template_name: logging.j2
+    regex_pattern: '^logging\s+host\s+(.*)'
+    negated: true
+    description: Validates syslog server is configured
+    recommendation: Configure 'logging host <ip>' for centralized logging
+    enabled: true
+
+  - check_id: logging_002
+    check_name: logging source-interface
+    check_type: objects
+    category: monitoreo
+    security_plane: management
+    max_score: 2
+    template_name: logging_source.j2
+    regex_pattern: '^logging\s+source[-]interface\s+(.*)'
+    negated: false
+    description: Validates logging source interface is configured
+    recommendation: Configure 'logging source-interface Loopback0'
+    enabled: true
+
+  - check_id: logging_003
+    check_name: login on-success log
+    check_type: typed
+    category: monitoreo
+    security_plane: management
+    max_score: 2
+    template_name: nof.j2
+    regex_pattern: '^login\s+on[-]success\s+log()'
+    default_value: 'True'
+    negated: false
+    description: Logs successful login attempts
+    recommendation: Configure 'login on-success log'
+    enabled: true
+
+  # NTP Configuration
+  - check_id: ntp_001
+    check_name: ntp server
+    check_type: objects
+    category: operativa
+    security_plane: management
+    max_score: 5
+    template_name: ntp.j2
+    regex_pattern: '^ntp\s+server\s+(\S+)(?:.*)'
+    negated: true
+    description: Validates NTP server is configured
+    recommendation: Configure 'ntp server <ip>' with authentication
+    enabled: true
+
+  - check_id: ntp_002
+    check_name: ntp source
+    check_type: objects
+    category: operativa
+    security_plane: management
+    max_score: 2
+    template_name: logging_source.j2
+    regex_pattern: '^ntp\s+source\s+(.*)'
+    negated: true
+    description: Validates NTP source interface is configured
+    recommendation: Configure 'ntp source Loopback0'
+    enabled: true
+
+  # Time Configuration
+  - check_id: time_001
+    check_name: clock timezone ARG -3
+    check_type: typed
+    category: operativa
+    security_plane: management
+    max_score: 3
+    template_name: nof.j2
+    regex_pattern: '^clock\s+timezone\s+ARG\s+[-]3()'
+    default_value: 'True'
+    negated: false
+    description: Validates timezone is configured
+    recommendation: Configure 'clock timezone <name> <offset>'
+    enabled: true
+
+  - check_id: time_002
+    check_name: service timestamps log
+    check_type: typed
+    category: operativa
+    security_plane: management
+    max_score: 2
+    template_name: nof.j2
+    regex_pattern: '^service\s+timestamps\s+log\s+datetime\s+msec()'
+    default_value: 'True'
+    negated: false
+    description: Enables timestamps on log messages
+    recommendation: Configure 'service timestamps log datetime msec'
+    enabled: true
+
+  - check_id: time_003
+    check_name: service timestamps debug
+    check_type: typed
+    category: operativa
+    security_plane: management
+    max_score: 2
+    template_name: nof.j2
+    regex_pattern: '^service\s+timestamps\s+debug\s+datetime\s+msec()'
+    default_value: 'True'
+    negated: false
+    description: Enables timestamps on debug messages
+    recommendation: Configure 'service timestamps debug datetime msec'
+    enabled: true
+
+  # Control Plane Protection
+  - check_id: cpp_001
+    check_name: control-plane host management-interface
+    check_type: parent
+    category: operativa
+    security_plane: control
+    max_score: 2
+    template_name: nof.j2
+    parent_pattern: 'control-plane host'
+    child_pattern: '^\s+management[-]interface\s\S+'
+    default_value: 'allow ssh'
+    description: Validates management interface protection
+    recommendation: Configure control-plane host with management-interface
+    enabled: true
+
+  - check_id: cpp_002
+    check_name: control-plane policing
+    check_type: parent
+    category: operativa
+    security_plane: control
+    max_score: 2
+    template_name: nof.j2
+    parent_pattern: 'control-plane'
+    child_pattern: '^\sservice[-]policy\s+input\s\S+'
+    default_value: 'system-cpp-policy'
+    description: Validates control plane policing is configured
+    recommendation: Configure service-policy input under control-plane
+    enabled: true
+
+  # ============================================================================
+  # Wave 1 Security Enhancements (QW-001, Sprint 2 v6.2.0)
+  # Added 2025-11-05: 5 high-priority CIS/NIST checks
+  # ============================================================================
+
+  # IP Source Routing Protection
+  - check_id: ip_source_route_001
+    check_name: no ip source-route
+    check_type: typed
+    category: control
+    security_plane: control
+    max_score: 5
+    template_name: nof.j2
+    regex_pattern: '^no\s+ip\s+source[-]route($)'
+    default_value: 'True'
+    negated: false
+    description: Disables IP source routing to prevent source-routing attacks where attacker specifies packet path
+    recommendation: Configure 'no ip source-route' globally
+    cis_control: "2.1.1"
+    nist_controls: ["SC-7"]
+    enabled: true
+
+  # Login Hardening - Brute Force Protection
+  - check_id: login_block_001
+    check_name: login block-for (brute force protection)
+    check_type: typed
+    category: acceso
+    security_plane: management
+    max_score: 5
+    template_name: nof.j2
+    regex_pattern: '^login\s+block[-]for\s+(\d+)\s+attempts\s+(\d+)'
+    default_value: 'True'
+    negated: false
+    description: Enables login blocking after failed attempts to prevent brute-force password attacks
+    recommendation: Configure 'login block-for 120 attempts 3 within 60' to block for 2 min after 3 failures
+    cis_control: "1.4.1"
+    nist_controls: ["AC-7"]
+    stig_id: "V-220691"
+    enabled: true
+
+  # Login Delay
+  - check_id: login_delay_001
+    check_name: login delay
+    check_type: typed
+    category: acceso
+    security_plane: management
+    max_score: 3
+    template_name: nof.j2
+    regex_pattern: '^login\s+delay\s+(\d+)'
+    default_value: 'True'
+    negated: false
+    description: Adds delay between login prompts to slow down brute-force attacks
+    recommendation: Configure 'login delay 2' to add 2-second delay
+    cis_control: "1.4.2"
+    nist_controls: ["AC-7"]
+    enabled: true
+
+  # Login Failure Logging
+  - check_id: login_on_failure_001
+    check_name: login on-failure log
+    check_type: typed
+    category: monitoreo
+    security_plane: management
+    max_score: 3
+    template_name: nof.j2
+    regex_pattern: '^login\s+on[-]failure\s+log($)'
+    default_value: 'True'
+    negated: false
+    description: Logs failed login attempts for security audit trail and incident response
+    recommendation: Configure 'login on-failure log' globally
+    cis_control: "1.4.3"
+    nist_controls: ["AU-3", "AU-12"]
+    enabled: true
+
+  # Password Policy - Minimum Length
+  - check_id: password_min_length_001
+    check_name: security passwords min-length
+    check_type: typed_value
+    category: acceso
+    security_plane: management
+    max_score: 5
+    template_name: nof.j2
+    regex_pattern: '^security\s+passwords\s+min[-]length\s+(\d+)'
+    default_value: '12'
+    min_value: 12
+    negated: false
+    description: Enforces minimum password length to ensure strong passwords (minimum 12 characters recommended)
+    recommendation: Configure 'security passwords min-length 12' or higher
+    cis_control: "1.1.3"
+    nist_controls: ["IA-5"]
+    enabled: true
+
+  # ============================================================================
+  # Wave 2 Security Enhancements (QW-001, Sprint 2 v6.2.0)
+  # Added 2025-11-05: 5 interface-aware and global security checks
+  # ============================================================================
+
+  # IP Redirects - Per-Interface Data Plane Protection
+  - check_id: ip_redirects_001
+    check_name: no ip redirects (per interface)
+    check_type: interface
+    category: control
+    security_plane: data
+    max_score: 5
+    template_name: nof.j2
+    parent_pattern: '^interface\s+(GigabitEthernet|TenGigabitEthernet|Ethernet|FastEthernet|Vlan)[\d\/\.]+'
+    child_pattern: '^\s+no\s+ip\s+redirects'
+    default_value: 'True'
+    description: Disables ICMP redirects on all active interfaces to prevent redirect attacks where attacker can alter routing tables
+    recommendation: Configure 'no ip redirects' on all external-facing interfaces
+    cis_control: "2.2.1"
+    nist_controls: ["SC-7"]
+    enabled: true
+
+  # Unicast Reverse Path Forwarding (uRPF)
+  - check_id: urpf_001
+    check_name: Unicast RPF (Anti-Spoofing)
+    check_type: interface
+    category: control
+    security_plane: data
+    max_score: 8
+    template_name: nof.j2
+    parent_pattern: '^interface\s+(GigabitEthernet|TenGigabitEthernet|Ethernet|FastEthernet)[\d\/\.]+'
+    child_pattern: '^\s+ip\s+verify\s+unicast\s+source\s+reachable[-]via'
+    default_value: 'rx'
+    description: Enables Unicast Reverse Path Forwarding to prevent IP address spoofing attacks by verifying source address validity
+    recommendation: Configure 'ip verify unicast source reachable-via rx' on all external interfaces
+    cis_control: "2.3.1"
+    nist_controls: ["SC-7", "SC-5"]
+    enabled: true
+
+  # RSA Key Size - Cryptographic Strength
+  - check_id: rsa_key_size_001
+    check_name: RSA key size >= 2048 bits
+    check_type: typed_value
+    category: acceso
+    security_plane: management
+    max_score: 5
+    template_name: nof.j2
+    regex_pattern: '^crypto\s+key\s+generate\s+rsa\s+general[-]keys\s+modulus\s+(\d+)'
+    default_value: '2048'
+    min_value: 2048
+    negated: false
+    description: Ensures SSH/HTTPS RSA keys are at least 2048 bits for strong encryption (1024-bit keys are deprecated and vulnerable)
+    recommendation: Configure 'crypto key generate rsa general-keys modulus 2048' or higher (4096 recommended)
+    cis_control: "1.2.2"
+    nist_controls: ["SC-13", "IA-5"]
+    enabled: true
+
+  # NTP Authentication - Time Synchronization Security
+  - check_id: ntp_authentication_001
+    check_name: NTP Authentication
+    check_type: typed
+    category: operativa
+    security_plane: management
+    max_score: 5
+    template_name: nof.j2
+    regex_pattern: '^ntp\s+authenticate($)'
+    default_value: 'True'
+    negated: false
+    description: Enables NTP authentication to prevent time manipulation attacks that can affect logging, certificates, and Kerberos
+    recommendation: Configure 'ntp authenticate' and 'ntp trusted-key' with MD5 authentication
+    cis_control: "4.3.1"
+    nist_controls: ["AU-8"]
+    enabled: true
+
+  # Logging Buffer Size - Audit Trail Capacity
+  - check_id: logging_buffered_size_001
+    check_name: logging buffered size
+    check_type: typed_value
+    category: monitoreo
+    security_plane: management
+    max_score: 4
+    template_name: nof.j2
+    regex_pattern: '^logging\s+buffered\s+(\d+)'
+    default_value: '32768'
+    min_value: 32768
+    negated: false
+    description: Ensures adequate log buffer size to prevent log loss during high-activity periods (minimum 32KB recommended)
+    recommendation: Configure 'logging buffered 32768' or higher (64KB for busy devices)
+    cis_control: "4.1.1"
+    nist_controls: ["AU-4"]
+    enabled: true
+
+  # ============================================================================
+  # Wave 3 Security Enhancements (QW-001, Sprint 2 v6.3.0)
+  # Added 2025-11-05: 5 complex security checks requiring custom Python classes
+  # Total: +30 points | Focus: Infrastructure protection, routing security, interface hardening
+  # ============================================================================
+
+  # Infrastructure ACL Protection - CRITICAL (STIG V-215852)
+  - check_id: infrastructure_acl_001
+    check_name: Infrastructure ACL Protection (iACL)
+    check_type: infrastructure_acl_001
+    category: control
+    security_plane: control
+    max_score: 10
+    template_name: infrastructure_acl.j2
+    description: Verifies infrastructure protection ACL is configured and applied to control-plane or VTY lines to restrict direct device access. Protects against unauthorized SSH, SNMP, and routing protocol attacks targeting the device itself.
+    recommendation: Configure 'ip access-list extended ACL-INFRASTRUCTURE-IN' with permit rules for authorized SSH/SNMP sources and explicit deny. Apply with 'ip access-group ACL-INFRASTRUCTURE-IN in' under control-plane, or 'access-class ACL-INFRASTRUCTURE-IN in' under line vty.
+    stig_id: "V-215852"
+    nist_controls: ["SC-7", "AC-4"]
+    cis_control: "2.4.1"
+    enabled: true
+
+  # BGP Neighbor Security - MD5 Authentication + TTL Security
+  - check_id: bgp_security_001
+    check_name: BGP Neighbor Security (MD5 + TTL)
+    check_type: bgp_security_001
+    category: control
+    security_plane: control
+    max_score: 4
+    template_name: bgp_security.j2
+    description: Verifies BGP neighbors use MD5 authentication and/or TTL security (GTSM) to prevent session hijacking and denial-of-service attacks. Critical for internet-facing routers.
+    recommendation: Configure 'neighbor <ip> password <md5-pwd>' for MD5 authentication and/or 'neighbor <ip> ttl-security hops <N>' for TTL security under router bgp. Use both for maximum protection on eBGP peers.
+    nist_controls: ["SC-8", "SC-5"]
+    cis_control: "5.4.1"
+    enabled: true
+
+  # OSPF MD5 Authentication - Area + Interface Levels
+  - check_id: ospf_authentication_001
+    check_name: OSPF MD5 Authentication
+    check_type: ospf_authentication_001
+    category: control
+    security_plane: control
+    max_score: 4
+    template_name: ospf_auth.j2
+    description: Verifies OSPF areas use MD5 message-digest authentication to prevent rogue router injection and false routing information. Requires both area-level and interface-level authentication.
+    recommendation: Configure 'area <area-id> authentication message-digest' under router ospf, then 'ip ospf message-digest-key <key-id> md5 <password>' on all OSPF interfaces.
+    nist_controls: ["SC-8", "SC-23"]
+    cis_control: "5.3.1"
+    enabled: true
+
+  # EIGRP MD5 Authentication - Key Chain + Interface Levels
+  - check_id: eigrp_authentication_001
+    check_name: EIGRP MD5 Authentication
+    check_type: eigrp_authentication_001
+    category: control
+    security_plane: control
+    max_score: 4
+    template_name: eigrp_auth.j2
+    description: Verifies EIGRP uses MD5 authentication with key chains to prevent rogue neighbor attacks and route injection. Requires key chain definition and interface-level authentication.
+    recommendation: Create key chain with 'key chain <name>' and 'key <id>' / 'key-string <password>'. Then configure 'ip authentication mode eigrp <as> md5' and 'ip authentication key-chain eigrp <as> <chain-name>' on EIGRP interfaces.
+    nist_controls: ["SC-8", "SC-23"]
+    cis_control: "5.3.2"
+    enabled: true
+
+  # Unused Interfaces Shutdown - Attack Surface Reduction
+  - check_id: unused_interfaces_shutdown_001
+    check_name: Shutdown Unused Interfaces
+    check_type: unused_interfaces_shutdown_001
+    category: operativa
+    security_plane: data
+    max_score: 8
+    template_name: unused_interfaces.j2
+    description: Identifies physical interfaces without configuration (no IP, description, or VLAN) that are not administratively shutdown. Unused active interfaces represent unnecessary attack surface and should be disabled.
+    recommendation: Issue 'shutdown' command on all unused interfaces. For interfaces with no IP address, description, or VLAN assignment, execute 'interface <name>' then 'shutdown' and 'description UNUSED - shutdown per security policy'.
+    cis_control: "3.2.1"
+    nist_controls: ["CM-7", "SC-7"]
+    enabled: true

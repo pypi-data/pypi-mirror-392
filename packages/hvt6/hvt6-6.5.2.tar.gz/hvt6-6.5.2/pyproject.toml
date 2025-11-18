@@ -1,0 +1,218 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hvt6"
+version = "6.5.2"
+description = "Automated security hardening verification tool for Cisco IOS, IOS-XE, and NX-OS devices"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "GPL-3.0-or-later"}
+authors = [
+    {name = "Nicolas Padin", email = "npadin@example.com"}
+]
+maintainers = [
+    {name = "Nicolas Padin", email = "npadin@example.com"}
+]
+keywords = [
+    "cisco",
+    "ios-xe",
+    "ios",
+    "nx-os",
+    "network-security",
+    "configuration-audit",
+    "hardening",
+    "security-compliance",
+    "cisco-ios",
+    "network-automation",
+    "security-audit",
+    "cisco-hardening",
+    "nist",
+    "cis-benchmark",
+    "stig"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Telecommunications Industry",
+    "Topic :: System :: Networking",
+    "Topic :: Security",
+    "Topic :: System :: Systems Administration",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Environment :: Console",
+    "Natural Language :: Spanish",
+    "Natural Language :: English"
+]
+
+# Core dependencies (required for basic functionality)
+dependencies = [
+    "ciscoconfparse2>=0.8.7",
+    "jinja2>=3.1.6",
+    "pyyaml>=6.0.2",
+    "python-dotenv>=1.1.0",
+    "loguru>=0.7.3",
+    "colorama>=0.4.6",
+    "rich>=14.0.0",
+    "tabulate>=0.9.0",
+    "pandas>=2.2.3",
+    "openpyxl>=3.1.2",
+]
+
+[project.optional-dependencies]
+# PDF generation support
+pdf = [
+    "weasyprint>=66.0",
+    "pypdf>=5.4.0",
+    "reportlab>=4.3.1",
+]
+
+# Collector module dependencies (network automation)
+collector = [
+    "nornir>=3.5.0",
+    "nornir-netmiko>=1.0.1",
+    "nornir-utils>=0.2.0",
+    "netmiko>=4.5.0",
+    "paramiko>=3.5.1",
+    "tenacity>=9.1.2",
+    "tqdm>=4.67.1",
+]
+
+# Full installation (all features)
+all = [
+    "weasyprint>=66.0",
+    "pypdf>=5.4.0",
+    "reportlab>=4.3.1",
+    "nornir>=3.5.0",
+    "nornir-netmiko>=1.0.1",
+    "nornir-utils>=0.2.0",
+    "netmiko>=4.5.0",
+    "paramiko>=3.5.1",
+    "tenacity>=9.1.2",
+    "tqdm>=4.67.1",
+]
+
+# Development dependencies
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "black>=23.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0",
+    "build>=1.0",
+    "twine>=4.0",
+    "check-manifest>=0.49",
+]
+
+[project.urls]
+Homepage = "https://github.com/npadin/ios-xe_hardening"
+Documentation = "https://github.com/npadin/ios-xe_hardening/blob/main/README.md"
+Repository = "https://github.com/npadin/ios-xe_hardening"
+Issues = "https://github.com/npadin/ios-xe_hardening/issues"
+Changelog = "https://github.com/npadin/ios-xe_hardening/blob/main/CHANGELOG.md"
+"Source Code" = "https://github.com/npadin/ios-xe_hardening"
+
+[project.scripts]
+hvt6 = "hvt6.__main__:main"
+hvt6-collect = "hvt6.collector_cli:main"
+
+# Setuptools-specific configuration
+[tool.setuptools]
+zip-safe = false
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hvt6*", "collector*"]
+exclude = [
+    "tests*",
+    "docs*",
+    "legacy*",
+    "examples*",
+    "venv*",
+    ".vscode*",
+    ".git*",
+    "__pycache__",
+    "*.pyc",
+    "repo*",
+    "reports*",
+    "results*",
+    "CIS*"
+]
+
+[tool.setuptools.package-data]
+"*" = [
+    "*.yaml",
+    "*.yml",
+    "*.j2",
+    "*.jinja2",
+]
+
+# Note: Root-level files (checks.yaml, hvt6_settings.yaml, templates/, inventory/)
+# are included in the source distribution via MANIFEST.in
+# When installed from PyPI, pip will use the sdist which contains these files
+
+# Black code formatting
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | legacy
+)/
+'''
+
+# Ruff linter
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+exclude = [
+    ".git",
+    ".venv",
+    "venv",
+    "build",
+    "dist",
+    "legacy",
+    "__pycache__",
+]
+
+# MyPy type checking
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+exclude = [
+    'venv',
+    'legacy',
+    'build',
+    'dist',
+]
+
+# Pytest configuration
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --cov=hvt6 --cov-report=term-missing"

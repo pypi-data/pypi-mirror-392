@@ -1,0 +1,235 @@
+{#
+OSPF Authentication Template - Displays OSPF area and interface authentication status
+
+Metadata structure expected:
+- processes: List of OSPF processes with area counts
+- total_areas: Total count of OSPF areas
+- authenticated_areas: Count of areas with authentication
+- areas: List of area dictionaries:
+  - area_id: OSPF area ID
+  - authenticated: Boolean - has message-digest authentication
+- total_interfaces: Total count of OSPF interfaces
+- interfaces_with_keys: Count of interfaces with MD5 keys
+- interfaces: List of interface dictionaries:
+  - name: Interface name
+  - has_key: Boolean - has message-digest key configured
+  - key_id: Key ID number (if configured)
+- areas_percentage: Percentage of authenticated areas
+- interfaces_percentage: Percentage of interfaces with keys
+#}
+
+<div class="check-detail">
+    <h4>OSPF MD5 Authentication Status</h4>
+
+    {% if metadata.total_areas == 0 %}
+        <p class="not-applicable">OSPF configured but no areas defined.</p>
+    {% else %}
+        <div class="summary-stats">
+            <p><strong>OSPF Processes:</strong> {{ metadata.processes|length }}</p>
+            <p><strong>Total Areas:</strong> {{ metadata.total_areas }}</p>
+            <p><strong>Areas with Authentication:</strong>
+                <span class="{% if metadata.areas_percentage == 100 %}pass-status{% elif metadata.areas_percentage > 50 %}partial-status{% else %}fail-status{% endif %}">
+                    {{ metadata.authenticated_areas }} ({{ metadata.areas_percentage }}%)
+                </span>
+            </p>
+            <p><strong>Total OSPF Interfaces:</strong> {{ metadata.total_interfaces }}</p>
+            <p><strong>Interfaces with Keys:</strong>
+                <span class="{% if metadata.interfaces_percentage == 100 %}pass-status{% elif metadata.interfaces_percentage > 50 %}partial-status{% else %}fail-status{% endif %}">
+                    {{ metadata.interfaces_with_keys }} ({{ metadata.interfaces_percentage }}%)
+                </span>
+            </p>
+        </div>
+
+        {% if metadata.areas %}
+        <h5>OSPF Areas</h5>
+        <table class="detail-table">
+            <thead>
+                <tr>
+                    <th>Area ID</th>
+                    <th>Authentication</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for area in metadata.areas %}
+                <tr class="{% if area.authenticated %}pass-row{% else %}fail-row{% endif %}">
+                    <td><code>{{ area.area_id }}</code></td>
+                    <td>
+                        {% if area.authenticated %}
+                            <code>message-digest</code>
+                        {% else %}
+                            <span class="fail-status">None</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if area.authenticated %}
+                            <span class="status-icon pass">✓</span> Secured
+                        {% else %}
+                            <span class="status-icon fail">✗</span> Unsecured
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        {% if metadata.interfaces %}
+        <h5>OSPF Interfaces</h5>
+        <table class="detail-table">
+            <thead>
+                <tr>
+                    <th>Interface</th>
+                    <th>MD5 Key ID</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for interface in metadata.interfaces %}
+                <tr class="{% if interface.has_key %}pass-row{% else %}fail-row{% endif %}">
+                    <td><code>{{ interface.name }}</code></td>
+                    <td class="centered">
+                        {% if interface.has_key %}
+                            <code>Key {{ interface.key_id }}</code>
+                        {% else %}
+                            <span class="fail-status">No key</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if interface.has_key %}
+                            <span class="status-icon pass">✓</span> Secured
+                        {% else %}
+                            <span class="status-icon fail">✗</span> Unsecured
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        <div class="recommendation-box">
+            <h5>Configuration Recommendations:</h5>
+            <ul>
+                <li><strong>Area Authentication:</strong> Configure <code>area &lt;area-id&gt; authentication message-digest</code> under <code>router ospf</code></li>
+                <li><strong>Interface Keys:</strong> Configure <code>ip ospf message-digest-key &lt;key-id&gt; md5 &lt;password&gt;</code> on each OSPF interface</li>
+                <li><strong>Key Management:</strong> Use unique key IDs per area and rotate keys periodically</li>
+                <li><strong>Best Practice:</strong> Both area-level and interface-level authentication must be configured for full security</li>
+            </ul>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.summary-stats {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 15px 0;
+}
+
+.summary-stats p {
+    margin: 5px 0;
+}
+
+.detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+}
+
+.detail-table th,
+.detail-table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #dee2e6;
+}
+
+.detail-table th {
+    background-color: #1e3a8a;
+    color: white;
+    font-weight: 600;
+}
+
+.detail-table td.centered {
+    text-align: center;
+}
+
+.pass-row {
+    background-color: #d4edda;
+}
+
+.fail-row {
+    background-color: #f8d7da;
+}
+
+.status-icon {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.status-icon.pass {
+    color: #28a745;
+}
+
+.status-icon.fail {
+    color: #dc3545;
+}
+
+.pass-status {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.fail-status {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.partial-status {
+    color: #ffc107;
+    font-weight: 600;
+}
+
+.not-applicable {
+    color: #6c757d;
+    font-style: italic;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.recommendation-box {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 5px;
+}
+
+.recommendation-box h5 {
+    margin-top: 0;
+    color: #856404;
+}
+
+.recommendation-box ul {
+    margin: 10px 0 0 0;
+    padding-left: 20px;
+}
+
+.recommendation-box li {
+    margin: 8px 0;
+}
+
+.recommendation-box code {
+    background-color: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+}
+
+h5 {
+    margin-top: 20px;
+    color: #1e3a8a;
+}
+</style>

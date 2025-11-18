@@ -1,0 +1,18 @@
+{# templates/logging_source.j2 #}
+<div style="border-bottom: 1px solid #ddd; padding: 10px 0; margin: 15px 0;"><h3 style="margin: 0; color: #1e3a8a; font-size: 18px;"><i class="fas fa-cog" style="margin-right: 8px;"></i> NTP Server </h3></div>
+<div class="annex-grid">
+{% if check %}
+        <span class="status-icon status-pass">✓</span>
+        <div class="cell">
+            {{ test }} está configurado contra:
+            <ul style="margin: 5px 0; padding-left: 20px;">
+            {% for result in value1 %}
+                <li>{{ result }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+{% else %}
+        <span class="status-icon status-fail">⚠</span>
+        <div class="cell">Es recomendable configurar un {{ test }} para sincronizar el reloj interno.</div>
+{% endif %}
+</div>

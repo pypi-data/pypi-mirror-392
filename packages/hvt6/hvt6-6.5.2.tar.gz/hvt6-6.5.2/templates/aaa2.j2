@@ -1,0 +1,222 @@
+{# templates/aaa.j2 #}
+<div style="border-bottom: 1px solid #ddd; padding: 10px 0; margin: 15px 0;"><h3 style="margin: 0; color: #1e3a8a; font-size: 18px;"><i class="fas fa-cog" style="margin-right: 8px;"></i> AAA </h3></div>
+<div class="annex-grid">
+
+{# Local Users Check #}
+{% if local_users_check %}
+	<span class="status-icon status-pass">✓</span>
+	<div class="cell">Usuarios locales configurados: {{ local_users|length }} usuario(s)</div>
+	{% for user in local_users[:5] %}
+		<span style="display: inline-block; width: 40px;"></span><div class="cell">• • {{ user }}</div>
+	{% endfor %}
+	{% if local_users|length > 5 %}
+		<span style="display: inline-block; width: 40px;"></span><div class="cell">• ... y {{ local_users|length - 5 }} más</div>
+	{% endif %}
+{% else %}
+	<span class="status-icon status-fail">⚠</span>
+	<div class="cell">No se detectaron usuarios locales configurados.
+	Se recomienda configurar usuarios locales como respaldo en caso de falla
+	de los servidores AAA centralizados (TACACS+ o RADIUS).</div>
+{% endif %}
+
+{# Privilege 15 Warning Check #}
+{% if priv15_check %}
+	<span class="status-icon status-pass">✓</span>
+	<div class="cell">No se detectaron usuarios locales con privilegio 15 (configuración segura).</div>
+{% else %}
+	<span class="status-icon status-fail">⚠</span>
+	<div class="cell"><strong>ADVERTENCIA DE SEGURIDAD:</strong> Se detectaron usuarios con privilegio 15:
+	{% for user in priv15_users %}
+		<span style="display: inline-block; width: 40px;"></span><div class="cell">• ⚠ <strong>{{ user }}</strong> (privilege 15)</div>
+	{% endfor %}
+	Los usuarios con privilegio 15 tienen acceso completo al dispositivo.
+	Se recomienda usar autenticación AAA centralizada en su lugar y limitar
+	los usuarios locales a privilege 1 o inferior.</div>
+{% endif %}
+
+{# AAA New-Model Check #}
+{% if not check %}
+	<span class="status-icon status-fail">⚠</span>
+        <div class="cell">No se está utilizando AAA en ninguna de sus formas
+		(local, TACACS+ o RADIUS). Es imperativo implementar AAA ya sea local
+		en el dispositivo o centralizado con TACACS+ o RADIUS para llevar
+		registro de actividades relacionadas al acceso a los mismos. <br/>
+		Bajo esta condición tenga en cuenta que:
+		<ul>
+  			<li>El comando <strong>login</strong> se utiliza para indicar al
+			VTY que solicite credenciales cuando se intenta iniciar sesión.</li>
+			<li>Si el comando es simplemente <strong>login</strong>, entonces usa
+			la contraseña configurada con el comando <strong>password</strong>
+			bajo la configuración VTY. </li>
+			<li>Tenga en cuenta que si se utiliza <strong>login</strong> y no
+			se configra <strong>password</strong>, aún pedirá una contraseña,
+			pero nunca se concederá el acceso.</li>
+			<li>Si el comando es <strong>login local</strong>, entonces pide un
+			nombre de usuario y una contraseña basados en la base de datos de
+			usuarios local, sin importar si se usó o no <strong>password</strong>.</li>
+		</ul>
+	</div>
+{% else %}
+	{% if not check1 %}
+		{% if not check2 %}
+			<span class="status-icon status-fail">⚠</span>
+        	<div class="cell">No se está utilizando TACACS+.</div>
+		{% endif %}	
+	{% else %}
+		<span class="status-icon status-pass">✓</span>
+		<div class="cell">El direccionamiento IP del TACACS+ server es: </div>
+		{% for result in tser %}
+			<span style="display: inline-block; width: 40px;"></span><div class="cell">• {{ result }}</div>
+		{% endfor %}
+		{% if not check1_1 %}
+			<span class="status-icon status-fail">⚠</span>
+			<div class="cell">TACACS+ no está utilizando una interfaz de origen.
+			Es importante que el dispositivo sea reconocido por una interfaz estable 
+			y única como una interfaz Loopback, sin importar la interfaz de salida 
+			del servicio.</div>
+		{% else %}
+			<span class="status-icon status-pass">✓</span>
+			<div class="cell">TACACS+ está utilizando la interfaz de origen 
+			{{ tsint[0] }}. </div>
+		{% endif %}
+	{% endif %}
+	{% if not check2 %}
+		{% if not check1 %}	
+			<span class="status-icon status-fail">⚠</span>
+        	<div class="cell">No se está utilizando RADIUS.</div>
+		{% endif %}
+	{% else %}
+		<span class="status-icon status-pass">✓</span>
+		<div class="cell">El direccionamiento IP del RADIUS server es: </div>
+		{% for result in rser %}
+			<span style="display: inline-block; width: 40px;"></span><div class="cell">• {{ result }}</div>
+		{% endfor %}
+		{% if not check2_1 %}
+			<span class="status-icon status-fail">⚠</span>
+			<div class="cell">RADIUS no está utilizando una interfaz de origen.
+			Es importante que el dispositivo sea reconocido por una interfaz estable 
+			y única como una interfaz Loopback, sin importar la interfaz de salida 
+			del servicio.</div>
+		{% else %}
+			<span class="status-icon status-pass">✓</span>
+			<div class="cell">RADIUS está utilizando la interfaz de origen 
+			{{ rsint }}. </div>
+		{% endif %}
+	{% endif %}
+	{% if not check3 %}
+		<span class="status-icon status-fail">⚠</span>
+        <div class="cell">Se está autenticando el login de usuario con el método <strong>default</strong>.</div>
+	{% else %}
+		<span class="status-icon status-pass">✓</span>
+        <div class="cell">Los siguientes métodos de autenticación de usuario están
+		configurados en el siguiente orden:</div>
+		{% for result in ldef %}
+			<span style="display: inline-block; width: 40px;"></span><div class="cell">• {{ loop.index }}. {{ result }}</div>
+		{% endfor %}
+		{% if ldef[0] == 'default' %}
+			<span class="status-icon status-pass">✓</span>
+			<div class="cell">El tipo de método es con la lista <strong>default</strong>, por ende, viene
+			configurado en todas las "line vty" del dispositivo.</div>
+		{% else %}
+			{% if not check3_1 %}
+				<span class="status-icon status-fail">⚠</span>
+				<div class="cell">El método de autenticación de usuario está habilitado 
+				pero falta especificar la lista <strong>{{ ldef_type }}</strong> en las Line VTY 
+				para que surja efecto.</div>
+			{% else %}
+				<span class="status-icon status-pass">✓</span>
+				<div class="cell">Las siguientes Line VTYs tienen habilitada la lista de 
+				autenticación {{ ldef_type }} de usuario: </div>
+				{% for key, value in ldef_vty.items() %}
+					<span style="display: inline-block; width: 40px;"></span><div class="cell">• {{ key }} --> {{ value }} </div>
+				{% endfor %}
+			{% endif %}
+		{% endif %}
+	{% endif %}
+	{% if check1 %}
+		{% if not check4 %}
+			<span class="status-icon status-fail">⚠</span>
+        	<div class="cell">Dado que el servidor TACACS+ está configurado, no se está autenticando 
+			la contraseña de ENABLE contra él. Se recomienda habilitar esta funcionalidad inmediatamente.</div>
+		{% else %}
+			<span class="status-icon status-pass">✓</span>
+    	    <div class="cell">La autenticación de la contraseña de ENABLE contra el servidor 
+			TACACS+, está configurada.</div>
+		{% endif %}
+		{% if not check5 %}
+			<span class="status-icon status-fail">⚠</span>
+    	    <div class="cell">Dado que el servidor TACACS+ está configurado, no se está autenticando si el 
+			usurio puede acceder al modo EXEC. Se recomienda habilitar esta funcionalidad inmediatamente.</div>
+		{% else %}
+			<span class="status-icon status-pass">✓</span>
+    	    <div class="cell">Los siguientes métodos de autenticación a modo EXEC están
+			configurados en el siguiente orden:</div>
+			{% for result in aexec %}
+				<span style="display: inline-block; width: 40px;"></span><div class="cell">• {{ loop.index }}. {{ result }}</div>
+			{% endfor %}
+		{% endif %}
+		{# VTY Authorization Exec Check #}
+		{% if vty_author_exec_check %}
+			<span class="status-icon status-pass">✓</span>
+			<div class="cell">Las líneas VTY tienen autorización EXEC configurada:</div>
+			{% for vty, method in vty_author_exec.items() %}
+				<span style="display: inline-block; width: 40px;"></span><div class="cell">• {{ vty }} → authorization exec {{ method }}</div>
+			{% endfor %}
+		{% else %}
+			<span class="status-icon status-fail">⚠</span>
+			<div class="cell">Las líneas VTY están utilizando autorización EXEC por defecto.
+			Se recomienda configurar 'authorization exec' en las líneas VTY para aplicar
+			control de acceso basado en AAA.</div>
+			{% for vty, method in vty_author_exec.items() %}
+				{% if method == 'default' %}
+					<span style="display: inline-block; width: 40px;"></span><div class="cell">• ⚠ {{ vty }} → {{ method }}</div>
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+		{% if not check6 %}
+			<span class="status-icon status-fail">⚠</span>
+    	    <div class="cell">Dado que el servidor TACACS+ está configurado, no se está configurada la autorización 
+			de ejecución de comandos basada en privilegios. Se recomienda habilitar esta funcionalidad inmediatamente.</div>
+		{% else %}
+			<span class="status-icon status-pass">✓</span>
+    	   	<div class="cell">Los siguientes métodos de ejecución de comandos de privilegio 1 están
+			configurados en el siguiente orden:</div>
+			{% for result in value6_1 %}
+				<span style="display: inline-block; width: 40px;"></span><div class="cell">• {{ loop.index }}. {{ result }}</div>
+			{% endfor %}
+			<span class="status-icon status-pass">✓</span>
+    	   	<div class="cell">Los siguientes métodos de ejecución de comandos de privilegio 15 están
+			configurados en el siguiente orden:</div>
+			{% for result in value6_2 %}
+				<span style="display: inline-block; width: 40px;"></span><div class="cell">• {{ loop.index }}. {{ result }}</div>
+			{% endfor %}
+		{% endif %}
+		{# VTY Authorization Commands Check #}
+		{% if vty_author_commands_check %}
+			<span class="status-icon status-pass">✓</span>
+			<div class="cell">Las líneas VTY tienen autorización de comandos configurada:</div>
+			{% for vty, method in vty_author_commands.items() %}
+				<span style="display: inline-block; width: 40px;"></span><div class="cell">• {{ vty }} → authorization commands {{ method }}</div>
+			{% endfor %}
+		{% else %}
+			<span class="status-icon status-fail">⚠</span>
+			<div class="cell"><strong>ADVERTENCIA:</strong> Las líneas VTY NO tienen autorización de comandos configurada.
+			Se recomienda urgentemente configurar 'authorization commands' en las líneas VTY para registrar
+			y controlar todos los comandos ejecutados por los usuarios.</div>
+			{% for vty, method in vty_author_commands.items() %}
+				{% if method == 'WARNING' %}
+					<span style="display: inline-block; width: 40px;"></span><div class="cell">• ⚠ {{ vty }} → NO CONFIGURADO</div>
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+	{% endif %}
+	{% if not fail %}
+		<span class="status-icon status-fail">⚠</span>
+        <div class="cell">Lo cantidad de reintntentos de login fallidos es por defecto 5.
+		Se recomienda reducirlo a 3.</div>
+	{% else %}
+		<span class="status-icon status-pass">✓</span>
+        <div class="cell">La cantidad de reintentos de login fallidos es de {{ fail[0] }}.</div>
+	{% endif %}
+{% endif %}
+</div>

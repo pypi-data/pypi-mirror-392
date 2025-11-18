@@ -1,0 +1,708 @@
+{# templates/comprehensive_report.j2 - Comprehensive PDF Report Template #}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>IOS-XE Security Hardening Report - {{ customer }}</title>
+    <style>
+        /* PDF Page Setup */
+        @page {
+            size: A4 portrait;
+            margin: 2.5cm 2cm 3cm 2cm;
+
+            @bottom-left {
+                content: "{{ customer }}";
+                font-size: 9pt;
+                color: #666;
+                font-family: Arial, sans-serif;
+            }
+
+            @bottom-center {
+                content: "Generated: {{ generation_date }}";
+                font-size: 9pt;
+                color: #666;
+                font-family: Arial, sans-serif;
+            }
+
+            @bottom-right {
+                content: "Page " counter(page) " of " counter(pages);
+                font-size: 9pt;
+                color: #666;
+                font-family: Arial, sans-serif;
+            }
+        }
+
+        @page:first {
+            margin: 0;
+            @bottom-left { content: none; }
+            @bottom-center { content: none; }
+            @bottom-right { content: none; }
+        }
+
+        /* Base Styles */
+        body {
+            font-family: Arial, 'Helvetica Neue', sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            font-size: 24pt;
+            font-weight: bold;
+            color: #1e3a8a;
+            margin: 20pt 0 15pt 0;
+            page-break-after: avoid;
+        }
+
+        h2 {
+            font-size: 18pt;
+            font-weight: bold;
+            color: #1e3a8a;
+            margin: 15pt 0 10pt 0;
+            page-break-after: avoid;
+        }
+
+        h3 {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #3b82f6;
+            margin: 12pt 0 8pt 0;
+            page-break-after: avoid;
+        }
+
+        p {
+            margin: 0 0 10pt 0;
+            text-align: justify;
+        }
+
+        /* Page Breaks */
+        .page-break {
+            page-break-before: always;
+        }
+
+        .no-break {
+            page-break-inside: avoid;
+        }
+
+        /* Cover Page */
+        .cover-page {
+            height: 297mm;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+        }
+
+        .cover-logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 40px auto;
+            display: block;
+            filter: brightness(0) invert(1);
+        }
+
+        .cover-title {
+            font-size: 42pt;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .cover-subtitle {
+            font-size: 28pt;
+            font-weight: 300;
+            margin: 10px 0 50px 0;
+            opacity: 0.95;
+        }
+
+        .cover-customer {
+            font-size: 36pt;
+            font-weight: bold;
+            margin: 30px 0;
+            padding: 20px 40px;
+            border-top: 3px solid white;
+            border-bottom: 3px solid white;
+        }
+
+        .cover-date {
+            font-size: 16pt;
+            margin-top: 40px;
+            opacity: 0.9;
+        }
+
+        .cover-footer {
+            position: absolute;
+            bottom: 40px;
+            font-size: 12pt;
+            opacity: 0.8;
+        }
+
+        /* Table of Contents */
+        .toc {
+            list-style: none;
+            padding: 0;
+            margin: 20pt 0;
+        }
+
+        .toc li {
+            padding: 8pt 0;
+            border-bottom: 1px dotted #ccc;
+            page-break-inside: avoid;
+        }
+
+        .toc li a {
+            text-decoration: none;
+            color: #1e3a8a;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .toc li a:hover {
+            color: #3b82f6;
+        }
+
+        .toc ul {
+            list-style: none;
+            padding-left: 20pt;
+            margin: 5pt 0;
+        }
+
+        .toc-page::after {
+            content: target-counter(attr(href), page);
+            color: #666;
+        }
+
+        /* Executive Summary */
+        .score-card {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            padding: 30pt;
+            border-radius: 10pt;
+            text-align: center;
+            margin: 20pt 0;
+            page-break-inside: avoid;
+        }
+
+        .score-large {
+            font-size: 72pt;
+            font-weight: bold;
+            margin: 10pt 0;
+        }
+
+        .grade {
+            font-size: 48pt;
+            font-weight: bold;
+            margin: 10pt 0;
+            padding: 10pt 30pt;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10pt;
+            display: inline-block;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15pt 0;
+            page-break-inside: avoid;
+        }
+
+        th {
+            background: #1e3a8a;
+            color: white;
+            padding: 10pt;
+            text-align: left;
+            font-weight: bold;
+            border: 1px solid #1e3a8a;
+        }
+
+        td {
+            padding: 8pt 10pt;
+            border: 1px solid #ddd;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .summary-table td.status-pass {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .summary-table td.status-fail {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .category-table tr:hover {
+            background: #eff6ff;
+        }
+
+        /* Critical Findings */
+        .critical-findings {
+            margin: 15pt 0;
+            padding-left: 25pt;
+        }
+
+        .critical-findings li {
+            margin: 12pt 0;
+            padding: 12pt;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            page-break-inside: avoid;
+        }
+
+        .critical-findings strong {
+            color: #856404;
+            font-size: 12pt;
+        }
+
+        /* Device Section */
+        .device-section {
+            margin: 20pt 0;
+            padding: 20pt;
+            border: 2px solid #1e3a8a;
+            border-radius: 8pt;
+            page-break-inside: avoid;
+        }
+
+        .device-meta {
+            background: #f8f9fa;
+            padding: 15pt;
+            border-radius: 5pt;
+            margin: 10pt 0;
+        }
+
+        .device-meta p {
+            margin: 5pt 0;
+        }
+
+        .device-score {
+            text-align: center;
+            margin: 15pt 0;
+            padding: 15pt;
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-radius: 8pt;
+        }
+
+        .score-circle {
+            font-size: 36pt;
+            font-weight: bold;
+            color: #1e3a8a;
+            margin: 10pt 0;
+        }
+
+        /* Check Result */
+        .check-failed {
+            margin: 12pt 0;
+            padding: 12pt;
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            page-break-inside: avoid;
+        }
+
+        .check-failed h4 {
+            color: #721c24;
+            margin: 0 0 8pt 0;
+            font-size: 12pt;
+        }
+
+        .check-passed {
+            margin: 8pt 0;
+            padding: 10pt;
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            page-break-inside: avoid;
+        }
+
+        .recommendation {
+            font-style: italic;
+            color: #721c24;
+            margin-top: 8pt;
+        }
+
+        /* Recommendations Section */
+        .priority-box {
+            padding: 15pt;
+            margin: 15pt 0;
+            border-radius: 8pt;
+            page-break-inside: avoid;
+        }
+
+        .priority-1 {
+            background: #f8d7da;
+            border-left: 5pt solid #dc3545;
+        }
+
+        .priority-2 {
+            background: #fff3cd;
+            border-left: 5pt solid #ffc107;
+        }
+
+        /* Appendix */
+        .scoring-table {
+            font-size: 10pt;
+        }
+
+        .scoring-table td:first-child {
+            font-weight: bold;
+            text-align: center;
+            font-size: 16pt;
+        }
+
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .mt-20 { margin-top: 20pt; }
+        .mb-20 { margin-bottom: 20pt; }
+    </style>
+</head>
+<body>
+    <!-- COVER PAGE -->
+    <div class="cover-page">
+        <img src="file://{{ logo_path }}" alt="HVT6 Logo" class="cover-logo">
+        <h1 class="cover-title">IOS-XE Security</h1>
+        <div class="cover-subtitle">Hardening Verification Report</div>
+        <div class="cover-customer">{{ customer }}</div>
+        <div class="cover-date">{{ generation_date }}</div>
+        <div class="cover-footer">Hardening Verification Tool v6.0</div>
+    </div>
+
+    <!-- TABLE OF CONTENTS -->
+    <div class="page-break">
+        <h1>Tabla de Contenidos</h1>
+        <ul class="toc">
+            <li><a href="#executive-summary"><span>Resumen Ejecutivo</span><span class="toc-page"></span></a></li>
+            <li><a href="#device-reports"><span>Reportes por Dispositivo</span><span class="toc-page"></span></a>
+                <ul>
+                    {% for report in device_reports %}
+                    <li><a href="#device-{{ loop.index }}"><span>{{ report.device_info.hostname }}</span></a></li>
+                    {% endfor %}
+                </ul>
+            </li>
+            <li><a href="#recommendations"><span>Recomendaciones Ejecutivas</span><span class="toc-page"></span></a></li>
+            <li><a href="#appendix"><span>Anexo: Metodología</span><span class="toc-page"></span></a></li>
+        </ul>
+    </div>
+
+    <!-- EXECUTIVE SUMMARY -->
+    <div class="page-break" id="executive-summary">
+        <h1>Resumen Ejecutivo</h1>
+
+        <p>Este reporte presenta los resultados de la verificación de hardening de seguridad realizada sobre
+        <strong>{{ total_devices }} dispositivo(s)</strong> de red Cisco IOS/IOS-XE para <strong>{{ customer }}</strong>.
+        La evaluación se basa en las mejores prácticas de Cisco, CIS Benchmarks y NIST SP 800-53.</p>
+
+        <!-- Overall Score -->
+        <div class="score-card no-break">
+            <div>Puntuación General de Seguridad</div>
+            <div class="score-large">{{ "%.1f"|format(overall_percentage) }}%</div>
+            <div class="grade">Calificación: {{ overall_grade }}</div>
+            <p style="margin-top: 20pt; font-size: 12pt;">
+                {{ passed_checks }} de {{ total_checks }} verificaciones aprobadas
+            </p>
+        </div>
+
+        <!-- Device Summary Table -->
+        <h2>Resumen por Dispositivo</h2>
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>Dispositivo</th>
+                    <th>Modelo</th>
+                    <th>Sistema Operativo</th>
+                    <th>Puntuación</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in device_reports %}
+                <tr>
+                    <td><strong>{{ report.device_info.hostname }}</strong></td>
+                    <td>{{ report.device_info.model }}</td>
+                    <td>{{ report.device_info.os }} {{ report.device_info.version }}</td>
+                    <td style="text-align: center; font-weight: bold;">{{ "%.1f"|format(report.total_percentage) }}%</td>
+                    <td class="status-{{ 'pass' if report.total_percentage >= 70 else 'fail' }}">
+                        {{ 'Aceptable' if report.total_percentage >= 70 else 'Requiere Atención' }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Top 5 Critical Findings -->
+        <h2 class="mt-20">Top 5 Hallazgos Críticos</h2>
+        <p>Los siguientes hallazgos afectan a múltiples dispositivos y requieren atención prioritaria:</p>
+        <ol class="critical-findings">
+            {% for finding in top_critical_findings[:5] %}
+            <li class="no-break">
+                <strong>{{ finding.check_name }}</strong><br>
+                <span style="color: #666;">Categoría: {{ finding.category|title }}</span><br>
+                <span style="color: #dc3545; font-weight: bold;">Dispositivos afectados: {{ finding.affected_count }}/{{ total_devices }}</span><br>
+                <strong>Recomendación:</strong> {{ finding.recommendation }}
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+
+    <!-- INDIVIDUAL DEVICE REPORTS -->
+    <div class="page-break" id="device-reports">
+        <h1>Reportes Detallados por Dispositivo</h1>
+
+        {% for report in device_reports %}
+        <div class="device-section page-break" id="device-{{ loop.index }}">
+            <h2>{{ report.device_info.hostname }}</h2>
+
+            <!-- Device Metadata -->
+            <div class="device-meta no-break">
+                <p><strong>Tipo:</strong> {{ report.device_info.device_type.value|title }}</p>
+                <p><strong>Modelo:</strong> {{ report.device_info.model }}</p>
+                <p><strong>Sistema Operativo:</strong> {{ report.device_info.os }} {{ report.device_info.version }}</p>
+                <p><strong>Número de Serie:</strong> {{ report.device_info.serial_number }}</p>
+            </div>
+
+            {% if report.device_info.version_warning %}
+            <div class="no-break" style="background: #fff3cd; padding: 12pt; border-left: 4pt solid #ffc107; margin: 10pt 0;">
+                <strong style="color: #856404;">⚠ Advertencia de Versión:</strong><br>
+                {{ report.device_info.version_warning_message }}
+            </div>
+            {% endif %}
+
+            <!-- Score Summary -->
+            <div class="device-score no-break">
+                <div class="score-circle">{{ "%.1f"|format(report.total_percentage) }}%</div>
+                <p style="font-size: 14pt; color: #1e3a8a;">
+                    <strong>{{ report.passed_checks }}/{{ report.total_checks }}</strong> verificaciones aprobadas
+                </p>
+            </div>
+
+            <!-- Category Breakdown -->
+            <h3>Desglose por Categoría de Seguridad</h3>
+            <table class="category-table">
+                <thead>
+                    <tr>
+                        <th>Categoría</th>
+                        <th style="text-align: center;">Puntaje Obtenido</th>
+                        <th style="text-align: center;">Puntaje Máximo</th>
+                        <th style="text-align: center;">Porcentaje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category_name, cat_score in report.category_scores.items() %}
+                    {% if cat_score.max_score > 0 %}
+                    <tr>
+                        <td><strong>
+                            {% if category_name.value == 'general' %}General
+                            {% elif category_name.value == 'operativa' %}Operativa
+                            {% elif category_name.value == 'control' %}Plano de Control
+                            {% elif category_name.value == 'acceso' %}Control de Acceso
+                            {% elif category_name.value == 'monitoreo' %}Monitoreo
+                            {% endif %}
+                        </strong></td>
+                        <td style="text-align: center;">{{ cat_score.achieved }}</td>
+                        <td style="text-align: center;">{{ cat_score.max_score }}</td>
+                        <td style="text-align: center; font-weight: bold;">{{ "%.1f"|format(cat_score.percentage) }}%</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Failed Checks -->
+            {% set failed_checks = report.results|selectattr('passed', 'equalto', False)|list %}
+            {% if failed_checks %}
+            <h3 class="mt-20">Verificaciones Fallidas que Requieren Atención</h3>
+            {% for result in failed_checks %}
+            <div class="check-failed">
+                <h4>⚠ {{ result.check_name }}</h4>
+                <p><strong>Categoría:</strong> {{ result.category.value|title }}</p>
+                <p>{{ result.description }}</p>
+                <p class="recommendation"><strong>Recomendación:</strong> {{ result.recommendation }}</p>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="check-passed">
+                <p style="margin: 0;"><strong>✓ Excelente:</strong> Todas las verificaciones aprobadas para este dispositivo.</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- EXECUTIVE RECOMMENDATIONS -->
+    <div class="page-break" id="recommendations">
+        <h1>Recomendaciones Ejecutivas</h1>
+
+        <p>Basado en el análisis de {{ total_devices }} dispositivos, las siguientes acciones son recomendadas
+        para mejorar la postura de seguridad de la infraestructura de red:</p>
+
+        <div class="priority-box priority-1 no-break">
+            <h2 style="color: #dc3545; margin-top: 0;">Prioridad 1: Acciones Inmediatas</h2>
+            <p>Estas vulnerabilidades afectan a más del 75% de los dispositivos y deben ser corregidas de inmediato:</p>
+            <ul>
+                {% for rec in priority_1_recommendations %}
+                <li><strong>{{ rec.title }}:</strong> {{ rec.description }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="priority-box priority-2 no-break">
+            <h2 style="color: #ffc107; margin-top: 0;">Prioridad 2: Acciones a Corto Plazo</h2>
+            <p>Estas mejoras deben implementarse dentro de los próximos 30 días:</p>
+            <ul>
+                {% for rec in priority_2_recommendations %}
+                <li><strong>{{ rec.title }}:</strong> {{ rec.description }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <h2 class="mt-20">Plan de Remediación Sugerido</h2>
+        <table style="font-size: 10pt;">
+            <thead>
+                <tr>
+                    <th>Fase</th>
+                    <th>Periodo</th>
+                    <th>Acciones</th>
+                    <th>Objetivo</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Fase 1</strong></td>
+                    <td>Semana 1-2</td>
+                    <td>Implementar correcciones de Prioridad 1</td>
+                    <td>Mitigar riesgos críticos</td>
+                </tr>
+                <tr>
+                    <td><strong>Fase 2</strong></td>
+                    <td>Semana 3-4</td>
+                    <td>Implementar correcciones de Prioridad 2</td>
+                    <td>Mejorar hardening general</td>
+                </tr>
+                <tr>
+                    <td><strong>Fase 3</strong></td>
+                    <td>Mes 2</td>
+                    <td>Re-auditoría y ajustes finales</td>
+                    <td>Alcanzar >80% compliance</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- APPENDIX -->
+    <div class="page-break" id="appendix">
+        <h1>Anexo: Metodología y Estándares</h1>
+
+        <h2>Estándares de Hardening Utilizados</h2>
+        <p>Esta evaluación se basa en las siguientes guías y estándares de la industria:</p>
+        <ul>
+            <li><strong>Cisco IOS-XE Hardening Guide:</strong> Guía oficial de Cisco para asegurar dispositivos IOS-XE</li>
+            <li><strong>CIS Cisco IOS Benchmark:</strong> Centro para la Seguridad de Internet (CIS) benchmarks</li>
+            <li><strong>NIST SP 800-53:</strong> Controles de seguridad para sistemas de información</li>
+            <li><strong>Mejores Prácticas de la Industria:</strong> Recomendaciones de seguridad reconocidas globalmente</li>
+        </ul>
+
+        <h2 class="mt-20">Sistema de Calificación</h2>
+        <table class="scoring-table">
+            <thead>
+                <tr>
+                    <th style="width: 15%;">Calificación</th>
+                    <th style="width: 25%;">Rango de Puntaje</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="background: #d4edda;">
+                    <td style="color: #28a745;">A</td>
+                    <td>90-100%</td>
+                    <td><strong>Excelente:</strong> Cumplimiento total con las mejores prácticas de seguridad</td>
+                </tr>
+                <tr style="background: #d1ecf1;">
+                    <td style="color: #0c5460;">B</td>
+                    <td>80-89%</td>
+                    <td><strong>Bueno:</strong> Pocas mejoras menores necesarias</td>
+                </tr>
+                <tr style="background: #fff3cd;">
+                    <td style="color: #856404;">C</td>
+                    <td>70-79%</td>
+                    <td><strong>Aceptable:</strong> Algunas brechas de seguridad identificadas</td>
+                </tr>
+                <tr style="background: #f8d7da;">
+                    <td style="color: #721c24;">D</td>
+                    <td>60-69%</td>
+                    <td><strong>Deficiente:</strong> Problemas significativos de seguridad</td>
+                </tr>
+                <tr style="background: #f5c6cb;">
+                    <td style="color: #721c24;">F</td>
+                    <td>0-59%</td>
+                    <td><strong>Crítico:</strong> Vulnerabilidades críticas requieren atención inmediata</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2 class="mt-20">Categorías de Verificación de Seguridad</h2>
+        <p>Las verificaciones se organizan en cinco categorías principales:</p>
+
+        <table style="font-size: 10pt;">
+            <thead>
+                <tr>
+                    <th style="width: 30%;">Categoría</th>
+                    <th>Descripción y Alcance</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>General</strong></td>
+                    <td>Configuración base de seguridad del dispositivo, incluyendo versión de IOS, cifrado de contraseñas, y servicios fundamentales.</td>
+                </tr>
+                <tr>
+                    <td><strong>Operativa</strong></td>
+                    <td>Prácticas operacionales como banners, CDP/LLDP, NTP, logging timestamps, y configuraciones de servicio.</td>
+                </tr>
+                <tr>
+                    <td><strong>Plano de Control</strong></td>
+                    <td>Protección del plano de control incluyendo AAA, cifrado de contraseñas, y políticas de control de acceso.</td>
+                </tr>
+                <tr>
+                    <td><strong>Control de Acceso</strong></td>
+                    <td>Mecanismos de autenticación y autorización: líneas VTY, SSH, access-lists, timeouts, y protección de puertos auxiliares.</td>
+                </tr>
+                <tr>
+                    <td><strong>Monitoreo</strong></td>
+                    <td>Capacidades de logging, SNMP, syslog, y trazabilidad de eventos de seguridad.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2 class="mt-20">Alcance de la Auditoría</h2>
+        <p>Esta auditoría evaluó:</p>
+        <ul>
+            <li><strong>Dispositivos Auditados:</strong> {{ total_devices }} dispositivo(s) Cisco IOS/IOS-XE</li>
+            <li><strong>Verificaciones Totales:</strong> {{ total_checks }} verificaciones de seguridad</li>
+            <li><strong>Fecha de Auditoría:</strong> {{ generation_date }}</li>
+            <li><strong>Herramienta Utilizada:</strong> Hardening Verification Tool v6.0 (HVT6)</li>
+        </ul>
+
+        <h2 class="mt-20">Contacto y Soporte</h2>
+        <p>Para consultas sobre este reporte o asistencia con la implementación de las recomendaciones,
+        por favor contacte a su equipo de seguridad de redes.</p>
+
+        <div style="margin-top: 30pt; padding: 15pt; background: #f8f9fa; border-radius: 8pt; text-align: center;">
+            <p style="margin: 0; font-size: 10pt; color: #666;">
+                Este reporte fue generado automáticamente por<br>
+                <strong>Hardening Verification Tool v6.0 (HVT6)</strong><br>
+                {{ generation_date }}
+            </p>
+        </div>
+    </div>
+</body>
+</html>

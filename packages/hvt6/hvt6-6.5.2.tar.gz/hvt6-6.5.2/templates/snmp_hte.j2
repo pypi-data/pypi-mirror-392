@@ -1,0 +1,48 @@
+<div class="annex-grid">
+        {% if sub_test == "host" %}
+                {% if check %}
+                        <span class="status-icon status-pass">✓</span>
+                        <div class="cell">
+                                SNMP está entregando información a los siguientes hosts con v2c o v3:
+                                <ul style="margin: 5px 0; padding-left: 20px;">
+                                {% for result in value1 %}
+                                        <li>{{ result }}</li>
+                                {% endfor %}
+                                </ul>
+                        </div>
+                        {% if not check2  %}
+                                <span class="status-icon status-fail">⚠</span>
+                                <div class="cell">
+                                        SNMP está entregando información a los siguientes hosts con v1, considerar migrar hacia v2c o v3:
+                                        <ul style="margin: 5px 0; padding-left: 20px;">
+                                        {% for result in value2 %}
+                                                <li>{{ result }}</li>
+                                        {% endfor %}
+                                        </ul>
+                                </div>
+                        {% endif %}
+                {% else %}
+                        <span class="status-icon status-fail">⚠</span>
+                        <div class="cell">SNMP debería indicar hosts con v2c o v3.</div>
+                {% endif %}
+        {% elif sub_test == "trap-source" %}
+                {% if check %}
+                        <span class="status-icon status-pass">✓</span>
+                        <div class="cell">trap-source está configurado.</div>
+                {% else %}
+                        <span class="status-icon status-fail">⚠</span>
+                        <div class="cell">trap-source no está configurado.</div>
+                {% endif %}
+        {% elif sub_test == "enable" %}
+                {% if check %}
+                        <span class="status-icon status-pass">✓</span>
+                        <div class="cell">enable traps está configurado.</div>
+                {% else %}
+                        <span class="status-icon status-fail">⚠</span>
+                        <div class="cell">enable traps no está configurado.</div>
+                {% endif %}       
+        {% else %}
+                <span class="status-icon status-fail">⚠</span>
+                <div class="cell">El comando de SNMP <i>snmp-server{{ sub_test }}</i> no ha sido configurado."</div>
+        {% endif %}
+</div>
