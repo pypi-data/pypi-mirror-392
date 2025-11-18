@@ -1,0 +1,118 @@
+[project]
+name = "AnkiHelper"
+version = "0.1.2"
+description = "Default template for PDM package"
+authors = [
+    { name = "산에사는가재", email = "qhals8380@gmail.com" },
+]
+dependencies = [
+    "argparse>=1.4.0",
+    "genanki>=0.13.1",
+]
+requires-python = ">=3.9"
+readme = "README.md"
+
+[project.license]
+text = "MIT"
+
+[project.scripts]
+anki-helper = "anki_helper.main:main"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14.5",
+    "mypy>=1.18.2",
+    "docformatter>=1.7.7",
+    "pip>=25.3",
+]
+
+[build-system]
+requires = [
+    "pdm-backend",
+]
+build-backend = "pdm.backend"
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.scripts]
+help = "ec"
+lint = "pdm run ruff check --fix ."
+fmt-code = "pdm run ruff format ."
+fmt-docstrings = "pdm run docformatter --in-place --recursive ."
+type-check = "pdm run mypy ."
+test = "pdm run pytest"
+
+[tool.ruff]
+src = [
+    "src",
+]
+target-version = "py312"
+line-length = 100
+indent-width = 4
+extend-include = [
+    "*.py",
+]
+fix = true
+
+[tool.ruff.lint]
+select = [
+    "F",
+    "E",
+    "W",
+    "I",
+    "B",
+    "C4",
+    "UP",
+    "D",
+    "N",
+    "ARG",
+    "TRY",
+    "RSE",
+    "RET",
+]
+ignore = [
+    "D203",
+    "D213",
+    "ARG002",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = [
+    "F401",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+force-sort-within-sections = true
+
+[tool.ruff.lint.pyupgrade]
+keep-runtime-typing = true
+
+[tool.ruff.format]
+line-ending = "lf"
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+docstring-code-line-length = 100
+
+[tool.mypy]
+ignore_missing_imports = true
+warn_unused_ignores = true
+strict_optional = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+show_error_codes = true
+plugins = [
+    "sqlalchemy.ext.mypy.plugin",
+]
+
+[tool.docformatter]
+wrap-summaries = 100
+wrap-descriptions = 100
+make-summary-multi-line = true
+close-quotes-on-newline = true
