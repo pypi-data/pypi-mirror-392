@@ -1,0 +1,35 @@
+{% load i18n %}
+
+{% if payment_info %}
+    <dl class="dl-horizontal">
+        {% if "paymentId" in payment_info %}
+            <dt>{% trans "Payment ID" %}</dt>
+            <dd>{{ payment_info.paymentId }}</dd>
+        {% endif %}
+        {% if "paymentId" in payment_info.payment %}
+            <dt>{% trans "Payment ID" %}</dt>
+            <dd>{{ payment_info.payment.paymentId }}</dd>
+        {% endif %}
+        {% if "chargeId" in payment_info %}
+            <dt>{% trans "Charge ID" %}</dt>
+            <dd>{{ payment_info.chargeId }}</dd>
+        {% endif %}
+        {% if "refundId" in payment_info %}
+            <dt>{% trans "Refund ID" %}</dt>
+            <dd>{{ payment_info.refundId }}</dd>
+        {% endif %}
+        {% if "paymentType" in payment_info.payment.paymentDetails %}
+            <dt>{% trans "Payment Type" %}</dt>
+            <dd>{{ payment_info.payment.paymentDetails.paymentType }}</dd>
+        {% endif %}
+        {% if "paymentMethod" in payment_info.payment.paymentDetails %}
+            <dt>{% trans "Payment Method" %}</dt>
+            <dd>{{ payment_info.payment.paymentDetails.paymentMethod }}</dd>
+        {% endif %}
+        {% if "maskedPan" in payment_info.payment.paymentDetails.cardDetails %}
+            <dt>{% trans "Payment Card" %}</dt>
+            <dd>{{ payment_info.payment.paymentDetails.cardDetails.maskedPan }}</dd>
+            <dt>{% trans "Expiry" %}</dt>
+            <dd>{{ payment_info.payment.paymentDetails.cardDetails.expiryDate }}</dd>
+        {% endif %}
+{% endif %}
