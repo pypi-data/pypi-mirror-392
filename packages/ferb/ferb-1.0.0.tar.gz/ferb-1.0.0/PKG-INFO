@@ -1,0 +1,97 @@
+Metadata-Version: 2.1
+Name: ferb
+Version: 1.0.0
+Summary: Link Checker: A GUI + JS-rendered multithreaded broken link checker for dynamic websites.
+Author: Shreyash Srivastva
+Author-email: Shreyash Srivastva <usershreyash@gmail.com>
+Keywords: broken links,SEO,crawler,GUI,playwright,checker,link checker
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Internet :: WWW/HTTP :: Indexing/Search
+Classifier: Topic :: Utilities
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# Ferb: Broken Link Checker
+
+[GUI + JS Rendering + Multithreading]
+
+A powerful, modern Broken Link Checker desktop application built with **Python**, featuring:
+
+- Full **GUI** (Tkinter)
+- **JS-rendering support** (Playwright) — Works with React, Next.js, Vue, Angular, etc.
+- **Multithreading** for extremely fast link scanning
+- **Broken links highlighted in red**
+- **Filter** to show only broken links
+- **Column sorting**
+- **Export broken links to CSV**
+- **Copy broken links to clipboard**
+- **Optional green progress bar**
+- Works as a **standalone Windows .EXE** (PyInstaller)
+
+---
+
+# Features
+
+## 1. JavaScript Rendering (Next.js / React)
+Uses **Playwright Chromium** to render dynamic pages and extract real DOM links.
+
+## 2. Multithreaded Link Checker
+Link checks run in parallel using `ThreadPoolExecutor`, drastically reducing scan time.
+
+## 3. GUI Application
+Built with Tkinter:
+- URL input
+- Check links button
+- JS rendering toggle
+- Status bar
+- Progress bar
+- Link results table
+
+## 4. Broken Link Identification
+Broken links are:
+- Highlighted **red**
+- Filterable via “Show Broken Only”
+- Exportable and copyable
+
+## 5. CSV Export & Clipboard Copy
+Useful for audits, reports, SEO analysis, QA testing.
+
+## 6. Sorting
+Click table headers to sort by:
+- URL
+- Status
+- Broken?
+
+## 7. EXE Support
+Can be compiled to a **standalone Windows application** via PyInstaller.
+
+---
+
+# Installation
+
+### 1. Install dependencies
+
+```bash
+pip install playwright requests beautifulsoup4
+python -m playwright install chromium
+python -m pip install pyinstaller
+```
+
+### 2. Running
+```bash
+python linkCheckGUI.py
+```
+
+### 3. Building a Standalone .exe 
+```bash
+python -m PyInstaller --onefile --noconsole linkCheckGUI.py
+```
+
+### 4. Repository
+URL: https://github.com/shreyazh/BrokenLinkChecker
