@@ -1,0 +1,136 @@
+<h2 id="33">Informe ejecutivo</h2>
+<p>
+  <strong>{{ data.empresa }}</strong> le solicitó a BVS, realizar una trabajo consultivo sobre el
+  estado de segurización operativa (hardening) de sus plataformas de switches y
+  routers Cisco. Se han relevado {{ data.cant_tot }} dispositivos, cuyos hostnames son:  </p>
+  <table class="content-table">
+    <thead>
+      <caption>
+        Devices
+      </caption>
+    </thead>
+    <tbody>
+      {% for row in range(0, (data.hostnames|length // 5) + 1) %}
+            <tr>
+                {% for col in range(0, 5) %}
+                    {% set index = row * 5 + col %}
+                    {% if index < data.hostnames|length %}
+                        <td>{{ data.hostnames[index] }}</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+  <p>
+  Para el tipo de red de <strong>{{ data.empresa }}</strong>, de todos los
+  parámetros operativos posibles que se mencionan en las siguientes secciones,
+  consideramos que sobre los que hay que prestar atención primaria, son
+  los referidos al Plano de Administración y Plano de Control, que
+  consisten en:
+</p>
+  <ul>
+    <li>Uso de SSH en vez de Telnet</li>
+    <li>Limitar los accesos SSH a las IPs de los administradores</li>
+    <li>Centralización de los accesos con TACACS+</li>
+    <li>Usuario local de emergencia con "privilege 1"</li>
+	<li>Protección de las VTY con ACLs</li>
+    <li>Servicio de encripción de passwords</li>
+    <li>Verificación y configuración de NTP</li>
+    <li>Servidor de Syslogs centralizado</li>
+    <li>Management Plane Protection</li>
+    <li>Control Plane Protection</li>
+  </ul>
+<p>
+  En base a lo mencionado, la cantidad de dispositivos relevados es {{ data.cant_tot }}, y los gráficos a continuación 
+  muestran el estado general del parque y sobre qué áreas prestar atención primaria.
+</p>
+<div class="bottom-container">
+    <div class="left-column">
+        <img src="./radar_1.jpg" alt="Image" width="100%">
+    </div>
+    <div class="right-column">
+        <img src="./figure_1.jpg" alt="Image" width="100%">
+    </div>
+</div>
+<p>
+	El score <strong>"CONTROL"</strong> pone foco en los usuarios, encripción de contraseñas y AAA.
+	{% if data.global_control < 80 %}
+		Al haber obtenido globalmente <strong>{{ data.global_control }}%</strong>, es recomendable mejorar estos aspectos
+		para prevenir que accesos indebidos a los dispositivos.
+		Si bien un servidor TACACS+ es lo ideal al momento de centralizar los usuarios
+		y contraseñas, además de registrar sus actividades; una opción de registro puede ser en menor medida y sus limitaciones, 
+		un servidor Radius o el servidor AAA propio de los dispositivos. <br/>
+		Para mayor detalle sobre este tema, vaya a la sección <a href="#60">AAA</a>.
+	{% else %}
+		Al haber obtenido globalmente <strong>{{ data.global_control }}%</strong>, significa que 
+		<strong>{{ data.empresa }}</strong> tiene en cuenta la robustés en el control y podrá haber 
+		puntos de mejora para elevar el score.
+	{% endif %}
+</p>
+<p>
+	El score <strong>"ACCESO"</strong> pone foco en los puertos locales CON 0 y AUX 0 y remotos 
+	VTY 0-31 y HTPP/HTTPS.
+	{% if data.global_acceso < 80 %}
+		Al haber obtenido globalmente <strong>{{ data.global_acceso }}%</strong>, el acceso físico por los puertos AUX 0 y CON 0 
+		y los remotos por los puertos VTY 0-31 para aplicaciones como Telnet o SSH y HTTP/HTTPS, 
+		están muy vulnerables y le será sencillo a un atacante, ingresar a los dispositivos, negar 
+		servicios y comprometer la estabilidad de la red. <br/>
+		Se debería tomar acción inmediata para robustecer esta área.
+	{% else %}
+		Al haber obtenido globalmente <strong>{{ data.global_acceso }}%</strong>, significa que 
+		<strong>{{ data.empresa }}</strong> cuida el método de acceso a los dispositivos. <br/>
+		No por ello hay que descuidar pequeños detalles que robustecerán el acceso, como por ejemplo
+		ponerle más foco al SSH con v2, ACLs, source interface por mencionar algunos.
+	{% endif %}
+</p>
+<p>
+	El score <strong>"OPERATIVA"</strong> pone foco en aspectos visuales (banners), interfaces que 
+	individualicen al dispositivo (Loopback0), cómo se interrelaciona con otros dispositivos 
+	(CDP/LLDP, keepalives), de qué manera accede a servicios externos (DNS, DHCP) y cómo protege las 
+	configuraciones locales.
+	{% if data.global_operativa < 80 %}
+		Al haber obtenido globalmente <strong>{{ data.global_operativa }}%</strong>, el dispositivo 
+		podrá ser fácilmente identificado por un atacante que además podrá acceder a tomar control 
+		del mismo ya que tendrá acceso a la memoria NVRAM para bypasear la password.
+		Adicionalmente, siempre es una buena práctica, utilizar una interfaz de referencia (generalmente 
+		la Loopback0; una interfaz física también sirve aunque no muy recomendable) para acceder a servicios 
+		como NTP, logging, SSH, AAA, etc.
+	{% else %}
+		Al haber obtenido globalmente <strong>{{ data.global_operativa }}%</strong>, significa que 
+		<strong>{{ data.empresa }}</strong> presta atención a detalles operativos para preservar el 
+		anonimato del dispositivo. 
+	{% endif %}
+</p>
+<p>
+	El score <strong>"MONITOREO"</strong> pone foco en servicios externos de consolas SNMP y servidores de Logging.
+	Si bien redes pequeñas pueden omitir estos servicios, redes complejas generalmente los tienen 
+	ya que pertimten centralizar y correlacionar eventos de la red y dispositivos.
+	{% if data.global_monitoreo < 80 %}
+		Al haber obtenido globalmente <strong>{{ data.global_monitoreo }}%</strong>, puede que no sea relevante 
+		en el contexto del tipo de red, pero a la hora de individualizar eventos y realizar un troubleshooting, 
+		éste será más demandante al tener que recoleccionar información de manera dispersa e individual.
+		Al menos contar con un servidor de logging, es una buena práctica y sencillamente se pueden 
+		instalar en una máquina virtual de pocos recursos.
+	{% else %}
+		Al haber obtenido globalmente <strong>{{ data.global_monitoreo }}%</strong>, significa que 
+		<strong>{{ data.empresa }}</strong> cuenta con herramientas de gestión y monitoreo para 
+		facilitar la administración y centralizar alarmas.
+	{% endif %}
+</p>
+<p>
+	Si desea omitir los pormenores de cada parámetro posible a configurar para robustecer las configuraciones 
+	de los dispositivos de red, puede ir directamente al <a href="#1210">Anexo</a> para visualizar los scores 
+	que cada dispositivo obtuvo y sobre que puntos prestar atención.
+</p>
+<hr class="solid">
+    <i class="fas fa-edit"></i>&nbsp;&nbsp;<strong>Nota:</strong> Las siguientes secciones del presente informe hasta el <a href="#1210">anexo</a>, 
+	muestran las capacidades que tiene el Cisco IOS y Cisco IOS-XE, para robustecer sus configuraciones. HVT verifica 
+	un conjunto de ellas y serán resaltadas con &nbsp;<i style="color: green" class="fas fa-check-circle"></i>&nbsp; 
+	como referencia de los puntos validados.
+<hr class="solid">
+<p>
+  <a href="#1">Índice</a>
+</p>

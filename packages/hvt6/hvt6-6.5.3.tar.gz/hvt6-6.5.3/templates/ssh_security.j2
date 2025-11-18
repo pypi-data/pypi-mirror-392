@@ -1,0 +1,470 @@
+{#
+SSH Security Template - Displays comprehensive SSH security status
+
+Metadata structure expected:
+- ssh_config: Dictionary with SSH configuration status
+  - ssh_version_2: Boolean
+  - ssh_timeout_configured: Boolean
+  - ssh_timeout_value: Integer (seconds)
+  - ssh_source_interface: String or None
+  - domain_name: String or None
+  - rsa_keypair: Boolean
+  - strong_ciphers: Boolean
+  - strong_macs: Boolean
+- vty_security: Dictionary with VTY line security
+  - total_vty_lines: Integer
+  - ssh_only_count: Integer
+  - all_vty_ssh_only: Boolean
+  - vty_timeout_configured: Boolean
+  - vty_acl_configured: Boolean
+  - vty_acl_count: Integer
+  - vty_lines: List of VTY line dicts
+- total_issues: Integer
+- issues_list: List of issue strings
+- achieved_score: Integer
+- percentage: Float
+#}
+
+<div class="check-detail">
+    <h4>SSH Security Configuration Status</h4>
+
+    <div class="summary-stats">
+        <p><strong>Overall Score:</strong>
+            <span class="{% if metadata.percentage >= 90 %}pass-status{% elif metadata.percentage >= 70 %}partial-status{% else %}fail-status{% endif %}">
+                {{ metadata.achieved_score }}/{{ result.max_score }} points ({{ metadata.percentage }}%)
+            </span>
+        </p>
+        <p><strong>Issues Found:</strong>
+            <span class="{% if metadata.total_issues == 0 %}pass-status{% elif metadata.total_issues <= 2 %}partial-status{% else %}fail-status{% endif %}">
+                {{ metadata.total_issues }}
+            </span>
+        </p>
+    </div>
+
+    <h5>Core SSH Configuration</h5>
+    <table class="detail-table">
+        <thead>
+            <tr>
+                <th>Feature</th>
+                <th>Status</th>
+                <th>Value/Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="{% if metadata.ssh_config.ssh_version_2 %}pass-row{% else %}fail-row{% endif %}">
+                <td><strong>SSH Version 2</strong></td>
+                <td class="centered">
+                    {% if metadata.ssh_config.ssh_version_2 %}
+                        <span class="status-icon pass">✓</span>
+                    {% else %}
+                        <span class="status-icon fail">✗</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if metadata.ssh_config.ssh_version_2 %}
+                        <span class="pass-status">SSHv2 Enabled</span>
+                    {% else %}
+                        <span class="fail-status">SSHv2 NOT configured - CRITICAL</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr class="{% if metadata.ssh_config.ssh_timeout_configured and metadata.ssh_config.ssh_timeout_value and metadata.ssh_config.ssh_timeout_value <= 120 %}pass-row{% elif metadata.ssh_config.ssh_timeout_configured %}warn-row{% else %}fail-row{% endif %}">
+                <td><strong>SSH Timeout</strong></td>
+                <td class="centered">
+                    {% if metadata.ssh_config.ssh_timeout_configured %}
+                        {% if metadata.ssh_config.ssh_timeout_value and metadata.ssh_config.ssh_timeout_value <= 120 %}
+                            <span class="status-icon pass">✓</span>
+                        {% else %}
+                            <span class="status-icon warn">⚠</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="status-icon fail">✗</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if metadata.ssh_config.ssh_timeout_configured %}
+                        {{ metadata.ssh_config.ssh_timeout_value }} seconds
+                        {% if metadata.ssh_config.ssh_timeout_value > 120 %}
+                            <span class="fail-status">(Too high - recommend ≤ 120s)</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="fail-status">Not configured</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr class="{% if metadata.ssh_config.ssh_source_interface %}pass-row{% else %}warn-row{% endif %}">
+                <td><strong>Source Interface</strong></td>
+                <td class="centered">
+                    {% if metadata.ssh_config.ssh_source_interface %}
+                        <span class="status-icon pass">✓</span>
+                    {% else %}
+                        <span class="status-icon warn">⚠</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if metadata.ssh_config.ssh_source_interface %}
+                        <code>{{ metadata.ssh_config.ssh_source_interface }}</code>
+                    {% else %}
+                        <span class="fail-status">Not configured</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr class="{% if metadata.ssh_config.domain_name %}pass-row{% else %}fail-row{% endif %}">
+                <td><strong>Domain Name</strong></td>
+                <td class="centered">
+                    {% if metadata.ssh_config.domain_name %}
+                        <span class="status-icon pass">✓</span>
+                    {% else %}
+                        <span class="status-icon fail">✗</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if metadata.ssh_config.domain_name %}
+                        <code>{{ metadata.ssh_config.domain_name }}</code>
+                    {% else %}
+                        <span class="fail-status">Not configured (required for RSA keys)</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr class="{% if metadata.ssh_config.rsa_keypair %}pass-row{% else %}fail-row{% endif %}">
+                <td><strong>RSA Keypair</strong></td>
+                <td class="centered">
+                    {% if metadata.ssh_config.rsa_keypair %}
+                        <span class="status-icon pass">✓</span>
+                    {% else %}
+                        <span class="status-icon fail">✗</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if metadata.ssh_config.rsa_keypair %}
+                        <span class="pass-status">Configured</span>
+                    {% else %}
+                        <span class="fail-status">Not found</span>
+                    {% endif %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h5>VTY Line Security ({{ metadata.vty_security.total_vty_lines }} lines)</h5>
+    <table class="detail-table">
+        <thead>
+            <tr>
+                <th>Feature</th>
+                <th>Status</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="{% if metadata.vty_security.all_vty_ssh_only %}pass-row{% else %}fail-row{% endif %}">
+                <td><strong>Transport Input SSH</strong></td>
+                <td class="centered">
+                    {% if metadata.vty_security.all_vty_ssh_only %}
+                        <span class="status-icon pass">✓</span>
+                    {% else %}
+                        <span class="status-icon fail">✗</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if metadata.vty_security.all_vty_ssh_only %}
+                        <span class="pass-status">All {{ metadata.vty_security.total_vty_lines }} lines SSH-only</span>
+                    {% else %}
+                        <span class="fail-status">{{ metadata.vty_security.ssh_only_count }}/{{ metadata.vty_security.total_vty_lines }} lines SSH-only</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr class="{% if metadata.vty_security.vty_timeout_configured %}pass-row{% else %}fail-row{% endif %}">
+                <td><strong>Exec-Timeout</strong></td>
+                <td class="centered">
+                    {% if metadata.vty_security.vty_timeout_configured %}
+                        <span class="status-icon pass">✓</span>
+                    {% else %}
+                        <span class="status-icon fail">✗</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if metadata.vty_security.vty_timeout_configured %}
+                        <span class="pass-status">Configured on all lines</span>
+                    {% else %}
+                        <span class="fail-status">Not configured on all lines</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr class="{% if metadata.vty_security.vty_acl_configured %}pass-row{% else %}warn-row{% endif %}">
+                <td><strong>Access-Class (ACL)</strong></td>
+                <td class="centered">
+                    {% if metadata.vty_security.vty_acl_configured %}
+                        <span class="status-icon pass">✓</span>
+                    {% else %}
+                        <span class="status-icon warn">⚠</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if metadata.vty_security.vty_acl_configured %}
+                        <span class="pass-status">{{ metadata.vty_security.vty_acl_count }} lines protected</span>
+                    {% else %}
+                        <span class="fail-status">Not configured (recommended)</span>
+                    {% endif %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    {% if metadata.vty_security.vty_lines %}
+    <details class="collapsible-section">
+        <summary><h5>VTY Line Details ({{ metadata.vty_security.total_vty_lines }})</h5></summary>
+        <table class="detail-table">
+            <thead>
+                <tr>
+                    <th>VTY Line</th>
+                    <th>SSH Only</th>
+                    <th>Timeout</th>
+                    <th>Access-Class</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vty in metadata.vty_security.vty_lines %}
+                <tr class="{% if vty.ssh_only and vty.timeout %}pass-row{% elif vty.ssh_only or vty.timeout %}warn-row{% else %}fail-row{% endif %}">
+                    <td><code>{{ vty.name }}</code></td>
+                    <td class="centered">
+                        {% if vty.ssh_only %}
+                            <span class="status-icon pass">✓</span>
+                        {% else %}
+                            <span class="status-icon fail">✗</span>
+                        {% endif %}
+                    </td>
+                    <td class="centered">
+                        {% if vty.timeout %}
+                            <span class="status-icon pass">✓</span>
+                        {% else %}
+                            <span class="status-icon fail">✗</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if vty.acl %}
+                            <code>{{ vty.acl }}</code>
+                        {% else %}
+                            <span class="fail-status">None</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </details>
+    {% endif %}
+
+    {% if metadata.issues_list %}
+    <div class="critical-section">
+        <h5><span class="status-icon fail">✗</span> Issues Found ({{ metadata.total_issues }})</h5>
+        <ul class="issue-list">
+            {% for issue in metadata.issues_list %}
+            <li>{{ issue }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="recommendation-box">
+        <h5>Configuration Recommendations:</h5>
+        <ul>
+            <li><strong>SSH Version 2:</strong> Configure <code>ip ssh version 2</code> (disables SSHv1)</li>
+            <li><strong>SSH Timeout:</strong> Configure <code>ip ssh time-out 60</code> (60-120 seconds recommended)</li>
+            <li><strong>Source Interface:</strong> Configure <code>ip ssh source-interface Loopback0</code> (consistency)</li>
+            <li><strong>Domain Name:</strong> Configure <code>ip domain-name yourdomain.com</code> (required for RSA keys)</li>
+            <li><strong>Generate RSA Keys:</strong> Execute <code>crypto key generate rsa modulus 2048</code> (2048-bit minimum)</li>
+            <li><strong>VTY SSH Only:</strong> Configure <code>transport input ssh</code> under all <code>line vty</code> configurations</li>
+            <li><strong>VTY Timeout:</strong> Configure <code>exec-timeout 10 0</code> under all VTY lines (10 minutes)</li>
+            <li><strong>VTY ACL:</strong> Configure <code>access-class &lt;acl-name&gt; in</code> under VTY lines (restrict source IPs)</li>
+        </ul>
+    </div>
+
+    <div class="info-box">
+        <h5>SSH Security Best Practices:</h5>
+        <ul>
+            <li><strong>SSHv2 Only:</strong> SSHv1 has known vulnerabilities - always use version 2</li>
+            <li><strong>Timeouts:</strong> Short timeouts (60-120s) reduce exposure from abandoned sessions</li>
+            <li><strong>Source Interface:</strong> Use Loopback0 for predictable source IP</li>
+            <li><strong>Key Size:</strong> Minimum 2048-bit RSA keys (4096-bit for high security)</li>
+            <li><strong>VTY Protection:</strong> Always restrict VTY access with ACLs limiting source networks</li>
+            <li><strong>Strong Algorithms:</strong> Configure strong ciphers, MACs, and KEX algorithms (IOS-XE 16.3+)</li>
+            <li><strong>STIG Compliance:</strong> V-215818 (SSHv2), V-215820 (Timeout), V-215821 (Source Interface)</li>
+        </ul>
+    </div>
+</div>
+
+<style>
+.summary-stats {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 15px 0;
+}
+
+.summary-stats p {
+    margin: 5px 0;
+}
+
+.detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+}
+
+.detail-table th,
+.detail-table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #dee2e6;
+}
+
+.detail-table th {
+    background-color: #1e3a8a;
+    color: white;
+    font-weight: 600;
+}
+
+.detail-table td.centered {
+    text-align: center;
+}
+
+.pass-row {
+    background-color: #d4edda;
+}
+
+.fail-row {
+    background-color: #f8d7da;
+}
+
+.warn-row {
+    background-color: #fff3cd;
+}
+
+.status-icon {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.status-icon.pass {
+    color: #28a745;
+}
+
+.status-icon.fail {
+    color: #dc3545;
+}
+
+.status-icon.warn {
+    color: #ffc107;
+}
+
+.pass-status {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.fail-status {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.partial-status {
+    color: #ffc107;
+    font-weight: 600;
+}
+
+.collapsible-section {
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 20px 0;
+}
+
+.collapsible-section summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: #1e3a8a;
+}
+
+.collapsible-section summary:hover {
+    color: #3b82f6;
+}
+
+.critical-section {
+    background-color: #fff5f5;
+    border: 2px solid #dc3545;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 20px 0;
+}
+
+.critical-section h5 {
+    color: #721c24;
+    margin-top: 0;
+}
+
+.issue-list {
+    margin: 10px 0 0 20px;
+    padding: 0;
+}
+
+.issue-list li {
+    margin: 8px 0;
+    color: #721c24;
+}
+
+.recommendation-box {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 5px;
+}
+
+.recommendation-box h5 {
+    margin-top: 0;
+    color: #856404;
+}
+
+.recommendation-box ul {
+    margin: 10px 0 0 0;
+    padding-left: 20px;
+}
+
+.recommendation-box li {
+    margin: 8px 0;
+}
+
+.recommendation-box code {
+    background-color: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+}
+
+.info-box {
+    background-color: #d1ecf1;
+    border-left: 4px solid #0c5460;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 5px;
+}
+
+.info-box h5 {
+    margin-top: 0;
+    color: #0c5460;
+}
+
+.info-box ul {
+    margin: 10px 0 0 0;
+    padding-left: 20px;
+}
+
+.info-box li {
+    margin: 8px 0;
+}
+
+h5 {
+    margin-top: 20px;
+    color: #1e3a8a;
+}
+</style>

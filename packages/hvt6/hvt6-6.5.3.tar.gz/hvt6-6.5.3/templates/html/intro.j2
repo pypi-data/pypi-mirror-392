@@ -1,0 +1,233 @@
+<body>
+  <main>
+    <h1>Hardening Verification Tool</h1>
+    <img src="./icon.jpg" alt="" height="100" width="110" class="center">
+    <h2 id="1">Índice</h2>
+    <nav>
+      <ul>
+        <li><a href="#10"> Introducción </a></li>
+        <li><a href="#20"> ¿Cómo funciona? </a></li>
+        <li><a href="#30"> Información general </a></li>
+        <li><a href="#33">Informe ejecutivo </a></li>
+        <li><a href="#40"> Operaciones seguras </a></li>
+        <li><a href="#50"> Supervise los avisos y las respuestas de seguridad de Cisco (PSIRT) </a></li>
+        <li><a href="#60"> Saque partido de la Autenticación, Autorización y Contabilidad (AAA) </a></li>
+        <li><a href="#70"> Centralice la recopilación y supervisión de registros (Syslog) </a></li>
+        <li><a href="#80"> Utilice protocolos seguros siempre que sea posible </a></li>
+        <li><a href="#90"> Obtenga visibilidad del tráfico con NetFlow </a></li>
+        <li><a href="#100">Gestión de la configuración</a></li>
+        <li><a href="#110"> Plano de gestión </a></li>
+        <li><a href="#120">Protección general del plano de gestión</a></li>
+        <li>&nbsp;&nbsp; <a href="#130"> Gestión de contraseñas </a></li>
+        <li>&nbsp;&nbsp; <a href="#140"> Seguridad de contraseña mejorada (Enhanced Password Security)</a></li>
+        <li>&nbsp;&nbsp; <a href="#150"> Bloqueo de reintento de contraseña de inicio de sesión</a></li>
+        <li>&nbsp;&nbsp; <a href="#160"> No Service Password-Recovery </a></li>
+        <li>&nbsp;&nbsp; <a href="#170"> Desactivar servicios no utilizados </a></li>
+        <li>&nbsp;&nbsp; <a href="#180"> EXEC Timeout </a></li>
+        <li>&nbsp;&nbsp; <a href="#190"> Keepalives para sesiones TCP </a></li>
+        <li>&nbsp;&nbsp; <a href="#200"> Uso de la interfaz de gestión </a></li>
+        <li>&nbsp;&nbsp; <a href="#210"> Notificaciones de umbral de memoria </a></li>
+        <li>&nbsp;&nbsp; <a href="#220"> Notificación de umbral de CPU </a></li>
+        <li>&nbsp;&nbsp; <a href="#230"> Network Time Protocol </a></li>
+        <li><a href="#240"> Limitar el acceso a la red con ACL de infraestructura (iACL) </a></li>
+        <li>&nbsp;&nbsp; <a href="#250"> Filtrado de paquetes ICMP </a></li>
+        <li>&nbsp;&nbsp; <a href="#260"> Filtrar fagmentos IP </a></li>
+        <li>&nbsp;&nbsp; <a href="#270"> Soporte ACL para filtrar opciones IP </a></li>
+        <li>&nbsp;&nbsp; <a href="#280"> Soporte de ACL para filtrar por valor TTL </a></li>
+        <li><a href="#290"> Sesiones seguras de gestión interactiva </a></li>
+        <li>&nbsp;&nbsp; <a href="#300"> Management Plane Protection </a></li>
+        <li>&nbsp;&nbsp; <a href="#310"> Control Plane Protection </a></li>
+        <li>&nbsp;&nbsp; <a href="#320"> Encriptar sesiones de gestión </a></li>
+        <li>&nbsp;&nbsp; <a href="#330"> SSHv2 </a></li>
+        <li>&nbsp;&nbsp; <a href="#340"> Mejoras SSHv2 para claves RSA </a></li>
+        <li>&nbsp;&nbsp; <a href="#350"> Puertos de Consola y AUX </a></li>
+        <li>&nbsp;&nbsp; <a href="#360"> Control de líneas vty y tty </a></li>
+        <li>&nbsp;&nbsp; <a href="#370"> Control de transporte para líneas vty y tty </a></li>
+        <li>&nbsp;&nbsp; <a href="#380"> Banners de advertencia </a></li>
+        <li><a href="#400"> Autenticación, autorización y contabilidad (AAA) </a></li>
+        <li>&nbsp;&nbsp; <a href="#410"> Autenticación TACACS+ </a></li>
+        <li>&nbsp;&nbsp; <a href="#420"> Autenticación de emergencia </a></li>
+        <li>&nbsp;&nbsp; <a href="#430"> Uso de contraseñas Type 7 </a></li>
+        <li>&nbsp;&nbsp; <a href="#440"> Autorización de comandos TACACS+ </a></li>
+        <li>&nbsp;&nbsp; <a href="#450"> Contabilidad de comandos de TACACS+ </a></li>
+        <li>&nbsp;&nbsp; <a href="#460"> Servidores AAA redundantes </a></li>
+        <li><a href="#470"> Fortificar el SNMP </a></li>
+        <li>&nbsp;&nbsp; <a href="#480"> Cadenas de comunidades SNMP </a></li>
+        <li>&nbsp;&nbsp; <a href="#490"> Cadenas de comunidades SNMP con ACLs </a></li>
+        <li>&nbsp;&nbsp; <a href="#500"> ACLs de infraestructura </a></li>
+        <li>&nbsp;&nbsp; <a href="#510"> Vistas SNMP </a></li>
+        <li>&nbsp;&nbsp; <a href="#520"> SNMP versión 3 </a></li>
+        <li>&nbsp;&nbsp; <a href="#530"> Protección del plano de gestión </a></li>
+        <li><a href="#540"> Prácticas recomendadas de "logging" </a></li>
+        <li>&nbsp;&nbsp; <a href="#550"> Enviar registros a una ubicación central </a></li>
+        <li>&nbsp;&nbsp; <a href="#560"> Nivel de Registro </a></li>
+        <li>&nbsp;&nbsp; <a href="#570"> Inhabilitación de Registro en la Consola o en las Sesiones de Monitoreo </a></li>
+        <li>&nbsp;&nbsp; <a href="#580"> Uso de Registros Almacenados en Buffer </a></li>
+        <li>&nbsp;&nbsp; <a href="#590"> Configuración de la Interfaz de Origen de Registro </a></li>
+        <li>&nbsp;&nbsp; <a href="#600"> Configuración de Fechados de Registro </a></li>
+        <li><a href="#610"> Gestión de la configuración del software Cisco IOS XE </a></li>
+        <li>&nbsp;&nbsp; <a href="#620"> Configuration Replace y Configuration Rollback </a></li>
+        <li>&nbsp;&nbsp; <a href="#630"> Función Exclusive Configuration Change Access </a></li>
+        <li>&nbsp;&nbsp; <a href="#640"> Digitally Signed Cisco Software </a></li>
+        <li><a href="#650"> Plano de Control </a></li>
+        <li>&nbsp;&nbsp; <a href="#660"> Consolidación del Plano de Control General </a></li>
+        <li>&nbsp;&nbsp; <a href="#670"> Mensajes de Redirección ICMP </a></li>
+        <li>&nbsp;&nbsp; <a href="#680"> Mensajes ICMP de Destino Inalcanzable </a></li>
+        <li>&nbsp;&nbsp; <a href="#690"> Proxy ARP </a></li>
+        <li>&nbsp;&nbsp; <a href="#700"> Mensajes de control NTP </a></li>
+        <li>&nbsp;&nbsp; <a href="#710"> Limitar el impacto del tráfico del plano de control sobre la CPU </a></li>
+        <li>&nbsp;&nbsp; <a href="#720"> Comprender el tráfico del plano de control </a></li>
+        <li>&nbsp;&nbsp; <a href="#730"> ACL de Infraestructura (iACL) </a></li>
+        <li>&nbsp;&nbsp; <a href="#740"> ACL de recepción </a></li>
+        <li>&nbsp;&nbsp; <a href="#750"> CoPP </a></li>
+        <li>&nbsp;&nbsp; <a href="#760"> Control Plane Protection </a></li>
+        <li>&nbsp;&nbsp; <a href="#770"> Limitadores de Velocidad Basados en Hardware </a></li>
+        <li><a href="#780"> Proteja el protocolo BGP </a></li>
+        <li>&nbsp;&nbsp; <a href="#790"> Protecciones de Seguridad Basadas en TTL </a></li>
+        <li>&nbsp;&nbsp; <a href="#800"> Autenticación de Peer BGP con MD5 </a></li>
+        <li>&nbsp;&nbsp; <a href="#810"> Configure el máximo de prefijos </a></li>
+        <li>&nbsp;&nbsp; <a href="#820"> Filtre los prefijos de BGP mediante listas de prefijos </a></li>
+        <li>&nbsp;&nbsp; <a href="#830"> Filtre los prefijos de BGP mediante listas de acceso a la
+        ruta del sistema autónomo </a></li>
+        <li><a href="#840"> Proteja los protocolos de ruteo interior </a></li>
+        <li>&nbsp;&nbsp; <a href="#850"> Autenticación y Verificación de Protocolo de Ruteo con Message Digest 5 </a></li>
+        <li>&nbsp;&nbsp; <a href="#860"> Comando Passive-Interface </a></li>
+        <li>&nbsp;&nbsp; <a href="#870"> Filtrado de Rutas </a></li>
+        <li>&nbsp;&nbsp; <a href="#880"> Consumo de Recursos del Proceso de Ruteo </a></li>
+        <li><a href="#890"> Proteja los protocolos de redundancia de primer salto (FHRP) </a></li>
+        <li><a href="#900"> Plano de Datos </a></li>
+        <li>&nbsp;&nbsp; <a href="#910"> IP Options Selective Drop </a></li>
+        <li>&nbsp;&nbsp; <a href="#920"> Inhabilitación de Ruteo de Origen de IP </a></li>
+        <li>&nbsp;&nbsp; <a href="#930"> Inhabilitación de Mensajes de Redirección ICMP </a></li>
+        <li>&nbsp;&nbsp; <a href="#940"> Inhabilitación o Limitación de Broadcasts Dirigidos a IP </a></li>
+        <li><a href="#950"> Filtrar el tráfico en tránsito con ACL de tránsito (tACL) </a></li>
+        <li>&nbsp;&nbsp; <a href="#960"> Filtrado de Paquetes ICMP </a></li>
+        <li>&nbsp;&nbsp; <a href="#970"> Filtrar fragmentos IP </a></li>
+        <li>&nbsp;&nbsp; <a href="#980"> Filtrar IP Options </a></li>
+        <li>&nbsp;&nbsp; <a href="#990"> Protecciones Contra Suplantación (Anti-Spoofing) </a></li>
+        <li>&nbsp;&nbsp; <a href="#1000"> Unicast RPF </a></li>
+        <li>&nbsp;&nbsp; <a href="#1010"> IP Source Guard </a></li>
+        <li>&nbsp;&nbsp; <a href="#1020"> Seguridad de Puertos </a></li>
+        <li>&nbsp;&nbsp; <a href="#1030"> ACL Contra Suplantación (Anti-Spoofing) </a></li>
+        <li><a href="#1040"> Limitar el impacto del tráfico del plano de datos sobre la CPU </a></li>
+        <li>&nbsp;&nbsp; <a href="#1050"> Funciones y tipos de tráfico que afectan la CPU </a></li>
+        <li>&nbsp;&nbsp; <a href="#1060"> Filtrar por el valor de TTL </a></li>
+        <li>&nbsp;&nbsp; <a href="#1070"> Filtrar por la presencia de IP Options </a></li>
+        <li>&nbsp;&nbsp; <a href="#1080"> Función Control Plane Protection </a></li>
+        <li><a href="#1090"> Identificación y Determinación del Origen del Tráfico </a></li>
+        <li>&nbsp;&nbsp; <a href="#1100"> Netflow </a></li>
+        <li>&nbsp;&nbsp; <a href="#1110"> ACL de Clasificación </a></li>
+        <li>&nbsp;&nbsp; <a href="#1120"> Control de Acceso con PACL </a></li>
+        <li>&nbsp;&nbsp; <a href="#1130"> VLAN aisladas </a></li>
+        <li>&nbsp;&nbsp; <a href="#1140"> VLAN Comunitarias </a></li>
+        <li><a href="#1200"> Conclusión </a></li>
+        <li><a href="#1210"> Anexo </a></li>
+        <li><a href="#1230"> Apéndice: Cisco IOS y IOS-XE Device Hardening Checklist </a></li>
+      </ul>
+    </nav>
+    <h2 id="10">Introducción</h2>
+    <p>
+      La herramienta HVT (Hardening Verification Tool) verifica que el IOS o
+      IOS-XE del switch o router, contenga las configuraciones mínimas y
+      necesarias para considerarlo seguro.<br />HVT lee las configuraciones de
+      los dispositivos fuera de línea, y genera un informe con el estado de
+      situación del parque de dispositivos verificados. <br /><strong
+        >Es importante dejar en claro que HVT, en ningún momento, realiza tareas
+        correctivas, simplemente genera informes.</strong
+      >
+    </p>
+    <p>
+      El marco de referencia utilizado por HVT, está basado en documentación
+      pública de Cisco Systems, denominada
+      <a
+        href="https://www.cisco.com/c/en/us/support/docs/ios-nx-os-software/ios-xe-16/220270-use-cisco-ios-xe-hardening-guide.html"
+        target="_blank"
+        >"Use Cisco IOS Hardening Guide"</a
+      >
+      y
+      <a
+        href="https://www.cisco.com/c/en/us/support/docs/ip/access-lists/13608-21.html"
+        target="_blank"
+      >
+        "Cisco Guide to Harden Cisco IOS Devices"</a
+      >.
+    </p>
+    <p>
+      Adicionalmente existe una comunidad denominada CIS, que tiene una plataforma impulsada por la comunidad 
+      en la que los expertos en TI pueden trabajar en red y colaborar para redactar recomendaciones de configuración 
+      para los Puntos de Referencia CIS, enviar tickets y debatir sobre las mejores prácticas para proteger una amplia 
+      gama de tecnologías. Muchas de las recomendaciones que genera HVT, utilizan los "benchmarks" que se producen en CIS.
+      Para mayor información sobre CIS ver: <a href="https://www.cisecurity.org/" target="_blank"
+        >"Center for Internet Security"</a>.
+    </p>
+    <p>
+      <a href="#1">Índice</a>
+    </p>
+    <h2 id="20">¿Cómo funciona?</h2>
+    <p>
+      HVT lee las configuraciones de los dispositivos fuera de línea (archivos 
+      previamente recolectados mediante los comandos <strong>show running-config</strong>, <strong>show version</strong> y 
+      <strong>show inventory</strong>), para generar un informe con el estado de situación del parque de dispositivos verificados.<br />
+      Cabe mencionar, que son más de <strong>50 puntos de verificación</strong> los que son evaluados para luego generar el denominado 
+      <strong>"Hardening Factor"</strong> o <strong>"Factor de Endurezimiento"</strong>. <br />
+      El <strong>"Hardening Factor"</strong> es el un valor porcentual entre el valor obtenido versus lo óptimo.<br />
+      Adicionalmente, la configuración del dispositivo se divide en 4 ejes conceptuales denominados <strong>"CONTROL"</strong>, 
+      <strong>"OPERATIVO"</strong>, <strong>"MONITOREO"</strong> y <strong>"ACCESO"</strong>. De esta manera, se podrán evaluar áreas de foco
+      en las configuración como para encarar tareas correctivas en el área. Por ejemplo si me concentro en el área de "MONITOREO", me enfocaré 
+      en erradicar cominidades SNMP con nombres obvios como "public" o "private" o centralizar las alertas en un único logging server. <br />
+      Los gráficos "radar" del anexo, mostrarán esta información individualmente para cada dispositivo. <br />
+      HVT, interpreta cada línea del archivo de configuración y la contrasta contra las mejores prácticas de segurización 
+      del Cisco IOS o Cisco IOS-XE y genera el presente informe; indicando lo que está correctamente configurado
+      y sobre lo que hay que prestar atención o corregir.
+    </p>
+    <hr class="solid">
+    <i class="fas fa-edit"></i>&nbsp;&nbsp;<strong>Nota:</strong> Las versiones mínimas mediante la cual HVT realiza el informe, 
+    están referenciadas contra el <strong>Cisco IOS versión 12.4(6)T</strong> y superiores; y el <strong>Cisco IOS-XE 16.6.4</strong> 
+    y superiores. Cualquier dispositivo por debajo de dichas versiones de referencia, se recomienda su actualización ya que no podrán 
+    implementarse las acciones correctivas que sugiere el informe de ser necesario.
+    <hr class="solid">
+    <hr class="solid">
+    <i class="fas fa-edit"></i>&nbsp;&nbsp;<strong>Nota:</strong> En la sección del <a href="#33">informe ejecutivo</a>, se darán más 
+    detalles de los parámetros de configuración que requieren una atención primaria. 
+    <hr class="solid">
+    <p>
+      <a href="#1">Índice</a>
+    </p>
+    <h2 id="30">Información general</h2>
+    <p>
+      Estructurado en torno a los tres planos en los que se pueden clasificar
+      las funciones de un dispositivo de red, HVT proporciona una visión general
+      de cada característica incluida y referencias a elementos relacionados.
+      <br />
+      Los tres planos funcionales de una red: plano de gestión, plano de control
+      y plano de datos, cada uno de ellos proporciona una funcionalidad
+      diferente que es necesario proteger. <br />
+      <strong>Plano de gestión:</strong> el plano de gestión gestiona el tráfico
+      que se envía al dispositivo Cisco IOS y se compone de aplicaciones y
+      protocolos como Secure Shell (SSH) y Simple Network Management Protocol
+      (SNMP). <br />
+      <strong> Plano de control:</strong> el plano de control de un dispositivo
+      de red procesa el tráfico que es primordial para mantener la funcionalidad
+      de la infraestructura de red. El plano de control consiste en aplicaciones
+      y protocolos entre dispositivos de red, que incluyen el Border Gateway
+      Protocol (BGP), así como los Protocolos de Enrutamiento Interior (IGP)
+      como el Enhanced Interior Gateway Routing Protocol (EIGRP) y el Open
+      Shortest Path First (OSPF).
+      <br />
+      <strong>Plano de datos:</strong> el plano de datos reenvía datos a través
+      de un dispositivo de red. El plano de datos no incluye el tráfico que se
+      envía al dispositivo local Cisco IOS. La cobertura de las funciones de
+      seguridad en este documento a menudo proporciona suficientes detalles para
+      que usted pueda configurar la función. Sin embargo, en los casos en los
+      que no es así, la función se explica de forma que pueda evaluar si es
+      necesario prestarle más atención. Cuando es posible y apropiado, este
+      documento contiene recomendaciones que, si se implementan, ayudan a
+      asegurar una red. <br />
+      De los tres planos, HVT hace foco en los planos de control y de gestión 
+      ya que, sobre el plano de datos, es más complejo hacer una análisis dado 
+      que no todas las redes son iguales.
+    </p>
+    <p>
+      <a href="#1">Índice</a>
+    </p>
+

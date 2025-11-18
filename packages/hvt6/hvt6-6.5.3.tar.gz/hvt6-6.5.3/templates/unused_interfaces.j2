@@ -1,0 +1,321 @@
+{#
+Unused Interfaces Template - Displays interface classification and shutdown status
+
+Metadata structure expected:
+- summary: Dictionary with counts:
+  - total_physical: Total physical interfaces
+  - in_use: Interfaces with configuration
+  - unused_shutdown: Unused interfaces that are shutdown (secure)
+  - unused_active: Unused interfaces that are active (security risk)
+  - shutdown_percentage: Percentage of unused interfaces properly shutdown
+- interfaces: Dictionary with lists:
+  - in_use: List of in-use interface dictionaries
+  - unused_shutdown: List of shutdown interface dictionaries
+  - unused_active: List of active unused interface dictionaries
+  Each interface dict has: name, status, reason, is_shutdown
+#}
+
+<div class="check-detail">
+    <h4>Unused Interface Shutdown Status</h4>
+
+    {% if metadata.summary.total_physical == 0 %}
+        <p class="not-applicable">No physical interfaces found (only virtual interfaces present).</p>
+    {% else %}
+        <div class="summary-stats">
+            <p><strong>Total Physical Interfaces:</strong> {{ metadata.summary.total_physical }}</p>
+            <p><strong>In Use:</strong>
+                <span class="pass-status">{{ metadata.summary.in_use }}</span>
+            </p>
+            <p><strong>Unused (Shutdown):</strong>
+                <span class="pass-status">{{ metadata.summary.unused_shutdown }}</span>
+            </p>
+            <p><strong>Unused (ACTIVE - Risk):</strong>
+                <span class="{% if metadata.summary.unused_active == 0 %}pass-status{% else %}fail-status{% endif %}">
+                    {{ metadata.summary.unused_active }}
+                </span>
+            </p>
+            <p><strong>Shutdown Compliance:</strong>
+                <span class="{% if metadata.summary.shutdown_percentage == 100 %}pass-status{% elif metadata.summary.shutdown_percentage >= 75 %}partial-status{% else %}fail-status{% endif %}">
+                    {{ metadata.summary.shutdown_percentage }}%
+                </span>
+            </p>
+        </div>
+
+        {% if metadata.interfaces.unused_active %}
+        <div class="critical-section">
+            <h5><span class="status-icon fail">✗</span> Unused ACTIVE Interfaces (Security Risk)</h5>
+            <p class="warning-text">These interfaces have no configuration but are administratively up. They should be shutdown to reduce attack surface.</p>
+            <table class="detail-table">
+                <thead>
+                    <tr>
+                        <th>Interface</th>
+                        <th>Reason</th>
+                        <th>Action Required</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for iface in metadata.interfaces.unused_active %}
+                    <tr class="fail-row">
+                        <td><code>{{ iface.name }}</code></td>
+                        <td>{{ iface.reason }}</td>
+                        <td><strong>SHUTDOWN</strong></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if metadata.interfaces.unused_shutdown %}
+        <div class="secure-section">
+            <h5><span class="status-icon pass">✓</span> Unused SHUTDOWN Interfaces (Secure)</h5>
+            <p class="info-text">These unused interfaces are properly shutdown, reducing attack surface.</p>
+            <table class="detail-table">
+                <thead>
+                    <tr>
+                        <th>Interface</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for iface in metadata.interfaces.unused_shutdown %}
+                    <tr class="pass-row">
+                        <td><code>{{ iface.name }}</code></td>
+                        <td><span class="pass-status">Shutdown</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if metadata.interfaces.in_use %}
+        <details class="collapsible-section">
+            <summary><h5>In-Use Interfaces ({{ metadata.summary.in_use }})</h5></summary>
+            <p class="info-text">These interfaces have active configuration and are excluded from shutdown requirements.</p>
+            <table class="detail-table">
+                <thead>
+                    <tr>
+                        <th>Interface</th>
+                        <th>Usage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for iface in metadata.interfaces.in_use %}
+                    <tr>
+                        <td><code>{{ iface.name }}</code></td>
+                        <td>{{ iface.reason }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </details>
+        {% endif %}
+
+        <div class="recommendation-box">
+            <h5>Remediation Steps:</h5>
+            <ol>
+                <li><strong>Identify Unused Interfaces:</strong> Review the "Unused ACTIVE" list above</li>
+                <li><strong>Verify No Future Use:</strong> Confirm interfaces are not needed for planned expansion</li>
+                <li><strong>Shutdown Interfaces:</strong>
+                    <pre>configure terminal
+interface &lt;interface-name&gt;
+  shutdown
+  description UNUSED - shutdown per security policy
+end
+write memory</pre>
+                </li>
+                <li><strong>Document Changes:</strong> Update network documentation and change management records</li>
+                <li><strong>Physical Security:</strong> For maximum security, disconnect unused cables at patch panel</li>
+            </ol>
+        </div>
+
+        <div class="info-box">
+            <h5>Interface Classification Criteria:</h5>
+            <ul>
+                <li><strong>In Use:</strong> Has IP address, description, or VLAN assignment</li>
+                <li><strong>Unused (Shutdown):</strong> No configuration AND administratively down (secure)</li>
+                <li><strong>Unused (Active):</strong> No configuration AND administratively up (security risk)</li>
+                <li><strong>Excluded:</strong> Virtual interfaces (Loopback, Tunnel, VLAN, Port-channel) not included</li>
+            </ul>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.summary-stats {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 15px 0;
+}
+
+.summary-stats p {
+    margin: 5px 0;
+}
+
+.critical-section {
+    background-color: #fff5f5;
+    border: 2px solid #dc3545;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 20px 0;
+}
+
+.secure-section {
+    background-color: #f0fff0;
+    border: 2px solid #28a745;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 20px 0;
+}
+
+.collapsible-section {
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 20px 0;
+}
+
+.collapsible-section summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: #1e3a8a;
+}
+
+.collapsible-section summary:hover {
+    color: #3b82f6;
+}
+
+.detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+}
+
+.detail-table th,
+.detail-table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #dee2e6;
+}
+
+.detail-table th {
+    background-color: #1e3a8a;
+    color: white;
+    font-weight: 600;
+}
+
+.pass-row {
+    background-color: #d4edda;
+}
+
+.fail-row {
+    background-color: #f8d7da;
+}
+
+.status-icon {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.status-icon.pass {
+    color: #28a745;
+}
+
+.status-icon.fail {
+    color: #dc3545;
+}
+
+.pass-status {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.fail-status {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.partial-status {
+    color: #ffc107;
+    font-weight: 600;
+}
+
+.not-applicable {
+    color: #6c757d;
+    font-style: italic;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.warning-text {
+    color: #721c24;
+    font-weight: 500;
+    margin: 10px 0;
+}
+
+.info-text {
+    color: #004085;
+    margin: 10px 0;
+}
+
+.recommendation-box {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 5px;
+}
+
+.recommendation-box h5 {
+    margin-top: 0;
+    color: #856404;
+}
+
+.recommendation-box ol {
+    margin: 10px 0 0 0;
+    padding-left: 25px;
+}
+
+.recommendation-box li {
+    margin: 10px 0;
+}
+
+.recommendation-box pre {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    margin: 5px 0;
+    overflow-x: auto;
+}
+
+.info-box {
+    background-color: #d1ecf1;
+    border-left: 4px solid #0c5460;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 5px;
+}
+
+.info-box h5 {
+    margin-top: 0;
+    color: #0c5460;
+}
+
+.info-box ul {
+    margin: 10px 0 0 0;
+    padding-left: 20px;
+}
+
+.info-box li {
+    margin: 8px 0;
+}
+
+h5 {
+    margin-top: 20px;
+    color: #1e3a8a;
+}
+</style>

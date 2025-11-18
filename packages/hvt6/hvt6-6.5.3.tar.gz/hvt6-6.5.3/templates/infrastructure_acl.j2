@@ -1,0 +1,412 @@
+{#
+Infrastructure ACL Template - Displays infrastructure protection ACL status
+
+Metadata structure expected:
+- acls: List of analyzed ACL dictionaries:
+  - name: ACL name
+  - type: 'extended' or 'standard'
+  - entry_count: Number of ACL entries
+  - analysis: Content analysis dict:
+    - has_management_permits: Boolean
+    - has_ssh, has_snmp, has_https: Booleans
+    - has_deny: Boolean
+    - permit_count, deny_count: Integers
+  - applications: Application locations dict:
+    - control_plane: Boolean
+    - vty_lines: List of VTY lines
+    - interfaces: List of interfaces
+  - quality_score: 0-100 quality score
+- best_acl: Best infrastructure ACL found (same structure as acls items)
+- has_iacl: Boolean - any infrastructure ACL found
+- application_summary: Summary of applications across all ACLs
+#}
+
+<div class="check-detail">
+    <h4>Infrastructure ACL Protection Status</h4>
+
+    {% if not metadata.has_iacl %}
+        <div class="critical-alert">
+            <h5><span class="status-icon fail">✗</span> CRITICAL: No Infrastructure ACL Found</h5>
+            <p>The device control plane is unprotected. An infrastructure protection ACL (iACL) is required to restrict management access.</p>
+            <p><strong>Risk:</strong> Attackers can directly target the device with SSH, SNMP, or routing protocol attacks.</p>
+        </div>
+    {% else %}
+        {% set best = metadata.best_acl %}
+
+        <div class="summary-stats">
+            <p><strong>Infrastructure ACLs Found:</strong> {{ metadata.acls|length }}</p>
+            <p><strong>Best ACL:</strong> <code>{{ best.name }}</code></p>
+            <p><strong>Quality Score:</strong>
+                <span class="{% if best.quality_score >= 90 %}pass-status{% elif best.quality_score >= 50 %}partial-status{% else %}fail-status{% endif %}">
+                    {{ best.quality_score }}/100
+                </span>
+            </p>
+            <p><strong>ACL Type:</strong> {{ best.type|capitalize }}</p>
+            <p><strong>Entry Count:</strong> {{ best.entry_count }}</p>
+        </div>
+
+        <div class="acl-details">
+            <h5>ACL Configuration Analysis: {{ best.name }}</h5>
+
+            <table class="detail-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="{% if best.analysis.has_management_permits %}pass-row{% else %}fail-row{% endif %}">
+                        <td><strong>Management Protocols</strong></td>
+                        <td class="centered">
+                            {% if best.analysis.has_management_permits %}
+                                <span class="status-icon pass">✓</span>
+                            {% else %}
+                                <span class="status-icon fail">✗</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            SSH: {% if best.analysis.has_ssh %}<span class="pass-status">✓</span>{% else %}<span class="fail-status">✗</span>{% endif %}
+                            | SNMP: {% if best.analysis.has_snmp %}<span class="pass-status">✓</span>{% else %}<span class="fail-status">✗</span>{% endif %}
+                            | HTTPS: {% if best.analysis.has_https %}<span class="pass-status">✓</span>{% else %}<span class="fail-status">✗</span>{% endif %}
+                        </td>
+                    </tr>
+                    <tr class="{% if best.analysis.has_deny %}pass-row{% else %}fail-row{% endif %}">
+                        <td><strong>Deny Rules</strong></td>
+                        <td class="centered">
+                            {% if best.analysis.has_deny %}
+                                <span class="status-icon pass">✓</span>
+                            {% else %}
+                                <span class="status-icon fail">✗</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ best.analysis.deny_count }} deny rule(s)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Permit Rules</strong></td>
+                        <td class="centered"><span class="status-icon">ℹ</span></td>
+                        <td>{{ best.analysis.permit_count }} permit rule(s)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h5>ACL Application Locations</h5>
+
+            <table class="detail-table">
+                <thead>
+                    <tr>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="{% if best.applications.control_plane %}pass-row{% else %}fail-row{% endif %}">
+                        <td><strong>Control Plane</strong></td>
+                        <td class="centered">
+                            {% if best.applications.control_plane %}
+                                <span class="status-icon pass">✓</span>
+                            {% else %}
+                                <span class="status-icon fail">✗</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if best.applications.control_plane %}
+                                Applied (Best Practice)
+                            {% else %}
+                                <span class="fail-status">Not Applied</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr class="{% if best.applications.vty_lines %}pass-row{% else %}warn-row{% endif %}">
+                        <td><strong>VTY Lines</strong></td>
+                        <td class="centered">
+                            {% if best.applications.vty_lines %}
+                                <span class="status-icon pass">✓</span>
+                            {% else %}
+                                <span class="status-icon warn">⚠</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if best.applications.vty_lines %}
+                                Applied to: {{ best.applications.vty_lines|join(', ') }}
+                            {% else %}
+                                <span class="fail-status">Not Applied</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr class="{% if best.applications.interfaces %}pass-row{% else %}warn-row{% endif %}">
+                        <td><strong>Interfaces</strong></td>
+                        <td class="centered">
+                            {% if best.applications.interfaces %}
+                                <span class="status-icon pass">✓</span>
+                            {% else %}
+                                <span class="status-icon warn">⚠</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if best.applications.interfaces %}
+                                Applied to: {{ best.applications.interfaces|join(', ') }}
+                            {% else %}
+                                Not Applied to management interfaces
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        {% if metadata.acls|length > 1 %}
+        <details class="collapsible-section">
+            <summary><h5>Other Infrastructure ACLs ({{ metadata.acls|length - 1 }})</h5></summary>
+            <table class="detail-table">
+                <thead>
+                    <tr>
+                        <th>ACL Name</th>
+                        <th>Type</th>
+                        <th>Entries</th>
+                        <th>Quality Score</th>
+                        <th>Applied</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for acl in metadata.acls %}
+                        {% if acl.name != best.name %}
+                        <tr>
+                            <td><code>{{ acl.name }}</code></td>
+                            <td>{{ acl.type }}</td>
+                            <td>{{ acl.entry_count }}</td>
+                            <td>
+                                <span class="{% if acl.quality_score >= 90 %}pass-status{% elif acl.quality_score >= 50 %}partial-status{% else %}fail-status{% endif %}">
+                                    {{ acl.quality_score }}/100
+                                </span>
+                            </td>
+                            <td>
+                                {% if acl.applications.control_plane %}CP{% endif %}
+                                {% if acl.applications.vty_lines %}VTY{% endif %}
+                                {% if acl.applications.interfaces %}IF{% endif %}
+                                {% if not (acl.applications.control_plane or acl.applications.vty_lines or acl.applications.interfaces) %}
+                                    <span class="fail-status">None</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </details>
+        {% endif %}
+    {% endif %}
+
+    <div class="recommendation-box">
+        <h5>Configuration Recommendations:</h5>
+
+        {% if not metadata.has_iacl %}
+        <p><strong>Step 1 - Create Infrastructure ACL:</strong></p>
+        <pre>ip access-list extended ACL-INFRASTRUCTURE-IN
+  ! Permit SSH from authorized management networks
+  permit tcp 10.1.0.0 0.0.255.255 any eq 22
+  permit tcp 192.168.100.0 0.0.0.255 any eq 22
+
+  ! Permit SNMP from NMS
+  permit udp 10.1.10.5 0.0.0.0 any eq snmp
+
+  ! Deny all other traffic to device
+  deny ip any any log</pre>
+
+        <p><strong>Step 2 - Apply to Control Plane (Preferred):</strong></p>
+        <pre>control-plane
+  ip access-group ACL-INFRASTRUCTURE-IN in</pre>
+
+        <p><strong>Alternative - Apply to VTY Lines:</strong></p>
+        <pre>line vty 0 15
+  access-class ACL-INFRASTRUCTURE-IN in</pre>
+        {% else %}
+        <ul>
+            <li><strong>Best Practice:</strong> Apply infrastructure ACL to control-plane for comprehensive protection</li>
+            <li><strong>Management Protocols:</strong> Ensure ACL permits authorized SSH (port 22) and SNMP (port 161/162)</li>
+            <li><strong>Deny Rule:</strong> Always include explicit deny at end of ACL to log violations</li>
+            <li><strong>Authorized Sources:</strong> Only permit management traffic from authorized network management stations</li>
+            <li><strong>Regular Review:</strong> Audit ACL quarterly and after personnel changes</li>
+        </ul>
+        {% endif %}
+    </div>
+
+    <div class="info-box">
+        <h5>Infrastructure ACL Purpose:</h5>
+        <p>An infrastructure protection ACL (iACL) protects the device control plane by restricting direct communication to the device itself. This prevents:</p>
+        <ul>
+            <li>Unauthorized SSH/Telnet access attempts</li>
+            <li>SNMP enumeration from untrusted sources</li>
+            <li>Routing protocol attacks (BGP, OSPF, EIGRP)</li>
+            <li>DoS attacks targeting the device CPU</li>
+        </ul>
+        <p><strong>STIG Requirement:</strong> V-215852 mandates infrastructure ACL for DoD compliance</p>
+    </div>
+</div>
+
+<style>
+.critical-alert {
+    background-color: #f8d7da;
+    border: 3px solid #dc3545;
+    border-radius: 5px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.critical-alert h5 {
+    color: #721c24;
+    margin-top: 0;
+}
+
+.critical-alert p {
+    color: #721c24;
+    margin: 10px 0;
+}
+
+.summary-stats {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 15px 0;
+}
+
+.summary-stats p {
+    margin: 5px 0;
+}
+
+.acl-details {
+    margin: 20px 0;
+}
+
+.detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+}
+
+.detail-table th,
+.detail-table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #dee2e6;
+}
+
+.detail-table th {
+    background-color: #1e3a8a;
+    color: white;
+    font-weight: 600;
+}
+
+.detail-table td.centered {
+    text-align: center;
+}
+
+.pass-row {
+    background-color: #d4edda;
+}
+
+.fail-row {
+    background-color: #f8d7da;
+}
+
+.warn-row {
+    background-color: #fff3cd;
+}
+
+.status-icon {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.status-icon.pass {
+    color: #28a745;
+}
+
+.status-icon.fail {
+    color: #dc3545;
+}
+
+.status-icon.warn {
+    color: #ffc107;
+}
+
+.pass-status {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.fail-status {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.partial-status {
+    color: #ffc107;
+    font-weight: 600;
+}
+
+.collapsible-section {
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 20px 0;
+}
+
+.collapsible-section summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: #1e3a8a;
+}
+
+.recommendation-box {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 5px;
+}
+
+.recommendation-box h5 {
+    margin-top: 0;
+    color: #856404;
+}
+
+.recommendation-box pre {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    margin: 10px 0;
+    overflow-x: auto;
+}
+
+.recommendation-box ul {
+    margin: 10px 0 0 0;
+    padding-left: 20px;
+}
+
+.info-box {
+    background-color: #d1ecf1;
+    border-left: 4px solid #0c5460;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 5px;
+}
+
+.info-box h5 {
+    margin-top: 0;
+    color: #0c5460;
+}
+
+.info-box ul {
+    margin: 10px 0 0 0;
+    padding-left: 20px;
+}
+
+h5 {
+    margin-top: 20px;
+    color: #1e3a8a;
+}
+</style>

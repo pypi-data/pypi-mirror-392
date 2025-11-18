@@ -1,0 +1,30 @@
+{# templates/user2.j2 #}
+<div style="border-bottom: 1px solid #ddd; padding: 10px 0; margin: 15px 0;"><h3 style="margin: 0; color: #1e3a8a; font-size: 18px;"><i class="fas fa-cog" style="margin-right: 8px;"></i> Usuarios locales </h3></div>
+<div class="annex-grid">
+{% if not check2 %}
+        <span class="status-icon status-fail">⚠</span>
+        <div class="cell">No hay usuarios locales definidos. Considerar crear un usuario de emergencia de la 
+		siguiente manera: <strong>username <i>usurio</i> enable <i>contraseña</i></strong>.
+		{% if check and check1 %}
+			Dado que que se configuró RADIUS o TACACS+, es conveniente la creación de un usuario local con 
+			"privilege 1" como vimos anteriormente en caso que se pierda contacto con los servidores de autenticación.
+		{% endif %}
+		</div>
+{% else %}
+		{% if check3 %}
+			<span class="status-icon status-fail">⚠</span>
+			<div class="cell">Es recomendable que los usuarios locales tengan "privilege 1" y que luego pasen a modo "enable" bajo demanda. <br />
+			Los siguientes usuarios locales tienen "privilege 15", tomar acción correctiva inmediata de ser necesario: </div>
+				{% for result in value1 %}
+					<span style="display: inline-block; width: 40px;"></span><div class="cell">• {{ result }}</div>
+				{% endfor %}
+		{% endif %}
+		{% if check4 %}
+			<span class="status-icon status-pass">✓</span>
+			<div class="cell">Los siguientes usuarios locales están configurados sin "privilege 15":</div>
+				{% for result in value2 %}
+					<span style="display: inline-block; width: 40px;"></span><div class="cell">• {{ result }}</div>
+				{% endfor %}
+		{% endif %}
+{% endif %}
+</div>
