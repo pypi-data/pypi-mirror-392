@@ -1,0 +1,20 @@
+# Read the Docs configuration file
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+
+version: 2
+
+python:
+  install:
+    - method: pip
+      path: .[docs]
+
+build:
+  os: ubuntu-22.04
+  apt_packages:
+    - gfortran
+  tools:
+    python: "3.12"
+
+# Build documentation in the "docs/" directory with Sphinx
+sphinx:
+  configuration: docs/conf.py
