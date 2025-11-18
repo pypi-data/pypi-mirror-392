@@ -1,0 +1,2 @@
+class SnagFactoryConfigError(Exception):
+	pass
