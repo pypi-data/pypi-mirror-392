@@ -1,0 +1,52 @@
+[project]
+name = "cqlib-algorithm"
+description = "Quantum algorithm package based on Cqlib"
+authors = [
+    { name = "China Telecom Quantum Group Quantum Computing Team", email = "tianyan@chinatelecom.cn" },
+]
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Environment :: Console",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Intended Audience :: Science/Research",
+    "Topic :: Software Development :: Libraries"
+]
+keywords = [
+    "cqlib",
+    "cqlib algorithms",
+    "quantum circuit",
+    "quantum computing",
+    "quantum programming language",
+    "quantum",
+    "quantum algorithms",
+]
+dynamic = ["version", "dependencies", ]
+
+
+[tool.setuptools.dynamic]
+version = { file = "cqlib_algorithm/VERSION.txt" }
+dependencies = { file = "requirements.txt" }
+
+[project.urls]
+Homepage = "https://qc.zdxlz.com/"
+Documentation = "https://qc.zdxlz.com/learn/#/resource/informationSpace"
+Repository = "https://gitee.com/cq-lib/cqlib-algorithm"
+Issues = "https://gitee.com/cq-lib/cqlib-algorithm/issues"
+
+[tool.setuptools]
+packages = { find = { exclude = ["tests", "tests.*"] } }
+
+[build-system]
+requires = ["setuptools>=80.0", "wheel"]
+build-backend = "setuptools.build_meta"
