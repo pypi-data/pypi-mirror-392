@@ -1,0 +1,2 @@
+from .client import DeepJSONConnector, DeepJSONError
+from deepjson_py_connector import DeepJSONConnector, DeepJSONError
