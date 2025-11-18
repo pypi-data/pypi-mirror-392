@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68,<75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "arbitrix-core"
+dynamic = ["version"]
+description = "Open-core toolkit for Arbitrix backtesting, strategies, and cost models."
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = ["backtesting", "trading", "quant", "strategies"]
+classifiers = [
+    "License :: Other/Proprietary License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Topic :: Office/Business :: Financial :: Investment",
+]
+authors = [{name = "Arbitrix Team"}]
+dependencies = [
+    "numpy>=1.23",
+    "pandas>=1.5",
+    "scipy>=1.9",
+    "typing-extensions>=4.5",
+]
+
+[project.optional-dependencies]
+ib = ["ib-insync>=0.9"]
+mt5 = ["rpyc>=6.0"]
+dev = ["pytest", "python-dateutil"]
+
+[project.scripts]
+arbitrix-core = "arbitrix.core.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["arbitrix", "arbitrix.core*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "arbitrix._version.__version__"}
