@@ -1,0 +1,117 @@
+Metadata-Version: 2.4
+Name: connect-resume-extractor
+Version: 0.1.3
+Summary: A Python package to extract resume data (college, branch, mobile, degree, passout year, LinkedIn) from PDFs.
+Author-email: Reddy Rohith <reddyrohith20061902@gmail.com>
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pandas
+Requires-Dist: PyMuPDF
+Dynamic: license-file
+
+# 📄 Connect Resume Extractor
+
+[![PyPI version](https://img.shields.io/pypi/v/connect-resume-extractor.svg)](https://pypi.org/project/connect-resume-extractor/)  
+[![PyPI downloads](https://img.shields.io/pypi/dm/connect-resume-extractor.svg)](https://pypi.org/project/connect-resume-extractor/)  
+[![Python Versions](https://img.shields.io/pypi/pyversions/connect-resume-extractor.svg)](https://pypi.org/project/connect-resume-extractor/)  
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+[![GitHub stars](https://img.shields.io/github/stars/reddyrohith49471/autofill-with-resume-pypi.svg)](https://github.com/reddyrohith49471/connect-resume-extractor/stargazers)  
+[![GitHub forks](https://img.shields.io/github/forks/reddyrohith49471/autofill-with-resume-pypi.svg)](https://github.com/reddyrohith49471/connect-resume-extractor/network)  
+[![GitHub issues](https://img.shields.io/github/issues/reddyrohith49471/autofill-with-resume-pypi.svg)](https://github.com/reddyrohith49471/connect-resume-extractor/issues)
+
+A powerful Python package that extracts **structured resume information** from PDF files with a single function or a simple CLI command.
+
+This tool is ideal for ATS systems, college portals, hiring automation, and any application that needs clean structured data from resumes.
+
+------------------------------------------------------------
+FEATURES
+------------------------------------------------------------
+- Extract mobile number
+- Extract degree (B.Tech, M.Tech, etc.)
+- Extract branch / specialization
+- Extract college / university (normalized using internal DB)
+- Extract passout year
+- Extract LinkedIn profile URL
+- One-line Python usage
+- CLI tool included: `resume-extract resume.pdf`
+
+------------------------------------------------------------
+INSTALLATION
+------------------------------------------------------------
+Install via PyPI:
+
+    pip install connect-resume-extractor
+
+Or for development:
+
+    pip install -e .
+
+------------------------------------------------------------
+PYTHON USAGE
+------------------------------------------------------------
+
+    from resume_extractor import extract_resume
+
+    data = extract_resume("resume.pdf")
+    print(data)
+
+Example Output:
+
+    {
+        "mobile": "9876543210",
+        "passout_year": 2027,
+        "degree": "B.Tech",
+        "branch": "Computer Science and Engineering",
+        "college": "Indian Institute of Information Technology Agartala",
+        "linkedin": "https://linkedin.com/in/example"
+    }
+
+------------------------------------------------------------
+CLI USAGE
+------------------------------------------------------------
+
+Run:
+
+    resume-extract resume.pdf
+
+It will output formatted JSON.
+
+------------------------------------------------------------
+PROJECT STRUCTURE
+------------------------------------------------------------
+
+    resume_extractor/
+    ├── extraction.py
+    ├── db.py
+    ├── cli.py
+    ├── version.py
+    └── resources/
+        ├── normalized_colleges.jsonl
+        └── normalized_branches.jsonl
+
+------------------------------------------------------------
+REQUIREMENTS
+------------------------------------------------------------
+- Python 3.8+
+- pandas
+- PyMuPDF
+
+------------------------------------------------------------
+CONTRIBUTING
+------------------------------------------------------------
+1. Fork the repository  
+2. Create a new branch  
+3. Make your changes  
+4. Submit a pull request  
+
+------------------------------------------------------------
+LICENSE
+------------------------------------------------------------
+MIT License
+
+------------------------------------------------------------
+SUPPORT
+------------------------------------------------------------
+If this package helped you, please ⭐ the project on GitHub!

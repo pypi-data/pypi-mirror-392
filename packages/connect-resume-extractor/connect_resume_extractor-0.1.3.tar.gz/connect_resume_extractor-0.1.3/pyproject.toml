@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "connect-resume-extractor"
+version = "0.1.3"
+description = "A Python package to extract resume data (college, branch, mobile, degree, passout year, LinkedIn) from PDFs."
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+    {name = "Reddy Rohith", email = "reddyrohith20061902@gmail.com"}
+]
+dependencies = [
+    "pandas",
+    "PyMuPDF"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["resume_extractor*"]
+
+[tool.setuptools.package-data]
+"resume_extractor" = ["resources/*.jsonl"]
+
+[project.scripts]                             
+resume-extract = "resume_extractor.cli:main"
+
+
