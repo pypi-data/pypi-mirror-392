@@ -1,0 +1,188 @@
+from __future__ import annotations
+
+from collections.abc import Generator
+from typing import Any
+
+from pydantic import BaseModel, ValidationError
+
+from retrocast.adapters.base_adapter import BaseAdapter
+from retrocast.domain.chem import canonicalize_smiles, get_inchi_key
+from retrocast.exceptions import RetroCastException
+from retrocast.schemas import Molecule, ReactionStep, Route, TargetInput
+from retrocast.typing import SmilesStr
+from retrocast.utils.logging import logger
+
+# --- pydantic models for input validation ---
+
+
+class RetrochimeraReaction(BaseModel):
+    reactants: list[str]
+    product: str
+    probability: float
+    metadata: dict[str, Any] = {}
+
+
+class RetrochimeraRoute(BaseModel):
+    reactions: list[RetrochimeraReaction]
+    num_steps: int
+    step_probability_min: float
+    step_probability_product: float
+
+
+class RetrochimeraOutput(BaseModel):
+    routes: list[RetrochimeraRoute]
+    num_routes: int
+    num_routes_initial_extraction: int = 0
+    target_is_purchasable: bool = False
+    num_model_calls_total: int = 0
+    num_model_calls_new: int = 0
+    num_model_calls_cached: int = 0
+    num_nodes_explored: int = 0
+    time_taken_s_search: float = 0.0
+    time_taken_s_extraction: float = 0.0
+
+
+class RetrochimeraResult(BaseModel):
+    request: dict[str, Any] | None = None
+    outputs: list[RetrochimeraOutput] | None = None
+    error: dict[str, Any] | None = None
+    time_taken_s: float = 0.0
+
+
+class RetrochimeraData(BaseModel):
+    smiles: str
+    result: RetrochimeraResult
+
+
+class RetrochimeraAdapter(BaseAdapter):
+    """adapter for converting retrochimera-style outputs to the Route schema."""
+
+    def adapt(self, raw_target_data: Any, target_info: TargetInput) -> Generator[Route, None, None]:
+        """
+        validates raw retrochimera data, transforms it, and yields Route objects.
+        """
+        try:
+            validated_data = RetrochimeraData.model_validate(raw_target_data)
+        except ValidationError as e:
+            logger.warning(
+                f"  - raw data for target '{target_info.id}' failed retrochimera schema validation. error: {e}"
+            )
+            return
+
+        if validated_data.result.error is not None:
+            error_msg = validated_data.result.error.get("message", "unknown error")
+            error_type = validated_data.result.error.get("type", "unknown")
+            logger.warning(
+                f"  - retrochimera reported an error for target '{target_info.id}': {error_type} - {error_msg}"
+            )
+            return
+
+        if canonicalize_smiles(validated_data.smiles) != target_info.smiles:
+            logger.warning(
+                f"  - mismatched smiles for target '{target_info.id}': expected {target_info.smiles}, got {canonicalize_smiles(validated_data.smiles)}"
+            )
+            return
+
+        if validated_data.result.outputs is None:
+            logger.warning(f"  - no outputs found for target '{target_info.id}'")
+            return
+
+        rank = 1
+        for output in validated_data.result.outputs:
+            for route in output.routes:
+                try:
+                    route_obj = self._transform(route, target_info, rank=rank)
+                    yield route_obj
+                    rank += 1
+                except RetroCastException as e:
+                    logger.warning(f"  - route for '{target_info.id}' failed transformation: {e}")
+                    continue
+
+    def _transform(self, route: RetrochimeraRoute, target_info: TargetInput, rank: int) -> Route:
+        """
+        orchestrates the transformation of a single retrochimera route.
+        raises RetroCastException on failure.
+        """
+        precursor_map = self._build_precursor_map(route)
+        target_molecule = self._build_molecule_from_precursor_map(
+            smiles=target_info.smiles,
+            precursor_map=precursor_map,
+        )
+
+        return Route(target=target_molecule, rank=rank, metadata={})
+
+    def _build_precursor_map(self, route: RetrochimeraRoute) -> dict[SmilesStr, list[SmilesStr]]:
+        """
+        builds a precursor map from the route's reactions.
+        each product maps to its list of reactant smiles.
+        """
+        precursor_map: dict[SmilesStr, list[SmilesStr]] = {}
+        for reaction in route.reactions:
+            canon_product = canonicalize_smiles(reaction.product)
+            canon_reactants = [canonicalize_smiles(r) for r in reaction.reactants]
+            precursor_map[canon_product] = canon_reactants
+        return precursor_map
+
+    def _build_molecule_from_precursor_map(
+        self,
+        smiles: SmilesStr,
+        precursor_map: dict[SmilesStr, list[SmilesStr]],
+        visited: set[SmilesStr] | None = None,
+    ) -> Molecule:
+        """
+        recursively builds a Molecule from a precursor map, with cycle detection.
+        """
+        if visited is None:
+            visited = set()
+
+        # Cycle detection
+        if smiles in visited:
+            logger.warning(f"Cycle detected in route graph involving smiles: {smiles}. Treating as a leaf node.")
+            return Molecule(
+                smiles=smiles,
+                inchikey=get_inchi_key(smiles),
+                synthesis_step=None,
+                metadata={},
+            )
+
+        new_visited = visited | {smiles}
+        is_leaf = smiles not in precursor_map
+
+        if is_leaf:
+            # This is a starting material (leaf node)
+            return Molecule(
+                smiles=smiles,
+                inchikey=get_inchi_key(smiles),
+                synthesis_step=None,
+                metadata={},
+            )
+
+        # Build reactants recursively
+        reactant_smiles_list = precursor_map[smiles]
+        reactant_molecules: list[Molecule] = []
+
+        for reactant_smi in reactant_smiles_list:
+            reactant_mol = self._build_molecule_from_precursor_map(
+                smiles=reactant_smi,
+                precursor_map=precursor_map,
+                visited=new_visited,
+            )
+            reactant_molecules.append(reactant_mol)
+
+        # Create the reaction step
+        synthesis_step = ReactionStep(
+            reactants=reactant_molecules,
+            mapped_smiles=None,
+            template=None,
+            reagents=None,
+            solvents=None,
+            metadata={},
+        )
+
+        # Create the molecule with its synthesis step
+        return Molecule(
+            smiles=smiles,
+            inchikey=get_inchi_key(smiles),
+            synthesis_step=synthesis_step,
+            metadata={},
+        )
