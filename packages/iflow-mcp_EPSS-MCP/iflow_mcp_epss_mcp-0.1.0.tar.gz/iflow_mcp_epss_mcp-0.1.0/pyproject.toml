@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iflow-mcp_EPSS-MCP"
+version = "0.1.0"
+description = "EPSS MCP Server - Retrieve CVE details from NVD API and EPSS scores"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "httpx",
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "mcp[cli]",
+]
+
+[project.scripts]
+epss_mcp = "epss_mcp:mcp.run"
+
+[tool.setuptools]
+py-modules = ["epss_mcp", "nvd_api", "epss_api"]
+
+[tool.uv]
+index-url = "https://mirrors.aliyun.com/pypi/simple/"
