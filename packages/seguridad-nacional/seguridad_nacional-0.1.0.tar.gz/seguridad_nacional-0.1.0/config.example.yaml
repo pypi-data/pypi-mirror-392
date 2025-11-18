@@ -1,0 +1,51 @@
+# Configuración de ejemplo para Seguridad Nacional
+
+seguridad:
+  # General
+  enabled: true
+  debug: false
+  
+  # Database
+  db_path: "./seguridad.db"
+  
+  # Blocking
+  block_threshold: 25
+  block_duration_30min: true
+  block_duration_1h: true
+  block_duration_indefinite: true
+  
+  # Analysis
+  analysis_timeout: 100
+  async_analysis: true
+  
+  # Dashboard
+  dashboard_enabled: true
+  dashboard_path: "/seguridad"
+  dashboard_user: "admin"
+  dashboard_password: "admin123"
+  
+  # Geolocation
+  geolocation_enabled: true
+  geolocation_api: "ip-api"
+  geolocation_cache_enabled: true
+  geolocation_cache_ttl: 86400
+  
+  # Whitelist
+  whitelist:
+    ips:
+      - "127.0.0.1"
+      - "::1"
+      # Agregar más IPs aquí
+    patterns:
+      - "/api/health"
+      # Agregar más patrones aquí
+  
+  # Detection
+  sql_injection_enabled: true
+  xss_enabled: true
+  suspicious_behavior_enabled: true
+  
+  # Logging
+  log_level: "INFO"
+  log_file: null
+
