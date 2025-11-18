@@ -1,0 +1,117 @@
+[project]
+name = "aijournal"
+dynamic = ["version"]
+description = "Local-first, YAML-centric personal self-modeling agent"
+readme = "README.md"
+authors = [
+    { name = "Bas Nijholt", email = "bas@nijho.lt" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "chromadb>=0.5.3",
+    "httpx>=0.28.1",
+    "fastapi>=0.115.0",
+    "orjson>=3.10.4",
+    "pydantic>=2.12.3",
+    "python-dateutil>=2.9.0.post0",
+    "numpy",
+    "pyyaml>=6.0.3",
+    "typer>=0.20.0",
+    "pydantic-ai>=1.6.0",
+    "uvicorn>=0.30.6",
+    "versioningit>=0.4.0",
+]
+
+[project.scripts]
+aijournal = "aijournal.cli:app"
+aij = "aijournal.cli:app"
+
+[build-system]
+requires = ["hatchling", "versioningit>=0.4.0"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.142.3",
+    "mypy>=1.18.2",
+    "pre-commit>=4.3.0",
+    "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.14.2",
+    "types-python-dateutil>=2.9.0.20251008",
+    "types-pyyaml>=6.0.12.20250915",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "T20",     # flake8-print
+    "S101",    # Use of assert detected
+    "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed in {name}
+    "D402",    # First line should not be the function's signature
+    "PLW0603", # Using the global statement to update `X` is discouraged
+    "D401",    # First line of docstring should be in imperative mood
+    "SLF001",  # Private member accessed
+    "S603",    # `subprocess` call: check for execution of untrusted input
+    "S607",    # Starting a process with a partial executable path
+    "PLR0913", # Too many arguments to function call (N > 5)
+    "TD002",   # Missing author in TODO; try: `# TODO(<author_name>): ...`
+    "TD003",   # Missing issue link on the line following this TODO
+    "FIX002",  # Line contains TODO"
+    "E501",    # Line too long
+    "D107",    # Missing docstring in `__init__`
+    "B905",    # `zip()` without an explicit `strict=` parameter
+    "PLC0415", # `import` should be at the top-level of a file
+    "FBT001",  # Boolean-typed positional argument in function definition
+    "TC006",   # Add quotes to type expression in `typing.cast()`
+    "D101",    # Missing docstring in public class
+    "D102",    # Missing docstring in public method
+    "D103",    # Missing docstring in public function
+    "RUF001",  # String contains ambiguous `–` (EN DASH).
+    "FBT003",  # Boolean-typed positional argument in function definition
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "ANN",
+    "D",
+    "PLR2004",
+    "ARG001",
+    "ARG002", # Unused method argument: `X`
+    "D103",
+    "ARG005", # ARG005 Unused lambda argument: `X`
+]
+
+[tool.mypy]
+python_version = "3.12"
+show_error_codes = true
+strict = false
+packages = ["aijournal"]
+
+[tool.hatch.version]
+source = "versioningit"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/aijournal"]
+
+[tool.hatch.build.hooks.versioningit-onbuild]
+build-file = "src/aijournal/_version.py"
+source-file = "src/aijournal/_version.py"
+
+[tool.versioningit]
+default-version = "0.0.0"
+
+[tool.versioningit.vcs]
+method = "git"
+match = ["v*"]
+default-tag = "0.0.0"
+
+[tool.versioningit.format]
+dirty = "{version}.dev{distance}+{branch}.{vcs}{rev}.dirty"
+distance = "{version}.dev{distance}+{branch}.{vcs}{rev}"
+distance-dirty = "{version}.dev{distance}+{branch}.{vcs}{rev}.dirty"
