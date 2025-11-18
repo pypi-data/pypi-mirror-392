@@ -1,0 +1,46 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "blart-py"
+version = "0.1.2"
+description = "High-performance adaptive radix tree (ART) for Python with prefix queries and fuzzy search"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.8"
+keywords = ["tree", "radix", "trie", "prefix", "fuzzy-search", "data-structure"]
+authors = [
+    { name = "Axel Vanraes" }
+]
+maintainers = [
+    { name = "Axel Vanraes" }
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://github.com/axelv/blart-py"
+Documentation = "https://github.com/axelv/blart-py#readme"
+Repository = "https://github.com/axelv/blart-py"
+Issues = "https://github.com/axelv/blart-py/issues"
+Changelog = "https://github.com/axelv/blart-py/blob/main/CHANGELOG.md"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+python-source = "python"
+module-name = "blart._blart"
