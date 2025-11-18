@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llmzoo"
+version = "0.1.1"
+description = "Lightweight, extensible LLM toolkit: chat, embeddings, vector stores (Chroma, Milvus Lite)."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "llmpy authors" }]
+keywords = ["LLM", "RAG", "embeddings", "chat", "vectorstore", "chroma", "milvus"]
+dependencies = [
+  "requests>=2.31.0",
+  "typing-extensions>=4.8.0",
+]
+
+[project.optional-dependencies]
+chroma = ["chromadb>=0.5.0"]
+milvus = ["pymilvus>=2.4.0"]
+pg = ["psycopg[binary]>=3.2.1", "pgvector>=0.3.3"]
+es = ["elasticsearch>=8.13.0"]
+opensearch = ["opensearch-py>=2.5.0"]
+dev = [
+  "pytest>=7.4.0",
+  "ruff>=0.5.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/llmpy"
+Repository = "https://github.com/yourusername/llmpy"
+Issues = "https://github.com/yourusername/llmpy/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["llmzoo*"]
+
+
