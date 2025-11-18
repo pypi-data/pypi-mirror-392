@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "selenium-browserkit"
+version = "1.1.0"
+description = "A toolkit for Selenium automation with multi-profile support"
+readme = "README.md"
+authors = [
+    { name = "Tran Lam", email = "lam.tranledien@gmail.com" }
+]
+license = "MIT"
+keywords = ["selenium", "automation", "browser", "profile", "toolkit"]
+requires-python = ">=3.8"
+
+dependencies = [
+    "selenium>=4.38,<5.0",
+    "requests>=2.32,<3.0",
+    "screeninfo>=0.8,<1.0",
+    "pillow>=12.0",
+    "google-genai>=1.50,<2.0",
+    "psutil>=7.1,<8.0"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["selenium_browserkit*"]
+exclude = ["user_data*", "extensions*"]
+
+[project.urls]
+Homepage = "https://github.com/tranledienlam/selenium-browserkit"
+Issues = "https://github.com/tranledienlam/selenium-browserkit/issues"
