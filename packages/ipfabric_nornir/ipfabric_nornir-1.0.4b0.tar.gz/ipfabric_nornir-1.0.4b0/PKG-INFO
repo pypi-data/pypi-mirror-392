@@ -1,0 +1,166 @@
+Metadata-Version: 2.4
+Name: ipfabric_nornir
+Version: 1.0.4b0
+Summary: IP Fabric Offical Plugin for nornir
+License: Apache-2.0
+License-File: LICENSE
+Keywords: ipfabric,ip-fabric,community-fabric
+Author: IP Fabric Solution Architecture
+Author-email: solution.architecture@ipfabric.io
+Requires-Python: >=3.8.1,<4.0.0
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Provides-Extra: all
+Provides-Extra: examples
+Provides-Extra: napalm
+Provides-Extra: netmiko
+Requires-Dist: ipfabric (>=7.0.0,<8.0.0)
+Requires-Dist: nornir (>=3.4.1,<4.0.0)
+Requires-Dist: nornir-napalm (>=0.4.0,<0.5.0) ; extra == "all" or extra == "examples" or extra == "napalm"
+Requires-Dist: nornir-netmiko (>=1.0.0,<2.0.0) ; extra == "all" or extra == "examples" or extra == "netmiko"
+Requires-Dist: nornir-utils (>=0.2.0,<0.3.0) ; extra == "all" or extra == "examples"
+Requires-Dist: tenacity (>=8.0,<10.0)
+Project-URL: Changelog, https://gitlab.com/ip-fabric/integrations/ipfabric_nornir/-/blob/main/CHANGELOG.md
+Project-URL: Homepage, https://gitlab.com/ip-fabric/integrations/ipfabric_nornir
+Project-URL: IP Fabric, https://ipfabric.io/
+Project-URL: Repository, https://gitlab.com/ip-fabric/integrations/ipfabric_nornir
+Description-Content-Type: text/markdown
+
+ipfabric_nornir
+==============
+
+## IP Fabric
+
+[IP Fabric](https://ipfabric.io) is a vendor-neutral network assurance platform that automates the 
+holistic discovery, verification, visualization, and documentation of 
+large-scale enterprise networks, reducing the associated costs and required 
+resources whilst improving security and efficiency.
+
+It supports your engineering and operations teams, underpinning migration and 
+transformation projects. IP Fabric will revolutionize how you approach network 
+visibility and assurance, security assurance, automation, multi-cloud 
+networking, and trouble resolution.
+
+**Integrations or scripts should not be installed directly on the IP Fabric VM unless directly communicated from the
+IP Fabric Support or Solution Architect teams.  Any action on the Command-Line Interface (CLI) using the root, osadmin,
+or autoboss account may cause irreversible, detrimental changes to the product and can render the system unusable.**
+
+# Special Thanks
+
+This project is an IP Fabric officially supported fork of 
+[nornir_ipfabric](https://github.com/routetonull/nornir_ipfabric) by [routetonull](https://github.com/routetonull/).  Thank you for your work!
+
+
+# Install
+
+The recommended way to install `ipfabric_nornir` is via pip
+
+```sh
+pip install ipfabric_nornir
+```
+
+# Requirements
+
+An instance of [IP Fabric](https://ipfabric.io/) is required to collect information.
+
+
+# Example usage
+
+## Setup
+
+### Using environment variables
+
+Set environment vars to provide url and credentials to connect to the IP Fabric server
+
+```sh
+export IPF_URL=https://ipfabric.local
+export IPF_TOKEN=myToken
+
+# Or Username and Password
+export IPF_USER=admin
+export IPF_PASSWORD=mySecretPassword
+```
+
+### Using `.env` file
+
+The easiest way to use this package is with a `.env` file.  You can copy the sample and edit it with your environment variables. 
+
+```commandline
+cp sample.env .env
+```
+
+This contains the following variables which can also be set as environment variables instead of a .env file.
+```
+IPF_URL="https://demo3.ipfabric.io"
+IPF_TOKEN=TOKEN
+IPF_VERIFY=true
+```
+
+Or if using Username/Password:
+```
+IPF_URL="https://demo3.ipfabric.io"
+IPF_USERNAME=USER
+IPF_PASSWORD=PASS
+```
+
+## Running
+
+```python
+from nornir import InitNornir
+nr = InitNornir(inventory={"plugin": "IPFabricInventory"})
+```
+
+
+## Using the InitNornir function
+
+Init
+
+```python
+from nornir import InitNornir
+nr = InitNornir(
+    inventory={
+        "plugin": "IPFabricInventory",
+        "options": {
+            "base_url": "https://ipfabric.local",
+            "token": "Token",  # or "username":"admin", "password":"mySecretPassword",
+            "verify": True,
+            "platform_map": "netmiko",  # "netmiko" (Default), "napalm", or "genie",
+            "default": {"username": "device_username", "password": "device_password"},
+        },
+    },
+)
+```
+
+## Using the Nornir configuration file
+
+File *config.yaml*
+
+```yaml
+---
+inventory:
+  plugin: IPFInventory
+  options:
+    base_url: "https://ipfabric.local"
+    token: "TOKEN"
+    # username: "admin"
+    # password: "mySecretPassword"
+    verify: true
+    platform_map: netmiko  # "netmiko", "napalm", or "genie"
+    default:
+      username: 'device_username'
+      password: 'device_password'
+```
+
+Usage:
+
+```python
+from nornir import InitNornir
+nr = InitNornir(config_file="config.yaml", inventory={"plugin": "IPFabricInventory"})
+```
+
