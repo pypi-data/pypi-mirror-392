@@ -1,0 +1,220 @@
+Metadata-Version: 2.4
+Name: storygenerator
+Version: 0.1.1
+Summary: Gemini-based story generator for children's books
+Author-email: Anders Hafreager <andershaf@gmail.com>
+License: MIT
+Keywords: ai,books,children,gemini,generator,story
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.11
+Requires-Dist: google-generativeai>=0.8.0
+Requires-Dist: pydantic>=2.0.0
+Provides-Extra: dev
+Requires-Dist: mypy>=1.0.0; extra == 'dev'
+Requires-Dist: pytest-asyncio>=0.21.0; extra == 'dev'
+Requires-Dist: pytest>=7.0.0; extra == 'dev'
+Description-Content-Type: text/markdown
+
+# DailyStories Generator
+
+A Python library for generating children's storybooks using Google's Gemini AI.
+
+## Installation
+
+```bash
+# From PyPI
+pip install dailystories-generator
+
+# Or with uv
+uv pip install dailystories-generator
+```
+
+## Building and Publishing
+
+### Build
+
+```bash
+./build.sh
+```
+
+This creates distribution files in `dist/` directory.
+
+### Publish to PyPI
+
+1. Get a PyPI API token from https://pypi.org/manage/account/token/
+2. Set the token:
+   ```bash
+   export PYPI_TOKEN="pypi-your-token-here"
+   ```
+3. Publish:
+   ```bash
+   ./publish.sh
+   ```
+
+The publish script will automatically build the package before publishing.
+
+## Quick Test
+
+```bash
+# Set your API key
+export GOOGLE_API_KEY="your-gemini-api-key-here"
+
+# Run a simple test
+uv run python test.py
+
+# Or test outline-only (faster)
+uv run python test.py --outline-only
+
+# Or test without images (faster)
+uv run python test.py --no-images
+```
+
+## Usage
+
+```python
+from storygenerator import StoryGenerator, GenerationRequest, UpdateType
+
+async def on_update(update):
+    print(f"Update: {update.type}")
+    if update.type == UpdateType.PAGE_COMPLETE:
+        print(f"Page {update.data['page_number']} completed")
+
+generator = StoryGenerator(gemini_api_key="your-api-key")
+
+request = GenerationRequest(
+    title="The Adventure Begins",
+    summary="A tale of courage and friendship",
+    num_pages=10,
+    child_name="Alex",
+    child_age=6,
+    language="English",
+    illustration_style="watercolor",
+    generate_images=True,
+)
+
+story = await generator.generate(request, on_update=on_update)
+print(f"Story generated with {len(story.pages)} pages")
+```
+
+## Features
+
+- Async story generation with Gemini AI
+- Optional image generation
+- Support for multiple reference images
+- Type-safe with full type annotations
+- Callback-based progress updates
+- **Prompt optimization system** for iterative improvement
+
+## Prompt Optimization
+
+The library includes a powerful prompt optimization system that automatically improves story generation prompts through iterative evaluation and feedback.
+
+### How It Works
+
+1. **Generate** story content (outline or pages)
+2. **Evaluate** across 11 quality categories (1-5 scale with explanations)
+3. **Improve** the prompt based on evaluation feedback
+4. **Validate** that all template placeholders are preserved
+5. **Track** scores in `statistics.csv` for analysis
+6. **Repeat** for N iterations
+
+### Evaluation Categories
+
+The system evaluates generated content on:
+- **creativity** - Originality and imaginativeness
+- **age_appropriateness** - Suitable content and vocabulary for target age
+- **coherence** - Logical flow and narrative consistency
+- **engagement** - How captivating for young readers
+- **language_quality** - Grammar and writing style
+- **plot_structure** - Clear beginning/middle/end
+- **character_development** - Growth and relatability
+- **character_introduction** - How well characters are established
+- **emotional_resonance** - Emotional depth and impact
+- **pacing** - Story rhythm and transitions
+- **tone_consistency** - Maintaining age-appropriate tone
+
+### Running Optimization
+
+```bash
+# Set your API key
+export GOOGLE_API_KEY="your-gemini-api-key-here"
+
+# Optimize the outline prompt (50 iterations)
+uv run python optimize_prompts.py --mode outline --iterations 50 \
+  --child-name Ludwig --child-age 6 \
+  --title "The Magical Adventure" \
+  --summary "A child discovers magic and goes on an adventure" \
+  --language Norwegian
+
+# Optimize the page generation prompt (20 iterations)
+uv run python optimize_prompts.py --mode pages --iterations 20 \
+  --child-name Emma --child-age 7 \
+  --num-pages 5 \
+  --language English
+```
+
+### Command Line Options
+
+- `--mode` - Type of prompt to optimize: `outline` or `pages` (required)
+- `--iterations` - Number of optimization iterations (default: 10)
+- `--child-name` - Child's name for test story (default: Alex)
+- `--child-age` - Child's age for test story (default: 6)
+- `--title` - Story title (default: The Magical Adventure)
+- `--summary` - Story theme/summary
+- `--num-pages` - Number of pages (default: 5)
+- `--language` - Story language (default: English)
+
+### Output
+
+The optimization system produces:
+
+1. **Updated prompt templates** in `prompt_templates/`
+   - `story_outline_prompt.txt`
+   - `story_page_prompt.txt`
+
+2. **Statistics CSV** (`statistics.csv`) with columns:
+   - timestamp, mode, iteration, prompt_version
+   - All 11 category scores (1-5)
+   - average_score
+
+3. **Console output** showing:
+   - Current iteration progress
+   - Evaluation scores per category
+   - Improvement suggestions
+   - Placeholder validation results
+
+### Analyzing Results
+
+Use the `statistics.csv` file to plot score trajectories over iterations:
+
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv('statistics.csv')
+df_outline = df[df['mode'] == 'outline']
+
+# Plot trajectory for each category
+for category in ['creativity', 'engagement', 'coherence']:
+    plt.plot(df_outline['iteration'], df_outline[category], label=category)
+
+plt.xlabel('Iteration')
+plt.ylabel('Score (1-5)')
+plt.legend()
+plt.title('Prompt Optimization Progress')
+plt.show()
+```
+
+### Automatic Retry on Placeholder Loss
+
+The system automatically validates that all template placeholders (e.g., `{child_name}`, `{story_so_far}`) are preserved during optimization. If the LLM forgets a placeholder, it receives clear feedback and retries up to 5 times before failing.
+
+This ensures the system can run autonomously for hours without manual intervention.
+
+
