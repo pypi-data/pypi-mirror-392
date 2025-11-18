@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agenticlypay"
+version = "0.1.0"
+description = "Python library and API for processing agentic payments (ACP, AP2, x402) via Stripe"
+readme = "README_PYPI.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "AgenticlyPay", email = "support@agenticlypay.com"}
+]
+keywords = ["stripe", "payments", "agentic", "acp", "ap2", "x402", "api", "payment-processing", "stripe-connect"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Office/Business :: Financial",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+]
+
+dependencies = [
+    "stripe>=7.0.0",
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "httpx>=0.25.0",
+    "python-multipart>=0.0.6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.11.0",
+    "ruff>=0.1.6",
+]
+
+[project.scripts]
+agenticlypay = "agenticlypay.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/agenticlypay/agenticlypay"
+Documentation = "https://agenticlypay-frontend-r6zgzqpgja-uc.a.run.app"
+Repository = "https://github.com/agenticlypay/agenticlypay"
+Issues = "https://github.com/agenticlypay/agenticlypay/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["agenticlypay*"]
+exclude = ["agenticlypay.api*", "agenticlypay.tests*"]
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
