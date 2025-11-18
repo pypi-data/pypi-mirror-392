@@ -1,0 +1,2 @@
+import{f as s}from"./i18n-5O2R8uRh.js";import{p as i,ah as o,ai as n,c as p}from"./index-bhUlIv2p.js";import{G as c}from"./utils.svelte-Baqu2V3e.js";function u(f,a){i(a,!0);const r=s(a,["$$slots","$$events","$$legacy"]),t=new c(r);let e;o(()=>{e&&clearInterval(e),t.props.active&&(e=setInterval(()=>{document.visibilityState==="visible"&&t.dispatch("tick")},t.props.value*1e3))}),n(()=>{e&&clearInterval(e)}),p()}export{u as default};
+//# sourceMappingURL=Index-rdUBnJCy.js.map
