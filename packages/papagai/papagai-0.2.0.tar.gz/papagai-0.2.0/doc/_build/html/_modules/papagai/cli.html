@@ -1,0 +1,1015 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>papagai.cli &mdash; papagai 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=7a5cd723" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            papagai
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../commands.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tasks.html">Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../concepts.html">Concepts</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">papagai</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">papagai.cli</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for papagai.cli</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># SPDX-License-Identifier: GPL-3.0-or-later</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shlex</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">click</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">rich.logging</span>
+
+    <span class="n">handler</span> <span class="o">=</span> <span class="n">rich</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">RichHandler</span><span class="p">(</span><span class="n">rich_tracebacks</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+    <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.cmd</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_command</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.markdown</span><span class="w"> </span><span class="kn">import</span> <span class="n">MarkdownInstructions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.worktree</span><span class="w"> </span><span class="kn">import</span> <span class="n">BRANCH_PREFIX</span><span class="p">,</span> <span class="n">Worktree</span><span class="p">,</span> <span class="n">WorktreeOverlayFs</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+    <span class="n">level</span><span class="o">=</span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
+    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">datefmt</span><span class="o">=</span><span class="s2">&quot;[</span><span class="si">%X</span><span class="s2">]&quot;</span><span class="p">,</span>
+    <span class="n">handlers</span><span class="o">=</span><span class="p">[</span><span class="n">handler</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;papagai&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Context">
+<a class="viewcode-back" href="../../api.html#papagai.cli.Context">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Context</span><span class="p">:</span>
+    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+
+<span class="n">ALLOWED_TOOLS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;Glob&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Grep&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Read&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Bash(git status)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Bash(git diff:*)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Bash(git log:*)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Bash(git show:*)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Bash(git add:*)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Bash(git commit:*)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Bash(uv :*)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Bash(pytest3 :*)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Edit(./**)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Write(./**)&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">PROMPT_SUFFIX</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+
+<span class="s2"># Important</span>
+
+<span class="s2">Any changes to this repository should be commited into git following git best</span>
+<span class="s2">practices:</span>
+<span class="s2">- use descriptive subject lines</span>
+<span class="s2">- group logical changes together</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="Isolation">
+<a class="viewcode-back" href="../../api.html#papagai.cli.Isolation">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Isolation</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">StrEnum</span><span class="p">):</span>
+    <span class="n">AUTO</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span>
+    <span class="n">WORKTREE</span> <span class="o">=</span> <span class="s2">&quot;worktree&quot;</span>
+    <span class="n">OVERLAYFS</span> <span class="o">=</span> <span class="s2">&quot;overlayfs&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="get_builtin_tasks_dir">
+<a class="viewcode-back" href="../../api.html#papagai.cli.get_builtin_tasks_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_builtin_tasks_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="n">package_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+    <span class="k">return</span> <span class="n">package_dir</span> <span class="o">/</span> <span class="s2">&quot;tasks&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="get_builtin_primers_dir">
+<a class="viewcode-back" href="../../api.html#papagai.cli.get_builtin_primers_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_builtin_primers_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="n">package_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+    <span class="k">return</span> <span class="n">package_dir</span> <span class="o">/</span> <span class="s2">&quot;primers&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="get_xdg_task_dir">
+<a class="viewcode-back" href="../../api.html#papagai.cli.get_xdg_task_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_xdg_task_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;XDG_CONFIG_HOME&quot;</span><span class="p">,</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.config&quot;</span><span class="p">))</span>
+        <span class="o">/</span> <span class="s2">&quot;papagai&quot;</span>
+        <span class="o">/</span> <span class="s2">&quot;tasks&quot;</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_branch">
+<a class="viewcode-back" href="../../api.html#papagai.cli.get_branch">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_branch</span><span class="p">(</span><span class="n">repo_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;HEAD&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the branch name for a given ref (commit-ish).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        repo_dir: Path to git repository</span>
+<span class="sd">        ref: Git ref (branch name, HEAD, etc.). Default: HEAD</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The branch name</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        subprocess.CalledProcessError if ref doesn&#39;t exist or not a git repo</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">run_command</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">&quot;git&quot;</span><span class="p">,</span> <span class="s2">&quot;rev-parse&quot;</span><span class="p">,</span> <span class="s2">&quot;--abbrev-ref&quot;</span><span class="p">,</span> <span class="s2">&quot;--verify&quot;</span><span class="p">,</span> <span class="n">ref</span><span class="p">],</span>
+        <span class="n">cwd</span><span class="o">=</span><span class="n">repo_dir</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="branch_exists">
+<a class="viewcode-back" href="../../api.html#papagai.cli.branch_exists">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">branch_exists</span><span class="p">(</span><span class="n">repo_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">run_command</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">&quot;git&quot;</span><span class="p">,</span> <span class="s2">&quot;rev-parse&quot;</span><span class="p">,</span> <span class="s2">&quot;--verify&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;refs/heads/</span><span class="si">{</span><span class="n">branch</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">],</span>
+        <span class="n">cwd</span><span class="o">=</span><span class="n">repo_dir</span><span class="p">,</span>
+        <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span></div>
+
+
+
+<div class="viewcode-block" id="create_branch_if_not_exists">
+<a class="viewcode-back" href="../../api.html#papagai.cli.create_branch_if_not_exists">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_branch_if_not_exists</span><span class="p">(</span>
+    <span class="n">repo_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">branch_spec</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">base_branch</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="c1"># None or &quot;.&quot; means use current branch</span>
+    <span class="k">if</span> <span class="n">branch_spec</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">branch_spec</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">base_branch</span>
+
+    <span class="k">if</span> <span class="n">branch_exists</span><span class="p">(</span><span class="n">repo_dir</span><span class="p">,</span> <span class="n">branch_spec</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">branch_spec</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating new branch: </span><span class="si">{</span><span class="n">branch_spec</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="n">base_branch</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">run_command</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">&quot;git&quot;</span><span class="p">,</span> <span class="s2">&quot;branch&quot;</span><span class="p">,</span> <span class="n">branch_spec</span><span class="p">,</span> <span class="n">base_branch</span><span class="p">],</span>
+        <span class="n">cwd</span><span class="o">=</span><span class="n">repo_dir</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">branch_spec</span></div>
+
+
+
+<div class="viewcode-block" id="merge_into_target_branch">
+<a class="viewcode-back" href="../../api.html#papagai.cli.merge_into_target_branch">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">merge_into_target_branch</span><span class="p">(</span><span class="n">repo_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">dest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">run_command</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="s2">&quot;git&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;merge-base&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;--is-ancestor&quot;</span><span class="p">,</span>
+            <span class="n">dest</span><span class="p">,</span>
+            <span class="n">src</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="n">cwd</span><span class="o">=</span><span class="n">repo_dir</span><span class="p">,</span>
+        <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Error: Cannot fast-forward </span><span class="si">{</span><span class="n">dest</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">src</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span>
+            <span class="s2">&quot;The branches have diverged. Manual merge required.&quot;</span><span class="p">,</span>
+            <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="c1"># Check if target branch is currently checked out</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">current_checkout</span> <span class="o">=</span> <span class="n">get_branch</span><span class="p">(</span><span class="n">repo_dir</span><span class="p">,</span> <span class="s2">&quot;HEAD&quot;</span><span class="p">)</span>
+        <span class="n">is_checked_out</span> <span class="o">=</span> <span class="n">current_checkout</span> <span class="o">==</span> <span class="n">dest</span>
+    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span><span class="p">:</span>
+        <span class="n">is_checked_out</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_checked_out</span><span class="p">:</span>
+            <span class="c1"># Use git merge if the target branch is currently checked out</span>
+            <span class="n">run_command</span><span class="p">(</span>
+                <span class="p">[</span><span class="s2">&quot;git&quot;</span><span class="p">,</span> <span class="s2">&quot;merge&quot;</span><span class="p">,</span> <span class="s2">&quot;--ff-only&quot;</span><span class="p">,</span> <span class="n">src</span><span class="p">],</span>
+                <span class="n">cwd</span><span class="o">=</span><span class="n">repo_dir</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Use internal fetch if the target branch is not checked out</span>
+            <span class="n">run_command</span><span class="p">(</span>
+                <span class="p">[</span><span class="s2">&quot;git&quot;</span><span class="p">,</span> <span class="s2">&quot;fetch&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">src</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">dest</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">],</span>
+                <span class="n">cwd</span><span class="o">=</span><span class="n">repo_dir</span><span class="p">,</span>
+            <span class="p">)</span>
+    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Error: Failed to merge </span><span class="si">{</span><span class="n">src</span><span class="si">}</span><span class="s2"> into </span><span class="si">{</span><span class="n">dest</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Work is available in branch </span><span class="si">{</span><span class="n">src</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;yellow&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="mi">0</span></div>
+
+
+
+<div class="viewcode-block" id="purge_branches">
+<a class="viewcode-back" href="../../api.html#papagai.cli.purge_branches">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">purge_branches</span><span class="p">(</span><span class="n">repo_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Delete all papagai branches from the repository.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">run_command</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">&quot;git&quot;</span><span class="p">,</span> <span class="s2">&quot;branch&quot;</span><span class="p">,</span> <span class="s2">&quot;--format=%(refname:short)&quot;</span><span class="p">,</span> <span class="s2">&quot;--list&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">BRANCH_PREFIX</span><span class="si">}</span><span class="s2">/*&quot;</span><span class="p">],</span>
+        <span class="n">cwd</span><span class="o">=</span><span class="n">repo_dir</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">branches</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">branch</span> <span class="ow">in</span> <span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">branches</span> <span class="k">if</span> <span class="n">b</span><span class="p">]:</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Deleting branch: </span><span class="si">{</span><span class="n">branch</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">run_command</span><span class="p">([</span><span class="s2">&quot;git&quot;</span><span class="p">,</span> <span class="s2">&quot;branch&quot;</span><span class="p">,</span> <span class="s2">&quot;-D&quot;</span><span class="p">,</span> <span class="n">branch</span><span class="p">],</span> <span class="n">cwd</span><span class="o">=</span><span class="n">repo_dir</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="purge_worktrees">
+<a class="viewcode-back" href="../../api.html#papagai.cli.purge_worktrees">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">purge_worktrees</span><span class="p">(</span><span class="n">repo_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Remove any leftover git worktrees created by papagai.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">run_command</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">&quot;git&quot;</span><span class="p">,</span> <span class="s2">&quot;worktree&quot;</span><span class="p">,</span> <span class="s2">&quot;list&quot;</span><span class="p">,</span> <span class="s2">&quot;--porcelain&quot;</span><span class="p">],</span>
+        <span class="n">cwd</span><span class="o">=</span><span class="n">repo_dir</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Parse worktree list output</span>
+    <span class="c1"># Format is: worktree &lt;path&gt;\nHEAD &lt;sha&gt;\nbranch &lt;branch&gt;\n\n</span>
+    <span class="n">worktrees</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">current_worktree</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;worktree &quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">current_worktree</span><span class="p">:</span>
+                <span class="n">worktrees</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_worktree</span><span class="p">)</span>
+            <span class="n">current_worktree</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]}</span>
+        <span class="k">elif</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;branch &quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">current_worktree</span><span class="p">[</span><span class="s2">&quot;branch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">current_worktree</span><span class="p">:</span>
+        <span class="n">worktrees</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_worktree</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">worktree</span> <span class="ow">in</span> <span class="n">worktrees</span><span class="p">:</span>
+        <span class="n">branch</span> <span class="o">=</span> <span class="n">worktree</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;branch&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">branch</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;refs/heads/</span><span class="si">{</span><span class="n">BRANCH_PREFIX</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">):</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">worktree</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Removing worktree: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> (branch: </span><span class="si">{</span><span class="n">branch</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="n">run_command</span><span class="p">(</span>
+                <span class="p">[</span><span class="s2">&quot;git&quot;</span><span class="p">,</span> <span class="s2">&quot;worktree&quot;</span><span class="p">,</span> <span class="s2">&quot;remove&quot;</span><span class="p">,</span> <span class="s2">&quot;--force&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">],</span>
+                <span class="n">cwd</span><span class="o">=</span><span class="n">repo_dir</span><span class="p">,</span>
+                <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="purge_overlays">
+<a class="viewcode-back" href="../../api.html#papagai.cli.purge_overlays">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">purge_overlays</span><span class="p">(</span><span class="n">repo_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Remove and unmount any leftover overlayfs created by papagai.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">xdg_cache_home</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;XDG_CACHE_HOME&quot;</span><span class="p">,</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.cache&quot;</span><span class="p">))</span> <span class="o">/</span> <span class="s2">&quot;papagai&quot;</span>
+    <span class="p">)</span>
+    <span class="n">overlay_base</span> <span class="o">=</span> <span class="n">xdg_cache_home</span> <span class="o">/</span> <span class="n">repo_dir</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">overlay_base</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span>
+
+    <span class="c1"># Find all overlay directories</span>
+    <span class="n">dirs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">overlay_base</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;**/mounted&quot;</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">mount_dir</span> <span class="ow">in</span> <span class="n">dirs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mount_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="k">continue</span>
+
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unmounting overlay: </span><span class="si">{</span><span class="n">mount_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">run_command</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">&quot;fusermount&quot;</span><span class="p">,</span> <span class="s2">&quot;-u&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">mount_dir</span><span class="p">)],</span>
+            <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Removing overlay directory: </span><span class="si">{</span><span class="n">mount_dir</span><span class="o">.</span><span class="n">parent</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">mount_dir</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to unmount </span><span class="si">{</span><span class="n">mount_dir</span><span class="si">}</span><span class="s2">, it may not be mounted&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="run_claude">
+<a class="viewcode-back" href="../../api.html#papagai.cli.run_claude">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_claude</span><span class="p">(</span>
+    <span class="n">worktree_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">instructions</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">allowed_tools</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the Claude review agent.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">allowed_tools</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">allowed_tools</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;claude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--allowed-tools&quot;</span><span class="p">,</span>
+        <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">allowed_tools</span><span class="p">),</span>
+        <span class="s2">&quot;-p&quot;</span><span class="p">,</span>
+        <span class="n">instructions</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;Would execute command:&quot;</span><span class="p">)</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  cd </span><span class="si">{</span><span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">worktree_dir</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">arg</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">cmd</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span>
+        <span class="s2">&quot;Claude is pondering, contemplating, mulling, puzzling, meditating, etc.&quot;</span><span class="p">,</span>
+        <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">run_command</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="n">worktree_dir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">:</span>
+            <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="p">:</span>
+            <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error running claude: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+        <span class="k">raise</span></div>
+
+
+
+<div class="viewcode-block" id="claude_run">
+<a class="viewcode-back" href="../../api.html#papagai.cli.claude_run">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">claude_run</span><span class="p">(</span>
+    <span class="n">base_branch</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">instructions</span><span class="p">:</span> <span class="n">MarkdownInstructions</span><span class="p">,</span>
+    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">branch_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">isolation</span><span class="p">:</span> <span class="n">Isolation</span> <span class="o">=</span> <span class="n">Isolation</span><span class="o">.</span><span class="n">AUTO</span><span class="p">,</span>
+    <span class="n">keep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">target_branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="c1"># Resolve repository directory</span>
+    <span class="n">repo_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">repo_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">repo_dir</span><span class="si">}</span><span class="s2"> is not a directory&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">current_branch</span> <span class="o">=</span> <span class="n">get_branch</span><span class="p">(</span><span class="n">repo_dir</span><span class="p">,</span> <span class="n">base_branch</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span><span class="p">:</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Error: Unable to find branch </span><span class="si">{</span><span class="n">base_branch</span><span class="si">}</span><span class="s2"> in this repo&quot;</span><span class="p">,</span>
+            <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="c1"># Handle target branch: create if needed, or use existing</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">work_base_branch</span> <span class="o">=</span> <span class="n">create_branch_if_not_exists</span><span class="p">(</span>
+            <span class="n">repo_dir</span><span class="p">,</span> <span class="n">target_branch</span><span class="p">,</span> <span class="n">current_branch</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Error: Failed to create or access target branch: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="n">worktree_class</span> <span class="o">=</span> <span class="n">Worktree</span>
+    <span class="k">if</span> <span class="n">isolation</span> <span class="ow">in</span> <span class="p">[</span><span class="n">Isolation</span><span class="o">.</span><span class="n">AUTO</span><span class="p">,</span> <span class="n">Isolation</span><span class="o">.</span><span class="n">OVERLAYFS</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">WorktreeOverlayFs</span><span class="o">.</span><span class="n">is_supported</span><span class="p">():</span>
+            <span class="n">worktree_class</span> <span class="o">=</span> <span class="n">WorktreeOverlayFs</span>
+        <span class="k">elif</span> <span class="n">isolation</span> <span class="o">!=</span> <span class="n">Isolation</span><span class="o">.</span><span class="n">AUTO</span><span class="p">:</span>
+            <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span>
+                <span class="s2">&quot;Error: fuse-overlayfs is not available. Please install it or use --isolation=worktree&quot;</span><span class="p">,</span>
+                <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">worktree_class</span> <span class="o">=</span> <span class="n">Worktree</span>
+        <span class="k">if</span> <span class="n">isolation</span> <span class="o">==</span> <span class="n">Isolation</span><span class="o">.</span><span class="n">AUTO</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using isolation </span><span class="si">{</span><span class="n">worktree_class</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">isolation</span> <span class="o">==</span> <span class="n">Isolation</span><span class="o">.</span><span class="n">WORKTREE</span><span class="p">:</span>
+        <span class="n">worktree_class</span> <span class="o">=</span> <span class="n">Worktree</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: Invalid isolation mode </span><span class="si">{</span><span class="n">isolation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">allowed_tools</span> <span class="o">=</span> <span class="n">ALLOWED_TOOLS</span> <span class="o">+</span> <span class="n">instructions</span><span class="o">.</span><span class="n">tools</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">worktree_class</span><span class="o">.</span><span class="n">from_branch</span><span class="p">(</span>
+            <span class="n">repo_dir</span><span class="p">,</span>
+            <span class="n">work_base_branch</span><span class="p">,</span>
+            <span class="n">branch_prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">BRANCH_PREFIX</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">branch_prefix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">keep</span><span class="o">=</span><span class="n">keep</span><span class="p">,</span>
+        <span class="p">)</span> <span class="k">as</span> <span class="n">worktree</span><span class="p">:</span>
+            <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Working in branch </span><span class="si">{</span><span class="n">worktree</span><span class="o">.</span><span class="n">branch</span><span class="si">}</span><span class="s2"> (based off </span><span class="si">{</span><span class="n">work_base_branch</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+                <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">assert</span> <span class="n">instructions</span><span class="o">.</span><span class="n">text</span>
+            <span class="n">insts</span> <span class="o">=</span> <span class="n">instructions</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{BRANCH}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">work_base_branch</span><span class="p">)</span>
+            <span class="n">insts</span> <span class="o">=</span> <span class="n">insts</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{WORKTREE_BRANCH}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">worktree</span><span class="o">.</span><span class="n">branch</span><span class="p">)</span>
+            <span class="n">insts</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">insts</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">PROMPT_SUFFIX</span><span class="si">}</span><span class="s2">&quot;</span>
+
+            <span class="n">run_claude</span><span class="p">(</span><span class="n">worktree</span><span class="o">.</span><span class="n">worktree_dir</span><span class="p">,</span> <span class="n">insts</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">,</span> <span class="n">allowed_tools</span><span class="p">)</span>
+
+            <span class="c1"># Save the worktree branch before context manager exits</span>
+            <span class="n">worktree_branch</span> <span class="o">=</span> <span class="n">worktree</span><span class="o">.</span><span class="n">branch</span>
+
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;My work here is done. Check out branch </span><span class="si">{</span><span class="n">work_base_branch</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">target_branch</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">worktree_branch</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># After worktree cleanup, merge work branch into target branch if specified</span>
+        <span class="k">if</span> <span class="n">target_branch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">merge_into_target_branch</span><span class="p">(</span>
+                <span class="n">repo_dir</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">work_base_branch</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="n">worktree_branch</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">e</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span></div>
+
+
+
+<div class="viewcode-block" id="list_all_tasks">
+<a class="viewcode-back" href="../../api.html#papagai.cli.list_all_tasks">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_all_tasks</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    List all available tasks from the instructions directory.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Exit code (0 for success, 1 for error)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Find the instructions directory from the installed package</span>
+    <span class="n">builtin_tasks_dir</span> <span class="o">=</span> <span class="n">get_builtin_tasks_dir</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">builtin_tasks_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">builtin_tasks_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Error: Tasks directory not found at </span><span class="si">{</span><span class="n">builtin_tasks_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="n">all_dirs</span> <span class="o">=</span> <span class="p">[</span><span class="n">builtin_tasks_dir</span><span class="p">]</span>
+    <span class="n">xdg_dir</span> <span class="o">=</span> <span class="n">get_xdg_task_dir</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">xdg_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">all_dirs</span> <span class="o">=</span> <span class="p">[</span><span class="n">xdg_dir</span><span class="p">]</span> <span class="o">+</span> <span class="n">all_dirs</span>
+
+    <span class="nd">@dataclass</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Task</span><span class="p">:</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+        <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="n">tasks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Task</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="nb">dir</span> <span class="ow">in</span> <span class="n">all_dirs</span><span class="p">:</span>
+        <span class="n">md_files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;**/*.md&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">md_files</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">for</span> <span class="n">md_file</span> <span class="ow">in</span> <span class="n">md_files</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">md</span> <span class="o">=</span> <span class="n">MarkdownInstructions</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">md_file</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
+                    <span class="c1"># Get relative path from instructions directory without .md extension</span>
+                    <span class="n">rel_path</span> <span class="o">=</span> <span class="n">md_file</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span>
+                    <span class="n">task_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">rel_path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">))</span>
+                    <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Task</span><span class="p">(</span><span class="n">task_name</span><span class="p">,</span> <span class="n">md</span><span class="o">.</span><span class="n">description</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span>
+                        <span class="s2">&quot;Found task file </span><span class="si">{md_file}</span><span class="s2"> but it doesn&#39;t have a description&quot;</span>
+                    <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Warning: Failed to parse </span><span class="si">{</span><span class="n">md_file</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span>
+                <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">tasks</span><span class="p">:</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span><span class="s2">&quot;No tasks with descriptions found.&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="c1"># Calculate the maximum task name length for alignment</span>
+    <span class="n">max_name_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">tasks</span><span class="p">)</span>
+
+    <span class="c1"># Print tasks with aligned descriptions</span>
+    <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">tasks</span><span class="p">:</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">task</span><span class="o">.</span><span class="n">name</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">max_name_len</span><span class="si">}}</span><span class="s2"> ... </span><span class="si">{</span><span class="n">task</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="mi">0</span></div>
+
+
+
+<span class="nd">@click</span><span class="o">.</span><span class="n">group</span><span class="p">()</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;-v&quot;</span><span class="p">,</span> <span class="s2">&quot;--verbose&quot;</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;increase verbosity&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--dry-run&quot;</span><span class="p">,</span>
+    <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Show the claude command that would be executed without running it&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_context</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">papagai</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">click</span><span class="o">.</span><span class="n">Context</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Papagai: Automate code changes with Claude AI on git worktrees.&quot;&quot;&quot;</span>
+
+    <span class="n">verbose_levels</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">}</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">verbose_levels</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">verbose</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Verbose level set </span><span class="si">{</span><span class="n">logger</span><span class="o">.</span><span class="n">getEffectiveLevel</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># Store context object for subcommands</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">obj</span> <span class="o">=</span> <span class="n">Context</span><span class="p">(</span><span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">)</span>
+
+
+<span class="nd">@papagai</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;do&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span>
+    <span class="s2">&quot;instructions_file&quot;</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">),</span>
+    <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--base-branch&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="s2">&quot;HEAD&quot;</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Branch to base the work on (default: current branch)&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;-b&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;--branch&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;target_branch&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Target branch to work on (creates if needed, merges work into it)&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--isolation&quot;</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Choice</span><span class="p">([</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;worktree&quot;</span><span class="p">,</span> <span class="s2">&quot;overlayfs&quot;</span><span class="p">],</span> <span class="n">case_sensitive</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">default</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Worktree isolation mode: auto (try overlayfs, fall back to worktree), worktree (git worktree), or overlayfs (fuse-overlayfs)&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--keep/--no-keep&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Keep the worktree/overlay after completion (default: --no-keep)&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_context</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cmd_do</span><span class="p">(</span>
+    <span class="n">ctx</span><span class="p">:</span> <span class="n">click</span><span class="o">.</span><span class="n">Context</span><span class="p">,</span>
+    <span class="n">instructions_file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">base_branch</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">target_branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">isolation</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">keep</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Tell Claude to do something non-code related on a work tree.</span>
+
+<span class="sd">    This is the command for non-coding related tasks, and the instructions</span>
+<span class="sd">    should include priming Claude for the task at hand.</span>
+
+<span class="sd">    See papagai code for programming tasks.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">instructions_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">instructions</span> <span class="o">=</span> <span class="n">MarkdownInstructions</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">instructions_file</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="ne">PermissionError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error reading instructions file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">isatty</span><span class="p">():</span>
+            <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span>
+                <span class="s2">&quot;Please tell me what you want me to do (Ctrl+D to complete)&quot;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+        <span class="n">instructions</span> <span class="o">=</span> <span class="n">MarkdownInstructions</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">instructions</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span>
+            <span class="s2">&quot;Empty instructions. That&#39;s it, I can&#39;t work under these conditions!&quot;</span><span class="p">,</span>
+            <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">claude_run</span><span class="p">(</span>
+        <span class="n">base_branch</span><span class="o">=</span><span class="n">base_branch</span><span class="p">,</span>
+        <span class="n">instructions</span><span class="o">=</span><span class="n">instructions</span><span class="p">,</span>
+        <span class="n">dry_run</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">dry_run</span><span class="p">,</span>
+        <span class="n">isolation</span><span class="o">=</span><span class="n">Isolation</span><span class="p">(</span><span class="n">isolation</span><span class="p">),</span>
+        <span class="n">keep</span><span class="o">=</span><span class="n">keep</span><span class="p">,</span>
+        <span class="n">target_branch</span><span class="o">=</span><span class="n">target_branch</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="nd">@papagai</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;code&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span>
+    <span class="s2">&quot;instructions_file&quot;</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">),</span>  <span class="c1"># type: ignore[type-var]</span>
+    <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--base-branch&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="s2">&quot;HEAD&quot;</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Branch to base the work on (default: current branch)&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;-b&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;--branch&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;target_branch&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Target branch to work on (creates if needed, merges work into it)&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--isolation&quot;</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Choice</span><span class="p">([</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;worktree&quot;</span><span class="p">,</span> <span class="s2">&quot;overlayfs&quot;</span><span class="p">],</span> <span class="n">case_sensitive</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">default</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Worktree isolation mode: auto (try overlayfs, fall back to worktree), worktree (git worktree), or overlayfs (fuse-overlayfs)&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--keep/--no-keep&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Keep the worktree/overlay after completion (default: --no-keep)&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_context</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cmd_code</span><span class="p">(</span>
+    <span class="n">ctx</span><span class="p">:</span> <span class="n">click</span><span class="o">.</span><span class="n">Context</span><span class="p">,</span>
+    <span class="n">instructions_file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">base_branch</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">target_branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">isolation</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">keep</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Tell Claude to code something on a work tree.</span>
+
+<span class="sd">    This command primes Claude to be software developer with an automatically</span>
+<span class="sd">    inserted prompt prefix. The provided instructions thus only need to focus on</span>
+<span class="sd">    the actual code.</span>
+
+<span class="sd">    See papagai code for coding tasks.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">instructions_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">instructions</span> <span class="o">=</span> <span class="n">MarkdownInstructions</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">instructions_file</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="ne">PermissionError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error reading instructions file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">isatty</span><span class="p">():</span>
+            <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span>
+                <span class="s2">&quot;Please tell me what you want me to do (Ctrl+D to complete)&quot;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+        <span class="n">instructions</span> <span class="o">=</span> <span class="n">MarkdownInstructions</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">instructions</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span>
+            <span class="s2">&quot;Empty instructions. That&#39;s it, I can&#39;t work under these conditions!&quot;</span><span class="p">,</span>
+            <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="n">primer</span> <span class="o">=</span> <span class="n">MarkdownInstructions</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">get_builtin_primers_dir</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;code.md&quot;</span><span class="p">)</span>
+    <span class="n">instructions</span> <span class="o">=</span> <span class="n">primer</span><span class="o">.</span><span class="n">combine</span><span class="p">(</span><span class="n">instructions</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">claude_run</span><span class="p">(</span>
+        <span class="n">base_branch</span><span class="o">=</span><span class="n">base_branch</span><span class="p">,</span>
+        <span class="n">instructions</span><span class="o">=</span><span class="n">instructions</span><span class="p">,</span>
+        <span class="n">dry_run</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">dry_run</span><span class="p">,</span>
+        <span class="n">isolation</span><span class="o">=</span><span class="n">Isolation</span><span class="p">(</span><span class="n">isolation</span><span class="p">),</span>
+        <span class="n">keep</span><span class="o">=</span><span class="n">keep</span><span class="p">,</span>
+        <span class="n">target_branch</span><span class="o">=</span><span class="n">target_branch</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="nd">@papagai</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;purge&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--branches/--no-branches&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Remove git branches created by papagai (default: --branches)&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--worktrees/--no-worktrees&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Remove leftover git worktrees created by papagai (default: --worktrees)&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--overlays/--no-overlays&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Remove and unmount leftover overlayfs created by papagai (default: --overlays)&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cmd_purge</span><span class="p">(</span><span class="n">branches</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">worktrees</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">overlays</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Clean up papagai artifacts: branches, worktrees, and overlayfs.</span>
+
+<span class="sd">    By default, removes all types of artifacts. Use --no-* flags to skip specific types.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">repo_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">repo_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">repo_dir</span><span class="si">}</span><span class="s2"> is not a directory&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="n">error_occurred</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">branches</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">purge_branches</span><span class="p">(</span><span class="n">repo_dir</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error purging branches: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+            <span class="n">error_occurred</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">worktrees</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">purge_worktrees</span><span class="p">(</span><span class="n">repo_dir</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error purging worktrees: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+            <span class="n">error_occurred</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">overlays</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">purge_overlays</span><span class="p">(</span><span class="n">repo_dir</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error purging overlays: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+            <span class="n">error_occurred</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">error_occurred</span> <span class="k">else</span> <span class="mi">0</span>
+
+
+<span class="nd">@papagai</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;task&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--list&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;list_tasks&quot;</span><span class="p">,</span>
+    <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;List all available tasks&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--base-branch&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="s2">&quot;HEAD&quot;</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Branch to base the work on (default: current branch)&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;task_name&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_context</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cmd_task</span><span class="p">(</span>
+    <span class="n">ctx</span><span class="p">:</span> <span class="n">click</span><span class="o">.</span><span class="n">Context</span><span class="p">,</span>
+    <span class="n">list_tasks</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">base_branch</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">task_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Run a pre-written task, either from the built-in list or from tasks in</span>
+<span class="sd">    XDG_CONFIG_HOME/papagai/tasks/**/*.md.</span>
+
+<span class="sd">    Use --list to see all available tasks.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">list_tasks</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">list_all_tasks</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">task_name</span><span class="p">:</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span>
+            <span class="s2">&quot;Error: missing task name. Available tasks:&quot;</span><span class="p">,</span>
+            <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">list_all_tasks</span><span class="p">()</span>
+
+    <span class="c1"># Resolve repository directory</span>
+    <span class="n">repo_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">repo_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">repo_dir</span><span class="si">}</span><span class="s2"> is not a directory&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="c1"># Resolve task to instructions file from installed package</span>
+    <span class="n">task_files</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">get_xdg_task_dir</span><span class="p">()</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">task_name</span><span class="si">}</span><span class="s2">.md&quot;</span><span class="p">,</span>
+        <span class="n">get_builtin_tasks_dir</span><span class="p">()</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">task_name</span><span class="si">}</span><span class="s2">.md&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="n">task_file</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">task_files</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">exists</span><span class="p">()),</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">task_file</span><span class="p">:</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Error: Task &#39;</span><span class="si">{</span><span class="n">task_name</span><span class="si">}</span><span class="s2">&#39; not found&quot;</span><span class="p">,</span>
+            <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span>
+            <span class="s2">&quot;Run &#39;papagai task --list&#39; to see available tasks&quot;</span><span class="p">,</span>
+            <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">instructions</span> <span class="o">=</span> <span class="n">MarkdownInstructions</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">task_file</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="ne">PermissionError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error reading instructions file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">claude_run</span><span class="p">(</span>
+        <span class="n">base_branch</span><span class="o">=</span><span class="n">base_branch</span><span class="p">,</span>
+        <span class="n">instructions</span><span class="o">=</span><span class="n">instructions</span><span class="p">,</span>
+        <span class="n">dry_run</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">dry_run</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="nd">@papagai</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;review&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--base-branch&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="s2">&quot;HEAD&quot;</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Branch to base the work on (default: current branch)&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;-b&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;--branch&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;target_branch&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Target branch to work on (creates if needed, merges work into it)&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--isolation&quot;</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Choice</span><span class="p">([</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;worktree&quot;</span><span class="p">,</span> <span class="s2">&quot;overlayfs&quot;</span><span class="p">],</span> <span class="n">case_sensitive</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">default</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Worktree isolation mode: auto (try overlayfs, fall back to worktree), worktree (git worktree), or overlayfs (fuse-overlayfs)&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--keep/--no-keep&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Keep the worktree/overlay after completion (default: --no-keep)&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">pass_context</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cmd_review</span><span class="p">(</span>
+    <span class="n">ctx</span><span class="p">:</span> <span class="n">click</span><span class="o">.</span><span class="n">Context</span><span class="p">,</span>
+    <span class="n">base_branch</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">target_branch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">isolation</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">keep</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Run a code review on the current branch.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Resolve repository directory</span>
+    <span class="n">repo_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">repo_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">repo_dir</span><span class="si">}</span><span class="s2"> is not a directory&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="n">primers_dir</span> <span class="o">=</span> <span class="n">get_builtin_primers_dir</span><span class="p">()</span>
+    <span class="n">review_task_file</span> <span class="o">=</span> <span class="n">primers_dir</span> <span class="o">/</span> <span class="s2">&quot;review.md&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">review_task_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Error: Review task not found at </span><span class="si">{</span><span class="n">review_task_file</span><span class="si">}</span><span class="s2">. This is a bug&quot;</span><span class="p">,</span>
+            <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">instructions</span> <span class="o">=</span> <span class="n">MarkdownInstructions</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">review_task_file</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="ne">PermissionError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">secho</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error reading review instructions: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fg</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">claude_run</span><span class="p">(</span>
+        <span class="n">base_branch</span><span class="o">=</span><span class="n">base_branch</span><span class="p">,</span>
+        <span class="n">instructions</span><span class="o">=</span><span class="n">instructions</span><span class="p">,</span>
+        <span class="n">dry_run</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">dry_run</span><span class="p">,</span>
+        <span class="n">branch_prefix</span><span class="o">=</span><span class="s2">&quot;review/&quot;</span><span class="p">,</span>
+        <span class="n">isolation</span><span class="o">=</span><span class="n">Isolation</span><span class="p">(</span><span class="n">isolation</span><span class="p">),</span>
+        <span class="n">keep</span><span class="o">=</span><span class="n">keep</span><span class="p">,</span>
+        <span class="n">target_branch</span><span class="o">=</span><span class="n">target_branch</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">papagai</span><span class="p">())</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Peter Hutterer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

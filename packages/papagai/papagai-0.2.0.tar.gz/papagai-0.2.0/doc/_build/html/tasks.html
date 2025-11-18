@@ -1,0 +1,373 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tasks &mdash; papagai 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=7a5cd723" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Concepts" href="concepts.html" />
+    <link rel="prev" title="Commands" href="commands.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            papagai
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="commands.html">Commands</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tasks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#task-structure">Task Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#built-in-tasks">Built-in Tasks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#python-tasks">Python Tasks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c-tasks">C Tasks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#meson-tasks">Meson Tasks</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#custom-user-tasks">Custom User Tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#task-organization">Task Organization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#variable-substitution">Variable Substitution</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#available-variables">Available Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-usage">Example Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#tool-restrictions">Tool Restrictions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices">Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#writing-effective-tasks">Writing Effective Tasks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#task-complexity">Task Complexity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sharing-tasks">Sharing Tasks</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#example-task-library">Example Task Library</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="concepts.html">Concepts</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">papagai</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Tasks</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/tasks.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tasks">
+<h1>Tasks<a class="headerlink" href="#tasks" title="Link to this heading"></a></h1>
+<p>Tasks are pre-written instruction sets that can be reused across projects. Papagai supports both built-in tasks and custom user tasks.</p>
+<section id="task-structure">
+<h2>Task Structure<a class="headerlink" href="#task-structure" title="Link to this heading"></a></h2>
+<p>Tasks are markdown files with YAML frontmatter:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span>---
+description: A short description of what this task does
+<span class="gu">tools: Bash(git:*), Read, Write, Edit  # Optional: tool restrictions</span>
+<span class="gu">---</span>
+
+<span class="gh"># Task Instructions</span>
+
+You are an expert programmer. Please analyze this codebase and...
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">description</span></code> field is required and is shown in the task list.</p>
+</section>
+<section id="built-in-tasks">
+<h2>Built-in Tasks<a class="headerlink" href="#built-in-tasks" title="Link to this heading"></a></h2>
+<p>Papagai ships with several useful tasks in <code class="docutils literal notranslate"><span class="pre">papagai/tasks/</span></code>:</p>
+<section id="python-tasks">
+<h3>Python Tasks<a class="headerlink" href="#python-tasks" title="Link to this heading"></a></h3>
+<p>Located in <code class="docutils literal notranslate"><span class="pre">papagai/tasks/python/</span></code>:</p>
+<ul class="simple">
+<li><p><strong>update-to-3.9</strong>: Update Python codebase to use Python 3.9+ features</p></li>
+<li><p>Other Python modernization tasks</p></li>
+</ul>
+</section>
+<section id="c-tasks">
+<h3>C Tasks<a class="headerlink" href="#c-tasks" title="Link to this heading"></a></h3>
+<p>Located in <code class="docutils literal notranslate"><span class="pre">papagai/tasks/c/</span></code>:</p>
+<ul class="simple">
+<li><p><strong>modernize</strong>: Modernize C code to C11 standards</p></li>
+</ul>
+</section>
+<section id="meson-tasks">
+<h3>Meson Tasks<a class="headerlink" href="#meson-tasks" title="Link to this heading"></a></h3>
+<p>Located in <code class="docutils literal notranslate"><span class="pre">papagai/tasks/meson/</span></code>:</p>
+<ul class="simple">
+<li><p>Build system related tasks</p></li>
+</ul>
+<p>To see all available built-in tasks:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>papagai<span class="w"> </span>task<span class="w"> </span>--list
+</pre></div>
+</div>
+</section>
+</section>
+<section id="custom-user-tasks">
+<h2>Custom User Tasks<a class="headerlink" href="#custom-user-tasks" title="Link to this heading"></a></h2>
+<p>Create your own tasks in <code class="docutils literal notranslate"><span class="pre">$XDG_CONFIG_HOME/papagai/tasks/</span></code>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mkdir<span class="w"> </span>-p<span class="w"> </span>~/.config/papagai/tasks/myproject
+<span class="gp">$ </span>cat<span class="w"> </span>&gt;<span class="w"> </span>~/.config/papagai/tasks/myproject/refactor.md<span class="w"> </span>&lt;&lt;<span class="w"> </span><span class="s1">&#39;EOF&#39;</span>
+<span class="go">---</span>
+<span class="go">description: Refactor myproject using modern patterns</span>
+<span class="go">---</span>
+
+<span class="go">You are an expert in software architecture. Please:</span>
+
+<span class="go">1. Analyze the current codebase structure</span>
+<span class="go">2. Identify areas for improvement</span>
+<span class="go">3. Apply modern design patterns</span>
+<span class="go">4. Ensure all tests pass after refactoring</span>
+<span class="go">EOF</span>
+</pre></div>
+</div>
+<p>Run your custom task:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>papagai<span class="w"> </span>task<span class="w"> </span>myproject/refactor
+</pre></div>
+</div>
+</section>
+<section id="task-organization">
+<h2>Task Organization<a class="headerlink" href="#task-organization" title="Link to this heading"></a></h2>
+<p>Tasks can be organized in subdirectories for better organization:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>~/.config/papagai/tasks/
+├── python/
+│   ├── django-upgrade.md
+│   └── async-refactor.md
+├── javascript/
+│   ├── react-modernize.md
+│   └── typescript-convert.md
+└── general/
+    ├── add-tests.md
+    └── improve-docs.md
+</pre></div>
+</div>
+<p>Reference tasks using the directory path:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>papagai<span class="w"> </span>task<span class="w"> </span>python/django-upgrade
+<span class="gp">$ </span>papagai<span class="w"> </span>task<span class="w"> </span>javascript/typescript-convert
+</pre></div>
+</div>
+</section>
+<section id="variable-substitution">
+<h2>Variable Substitution<a class="headerlink" href="#variable-substitution" title="Link to this heading"></a></h2>
+<p>Tasks support variable substitution for dynamic content:</p>
+<section id="available-variables">
+<h3>Available Variables<a class="headerlink" href="#available-variables" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">{BRANCH}</span></code> - The original branch name (before creating the worktree)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">{WORKTREE_BRANCH}</span></code> - The worktree branch name (e.g., <code class="docutils literal notranslate"><span class="pre">papagai/main-20251112-1030-7be3946e</span></code>)</p></li>
+</ul>
+</section>
+<section id="example-usage">
+<h3>Example Usage<a class="headerlink" href="#example-usage" title="Link to this heading"></a></h3>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span>---
+<span class="gu">description: Create a PR for changes</span>
+<span class="gu">---</span>
+
+Create a pull request from branch {WORKTREE_BRANCH} to {BRANCH}.
+
+Use the following PR template:
+<span class="k">-</span><span class="w"> </span>Base branch: {BRANCH}
+<span class="k">-</span><span class="w"> </span>Working branch: {WORKTREE_BRANCH}
+</pre></div>
+</div>
+</section>
+</section>
+<section id="tool-restrictions">
+<h2>Tool Restrictions<a class="headerlink" href="#tool-restrictions" title="Link to this heading"></a></h2>
+<p>Limit which tools Claude can use in a task:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span>---
+description: Update dependencies only
+tools:
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>Bash(uv :*)
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>Bash(pip :*)
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>Edit(./**/pyproject.toml)
+<span class="gu">  - Read</span>
+<span class="gu">---</span>
+
+Update all Python dependencies to their latest compatible versions.
+</pre></div>
+</div>
+<p>This ensures Claude can only:</p>
+<ul class="simple">
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">uv</span></code> and <code class="docutils literal notranslate"><span class="pre">pip</span></code> commands</p></li>
+<li><p>Edit <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> files</p></li>
+<li><p>Read files for information</p></li>
+</ul>
+</section>
+<section id="best-practices">
+<h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
+<section id="writing-effective-tasks">
+<h3>Writing Effective Tasks<a class="headerlink" href="#writing-effective-tasks" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Be Specific</strong>: Clear, detailed instructions produce better results</p></li>
+<li><p><strong>Include Context</strong>: Explain why the task matters and what the expected outcome is</p></li>
+<li><p><strong>Set Boundaries</strong>: Use tool restrictions to prevent unintended changes</p></li>
+<li><p><strong>Test First</strong>: Run tasks on a test repository before using on production code</p></li>
+<li><p><strong>Version Control</strong>: Keep your task library in git for versioning and sharing</p></li>
+</ol>
+</section>
+<section id="task-complexity">
+<h3>Task Complexity<a class="headerlink" href="#task-complexity" title="Link to this heading"></a></h3>
+<p>Tasks can range from simple to complex:</p>
+<p><strong>Simple Task</strong> (single focus):</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span>---
+<span class="gu">description: Add type hints to Python functions</span>
+<span class="gu">---</span>
+
+Add type hints to all function signatures in the codebase.
+</pre></div>
+</div>
+<p><strong>Complex Task</strong> (multi-step):</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span>---
+<span class="gu">description: Comprehensive code modernization</span>
+<span class="gu">---</span>
+
+Modernize this codebase by:
+
+<span class="k">1.</span> Updating to Python 3.12 features (match statements, type hints, etc.)
+<span class="k">2.</span> Replacing deprecated APIs with modern equivalents
+<span class="k">3.</span> Improving error handling with exception groups
+<span class="k">4.</span> Adding comprehensive docstrings
+<span class="k">5.</span> Ensuring all tests pass
+</pre></div>
+</div>
+</section>
+<section id="sharing-tasks">
+<h3>Sharing Tasks<a class="headerlink" href="#sharing-tasks" title="Link to this heading"></a></h3>
+<p>Share tasks with your team by:</p>
+<ol class="arabic simple">
+<li><p>Creating a shared task repository</p></li>
+<li><p>Symlinking or copying tasks to <code class="docutils literal notranslate"><span class="pre">~/.config/papagai/tasks/</span></code></p></li>
+<li><p>Documenting task usage in your project README</p></li>
+</ol>
+</section>
+</section>
+<section id="example-task-library">
+<h2>Example Task Library<a class="headerlink" href="#example-task-library" title="Link to this heading"></a></h2>
+<p>Here’s a complete example of a useful task:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span>---
+description: Add comprehensive logging to Python codebase
+tools:
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>Bash(git:*)
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>Read
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>Edit(./**/*.py)
+<span class="gu">  - Write(./**/*.py)</span>
+<span class="gu">---</span>
+
+<span class="gh"># Add Comprehensive Logging</span>
+
+You are an expert Python developer. Add comprehensive logging to this codebase:
+
+<span class="gu">## Requirements</span>
+
+<span class="k">1.</span> Import logging at the top of each module that needs it
+<span class="k">2.</span> Create module-level loggers: <span class="sb">`logger = logging.getLogger(__name__)`</span>
+<span class="k">3.</span> Add appropriate log levels:
+<span class="w">   </span><span class="k">-</span><span class="w"> </span>DEBUG: Detailed diagnostic information
+<span class="w">   </span><span class="k">-</span><span class="w"> </span>INFO: Confirmation of expected behavior
+<span class="w">   </span><span class="k">-</span><span class="w"> </span>WARNING: Unexpected events that don&#39;t prevent operation
+<span class="w">   </span><span class="k">-</span><span class="w"> </span>ERROR: Serious problems that prevent some functionality
+<span class="w">   </span><span class="k">-</span><span class="w"> </span>CRITICAL: System failure
+
+<span class="k">4.</span> Log at key points:
+<span class="w">   </span><span class="k">-</span><span class="w"> </span>Function entry/exit for complex functions
+<span class="w">   </span><span class="k">-</span><span class="w"> </span>Error conditions with context
+<span class="w">   </span><span class="k">-</span><span class="w"> </span>Important state changes
+<span class="w">   </span><span class="k">-</span><span class="w"> </span>External API calls
+
+<span class="k">5.</span> Include relevant context in log messages
+<span class="k">6.</span> Use structured logging where appropriate
+
+<span class="gu">## Do Not</span>
+
+<span class="k">-</span><span class="w"> </span>Don&#39;t add logging to test files
+<span class="k">-</span><span class="w"> </span>Don&#39;t log sensitive information (passwords, tokens, etc.)
+<span class="k">-</span><span class="w"> </span>Don&#39;t use print() statements - convert existing ones to logging
+
+<span class="gu">## Testing</span>
+
+After adding logging, run the test suite to ensure nothing broke.
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="commands.html" class="btn btn-neutral float-left" title="Commands" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="concepts.html" class="btn btn-neutral float-right" title="Concepts" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Peter Hutterer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

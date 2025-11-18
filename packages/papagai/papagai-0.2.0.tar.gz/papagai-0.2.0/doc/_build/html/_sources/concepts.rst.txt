@@ -1,0 +1,440 @@
+Concepts
+========
+
+This page explains the core concepts and architecture of papagai.
+
+Worktrees
+---------
+
+What are Worktrees?
+~~~~~~~~~~~~~~~~~~~
+
+Git worktrees allow you to have multiple working directories for a single repository. Papagai uses worktrees to isolate Claude's work from your main development environment.
+
+**Benefits:**
+
+* Work on multiple tasks simultaneously without switching branches
+* Keep your main workspace clean and unaffected by Claude's changes
+* Easy rollback - just delete the worktree branch if you don't like the changes
+* Safe experimentation without risking your working code
+
+How Papagai Uses Worktrees
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When you run a papagai command:
+
+1. Creates a new git worktree in a temporary directory
+2. Creates a new branch with the naming pattern: ``papagai/<prefix><base>-<timestamp>-<uuid>``
+3. Runs Claude in that isolated worktree
+4. Commits changes to the worktree branch
+5. Returns to your original workspace
+6. (Optionally) Removes the worktree directory
+
+The ``papagai/latest`` branch always points to the most recent work, making it easy to find.
+
+Isolation Modes
+---------------
+
+Papagai supports two isolation modes for running Claude:
+
+Standard Git Worktrees
+~~~~~~~~~~~~~~~~~~~~~~~
+
+**Mode:** ``--isolation worktree``
+
+Uses standard git worktree functionality. This creates a new working directory with a full checkout of the repository.
+
+**Pros:**
+
+* Native git feature, no additional dependencies
+* Reliable and well-tested
+* Works on all platforms
+
+**Cons:**
+
+* Slower for large repositories (full file copy)
+* Uses more disk space
+* Higher I/O overhead
+
+Overlay Filesystem Worktrees
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Mode:** ``--isolation overlayfs``
+
+Uses fuse-overlayfs to create a copy-on-write filesystem layer. Only modified files are actually written to disk.
+
+**Pros:**
+
+* Much faster for large repositories
+* Minimal disk space usage (only stores changes)
+* Reduced I/O overhead
+
+**Cons:**
+
+* Requires ``fuse-overlayfs`` installation
+* Linux-only (uses FUSE filesystem)
+* More complex setup
+
+**Installation:**
+
+Fedora/RHEL:
+
+.. code-block:: console
+
+   $ sudo dnf install fuse-overlayfs
+
+Ubuntu/Debian:
+
+.. code-block:: console
+
+   $ sudo apt install fuse-overlayfs
+
+Auto Mode
+~~~~~~~~~
+
+**Mode:** ``--isolation auto`` (default)
+
+Automatically selects the best available isolation mode:
+
+1. Tries overlay filesystem if ``fuse-overlayfs`` is available
+2. Falls back to standard git worktrees
+
+Branch Naming
+-------------
+
+Branch Naming Convention
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Papagai creates branches following a specific pattern:
+
+.. code-block:: text
+
+   papagai/<prefix><base-branch>-<YYYYmmdd-HHMM>-<uuid>
+
+**Components:**
+
+* ``papagai/`` - Namespace prefix for easy identification
+* ``<prefix>`` - Optional prefix (e.g., ``wip/`` for work-in-progress)
+* ``<base-branch>`` - The branch you were on when starting
+* ``<YYYYmmdd-HHMM>`` - Timestamp when the branch was created
+* ``<uuid>`` - Short unique identifier
+
+**Examples:**
+
+.. code-block:: text
+
+   papagai/main-20251112-1030-7be3946e
+   papagai/wip/develop-20251113-1445-abc123fe
+   papagai/latest
+
+Special Branches
+~~~~~~~~~~~~~~~~
+
+``papagai/latest``
+  Always points to the most recently completed papagai task. This makes it easy to find your latest work without remembering the exact branch name.
+
+Finding Your Work
+~~~~~~~~~~~~~~~~~
+
+List all papagai branches:
+
+.. code-block:: console
+
+   $ git branch --list 'papagai/*'
+   papagai/latest
+   papagai/main-20251112-1030-7be3946e
+   papagai/main-20251113-1445-abc123fe
+
+Check out the latest work:
+
+.. code-block:: console
+
+   $ git checkout papagai/latest
+
+Workflow
+--------
+
+Typical Workflow
+~~~~~~~~~~~~~~~~
+
+1. **Start a Task**
+
+   .. code-block:: console
+
+      $ papagai code task.md
+
+2. **Papagai Creates Worktree**
+
+   * Creates temporary worktree directory
+   * Creates new branch (e.g., ``papagai/main-20251112-1030-7be3946e``)
+   * Runs Claude in the isolated environment
+
+3. **Claude Makes Changes**
+
+   * Reads and modifies files
+   * Runs tests
+   * Commits changes with descriptive messages
+
+4. **Review Results**
+
+   * Papagai reports the branch name
+   * Worktree is removed (unless ``--keep`` was used)
+
+5. **Inspect Changes**
+
+   .. code-block:: console
+
+      $ git checkout papagai/latest
+      $ git diff main
+
+6. **Merge or Iterate**
+
+   If satisfied:
+
+   .. code-block:: console
+
+      $ git checkout main
+      $ git merge papagai/latest
+
+   If not satisfied, run another task to refine.
+
+Concurrent Tasks
+~~~~~~~~~~~~~~~~
+
+Run multiple tasks simultaneously:
+
+.. code-block:: console
+
+   # Terminal 1
+   $ papagai code "Add logging to authentication module"
+
+   # Terminal 2 (while first is running)
+   $ papagai code "Update documentation for API endpoints"
+
+Each task runs in its own isolated worktree, so they don't interfere with each other.
+
+Primers
+-------
+
+What are Primers?
+~~~~~~~~~~~~~~~~~
+
+Primers are instruction templates that provide context and guidance to Claude before your specific task instructions.
+
+Built-in Primers
+~~~~~~~~~~~~~~~~
+
+``code`` Primer
+  Includes programming best practices, git workflow guidance, testing principles, and documentation standards. Used by the ``papagai code`` command.
+
+``review`` Primer
+  Provides code review guidelines and feedback structure. Used by the ``papagai review`` command.
+
+No Primer (``do`` command)
+  The ``papagai do`` command runs without a primer, giving you full control over Claude's instructions.
+
+Primer Location
+~~~~~~~~~~~~~~~
+
+Primers are stored in ``papagai/primers/`` within the package:
+
+.. code-block:: text
+
+   papagai/primers/
+   ├── code.md
+   └── review.md
+
+How Primers Work
+~~~~~~~~~~~~~~~~
+
+When you run ``papagai code task.md``:
+
+1. Loads the code primer from ``papagai/primers/code.md``
+2. Appends your task instructions from ``task.md``
+3. Sends the combined instructions to Claude
+
+This allows you to focus on task-specific instructions while maintaining consistent code quality guidance.
+
+Instruction Files
+-----------------
+
+Markdown Format
+~~~~~~~~~~~~~~~
+
+Instructions are written in Markdown format for readability and structure:
+
+.. code-block:: markdown
+
+   # Task: Update Dependencies
+
+   Please update all Python dependencies in this project:
+
+   1. Update `pyproject.toml` with latest compatible versions
+   2. Run tests to ensure compatibility
+   3. Document any breaking changes
+
+Frontmatter Support
+~~~~~~~~~~~~~~~~~~~
+
+Instruction files support YAML frontmatter for metadata and configuration:
+
+.. code-block:: markdown
+
+   ---
+   description: Update Python dependencies
+   tools:
+     - Bash(uv :*)
+     - Edit(./**/pyproject.toml)
+     - Read
+   ---
+
+   # Instructions
+
+   Update all dependencies...
+
+**Supported Frontmatter Keys:**
+
+* ``description``: Human-readable task description (required for tasks)
+* ``tools``: List of allowed tools (restricts Claude's capabilities)
+
+Interactive Input
+~~~~~~~~~~~~~~~~~
+
+If no instruction file is provided, papagai prompts for interactive input:
+
+.. code-block:: console
+
+   $ papagai code
+   Please tell me what you want me to do (Ctrl+D to complete)
+   Add type hints to all functions
+   [Ctrl+D]
+
+This is convenient for quick, one-off tasks.
+
+Git Integration
+---------------
+
+Automatic Commits
+~~~~~~~~~~~~~~~~~
+
+Claude automatically commits changes following git best practices:
+
+* Atomic commits (logical units of change)
+* Descriptive commit messages
+* Appropriate commit message structure
+
+Branch Management
+~~~~~~~~~~~~~~~~~
+
+Papagai manages branches automatically:
+
+* Creates new branches for each task
+* Updates ``papagai/latest`` to point to most recent work
+* Preserves branch history for review
+
+Cleanup
+~~~~~~~
+
+Remove papagai branches when done:
+
+.. code-block:: console
+
+   $ papagai purge
+
+This removes all branches matching ``papagai/*`` except the ones that are currently checked out.
+
+Security Considerations
+-----------------------
+
+Tool Restrictions
+~~~~~~~~~~~~~~~~~
+
+Use the ``tools`` frontmatter key to limit what Claude can do:
+
+.. code-block:: markdown
+
+   ---
+   tools:
+     - Read
+     - Bash(git status)
+     - Bash(git diff)
+   ---
+
+   Review the changes and provide feedback.
+
+This prevents Claude from making unwanted modifications.
+
+Worktree Isolation
+~~~~~~~~~~~~~~~~~~
+
+Worktrees provide isolation, but remember:
+
+* Changes are still committed to git branches
+* Claude has access to the entire repository history
+* Sensitive files in the repository are accessible
+
+Best Practices
+--------------
+
+Task Design
+~~~~~~~~~~~
+
+1. **Start Small**: Begin with simple, focused tasks
+2. **Iterate**: Run multiple tasks to refine results rather than one complex task
+3. **Review Changes**: Always review Claude's changes before merging
+4. **Use Version Control**: Commit your work before running papagai tasks
+
+Workflow Tips
+~~~~~~~~~~~~~
+
+1. **Use Descriptive Instructions**: Clear instructions produce better results
+2. **Leverage Primers**: Use ``papagai code`` for programming tasks
+3. **Organize Tasks**: Create a task library for common operations
+4. **Clean Up Regularly**: Use ``papagai purge`` to remove old branches
+
+Performance Optimization
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. **Use Overlay Filesystem**: For large repositories, use ``--isolation overlayfs``
+2. **Keep Repositories Clean**: Remove unnecessary files to speed up worktree creation
+3. **Limit Tool Access**: Restrict tools to only what's needed for faster execution
+
+Troubleshooting
+---------------
+
+Common Issues
+~~~~~~~~~~~~~
+
+**Worktree Creation Fails**
+
+* Ensure you're in a git repository
+* Check that the repository is clean (``git status``)
+* Verify you have write permissions
+
+**Overlay Filesystem Not Working**
+
+* Install ``fuse-overlayfs`` (see Installation)
+* Check that FUSE is available: ``fusermount --version``
+* Fall back to standard worktrees: ``--isolation worktree``
+
+**Branches Accumulate**
+
+* Regularly run ``papagai purge`` to clean up
+* Use ``--no-keep`` to automatically remove worktrees (default behavior)
+
+**Claude Makes Unwanted Changes**
+
+* Use ``tools`` frontmatter to restrict capabilities
+* Provide more specific instructions
+* Review and iterate with additional tasks
+
+Debug Mode
+~~~~~~~~~~
+
+For troubleshooting, use the ``--dry-run`` flag:
+
+.. code-block:: console
+
+   $ papagai code --dry-run task.md
+
+This shows what would happen without actually executing the task.

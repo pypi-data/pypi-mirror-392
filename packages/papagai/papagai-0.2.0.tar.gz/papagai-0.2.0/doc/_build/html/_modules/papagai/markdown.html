@@ -1,0 +1,398 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>papagai.markdown &mdash; papagai 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=7a5cd723" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            papagai
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../commands.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tasks.html">Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../concepts.html">Concepts</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">papagai</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">papagai.markdown</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for papagai.markdown</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># SPDX-License-Identifier: GPL-3.0-or-later</span>
+
+<span class="sd">&quot;&quot;&quot;Markdown file parsing utilities.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Self</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;papagai.markdown&quot;</span><span class="p">)</span>
+
+<span class="c1"># Regex pattern for frontmatter key: value pairs</span>
+<span class="c1"># Matches: key_name: value</span>
+<span class="n">KEY_VALUE_PATTERN</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^([a-zA-Z0-9_-]+):\s*(.*)$&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Markdown">
+<a class="viewcode-back" href="../../api.html#papagai.markdown.Markdown">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Markdown</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Markdown file with parsed frontmatter.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        frontmatter: Dictionary of frontmatter key-value pairs</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">frontmatter</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+<div class="viewcode-block" id="Markdown.from_string">
+<a class="viewcode-back" href="../../api.html#papagai.markdown.Markdown.from_string">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse a markdown string and extract frontmatter.</span>
+
+<span class="sd">        Frontmatter is delimited by --- at the start and end, and contains</span>
+<span class="sd">        key: value pairs that may span multiple lines.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            content: Markdown content as a string</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Markdown instance with parsed frontmatter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Check if content starts with ---</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">lines</span> <span class="ow">or</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;---&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">frontmatter</span><span class="o">=</span><span class="p">{},</span> <span class="n">text</span><span class="o">=</span><span class="n">content</span><span class="p">)</span>
+
+        <span class="c1"># Find the closing ---</span>
+        <span class="n">current_key</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">current_value</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">frontmatter</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">content</span>  <span class="c1"># Default to full content if no closing --- found</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;---&quot;</span><span class="p">:</span>
+                <span class="c1"># End of frontmatter</span>
+                <span class="k">if</span> <span class="n">current_key</span><span class="p">:</span>
+                    <span class="n">frontmatter</span><span class="p">[</span><span class="n">current_key</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_value</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:])</span>
+                <span class="k">break</span>
+
+            <span class="c1"># Check if this is a key: value line using regex</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">KEY_VALUE_PATTERN</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="c1"># Save previous key-value if exists</span>
+                <span class="k">if</span> <span class="n">current_key</span><span class="p">:</span>
+                    <span class="n">frontmatter</span><span class="p">[</span><span class="n">current_key</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_value</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+                <span class="c1"># Start new key-value</span>
+                <span class="n">current_key</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">current_value</span> <span class="o">=</span> <span class="p">[</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span>
+            <span class="k">elif</span> <span class="n">current_key</span><span class="p">:</span>
+                <span class="c1"># Continuation of multi-line value</span>
+                <span class="n">current_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># No closing --- found, reset to empty frontmatter</span>
+            <span class="n">frontmatter</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">content</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">frontmatter</span><span class="o">=</span><span class="n">frontmatter</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Markdown.from_file">
+<a class="viewcode-back" href="../../api.html#papagai.markdown.Markdown.from_file">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse a markdown file and extract frontmatter.</span>
+
+<span class="sd">        Frontmatter is delimited by --- at the start and end, and contains</span>
+<span class="sd">        key: value pairs that may span multiple lines.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            file_path: Path to the markdown file</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Markdown instance with parsed frontmatter</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FileNotFoundError: If the file does not exist</span>
+<span class="sd">            PermissionError: If the file cannot be read</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">file_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">content</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="MarkdownInstructions">
+<a class="viewcode-back" href="../../api.html#papagai.markdown.MarkdownInstructions">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MarkdownInstructions</span><span class="p">(</span><span class="n">Markdown</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Markdown file with parsed instructions frontmatter.</span>
+
+<span class="sd">    Inherits from Markdown and adds convenience fields for description and tools.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        description: Description from frontmatter, or empty string if not found</span>
+<span class="sd">        tools: List of tool strings parsed from frontmatter, or empty list if not found</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">tools</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MarkdownInstructions.from_string">
+<a class="viewcode-back" href="../../api.html#papagai.markdown.MarkdownInstructions.from_string">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse a markdown string and extract instructions frontmatter.</span>
+
+<span class="sd">        Parses the description and tools from the frontmatter.</span>
+<span class="sd">        Tools are comma-separated, but commas inside parentheses/braces are preserved.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            content: Markdown content as a string</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            MarkdownInstructions instance with parsed frontmatter and fields</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># First parse the base frontmatter</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">Markdown</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+
+        <span class="c1"># Extract description</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">frontmatter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Extract and parse tools</span>
+        <span class="n">tools_str</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">frontmatter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tools&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">tools</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_parse_tools</span><span class="p">(</span><span class="n">tools_str</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">frontmatter</span><span class="o">=</span><span class="n">base</span><span class="o">.</span><span class="n">frontmatter</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="n">base</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MarkdownInstructions.from_file">
+<a class="viewcode-back" href="../../api.html#papagai.markdown.MarkdownInstructions.from_file">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse a markdown file and extract instructions frontmatter.</span>
+
+<span class="sd">        Parses the description and tools from the frontmatter.</span>
+<span class="sd">        Tools are comma-separated, but commas inside parentheses/braces are preserved.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            file_path: Path to the markdown file</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            MarkdownInstructions instance with parsed frontmatter and fields</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FileNotFoundError: If the file does not exist</span>
+<span class="sd">            PermissionError: If the file cannot be read</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># First parse the base frontmatter</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">Markdown</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+
+        <span class="c1"># Extract description</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">frontmatter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Extract and parse tools</span>
+        <span class="n">tools_str</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">frontmatter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tools&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">tools</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_parse_tools</span><span class="p">(</span><span class="n">tools_str</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">frontmatter</span><span class="o">=</span><span class="n">base</span><span class="o">.</span><span class="n">frontmatter</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="n">base</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MarkdownInstructions.combine">
+<a class="viewcode-back" href="../../api.html#papagai.markdown.MarkdownInstructions.combine">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">combine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Combine this MarkdownInstructions with another.</span>
+
+<span class="sd">        Creates a new MarkdownInstructions with:</span>
+<span class="sd">        - Text from both objects concatenated (self.text + other.text)</span>
+<span class="sd">        - Tools from both objects combined (deduplicated)</span>
+<span class="sd">        - Description from only the first object (self)</span>
+<span class="sd">        - Frontmatter merged from both objects</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other: Another MarkdownInstructions to combine with</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            New MarkdownInstructions with combined content</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Combine text from both objects</span>
+        <span class="n">combined_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">text</span>
+
+        <span class="c1"># Combine tools, preserving order and removing duplicates</span>
+        <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">combined_tools</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">tool</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tools</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">tools</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tool</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tool</span><span class="p">)</span>
+                <span class="n">combined_tools</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tool</span><span class="p">)</span>
+
+        <span class="c1"># Merge frontmatter (self takes precedence for duplicate keys)</span>
+        <span class="n">combined_frontmatter</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">other</span><span class="o">.</span><span class="n">frontmatter</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">frontmatter</span><span class="p">}</span>
+
+        <span class="c1"># Description only from first object</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span>
+
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span>
+            <span class="n">frontmatter</span><span class="o">=</span><span class="n">combined_frontmatter</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="n">combined_text</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">tools</span><span class="o">=</span><span class="n">combined_tools</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parse_tools</span><span class="p">(</span><span class="n">tools_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse comma-separated tools, respecting nested parentheses and braces.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tools_str: Comma-separated tool specifications</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List of tool strings, or empty list if input is empty</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tools_str</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="c1"># Split by comma, but only if not inside parentheses or braces</span>
+        <span class="n">tools</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">current_tool</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">depth</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Track nesting depth of () and {}</span>
+
+        <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">tools_str</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">char</span> <span class="ow">in</span> <span class="s2">&quot;({&quot;</span><span class="p">:</span>
+                <span class="n">depth</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">current_tool</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">char</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">char</span> <span class="ow">in</span> <span class="s2">&quot;)}&quot;</span><span class="p">:</span>
+                <span class="n">depth</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="n">current_tool</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">char</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">char</span> <span class="o">==</span> <span class="s2">&quot;,&quot;</span> <span class="ow">and</span> <span class="n">depth</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># Comma at top level - end of current tool</span>
+                <span class="n">tool</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_tool</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">tool</span><span class="p">:</span>
+                    <span class="n">tools</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tool</span><span class="p">)</span>
+                <span class="n">current_tool</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">current_tool</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">char</span><span class="p">)</span>
+
+        <span class="c1"># Add the last tool</span>
+        <span class="n">tool</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_tool</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">tool</span><span class="p">:</span>
+            <span class="n">tools</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tool</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tools</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Peter Hutterer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

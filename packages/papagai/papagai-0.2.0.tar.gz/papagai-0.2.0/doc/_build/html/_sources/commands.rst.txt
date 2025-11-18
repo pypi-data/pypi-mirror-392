@@ -1,0 +1,244 @@
+Commands
+========
+
+This page describes all available papagai commands.
+
+papagai code
+------------
+
+Run Claude with a programming primer that provides best practices guidance.
+
+.. code-block:: console
+
+   $ papagai code [OPTIONS] [INSTRUCTIONS_FILE]
+
+**Options:**
+
+* ``--branch, -b BRANCH``: Base branch to work from (default: current branch)
+* ``--keep/--no-keep``: Keep or remove the worktree after completion (default: remove)
+* ``--isolation CHOICE``: Isolation mode - ``auto``, ``worktree``, or ``overlayfs`` (default: auto)
+* ``--dry-run``: Show what would be done without executing
+
+**Arguments:**
+
+* ``INSTRUCTIONS_FILE``: Optional path to a markdown file with instructions. If not provided, will prompt for input.
+
+**Description:**
+
+The ``code`` command includes a programming primer that instructs Claude on:
+
+* Code quality principles
+* Git best practices
+* Development workflow
+* Testing and documentation standards
+
+This primer is automatically prepended to your instructions, allowing you to focus on the specific task.
+
+**Examples:**
+
+Interactive mode (prompts for instructions):
+
+.. code-block:: console
+
+   $ papagai code
+   Please tell me what you want me to do (Ctrl+D to complete)
+   Update all .format() strings with f-strings
+
+From a file:
+
+.. code-block:: console
+
+   $ echo "Update all .format() strings with f-strings" > task.md
+   $ papagai code task.md
+
+With options:
+
+.. code-block:: console
+
+   $ papagai code --branch main --keep task.md
+
+papagai do
+----------
+
+Run Claude without the programming primer for more general tasks.
+
+.. code-block:: console
+
+   $ papagai do [OPTIONS] [INSTRUCTIONS_FILE]
+
+**Options:**
+
+Same as ``papagai code``.
+
+**Description:**
+
+The ``do`` command works exactly like ``code`` but does not include the programming primer. Use this when you want full control over the instructions or for non-programming tasks.
+
+**Example:**
+
+.. code-block:: console
+
+   $ echo "You are a native Spanish speaker. Translate all strings to Spanish" > translate.md
+   $ papagai do translate.md
+
+papagai task
+------------
+
+Run pre-written tasks from built-in or custom task libraries.
+
+.. code-block:: console
+
+   $ papagai task [OPTIONS] [TASK_NAME]
+
+**Options:**
+
+* ``--list``: List all available tasks
+* ``--branch, -b BRANCH``: Base branch to work from
+* ``--keep/--no-keep``: Keep or remove the worktree after completion
+* ``--isolation CHOICE``: Isolation mode
+
+**Arguments:**
+
+* ``TASK_NAME``: Name of the task to run (e.g., ``python/update-to-3.9``)
+
+**Description:**
+
+Tasks are markdown files with frontmatter stored in:
+
+* Built-in tasks: Shipped with papagai in ``papagai/tasks/**/*.md``
+* User tasks: ``$XDG_CONFIG_HOME/papagai/tasks/**/*.md``
+
+Task files must have a ``description`` key in the frontmatter:
+
+.. code-block:: markdown
+
+   ---
+   description: Update a Python code base to Python 3.9+
+   ---
+   You are a very smart LLM. Please update this codebase...
+
+**Variable Substitution:**
+
+Tasks support variable substitution:
+
+* ``{BRANCH}`` - Original branch name
+* ``{WORKTREE_BRANCH}`` - Current worktree branch name
+
+**Examples:**
+
+List available tasks:
+
+.. code-block:: console
+
+   $ papagai task --list
+   Built-in tasks:
+     python/update-to-3.9  ... Update a Python code base to Python 3.9+
+     c/modernize           ... Modernize C code to C11 standards
+
+   User tasks:
+     myproject/refactor    ... Refactor myproject code
+
+Run a task:
+
+.. code-block:: console
+
+   $ papagai task python/update-to-3.9
+
+papagai review
+--------------
+
+Convenience command for code review.
+
+.. code-block:: console
+
+   $ papagai review [OPTIONS]
+
+**Options:**
+
+Same as ``papagai code``.
+
+**Description:**
+
+This command reviews all commits on the current branch, providing inline feedback and creating fixup commits for any issues found. It's a shortcut for running a code review task.
+
+**Example:**
+
+.. code-block:: console
+
+   $ papagai review
+
+papagai purge
+-------------
+
+Clean up papagai branches.
+
+.. code-block:: console
+
+   $ papagai purge [OPTIONS]
+
+**Options:**
+
+* ``--dry-run``: Show what would be deleted without actually deleting
+
+**Description:**
+
+Removes all branches matching the ``papagai/*`` pattern. Use this to clean up branches created by papagai after you've merged or reviewed the changes.
+
+**Example:**
+
+.. code-block:: console
+
+   $ papagai purge
+   Deleting branch papagai/main-20251112-1030-7be3946e
+   Deleting branch papagai/main-20251113-1445-abc123fe
+
+Common Options
+--------------
+
+These options are available for most commands:
+
+Isolation Modes
+~~~~~~~~~~~~~~~
+
+The ``--isolation`` option controls how worktrees are isolated:
+
+* ``auto`` (default): Automatically choose based on availability (prefers overlayfs if available)
+* ``worktree``: Use standard git worktrees
+* ``overlayfs``: Use fuse-overlayfs for copy-on-write isolation (requires fuse-overlayfs)
+
+Branch Selection
+~~~~~~~~~~~~~~~~
+
+The ``--branch`` or ``-b`` option specifies which branch to base the work on:
+
+.. code-block:: console
+
+   $ papagai code --branch develop task.md
+
+Worktree Retention
+~~~~~~~~~~~~~~~~~~
+
+By default, worktrees are removed after the task completes. Use ``--keep`` to retain them:
+
+.. code-block:: console
+
+   $ papagai code --keep task.md
+
+Frontmatter Options
+-------------------
+
+Instruction files can include YAML frontmatter to control behavior:
+
+Tool Restrictions
+~~~~~~~~~~~~~~~~~
+
+Limit which tools Claude can use:
+
+.. code-block:: markdown
+
+   ---
+   tools: Bash(uv :*)
+   ---
+   Update all dependencies using uv
+
+This restricts Claude to only use the ``uv`` command via Bash.

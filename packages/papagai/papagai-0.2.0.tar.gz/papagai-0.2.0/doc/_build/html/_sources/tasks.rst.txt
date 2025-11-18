@@ -1,0 +1,259 @@
+Tasks
+=====
+
+Tasks are pre-written instruction sets that can be reused across projects. Papagai supports both built-in tasks and custom user tasks.
+
+Task Structure
+--------------
+
+Tasks are markdown files with YAML frontmatter:
+
+.. code-block:: markdown
+
+   ---
+   description: A short description of what this task does
+   tools: Bash(git:*), Read, Write, Edit  # Optional: tool restrictions
+   ---
+
+   # Task Instructions
+
+   You are an expert programmer. Please analyze this codebase and...
+
+The ``description`` field is required and is shown in the task list.
+
+Built-in Tasks
+--------------
+
+Papagai ships with several useful tasks in ``papagai/tasks/``:
+
+Python Tasks
+~~~~~~~~~~~~
+
+Located in ``papagai/tasks/python/``:
+
+* **update-to-3.9**: Update Python codebase to use Python 3.9+ features
+* Other Python modernization tasks
+
+C Tasks
+~~~~~~~
+
+Located in ``papagai/tasks/c/``:
+
+* **modernize**: Modernize C code to C11 standards
+
+Meson Tasks
+~~~~~~~~~~~
+
+Located in ``papagai/tasks/meson/``:
+
+* Build system related tasks
+
+To see all available built-in tasks:
+
+.. code-block:: console
+
+   $ papagai task --list
+
+Custom User Tasks
+-----------------
+
+Create your own tasks in ``$XDG_CONFIG_HOME/papagai/tasks/``:
+
+.. code-block:: console
+
+   $ mkdir -p ~/.config/papagai/tasks/myproject
+   $ cat > ~/.config/papagai/tasks/myproject/refactor.md << 'EOF'
+   ---
+   description: Refactor myproject using modern patterns
+   ---
+
+   You are an expert in software architecture. Please:
+
+   1. Analyze the current codebase structure
+   2. Identify areas for improvement
+   3. Apply modern design patterns
+   4. Ensure all tests pass after refactoring
+   EOF
+
+Run your custom task:
+
+.. code-block:: console
+
+   $ papagai task myproject/refactor
+
+Task Organization
+-----------------
+
+Tasks can be organized in subdirectories for better organization:
+
+.. code-block:: text
+
+   ~/.config/papagai/tasks/
+   ├── python/
+   │   ├── django-upgrade.md
+   │   └── async-refactor.md
+   ├── javascript/
+   │   ├── react-modernize.md
+   │   └── typescript-convert.md
+   └── general/
+       ├── add-tests.md
+       └── improve-docs.md
+
+Reference tasks using the directory path:
+
+.. code-block:: console
+
+   $ papagai task python/django-upgrade
+   $ papagai task javascript/typescript-convert
+
+Variable Substitution
+---------------------
+
+Tasks support variable substitution for dynamic content:
+
+Available Variables
+~~~~~~~~~~~~~~~~~~~
+
+* ``{BRANCH}`` - The original branch name (before creating the worktree)
+* ``{WORKTREE_BRANCH}`` - The worktree branch name (e.g., ``papagai/main-20251112-1030-7be3946e``)
+
+Example Usage
+~~~~~~~~~~~~~
+
+.. code-block:: markdown
+
+   ---
+   description: Create a PR for changes
+   ---
+
+   Create a pull request from branch {WORKTREE_BRANCH} to {BRANCH}.
+
+   Use the following PR template:
+   - Base branch: {BRANCH}
+   - Working branch: {WORKTREE_BRANCH}
+
+Tool Restrictions
+-----------------
+
+Limit which tools Claude can use in a task:
+
+.. code-block:: markdown
+
+   ---
+   description: Update dependencies only
+   tools:
+     - Bash(uv :*)
+     - Bash(pip :*)
+     - Edit(./**/pyproject.toml)
+     - Read
+   ---
+
+   Update all Python dependencies to their latest compatible versions.
+
+This ensures Claude can only:
+
+* Run ``uv`` and ``pip`` commands
+* Edit ``pyproject.toml`` files
+* Read files for information
+
+Best Practices
+--------------
+
+Writing Effective Tasks
+~~~~~~~~~~~~~~~~~~~~~~~
+
+1. **Be Specific**: Clear, detailed instructions produce better results
+2. **Include Context**: Explain why the task matters and what the expected outcome is
+3. **Set Boundaries**: Use tool restrictions to prevent unintended changes
+4. **Test First**: Run tasks on a test repository before using on production code
+5. **Version Control**: Keep your task library in git for versioning and sharing
+
+Task Complexity
+~~~~~~~~~~~~~~~
+
+Tasks can range from simple to complex:
+
+**Simple Task** (single focus):
+
+.. code-block:: markdown
+
+   ---
+   description: Add type hints to Python functions
+   ---
+
+   Add type hints to all function signatures in the codebase.
+
+**Complex Task** (multi-step):
+
+.. code-block:: markdown
+
+   ---
+   description: Comprehensive code modernization
+   ---
+
+   Modernize this codebase by:
+
+   1. Updating to Python 3.12 features (match statements, type hints, etc.)
+   2. Replacing deprecated APIs with modern equivalents
+   3. Improving error handling with exception groups
+   4. Adding comprehensive docstrings
+   5. Ensuring all tests pass
+
+Sharing Tasks
+~~~~~~~~~~~~~
+
+Share tasks with your team by:
+
+1. Creating a shared task repository
+2. Symlinking or copying tasks to ``~/.config/papagai/tasks/``
+3. Documenting task usage in your project README
+
+Example Task Library
+--------------------
+
+Here's a complete example of a useful task:
+
+.. code-block:: markdown
+
+   ---
+   description: Add comprehensive logging to Python codebase
+   tools:
+     - Bash(git:*)
+     - Read
+     - Edit(./**/*.py)
+     - Write(./**/*.py)
+   ---
+
+   # Add Comprehensive Logging
+
+   You are an expert Python developer. Add comprehensive logging to this codebase:
+
+   ## Requirements
+
+   1. Import logging at the top of each module that needs it
+   2. Create module-level loggers: `logger = logging.getLogger(__name__)`
+   3. Add appropriate log levels:
+      - DEBUG: Detailed diagnostic information
+      - INFO: Confirmation of expected behavior
+      - WARNING: Unexpected events that don't prevent operation
+      - ERROR: Serious problems that prevent some functionality
+      - CRITICAL: System failure
+
+   4. Log at key points:
+      - Function entry/exit for complex functions
+      - Error conditions with context
+      - Important state changes
+      - External API calls
+
+   5. Include relevant context in log messages
+   6. Use structured logging where appropriate
+
+   ## Do Not
+
+   - Don't add logging to test files
+   - Don't log sensitive information (passwords, tokens, etc.)
+   - Don't use print() statements - convert existing ones to logging
+
+   ## Testing
+
+   After adding logging, run the test suite to ensure nothing broke.

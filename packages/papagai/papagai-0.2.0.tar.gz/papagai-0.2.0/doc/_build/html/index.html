@@ -1,0 +1,221 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>papagai Documentation &mdash; papagai 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=7a5cd723" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            papagai
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="commands.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tasks.html">Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="concepts.html">Concepts</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">papagai</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">papagai Documentation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="papagai-documentation">
+<h1>papagai Documentation<a class="headerlink" href="#papagai-documentation" title="Link to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">papagai</span></code> is a command-line tool that runs Claude AI on git repositories using isolated worktrees. It allows Claude to make changes in separate git worktrees, enabling multiple tasks to run simultaneously without interfering with the main working directory.</p>
+<section id="key-features">
+<h2>Key Features<a class="headerlink" href="#key-features" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Isolated Worktrees</strong>: All changes happen in dedicated git worktrees, keeping your main workspace clean</p></li>
+<li><p><strong>Concurrent Tasks</strong>: Run multiple Claude tasks simultaneously without conflicts</p></li>
+<li><p><strong>Automatic Git Integration</strong>: Changes are automatically committed and pulled back as branches</p></li>
+<li><p><strong>Pre-written Tasks</strong>: Comes with built-in tasks and supports custom task templates</p></li>
+<li><p><strong>Flexible Isolation</strong>: Supports both standard git worktrees and overlay filesystem worktrees</p></li>
+</ul>
+</section>
+<section id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading"></a></h2>
+<section id="installation">
+<h3>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>https://github.com/whot/papagai
+</pre></div>
+</div>
+<p>If running from the git repository, use <a class="reference external" href="https://github.com/astral-sh/uv">uv</a>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>papagai
+</pre></div>
+</div>
+</section>
+<section id="basic-usage">
+<h3>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading"></a></h3>
+<p>The primary commands are <code class="docutils literal notranslate"><span class="pre">code</span></code> and <code class="docutils literal notranslate"><span class="pre">do</span></code> to get Claude to perform tasks:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>papagai<span class="w"> </span>code
+<span class="go">Please tell me what you want me to do (Ctrl+D to complete)</span>
+<span class="go">Update all .format() strings with f-strings</span>
+<span class="go">Working in papagai/main-2025-11-12-7be3946e (based off main)</span>
+<span class="go">[...]</span>
+<span class="go">My work here is done. Check out branch papagai/main-2025-11-12-7be3946e</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">code</span></code> command includes programming best practices guidance, while <code class="docutils literal notranslate"><span class="pre">do</span></code> runs without the programming primer.</p>
+</section>
+</section>
+<section id="documentation-contents">
+<h2>Documentation Contents<a class="headerlink" href="#documentation-contents" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-from-source">Installing from Source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#development-installation">Development Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#optional-dependencies">Optional Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#verifying-installation">Verifying Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="commands.html">Commands</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="commands.html#papagai-code">papagai code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="commands.html#papagai-do">papagai do</a></li>
+<li class="toctree-l2"><a class="reference internal" href="commands.html#papagai-task">papagai task</a></li>
+<li class="toctree-l2"><a class="reference internal" href="commands.html#papagai-review">papagai review</a></li>
+<li class="toctree-l2"><a class="reference internal" href="commands.html#papagai-purge">papagai purge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="commands.html#common-options">Common Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="commands.html#frontmatter-options">Frontmatter Options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tasks.html">Tasks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tasks.html#task-structure">Task Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks.html#built-in-tasks">Built-in Tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks.html#custom-user-tasks">Custom User Tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks.html#task-organization">Task Organization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks.html#variable-substitution">Variable Substitution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks.html#tool-restrictions">Tool Restrictions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks.html#example-task-library">Example Task Library</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="concepts.html">Concepts</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="concepts.html#worktrees">Worktrees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts.html#isolation-modes">Isolation Modes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts.html#branch-naming">Branch Naming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts.html#workflow">Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts.html#primers">Primers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts.html#instruction-files">Instruction Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts.html#git-integration">Git Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts.html#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-papagai.cli">CLI Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-papagai.worktree">Worktree Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-papagai.markdown">Markdown Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-papagai.cmd">Command Module</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Peter Hutterer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

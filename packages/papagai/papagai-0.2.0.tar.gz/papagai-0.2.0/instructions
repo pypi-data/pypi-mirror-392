@@ -1,0 +1,12 @@
+Add a new --branch/-b commandline argument to code, do and review. This command specifies the target branch to work on.
+
+- if the value is None or ., use the current branch as base branch
+- if the value is an existing branch, use that branch as the base branch
+- if the value is a new branch's name, create that branch and then use it as a base branch
+
+For example, a `--branch foo` argument should (optionally create and) switch to
+the foo branch in the worktree or overlayfs before creating the custom branch.
+
+After pulling the work branch into the local repository, if --branch is any
+value other than None, git pull the work branch into the desired branch.
+

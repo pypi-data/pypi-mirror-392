@@ -1,0 +1,70 @@
+papagai Documentation
+=====================
+
+``papagai`` is a command-line tool that runs Claude AI on git repositories using isolated worktrees. It allows Claude to make changes in separate git worktrees, enabling multiple tasks to run simultaneously without interfering with the main working directory.
+
+Key Features
+------------
+
+* **Isolated Worktrees**: All changes happen in dedicated git worktrees, keeping your main workspace clean
+* **Concurrent Tasks**: Run multiple Claude tasks simultaneously without conflicts
+* **Automatic Git Integration**: Changes are automatically committed and pulled back as branches
+* **Pre-written Tasks**: Comes with built-in tasks and supports custom task templates
+* **Flexible Isolation**: Supports both standard git worktrees and overlay filesystem worktrees
+
+Quick Start
+-----------
+
+Installation
+~~~~~~~~~~~~
+
+.. code-block:: console
+
+   $ pip install https://github.com/whot/papagai
+
+If running from the git repository, use `uv <https://github.com/astral-sh/uv>`_:
+
+.. code-block:: console
+
+   $ uv run papagai
+
+Basic Usage
+~~~~~~~~~~~
+
+The primary commands are ``code`` and ``do`` to get Claude to perform tasks:
+
+.. code-block:: console
+
+   $ papagai code
+   Please tell me what you want me to do (Ctrl+D to complete)
+   Update all .format() strings with f-strings
+   Working in papagai/main-2025-11-12-7be3946e (based off main)
+   [...]
+   My work here is done. Check out branch papagai/main-2025-11-12-7be3946e
+
+The ``code`` command includes programming best practices guidance, while ``do`` runs without the programming primer.
+
+Documentation Contents
+----------------------
+
+.. toctree::
+   :maxdepth: 2
+   :caption: User Guide
+
+   installation
+   commands
+   tasks
+   concepts
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Reference
+
+   api
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

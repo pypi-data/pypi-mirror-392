@@ -1,0 +1,571 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Concepts &mdash; papagai 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=7a5cd723" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="api.html" />
+    <link rel="prev" title="Tasks" href="tasks.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            papagai
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="commands.html">Commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tasks.html">Tasks</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Concepts</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#worktrees">Worktrees</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-are-worktrees">What are Worktrees?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-papagai-uses-worktrees">How Papagai Uses Worktrees</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#isolation-modes">Isolation Modes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#standard-git-worktrees">Standard Git Worktrees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#overlay-filesystem-worktrees">Overlay Filesystem Worktrees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#auto-mode">Auto Mode</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#branch-naming">Branch Naming</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#branch-naming-convention">Branch Naming Convention</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#special-branches">Special Branches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#finding-your-work">Finding Your Work</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#workflow">Workflow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#typical-workflow">Typical Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#concurrent-tasks">Concurrent Tasks</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#primers">Primers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-are-primers">What are Primers?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#built-in-primers">Built-in Primers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#primer-location">Primer Location</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-primers-work">How Primers Work</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#instruction-files">Instruction Files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#markdown-format">Markdown Format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#frontmatter-support">Frontmatter Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#interactive-input">Interactive Input</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#git-integration">Git Integration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#automatic-commits">Automatic Commits</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#branch-management">Branch Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cleanup">Cleanup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#security-considerations">Security Considerations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tool-restrictions">Tool Restrictions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#worktree-isolation">Worktree Isolation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices">Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#task-design">Task Design</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#workflow-tips">Workflow Tips</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#performance-optimization">Performance Optimization</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#common-issues">Common Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#debug-mode">Debug Mode</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">papagai</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Concepts</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/concepts.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="concepts">
+<h1>Concepts<a class="headerlink" href="#concepts" title="Link to this heading"></a></h1>
+<p>This page explains the core concepts and architecture of papagai.</p>
+<section id="worktrees">
+<h2>Worktrees<a class="headerlink" href="#worktrees" title="Link to this heading"></a></h2>
+<section id="what-are-worktrees">
+<h3>What are Worktrees?<a class="headerlink" href="#what-are-worktrees" title="Link to this heading"></a></h3>
+<p>Git worktrees allow you to have multiple working directories for a single repository. Papagai uses worktrees to isolate Claude’s work from your main development environment.</p>
+<p><strong>Benefits:</strong></p>
+<ul class="simple">
+<li><p>Work on multiple tasks simultaneously without switching branches</p></li>
+<li><p>Keep your main workspace clean and unaffected by Claude’s changes</p></li>
+<li><p>Easy rollback - just delete the worktree branch if you don’t like the changes</p></li>
+<li><p>Safe experimentation without risking your working code</p></li>
+</ul>
+</section>
+<section id="how-papagai-uses-worktrees">
+<h3>How Papagai Uses Worktrees<a class="headerlink" href="#how-papagai-uses-worktrees" title="Link to this heading"></a></h3>
+<p>When you run a papagai command:</p>
+<ol class="arabic simple">
+<li><p>Creates a new git worktree in a temporary directory</p></li>
+<li><p>Creates a new branch with the naming pattern: <code class="docutils literal notranslate"><span class="pre">papagai/&lt;prefix&gt;&lt;base&gt;-&lt;timestamp&gt;-&lt;uuid&gt;</span></code></p></li>
+<li><p>Runs Claude in that isolated worktree</p></li>
+<li><p>Commits changes to the worktree branch</p></li>
+<li><p>Returns to your original workspace</p></li>
+<li><p>(Optionally) Removes the worktree directory</p></li>
+</ol>
+<p>The <code class="docutils literal notranslate"><span class="pre">papagai/latest</span></code> branch always points to the most recent work, making it easy to find.</p>
+</section>
+</section>
+<section id="isolation-modes">
+<h2>Isolation Modes<a class="headerlink" href="#isolation-modes" title="Link to this heading"></a></h2>
+<p>Papagai supports two isolation modes for running Claude:</p>
+<section id="standard-git-worktrees">
+<h3>Standard Git Worktrees<a class="headerlink" href="#standard-git-worktrees" title="Link to this heading"></a></h3>
+<p><strong>Mode:</strong> <code class="docutils literal notranslate"><span class="pre">--isolation</span> <span class="pre">worktree</span></code></p>
+<p>Uses standard git worktree functionality. This creates a new working directory with a full checkout of the repository.</p>
+<p><strong>Pros:</strong></p>
+<ul class="simple">
+<li><p>Native git feature, no additional dependencies</p></li>
+<li><p>Reliable and well-tested</p></li>
+<li><p>Works on all platforms</p></li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul class="simple">
+<li><p>Slower for large repositories (full file copy)</p></li>
+<li><p>Uses more disk space</p></li>
+<li><p>Higher I/O overhead</p></li>
+</ul>
+</section>
+<section id="overlay-filesystem-worktrees">
+<h3>Overlay Filesystem Worktrees<a class="headerlink" href="#overlay-filesystem-worktrees" title="Link to this heading"></a></h3>
+<p><strong>Mode:</strong> <code class="docutils literal notranslate"><span class="pre">--isolation</span> <span class="pre">overlayfs</span></code></p>
+<p>Uses fuse-overlayfs to create a copy-on-write filesystem layer. Only modified files are actually written to disk.</p>
+<p><strong>Pros:</strong></p>
+<ul class="simple">
+<li><p>Much faster for large repositories</p></li>
+<li><p>Minimal disk space usage (only stores changes)</p></li>
+<li><p>Reduced I/O overhead</p></li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul class="simple">
+<li><p>Requires <code class="docutils literal notranslate"><span class="pre">fuse-overlayfs</span></code> installation</p></li>
+<li><p>Linux-only (uses FUSE filesystem)</p></li>
+<li><p>More complex setup</p></li>
+</ul>
+<p><strong>Installation:</strong></p>
+<p>Fedora/RHEL:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>fuse-overlayfs
+</pre></div>
+</div>
+<p>Ubuntu/Debian:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>fuse-overlayfs
+</pre></div>
+</div>
+</section>
+<section id="auto-mode">
+<h3>Auto Mode<a class="headerlink" href="#auto-mode" title="Link to this heading"></a></h3>
+<p><strong>Mode:</strong> <code class="docutils literal notranslate"><span class="pre">--isolation</span> <span class="pre">auto</span></code> (default)</p>
+<p>Automatically selects the best available isolation mode:</p>
+<ol class="arabic simple">
+<li><p>Tries overlay filesystem if <code class="docutils literal notranslate"><span class="pre">fuse-overlayfs</span></code> is available</p></li>
+<li><p>Falls back to standard git worktrees</p></li>
+</ol>
+</section>
+</section>
+<section id="branch-naming">
+<h2>Branch Naming<a class="headerlink" href="#branch-naming" title="Link to this heading"></a></h2>
+<section id="branch-naming-convention">
+<h3>Branch Naming Convention<a class="headerlink" href="#branch-naming-convention" title="Link to this heading"></a></h3>
+<p>Papagai creates branches following a specific pattern:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>papagai/&lt;prefix&gt;&lt;base-branch&gt;-&lt;YYYYmmdd-HHMM&gt;-&lt;uuid&gt;
+</pre></div>
+</div>
+<p><strong>Components:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">papagai/</span></code> - Namespace prefix for easy identification</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;prefix&gt;</span></code> - Optional prefix (e.g., <code class="docutils literal notranslate"><span class="pre">wip/</span></code> for work-in-progress)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;base-branch&gt;</span></code> - The branch you were on when starting</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;YYYYmmdd-HHMM&gt;</span></code> - Timestamp when the branch was created</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;uuid&gt;</span></code> - Short unique identifier</p></li>
+</ul>
+<p><strong>Examples:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>papagai/main-20251112-1030-7be3946e
+papagai/wip/develop-20251113-1445-abc123fe
+papagai/latest
+</pre></div>
+</div>
+</section>
+<section id="special-branches">
+<h3>Special Branches<a class="headerlink" href="#special-branches" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">papagai/latest</span></code></dt><dd><p>Always points to the most recently completed papagai task. This makes it easy to find your latest work without remembering the exact branch name.</p>
+</dd>
+</dl>
+</section>
+<section id="finding-your-work">
+<h3>Finding Your Work<a class="headerlink" href="#finding-your-work" title="Link to this heading"></a></h3>
+<p>List all papagai branches:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>branch<span class="w"> </span>--list<span class="w"> </span><span class="s1">&#39;papagai/*&#39;</span>
+<span class="go">papagai/latest</span>
+<span class="go">papagai/main-20251112-1030-7be3946e</span>
+<span class="go">papagai/main-20251113-1445-abc123fe</span>
+</pre></div>
+</div>
+<p>Check out the latest work:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>checkout<span class="w"> </span>papagai/latest
+</pre></div>
+</div>
+</section>
+</section>
+<section id="workflow">
+<h2>Workflow<a class="headerlink" href="#workflow" title="Link to this heading"></a></h2>
+<section id="typical-workflow">
+<h3>Typical Workflow<a class="headerlink" href="#typical-workflow" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p><strong>Start a Task</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>papagai<span class="w"> </span>code<span class="w"> </span>task.md
+</pre></div>
+</div>
+</li>
+<li><p><strong>Papagai Creates Worktree</strong></p>
+<ul class="simple">
+<li><p>Creates temporary worktree directory</p></li>
+<li><p>Creates new branch (e.g., <code class="docutils literal notranslate"><span class="pre">papagai/main-20251112-1030-7be3946e</span></code>)</p></li>
+<li><p>Runs Claude in the isolated environment</p></li>
+</ul>
+</li>
+<li><p><strong>Claude Makes Changes</strong></p>
+<ul class="simple">
+<li><p>Reads and modifies files</p></li>
+<li><p>Runs tests</p></li>
+<li><p>Commits changes with descriptive messages</p></li>
+</ul>
+</li>
+<li><p><strong>Review Results</strong></p>
+<ul class="simple">
+<li><p>Papagai reports the branch name</p></li>
+<li><p>Worktree is removed (unless <code class="docutils literal notranslate"><span class="pre">--keep</span></code> was used)</p></li>
+</ul>
+</li>
+<li><p><strong>Inspect Changes</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>checkout<span class="w"> </span>papagai/latest
+<span class="gp">$ </span>git<span class="w"> </span>diff<span class="w"> </span>main
+</pre></div>
+</div>
+</li>
+<li><p><strong>Merge or Iterate</strong></p>
+<p>If satisfied:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>checkout<span class="w"> </span>main
+<span class="gp">$ </span>git<span class="w"> </span>merge<span class="w"> </span>papagai/latest
+</pre></div>
+</div>
+<p>If not satisfied, run another task to refine.</p>
+</li>
+</ol>
+</section>
+<section id="concurrent-tasks">
+<h3>Concurrent Tasks<a class="headerlink" href="#concurrent-tasks" title="Link to this heading"></a></h3>
+<p>Run multiple tasks simultaneously:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp"># </span>Terminal<span class="w"> </span><span class="m">1</span>
+<span class="gp">$ </span>papagai<span class="w"> </span>code<span class="w"> </span><span class="s2">&quot;Add logging to authentication module&quot;</span>
+
+<span class="gp"># </span>Terminal<span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="o">(</span><span class="k">while</span><span class="w"> </span>first<span class="w"> </span>is<span class="w"> </span>running<span class="o">)</span>
+<span class="gp">$ </span>papagai<span class="w"> </span>code<span class="w"> </span><span class="s2">&quot;Update documentation for API endpoints&quot;</span>
+</pre></div>
+</div>
+<p>Each task runs in its own isolated worktree, so they don’t interfere with each other.</p>
+</section>
+</section>
+<section id="primers">
+<h2>Primers<a class="headerlink" href="#primers" title="Link to this heading"></a></h2>
+<section id="what-are-primers">
+<h3>What are Primers?<a class="headerlink" href="#what-are-primers" title="Link to this heading"></a></h3>
+<p>Primers are instruction templates that provide context and guidance to Claude before your specific task instructions.</p>
+</section>
+<section id="built-in-primers">
+<h3>Built-in Primers<a class="headerlink" href="#built-in-primers" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">code</span></code> Primer</dt><dd><p>Includes programming best practices, git workflow guidance, testing principles, and documentation standards. Used by the <code class="docutils literal notranslate"><span class="pre">papagai</span> <span class="pre">code</span></code> command.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">review</span></code> Primer</dt><dd><p>Provides code review guidelines and feedback structure. Used by the <code class="docutils literal notranslate"><span class="pre">papagai</span> <span class="pre">review</span></code> command.</p>
+</dd>
+<dt>No Primer (<code class="docutils literal notranslate"><span class="pre">do</span></code> command)</dt><dd><p>The <code class="docutils literal notranslate"><span class="pre">papagai</span> <span class="pre">do</span></code> command runs without a primer, giving you full control over Claude’s instructions.</p>
+</dd>
+</dl>
+</section>
+<section id="primer-location">
+<h3>Primer Location<a class="headerlink" href="#primer-location" title="Link to this heading"></a></h3>
+<p>Primers are stored in <code class="docutils literal notranslate"><span class="pre">papagai/primers/</span></code> within the package:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>papagai/primers/
+├── code.md
+└── review.md
+</pre></div>
+</div>
+</section>
+<section id="how-primers-work">
+<h3>How Primers Work<a class="headerlink" href="#how-primers-work" title="Link to this heading"></a></h3>
+<p>When you run <code class="docutils literal notranslate"><span class="pre">papagai</span> <span class="pre">code</span> <span class="pre">task.md</span></code>:</p>
+<ol class="arabic simple">
+<li><p>Loads the code primer from <code class="docutils literal notranslate"><span class="pre">papagai/primers/code.md</span></code></p></li>
+<li><p>Appends your task instructions from <code class="docutils literal notranslate"><span class="pre">task.md</span></code></p></li>
+<li><p>Sends the combined instructions to Claude</p></li>
+</ol>
+<p>This allows you to focus on task-specific instructions while maintaining consistent code quality guidance.</p>
+</section>
+</section>
+<section id="instruction-files">
+<h2>Instruction Files<a class="headerlink" href="#instruction-files" title="Link to this heading"></a></h2>
+<section id="markdown-format">
+<h3>Markdown Format<a class="headerlink" href="#markdown-format" title="Link to this heading"></a></h3>
+<p>Instructions are written in Markdown format for readability and structure:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Task: Update Dependencies</span>
+
+Please update all Python dependencies in this project:
+
+<span class="k">1.</span> Update <span class="sb">`pyproject.toml`</span> with latest compatible versions
+<span class="k">2.</span> Run tests to ensure compatibility
+<span class="k">3.</span> Document any breaking changes
+</pre></div>
+</div>
+</section>
+<section id="frontmatter-support">
+<h3>Frontmatter Support<a class="headerlink" href="#frontmatter-support" title="Link to this heading"></a></h3>
+<p>Instruction files support YAML frontmatter for metadata and configuration:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span>---
+description: Update Python dependencies
+tools:
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>Bash(uv :*)
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>Edit(./**/pyproject.toml)
+<span class="gu">  - Read</span>
+<span class="gu">---</span>
+
+<span class="gh"># Instructions</span>
+
+Update all dependencies...
+</pre></div>
+</div>
+<p><strong>Supported Frontmatter Keys:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">description</span></code>: Human-readable task description (required for tasks)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tools</span></code>: List of allowed tools (restricts Claude’s capabilities)</p></li>
+</ul>
+</section>
+<section id="interactive-input">
+<h3>Interactive Input<a class="headerlink" href="#interactive-input" title="Link to this heading"></a></h3>
+<p>If no instruction file is provided, papagai prompts for interactive input:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>papagai<span class="w"> </span>code
+<span class="go">Please tell me what you want me to do (Ctrl+D to complete)</span>
+<span class="go">Add type hints to all functions</span>
+<span class="go">[Ctrl+D]</span>
+</pre></div>
+</div>
+<p>This is convenient for quick, one-off tasks.</p>
+</section>
+</section>
+<section id="git-integration">
+<h2>Git Integration<a class="headerlink" href="#git-integration" title="Link to this heading"></a></h2>
+<section id="automatic-commits">
+<h3>Automatic Commits<a class="headerlink" href="#automatic-commits" title="Link to this heading"></a></h3>
+<p>Claude automatically commits changes following git best practices:</p>
+<ul class="simple">
+<li><p>Atomic commits (logical units of change)</p></li>
+<li><p>Descriptive commit messages</p></li>
+<li><p>Appropriate commit message structure</p></li>
+</ul>
+</section>
+<section id="branch-management">
+<h3>Branch Management<a class="headerlink" href="#branch-management" title="Link to this heading"></a></h3>
+<p>Papagai manages branches automatically:</p>
+<ul class="simple">
+<li><p>Creates new branches for each task</p></li>
+<li><p>Updates <code class="docutils literal notranslate"><span class="pre">papagai/latest</span></code> to point to most recent work</p></li>
+<li><p>Preserves branch history for review</p></li>
+</ul>
+</section>
+<section id="cleanup">
+<h3>Cleanup<a class="headerlink" href="#cleanup" title="Link to this heading"></a></h3>
+<p>Remove papagai branches when done:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>papagai<span class="w"> </span>purge
+</pre></div>
+</div>
+<p>This removes all branches matching <code class="docutils literal notranslate"><span class="pre">papagai/*</span></code> except the ones that are currently checked out.</p>
+</section>
+</section>
+<section id="security-considerations">
+<h2>Security Considerations<a class="headerlink" href="#security-considerations" title="Link to this heading"></a></h2>
+<section id="tool-restrictions">
+<h3>Tool Restrictions<a class="headerlink" href="#tool-restrictions" title="Link to this heading"></a></h3>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">tools</span></code> frontmatter key to limit what Claude can do:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span>---
+tools:
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>Read
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>Bash(git status)
+<span class="gu">  - Bash(git diff)</span>
+<span class="gu">---</span>
+
+Review the changes and provide feedback.
+</pre></div>
+</div>
+<p>This prevents Claude from making unwanted modifications.</p>
+</section>
+<section id="worktree-isolation">
+<h3>Worktree Isolation<a class="headerlink" href="#worktree-isolation" title="Link to this heading"></a></h3>
+<p>Worktrees provide isolation, but remember:</p>
+<ul class="simple">
+<li><p>Changes are still committed to git branches</p></li>
+<li><p>Claude has access to the entire repository history</p></li>
+<li><p>Sensitive files in the repository are accessible</p></li>
+</ul>
+</section>
+</section>
+<section id="best-practices">
+<h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
+<section id="task-design">
+<h3>Task Design<a class="headerlink" href="#task-design" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Start Small</strong>: Begin with simple, focused tasks</p></li>
+<li><p><strong>Iterate</strong>: Run multiple tasks to refine results rather than one complex task</p></li>
+<li><p><strong>Review Changes</strong>: Always review Claude’s changes before merging</p></li>
+<li><p><strong>Use Version Control</strong>: Commit your work before running papagai tasks</p></li>
+</ol>
+</section>
+<section id="workflow-tips">
+<h3>Workflow Tips<a class="headerlink" href="#workflow-tips" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Use Descriptive Instructions</strong>: Clear instructions produce better results</p></li>
+<li><p><strong>Leverage Primers</strong>: Use <code class="docutils literal notranslate"><span class="pre">papagai</span> <span class="pre">code</span></code> for programming tasks</p></li>
+<li><p><strong>Organize Tasks</strong>: Create a task library for common operations</p></li>
+<li><p><strong>Clean Up Regularly</strong>: Use <code class="docutils literal notranslate"><span class="pre">papagai</span> <span class="pre">purge</span></code> to remove old branches</p></li>
+</ol>
+</section>
+<section id="performance-optimization">
+<h3>Performance Optimization<a class="headerlink" href="#performance-optimization" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Use Overlay Filesystem</strong>: For large repositories, use <code class="docutils literal notranslate"><span class="pre">--isolation</span> <span class="pre">overlayfs</span></code></p></li>
+<li><p><strong>Keep Repositories Clean</strong>: Remove unnecessary files to speed up worktree creation</p></li>
+<li><p><strong>Limit Tool Access</strong>: Restrict tools to only what’s needed for faster execution</p></li>
+</ol>
+</section>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<section id="common-issues">
+<h3>Common Issues<a class="headerlink" href="#common-issues" title="Link to this heading"></a></h3>
+<p><strong>Worktree Creation Fails</strong></p>
+<ul class="simple">
+<li><p>Ensure you’re in a git repository</p></li>
+<li><p>Check that the repository is clean (<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">status</span></code>)</p></li>
+<li><p>Verify you have write permissions</p></li>
+</ul>
+<p><strong>Overlay Filesystem Not Working</strong></p>
+<ul class="simple">
+<li><p>Install <code class="docutils literal notranslate"><span class="pre">fuse-overlayfs</span></code> (see Installation)</p></li>
+<li><p>Check that FUSE is available: <code class="docutils literal notranslate"><span class="pre">fusermount</span> <span class="pre">--version</span></code></p></li>
+<li><p>Fall back to standard worktrees: <code class="docutils literal notranslate"><span class="pre">--isolation</span> <span class="pre">worktree</span></code></p></li>
+</ul>
+<p><strong>Branches Accumulate</strong></p>
+<ul class="simple">
+<li><p>Regularly run <code class="docutils literal notranslate"><span class="pre">papagai</span> <span class="pre">purge</span></code> to clean up</p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">--no-keep</span></code> to automatically remove worktrees (default behavior)</p></li>
+</ul>
+<p><strong>Claude Makes Unwanted Changes</strong></p>
+<ul class="simple">
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">tools</span></code> frontmatter to restrict capabilities</p></li>
+<li><p>Provide more specific instructions</p></li>
+<li><p>Review and iterate with additional tasks</p></li>
+</ul>
+</section>
+<section id="debug-mode">
+<h3>Debug Mode<a class="headerlink" href="#debug-mode" title="Link to this heading"></a></h3>
+<p>For troubleshooting, use the <code class="docutils literal notranslate"><span class="pre">--dry-run</span></code> flag:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>papagai<span class="w"> </span>code<span class="w"> </span>--dry-run<span class="w"> </span>task.md
+</pre></div>
+</div>
+<p>This shows what would happen without actually executing the task.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tasks.html" class="btn btn-neutral float-left" title="Tasks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Peter Hutterer.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
