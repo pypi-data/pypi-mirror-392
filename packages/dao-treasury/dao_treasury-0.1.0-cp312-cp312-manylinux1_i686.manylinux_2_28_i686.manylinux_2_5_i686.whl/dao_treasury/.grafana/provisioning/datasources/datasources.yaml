@@ -1,0 +1,20 @@
+apiVersion: 1
+
+datasources:
+- name: PostgreSQL
+  type: postgres
+  isDefault: true
+  editable: false
+  url: postgres://dao_treasury:dao_treasury@postgres:5432/dao_treasury
+  user: dao_treasury
+  database: dao_treasury
+  jsonData:
+    sslmode: "disable"
+  secureJsonData: {}
+
+- name: 'PROMETHEUS'
+  type: 'prometheus'
+  access: 'proxy'
+  url: 'http://victoria-metrics:8428'
+  version: 1
+  editable: false
