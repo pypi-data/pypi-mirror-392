@@ -1,0 +1,43 @@
+Metadata-Version: 2.4
+Name: datahero
+Version: 0.1.0
+Summary: DataHero — quick human-like insights & suggestions for pandas DataFrames
+Home-page: https://www.linkedin.com/in/ganeshamoorthy-s-8466b7332
+Author: Ganeshamoorthy
+Author-email: Ganeshamoorthy <ganeshms110@gmail.com>
+Project-URL: Homepage, https://github.com/<https://github.com/ganeshcoderun>/datahero
+Project-URL: Repository, https://github.com/<https://github.com/ganeshcoderun>/datahero
+Project-URL: LinkedIn, https://www.linkedin.com/in/ganeshamoorthy-s-8466b7332
+Keywords: data,insights,pandas,analysis
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pandas>=1.3
+Requires-Dist: numpy>=1.21
+Requires-Dist: matplotlib>=3.3
+Dynamic: author
+Dynamic: home-page
+Dynamic: license-file
+Dynamic: requires-python
+
+# DataHero
+
+DataHero produces a quick, human-readable explanation of a pandas DataFrame:
+summary, missing data, outliers, correlations, and suggested visualizations.
+
+## Author
+**Ganeshamoorthy**  
+Email: ganeshms110@gmail.com  
+LinkedIn: https://www.linkedin.com/in/ganeshamoorthy-s-8466b7332
+
+## Quick example
+```python
+import pandas as pd
+from datahero import explain
+
+df = pd.read_csv("sales.csv")
+report = explain(df, save_plots=True, outdir="plots")
+print(report["summary"])
