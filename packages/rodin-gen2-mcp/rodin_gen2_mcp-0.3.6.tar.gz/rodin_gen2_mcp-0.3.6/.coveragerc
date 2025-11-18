@@ -1,0 +1,29 @@
+[run]
+# Файлы для измерения покрытия
+source = .
+omit = 
+    */tests/*
+    */venv/*
+    */.venv/*
+    */site-packages/*
+    */__pycache__/*
+    */conftest.py
+
+[report]
+# Формат отчета
+precision = 2
+show_missing = True
+skip_covered = False
+
+# Исключения
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    @abstractmethod
+
+[html]
+directory = htmlcov
