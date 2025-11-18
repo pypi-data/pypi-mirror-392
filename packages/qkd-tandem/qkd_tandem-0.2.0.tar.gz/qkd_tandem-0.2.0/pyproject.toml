@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qkd_tandem"
+version = "0.2.0"
+description = "Quantum Kill Switch with trielliptic commitments"
+readme = "README.md"
+license = { file = "LICENSE" }
+dependencies = [
+  "qiskit",
+  "qiskit-aer",
+  "matplotlib",
+  "numpy",
+  "blake3",
+  "cryptography"
+]
+
+[project.scripts]
+qkd-run = "qkd_tandem.cli.run:main"
+
+[tool.setuptools.packages.find]
+include = ["qkd_tandem*"]
+
