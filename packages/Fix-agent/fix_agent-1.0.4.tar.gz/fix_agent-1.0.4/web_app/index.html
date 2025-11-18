@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Agent - AI代码助手</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header h1 {
+            color: #2563eb;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .status.connected {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status.disconnected {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .main-content {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .chat-section {
+            flex: 2;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .session-panel, .info-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f9fafb;
+        }
+
+        .message {
+            margin-bottom: 16px;
+            display: flex;
+            gap: 12px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: #2563eb;
+        }
+
+        .message.assistant .message-avatar {
+            background: #10b981;
+        }
+
+        .message.system .message-avatar {
+            background: #6b7280;
+        }
+
+        .message-content {
+            flex: 1;
+            background: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            max-width: 80%;
+        }
+
+        .message.user .message-content {
+            background: #2563eb;
+            color: white;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .input-area {
+            padding: 20px;
+            border-top: 1px solid #e5e7eb;
+            background: white;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: none;
+            min-height: 44px;
+            max-height: 120px;
+            transition: border-color 0.2s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .send-button {
+            padding: 12px 24px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .send-button:hover {
+            background: #1d4ed8;
+        }
+
+        .send-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .typing-indicator {
+            padding: 20px;
+            text-align: center;
+            color: #6b7280;
+            font-style: italic;
+            display: none;
+        }
+
+        .typing-indicator.active {
+            display: block;
+        }
+
+        .typing-indicator::after {
+            content: '...';
+            animation: typing 1.4s infinite;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% { opacity: 1; }
+            30% { opacity: 0.3; }
+        }
+
+        .session-info {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+
+        .session-id {
+            font-family: 'Monaco', 'Menlo', monospace;
+            background: #f3f4f6;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .quick-action {
+            padding: 8px 12px;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-align: left;
+        }
+
+        .quick-action:hover {
+            background: #e5e7eb;
+        }
+
+        .info-text {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        /* 批准对话框样式 */
+        .approval-dialog {
+            background: #fffbeb;
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+        }
+
+        .approval-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            color: #d97706;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .approval-content {
+            background: #fef3c7;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .approval-title {
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 8px;
+        }
+
+        .approval-details {
+            font-size: 14px;
+            color: #78350f;
+            line-height: 1.5;
+        }
+
+        .approval-details ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .approval-details li {
+            margin: 4px 0;
+        }
+
+        .approval-diff {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin-top: 12px;
+        }
+
+        .approval-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .approval-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .approval-button.approve {
+            background: #16a34a;
+            color: white;
+        }
+
+        .approval-button.approve:hover {
+            background: #15803d;
+        }
+
+        .approval-button.reject {
+            background: #dc2626;
+            color: white;
+        }
+
+        .approval-button.reject:hover {
+            background: #b91c1c;
+        }
+
+        .approval-shortcuts {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 8px;
+            text-align: right;
+        }
+
+        /* 工具调用状态样式 */
+        .tool-call-message {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 12px 16px;
+            margin: 8px 0;
+            border-radius: 6px;
+        }
+
+        .tool-call-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            color: #075985;
+            margin-bottom: 4px;
+        }
+
+        .tool-call-details {
+            font-size: 13px;
+            color: #0c4a6e;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+        }
+
+        .tool-result-message {
+            background: #f0fdf4;
+            border-left: 4px solid #22c55e;
+            padding: 12px 16px;
+            margin: 8px 0;
+            border-radius: 6px;
+            white-space: pre-line;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 13px;
+            color: #14532d;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                flex-direction: row;
+                overflow-x: auto;
+            }
+
+            .session-panel, .info-panel {
+                min-width: 280px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Fix Agent</h1>
+            <div class="status disconnected" id="connectionStatus">
+                <div class="status-dot"></div>
+                <span id="statusText">未连接</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="chat-section">
+                <div class="messages" id="messages">
+                    <div class="message system">
+                        <div class="message-avatar">ℹ️</div>
+                        <div class="message-content">
+                            <div>欢迎使用 Fix Agent！正在连接服务器...</div>
+                            <div class="message-time"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="typing-indicator" id="typingIndicator">
+                    AI正在思考
+                </div>
+
+                <div class="input-area">
+                    <div class="input-group">
+                        <textarea
+                            class="input-field"
+                            id="messageInput"
+                            placeholder="输入你的问题，Fix Agent 将帮助你分析代码、修复缺陷..."
+                            rows="1"
+                        ></textarea>
+                        <button class="send-button" id="sendButton" disabled>
+                            <span>发送</span>
+                            <span>→</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="session-panel">
+                    <div class="panel-title">
+                        📋 会话信息
+                    </div>
+                    <div class="session-info">
+                        会话ID: <span class="session-id" id="sessionId">--</span>
+                    </div>
+                    <div class="session-info">
+                        状态: <span id="sessionStatus">初始化中</span>
+                    </div>
+                    <div class="quick-actions">
+                        <button class="quick-action" onclick="sendExample('analyze')">🔍 分析代码</button>
+                        <button class="quick-action" onclick="sendExample('fix')">🛠️ 修复缺陷</button>
+                        <button class="quick-action" onclick="sendExample('optimize')">📊 优化性能</button>
+                        <button class="quick-action" onclick="sendExample('test')">🧪 生成测试</button>
+                        <button class="quick-action" onclick="newSession()">🆕 新建会话</button>
+                        <button class="quick-action" onclick="clearMessages()">🧹 清空对话</button>
+                        <button class="quick-action" onclick="exportChat()">💾 导出对话</button>
+                    </div>
+                </div>
+
+                <div class="info-panel">
+                    <div class="panel-title">
+                        💡 使用提示
+                    </div>
+                    <div class="info-text">
+                        <p><strong>Fix Agent</strong> 是专业的AI代码助手，可以帮助你：</p>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>🔍 分析代码缺陷</li>
+                            <li>🛠️ 修复代码问题</li>
+                            <li>📊 优化代码性能</li>
+                            <li>🧪 测试用例生成</li>
+                            <li>📚 代码重构建议</li>
+                        </ul>
+
+                        <p style="margin-top: 15px;">
+                            <strong>📁 文件访问：</strong><br>
+                            直接提供文件绝对路径，例如：<br>
+                            <code>/Users/macbookair/project/main.py</code><br>
+                            <code>/home/user/src/app.js</code>
+                        </p>
+
+                        <p style="margin-top: 10px;">
+                            <strong>快捷键：</strong><br>
+                            Enter - 发送消息<br>
+                            Shift+Enter - 换行
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class FixAgentChat {
+            constructor() {
+                this.sessionId = null;
+                this.websocket = null;
+                this.isConnected = false;
+                this.reconnectAttempts = 0;
+                this.maxReconnectAttempts = 5;
+
+                this.init();
+            }
+
+            async init() {
+                await this.createSession();
+                this.setupEventListeners();
+                this.connectWebSocket();
+            }
+
+            async createSession() {
+                try {
+                    const response = await fetch('/api/sessions/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            title: `Web会话 - ${new Date().toLocaleString()}`
+                        })
+                    });
+
+                    if (response.ok) {
+                        const session = await response.json();
+                        this.sessionId = session.session_id;
+                        document.getElementById('sessionId').textContent = this.sessionId.substring(0, 8) + '...';
+                        document.getElementById('sessionStatus').textContent = '已创建';
+                        this.addMessage('system', '会话已创建，可以开始对话了！');
+                    } else {
+                        throw new Error('创建会话失败');
+                    }
+                } catch (error) {
+                    this.addMessage('system', `❌ ${error.message}`);
+                }
+            }
+
+            connectWebSocket() {
+                if (!this.sessionId) return;
+
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const wsUrl = `${protocol}//${window.location.host}/ws/${this.sessionId}`;
+
+                try {
+                    this.websocket = new WebSocket(wsUrl);
+                    this.setupWebSocketHandlers();
+                } catch (error) {
+                    console.error('WebSocket连接失败:', error);
+                    this.addMessage('system', `❌ WebSocket连接失败: ${error.message}`);
+                }
+            }
+
+            setupWebSocketHandlers() {
+                this.websocket.onopen = () => {
+                    console.log('WebSocket连接成功');
+                    this.isConnected = true;
+                    this.updateConnectionStatus(true);
+                    document.getElementById('sendButton').disabled = false;
+                    document.getElementById('sessionStatus').textContent = '已连接';
+                    this.reconnectAttempts = 0;
+                };
+
+                this.websocket.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        this.handleWebSocketMessage(data);
+                    } catch (error) {
+                        console.error('解析消息失败:', error);
+                    }
+                };
+
+                this.websocket.onclose = () => {
+                    console.log('WebSocket连接关闭');
+                    this.isConnected = false;
+                    this.updateConnectionStatus(false);
+                    document.getElementById('sendButton').disabled = true;
+                    document.getElementById('sessionStatus').textContent = '连接断开';
+
+                    // 尝试重连
+                    if (this.reconnectAttempts < this.maxReconnectAttempts) {
+                        this.reconnectAttempts++;
+                        setTimeout(() => {
+                            this.addMessage('system', `🔄 尝试重连 (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+                            this.connectWebSocket();
+                        }, 2000 * this.reconnectAttempts);
+                    }
+                };
+
+                this.websocket.onerror = (error) => {
+                    console.error('WebSocket错误:', error);
+                    this.addMessage('system', '❌ WebSocket连接发生错误');
+                };
+            }
+
+            handleWebSocketMessage(data) {
+                switch (data.type) {
+                    case 'status':
+                        if (data.metadata?.state === 'thinking') {
+                            this.showTypingIndicator(true);
+                        } else if (data.metadata?.state === 'complete') {
+                            this.showTypingIndicator(false);
+                        } else {
+                            this.addMessage('system', data.content);
+                        }
+                        break;
+
+                    case 'message':
+                        this.showTypingIndicator(false);
+                        this.addMessage('assistant', data.content);
+                        break;
+
+                    case 'tool_call':
+                        this.handleToolCall(data);
+                        break;
+
+                    case 'tool_result':
+                        this.handleToolResult(data);
+                        break;
+
+                    case 'approval_request':
+                        this.handleApprovalRequest(data);
+                        break;
+
+                    case 'todos':
+                        this.handleTodosUpdate(data);
+                        break;
+
+                    case 'error':
+                        this.showTypingIndicator(false);
+                        this.addMessage('system', `❌ ${data.content}`);
+                        break;
+
+                    default:
+                        console.log('未知消息类型:', data);
+                }
+            }
+
+            handleToolCall(data) {
+                const toolIcons = {
+                    'read_file': '📖',
+                    'write_file': '✏️',
+                    'edit_file': '✂️',
+                    'shell': '⚡',
+                    'web_search': '🌐',
+                    'bash': '⚡',
+                    'task': '🔧',
+                };
+
+                const icon = toolIcons[data.tool] || '🔧';
+                const content = `${icon} ${data.tool}: ${data.args}`;
+
+                // 添加工具调用消息
+                this.addMessage('system', content, 'tool-call');
+            }
+
+            handleToolResult(data) {
+                // 添加工具结果消息，使用预格式化文本以保持换行
+                this.addMessage('system', data.content, 'tool-result');
+            }
+
+            handleApprovalRequest(data) {
+                const approvalData = data.approval_data;
+                const actionRequests = approvalData.action_requests || [];
+
+                actionRequests.forEach((request, index) => {
+                    this.addApprovalDialog(request, index);
+                });
+            }
+
+            addApprovalDialog(request, index) {
+                const messagesContainer = document.getElementById('messages');
+
+                const approvalDiv = document.createElement('div');
+                approvalDiv.className = 'approval-dialog';
+                approvalDiv.id = `approval-${index}`;
+
+                const toolName = request.tool_name || 'unknown';
+                const description = request.description || '需要批准的操作';
+
+                approvalDiv.innerHTML = `
+                    <div class="approval-header">
+                        ⚠️ 工具操作需要批准
+                    </div>
+                    <div class="approval-content">
+                        <div class="approval-title">操作详情</div>
+                        <div class="approval-details">
+                            ${description}
+                        </div>
+                    </div>
+                    <div class="approval-actions">
+                        <button class="approval-button approve" onclick="chat.approveAction(${index})">
+                            ✅ 批准
+                        </button>
+                        <button class="approval-button reject" onclick="chat.rejectAction(${index})">
+                            ❌ 拒绝
+                        </button>
+                    </div>
+                    <div class="approval-shortcuts">
+                        快捷键: A=批准, R=拒绝
+                    </div>
+                `;
+
+                messagesContainer.appendChild(approvalDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+                // 添加键盘快捷键支持
+                this.setupApprovalShortcuts(index);
+            }
+
+            setupApprovalShortcuts(index) {
+                const handleKeyPress = (e) => {
+                    if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+
+                    if (e.key.toLowerCase() === 'a') {
+                        this.approveAction(index);
+                    } else if (e.key.toLowerCase() === 'r') {
+                        this.rejectAction(index);
+                    }
+                };
+
+                document.addEventListener('keydown', handleKeyPress);
+
+                // 清理事件监听器
+                this.approvalShortcuts = this.approvalShortcuts || [];
+                this.approvalShortcuts.push({ handle: handleKeyPress, index });
+            }
+
+            approveAction(index) {
+                this.removeApprovalDialog(index);
+                this.sendApprovalResponse(index, 'approve');
+                this.addMessage('system', '✅ 操作已批准', 'success');
+            }
+
+            rejectAction(index) {
+                this.removeApprovalDialog(index);
+                this.sendApprovalResponse(index, 'reject');
+                this.addMessage('system', '❌ 操作已拒绝', 'error');
+            }
+
+            removeApprovalDialog(index) {
+                const approvalDiv = document.getElementById(`approval-${index}`);
+                if (approvalDiv) {
+                    approvalDiv.remove();
+                }
+
+                // 清理快捷键监听器
+                if (this.approvalShortcuts) {
+                    const shortcut = this.approvalShortcuts.find(s => s.index === index);
+                    if (shortcut) {
+                        document.removeEventListener('keydown', shortcut.handle);
+                        this.approvalShortcuts = this.approvalShortcuts.filter(s => s.index !== index);
+                    }
+                }
+            }
+
+            sendApprovalResponse(index, decision) {
+                if (this.isConnected && this.websocket) {
+                    this.websocket.send(JSON.stringify({
+                        type: 'approval_response',
+                        approval_index: index,
+                        decision: decision,
+                        session_id: this.sessionId
+                    }));
+                }
+            }
+
+            handleTodosUpdate(data) {
+                const todos = data.todos || [];
+                if (todos.length > 0) {
+                    const todoText = todos.map(todo => `- ${todo}`).join('\n');
+                    this.addMessage('system', `📋 任务更新:\n${todoText}`);
+                }
+            }
+
+            setupEventListeners() {
+                const messageInput = document.getElementById('messageInput');
+                const sendButton = document.getElementById('sendButton');
+
+                // 发送按钮
+                sendButton.addEventListener('click', () => this.sendMessage());
+
+                // 输入框事件
+                messageInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+
+                // 自动调整输入框高度
+                messageInput.addEventListener('input', () => {
+                    messageInput.style.height = 'auto';
+                    messageInput.style.height = Math.min(messageInput.scrollHeight, 120) + 'px';
+                });
+            }
+
+            async sendMessage() {
+                const messageInput = document.getElementById('messageInput');
+                const content = messageInput.value.trim();
+
+                if (!content || !this.isConnected) return;
+
+                // 添加用户消息
+                this.addMessage('user', content);
+
+                // 清空输入框
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+
+                // 发送到WebSocket
+                try {
+                    this.websocket.send(JSON.stringify({
+                        type: 'chat',
+                        content: content,
+                        session_id: this.sessionId
+                    }));
+                } catch (error) {
+                    console.error('发送消息失败:', error);
+                    this.addMessage('system', `❌ 发送失败: ${error.message}`);
+                }
+            }
+
+            addMessage(role, content, messageType = 'default') {
+                const messagesContainer = document.getElementById('messages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${role}`;
+
+                // 特殊处理工具调用消息
+                if (messageType === 'tool-call') {
+                    messageDiv.classList.add('tool-call-message');
+                    const headerDiv = document.createElement('div');
+                    headerDiv.className = 'tool-call-header';
+                    headerDiv.textContent = content.split(':')[0]; // 工具名称部分
+
+                    const detailsDiv = document.createElement('div');
+                    detailsDiv.className = 'tool-call-details';
+                    detailsDiv.textContent = content.substring(content.indexOf(':') + 1).trim(); // 工具参数部分
+
+                    messageDiv.appendChild(headerDiv);
+                    messageDiv.appendChild(detailsDiv);
+                } else if (messageType === 'tool-result') {
+                    messageDiv.classList.add('tool-result-message');
+                    messageDiv.textContent = content;
+                } else {
+                    const avatar = document.createElement('div');
+                    avatar.className = 'message-avatar';
+                    avatar.textContent = role === 'user' ? 'U' : role === 'assistant' ? '🤖' : 'ℹ️';
+
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = 'message-content';
+                    contentDiv.innerHTML = this.formatMessage(content);
+
+                    const timeDiv = document.createElement('div');
+                    timeDiv.className = 'message-time';
+                    timeDiv.textContent = new Date().toLocaleTimeString();
+
+                    messageDiv.appendChild(avatar);
+                    messageDiv.appendChild(contentDiv);
+                    contentDiv.appendChild(timeDiv);
+                }
+
+                messagesContainer.appendChild(messageDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            formatMessage(content) {
+                // 简单的 markdown 格式化
+                return content
+                    .replace(/```([^`]+)```/g, '<pre><code>$1</code></pre>')
+                    .replace(/`([^`]+)`/g, '<code>$1</code>')
+                    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                    .replace(/\n/g, '<br>');
+            }
+
+            showTypingIndicator(show) {
+                const indicator = document.getElementById('typingIndicator');
+                if (show) {
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.remove('active');
+                }
+            }
+
+            updateConnectionStatus(connected) {
+                const statusElement = document.getElementById('connectionStatus');
+                const statusText = document.getElementById('statusText');
+
+                if (connected) {
+                    statusElement.className = 'status connected';
+                    statusText.textContent = '已连接';
+                } else {
+                    statusElement.className = 'status disconnected';
+                    statusText.textContent = '未连接';
+                }
+            }
+        }
+
+        // 全局函数
+        function sendExample(type) {
+            const examples = {
+                'analyze': '请分析这个文件的代码质量和潜在问题：/path/to/your/file.py',
+                'fix': '请帮助修复这个文件中的缺陷：/path/to/your/file.py',
+                'optimize': '请优化这个文件的性能：/path/to/your/file.py',
+                'test': '请为这个文件生成测试用例：/path/to/your/file.py'
+            };
+
+            const messageInput = document.getElementById('messageInput');
+            messageInput.value = examples[type];
+            messageInput.focus();
+
+            // 自动调整输入框高度
+            messageInput.style.height = 'auto';
+            messageInput.style.height = messageInput.scrollHeight + 'px';
+        }
+
+        function newSession() {
+            if (confirm('确定要创建新会话吗？当前对话将被保存。')) {
+                location.reload();
+            }
+        }
+
+        function clearMessages() {
+            if (confirm('确定要清空当前对话吗？')) {
+                const messagesContainer = document.getElementById('messages');
+                messagesContainer.innerHTML = '';
+                chat.addMessage('system', '对话已清空，可以开始新的对话了！');
+            }
+        }
+
+        function exportChat() {
+            const messages = document.querySelectorAll('#messages .message');
+            let exportText = `Fix Agent 对话记录\n${new Date().toLocaleString()}\n${'='.repeat(50)}\n\n`;
+
+            messages.forEach(msg => {
+                const role = msg.classList.contains('user') ? '用户' :
+                           msg.classList.contains('assistant') ? 'AI助手' : '系统';
+                const content = msg.querySelector('.message-content div').textContent;
+                const time = msg.querySelector('.message-time').textContent;
+                exportText += `[${time}] ${role}:\n${content}\n\n`;
+            });
+
+            const blob = new Blob([exportText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `fix-agent-chat-${new Date().toISOString().slice(0, 10)}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // 初始化应用
+        let chat;
+        document.addEventListener('DOMContentLoaded', () => {
+            chat = new FixAgentChat();
+        });
+    </script>
+</body>
+</html>
