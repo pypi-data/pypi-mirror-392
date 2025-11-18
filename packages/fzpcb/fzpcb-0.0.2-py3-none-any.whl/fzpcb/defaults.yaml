@@ -1,0 +1,741 @@
+metadata:
+    author: Unknown
+    version: '0.1'
+    title: Unknown
+    #moduleId: # Default md5sum of "{author}|{version}|{title}", or of {source}
+    url: ''
+    #label: Default "{source}"
+    #basename: Output file will be "{basename}.fzpz". Default "{source}"
+    #SVGbasename: # SVG e.g "svg.pcb.{SVGbasename}_pcb.svg". Default "{basename}_{moduleId}"
+    #date: In YAML date format, or string. Default today
+    #description: # Default "{title}"
+    scale: 36
+    grid_size: 0.05
+    grid_unit: inch
+    encoding: 'UTF-8'
+tags: [] # Empty if not set
+properties: # Required
+    family: Generic mystery part
+layout: []
+
+colours:
+    # Single letters can be used as part colours
+    # NOTE Must be uppercase - lowercase part colours means offset the part down one
+    # Word colours can be used in part drawing code, and defaults, but not in part
+    # codes in the layout. All single letter colours have a word equivalent, for
+    # convenience. Lighter and darker versions are calculated automatically, and can
+    # be refered to as a list when a colour is expected, for example:
+    #   stroke: C           # Copper
+    #   stroke: copper      # Copper
+    #   stroke: [C, 0]      # Copper
+    #   stroke: [copper, 0] # Copper
+    #   stroke: [C, 1]      # Dark copper
+    #   stroke: [copper, 1] # Dark copper
+    #   stroke: [C, 2]      # Light copper
+    #   stroke: [copper, 2] # Light copper
+    # The list idea is partly so colours can support resistor codes in the future
+    # You can also hardcode the dark and light versions if desired
+    # I've added a few pure colours that can't have lighter or darker versions
+    # as the are useful for some parts (e.g. pure-white, jet-black)
+    # Some colours are Fritzing standards
+    # It is not an error to redefine colours, to allow the input yaml
+    # to override the defaults
+    # Use letter+name-of-colour as the keys (or just one of them)
+    E+earth: ['tan']
+    R+red: ['#CC1414']
+    G+green: ['#47CC79']
+    B+blue: ['#418DD9']
+    K+black: ['#1A1A1A']
+    J+jet-black: ['black'] # Standard Fritzing colour for schematic
+    D+dark-grey: ['#555555']
+    M+middle-grey: ['#888']
+    L+light-grey: ['#CCC']
+    Y+yellow: ['#FFE24D']
+    O+orange: ['#FF7033']
+    S+silver: ['silver']
+    W+white: ['#E5E5E5']
+    P+pure-white: ['#FFFFFF']
+    C+copper: ['#9A916C'] # Standard Fritzing colour for breadboard parts
+    connector: ['#F7BD13'] # Standard Fritzing colour for schematic
+    leg: ['#8C8C8C'] # Standard Fritzing colour for breadboard parts
+    gold: ['gold']
+    brown: ['brown']
+    goldenrod: ['goldenrod'] # Goldenrod looks better than gold (which is very yellow)
+    pcb: ['#066938'] # PCB green used for drawing breadboard PCB
+    unknown: ['magenta'] # Used for unrecognized colors names, so it still draws
+    T: ['text'] # Keyword meaning this is a text identifier
+    N+none: ['none'] # Do not draw
+extenders:
+    # Multi-cell extenders
+    # No top left, as that's the part description cell
+    # No two extenders can use the same string
+    top: '+'
+    middle: '#'
+    half-bottom: '='
+specials:
+    empty: ' ' # Not part of the PCB
+    pcb: ' .' # Any combination of these neither a part or a connector
+# text-source: 
+#     left: '<'   # Undefined text cells (e.g. "T^") take their text from 
+#     right: '>'  # connector above, below, left or right.
+#     above: '^'
+#     below: 'v'
+appearance:
+    breadboard:
+        PCB-colour: pcb
+        highlight: 0.2 # Width of hightlights and lowlights around the PCB
+        font: DroidSans
+        terminal-size: 0.2
+    pcb:
+        outline: 0.2 # Width of hightlights and lowlights around the PCB
+        outline-colour: jet-black
+        font: DroidSans
+        terminal-size: 0.2
+    schematic:
+        outline-width: 0.2 # Width of hightlights and lowlights around the PCB
+        outline-colour: jet-black
+        tick-colour: dark-grey
+        tick: 2
+        tick-width: 0.2
+        id-font: DroidSans
+        id-font-size: 0.69444444444 # 2.5pt = 25/36
+        id-colour: dark-grey
+        label-font: DroidSans
+        label-font-size: 0.972222222222 # 3.5pt = 35/36
+        label-colour: dark-grey
+        name-font: DroidSans
+        name-font-size: 1.180555555555 # 4.25pt = 42.5/36
+        name-colour: jet-black
+        terminal-size: 0.2
+
+connectors:
+    defaults: {gender: male, part: leg, edge-part: leg-edge, gnd-part: leg-gnd,
+               gnd-edge-part: leg-gnd-edge, colour: copper}
+connectors-noedge:
+    defaults: {gender: male, part: leg, gnd-part: leg-gnd, colour: copper}
+connectors-female:
+    defaults: {gender: female, part: leg, edge-part: leg-edge, gnd-part: leg-gnd,
+               gnd-edge-part: leg-gnd-edge, colour: copper}
+connectors-female-noedge:
+    defaults: {gender: female, part: leg, gnd-part: leg-gnd, colour: copper}
+connectors-pin:
+    defaults: {gender: male, part: pin, gnd-part: pin-gnd, colour: black}
+connectors-pin-female:
+    defaults: {gender: female, part: pin, gnd-part: pin-gnd, colour: black}
+connectors-pin-white:
+    defaults: {gender: male, part: pin, gnd-part: pin-gnd, colour: white}
+connectors-pin-white-female:
+    defaults: {gender: female, part: pin, gnd-part: pin-gnd, colour: white}
+connectors-pin-nocolour:
+    defaults: {gender: male, part: pin, gnd-part: pin-gnd, colour: none}
+connectors-pin-nocolour-female:
+    defaults: {gender: female, part: pin, gnd-part: pin-gnd, colour: none}
+
+text:
+    defaults: {font: DroidSans, size: 1, angle: 0, colour: white}
+text-up:
+    defaults: {font: DroidSans, size: 1, angle: 270, colour: white}
+text-down:
+    defaults: {font: DroidSans, size: 1, angle: 90, colour: white}
+text-upside-down:
+    defaults: {font: DroidSans, size: 1, angle: 180, colour: white}
+    
+schematic-parts: {}
+pcb-parts:
+    leg:  # Leg connectors on the PCB
+        name: Leg-connector
+        shapes:
+            -   type: circle
+                stroke-width: 0.25
+                stroke: 'connector'
+                id: 'pin'
+                args: [pabs:[0.5, 0.5], plen:[0.22]]
+    leg-gnd:  # Leg connectors on the PCB that have label GND
+        name: Leg-gnd-connector
+        shapes:
+            - type: circle
+              id: 'pin'
+              stroke: 'connector'
+              stroke-width: 0.25
+              args: [pabs:[0.5, 0.5], plen:[0.22]]
+            - type: rect
+              stroke: 'connector'
+              stroke-width: 0.25
+              args: [cabs:[0.5, 0.5], prel:[0.5, 0.5]]
+    pin:  # Pin connectors on the PCB
+        name: Pin-connector
+        copy: leg
+    pin-gnd:  # Pin connectors on the PCB that have label GND
+        name: Pin-gnd-connector
+        copy: leg-gnd
+        
+breadboard-parts:
+    pin:
+        name: Pin-connector
+        shapes:
+            - type: rectround
+              fill: '?'
+              args: [pabs:[0, 0], prel:[1, 1], crel:[0.4, 0.4]]            
+            - type: rect
+              stroke: blue
+              id: 'pin'
+              args: [pabs:[0.35, 0.35], prel:[0.3, 0.3]]            
+            - type: path
+              fill: ['copper', 2]
+              args: ['M', pabs:[0.35, 0.35],
+                     'l', prel:[0.3, 0],         
+                     'l', prel:[-0.3, 0.3],
+                     'z']
+            - type: path
+              fill: ['copper', 1]
+              args: ['M', pabs:[0.65, 0.65],
+                     'l', prel:[-0.3, 0],         
+                     'l', prel:[0.3, -0.3],
+                     'z']
+            - type: rect
+              fill: 'copper'
+              args: [pabs:[0.43, 0.43], prel:[0.14, 0.14]]            
+    pin-gnd:
+        name: Pin-edge-connector
+        copy: pin
+        
+    leg:  # Leg connectors on the breadboard
+        name: Leg-connector
+        shapes:
+            - type: holepath
+              args: ['M', pabs:[0.23, 0.5],
+                     'a', parc:[0.27, 0.27, 3.1415297, 0, 0, 0.54, 0.0],
+                     'a', parc:[0.27, 0.27, 3.1415297, 0, 0, -0.54, 0.0],
+                     'z']
+            - type: ellipse
+              id: 'pin'
+              stroke-width: 0.25
+              stroke: 'C'
+              args: [pabs:[0.5, 0.5], prel:[0.22, 0.22]]
+    leg-edge:  # Leg connectors on the breadboard
+        name: Leg-edge-connector
+        shapes:
+            - type: holepath
+              args: ['M', pabs:[0.23, 0.5],
+                     'a', parc:[0.27, 0.27, 3.1415297, 0, 0, 0.54, 0.0],
+                     'a', parc:[0.27, 0.27, 3.1415297, 0, 0, -0.54, 0.0],
+                     'z']
+            - type: path
+              id: 'pin'
+              fill: 'C'
+              args: ['M', pabs:[0.5, 0.225],
+                     'a', parc:[0.275, 0.275, 3.1415297, 0, 1, 0.0, 0.55],
+                     'l', prel:[-0.5, 0.0],
+                     'l', prel:[0.0, -0.55],
+                     'z',
+                     'M', pabs:[0.34, 0.5],
+                     'a', parc:[0.16, 0.16, 3.1415297, 0, 0, 0.32, 0.0],
+                     'a', parc:[0.16, 0.16, 3.1415297, 0, 0, -0.32, 0.0],
+                     'z']
+    leg-gnd:  # Leg connectors on the breadboard that have label GND
+        name: Leg-gnd-connector
+        shapes:
+            - type: holepath
+              args: ['M', pabs:[0.23, 0.5],
+                     'a', parc:[0.27, 0.27, 3.1415297, 0, 0, 0.54, 0.0],
+                     'a', parc:[0.27, 0.27, 3.1415297, 0, 0, -0.54, 0.0],
+                     'z']
+            - type: ellipse
+              id: 'pin'
+              stroke-width: 0.25
+              stroke: 'C'
+              args: [pabs:[0.5, 0.5], prel:[0.22, 0.22]]
+            - type: rect
+              stroke-width: 0.25
+              stroke: 'C'
+              args: [pabs:[0.25, 0.25], prel:[0.5, 0.5]]
+    leg-gnd-edge:  # Leg connectors on the breadboard that have label GND
+        name: Leg-gnd-edge-connector
+        shapes:
+            - type: holepath
+              args: ['M', pabs:[0.23, 0.5],
+                     'a', parc:[0.27, 0.27, 3.1415297, 0, 0, 0.54, 0.0],
+                     'a', parc:[0.27, 0.27, 3.1415297, 0, 0, -0.54, 0.0],
+                     'z']
+            - type: path
+              id: 'pin'
+              fill: 'C'
+              args: ['M', pabs:[0.75, 0.225],
+                     'l', prel:[0.0, 0.55],
+                     'l', prel:[-0.75, 0.0],
+                     'l', prel:[0.0, -0.55],
+                     'z',
+                     'M', pabs:[0.34, 0.5],
+                     'a', parc:[0.16, 0.16, 3.1415297, 0, 0, 0.32, 0.0],
+                     'a', parc:[0.16, 0.16, 3.1415297, 0, 0, -0.32, 0.0],
+                     'z']
+    l:
+        name: LED-small
+        shapes:
+            -   type: ellipse
+                stroke-width: 0.15
+                stroke: ['?', 1]
+                fill: ['?', 0]
+                args: [pabs:[0.5, 0.5], prel:[0.15, 0.15]]
+    L:
+        name: LED-large
+        shapes:
+            -   type: circle
+                stroke-width: 0.3
+                stroke: ['?', 1]
+                fill: ['?', 0]
+                args: [pabs:[0.5, 0.5], plen:[0.5]]
+            -   type: path
+                stroke-width: 0.35
+                stroke: ['?', 2]
+                args: ['M', pabs:[0.25, 0.5],
+                       'a', parc:[0.25, 0.25, 1.570796327, 0, 1, 0.25, -0.25]]
+    B:
+        name: Button-rounded
+        shapes:
+            - type: rectround
+              fill: M
+              shadow: 0.1
+              args: [cabs:[0.1, 0.1], jump:[0.8, 0.8], crel:[0.2, 0.2]]
+            - type: rectround
+              fill: '?'
+              shadow: 0.2
+              args: [cabs:[0.5, 0.5], jump:[0, 0], crel:[0.5, 0.5]]
+    b:
+        name: Button-square
+        shapes:
+            - type: rect
+              fill: S
+              args: [cabs:[0.1, 0.1], jump:[0.8, 0.8]]
+            - type: rect
+              fill: '?'
+              args: [cabs:[0.5, 0.5], jump:[0, 0]]
+    h:
+        name: Hole
+        shapes:
+            - type: holepath
+              args: ['M', pabs:[0.27, 0.5],
+                     'a', parc:[0.23, 0.23, 3.1415297, 0, 0, 0.46, 0.0],
+                     'a', parc:[0.23, 0.23, 3.1415297, 0, 0, -0.46, 0.0],
+                     'z']
+            - type: ellipse
+              stroke-width: 0.2
+              stroke: '?'
+              args: [pabs:[0.5, 0.5], prel:[0.2, 0.2]]
+    H:
+        name: Hole
+        shapes:
+            - type: holepath
+              args: ['M', pabs:[0.22, 0.5],
+                     'a', parc:[0.28, 0.28, 3.1415297, 0, 0, 0.56, 0.0],
+                     'a', parc:[0.28, 0.28, 3.1415297, 0, 0, -0.56, 0.0],
+                     'z']
+            - type: ellipse
+              stroke-width: 0.4
+              stroke: '?'
+              args: [pabs:[0.5, 0.5], prel:[0.3, 0.3]]
+    '-':
+        name: Small-horizontal-surface-mount-part
+        shapes:
+            - type: rect
+              fill: S
+              shadow: 0.05
+              args: [cabs:[0.4, 0.8], jump:[0.2, -0.6]]
+              
+            - type: rect
+              fill: '?'
+              shadow: [0, 0.05]
+              args: [cabs:[0.7, 0.8], jump:[-0.4, -0.6]]
+    '|':
+        name: Small-veritcal-surface-mount-part
+        transpose: '-'
+    'r':
+        name: Resisitor-horizontal
+        shapes:
+            - type: path
+              fill: S
+              shadow: 0.03
+              args: [ # 'M', cabs:[0, 0],
+                     'M', pabs:[0.1, 0.5],
+                     'm', prelh:[0, -0.01], 
+                     'l', prelh:[0, 0.02], 
+                     'l', prelh:[0.8, 0], 
+                     'l', prelh:[0, -0.02], 
+                     'z']
+            - type: path
+              fill: ['?', 0]
+              args: ['M', pabs:[0.4, 0.5],
+                     'm', prelh:[0, -0.1], 
+                     # 'l', prelh:[0, 0.3], 
+                     # 'l', prelh:[0.2, 0],
+                     # 'l', prelh:[0, -0.3], 
+                     # 'l', prelh:[-0.2, 0],
+                     'a', prelh:[0.11, 0.11], 0, parcflags:[1, 0], prelh:[0, 0.2],
+                     'a', prelh:[0.6, 0.6], 0, parcflags:[0, 1], prelh:[0.2, 0],
+                     'a', prelh:[0.11, 0.11], 0, parcflags:[1, 0], prelh:[0, -0.2],
+                     'a', prelh:[0.6, 0.6], 0, parcflags:[0, 1], prelh:[-0.2, 0],
+                     # 'z'
+                     ]
+            - type: path
+              fill: ['?', 2]
+              args: ['M', pabs:[0.4, 0.5],
+                     'm', prelh:[-0.025, -0.03], 
+                     'm', prelh:[-0.017, -0.04], 
+                     # 'l', prelh:[0, 0.3], 
+                     # 'l', prelh:[0.2, 0],
+                     # 'l', prelh:[0, -0.3], 
+                     # 'l', prelh:[-0.2, 0],
+                     'a', prelh:[0.05, 0.05], 0, parcflags:[1, 0], prelh:[0, 0.06],
+                     'a', prelh:[0.6, 0.6], 0, parcflags:[0, 1], prelh:[0.22, 0],
+                     'a', prelh:[0.05, 0.05], 0, parcflags:[1, 0], prelh:[0, -0.06],
+                     'a', prelh:[0.6, 0.6], 0, parcflags:[0, 1], prelh:[-0.22, 0],
+                     # 'z'
+                     ]
+            - type: path
+              fill: brown
+              args: ['M', pabs:[0.38, 0.5],
+                     'm', prelh:[-0.02, -0.115],
+                     'l', prelh:[0.04, 0.01],
+                     'l', prelh:[0, 0.21],
+                     'l', prelh:[-0.04, 0.01],
+                     'z']
+            - type: path
+              fill: [brown, 2]
+              args: ['M', pabs:[0.38, 0.5],
+                     'm', prelh:[-0.02, -0.07],
+                     'l', prelh:[0.04, 0.007],
+                     'l', prelh:[0, 0.05],
+                     'l', prelh:[-0.04, 0.007],
+                     'z']
+            - type: path
+              fill: black
+              args: ['M', pabs:[0.46, 0.5],
+                     'm', prelh:[-0.02, -0.1],
+                     'l', prelh:[0.04, 0],
+                     'l', prelh:[0, 0.2],
+                     'l', prelh:[-0.04, 0],
+                     'z']
+            - type: path
+              fill: [black, 2]
+              args: ['M', pabs:[0.46, 0.5],
+                     'm', prelh:[-0.02, -0.06],
+                     'l', prelh:[0.04, 0],
+                     'l', prelh:[0, 0.04],
+                     'l', prelh:[-0.04, 0],
+                     'z']
+            - type: path
+              fill: red
+              args: ['M', pabs:[0.54, 0.5],
+                     'm', prelh:[-0.02, -0.1],
+                     'l', prelh:[0.04, 0],
+                     'l', prelh:[0, 0.2],
+                     'l', prelh:[-0.04, 0],
+                     'z']
+            - type: path
+              fill: [red, 2]
+              args: ['M', pabs:[0.54, 0.5],
+                     'm', prelh:[-0.02, -0.06],
+                     'l', prelh:[0.04, -0.01],
+                     'l', prelh:[0, 0.06],
+                     'l', prelh:[-0.04, -0.01],
+                     'z']
+            - type: path
+              fill: goldenrod
+              args: ['M', pabs:[0.62, 0.5],
+                     'm', prelh:[-0.02, -0.105],
+                     'l', prelh:[0.04, -0.01],
+                     'l', prelh:[0, 0.23],
+                     'l', prelh:[-0.04, -0.01],
+                     'z']
+            - type: path
+              fill: [goldenrod, 2]
+              args: ['M', pabs:[0.62, 0.5],
+                     'm', prelh:[-0.02, -0.09],
+                     'l', prelh:[0.04, 0],
+                     'l', prelh:[0, 0.1],
+                     'l', prelh:[-0.04, 0],
+                     'z']
+    'R':
+        name: Resisitor-vertical
+        transpose: 'r'
+    'd':
+        name: Disc-capacitor-horizontal
+        shapes:
+            - type: path
+              fill: '?'
+              args: ['M', pabs:[0.375, 0.25],
+                     'l', prel:[0.25, 0], 
+                     'a', parc:[0.325, 0.25, 0, 0, 1, 0, 0.5],
+                     'l', prel:[-0.25, 0], 
+                     'a', parc:[0.325, 0.25, 0, 0, 1, 0, -0.5],
+                     'z']
+            - type: path
+              fill: ['?', 2]
+              args: ['M', pabs:[0.375, 0.25],
+                     'l', prel:[0.25, 0], 
+                     'a', parc:[0.325, 0.25, 0, 0, 1, 0.21, 0.06],
+                     'a', parc:[0.325, 0.25, 0, 0, 1, -0.21, 0.06],
+                     'l', prel:[-0.25, 0], 
+                     'a', parc:[0.325, 0.25, 0, 0, 0, -0.32, 0.18], 
+                     'a', parc:[0.325, 0.25, 0, 0, 1, 0.32, -0.3], 
+                     ]
+            - type: path
+              fill: ['?', 1]
+              args: ['M', pabs:[0.625, 0.75],
+                     'l', prel:[-0.25, 0], 
+                     'a', parc:[0.325, 0.25, 0, 0, 1, -0.21, -0.06],
+                     'a', parc:[0.325, 0.25, 0, 0, 1, 0.21, -0.06],
+                     'l', prel:[0.25, 0], 
+                     'a', parc:[0.325, 0.25, 0, 0, 0, 0.32, -0.18], 
+                     'a', parc:[0.325, 0.25, 0, 0, 1, -0.32, 0.3], 
+                     ]
+    'v':
+        name: Disc-capacitor-horizontal
+        shapes:
+            - type: path
+              fill: '?'
+              args: ['M', pabs:[0.375, 0.25],
+                     'l', prel:[0.25, 0], 
+                     'a', parc:[0.325, 0.25, 180, 0, 1, 0, 0.5],
+                     'l', prel:[-0.25, 0], 
+                     'a', parc:[0.325, 0.25, 180, 0, 1, 0, -0.5],
+                     'z']
+            - type: path
+              fill: ['?', 2]
+              args: ['M', pabs:[0.325, 0.325],
+                     'a', parc:[0.175, 0.05, 180, 1, 0, 0, 0.1],
+                     'a', parc:[0.175, 0.05, 180, 1, 0, 0, -0.1],
+                     # 'a', parc:[0.15, 0.3, 180, 0, 1, 0, -0.1],
+                     'z']
+    'D':
+        name: Disc-capacitor-vertical
+        transpose: 'd'
+    'v':
+        name: Resisitor-horizontal
+        shapes:
+            - type: path
+              fill: S
+              args: ['M', cabs:[0, 0],
+                     'l', jumpright:[1, 1],
+                     'l', jumpleft:[-1, 1],
+                     'z']
+    'V':
+        name: Resisitor-veritcal
+        transpose: 'v'
+    'f':
+        name: Small-fat-horizontal-surface-mount-part
+        shapes:
+            - type: rect
+              fill: S
+              shadow: 0.05
+              args: [cabs:[0.2, 0.6], jump:[0.6, -0.2]]
+              
+            - type: rect
+              fill: '?'
+              shadow: [0, 0.05]
+              args: [cabs:[0.6, 0.6], jump:[-0.2, -0.2]]
+    'F':
+        name: Small-fat-vertical-surface-mount-part
+        transpose: 'f'
+    't':
+        name: Two-small-horizontal-surface-mount-parts
+        shapes:
+            - type: rect
+              draw-in: [top-left, middle-left, bottom-left]
+              fill: S
+              shadow: 0.05
+              args: [cabs:[0.4, 0.3], jumpright:[0.2, 0.4]]
+              
+            - type: rect
+              draw-in: [top-left, middle-left, bottom-left]
+              fill: '?'
+              shadow: [0, 0.05]
+              args: [cabs:[0.7, 0.3], jumpright:[-0.4, 0.4]]
+    'T':
+        name: Two-small-fat-vertical-surface-mount-parts
+        transpose: 't'
+    'X':
+        name: Oversized-solid
+        shapes:
+            - type: rectround
+              fill: '?'
+              shadow: 0.07
+              args: [cabs:[-0.13, -0.13], jump:[1.26, 1.26],crel:[0.05,0.05]]
+    'x':
+        name: Solid
+        shapes:
+            - type: rectround
+              fill: '?'
+              shadow: 0.07
+              args: [pabs:[0, 0], prel:[1,1],crel:[0.05,0.05]]
+    'E':
+        name: Edged-solid
+        # shapes:
+            # - type: rect
+            #   fill: ['?', 1]
+            #   stroke: ['?', 2]
+            #   stroke-width: 0.5
+            #   args: [cabs:[0.25, 0.25], jump:[0.5, 0.5]]
+        shapes:
+            - type: rect
+              fill: ['?', 0]
+              args: [cabs:[0, 0], jump:[1, 1]]
+            - type: path
+              fill: ['?', 1]
+              args: ['M', cabs:[0.4, 0.4],
+                     'l', jumpright:[0.2, 0],
+                     'l', crel:[-0.4, 0.4],
+                     'l', jumpleft:[0.6, 0],
+                     'l', jumpdown:[0, -0.6],
+                     'l', crel:[-0.4, 0.4],
+                     'z']
+            - type: path
+              draw-in: ['top-right']
+              fill: ['?', 2]
+              args: ['M', cabs:[0.6, 0.4],
+                     'l', jumpdown:[0, 0.2],
+                     'l', jumpleft:[-0.2, 0],
+                     'l', crel:[0.4, -0.4],
+                     'l', jumpright:[-0.6, 0],
+                     'l', jumpup:[0, 0.6],
+                     'z']
+    'S':
+        name: Block-solid
+        shapes:
+            - type: rectround
+              shadow: 0.07
+              fill: '?'
+              args: [cabs:[0.16666, 0.16666], jump:[0.66666, 0.66666],crel:[0.05,0.05]]
+    's':
+        name: Small-block-solid
+        shapes:
+            - type: rectround
+              shadow: 0.07
+              fill: '?'
+              args: [cabs:[0.26666, 0.26666], jump:[0.46666, 0.46666],crel:[0.05,0.05]]
+    'M':
+        name: Chip-surface-mount-left-and-right
+        shapes:
+            - type: path
+              draw-in: [top-left]
+              flip-to: [top-right]
+              flop-to: [bottom-left]
+              flipflop-to: [bottom-right]
+              stroke-width: 0.16666
+              stroke: 'leg'
+              args: ['M', cabs:[0.1, 0.5], 
+                     'l', crel:[0.4, 0],
+                     'M', cabs:[0.1, 0.83333], 
+                     'l', crel:[0.4, 0],
+                    ]
+            - type: path
+              draw-in: [middle-left]
+              flip-to: [middle-right]
+              stroke-width: 0.16666
+              stroke: 'leg'
+              args: ['M', cabs:[0.1, 0.16666], # Each takes up .333
+                     'l', crel:[0.4, 0],
+                     'M', cabs:[0.1, 0.5], 
+                     'l', crel:[0.4, 0],
+                     'M', cabs:[0.1, 0.83333], 
+                     'l', crel:[0.4, 0],
+                    ]
+            - type: rect
+              fill: '?'
+              shadow: 0.15
+              args: [cabs:[0.5, 0.3], jump:[0, 0.4]]
+    'm':
+        name: Chip-surface-mount-top-to-bottom
+        transpose: 'M'
+    'A':
+        name: Chip-surface-mount-all-sides
+        shapes:
+            - type: path
+              draw-in: [middle-left]
+              flip-to: [middle-right]
+              transpose-to: [top-middle]
+              transpose-flop-to: [bottom-middle]
+              stroke-width: 0.16666
+              stroke: 'leg'
+              args: ['M', cabs:[0.1, 0.16666], # Each takes up .333
+                     'l', crel:[0.4, 0],
+                     'M', cabs:[0.1, 0.5], 
+                     'l', crel:[0.4, 0],
+                     'M', cabs:[0.1, 0.83333], 
+                     'l', crel:[0.4, 0],
+                    ]
+            - type: path
+              draw-in: [top-left]
+              flip-to: [top-right]
+              flop-to: [bottom-left]
+              flipflop-to: [bottom-right]
+              transpose-to: [top-left]
+              transpose-flip-to: [top-right]
+              transpose-flop-to: [bottom-left]
+              transpose-flipflop-to: [bottom-right]
+              stroke-width: 0.16666
+              stroke: 'leg'
+              args: ['M', cabs:[0.1, 0.5], 
+                     'l', crel:[0.4, 0],
+                     'M', cabs:[0.1, 0.83333], 
+                     'l', crel:[0.4, 0],
+                    ]
+            - type: rect
+              fill: '?'
+              shadow: 0.15
+              args: [cabs:[0.5, 0.5], jump:[0.0, 0.0]]
+    'P':
+        name: Chip-pin-mount-left-and-right
+        shapes:
+            - type: rect
+              fill: [D, 0]
+              args: [cabs:[0.2, 0.2], jump:[0.6, 0.6]]
+            - type: rect
+              fill: ['?', 1]
+              args: [cabs:[1.8, 0.4], jump:[-2.2, 0.2]]
+            - type: rect
+              fill: ['?', 0]
+              args: [cabs:[1.8, 0.4], jump:[-2.6, 0.2]]
+            - type: rect
+              fill: ['?', 2]
+              args: [cabs:[1.4, 0.4], jumpdown:[0.4, 0.2]]
+            - type: rectround
+              step: 2
+              draw-in: [top-left, middle-left, bottom-left]
+              flip-to: [top-right, middle-right, bottom-right]
+              fill: [D, 1]
+              args: [sabs:[0.25, 0.2], srel:[0.2, 0.6], srel:[0.1, 0.1]]
+            - type: path
+              step: 2
+              draw-in: [top-left]
+              flip-to: [top-right]
+              flop-to: [bottom-left]
+              flipflop-to: [bottom-right]
+              fill: 'leg'
+              args: ['M', sabs:[0.35, 0.35],
+                     'l', srel:[0, 0.3],
+                     'l', srel:[0.25, 0],
+                     'l', srel:[0.1, 0.2],
+                     'l', srel:[0.1, 0],
+                     'l', srel:[0, -0.5],
+                     'z'
+                    ]
+            - type: path
+              step: 2
+              draw-in: [middle-left]
+              flip-to: [middle-right]
+              # stroke-width: 0.05
+              fill: 'leg'
+              args: ['M', sabs:[0.35, 0.35],
+                     'l', srel:[0, 0.3],
+                     'l', srel:[0.25, 0],
+                     'l', srel:[0.1, 0.2],
+                     'l', srel:[0.1, 0],
+                     'l', srel:[0, -0.7],
+                     'l', srel:[-0.1, 0],
+                     'l', srel:[-0.1, 0.2],
+                     'z'
+                    ]
+    'p':
+        name: Chip-pin-mount-top-to-bottom
+        transpose: 'p'
