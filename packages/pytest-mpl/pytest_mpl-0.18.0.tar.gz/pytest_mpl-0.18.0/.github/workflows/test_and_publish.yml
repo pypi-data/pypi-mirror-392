@@ -1,0 +1,61 @@
+name: CI
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+      - '!*dev*'
+      - '!*pre*'
+      - '!*post*'
+  pull_request:
+  # Allow manual runs through the web UI
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v2
+    with:
+      libraries: |
+        apt:
+          - ghostscript
+          - inkscape
+      envs: |
+        # Test oldest SPEC 0 configurations
+        - linux: py311-test-mpl38
+        - macos: py311-test-mpl38
+        - windows: py311-test-mpl38
+        # Test newest configurations
+        - linux: py313-test-mpl310
+        - macos: py313-test-mpl310
+        - windows: py313-test-mpl310
+        # Test intermediate SPEC 0 configurations on Linux
+        - linux: py311-test-mpl39
+        - linux: py312-test-mpl39
+        - linux: py311-test-mpl310
+        - linux: py312-test-mpl310
+        # Test non-SPEC 0 configurations
+        - linux: py313-test-mpldev-pytestdev
+        - linux: py311-test-mpl37-pytest74
+        - linux: py39-test-mpl33-pytest62
+        # Test oldest non-SPEC 0 configurations
+        - linux: py39-test-mpl33
+        - macos: py39-test-mpl35
+        - windows: py39-test-mpl33
+      coverage: 'codecov'
+
+  publish:
+    if: github.event_name != 'pull_request'
+    needs: [test]
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish_pure_python.yml@v2
+    with:
+      test_command: pytest $GITHUB_WORKSPACE/tests; pytest --mpl $GITHUB_WORKSPACE/tests
+    secrets:
+      pypi_token: ${{ secrets.pypi_password }}
