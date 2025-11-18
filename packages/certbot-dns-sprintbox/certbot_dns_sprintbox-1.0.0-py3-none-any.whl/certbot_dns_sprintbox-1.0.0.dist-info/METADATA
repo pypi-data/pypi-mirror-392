@@ -1,0 +1,99 @@
+Metadata-Version: 2.4
+Name: certbot-dns-sprintbox
+Version: 1.0.0
+Summary: sprintbox.ru DNS authenticator plugin for Certbot
+Author-email: Percifal <percifal@shpw.ru>
+License-Expression: MIT
+Project-URL: Homepage, https://github.com/shadowpercifal/certbot-dns-sprintbox
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Plugins
+Classifier: Intended Audience :: System Administrators
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Security
+Classifier: Topic :: System :: Installation/Setup
+Classifier: Topic :: System :: Networking
+Classifier: Topic :: System :: Systems Administration
+Classifier: Topic :: Utilities
+Requires-Python: >=3.4
+Description-Content-Type: text/markdown
+Requires-Dist: certbot>=1.0.0
+Requires-Dist: acme>=1.0.0
+Requires-Dist: requests>=2.0.0
+Requires-Dist: setuptools
+Requires-Dist: pyotp>=2.0.0
+Requires-Dist: idna>=2.8
+Requires-Dist: beautifulsoup4>=4.0.0
+
+# certbot-dns-sprintbox
+
+Certbot DNS-01 plugin for managing TXT records via Sprintbox control panel.
+
+An authenticator plugin for [certbot](https://certbot.eff.org/) to support [Let's Encrypt](https://letsencrypt.org/) 
+DNS challenges (dns-01) for domains managed by the nameservers of [sprintbox.ru](https://sprintbox.ru).
+
+
+## Requirements
+
+Sprintbox account settings must allow programmatic login with TOTP-based 2FA only (it is optional, but highly recommended):
+
+- Enable TOTP 2FA and use its secret in `dns_sprintbox_totp_secret`.
+- Disable all other login confirmations (email/SMS codes, IP checks).
+
+You can review/change these settings at Sprintbox: https://cp.sprintbox.ru/security/auth-access
+
+Script unchecks `save_device`
+
+## Installation
+
+```bash
+sudo pip install certbot-dns-sprintbox
+```
+
+## Credentials file
+
+Create an INI file (e.g. `sprintbox.ini`) with:
+
+```ini
+dns_sprintbox_username = YOUR_LOGIN
+dns_sprintbox_password = YOUR_PASSWORD
+dns_sprintbox_totp_secret = YOUR_TOTP_SECRET
+```
+
+## Usage with Certbot
+
+```bash
+certbot certonly \
+  --authenticator dns-sprintbox \
+  --dns-sprintbox-credentials /path/to/sprintbox.ini \
+  --dns-sprintbox-propagation-seconds 120 \
+  -d example.com
+```
+
+## SWAG
+
+To use this plugin with [docker-swag](https://github.com/linuxserver/docker-swag) you need to follow their [guide](https://github.com/linuxserver/docker-swag?tab=readme-ov-file#certbot-plugins)
+
+Add the following environment variables to your container:
+
+```
+DOCKER_MODS=linuxserver/mods:universal-package-install
+INSTALL_PIP_PACKAGES=certbot-dns-sprintbox
+```
+
+Then modify `/config/dns-conf/sprintbox.ini` and provide credentials
+
+
+## Removal
+```
+   sudo pip uninstall certbot-dns-sprintbox
+```
