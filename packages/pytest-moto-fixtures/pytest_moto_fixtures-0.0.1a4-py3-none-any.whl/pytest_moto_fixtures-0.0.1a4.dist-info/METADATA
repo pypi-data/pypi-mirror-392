@@ -1,0 +1,101 @@
+Metadata-Version: 2.4
+Name: pytest-moto-fixtures
+Version: 0.0.1a4
+Summary: Fixtures for testing code that interacts with AWS
+License-Expression: MIT
+License-File: LICENSE
+Author: Eduardo Klosowski
+Author-email: eduardo_klosowski@yahoo.com
+Requires-Python: >=3.10
+Classifier: Development Status :: 1 - Planning
+Classifier: Environment :: Plugins
+Classifier: Framework :: Pytest
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Classifier: Topic :: Software Development
+Classifier: Topic :: Software Development :: Testing
+Classifier: Topic :: Software Development :: Testing :: Mocking
+Classifier: Typing :: Typed
+Provides-Extra: pytest
+Requires-Dist: boto3 (>=1.36,<1.41)
+Requires-Dist: moto[events,s3,sns,sqs] (>=5.1,<5.2) ; extra == "pytest"
+Requires-Dist: pytest (>=8.3,<9.1) ; extra == "pytest"
+Project-URL: Documentation, https://pytest-moto-fixtures.readthedocs.io/
+Project-URL: Repository, https://github.com/eduardoklosowski/pytest-moto-fixtures.git
+Project-URL: Release notes, https://github.com/eduardoklosowski/pytest-moto-fixtures/releases
+Description-Content-Type: text/markdown
+
+# pytest-moto-fixtures
+
+[pytest](https://docs.pytest.org/) fixtures for testing code that integrates with [AWS](https://aws.amazon.com/) using [moto](https://docs.getmoto.org/) as a mock.
+
+## Install
+
+Install `pytest-moto-fixtures` package from [PyPI](https://pypi.org/project/pytest-moto-fixtures/):
+
+```sh
+pip install pytest-moto-fixtures[pytest]
+```
+
+## Examples of Use
+
+**Code for test:**
+
+```python
+class Example:
+    def __init__(self, sqs_client, queue_url):
+        self._sqs_client = sqs_client
+        self._queue_url = queue_url
+
+    def run(self, values):
+        total = 0
+        for value in values:
+            total += value
+            self._sqs_client.send_message(QueueUrl=self._queue_url, MessageBody=f'Value processed: {value}')
+        return total
+```
+
+**Test example using fixture:**
+
+```python
+from random import randint
+
+def test_example_with_fixture(sqs_queue):
+    values = [randint(1, 10) for _ in range(randint(3, 10))]
+    expected = sum(values)
+
+    sut = Example(sqs_client=sqs_queue.client, queue_url=sqs_queue.url)
+    returned = sut.run(values)
+
+    assert returned == expected
+    assert len(sqs_queue) == len(values)
+    for value, message in zip(values, sqs_queue):
+        assert message['Body'] == f'Value processed: {value}'
+```
+
+**Test example using context:**
+
+```python
+from random import randint
+from pytest_moto_fixtures.services.sqs import sqs_create_queue
+
+def test_example_with_context(sqs_client):
+    values = [randint(1, 10) for _ in range(randint(3, 10))]
+    expected = sum(values)
+
+    with sqs_create_queue(sqs_client=sqs_client, name='my-queue') as sqs_queue:
+        sut = Example(sqs_client=sqs_client, queue_url=sqs_queue.url)
+        returned = sut.run(values)
+
+        assert returned == expected
+        assert len(sqs_queue) == len(values)
+        for value, message in zip(values, sqs_queue):
+            assert message['Body'] == f'Value processed: {value}'
+```
+
