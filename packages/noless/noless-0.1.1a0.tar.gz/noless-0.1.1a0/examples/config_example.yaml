@@ -1,0 +1,65 @@
+# NoLess Configuration Example
+
+# Task type: image-classification, text-classification, object-detection, etc.
+task: image-classification
+
+# ML Framework: pytorch, tensorflow, sklearn
+framework: pytorch
+
+# Dataset path or identifier
+dataset: ./data/my_dataset
+
+# Model configuration
+model:
+  architecture: resnet50  # Model architecture
+  pretrained: true        # Use pretrained weights
+  num_classes: 10         # Number of output classes
+  input_size: [224, 224]  # Input dimensions
+
+# Training configuration
+training:
+  batch_size: 32
+  epochs: 50
+  learning_rate: 0.001
+  optimizer: adam
+  loss_function: cross_entropy
+  
+  # Learning rate scheduler
+  scheduler:
+    type: step  # step, cosine, exponential
+    step_size: 10
+    gamma: 0.1
+  
+  # Early stopping
+  early_stopping:
+    enabled: true
+    patience: 5
+    monitor: val_loss
+
+# Data configuration
+data:
+  train_split: 0.7
+  val_split: 0.15
+  test_split: 0.15
+  shuffle: true
+  num_workers: 4
+  
+  # Data augmentation
+  augmentation:
+    enabled: true
+    random_flip: true
+    random_rotation: 15
+    random_crop: true
+
+# Hardware configuration
+hardware:
+  device: auto  # auto, cpu, cuda, mps
+  mixed_precision: false
+  distributed: false
+
+# Logging configuration
+logging:
+  log_interval: 10
+  save_checkpoints: true
+  checkpoint_dir: ./checkpoints
+  tensorboard: true
