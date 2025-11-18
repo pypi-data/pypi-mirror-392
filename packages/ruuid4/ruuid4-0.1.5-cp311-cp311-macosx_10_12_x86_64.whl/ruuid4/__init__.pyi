@@ -1,0 +1,3 @@
+def uuid4() -> str:
+    """returns a uuid version 4."""
+    ...
