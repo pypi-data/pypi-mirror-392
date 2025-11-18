@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcp-pptx-tools"
+version = "1.0.0"
+description = "MCP server for creating and managing PowerPoint presentations using python-pptx"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "PowerPoint MCP Contributors"}
+]
+keywords = ["mcp", "powerpoint", "pptx", "presentations", "model-context-protocol"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    "mcp>=1.0.0",
+    "python-pptx>=0.6.21",
+    "Pillow>=10.0.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "build>=0.10.0",
+    "twine>=4.0.0"
+]
+
+[project.scripts]
+powerpoint-mcp = "powerpoint_mcp.server:main"
+
+[project.urls]
+Homepage = "https://github.com/Prathush21/powerpoint-mcp"
+Documentation = "https://github.com/Prathush21/powerpoint-mcp#readme"
+Repository = "https://github.com/Prathush21/powerpoint-mcp"
+Issues = "https://github.com/Prathush21/powerpoint-mcp/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["powerpoint_mcp*"]
+exclude = ["tests*"]
