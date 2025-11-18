@@ -1,0 +1,397 @@
+Metadata-Version: 2.4
+Name: pycharter
+Version: 0.0.1
+Summary: A Python package for data contract management with five core services: contract parsing, metadata storage, Pydantic generation, JSON Schema conversion, and runtime validation
+Author-email: semantic developers <na@example.com>
+License: MIT
+Project-URL: Homepage, https://github.com/auscheng/schemantic
+Project-URL: Documentation, https://github.com/auscheng/schemantic#readme
+Project-URL: Repository, https://github.com/auscheng/schemantic
+Project-URL: Issues, https://github.com/auscheng/schemantic/issues
+Keywords: semantic,python,pydantic,contract,validation,schema
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: jsonschema>=4.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: isort>=5.12.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Requires-Dist: build>=0.10.0; extra == "dev"
+Requires-Dist: twine>=4.0.0; extra == "dev"
+Requires-Dist: jupyterlab>=4.0.0; extra == "dev"
+Requires-Dist: ipykernel>=6.0.0; extra == "dev"
+Dynamic: license-file
+
+# PyCharter
+
+> **Dynamically generate Pydantic models from JSON schemas with coercion and validation support**
+
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+**PyCharter** is a powerful Python library that automatically converts JSON schemas into fully-functional Pydantic models. It fully supports the JSON Schema Draft 2020-12 standard, including all standard validation keywords (minLength, maxLength, pattern, enum, minimum, maximum, etc.), while also providing extensions for pre-validation coercion and post-validation checks. It handles nested objects, arrays, and custom validators, with all validation logic stored as data (not Python code).
+
+## ✨ Features
+
+- 🚀 **Dynamic Model Generation** - Convert JSON schemas to Pydantic models at runtime
+- 📋 **JSON Schema Compliant** - Full support for JSON Schema Draft 2020-12 standard
+- 🔄 **Type Coercion** - Automatic type conversion before validation (e.g., string → integer)
+- ✅ **Custom Validators** - Built-in and extensible validation rules
+- 🏗️ **Nested Structures** - Full support for nested objects and arrays
+- 📦 **Multiple Input Formats** - Load schemas from dicts, JSON strings, files, or URLs
+- 🎯 **Type Safe** - Full type hints and Pydantic v2 compatibility
+- 🔧 **Extensible** - Register custom coercion and validation functions
+- 📊 **Data-Driven** - All validation logic stored as JSON data, not Python code
+
+## 📦 Installation
+
+```bash
+pip install pycharter
+```
+
+## 🚀 Quick Start
+
+```python
+from pycharter import from_dict
+
+# Define your JSON schema
+schema = {
+    "type": "object",
+    "properties": {
+        "name": {"type": "string"},
+        "age": {"type": "integer"},
+        "email": {"type": "string"}
+    },
+    "required": ["name", "age"]
+}
+
+# Generate a Pydantic model
+Person = from_dict(schema, "Person")
+
+# Use it like any Pydantic model
+person = Person(name="Alice", age=30, email="alice@example.com")
+print(person.name)  # Output: Alice
+print(person.age)   # Output: 30
+```
+
+## 📚 Usage Examples
+
+### Basic Usage
+
+```python
+from pycharter import from_dict, from_json, from_file
+
+# From dictionary
+schema = {
+    "type": "object",
+    "properties": {
+        "title": {"type": "string"},
+        "published": {"type": "boolean", "default": False}
+    }
+}
+Article = from_dict(schema, "Article")
+
+# From JSON string
+schema_json = '{"type": "object", "properties": {"name": {"type": "string"}}}'
+User = from_json(schema_json, "User")
+
+# From file
+Product = from_file("product_schema.json", "Product")
+```
+
+### Nested Objects
+
+```python
+from pycharter import from_dict
+
+schema = {
+    "type": "object",
+    "properties": {
+        "name": {"type": "string"},
+        "address": {
+            "type": "object",
+            "properties": {
+                "street": {"type": "string"},
+                "city": {"type": "string"},
+                "zipcode": {"type": "string"}
+            }
+        }
+    }
+}
+
+Person = from_dict(schema, "Person")
+person = Person(
+    name="Alice",
+    address={
+        "street": "123 Main St",
+        "city": "New York",
+        "zipcode": "10001"
+    }
+)
+
+print(person.address.city)  # Output: New York
+```
+
+### Arrays and Collections
+
+```python
+from pycharter import from_dict
+
+schema = {
+    "type": "object",
+    "properties": {
+        "tags": {
+            "type": "array",
+            "items": {"type": "string"}
+        },
+        "items": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "price": {"type": "number"}
+                }
+            }
+        }
+    }
+}
+
+Cart = from_dict(schema, "Cart")
+cart = Cart(
+    tags=["python", "pydantic"],
+    items=[
+        {"name": "Apple", "price": 1.50},
+        {"name": "Banana", "price": 0.75}
+    ]
+)
+
+print(cart.items[0].name)  # Output: Apple
+```
+
+### Coercion and Validation
+
+Charter supports **coercion** (pre-validation transformation) and **validation** (post-validation checks):
+
+```python
+from pycharter import from_dict
+
+schema = {
+    "type": "object",
+    "properties": {
+        "flight_number": {
+            "type": "integer",
+            "coercion": "coerce_to_integer"  # Convert string/float to int
+        },
+        "destination": {
+            "type": "string",
+            "coercion": "coerce_to_string",
+            "validations": {
+                "min_length": {"threshold": 3},
+                "max_length": {"threshold": 3},
+                "no_capital_characters": None,
+                "only_allow": {"allowed_values": ["abc", "def", "ghi"]}
+            }
+        },
+        "distance": {
+            "type": "number",
+            "coercion": "coerce_to_float",
+            "validations": {
+                "greater_than_or_equal_to": {"threshold": 0}
+            }
+        }
+    }
+}
+
+Flight = from_dict(schema, "Flight")
+
+# Coercion happens automatically
+flight = Flight(
+    flight_number="123",    # Coerced to int: 123
+    destination="abc",      # Passes all validations
+    distance="100.5"        # Coerced to float: 100.5
+)
+```
+
+## 📋 Standard JSON Schema Support
+
+Charter supports all standard JSON Schema Draft 2020-12 validation keywords:
+
+| Keyword | Type | Description | Example |
+|---------|------|-------------|---------|
+| `minLength` | string | Minimum string length | `{"minLength": 3}` |
+| `maxLength` | string | Maximum string length | `{"maxLength": 10}` |
+| `pattern` | string | Regular expression pattern | `{"pattern": "^[a-z]+$"}` |
+| `enum` | any | Allowed values | `{"enum": ["a", "b", "c"]}` |
+| `const` | any | Single allowed value | `{"const": "fixed"}` |
+| `minimum` | number | Minimum value (inclusive) | `{"minimum": 0}` |
+| `maximum` | number | Maximum value (inclusive) | `{"maximum": 100}` |
+| `exclusiveMinimum` | number | Minimum value (exclusive) | `{"exclusiveMinimum": 0}` |
+| `exclusiveMaximum` | number | Maximum value (exclusive) | `{"exclusiveMaximum": 100}` |
+| `multipleOf` | number | Must be multiple of | `{"multipleOf": 2}` |
+| `minItems` | array | Minimum array length | `{"minItems": 1}` |
+| `maxItems` | array | Maximum array length | `{"maxItems": 10}` |
+| `uniqueItems` | array | Array items must be unique | `{"uniqueItems": true}` |
+
+All schemas are validated against JSON Schema standard before processing, ensuring compliance.
+
+## 🔧 Built-in Coercions (Charter Extensions)
+
+| Coercion | Description |
+|----------|-------------|
+| `coerce_to_string` | Convert int, float, bool, datetime, dict, list to string |
+| `coerce_to_integer` | Convert float, string (numeric), bool, datetime to int |
+| `coerce_to_float` | Convert int, string (numeric), bool to float |
+| `coerce_to_boolean` | Convert int, string to bool |
+| `coerce_to_datetime` | Convert string (ISO format), timestamp to datetime |
+| `coerce_to_uuid` | Convert string to UUID |
+
+## ✅ Built-in Validations (Charter Extensions)
+
+| Validation | Description | Configuration |
+|------------|-------------|---------------|
+| `min_length` | Minimum length for strings/arrays | `{"threshold": N}` |
+| `max_length` | Maximum length for strings/arrays | `{"threshold": N}` |
+| `only_allow` | Only allow specific values | `{"allowed_values": [...]}` |
+| `greater_than_or_equal_to` | Numeric minimum | `{"threshold": N}` |
+| `less_than_or_equal_to` | Numeric maximum | `{"threshold": N}` |
+| `no_capital_characters` | No uppercase letters | `null` |
+| `no_special_characters` | Only alphanumeric and spaces | `null` |
+
+> **Note**: Charter extensions (`coercion` and `validations`) are optional and can be used alongside standard JSON Schema keywords. All validation logic is stored as data in the JSON schema, making it fully data-driven.
+
+## 🎨 Custom Coercions and Validations
+
+Extend Charter with your own coercion and validation functions:
+
+```python
+from pycharter.coercions import register_coercion
+from pycharter.validations import register_validation
+
+# Register custom coercion
+def coerce_to_uppercase(data):
+    if isinstance(data, str):
+        return data.upper()
+    return data
+
+register_coercion("coerce_to_uppercase", coerce_to_uppercase)
+
+# Register custom validation
+def must_be_positive(threshold=0):
+    def _validate(value, info):
+        if value <= threshold:
+            raise ValueError(f"Value must be > {threshold}")
+        return value
+    return _validate
+
+register_validation("must_be_positive", must_be_positive)
+```
+
+## 📖 API Reference
+
+### Main Functions
+
+- **`from_dict(schema: dict, model_name: str = "DynamicModel")`** - Create model from dictionary
+- **`from_json(json_string: str, model_name: str = "DynamicModel")`** - Create model from JSON string
+- **`from_file(file_path: str, model_name: str = None)`** - Create model from JSON file
+- **`from_url(url: str, model_name: str = "DynamicModel")`** - Create model from URL
+- **`schema_to_model(schema: dict, model_name: str = "DynamicModel")`** - Low-level model generator
+
+## 🎯 Design Principles & Requirements
+
+Charter is designed to meet the following core requirements:
+
+### ✅ JSON Schema Standard Compliance
+
+All schemas must abide by conventional JSON Schema syntax and qualify as valid JSON Schema:
+
+- **Validation**: All schemas are validated against JSON Schema Draft 2020-12 standard before processing
+- **Standard Keywords**: Full support for all standard validation keywords (minLength, pattern, enum, minimum, maximum, etc.)
+- **Compliance**: Uses `jsonschema` library for validation with graceful fallback
+
+### ✅ Data-Driven Validation Logic
+
+All schema information and complex field validation logic is stored as **data**, not Python code:
+
+- **Coercion**: Referenced by name (string) in JSON: `"coercion": "coerce_to_integer"`
+- **Validations**: Referenced by name with configuration (dict) in JSON: `"validations": {"min_length": {"threshold": 3}}`
+- **No Code Required**: Validation rules are defined entirely in JSON schema files
+- **Example**: `{"coercion": "coerce_to_string", "validations": {"min_length": {"threshold": 3}}}`
+
+### ✅ Dynamic Pydantic Model Generation
+
+Models are created dynamically at runtime from JSON schemas:
+
+- **Runtime Generation**: Uses `pydantic.create_model()` to generate models on-the-fly
+- **Dynamic Validators**: Field validators are dynamically attached using `field_validator` decorators
+- **Multiple Sources**: Models can be created from dicts, JSON strings, files, or URLs
+- **No Static Code**: All models are generated from data, not pre-defined classes
+
+### ✅ Nested Schema Support
+
+Full support for nested object schemas and complex structures:
+
+- **Recursive Processing**: Nested objects are recursively processed into their own Pydantic models
+- **Arrays of Objects**: Arrays containing nested objects are fully supported
+- **Deep Nesting**: Deeply nested structures work correctly with full type safety
+- **Type Safety**: Each nested object becomes its own typed Pydantic model
+
+### ✅ Extension Fields
+
+Custom fields can be added to JSON Schema to extend functionality:
+
+- **`coercion`**: Pre-validation type conversion (e.g., string → integer)
+- **`validations`**: Post-validation custom rules
+- **Optional**: Extensions work alongside standard JSON Schema keywords
+- **Separated**: Extensions are clearly distinguished from standard JSON Schema
+
+### ✅ Complex Field Validation
+
+Support for both standard and custom field validators:
+
+- **Standard Validators**: minLength, pattern, enum, minimum, maximum, etc. (JSON Schema standard)
+- **Custom Validators**: Extensible validation rules via `validations` field
+- **Validation Order**: Coercion → Standard Validation → Pydantic Validation → Custom Validations
+- **Factory Pattern**: Validators are factory functions that return validation functions
+
+## 🔗 Requirements
+
+- Python 3.10+
+- Pydantic >= 2.0.0
+- jsonschema >= 4.0.0 (optional, for enhanced validation)
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🔗 Links
+
+- **Repository**: [GitHub](https://github.com/auscheng/schemantic)
+- **Issues**: [GitHub Issues](https://github.com/auscheng/schemantic/issues)
+- **Documentation**: [GitHub README](https://github.com/auscheng/schemantic#readme)
+
+---
+
+**Made with ❤️ for the Python community**
