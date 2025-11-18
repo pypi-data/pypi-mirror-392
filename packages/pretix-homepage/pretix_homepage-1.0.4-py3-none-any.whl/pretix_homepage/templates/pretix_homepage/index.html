@@ -1,0 +1,25 @@
+{% extends "pretix_homepage/base.html" %}
+{% load i18n %}
+{% load static %}
+{% block content %}
+
+<div class="row">
+    <div class="col-md-7">
+        <img src="{% static "pretix_homepage/images/diptune-collage.jpg" %}" alt="{% trans 'Event image' %}" class="img-fluid w-100" style="width:100%; object-fit:cover;">
+    </div>
+    <div class="col-md-5">
+
+        <h3 class="text-primary">{% trans "Events" %}</h3>
+        <p class="text-muted">{% trans "Explore event calendars of my associated bands and artists." %}</p>
+
+        <ul class="list-group">
+            {% for organizer in organizers %}
+            <li class="list-group-item"><a href="{{ organizer.url }}"><span class="fa fa-calendar"></span> {{ organizer.name }}</a></li>
+            {% endfor %}
+        </ul>
+       
+    </div>
+</div>
+     
+
+{% endblock %}
