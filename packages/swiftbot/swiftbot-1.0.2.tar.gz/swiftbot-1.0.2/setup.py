@@ -1,0 +1,48 @@
+"""
+SwiftBot - Ultra-Fast Telegram Bot Framework
+Copyright (c) 2025 Arjun-M/SwiftBot
+"""
+
+from setuptools import setup, find_packages
+
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
+with open("requirements.txt", "r", encoding="utf-8") as fh:
+    requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
+
+setup(
+    name="swiftbot",
+    version="1.0.2",
+    author="Arjun-M",
+    author_email="",
+    description="Ultra-fast Telegram bot framework with 30× faster routing & consume 20-30% less memory",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/Arjun-M/SwiftBot",
+    # Explicitly state that the root of the package namespace is the current directory '.'
+    package_dir={'': '.'},
+    # Find all packages starting from the current directory '.'
+    packages=find_packages(where='.'),
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Topic :: Communications :: Chat",
+        "Framework :: AsyncIO"
+    ],
+    python_requires=">=3.10",
+    install_requires=requirements,
+    extras_require={
+        "webhook": ["uvicorn>=0.23.0,<0.26.0"],
+        "dev": [
+            "pytest>=7.4.0,<8.0.0",
+            "pytest-asyncio>=0.21.0,<0.22.0",
+        ]
+    },
+)
