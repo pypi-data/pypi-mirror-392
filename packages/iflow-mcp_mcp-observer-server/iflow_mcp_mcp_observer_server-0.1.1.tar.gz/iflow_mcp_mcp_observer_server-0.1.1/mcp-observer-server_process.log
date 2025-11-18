@@ -1,0 +1,248 @@
+[2025-11-16 01:38:47] [START] 开始处理 mcp-observer-server 项目
+[2025-11-16 01:38:59] [SUCCESS] 配置文件修改完成: name改为iflow-mcp_mcp-observer-server, 添加project.scripts
+Building source distribution...
+Building wheel from source distribution...
+Traceback (most recent call last):
+  File "<string>", line 11, in <module>
+  File "/Users/hanyepeng/.cache/uv/builds-v0/.tmplbTEk2/lib/python3.10/site-packages/hatchling/build.py", line 58, in build_wheel
+    return os.path.basename(next(builder.build(directory=wheel_directory, versions=['standard'])))
+  File "/Users/hanyepeng/.cache/uv/builds-v0/.tmplbTEk2/lib/python3.10/site-packages/hatchling/builders/plugin/interface.py", line 155, in build
+    artifact = version_api[version](directory, **build_data)
+  File "/Users/hanyepeng/.cache/uv/builds-v0/.tmplbTEk2/lib/python3.10/site-packages/hatchling/builders/wheel.py", line 477, in build_standard
+    for included_file in self.recurse_included_files():
+  File "/Users/hanyepeng/.cache/uv/builds-v0/.tmplbTEk2/lib/python3.10/site-packages/hatchling/builders/plugin/interface.py", line 176, in recurse_included_files
+    yield from self.recurse_selected_project_files()
+  File "/Users/hanyepeng/.cache/uv/builds-v0/.tmplbTEk2/lib/python3.10/site-packages/hatchling/builders/plugin/interface.py", line 180, in recurse_selected_project_files
+    if self.config.only_include:
+  File "/Users/hanyepeng/.local/share/uv/python/cpython-3.10.16-macos-aarch64-none/lib/python3.10/functools.py", line 981, in __get__
+    val = self.func(instance)
+  File "/Users/hanyepeng/.cache/uv/builds-v0/.tmplbTEk2/lib/python3.10/site-packages/hatchling/builders/config.py", line 713, in only_include
+    only_include = only_include_config.get('only-include', self.default_only_include()) or self.packages
+  File "/Users/hanyepeng/.cache/uv/builds-v0/.tmplbTEk2/lib/python3.10/site-packages/hatchling/builders/wheel.py", line 262, in default_only_include
+    return self.default_file_selection_options.only_include
+  File "/Users/hanyepeng/.local/share/uv/python/cpython-3.10.16-macos-aarch64-none/lib/python3.10/functools.py", line 981, in __get__
+    val = self.func(instance)
+  File "/Users/hanyepeng/.cache/uv/builds-v0/.tmplbTEk2/lib/python3.10/site-packages/hatchling/builders/wheel.py", line 250, in default_file_selection_options
+    raise ValueError(message)
+ValueError: Unable to determine which files to ship inside the wheel using the following heuristics: https://hatch.pypa.io/latest/plugins/builder/wheel/#default-file-selection
+
+The most likely cause of this is that there is no directory that matches the name of your project (iflow_mcp_mcp_observer_server).
+
+At least one file selection option must be defined in the `tool.hatch.build.targets.wheel` table, see: https://hatch.pypa.io/latest/config/build/
+
+As an example, if you intend to ship a directory named `foo` that resides within a `src` directory located at the root of your project, you can define the following:
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/foo"]
+  × Failed to build `/Users/hanyepeng/Desktop/Code库/auto-L1-1/auto-mcp-upload/data/hesreallyhim-mcp-observer-server-20251116`
+  ├─▶ The build backend returned an error
+  ╰─▶ Call to `hatchling.build.build_wheel` failed (exit status: 1)
+      hint: This usually indicates a problem with the package or the build environment.
+[2025-11-16 01:39:14] [INFO] 添加hatch build配置: packages = ["src/mcp_observer_server"]
+Building source distribution...
+Building wheel from source distribution...
+Successfully built dist/iflow_mcp_mcp_observer_server-0.1.0.tar.gz
+Successfully built dist/iflow_mcp_mcp_observer_server-0.1.0-py3-none-any.whl
+[2025-11-16 01:39:29] [SUCCESS] 构建成功: dist/iflow_mcp_mcp_observer_server-0.1.0-py3-none-any.whl
+Resolved 38 packages in 617ms
+Prepared 1 package in 4ms
+Installed 1 package in 11ms
+ + iflow-mcp-mcp-observer-server==0.1.0 (from file:///Users/hanyepeng/Desktop/Code%E5%BA%93/auto-L1-1/auto-mcp-upload/data/hesreallyhim-mcp-observer-server-20251116/dist/iflow_mcp_mcp_observer_server-0.1.0-py3-none-any.whl)
+2025-11-16 01:39:31,933 - INFO - 🚀 启动MCP服务器: /Users/hanyepeng/Desktop/Code库/auto-L1-1/auto-mcp-upload/.venv/bin/python3 -m mcp_observer_server.server
+2025-11-16 01:39:33,938 - INFO - ✅ MCP服务器启动成功
+2025-11-16 01:39:33,938 - INFO - 📤 发送请求: initialize
+2025-11-16 01:39:33,941 - INFO - 📥 收到响应: 1
+2025-11-16 01:39:33,941 - INFO - ✅ 初始化成功
+2025-11-16 01:39:33,941 - INFO - 📤 发送请求: tools/list
+2025-11-16 01:39:33,943 - INFO - 📥 收到响应: 2
+2025-11-16 01:39:33,943 - INFO - 🛠️  成功获取到 4 个工具:
+2025-11-16 01:39:33,943 - INFO -    1. subscribe
+2025-11-16 01:39:33,943 - INFO -       描述: Subscribe to changes on a file or directory
+2025-11-16 01:39:33,943 - INFO -       参数: ['path']
+2025-11-16 01:39:33,943 - INFO - 
+2025-11-16 01:39:33,943 - INFO -    2. unsubscribe
+2025-11-16 01:39:33,943 - INFO -       描述: Unsubscribe from changes on a file or directory
+2025-11-16 01:39:33,943 - INFO -       参数: ['path']
+2025-11-16 01:39:33,943 - INFO - 
+2025-11-16 01:39:33,943 - INFO -    3. list_watched
+2025-11-16 01:39:33,943 - INFO -       描述: List all currently monitored paths and their subscriber counts
+2025-11-16 01:39:33,943 - INFO -       参数: []
+2025-11-16 01:39:33,943 - INFO - 
+2025-11-16 01:39:33,944 - INFO -    4. subscribe_default
+2025-11-16 01:39:33,944 - INFO -       描述: Subscribe to the default watched.txt file for development
+2025-11-16 01:39:33,944 - INFO -       参数: []
+2025-11-16 01:39:33,944 - INFO - 
+2025-11-16 01:39:33,944 - INFO - 🎉 所有测试通过！
+2025-11-16 01:39:33,947 - INFO - 🧹 服务器进程已清理
+
+🔄 开始测试...
+
+✅ 测试成功！MCP服务器可以正常调用list_tools
+[2025-11-16 01:39:48] [SUCCESS] 本地测试通过: 成功获取4个工具(subscribe, unsubscribe, list_watched, subscribe_default)
+开始更新 .gitignore 文件...
+.gitignore 文件已存在
+已将 level.log 添加到 .gitignore
+已将 serverConfig.json 添加到 .gitignore
+已将 *.pyc 添加到 .gitignore
+已将 *.pyo 添加到 .gitignore
+已将 *.pyd 添加到 .gitignore
+__pycache__/ 已经在 .gitignore 中，跳过
+已将 *.so 添加到 .gitignore
+已将 .Python 添加到 .gitignore
+build/ 已经在 .gitignore 中，跳过
+已将 develop-eggs/ 添加到 .gitignore
+dist/ 已经在 .gitignore 中，跳过
+已将 downloads/ 添加到 .gitignore
+已将 eggs/ 添加到 .gitignore
+已将 .eggs/ 添加到 .gitignore
+已将 lib/ 添加到 .gitignore
+已将 lib64/ 添加到 .gitignore
+已将 parts/ 添加到 .gitignore
+已将 sdist/ 添加到 .gitignore
+已将 var/ 添加到 .gitignore
+wheels/ 已经在 .gitignore 中，跳过
+已将 *.egg-info/ 添加到 .gitignore
+已将 .installed.cfg 添加到 .gitignore
+已将 *.egg 添加到 .gitignore
+已将 MANIFEST 添加到 .gitignore
+已将 node_modules/ 添加到 .gitignore
+已将 npm-debug.log* 添加到 .gitignore
+已将 yarn-debug.log* 添加到 .gitignore
+已将 yarn-error.log* 添加到 .gitignore
+已将 .npm 添加到 .gitignore
+已将 .eslintcache 添加到 .gitignore
+已将 .node_repl_history 添加到 .gitignore
+已将 *.tgz 添加到 .gitignore
+已将 *.tar.gz 添加到 .gitignore
+已将 .cache/ 添加到 .gitignore
+已将 .parcel-cache/ 添加到 .gitignore
+已将 .next/ 添加到 .gitignore
+已将 out/ 添加到 .gitignore
+已将 .nuxt/ 添加到 .gitignore
+dist/ 已经在 .gitignore 中，跳过
+已将 .vuepress/dist 添加到 .gitignore
+已将 .serverless/ 添加到 .gitignore
+已将 .fusebox/ 添加到 .gitignore
+已将 .dynamodb/ 添加到 .gitignore
+已将 *_request_body.json 添加到 .gitignore
+已将 api_id.txt 添加到 .gitignore
+已将 logo_prompt.txt 添加到 .gitignore
+更新完成！
+
+当前 .gitignore 文件内容：
+==========================
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Cache directories
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Coverage files
+.coverage
+htmlcov/
+
+# Local settings
+**/.claude/settings.local.json
+
+watched.txt
+level.log
+serverConfig.json
+*.pyc
+*.pyo
+*.pyd
+*.so
+.Python
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.eslintcache
+.node_repl_history
+*.tgz
+*.tar.gz
+.cache/
+.parcel-cache/
+.next/
+out/
+.nuxt/
+.vuepress/dist
+.serverless/
+.fusebox/
+.dynamodb/
+*_request_body.json
+api_id.txt
+logo_prompt.txt
+==========================
+remote: 
+remote: Create a pull request for 'iflow' on GitHub by visiting:        
+remote:      https://github.com/iflow-mcp/hesreallyhim-mcp-observer-server-20251116/pull/new/iflow        
+remote: 
+To https://github.com/iflow-mcp/hesreallyhim-mcp-observer-server-20251116
+ * [new branch]      iflow -> iflow
+[2025-11-16 01:40:04] [SUCCESS] iflow分支推送成功: https://github.com/iflow-mcp/hesreallyhim-mcp-observer-server-20251116/tree/iflow
+[2025-11-16 01:40:04] INFO: 开始执行发布脚本，项目类型: python
+[2025-11-16 01:40:04] INFO: 检测到Python项目，准备上传到PyPI
+[2025-11-16 01:40:04] INFO: 使用内置PyPI token
+[2025-11-16 01:40:04] INFO: 开始执行uv publish命令
+[2025-11-16 01:40:04] DEBUG: 执行命令: uv publish --token [HIDDEN]
+[2025-11-16 01:40:08] INFO: uv publish命令执行完成，退出码: 2
+[2025-11-16 01:40:08] DEBUG: 命令输出: Publishing 2 files https://upload.pypi.org/legacy/
+Uploading iflow_mcp_mcp_observer_server-0.1.0-py3-none-any.whl (9.8KiB)
+Uploading iflow_mcp_mcp_observer_server-0.1.0.tar.gz (829.5KiB)
+error: Failed to publish `dist/iflow_mcp_mcp_observer_server-0.1.0.tar.gz` to https://upload.pypi.org/legacy/
+  Caused by: Upload failed with status code 400 Bad Request. Server says: 400 File already exists ('iflow_mcp_mcp_observer_server-0.1.0.tar.gz', with blake2_256 hash 'd5d179b81d0b786ec1283ea4e61760bad33d1bcf399c38721a2fb3dc1131a6e8'). See https://pypi.org/help/#file-name-reuse for more information.
+[2025-11-16 01:40:08] ERROR: Python项目发布失败，退出码: 2
+错误: Python项目上传失败
+Publishing 2 files https://upload.pypi.org/legacy/
+Uploading iflow_mcp_mcp_observer_server-0.1.0-py3-none-any.whl (9.8KiB)
+Uploading iflow_mcp_mcp_observer_server-0.1.0.tar.gz (829.5KiB)
+error: Failed to publish `dist/iflow_mcp_mcp_observer_server-0.1.0.tar.gz` to https://upload.pypi.org/legacy/
+  Caused by: Upload failed with status code 400 Bad Request. Server says: 400 File already exists ('iflow_mcp_mcp_observer_server-0.1.0.tar.gz', with blake2_256 hash 'd5d179b81d0b786ec1283ea4e61760bad33d1bcf399c38721a2fb3dc1131a6e8'). See https://pypi.org/help/#file-name-reuse for more information.
+[2025-11-16 01:40:23] [INFO] 版本号已更新为0.1.1，重新构建
+Building source distribution...
+Building wheel from source distribution...
+Successfully built dist/iflow_mcp_mcp_observer_server-0.1.1.tar.gz
+Successfully built dist/iflow_mcp_mcp_observer_server-0.1.1-py3-none-any.whl
+[2025-11-16 01:40:26] INFO: 开始执行发布脚本，项目类型: python
+[2025-11-16 01:40:26] INFO: 检测到Python项目，准备上传到PyPI
+[2025-11-16 01:40:26] INFO: 使用内置PyPI token
+[2025-11-16 01:40:26] INFO: 开始执行uv publish命令
+[2025-11-16 01:40:26] DEBUG: 执行命令: uv publish --token [HIDDEN]
+[2025-11-16 01:40:28] INFO: uv publish命令执行完成，退出码: 2
+[2025-11-16 01:40:29] DEBUG: 命令输出: Publishing 4 files https://upload.pypi.org/legacy/
+Uploading iflow_mcp_mcp_observer_server-0.1.0-py3-none-any.whl (9.8KiB)
+Uploading iflow_mcp_mcp_observer_server-0.1.0.tar.gz (829.5KiB)
+error: Failed to publish `dist/iflow_mcp_mcp_observer_server-0.1.0.tar.gz` to https://upload.pypi.org/legacy/
+  Caused by: Upload failed with status code 400 Bad Request. Server says: 400 File already exists ('iflow_mcp_mcp_observer_server-0.1.0.tar.gz', with blake2_256 hash 'd5d179b81d0b786ec1283ea4e61760bad33d1bcf399c38721a2fb3dc1131a6e8'). See https://pypi.org/help/#file-name-reuse for more information.
+[2025-11-16 01:40:29] ERROR: Python项目发布失败，退出码: 2
+错误: Python项目上传失败
+Publishing 4 files https://upload.pypi.org/legacy/
+Uploading iflow_mcp_mcp_observer_server-0.1.0-py3-none-any.whl (9.8KiB)
+Uploading iflow_mcp_mcp_observer_server-0.1.0.tar.gz (829.5KiB)
+error: Failed to publish `dist/iflow_mcp_mcp_observer_server-0.1.0.tar.gz` to https://upload.pypi.org/legacy/
+  Caused by: Upload failed with status code 400 Bad Request. Server says: 400 File already exists ('iflow_mcp_mcp_observer_server-0.1.0.tar.gz', with blake2_256 hash 'd5d179b81d0b786ec1283ea4e61760bad33d1bcf399c38721a2fb3dc1131a6e8'). See https://pypi.org/help/#file-name-reuse for more information.
+Building source distribution...
