@@ -1,0 +1,174 @@
+Metadata-Version: 2.4
+Name: piptalk-cli
+Version: 1.0.1
+Summary: A command-line interface for interacting with Google's Gemini AI models
+Home-page: https://github.com/YOUR_USERNAME/gemini-cli
+Author: Kartikeya Ranjan
+Author-email: Kartikeya Ranjan <kartikeyaranjan01@gmail.com>
+License: ISC
+Project-URL: Homepage, https://github.com/YOUR_USERNAME/gemini-cli
+Project-URL: Repository, https://github.com/YOUR_USERNAME/gemini-cli
+Keywords: gemini,ai,cli,google,generative-ai,chat,command-line
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: ISC License (ISCL)
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: google-generativeai>=0.3.0
+Requires-Dist: colorama>=0.4.6
+Requires-Dist: python-dotenv>=1.0.0
+Dynamic: author
+Dynamic: home-page
+Dynamic: license-file
+Dynamic: requires-python
+
+# Piptalk CLI (Python)
+
+A command-line interface for interacting with Google's Gemini AI models. Chat with Gemini AI directly from your terminal!
+
+This is the Python version of the Gemini CLI tool. For the Node.js version, see [@karitkeyaranjan/talk-cli](https://www.npmjs.com/package/@karitkeyaranjan/talk-cli).
+
+## Installation
+
+### From PyPI (when published):
+
+```bash
+pip install piptalk-cli
+```
+
+### From source:
+
+```bash
+git clone <repository-url>
+cd gemini-cli-python
+pip install -e .
+```
+
+## Setup
+
+1. Get your Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Set it as an environment variable:
+
+```bash
+export GEMINI_API_KEY="your-api-key-here"
+```
+
+Or create a `.env` file in your home directory:
+
+```
+GEMINI_API_KEY=your-api-key-here
+```
+
+**Note:** The tool comes with a default API key, but it's recommended to use your own.
+
+## Usage
+
+### Interactive Mode
+
+Simply run the command without any arguments:
+
+```bash
+piptalk
+```
+
+### Command Mode
+
+Provide a prompt directly:
+
+```bash
+piptalk "Explain quantum computing in simple terms"
+```
+
+### Select a Model
+
+Use the `--model` or `-m` flag to choose a specific model:
+
+```bash
+piptalk --model flash "Hello world"
+piptalk -m 2.0-flash "Quick question"
+piptalk -m 2.5-pro "Explain machine learning"
+```
+
+### Available Models
+
+- `flash` - ⚡ Gemini 2.5 Flash (default)
+- `2.0-flash` - ⚡ Gemini 2.0 Flash
+- `2.5-pro` - 🟦 Gemini 2.5 Pro
+- `1.5-pro` - 🟦 Gemini Pro Latest
+- `pro-latest` - 🟦 Gemini Pro Latest
+- `pro@latest` - 🟦 Gemini Pro Latest
+
+### Help
+
+```bash
+piptalk --help
+piptalk -h
+```
+
+## Examples
+
+```bash
+# Interactive mode
+piptalk
+
+# Quick question
+piptalk "What is the capital of France?"
+
+# Use a specific model
+piptalk -m 2.0-flash "Write a Python function to sort a list"
+piptalk -m 2.5-pro "Explain the difference between REST and GraphQL"
+
+# Multi-word prompts
+piptalk "Explain the difference between REST and GraphQL"
+```
+
+## Requirements
+
+- Python >= 3.8
+- A valid Gemini API key (optional, default key included)
+
+## Features
+
+- ✨ Beautiful formatted output with syntax highlighting
+- 🎨 Color-coded responses for better readability
+- 📝 Code block formatting with borders
+- 📋 List and header formatting
+- 🔄 Support for multiple Gemini models
+- 💬 Interactive and command-line modes
+
+## License
+
+ISC
+
+## Development
+
+To set up for development:
+
+```bash
+git clone <repository-url>
+cd gemini-cli-python
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+pip install -e .
+```
+
+## Publishing to PyPI
+
+```bash
+# Install build tools
+pip install build twine
+
+# Build the package
+python -m build
+
+# Upload to PyPI (test first with test.pypi.org)
+twine upload dist/*
+```
