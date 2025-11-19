@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "extrator_fbds"
+version = "0.1.0"
+description = "Async scraper and OCR tools for FBDS (geo.fbds.org.br) geodata"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    {name = "CEPAD-IFSP"}
+]
+keywords = ["fbds", "scraper", "ocr", "geodata", "brasil"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: GIS",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "httpx[http2]>=0.24.0",
+    "h2>=4.1.0",
+    "beautifulsoup4>=4.11.0",
+    "pytesseract>=0.3.10",
+    "Pillow>=9.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=22.0.0",
+    "ruff>=0.0.260",
+    "build>=1.0.0",
+    "twine>=5.0.0",
+]
+
+[project.scripts]
+fbds-scraper = "extrator_fbds.fbds_async_scraper:main"
+fbds-ocr = "extrator_fbds.run_fbds_ocr_batch:main"
+fbds-ocr-mp = "extrator_fbds.run_fbds_ocr_batch_mp:main"
+
+[project.urls]
+Homepage = "https://github.com/CEPAD-IFSP/extrator_fbds"
+Repository = "https://github.com/CEPAD-IFSP/extrator_fbds"
+Issues = "https://github.com/CEPAD-IFSP/extrator_fbds/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["extrator_fbds*"]
+exclude = ["tests*", "examples*"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py38"
+
+[tool.black]
+line-length = 120
+target-version = ["py38", "py39", "py310", "py311"]
