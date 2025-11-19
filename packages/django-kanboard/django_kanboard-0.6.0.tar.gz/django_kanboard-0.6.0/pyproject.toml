@@ -1,0 +1,140 @@
+[project]
+name = "django-kanboard"
+description = "Project management with help of kanboard."
+version = "0.6.0"
+requires-python = ">=3.11"
+authors = [
+    { name = "François GUÉRIN", email = "fguerin@ville-tourcoing.fr" },
+]
+maintainers = [
+    { name = "François GUÉRIN", email = "fguerin@ville-tourcoing.fr" },
+]
+keywords = [
+    "Kanboard",
+    "Django",
+    "Project management",
+    "Scheduling",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 3.2",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Office/Business :: Scheduling",
+]
+dependencies = [
+    "kanboard>=1.1.2",
+    "django>=3.2,<6.0",
+    "django-solo>=2.3.0",
+    "django-reversion>=3.0.9",
+    "django-colorfield>=0.4.1",
+    "django-currentuser>=0.5.3",
+    "requests>=2.25.0",
+    "django-ckeditor-5==0.2.13",
+]
+
+[project.license]
+file = "LICENSE"
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.urls]
+Homepage = "https://gitlab.ville.tg/fguerin/django-kanboard/"
+
+[build-system]
+requires = [
+    "uv_build",
+]
+build-backend = "uv_build"
+
+[dependency-groups]
+docs = [
+    "Sphinx>=8.2",
+    "sphinx-rtd-theme",
+    "sphinx-autodoc-typehints",
+]
+tests = [
+    "pytest",
+    "pytest-cov",
+    "pytest-pythonpath",
+    "python-dotenv",
+]
+
+[tool.pytest.ini_options]
+pythonpath = [
+    "src/",
+]
+minversion = "6.0"
+testpaths = [
+    "tests",
+]
+addopts = "-ra -q"
+
+[tool.djlint]
+indent = 2
+profile = "django"
+max_line_length = 88
+ignore = "H031,H006,H017"
+
+[tool.djlint.js]
+indent_size = 2
+
+[tool.djlint.css]
+indent_size = 2
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
+exclude = [
+    ".git/",
+    "__pycache__",
+    ".uv_cache/",
+    "tmp/",
+    "**/migrations/",
+]
+
+[tool.ruff.lint]
+fixable = [
+    "ALL",
+]
+select = [
+    "E",
+    "F",
+    "B",
+    "SIM",
+    "I",
+    "UP",
+]
+ignore = []
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 120
+max-line-length = 120
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[[tool.uv.index]]
+name = "gitlab.ville.tg"
+url = "https://gitlab.ville.tg/api/v4/projects/fguerin%2Fpackages/packages/pypi/simple"
+publish-url = "https://gitlab.ville.tg/api/v4/projects/fguerin%2Fpackages/packages/pypi"
+explicit = true
+
+[tool.pyrefly]
+project-excludes = [
+    "docs/*",
+    "example/*",
+    "tests/*",
+    "**/migrations/*",
+]
