@@ -1,0 +1,111 @@
+{
+    "repositories": {
+        "qt_repo":{
+            "gc_url": "https://gitcode.com/qtforohos/qt5.git",
+            "gh_url": "https://github.com/qt/qt5.git"
+        },
+        "qt-ohos-patch": {
+            "gc_url": "https://gitcode.com/openharmony-sig/qt.git",
+            "gh_url": "https://github.com/liys-online/qt.git"
+        }
+    },
+    "dependencies": {
+        "git": {
+            "gc_url": "https://gitcode.com/Li-Yaosong/prebuilt/releases/download/1.0.0/Git-2.51.2-windows-64-bit.7z",
+            "gh_url": "https://github.com/liys-online/prebuilt/releases/download/1.0.0/Git-2.51.2-windows-64-bit.7z",
+            "sha256": "C68BF800F0EFE70543B3AB569C31957FDA8AB446674F8A14E055F884E6A54553"
+        },
+        "perl":{
+            "gc_url": "https://gitcode.com/Li-Yaosong/prebuilt/releases/download/1.0.0/perl5.7z",
+            "gh_url": "https://github.com/liys-online/prebuilt/releases/download/1.0.0/perl5.7z",
+            "sha256": "B783A9D8872E54BD545E16F2B384BA4EB1ECE8594CB444F70D38C8DF572E69DA"
+        },
+        "mingw":{
+            "gc_url": "https://gitcode.com/Li-Yaosong/prebuilt/releases/download/1.0.0/mingw64-x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z",
+            "gh_url": "https://github.com/liys-online/prebuilt/releases/download/1.0.0/mingw64-x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z",
+            "sha256": "412A340FD3767CDBAEC7423F9ADCE01DADF6F6B05B1241D7F39224940D803CF8"
+        },
+        "openssl":{
+            "gc_url": "https://gitcode.com/Li-Yaosong/prebuilt/releases/download/1.0.0/openssl_1_1_1u.zip",
+            "gh_url": "https://github.com/liys-online/prebuilt/releases/download/1.0.0/openssl_1_1_1u.zip",
+            "sha256": "F2F5FD2773B8DD37F18824BD065D510046E284060BAD443801AD7A2DCCAEB11D"
+        },
+        "ohos_sdk":{
+            "url": "https://repo.harmonyos.com/sdkmanager/v5/ohos/getSdkList",
+            "gc_url": "https://gitcode.com/Li-Yaosong/prebuilt/releases/download/1.0.0/getSdkList",
+            "gh_url": "https://github.com/liys-online/prebuilt/releases/download/1.0.0/getSdkList",
+            "support_version": "6.0-ohos-single-2"
+        }
+    },
+    "supported-qt-tags": [
+        "v5.15.12-lts-lgpl"
+    ],
+    "config": {
+        "working_dir": "${pwd}/work",
+        "perl": "${pwd}/work/perl/bin",
+        "mingw": "${pwd}/work/mingw/bin",
+        "openssl": "${pwd}/work/openssl/${build_ohos_abi}",
+        "ohos_sdk": "${pwd}/work/ohos-sdk/${ohos_version}",
+        "ohos_version": 15,
+        "build_type": "release",
+        "features": ["ipc_posix"],
+        "build_ohos_abi": "arm64-v8a",
+        "build_qt_tag": "v5.15.12-lts-lgpl",
+        "build_ohqt_tag": "master",
+        "clone_depth": 1,
+        "jobs": 4,
+        "verbose": false
+    },
+    "qt-config": {
+        "license": "opensource",
+        "confirm-license": true,
+        "-platform": "win32-g++",
+        "-xplatform": "oh-clang",
+        "-opengl": "es2",
+        "-opengles3": true,
+        "-no-dbus": true,
+        "openssl-runtime": true,
+        "-disable-rpath": true,
+        "-nomake": ["tests", "examples"]
+    },
+    "v5.15.12-lts-lgpl": {
+        "-skip": [
+            "qtpim", 
+            "qtvirtualkeyboard", 
+            "qtwebengine", 
+            "qtsystems", 
+            "qtlocation", 
+            "qtgamepad", 
+            "qtscript", 
+            "qtwebview"
+        ]
+    },
+    "v5.15.17-lts-lgpl": {
+        "-skip": [
+            "qtpim",
+            "qtvirtualkeyboard",
+            "qtwebengine",
+            "qtsystems",
+            "qtlocation",
+            "qtgamepad",
+            "qtscript",
+            "qtwebview"
+        ]
+    },
+    "v6.5.6-lts-lgpl": {
+        "-skip": [
+            "qtpim", 
+            "qtconnectivity",
+            "qtvirtualkeyboard", 
+            "qtwebengine", 
+            "qtsystems", 
+            "qtlocation", 
+            "qtwebchannel",
+            "qtgamepad", 
+            "qtscript", 
+            "qtsensors",
+            "qtconnectivity",
+            "qtwebview"
+        ]
+    }
+}
