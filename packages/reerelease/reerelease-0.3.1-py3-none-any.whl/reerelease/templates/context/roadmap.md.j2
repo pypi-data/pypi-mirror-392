@@ -1,0 +1,36 @@
+{# Roadmap template with DSL annotations for parsing multiple milestones #}
+
+{# INPUT section #}
+{# @field:context_name type=inline required=true pattern='(\S+)\s+roadmap' #}
+{# @section:milestones title_pattern='^(?!Backlog$|Note$|Unassigned$).*' level=2 multi=true template='milestone/milestone_section.j2' #}
+{# @section:backlog title_pattern='(?i)^(Backlog|Unassigned)$' level=2 checkbox='^\[([ xX/\^])\]\s*(?P<text>.*?)(?:\s*\(@(?P<assigned>\w+)\))?\s*$' #}
+
+{# OUTPUT section #}
+# {{ context_name }} roadmap
+
+{% block roadmap_header %}
+To see what was released so far, check the [release notes][release_file].
+{% endblock %}
+
+{% block roadmap_milestones%}
+{% for milestone in milestones %}
+{%- set milestone_name = milestone.milestone_name -%}
+{%- set milestone_description = milestone.milestone_description -%}
+{%- set milestone_target_date = milestone.milestone_target_date -%}
+{%- set milestone_status = milestone.milestone_status -%}
+{%- set milestone_tasks = milestone.milestone_tasks -%}
+{%- set milestone_problems = milestone.milestone_problems -%}
+{% include 'milestone/milestone_section.j2' %}
+{% endfor -%}
+{% endblock %}
+
+## Backlog
+
+- [ ] Feature A
+
+{% block roadmap_link_section %}
+<!-- links -->
+
+<!-- files -->
+{% include 'common/file_links.j2' %}
+{% endblock %}
