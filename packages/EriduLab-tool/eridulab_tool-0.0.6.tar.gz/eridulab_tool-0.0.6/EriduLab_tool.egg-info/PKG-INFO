@@ -1,0 +1,138 @@
+Metadata-Version: 2.4
+Name: EriduLab_tool
+Version: 0.0.6
+Summary: A small example package for EriduLab
+Author-email: Example Author <author@example.com>
+Project-URL: Homepage, https://github.com/pypa/sampleproject
+Project-URL: Bug Tracker, https://github.com/pypa/sampleproject/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy
+Requires-Dist: pandas
+Dynamic: license-file
+
+
+# EriduLab_tool
+
+`EriduLab_tool` is a Python package designed to generate mock cloud data for testing and analysis purposes. It features the `MCD` (Mock Cloud Data Generator) class, which provides a fluent API for easy configuration and data generation.
+
+## Features
+
+- **MCD (Mock Cloud Data Generator)**: A powerful tool for creating synthetic cloud resource usage and cost data.
+- **Fluent API**: Configure data generation parameters using a chainable, readable interface.
+- **Customizable Parameters**: Adjust days, instance count, risk tolerance, and more.
+- **Advanced Control**: Fine-tune data characteristics with methods like `with_storage_ratio()`, `with_anomaly_rate()`, `with_idle_ratio()`, and `with_overprovisioned_ratio()`.
+
+## Installation
+
+```bash
+pip install EriduLab_tool
+```
+
+## Usage
+
+### Basic Usage
+
+```python
+from EriduLab_tool import MCD
+
+mcd_instance = MCD()
+data_df = mcd_instance.days(30).inst(100).risk(0.7).gen()
+
+print(data_df.head())
+```
+
+### Advanced Configuration
+
+```python
+from datetime import datetime
+
+advanced_data_df = MCD()     .days(60)     .inst(250)     .start_date(datetime(2023, 1, 1))     .risk(0.9)     .with_storage_ratio(0.3)     .with_anomaly_rate(0.05)     .with_idle_ratio(0.05)     .with_overprovisioned_ratio(0.1)     .Rs(42)     .gen()
+
+print(advanced_data_df.info())
+```
+
+## MCD Fluent API Methods Overview
+
+### `.days(days: int)`
+*   **Purpose**: Sets the duration in days for which mock cloud data will be generated.
+*   **Input Type**: `int`
+*   **Valid Range**: `days > 0`
+*   **Influence**: Determines the length of the time series data.
+
+### `.risk(risk_level: float)`
+*   **Purpose**: Adjusts the overall risk tolerance, influencing pricing categories (e.g., more Spot instances for higher risk) and operational risk scores.
+*   **Input Type**: `float`
+*   **Valid Range**: `0.0 <= risk_level <= 1.0`
+*   **Influence**: Affects `PricingCategory` distribution, `Config_Risk_Factor`, and `Operational_Risk_Score`.
+
+### `.inst(instance_count: int)`
+*   **Purpose**: Specifies the total number of unique resource instances to simulate.
+*   **Input Type**: `int`
+*   **Valid Range**: `instance_count > 0`
+*   **Influence**: Determines the cardinality of `ResourceID`.
+
+### `.Rs(random_state: int)`
+*   **Purpose**: Sets a seed for the random number generator to ensure reproducible data generation.
+*   **Input Type**: `int` or `None`
+*   **Valid Range**: Any integer or `None`.
+*   **Influence**: Ensures consistency of all randomized aspects across runs.
+
+### `.start_date(start_date: datetime)`
+*   **Purpose**: Defines the initial timestamp for the generated time series data.
+*   **Input Type**: `datetime.datetime` object
+*   **Valid Range**: Any valid `datetime` object.
+*   **Influence**: Sets the starting point for `TimeInterval`.
+
+### `.with_storage_ratio(ratio: float)`
+*   **Purpose**: Controls the proportion of storage resources versus compute (VM) resources in the generated dataset.
+*   **Input Type**: `float`
+*   **Valid Range**: `0.0 <= ratio <= 1.0`
+*   **Influence**: Affects the distribution of `ResourceTypeGroup`.
+
+### `.with_anomaly_rate(probability: float)`
+*   **Purpose**: Sets the probability that a VM instance will exhibit "spiky" (anomalous) CPU utilization behavior.
+*   **Input Type**: `float`
+*   **Valid Range**: `0.0 <= probability <= 1.0`
+*   **Influence**: Determines the number of `Is_Spiky` VMs and their CPU patterns.
+
+### `.with_idle_ratio(ratio: float)`
+*   **Purpose**: Sets the target proportion of VM instances that will be marked as idle.
+*   **Input Type**: `float`
+*   **Valid Range**: `0.0 <= ratio <= 1.0`
+*   **Influence**: Directly controls the number of VM instances where `Is_Idle` is `True`.
+
+### `.with_overprovisioned_ratio(ratio: float)`
+*   **Purpose**: Sets the target proportion of VM instances that will be marked as overprovisioned.
+*   **Input Type**: `float`
+*   **Valid Range**: `0.0 <= ratio <= 1.0`
+*   **Influence**: Directly controls the number of VM instances where `Is_Overprovisioned` is `True` (among non-idle instances).
+
+### `.gen()`
+*   **Purpose**: Generates and returns a pandas DataFrame containing the mock cloud data based on the configured parameters.
+*   **Returns**: `pandas.DataFrame`
+*   **Output Columns**: Detailed explanation of all output columns (e.g., `TimeInterval`, `ResourceID`, `ProjectID`, `Region`, `ResourceType`, `ResourceTypeGroup`, `PricingCategory`, `ListCost_Per_Hour`, `EffectiveCost`, `BilledCost_Daily_Total`, `CPU_Cores`, `Max_Memory_GB`, `ConsumedQuantity`, `CPU_Utilization_Pct`, `Memory_Usage_GB`, `Operational_Risk_Score`, `Config_Risk_Factor`, `Is_Idle`, `Is_Overprovisioned`, `Is_Spiky`, `ServiceName`, `ConsumedUnit`, `Tags`).
+
+## Practical Use Cases
+
+### FinOps Reporting and Cost Analysis
+*   How to use `MCD` data to simulate cost allocation, identify cost anomalies, and analyze spending patterns.
+*   Examples of filtering and aggregating data for different reporting needs (e.g., cost per project, cost per region, cost by resource type).
+*   Highlighting columns like `EffectiveCost`, `BilledCost_Daily_Total`, `ProjectID`, `Region`.
+
+### Anomaly Detection in Resource Utilization and Cost
+*   Generating datasets with simulated anomalies (`with_anomaly_rate`) to test anomaly detection algorithms.
+*   Identifying unusual spikes in `CPU_Utilization_Pct` or `EffectiveCost`.
+*   Using `Operational_Risk_Score` and `Config_Risk_Factor` for predictive anomaly detection.
+
+### Capacity Planning and Optimization
+*   Simulating different `instance_count` and `resource_type` scenarios.
+*   Analyzing `CPU_Utilization_Pct` and `Memory_Usage_GB` to identify `Is_Idle` and `Is_Overprovisioned` resources.
+
+### Policy Enforcement and Compliance Testing
+*   Using `Tags` to simulate environments (e.g., 'prod', 'dev') and test policy adherence.
+*   Evaluating the impact of `PricingCategory` distributions based on `risk_level` for compliance with FinOps best practices.
