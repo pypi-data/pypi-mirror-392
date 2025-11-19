@@ -1,0 +1,25 @@
+version: 2
+formats:
+    - htmlzip
+    - pdf
+build:
+    os: ubuntu-24.04
+    apt_packages:
+        - libgmp-dev
+        - build-essential
+        - pkg-config
+    jobs:
+      pre_create_environment:
+        - wget https://github.com/diofant/zz/releases/download/v0.6.1/zz-0.6.1.tar.gz
+        - tar xzf zz-0.6.1.tar.gz
+        - cd zz-0.6.1 && ./configure -q --prefix=$(pwd)/../.local && make -s && make -s install
+    tools:
+        python: "3"
+python:
+    install:
+        - path: .
+          extra_requirements:
+              - docs
+sphinx:
+    fail_on_warning: true
+    configuration: docs/conf.py
