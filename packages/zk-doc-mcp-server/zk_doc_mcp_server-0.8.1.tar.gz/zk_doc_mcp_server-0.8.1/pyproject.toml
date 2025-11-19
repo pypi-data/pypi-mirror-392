@@ -1,0 +1,59 @@
+[project]
+name = "zk-doc-mcp-server"
+version = "0.8.1"
+description = "MCP server for searching ZK Framework documentation"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [
+    { name = "ZK Doc MCP Contributors" }
+]
+keywords = ["mcp", "zk", "documentation", "search", "ai"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "httpx>=0.28.1",
+    "mcp[cli]>=1.21.0",
+    "fastmcp>=0.1.0",
+]
+
+[project.optional-dependencies]
+# Optional dependencies for semantic search and documentation indexing
+search = [
+    "chromadb>=0.6.0",
+]
+
+# Development dependencies
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "mypy>=1.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/zkoss/zk-doc-mcp"
+Documentation = "https://github.com/zkoss/zk-doc-mcp#readme"
+Repository = "https://github.com/zkoss/zk-doc-mcp"
+Issues = "https://github.com/zkoss/zk-doc-mcp/issues"
+
+[project.scripts]
+zk-doc-mcp = "zk_doc_mcp.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+directory = "."
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/zk_doc_mcp"]
