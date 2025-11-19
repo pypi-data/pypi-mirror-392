@@ -1,0 +1,40 @@
+import os
+
+from setuptools import setup, find_packages
+
+
+def get_version():
+    return os.getenv("PYRASP_VERSION")
+
+
+setup(
+    name="python-rasp-setup",
+    version=get_version(),
+    description="Python RASP Setup Utils",
+    long_description="Python RASP Setup Utils",
+    long_description_content_type="text/markdown",
+    author="Alibaba Cloud",
+    author_email="security@alibaba-inc.com",
+    packages=find_packages(),
+    include_package_data=True,
+    python_requires=">=3.6",
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+    ],
+    install_requires=[],
+    entry_points={
+        "console_scripts": [
+            "pyrasp=aliyunraspsetup:run",
+            "pyrasp-bootstrap=aliyunraspsetup.dynamic_setup:run",
+        ],
+    },
+    zip_safe=False,
+)
