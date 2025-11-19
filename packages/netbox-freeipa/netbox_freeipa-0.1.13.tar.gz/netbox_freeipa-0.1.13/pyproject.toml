@@ -1,0 +1,52 @@
+# NetBox FreeIPA Plugin Configuration
+# See PEP 518 for the spec of this file
+# https://www.python.org/dev/peps/pep-0518/
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "netbox-freeipa"
+version = "0.1.13"
+authors = [
+    {name = "Maksym Hrytsaienko", email = "hrytsaienko.my@gmail.com"},
+]
+description = "NetBox plugin for FreeIPA integration - manage enrolled hosts"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.10"
+keywords = ["netbox", "netbox-plugin", "freeipa", "identity-management"]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: Django",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Systems Administration",
+]
+
+dependencies = [
+    "python-freeipa>=1.0.6",
+]
+
+[project.urls]
+Homepage = "https://github.com/neverlless/netbox-freeipa"
+Documentation = "https://github.com/neverlless/netbox-freeipa/blob/main/README.md"
+Repository = "https://github.com/neverlless/netbox-freeipa"
+"Bug Tracker" = "https://github.com/neverlless/netbox-freeipa/issues"
+
+[tool.setuptools]
+packages = ["netbox_freeipa", "netbox_freeipa.api", "netbox_freeipa.migrations"]
+
+[tool.setuptools.package-data]
+netbox_freeipa = [
+    "templates/**/*.html",
+]
