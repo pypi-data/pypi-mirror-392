@@ -1,0 +1,124 @@
+Metadata-Version: 2.4
+Name: django-adminfilters
+Version: 2.7
+Summary: Collection of Django Admin filters
+Project-URL: Documentation, https://github.com/saxix/django-adminfilters
+Project-URL: Homepage, https://github.com/saxix/django-adminfilters
+License-File: AUTHORS
+License-File: LICENSE
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Django
+Classifier: Framework :: Django :: 4.2
+Classifier: Framework :: Django :: 5.2
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Software Development :: Libraries :: Application Frameworks
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.10
+Requires-Dist: django-stubs-ext>=5.1.3
+Requires-Dist: django-stubs>=5.1.3
+Description-Content-Type: text/markdown
+
+django-adminfilters
+===================
+
+Collection of extra filters for the Django admin site
+
+[![Pypi](https://badge.fury.io/py/django-adminfilters.svg)](https://pypi.org/project/django-adminfilters/)
+[![coverage](https://codecov.io/github/saxix/django-adminfilters/coverage.svg?branch=develop)](https://codecov.io/github/saxix/django-adminfilters?branch=develop)
+[![Test](https://github.com/saxix/django-adminfilters/actions/workflows/test.yml/badge.svg)](https://github.com/saxix/django-adminfilters/actions/workflows/test.yml)
+[![Documentation](https://github.com/saxix/django-adminfilters/actions/workflows/docs.yml/badge.svg)](https://saxix.github.io/django-adminfilters/)
+[![Django](https://img.shields.io/pypi/frameworkversions/django/django-adminfilters)](https://pypi.org/project/django-adminfilters/)
+[![Supported Python versions](https://img.shields.io/pypi/pyversions/django-adminfilters.svg)](https://pypi.org/project/django-adminfilters/)
+
+
+https://user-images.githubusercontent.com/27282/153727131-d875f946-a8a8-4d89-be83-1d8cb5c9391a.mp4
+
+
+Filters
+=======
+
+* Autocomplete
+  * AutocompleteFilter
+* Simple
+  * ValueFilter
+* Combobox
+  * AllValuesComboFilter
+  * RelatedFieldComboFilter
+  * ChoicesFieldComboFilter
+* Dates
+  * DateFilter
+  * DateInDateRange
+* Radio
+  * AllValuesRadioFilter
+  * RelatedFieldRadioFilter
+  * ChoicesFieldRadioFilter
+  * BooleanRadioFilter
+* Checkbox
+  * RelatedFieldCheckBoxFilter
+* Multiple
+  * MultiValueFilter
+* ManyToMany
+  * IntersectionFieldListFilter
+  * UnionFieldListFilter
+* JSON
+  * JsonFieldFilter
+* Number
+  * NumberFilter
+* Special
+  * QueryStringFilter
+  * DjangoLookupFilter
+  * PermissionPrefixFilter
+
+FYI
+====
+
+Filters management (save/retrieve), is handled by an optional application `adminfilters.depot` that,
+due to the Django filters internal design, it uses GET method to save filter definition to the database.
+When you use `FilterDepotManager` to save a filter, the call is *idempotent* but not *safe*.
+
+
+Usage examples
+==============
+
+```python
+class MyModel(models.Model):
+    index = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
+    age = models.IntegerField()
+    flag = models.CharField(default="1", choices=(("0", "Flag 1"), ("1", "Flag 2"))
+    household = models.ForeignKey("Household")
+    custom = JSONField(default=dict, blank=True)
+
+
+class MyModelAdmin(ModelAdmin):
+    list_filter = (
+        FilterDepotManager,  # needs `adminfilters.depot` app
+        QueryStringFilter,
+        DjangoLookupFilter,
+        ("custom", JsonFieldFilter.factory(can_negate=False, options=True)),
+        ("flag", ChoicesFieldComboFilter),
+        ("household", AutoCompleteFilter)
+        ("name", ValueFilter.factory(lookup="istartswith"),
+        ("age", NumberFilter),
+    )
+```
+
+
+Run demo app
+============
+
+```sh
+git clone https://github.com/saxix/django-adminfilters.git
+cd django-adminfilters
+python3 -m venv .venv
+source .venv/bin/activate
+make develop
+make demo
+```
