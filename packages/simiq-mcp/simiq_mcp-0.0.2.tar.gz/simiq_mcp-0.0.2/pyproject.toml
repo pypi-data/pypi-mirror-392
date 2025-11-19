@@ -1,0 +1,41 @@
+# pyproject.toml
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "simiq-mcp"
+version = "0.0.2"
+copyright = "Copyright 2025, ChipIQ"
+description = 'MCP server for the ChipIQ "simiq" tool'
+readme = "README.md"
+requires-python = ">=3.13"
+keywords = []
+authors = [
+  { name = "Hans Bouwmeester", email = "hans.bouwmeester@icloud.com" },
+  { name = "Asav Gandhi", email = "asavgandhi01@gmail.com" },    
+]
+classifiers = [
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.13",
+  "Operating System :: OS Independent",
+
+]
+dependencies = [
+  #"chipiq @ file:///Users/hansb/workspace/chipiq/packages/chipiq",
+  "chipiq>=0.0.3",
+  "mcp~=1.8.0",
+  "uvicorn>=0.38.0",
+]
+
+[project.urls]
+Documentation = "https://github.com/ChipIQ/simiq-mcp#readme"
+Issues = "https://github.com/ChipIQ/chipiq/issues"
+Source = "https://github.com/ChipIQ/chipiq"
+
+[project.scripts]
+simiq-mcp = "simiq_mcp.__main__:main"
+
+[tool.hatch.metadata]
+allow-direct-references = true
