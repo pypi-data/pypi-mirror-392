@@ -1,0 +1,167 @@
+"""
+Configuration loading for STIndex.
+
+Loads configuration from YAML files with provider switching.
+"""
+
+import os
+from typing import Any, Dict
+from pathlib import Path
+
+from dotenv import load_dotenv
+import yaml
+
+from stindex.utils.constants import (
+    CFG_EXTRACTION_INFERENCE_DIR,
+    CFG_EXTRACTION_POSTPROCESS_DIR,
+    CFG_PREPROCESS_DIR,
+    CFG_DIR,
+    DEFAULT_LLM_PROVIDER,
+)
+
+# Load environment variables from .env file
+load_dotenv()
+
+
+def load_config_from_file(config_path: str = "extract") -> Dict[str, Any]:
+    """
+    Load complete configuration from a config file with LLM provider switching.
+
+    This function loads the main config (extract.yml by default) and merges it with
+    the provider-specific config (hf.yml, openai.yml, or anthropic.yml).
+
+    Args:
+        config_path: Path to config file (e.g., 'extract', 'evaluate', 'cfg/extraction/inference/extract.yml')
+                    Defaults to 'extract' (cfg/extraction/inference/extract.yml)
+
+    Returns:
+        Dictionary containing merged configuration
+    """
+    # If config_path doesn't end with .yml, add it and look in appropriate directory
+    if not config_path.endswith(('.yml', '.yaml')):
+        # Try inference directory first
+        config_file = Path(CFG_EXTRACTION_INFERENCE_DIR) / f"{config_path}.yml"
+
+        # If not found, try evaluation directory
+        if not config_file.exists():
+            from stindex.utils.constants import CFG_EXTRACTION_EVALUATION_DIR
+            eval_config_file = Path(CFG_EXTRACTION_EVALUATION_DIR) / f"{config_path}.yml"
+            if eval_config_file.exists():
+                config_file = eval_config_file
+    else:
+        config_file = Path(config_path)
+
+    try:
+        # Load main config file
+        with open(config_file, "r") as f:
+            main_config = yaml.safe_load(f) or {}
+
+        # Get LLM provider from llm section in main config
+        llm_provider = main_config.get("llm", {}).get("llm_provider")
+        if not llm_provider:
+            llm_provider = DEFAULT_LLM_PROVIDER
+
+        # Load provider-specific config
+        provider_config_file = Path(CFG_EXTRACTION_INFERENCE_DIR) / f"{llm_provider}.yml"
+
+        if provider_config_file.exists():
+            with open(provider_config_file, "r") as f:
+                provider_config = yaml.safe_load(f) or {}
+
+            # Merge configs with proper handling of nested llm section
+            # Start with main_config and merge provider config's llm section
+            merged_config = {**main_config}
+
+            # Merge llm section from provider config
+            if "llm" in provider_config:
+                merged_config["llm"] = {
+                    **merged_config.get("llm", {}),
+                    **provider_config["llm"]
+                }
+        else:
+            # If no provider config exists, use main config
+            merged_config = main_config
+
+        return merged_config
+
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Config file not found: {config_file}")
+    except yaml.YAMLError as e:
+        raise ValueError(f"Error parsing config file {config_file}: {e}")
+
+
+def load_preprocess_config(config_name: str) -> Dict[str, Any]:
+    """
+    Load preprocessing configuration file.
+
+    Args:
+        config_name: Config name (e.g., 'chunking', 'parsing', 'scraping')
+                    without .yml extension
+
+    Returns:
+        Dictionary containing configuration
+
+    Examples:
+        >>> load_preprocess_config('chunking')
+        >>> load_preprocess_config('parsing')
+    """
+    config_file = Path(CFG_PREPROCESS_DIR) / f"{config_name}.yml"
+
+    try:
+        with open(config_file, "r") as f:
+            config = yaml.safe_load(f) or {}
+        return config
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Preprocess config not found: {config_file}")
+    except yaml.YAMLError as e:
+        raise ValueError(f"Error parsing config file {config_file}: {e}")
+
+
+def load_postprocess_config(config_name: str) -> Dict[str, Any]:
+    """
+    Load postprocessing configuration file.
+
+    Args:
+        config_name: Config name (e.g., 'spatial', 'temporal', 'validation')
+                    without .yml extension
+
+    Returns:
+        Dictionary containing configuration
+
+    Examples:
+        >>> load_postprocess_config('spatial')
+        >>> load_postprocess_config('temporal')
+    """
+    config_file = Path(CFG_EXTRACTION_POSTPROCESS_DIR) / f"{config_name}.yml"
+
+    try:
+        with open(config_file, "r") as f:
+            config = yaml.safe_load(f) or {}
+        return config
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Postprocess config not found: {config_file}")
+    except yaml.YAMLError as e:
+        raise ValueError(f"Error parsing config file {config_file}: {e}")
+
+
+def load_visualization_config() -> Dict[str, Any]:
+    """
+    Load visualization configuration file.
+
+    Returns:
+        Dictionary containing visualization configuration
+
+    Examples:
+        >>> config = load_visualization_config()
+    """
+    config_file = Path(CFG_DIR) / "visualization.yml"
+
+    try:
+        with open(config_file, "r") as f:
+            config = yaml.safe_load(f) or {}
+        return config
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Visualization config not found: {config_file}")
+    except yaml.YAMLError as e:
+        raise ValueError(f"Error parsing config file {config_file}: {e}")
+

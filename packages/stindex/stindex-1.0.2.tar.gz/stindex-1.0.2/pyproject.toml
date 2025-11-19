@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stindex"
+version = "1.0.2"
+description = "Spatiotemporal Index Extraction from Unstructured Text"
+readme = "README.md"
+authors = [
+    {name = "Wenxiao Zhang", email = "wenxiao.zhang@research.uwa.edu.au"}
+]
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Text Processing :: Linguistic",
+]
+keywords = ["nlp", "spatiotemporal", "information-extraction", "ner", "geocoding", "temporal-extraction"]
+requires-python = ">=3.9"
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[project.urls]
+Homepage = "https://github.com/MoeBuTa/STIndex/"
+Documentation = "https://stindex.readthedocs.io"
+Repository = "https://github.com/MoeBuTa/STIndex/"
+"Bug Tracker" = "https://github.com/MoeBuTa/STIndex/issues"
+
+[project.scripts]
+stindex = "stindex.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["stindex*", "cfg*", "scripts*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.yml", "*.yaml", "*.sh"]
+
+[tool.setuptools]
+include-package-data = true
+zip-safe = false
+
+[tool.black]
+line-length = 100
+target-version = ['py39', 'py310', 'py311']
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v"
