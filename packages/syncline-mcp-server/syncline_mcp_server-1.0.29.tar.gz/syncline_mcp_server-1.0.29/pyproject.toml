@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "syncline-mcp-server"
+version = "1.0.29"
+description = "Model Context Protocol server for Syncline - AI-powered meeting scheduling"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Kekwanu Labs", email = "hello@kekwanulabs.com"}
+]
+keywords = ["mcp", "model-context-protocol", "syncline", "scheduling", "ai", "calendar"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "mcp>=1.0.0",
+    "httpx>=0.27.0",
+]
+
+[project.scripts]
+syncline-mcp-server = "syncline_mcp_server.server:main"
+
+[project.urls]
+Homepage = "https://syncline.run"
+Documentation = "https://kekwanulabslllc.mintlify.app"
+Repository = "https://github.com/KekwanuLabs/syncline"
+"Bug Tracker" = "https://github.com/KekwanuLabs/syncline/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["syncline_mcp_server*"]
