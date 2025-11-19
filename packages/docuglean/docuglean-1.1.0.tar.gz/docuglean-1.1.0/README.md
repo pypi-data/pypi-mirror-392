@@ -1,0 +1,364 @@
+# Docuglean OCR - Python SDK
+
+A unified Python SDK for intelligent document processing using State of the Art AI models.
+
+## Features
+
+- 🚀 **Easy to Use**: Simple, intuitive API with detailed documentation
+- 🔍 **OCR Capabilities**: Extract text from images and scanned documents  
+- 📊 **Structured Data Extraction**: Use Pydantic models for type-safe data extraction
+- 📑 **Document Classification**: Intelligently split multi-section documents by category with automatic chunking
+- 📄 **Multimodal Support**: Process PDFs and images with ease
+- 🤖 **Multiple AI Providers**: Support for OpenAI, Mistral, Google Gemini, and Hugging Face
+- ⚡ **Batch Processing**: Process multiple documents concurrently with automatic error handling
+- 🔒 **Type Safety**: Full Python type hints with Pydantic validation
+- 📦 **Permissive Licensing**: Uses pdftext (Apache/BSD) instead of PyMuPDF (AGPL) for commercial-friendly PDF processing
+- 📝 **Document Parsers**: Built-in local parsers for DOCX, PPTX, XLSX, CSV, TSV, and PDF (no API required)
+
+## Installation
+
+```bash
+pip install docuglean-ocr
+```
+
+## Quick Start
+
+### OCR Processing
+
+```python
+from docuglean import ocr
+
+# Mistral OCR
+result = await ocr(
+    file_path="./document.pdf",
+    provider="mistral",
+    model="mistral-ocr-latest",
+    api_key="your-api-key"
+)
+
+# Google Gemini OCR
+result = await ocr(
+    file_path="./document.pdf",
+    provider="gemini",
+    model="gemini-2.5-flash",
+    api_key="your-gemini-api-key",
+    prompt="Extract all text from this document"
+)
+
+# Hugging Face OCR (no API key needed)
+result = await ocr(
+    file_path="https://example.com/image.jpg",  # Supports URLs, local files, base64
+    provider="huggingface",
+    model="Qwen/Qwen2.5-VL-3B-Instruct",
+    prompt="Extract all text from this image"
+)
+
+# Local OCR (no API, PDFs only) using pdftext
+result = await ocr(
+    file_path="./document.pdf",
+    provider="local",
+    api_key="local"
+)
+print("Local text:", result.text[:200] + "...")
+```
+
+### Structured Data Extraction
+
+```python
+from docuglean import extract
+from pydantic import BaseModel
+from typing import List
+
+class ReceiptItem(BaseModel):
+    name: str
+    price: float
+
+class Receipt(BaseModel):
+    date: str
+    total: float
+    items: List[ReceiptItem]
+
+# Extract structured data with OpenAI
+receipt = await extract(
+    file_path="./receipt.pdf",
+    provider="openai",
+    api_key="your-api-key",
+    response_format=Receipt,
+    prompt="Extract receipt information"
+)
+
+# Extract structured data with Gemini
+receipt = await extract(
+    file_path="./receipt.pdf",
+    provider="gemini",
+    api_key="your-gemini-api-key",
+    response_format=Receipt,
+    prompt="Extract receipt information including date, total, and all items"
+)
+
+# Summarization via extract
+class Summary(BaseModel):
+    title: str | None = None
+    summary: str
+    keyPoints: List[str]
+
+summary = await extract(
+    file_path="./long-report.pdf",
+    provider="openai",
+    api_key="your-api-key",
+    response_format=Summary,
+    prompt="Provide a concise 3-sentence summary of this document and 3–7 key points."
+)
+print("Summary:", summary.summary)
+```
+
+Note: you can also use extract with a targeted "search" prompt (e.g., "Find all occurrences of X and return matching passages") to perform semantic search within a document.
+
+### Document Classification - Split Documents by Category
+
+Intelligently classify and split documents into categories based on content. Perfect for processing multi-section documents like medical records, legal contracts, or research papers.
+
+```python
+from docuglean import classify, CategoryDescription
+
+# Classify a patient medical record
+result = await classify(
+    file_path="./patient-record.pdf",
+    categories=[
+        CategoryDescription(
+            name="Patient Intake Forms",
+            description="Pages with patient registration, insurance information, and consent forms"
+        ),
+        CategoryDescription(
+            name="Medical History",
+            description="Pages containing past medical history, medications, allergies, and family history"
+        ),
+        CategoryDescription(
+            name="Lab Results",
+            description="Pages with laboratory test results, blood work, and diagnostic reports"
+        ),
+        CategoryDescription(
+            name="Treatment Notes",
+            description="Pages with doctor's notes, treatment plans, and prescriptions"
+        )
+    ],
+    api_key="your-api-key",
+    provider="mistral"  # or "openai", "gemini"
+)
+
+# Access the results
+for split in result.splits:
+    print(f"\n{split.name}:")
+    print(f"  Pages: {split.pages}")
+    print(f"  Confidence: {split.conf}")
+    
+# Example output:
+# Patient Intake Forms:
+#   Pages: [1, 2, 3, 4]
+#   Confidence: high
+# Medical History:
+#   Pages: [5, 6, 7]
+#   Confidence: high
+# Lab Results:
+#   Pages: [8, 9, 10, 11, 12]
+#   Confidence: high
+# Treatment Notes:
+#   Pages: [13, 14, 15, 16]
+#   Confidence: high
+```
+
+**Key Features:**
+- 🎯 **Automatic Chunking**: Handles large documents (100+ pages) by automatically splitting into chunks
+- ⚡ **Concurrent Processing**: Processes chunks in parallel for faster results
+- 🎚️ **Confidence Scores**: Returns "high" or "low" confidence for each classification
+- 📊 **Page-Level Granularity**: Get exact page numbers for each category
+- 🔧 **Configurable**: Adjust chunk size and concurrency limits
+
+**Advanced Options:**
+```python
+result = await classify(
+    file_path="./large-document.pdf",
+    categories=[...],
+    api_key="your-api-key",
+    provider="openai",
+    model="gpt-4o-mini",  # Optional: specify model
+    chunk_size=75,  # Pages per chunk (default: 75)
+    max_concurrent=5  # Max parallel requests (default: 5)
+)
+```
+
+### Batch Processing - Process Multiple Documents Concurrently
+
+Process multiple documents concurrently with automatic error handling for maximum speed.
+
+```python
+from docuglean import batch_ocr, batch_extract
+from docuglean.types import OCRConfig, ExtractConfig
+from pydantic import BaseModel
+
+# Batch OCR - Process multiple files
+results = await batch_ocr([
+    OCRConfig(
+        file_path="./invoice1.pdf",
+        provider="openai",
+        api_key="your-api-key",
+        model="gpt-4o-mini"
+    ),
+    OCRConfig(
+        file_path="./invoice2.pdf",
+        provider="mistral",
+        api_key="your-api-key",
+        model="pixtral-12b-2409"
+    ),
+    OCRConfig(
+        file_path="./receipt.png",
+        provider="local",
+        api_key="not-needed"
+    )
+])
+
+# Handle results - errors don't stop processing
+for i, result in enumerate(results):
+    if result["success"]:
+        print(f"File {i + 1} processed:", result["result"])
+    else:
+        print(f"File {i + 1} failed:", result["error"])
+
+# Batch Extract - Extract structured data from multiple files
+class Invoice(BaseModel):
+    invoice_number: str
+    vendor: str
+    total: float
+
+extract_results = await batch_extract([
+    ExtractConfig(
+        file_path="./invoice1.pdf",
+        provider="openai",
+        api_key="your-api-key",
+        response_format=Invoice
+    ),
+    ExtractConfig(
+        file_path="./invoice2.pdf",
+        provider="openai",
+        api_key="your-api-key",
+        response_format=Invoice
+    )
+])
+
+# Get successful extractions
+successful = [r for r in extract_results if r["success"]]
+print(f"Processed {len(successful)}/{len(extract_results)} files")
+```
+
+**Key Features:**
+- ✅ Automatic error handling - one failure doesn't stop the batch
+- ✅ Results returned in same order as input
+- ✅ Mix different providers in single batch
+- ✅ Simple success/failure status for each file
+
+## Document Parsers (Local - No API Required)
+
+Extract text from various document formats without any AI provider:
+
+```python
+from docuglean import (
+    parse_docx,
+    parse_pptx,
+    parse_spreadsheet,
+    parse_pdf,
+    parse_csv,
+    parse_document_local
+)
+
+# Parse DOCX files (returns HTML, Markdown, and raw text)
+result = await parse_docx("./document.docx")
+print(result["html"])      # HTML output
+print(result["markdown"])  # Markdown output
+print(result["raw_text"])  # Plain text
+print(result["text"])      # Same as markdown
+
+# Parse PPTX files
+result = await parse_pptx("./presentation.pptx")
+print(result["text"])
+
+# Parse spreadsheets (XLSX, XLS)
+result = await parse_spreadsheet("./data.xlsx")
+print(result["text"])
+
+# Parse CSV/TSV files
+result = await parse_csv("./data.csv")
+print(result["text"])
+print(result["rows"])      # List of row dictionaries
+print(result["columns"])   # List of column names
+
+# Parse PDF files
+result = await parse_pdf("./document.pdf")
+print(result["text"])
+
+# Auto-detect format and parse
+result = await parse_document_local("./document.docx")
+print(result["text"])
+```
+
+### Supported Document Formats
+
+- **Word Documents**: DOC, DOCX
+- **Presentations**: PPT, PPTX
+- **Spreadsheets**: XLSX, XLS
+- **Delimited Files**: CSV, TSV
+- **PDFs**: PDF
+
+All parsers return dictionaries with extracted content. The specific keys depend on the format:
+- DOCX: `html`, `markdown`, `raw_text`, `text`
+- PPTX/XLSX/PDF: `text`
+- CSV/TSV: `text`, `rows`, `columns`
+
+## Development
+
+### Setup
+
+```bash
+# Install with UV
+uv sync
+```
+
+### Testing
+
+```bash
+# Run all tests
+uv run pytest tests/ -v
+
+# Run specific test files
+uv run pytest tests/test_basic.py -v                    # Basic tests only
+uv run pytest tests/test_ocr.py tests/test_extract.py -v  # Mistral tests (requires MISTRAL_API_KEY)
+uv run pytest tests/test_openai.py -v                   # OpenAI tests (requires OPENAI_API_KEY)
+
+# Run with output (shows print statements)
+uv run pytest tests/ -v -s
+
+# Run specific test function
+uv run pytest tests/test_openai.py::test_openai_extract_unstructured_pdf -v -s
+
+# Set API keys for real testing
+export MISTRAL_API_KEY=your_mistral_key_here
+export OPENAI_API_KEY=your_openai_key_here
+export GEMINI_API_KEY=your_gemini_key_here
+uv run pytest tests/ -v -s
+```
+
+### Code Quality
+
+```bash
+# Run linting and type checking
+uv run ruff check src/ tests/
+
+# Fix linting issues automatically
+uv run ruff check src/ tests/ --fix
+
+# Format code
+uv run ruff format src/ tests/
+```
+
+## License
+
+Apache 2.0 - see the [LICENSE](LICENSE) file for details.
