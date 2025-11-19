@@ -1,0 +1,100 @@
+Metadata-Version: 2.4
+Name: tyconf
+Version: 1.0.2
+Summary: TyConf - Type-safe Configuration Management for Python
+Author-email: barabasz <tyconf@anba.ovh>
+License-Expression: MIT
+Project-URL: Homepage, https://github.com/barabasz/tyconf
+Project-URL: Documentation, https://github.com/barabasz/tyconf/blob/main/docs/user_guide.md
+Project-URL: Repository, https://github.com/barabasz/tyconf
+Project-URL: Issues, https://github.com/barabasz/tyconf/issues
+Project-URL: Changelog, https://github.com/barabasz/tyconf/blob/main/CHANGELOG.md
+Keywords: configuration,config,settings,typed,validation,type-safe
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Utilities
+Classifier: Typing :: Typed
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: flake8>=6.0.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Dynamic: license-file
+
+# TyConf
+
+**TyConf** ≡ **Ty**ped **Conf**ig - A type-safe configuration management library for Python with runtime validation.
+
+## What is TyConf?
+
+TyConf is a modern Python library that makes managing application configuration simple, safe, and intuitive. It provides runtime type validation, read-only properties, and freeze/unfreeze capabilities to help you build robust applications.
+
+## Quick Start
+
+```python
+from tyconf import TyConf
+
+# Create configuration with type-safe properties
+config = TyConf(
+    host=(str, "localhost"),
+    port=(int, 8080),
+    debug=(bool, True)
+)
+
+# Access values easily
+print(config.host)      # 'localhost'
+config.port = 3000      # Type-checked automatically
+```
+
+## Key Features
+
+✅ **Type Safety** - Runtime type validation with support for `Optional` and `Union` types  
+✅ **Read-Only Properties** - Protect critical configuration from accidental changes  
+✅ **Freeze/Unfreeze** - Lock entire configuration to prevent modifications  
+✅ **Intuitive API** - Both attribute (`config.host`) and dict-style (`config['host']`) access  
+✅ **Copy & Reset** - Easily duplicate or restore default configurations  
+✅ **Zero Dependencies** - Pure Python with no external requirements  
+
+## Installation
+
+```bash
+pip install tyconf
+```
+
+## Documentation
+
+- **[User Guide](https://github.com/barabasz/tyconf/blob/main/docs/user_guide.md)** - Comprehensive guide with all features
+- **[API Reference](https://github.com/barabasz/tyconf/blob/main/docs/api_reference.md)** - Complete API documentation
+- **[Best Practices](https://github.com/barabasz/tyconf/blob/main/docs/best_practices.md)** - Tips for effective usage
+
+## Examples
+
+See the [examples/](https://github.com/barabasz/tyconf/tree/main/examples) directory for complete examples:
+
+- **[basic_usage.py](https://github.com/barabasz/tyconf/blob/main/examples/basic_usage.py)** - Getting started
+- **[advanced_usage.py](https://github.com/barabasz/tyconf/blob/main/examples/advanced_usage.py)** - Advanced features
+- **[real_world_app.py](https://github.com/barabasz/tyconf/blob/main/examples/real_world_app.py)** - Real-world application configuration
+
+## License
+
+MIT License - see [LICENSE](https://github.com/barabasz/tyconf/blob/main/LICENSE) for details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Links
+
+- **GitHub**: https://github.com/barabasz/tyconf
+- **Issues**: https://github.com/barabasz/tyconf/issues
