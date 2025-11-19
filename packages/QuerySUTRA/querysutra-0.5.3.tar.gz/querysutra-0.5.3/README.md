@@ -1,0 +1,256 @@
+# QuerySUTRA
+
+**SUTRA: Structured-Unstructured-Text-Retrieval-Architecture**
+
+AI-powered data analysis. Upload any data (PDF, Word, Text, CSV, Excel), query with natural language, export to MySQL.
+
+## Installation
+
+```bash
+pip install QuerySUTRA
+pip install QuerySUTRA[mysql]       # MySQL support
+pip install QuerySUTRA[embeddings]  # Smart caching
+pip install QuerySUTRA[all]         # All features
+```
+
+## Quick Start
+
+```python
+from sutra import SUTRA
+
+sutra = SUTRA(api_key="your-openai-key")
+sutra.upload("data.pdf")  # or .docx, .txt, .csv, .xlsx, .json
+result = sutra.ask("Show me all people")
+print(result.data)
+```
+
+## Supported Formats
+
+**Structured Data:**
+- CSV (.csv)
+- Excel (.xlsx, .xls)
+- JSON (.json)
+- SQL (.sql)
+- Pandas DataFrame
+
+**Unstructured Documents (AI Extraction):**
+- PDF (.pdf)
+- Word (.docx)
+- Text (.txt)
+
+## Core Features
+
+### 1. Upload Any Data Format
+
+```python
+# Structured data
+sutra.upload("sales.csv")
+sutra.upload("report.xlsx")
+sutra.upload("api_data.json")
+sutra.upload("dump.sql")
+
+# Unstructured documents (AI extracts entities)
+sutra.upload("resume.pdf")
+sutra.upload("meeting_notes.docx")
+sutra.upload("transcript.txt")
+
+# DataFrame
+import pandas as pd
+df = pd.DataFrame({'name': ['Alice'], 'score': [95]})
+sutra.upload(df, name="scores")
+```
+
+### 2. Complete Data Extraction
+
+Processes entire documents in chunks. No data loss.
+
+```python
+# PDF - Extracts ALL pages
+sutra.upload("50_page_report.pdf")  # Gets all 50 pages, all employees
+
+# Word - Extracts ALL content
+sutra.upload("large_document.docx")  # Full document processed
+
+# Text - Processes ALL lines
+sutra.upload("log_file.txt")  # Entire file analyzed
+
+# All create multiple related tables
+sutra.tables()
+```
+
+### 3. Automatic MySQL Export
+
+One-line upload and export. Database auto-created.
+
+```python
+sutra.upload("data.pdf", auto_export_mysql={
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'your_password',
+    'database': 'my_database'  # Auto-creates if not exists
+})
+```
+
+### 4. Natural Language Queries
+
+```python
+result = sutra.ask("Show all people from California")
+result = sutra.ask("Who has Python skills?", table="skills")
+result = sutra.ask("Count employees by state", viz="pie")
+```
+
+### 5. Custom Visualizations
+
+```python
+result = sutra.ask("Sales by region", viz="pie")       # Pie chart
+result = sutra.ask("Trends over time", viz="line")     # Line chart
+result = sutra.ask("Compare values", viz="bar")        # Bar chart
+result = sutra.ask("Correlations", viz="scatter")      # Scatter
+result = sutra.ask("Show table", viz="table")          # Table
+result = sutra.ask("Heatmap", viz="heatmap")           # Heatmap
+result = sutra.ask("Auto", viz=True)                   # Auto-detect
+```
+
+### 6. Load Existing Databases
+
+```python
+# Load SQLite
+sutra = SUTRA.load_from_db("data.db", api_key="key")
+
+# Connect to MySQL
+sutra = SUTRA.connect_mysql("localhost", "root", "pass", "database")
+
+# Connect to PostgreSQL  
+sutra = SUTRA.connect_postgres("localhost", "postgres", "pass", "database")
+```
+
+### 7. Fuzzy Matching
+
+```python
+sutra = SUTRA(api_key="key", fuzzy_match=True)
+
+# "New York City" matches "New York" automatically
+result = sutra.ask("Who are from New York City?")
+# Fuzzy: 'City' -> 'New York'
+```
+
+Uses `difflib.get_close_matches` with 60% threshold.
+
+### 8. Embeddings for Smart Caching
+
+Save 90% on API costs.
+
+```python
+sutra = SUTRA(api_key="key", use_embeddings=True)
+
+result = sutra.ask("Show sales")            # API call
+result = sutra.ask("Display sales data")    # Cached (92% similar)
+result = sutra.ask("Give me sales info")    # Cached (88% similar)
+```
+
+**How it works:**
+- Model: `all-MiniLM-L6-v2` (80MB, runs locally)
+- Converts queries to 384D vectors
+- 85% similarity threshold
+- No external API calls
+
+**Cost savings:**
+- 10 similar queries: 1 API call vs 10 = 90% savings
+
+### 9. Irrelevant Query Detection
+
+```python
+sutra = SUTRA(api_key="key", check_relevance=True)
+
+result = sutra.ask("What's the weather?")
+# Warning: Query may be irrelevant
+```
+
+### 10. Direct SQL
+
+```python
+result = sutra.sql("SELECT * FROM people WHERE state='CA'")
+```
+
+## Complete Example
+
+```python
+from sutra import SUTRA
+
+# Initialize with all features
+sutra = SUTRA(
+    api_key="your-key",
+    use_embeddings=True,
+    fuzzy_match=True,
+    check_relevance=True
+)
+
+# Upload any format
+sutra.upload("employees.pdf")      # PDF
+sutra.upload("skills.docx")        # Word
+sutra.upload("projects.txt")       # Text
+sutra.upload("sales.csv")          # CSV
+sutra.upload("budget.xlsx")        # Excel
+
+# View tables
+sutra.tables()
+
+# Query
+result = sutra.ask("Show all people", viz="bar")
+
+# Export to MySQL
+sutra.save_to_mysql("localhost", "root", "pass", "my_db")
+```
+
+## Import to MySQL Workflow
+
+**Colab:**
+```python
+sutra.upload("data.pdf")
+sutra.export_db("data.db", "sqlite")
+from google.colab import files
+files.download("data.db")
+```
+
+**Windows:**
+```python
+sutra = SUTRA.load_from_db("data.db", api_key="key")
+sutra.save_to_mysql("localhost", "root", "pass", "my_db")
+```
+
+## Export Options
+
+```python
+sutra.export_db("backup.db", "sqlite")
+sutra.export_db("schema.sql", "sql")
+sutra.export_db("data.json", "json")
+sutra.export_db("data.xlsx", "excel")
+sutra.save_to_mysql("localhost", "root", "pass", "db")
+sutra.save_to_postgres("localhost", "postgres", "pass", "db")
+```
+
+## API Reference
+
+**Methods**
+- `upload(data, name, auto_export_mysql)` - Upload any format
+- `ask(question, viz, table)` - Natural language query
+- `sql(query, viz)` - Direct SQL
+- `tables()` - List tables
+- `schema()` - Show schema
+- `peek(table, n)` - Preview
+- `save_to_mysql(...)` - Export MySQL (auto-creates DB)
+- `export_db(path, format)` - Export database
+- `load_from_db(path)` - Load SQLite
+- `connect_mysql(...)` - Connect MySQL
+
+## Requirements
+
+Python 3.8+, OpenAI API key
+
+## License
+
+MIT
+
+---
+
+**Made by Aditya Batta**
