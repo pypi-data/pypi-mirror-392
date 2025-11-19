@@ -1,0 +1,493 @@
+diff --git a/lx_anonymizer/ollama_llm_meta_extraction.py b/lx_anonymizer/ollama_llm_meta_extraction.py
+index 19f5cb55ae420ddd553c570ea73c66b19b25ea4b..6541cd29500f2693de761e2ebd8e75f7cb7e6f1d 100644
+--- a/lx_anonymizer/ollama_llm_meta_extraction.py
++++ b/lx_anonymizer/ollama_llm_meta_extraction.py
+@@ -175,54 +175,52 @@ class OllamaOptimizedExtractor:
+ Analysiere den folgenden Text und extrahiere alle verfügbaren Patienteninformationen.
+ 
+ MEDIZINISCHER TEXT:
+ {text[:800]}
+ 
+ Extrahiere folgende Informationen als JSON:
+ 
+ {self.sensitive_meta_dict}
+ 
+ SUCHHINWEISE:
+ - Achte auf Begriffe wie: "Fall", "Case", "ID", "Nr.", "Nummer", "Pat-ID", "Geburtsdatum", "geb.", "geboren"
+ - Datumsformate können variieren: 15.01.2024, 2024-01-15, 15/01/24
+ - Namen können mit Titeln stehen: "Dr. Schmidt", "Herr Müller", "Frau Weber"
+ - Fallnummern können alphanumerisch sein: "F2024-001", "CASE123", "PAT-456"
+ 
+ Gib NUR das JSON-Objekt zurück. Wenn ein Feld nicht gefunden wird, setze es auf null.
+ 
+ JSON:"""
+ 
+     def _create_json_schema(self) -> Dict[str, Any]:
+         """Erstellt das erweiterte JSON-Schema für medizinische Metadaten-Extraktion."""
+         return {
+             "type": "object",
+             "properties": {
+                 # Patientendaten
+-                "patient_first_name, patient_last_name": {"type": ["string", "null"]},
+                 "patient_first_name": {"type": ["string", "null"]},
+                 "patient_last_name": {"type": ["string", "null"]},
+-                "patient_age": {"type": ["integer", "null"]},
+                 "patient_dob": {"type": ["string", "null"]},
+                 "patient_gender_name": {"type": ["string", "null"], "enum": ["male", "female", "unknown", None]},
+                 # Untersuchungsdaten
+                 "examination_date": {"type": ["string", "null"]},
+                 "examination_time": {"type": ["string", "null"]},
+                 "examiner_first_name": {"type": ["string", "null"]},
+                 "examiner_last_name": {"type": ["string", "null"]},
+                 # Administrative Daten
+                 "casenumber": {"type": ["string", "null"]},
+                 # Zusätzliche Informationen
+             },
+             "required": [],  # Keine Felder sind zwingend erforderlich
+         }
+ 
+     @retry(stop=stop_after_attempt(2), wait=wait_fixed(1))
+     def _make_api_request(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+         """
+         Macht API-Request mit Retry-Logik und robuster Fehlerbehandlung.
+ 
+         Args:
+             payload: Request-Payload für Ollama API
+ 
+         Returns:
+             Response-Dictionary von der API
+ 
+@@ -331,51 +329,51 @@ JSON:"""
+                 start_time = time.time()
+ 
+                 payload = {
+                     "model": self.current_model["name"],
+                     "messages": [{"role": "user", "content": self._create_extraction_prompt(text)}],
+                     "stream": False,
+                     "format": self._create_json_schema(),
+                 }
+ 
+                 logger.info(f"Versuch {model_attempt + 1}/{len(available_model_configs)}: Extraktion mit {self.current_model['name']}")
+ 
+                 # API-Request mit Retry-Logik
+                 response = self._make_api_request(payload)
+                 content = response.get("message", {}).get("content", "") or response.get("content", "")
+ 
+                 # Performance-Metriken loggen
+                 duration = time.time() - start_time
+                 token_count = response.get("eval_count", 0)
+                 logger.info(f"API-Erfolg in {duration:.2f}s, {token_count} Tokens")
+ 
+                 # JSON parsen und validieren
+                 try:
+                     # Bereinige Antwort falls nötig (entferne Markdown-Blöcke etc.)
+                     cleaned_content = self._clean_json_response(content)
+                     metadata_dict = json.loads(cleaned_content)
+-                    self.sensitive_meta.safe_update(**metadata_dict)
++                    self.sensitive_meta.safe_update(metadata_dict)
+                     metadata = self.sensitive_meta
+                     
+                     # Speichere im Cache
+                     self.cache.put(text, metadata)
+ 
+                     logger.info(
+                         f"✅ Erfolgreich extrahiert mit {self.current_model['name']}: "
+                         f"Datum: {metadata.examination_date}"
+                     )
+ 
+                     self.sensitive_meta.safe_update(metadata.to_dict())
+                     return self.sensitive_meta.to_dict()
+ 
+                 except (json.JSONDecodeError, ValidationError) as e:
+                     logger.warning(f"JSON/Validierung fehlgeschlagen für {self.current_model['name']}: {e}")
+                     logger.debug(f"Rohe Antwort: {content}")
+ 
+                     # Bei JSON-Fehlern versuche das nächste Modell
+                     if model_attempt < len(available_model_configs) - 1:
+                         logger.info("Versuche nächstes Modell wegen JSON-Fehler...")
+                         continue
+                     else:
+                         raise ValueError("Alle Modelle lieferten ungültige JSON-Antworten")
+ 
+             except requests.Timeout:
+@@ -488,53 +486,55 @@ JSON:"""
+                 "messages": [{"role": "user", "content": self._create_fast_extraction_prompt(truncated_text)}],
+                 "stream": False,
+                 "options": {
+                     "temperature": 0.1,  # Niedriger für konsistentere Ergebnisse
+                     "top_p": 0.9,
+                     "num_predict": 150,  # Begrenzte Token-Anzahl für Geschwindigkeit
+                 },
+             }
+ 
+             logger.info(f"Smart-Sampling mit {self.current_model['name']}")
+             response = self._make_api_request(payload)
+             content = response["message"]["content"]
+ 
+             duration = time.time() - start_time
+             logger.info(f"Smart-Sampling in {duration:.2f}s abgeschlossen")
+ 
+             # Schnelle JSON-Parsing ohne komplexe Validierung
+             try:
+                 cleaned_content = self._clean_json_response(content)
+                 metadata_dict = json.loads(cleaned_content)
+ 
+                 # Einfache Konfidenz-Bewertung basierend auf gefundenen Daten
+                 confidence = self._calculate_confidence(metadata_dict)
+ 
+                 if confidence >= confidence_threshold:
+-                    self.sensitive_meta.safe_update(**metadata_dict)
++                    self.sensitive_meta.safe_update(metadata_dict)
+                     metadata = self.sensitive_meta
+-                    logger.info(f"✅ Smart-Sampling erfolgreich (Konfidenz: {confidence:.2f}): {metadata.patient_first_name, patient_last_name}, Alter: {metadata.patient_age}")
++                    logger.info(
++                        f"✅ Smart-Sampling erfolgreich (Konfidenz: {confidence:.2f}): {metadata.patient_first_name} {metadata.patient_last_name}, DOB: {metadata.patient_dob}"
++                    )
+                     return metadata
+                 else:
+                     logger.info(f"Smart-Sampling Konfidenz zu niedrig ({confidence:.2f}), verwende Vollextraktion")
+                     return self.extract_metadata(text)  # Fallback zur vollständigen Extraktion
+ 
+             except (json.JSONDecodeError, ValidationError) as e:
+                 logger.debug(f"Smart-Sampling JSON-Fehler, Fallback zur Vollextraktion: {e}")
+                 return self.extract_metadata(text)
+ 
+         except Exception as e:
+             logger.warning(f"Smart-Sampling fehlgeschlagen, Fallback zur Vollextraktion: {e}")
+             return self.extract_metadata(text)
+ 
+         finally:
+             # Restore original model
+             self.current_model = original_model
+ 
+     def _contains_patient_data(self, text: str) -> bool:
+         """Erweiterte Prüfung ob Text potentielle Patientendaten enthält."""
+         if not text or len(text.strip()) < 10:
+             return False
+ 
+         # Erweiterte Keyword-Liste für medizinische Dokumente
+         keywords = [
+             # Patienteninformationen
+@@ -601,112 +601,101 @@ JSON:"""
+ 
+         # Erhöhte Schwelle: mindestens 2 Keywords für bessere Präzision
+         return keyword_count >= 2
+ 
+     def _get_fastest_available_model(self) -> Optional[Dict[str, Any]]:
+         """Gibt das schnellste verfügbare Modell zurück."""
+         for model_config in ModelConfig.get_models_by_priority():
+             if model_config["name"] in self.available_models:
+                 return model_config
+         return None
+ 
+     def _create_fast_extraction_prompt(self, text: str) -> str:
+         """Erstellt einen optimierten Fast-Prompt für Smart-Sampling."""
+         return f"""Schnelle Extraktion von Patientendaten aus medizinischem Text:
+ 
+ TEXT: {text}
+ 
+ Suche nach:
+ - Name (Herr/Frau + Nachname)
+ - Alter (Jahre)
+ - Datum (DD.MM.YYYY)
+ - Fallnummer/Case-ID
+ - Geburtsdatum
+ 
+ JSON Format:
+-{{"patient_first_name, patient_last_name": "...", "patient_age": 0, "examination_date": "...", "casenumber": "...", "patient_dob": "...", "gender": "unknown"}}
++{{"patient_first_name": "...", "patient_last_name": "...", "examination_date": "...", "casenumber": "...", "patient_dob": "...", "patient_gender_name": "unknown"}}
+ 
+ JSON:"""
+ 
+     def _calculate_confidence(self, metadata_dict: dict) -> float:
+         """
+         Erweiterte Konfidenz-Berechnung basierend auf gefundenen medizinischen Daten.
+ 
+         Returns:
+             Konfidenz-Score zwischen 0.0 und 1.0
+         """
+         score = 0.0
+ 
+         # Patient Name (höchste Priorität)
+-        name = metadata_dict.get("patient_first_name, patient_last_name", "") or ""
+         first_name = metadata_dict.get("patient_first_name", "") or ""
+         last_name = metadata_dict.get("patient_last_name", "") or ""
+ 
+-        if name and name.lower() not in ["unknown", "", "patient", "null", "nix"]:
+-            score += 0.25
++        if first_name and last_name and f"{first_name} {last_name}".strip().lower() not in ["unknown", "patient", "null", "nix"]:
++            score += 0.30
+         elif (first_name and first_name.lower() not in ["unknown", "", "null"]) or (last_name and last_name.lower() not in ["unknown", "", "null"]):
+-            score += 0.20
+-
+-        # Patient Age (wichtig für Validierung)
+-        age = metadata_dict.get("patient_age", 0)
+-        if isinstance(age, int) and 0 < age < 120:
+-            score += 0.20
++            score += 0.25
+ 
+         # Examination Date (wichtig für medizinische Aufzeichnungen)
+         exam_date = metadata_dict.get("examination_date", "") or ""
+         if exam_date and exam_date.lower() not in ["unknown", "", "null"]:
+-            score += 0.15
++            score += 0.20
+ 
+         # Fallnummer/Case Number (sehr wichtig für medizinische Identifikation)
+         case_num = metadata_dict.get("casenumber", "") or ""
+         if case_num and case_num.lower() not in ["unknown", "", "null"]:
+-            score += 0.15
++            score += 0.20
+ 
+         # Geburtsdatum (wichtig für Patientenidentifikation)
+         dob = metadata_dict.get("patient_dob", "") or ""
+         if dob and dob.lower() not in ["unknown", "", "null"]:
+-            score += 0.10
++            score += 0.15
+ 
+         # Gender (weniger wichtig, aber hilfreich)
+-        gender = metadata_dict.get("gender", "") or ""
++        gender = metadata_dict.get("patient_gender_name", "") or ""
+         if gender and gender.lower() in ["male", "female"]:
+             score += 0.05
+ 
+         # Examiner (zusätzlicher Kontext)
+         examiner_first_name = metadata_dict.get("examiner_first_name", "") or ""
+         if examiner_first_name and examiner_first_name.lower() not in ["unknown", "", "null"]:
+             score += 0.05
+ 
+         examiner_last_name = metadata_dict.get("examiner_last_name", "") or ""
+         if examiner_last_name and examiner_last_name.lower() not in ["unknown", "", "null"]:
+             score += 0.05
+ 
+-        # Patient ID (administrative Identifikation)
+-        patient_dob = metadata_dict.get("patient_dob", "") or ""
+-        if patient_dob and patient_dob.lower() not in ["unknown", "", "null"]:
+-            score += 0.05
+-
+         return min(score, 1.0)
+ 
+ 
+ class FrameSamplingOptimizer:
+     """
+     Optimiert Frame-Sampling für bessere Performance.
+     Reduziert unnötige OCR-Operationen durch intelligente Frame-Auswahl.
+     """
+ 
+     def __init__(self, max_frames: int = 50, skip_similar_threshold: float = 0.85):
+         self.max_frames = max_frames
+         self.skip_similar_threshold = skip_similar_threshold
+         self.processed_hashes = set()
+         self.last_metadata = None
+ 
+     def should_process_frame(self, frame_idx: int, total_frames: int, frame_hash: str) -> bool:
+         """
+         Entscheidet ob ein Frame verarbeitet werden soll.
+ 
+         Args:
+             frame_idx: Index des aktuellen Frames
+             total_frames: Gesamtanzahl der Frames
+             frame_hash: Optional - Hash des Frame-Inhalts für Duplikat-Erkennung
+ 
+         Returns:
+@@ -1138,52 +1127,53 @@ async def extract_enriched_metadata_from_video(video_path: str, sample_frames_co
+     Returns:
+         Angereicherte Metadaten
+     """
+ 
+     # 1. Führe sample_frames_coroutine aus
+     logger.info(f"Starte Frame-Sampling für Video: {video_path}")
+     frame_samples = await sample_frames_coroutine(video_path)
+ 
+     # 2. Verarbeite Coroutine-Ausgabe
+     processed_frames = FrameDataProcessor.process_coroutine_output(frame_samples)
+     logger.info(f"Verarbeitete {len(processed_frames)} Frames")
+ 
+     # 3. Erstelle angereicherten Extractor
+     enriched_extractor = create_enriched_extractor()
+ 
+     # 4. Extrahiere angereicherte Metadaten
+     enriched_metadata = enriched_extractor.extract_from_frame_sequence(processed_frames)
+ 
+     # 5. Füge Video-spezifische Informationen hinzu
+     enriched_metadata["video_info"] = {"video_path": video_path, "processing_timestamp": time.time(), "total_sampled_frames": len(processed_frames)}
+ 
+     # 6. Logge Ergebnisse
+     logger.info(f"✅ Angereicherte Metadaten-Extraktion abgeschlossen:")
+     if enriched_metadata.get("llm_extracted"):
+         llm_data = enriched_metadata["llm_extracted"]
+-        logger.info(f"   Patient: {llm_data.get('patient_first_name, patient_last_name', 'Unknown')}")
+-        logger.info(f"   Alter: {llm_data.get('patient_age', 'Unknown')}")
++        patient_name = " ".join(filter(None, [llm_data.get("patient_first_name"), llm_data.get("patient_last_name")])).strip() or "Unknown"
++        logger.info(f"   Patient: {patient_name}")
++        logger.info(f"   Geburtsdatum: {llm_data.get('patient_dob', 'Unknown')}")
+         logger.info(f"   Datum: {llm_data.get('examination_date', 'Unknown')}")
+ 
+     confidence = enriched_metadata.get("confidence_scores", {}).get("overall_confidence", 0)
+     logger.info(f"   Gesamt-Konfidenz: {confidence:.2f}")
+ 
+     return enriched_metadata
+ 
+ 
+ def integrate_with_frame_cleaner(frame_cleaner_instance, video_path: str) -> Dict[str, Any]:
+     """
+     Integration mit dem bestehenden FrameCleaner für nahtlose Metadaten-Anreicherung.
+ 
+     Args:
+         frame_cleaner_instance: Instanz des FrameCleaner
+         video_path: Pfad zum Video
+ 
+     Returns:
+         Angereicherte Metadaten
+     """
+     from pathlib import Path
+ 
+     # 1. Simuliere Frame-Sampling (angepasst an FrameCleaner-Architektur)
+     frames_data = []
+ 
+     # Verwende FrameCleaner's _iter_video Methode für konsistentes Frame-Sampling
+@@ -1254,64 +1244,64 @@ class VideoMetadataEnricher:
+ 
+         # 1. Verarbeite Frame-Samples falls vorhanden
+         if frame_samples:
+             processed_frames = self.frame_processor.process_coroutine_output(frame_samples)
+             enriched_data = self.enriched_extractor.extract_from_frame_sequence(processed_frames, ocr_texts)
+             final_metadata["enriched_data"] = enriched_data
+ 
+         # 2. Merge mit bestehenden Metadaten
+         if existing_metadata:
+             final_metadata = self._merge_metadata_sources(final_metadata, existing_metadata)
+ 
+         # 3. Berechne Integrations-Statistiken
+         final_metadata["integration_stats"] = self._calculate_integration_stats(final_metadata)
+ 
+         return final_metadata
+ 
+     def _merge_metadata_sources(self, enriched_metadata: Dict[str, Any], existing_metadata: Dict[str, Any]) -> Dict[str, Any]:
+         """Merged angereicherte Metadaten mit bestehenden Daten."""
+ 
+         # Prioritäts-basiertes Merging
+         merged = enriched_metadata.copy()
+ 
+         # LLM-Daten haben Priorität über legacy OCR-Extraktion
+         llm_data = enriched_metadata.get("enriched_data", {}).get("llm_extracted", {})
+ 
+-        for key in ["patient_first_name, patient_last_name", "patient_age", "examination_date", "gender"]:
++        for key in ["patient_first_name", "patient_last_name", "examination_date", "patient_gender_name", "patient_dob"]:
+             if key in existing_metadata and (not llm_data.get(key) or llm_data.get(key) in ["unknown", "", None]):
+                 # Verwende Legacy-Daten als Fallback
+                 if "fallback_data" not in merged:
+                     merged["fallback_data"] = {}
+                 merged["fallback_data"][key] = existing_metadata[key]
+ 
+         return merged
+ 
+     def _calculate_integration_stats(self, metadata: Dict[str, Any]) -> Dict[str, Any]:
+         """Berechnet Statistiken über die Metadaten-Integration."""
+ 
+         stats = {"data_sources_used": [], "confidence_comparison": {}, "data_completeness": 0.0}
+ 
+         # Erkenne verwendete Datenquellen
+         if metadata.get("enriched_data"):
+             stats["data_sources_used"].append("enriched_llm")
+         if metadata.get("legacy_data"):
+             stats["data_sources_used"].append("legacy_ocr")
+         if metadata.get("fallback_data"):
+             stats["data_sources_used"].append("fallback_data")
+ 
+         # Daten-Vollständigkeit berechnen
+-        required_fields = ["patient_first_name, patient_last_name", "patient_dob", "examination_date", "patient_gender_name"]
++        required_fields = ["patient_first_name", "patient_last_name", "patient_dob", "examination_date", "patient_gender_name"]
+         filled_fields = 0
+ 
+         for source in ["enriched_data", "legacy_data", "fallback_data"]:
+             source_data = metadata.get(source, {})
+             if isinstance(source_data, dict) and "llm_extracted" in source_data:
+                 source_data = source_data["llm_extracted"]
+ 
+             for field in required_fields:
+                 if source_data.get(field) not in [None, "", "unknown"]:
+                     filled_fields += 1
+                     break  # Feld ist gefüllt, nächstes Feld
+ 
+         stats["data_completeness"] = filled_fields / len(required_fields)
+ 
+         return stats
+diff --git a/lx_anonymizer/sensitive_meta_interface.py b/lx_anonymizer/sensitive_meta_interface.py
+index c46919315d826d7544194e74cddf8520ed83cb78..9ce8d37368425c6881de262e4e6d937b5864c808 100644
+--- a/lx_anonymizer/sensitive_meta_interface.py
++++ b/lx_anonymizer/sensitive_meta_interface.py
+@@ -76,63 +76,70 @@ class SensitiveMeta:
+     patient_gender_name: Optional[str] = None
+     examination_date: Optional[str] = None
+     examination_time: Optional[str] = None
+     examiner_first_name: Optional[str] = None
+     examiner_last_name: Optional[str] = None
+     center: Optional[str] = None
+     text: Optional[str] = None
+     anonymized_text: Optional[str] = None
+     endoscope_type: Optional[str] = None
+     endoscope_sn: Optional[str] = None
+ 
+     def __getitem__(self, key: str) -> Any:
+         if hasattr(self, key):
+             return getattr(self, key)
+         raise KeyError(f"Invalid key '{key}' for SensitiveMeta")
+ 
+     def __setitem__(self, key: str, value: Any) -> None:
+         if hasattr(self, key):
+             setattr(self, key, value)
+         else:
+             raise KeyError(f"Invalid key '{key}' for SensitiveMeta")
+ 
+     def to_dict(self) -> Dict[str, Any]:
+         return asdict(self)
+ 
+-    def safe_update(self, data: Optional[Mapping[str, Any]]) -> None:
++    def safe_update(self, data: Optional[Mapping[str, Any]] = None, **kwargs) -> None:
+         """
+-        Safely update fields from a mapping:
++        Safely update fields from a mapping or keyword arguments:
+         - Ignore unknown keys
+         - Ignore blank values (None, '', {}, [], 'Unknown', 'undefined', NaN, etc.)
+         - Never overwrite a non-blank existing value with a blank or conflicting value
+         - Merge dicts/lists without duplicates, preserving existing content
+         """
+-        if not data:
++        payload: Dict[str, Any] = {}
++
++        if data:
++            payload.update(dict(data))
++        if kwargs:
++            payload.update(kwargs)
++
++        if not payload:
+             return
+ 
+         allowed = self.__annotations__.keys()
+-        for k, v in data.items():
++        for k, v in payload.items():
+             if k not in allowed:
+                 continue
+ 
+             nv = _normalize_scalar(v)
+             if _is_blank(nv):
+                 continue
+ 
+             cv = getattr(self, k)
+             merged = _merge_values(cv, nv)
+             # Only set when there is a meaningful improvement/change
+             if merged is not cv:
+                 setattr(self, k, merged)
+ 
+     @classmethod
+     def from_dict(cls, data: Dict[str, Any]) -> "SensitiveMeta":
+         """
+         Construct from dict safely. Also auto-create anonymized_text if missing
+         and (first_name, last_name, text) are present (legacy compatibility).
+         """
+         data = dict(data or {})
+         if (
+             not data.get("anonymized_text")
+             and data.get("patient_first_name")
+             and data.get("patient_last_name")
+             and data.get("text")
