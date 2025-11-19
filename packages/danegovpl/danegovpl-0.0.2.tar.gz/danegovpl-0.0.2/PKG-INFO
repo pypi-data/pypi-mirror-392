@@ -1,0 +1,313 @@
+Metadata-Version: 2.4
+Name: danegovpl
+Version: 0.0.2
+Summary: Api for getting data from dane.gov.pl
+Author-email: Dominik Stanisław Suchora <hexderm@gmail.com>
+License: GPLv3
+Project-URL: Homepage, https://github.com/TUVIMEN/danegovpl
+Keywords: api,dane.gov.pl,cli
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3 :: Only
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: requests
+Requires-Dist: treerequests
+Provides-Extra: compression
+Requires-Dist: zstandard; extra == "compression"
+Dynamic: license-file
+
+# danegovpl
+
+Tool for getting data from dane.gov.pl
+
+# Installation
+
+```bash
+pip install danegovpl
+```
+
+# Usage
+
+## CLI
+
+```
+usage: __main__.py [-h] [-v] [-d DIR] [-t NUM] [-l LVL] [-f FORMAT] [-w TIME]
+                   [-W TIME] [-r NUM] [--retry-delay TIME]
+                   [--retry-all-errors] [-m TIMEOUT] [-k] [-L]
+                   [--max-redirs NUM] [-A UA] [-x PROXY] [-H HEADER]
+                   [-b COOKIE] [-B BROWSER]
+                   [RESOURCE ...]
+
+Tool for getting data from dane.gov.pl
+
+positional arguments:
+  RESOURCE              starting point for getting resources i.e.
+                        institutions, institution.{ID}, datasets,
+                        dataset.{ID}, resources, resource.{ID}
+
+General:
+  -h, --help            Show this help message and exit
+  -v, --version         Print program version and exit
+
+Files:
+  -d, --directory DIR   Change directory to DIR
+
+Settings:
+  -t, --threads NUM     use NUM of threads
+  -l, --lvl LVL         Get resources metadata up to level
+  -f, --format FORMAT   Download files in specified format preference i.e.
+                        all; jsonld; csv; xlsx, csv,jsonld,xls (if not set,
+                        files are not downloaded)
+
+Request settings:
+  -w, --wait TIME       Set waiting time for each request
+  -W, --wait-random TIME
+                        Set random waiting time for each request to be from 0
+                        to TIME
+  -r, --retry NUM       Set number of retries for failed request to NUM
+  --retry-delay TIME    Set interval between each retry
+  --retry-all-errors    Retry no matter the error
+  -m, --timeout TIMEOUT
+                        Set request timeout, if in TIME format it'll be set
+                        for the whole request. If in TIME,TIME format first
+                        TIME will specify connection timeout, the second read
+                        timeout. If set to '-' timeout is disabled
+  -k, --insecure        Ignore ssl errors
+  -L, --location        Allow for redirections, can be dangerous if
+                        credentials are passed in headers
+  --max-redirs NUM      Set the maximum number of redirections to follow
+  -A, --user-agent UA   Sets custom user agent
+  -x, --proxy PROXY     Use the specified proxy, can be used multiple times.
+                        If set to URL it'll be used for all protocols, if in
+                        PROTOCOL URL format it'll be set only for given
+                        protocol, if in URL URL format it'll be set only for
+                        given path. If first character is '@' then proxies are
+                        read from file
+  -H, --header HEADER   Set curl style header, can be used multiple times e.g.
+                        -H 'User: Admin' -H 'Pass: 12345', if first character
+                        is '@' then headers are read from file e.g. -H @file
+  -b, --cookie COOKIE   Set curl style cookie, can be used multiple times e.g.
+                        -b 'auth=8f82ab' -b 'PHPSESSID=qw3r8an829', without
+                        '=' character argument is read as a file
+  -B, --browser BROWSER
+                        Get cookies from specified browser e.g. -B firefox
+```
+
+`dane.gov.pl` groups it's data as a tree where nodes at each next level are: `institution`, `dataset`, `resource`.
+
+Get metadata for all institutions and datasets and resources published by it
+
+```bash
+danegovpl institutions
+```
+
+This is also equivalent to
+
+```bash
+danegovpl institutions --lvl 3
+```
+
+Get metadata using 8 threads
+
+```bash
+danegovpl institutions -t 8
+```
+
+Get metadata for all institutions
+
+```bash
+danegovpl institutions --lvl 1
+```
+
+Get metadata for all institutions and datasets published by it
+
+```bash
+danegovpl institutions --lvl 2
+```
+
+Get metadata for specific institution and datasets and resources published by it
+
+```bash
+danegovpl institution.2522
+```
+
+Get metadata for all datasets and resources under it
+
+```bash
+danegovpl datasets
+```
+
+Get metadata for specific dataset
+
+```bash
+danegovpl dataset.6935
+```
+
+Get metadata for all datasets
+
+```bash
+danegovpl datasets --lvl 1
+```
+
+Get metadata for all resources
+
+```bash
+danegovpl resources
+```
+
+Get metadata for specific resource
+
+```bash
+danegovpl resource.3814
+```
+
+Get all metadata and download all resource files using 8 threads
+
+```bash
+danegovpl institutions -t 8 -f all
+```
+
+Get metadata for all resources and download only `csv` files using 8 threads
+
+```bash
+danegovpl institutions -t 8 -f csv
+```
+
+Get metadata for all resources and download `csv` files or `jsonld` files if csv files aren't available
+
+```bash
+danegovpl institutions -t 8 -f csv,jsonld
+```
+
+Get metadata for all resources and download `csv` files or `jsonld` files or `xlsx` files, while compressing `csv` and `jsonld` files with `zstd`
+
+```bash
+danegovpl institutions -t 8 -f csv,jsonld,xlsx
+```
+
+### Output example
+
+Can be found in [examples](examples) directory and are excerpt taken from running
+
+```bash
+danegovpl institutions
+```
+
+this illustrates all provided formats, using `datasets` or `resources` would create a single directory with thousands of subdirectories in it.
+
+## Library
+
+### Code
+
+```python
+from danegovpl import Api, Error, ArgError, RequestError
+
+api = Api(timeout=30) # arguments for treerequests can be passed
+
+try:
+    for datasets in api.datasets(page=2,params=[("title[prefix]","imiona")]):
+        for dataset in datasets['data']:
+            print(dataset['id'])
+except RequestError as e:
+    print(repr(e))
+```
+
+### Exceptions
+
+All exceptions raised by this library are derived from `Error`, `ArgError` is raised if functions are called with incorrect arguments and `RequestError` is raised for errors when handling requests.
+
+### Api
+
+`Api` class provides methods for interacting with `dane.gov.pl`, at it's initialization it accepts parameters for [treerequests](https://github.com/TUVIMEN/treerequests) session.
+
+### Methods
+
+Methods are named in fashion similar to the [endpoints](https://api.dane.gov.pl/doc#/API%20Endpoints/get_datasets), some names were changed from plural to singular form to denote operation on single item.
+
+All of them accept optional argument `params: List[Tuple[str]]`  which represents parameters passed in url params. It's done this way, because they aren't always consistent and allow for expressions not easily representable in python code. If you know what you need you can add them manually (protip: `https://dane.gov.pl/` site uses it's own api for the requests, so the params can taken from requests made by it e.g. in searches).
+
+#### dga_aggregated(self, i_id: int, params: List[Tuple[str, str]] = []) -> dict
+
+Returns data about Aggregated DGA resource - especially resource_id and dataset_id
+
+#### Methods for items
+
+The following take `i_id: int` denoting id of element
+
+##### institution(self, i_id: int, params: List[Tuple[str, str]] = []) -> dict
+
+Returns institution with given ID
+
+##### dataset(self, i_id: int, params: List[Tuple[str, str]] = []) -> dict
+
+Returns dataset with given ID
+
+##### resource(self, i_id: int, params: List[Tuple[str, str]] = []) -> dict
+
+Returns resource with given ID
+
+##### resource_data_row(self, i_id: int, row_id: int, params: List[Tuple[str]] = []) -> str
+
+Returns single row
+
+##### showcase(self, i_id: int, params: List[Tuple[str]] = []) -> dict
+
+Returns showcase with given ID
+
+##### history(self, i_id: int, params: List[Tuple[str]] = []) -> dict
+
+Returns history item with given ID
+
+#### Methods for pages
+
+The following take `page: int = 1` and `per_page: int = 100` denoting starting page and number of results per page, and return iterator yielding pages starting from `page`
+
+##### institutions(self, params: List[Tuple[str, str]] = [], page: int = 1, per_page: int = 100) -> Iterator[dict]
+
+Gives the ability to browse, filter and search for institutions
+
+##### institution_datasets(self, i_id: int, params: List[Tuple[str, str]] = [], page: int = 1, per_page: int = 100) -> Iterator[dict]
+
+Gives the ability to browse, filter and search for datasets of given institution
+
+##### datasets(self, params: List[Tuple[str, str]] = [], page: int = 1, per_page: int = 100) -> Iterator[dict]
+
+Gives the ability to browse, filter and search datasets
+
+##### dataset_resources(self, i_id: int, params: List[Tuple[str, str]] = [], page: int = 1, per_page: int = 100) -> Iterator[dict]
+
+Gives the ability to browse, filter and search for resources of given dataset
+
+##### dataset_showcases(self, i_id: int, params: List[Tuple[str, str]] = [], page: int = 1, per_page: int = 100) -> Iterator[dict]
+
+Gives the ability to browse, filter and search for showcases of given dataset
+
+##### resources(self, params: List[Tuple[str, str]] = [], page: int = 1, per_page: int = 100) -> Iterator[dict]
+
+Gives the ability to browse, filter and search resources
+
+##### resource_data(self, i_id: int, params: List[Tuple[str, str]] = [], page=1, per_page=100) -> Iterator[dict]
+
+Returns list of rows
+
+##### search(self, params: List[Tuple[str, str]] = [], page: int = 1, per_page: int = 100) -> Iterator[dict]
+
+Gives the ability to filter and search objects of various types: articles, datasets, institutions, resources, showcases
+
+##### showcases(self, params: List[Tuple[str, str]] = [], page: int = 1, per_page: int = 100) -> Iterator[dict]
+
+Gives the ability to browse, filter and search showcases
+
+##### histories(self, params: List[Tuple[str, str]] = [], page: int = 1, per_page: int = 100) -> Iterator[dict]
+
+Gives the ability to browse, filter and search histories
