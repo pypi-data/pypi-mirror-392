@@ -1,0 +1,54 @@
+services:
+{% for svc in services %}
+  {{ svc.name }}:
+    build:
+      context: {{ svc.build.context }}
+      dockerfile: Dockerfile
+    stdin_open: true
+    tty: true
+    env_file:
+      - {{ svc.env_file }}
+    container_name: {{ svc.name }}
+{% if svc.ports is defined %}
+    ports:
+{% for p in svc.ports %}
+      - "{{ p }}"
+{% endfor %}
+{% endif %}
+{% if svc.expose is defined %}
+    expose:
+{% for e in svc.expose %}
+      - {{ e }}
+{% endfor %}
+{% endif %}
+{% if svc.networks is defined %}
+    networks:
+{% for n in svc.networks %}
+      - {{ n }}
+{% endfor %}
+{% endif %}
+{% if svc.resources is defined %}
+    deploy:
+      resources:
+{% if svc.resources.limits is defined %}
+        limits:
+{% for k, v in svc.resources.limits.items() %}
+          {{ k }}: {{ v }}
+{% endfor %}
+{% endif %}
+{% if svc.resources.reservations is defined %}
+        reservations:
+{% for k, v in svc.resources.reservations.items() %}
+          {{ k }}: {{ v }}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% endfor %}
+
+{% if networks %}
+networks:
+{% for net_name in networks %}
+  {{ net_name }}:
+    driver: bridge
+{% endfor %}
+{% endif %}
