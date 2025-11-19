@@ -1,0 +1,646 @@
+"""Language Model class implementation using AnyWidget for Jupyter integration."""
+
+import asyncio
+from logging import log
+import uuid
+from typing import Any, AsyncIterator, Dict, List, Optional, Union
+from functools import cache
+import time
+
+import anywidget
+import traitlets
+
+
+class LanguageModelWidget(anywidget.AnyWidget):
+    """AnyWidget bridge to Chrome's Prompt API."""
+
+    _esm = """
+    function render({ model, el }) {
+        let statusTextArea = document.createElement("textarea", {readonly: true});
+        statusTextArea.value = "Initializing...";
+        // Check if Chrome Prompt API is available
+        if (!('LanguageModel' in self)) {
+            model.set('error', {
+                type: 'NotSupportedError',
+                message: 'Chrome Prompt API is not available in this browser'
+            });
+            model.save_changes();
+            return;
+        }
+        statusTextArea.value = "Chrome Prompt API is available.";
+        el.appendChild(statusTextArea);
+
+        // Store sessions by ID
+        const sessions = {};
+        const streamStates = new Map();
+
+        model.on('change:request', () => {
+            const request = model.get('request');
+            if (!request || !request.id) return;
+
+            handleRequest(request)
+                .then(result => {
+                    // console.log('Result: ', result);
+                    model.set('response', {
+                        id: request.id,
+                        result: result,
+                        error: null
+                    });
+                    model.save_changes();
+                })
+                .catch(error => {
+                    // console.error('Error: ', error);
+                    model.set('response', {
+                        id: request.id,
+                        result: null,
+                        error: {
+                            type: error.name || 'Error',
+                            message: error.message || String(error)
+                        }
+                    });
+                    model.save_changes();
+                });
+        });
+    
+        async function getParamsDict() {
+            const params = (await LanguageModel.params()) ?? {
+                defaultTopK: 3,
+                maxTopK: 128,
+                defaultTemperature: 1,
+                maxTemperature: 2,
+            };
+            return {
+                defaultTopK: params.defaultTopK,
+                maxTopK: params.maxTopK,
+                defaultTemperature: params.defaultTemperature,
+                maxTemperature: params.maxTemperature,
+            };
+        }
+
+        function handleRequest(request) {
+            const { method, params } = request;
+
+            switch (method) {
+                case 'create':
+                    // console.log('Creating session with params:', params);
+                    return createSession(params);
+                case 'availability':
+                    // console.log('Checking availability with params:', params);
+                    return self.LanguageModel.availability(params.options || {});
+                case 'params':
+                    return getParamsDict();
+                case 'prompt':
+                    return promptSession(params);
+                case 'promptStreaming':
+                    return promptStreamingSession(params);
+                case 'append':
+                    return appendSession(params);
+                case 'measureInputUsage':
+                    return measureInputUsageSession(params);
+                case 'clone':
+                    return cloneSession(params);
+                case 'destroy':
+                    return destroySession(params);
+                default:
+                    return Promise.reject(new Error(`Unknown method: ${method}`));
+            }
+        }
+
+        function createSession(params) {
+            return self.LanguageModel.create(params.options || {})
+                .then(session => {
+                    const sessionId = params.sessionId;
+                    sessions[sessionId] = session;
+
+                    // Set up quota overflow listener
+                    session.addEventListener('quotaoverflow', () => {
+                        model.set('quota_overflow_event', {
+                            sessionId: sessionId,
+                        });
+                        model.save_changes();
+                    });
+
+                    return {
+                        sessionId: sessionId,
+                        topK: session.topK,
+                        temperature: session.temperature,
+                        inputUsage: session.inputUsage,
+                        inputQuota: session.inputQuota
+                    };
+                });
+        }
+
+        function promptSession(params) {
+            const session = sessions[params.sessionId];
+            if (!session) return Promise.reject(new Error('Session not found'));
+
+            return session.prompt(params.input, params.options || {})
+                .then(result => {
+                    return {
+                        result: result,
+                        inputUsage: session.inputUsage,
+                        inputQuota: session.inputQuota
+                    };
+                });
+        }
+
+        function promptStreamingSession(params) {
+            const session = sessions[params.sessionId];
+            if (!session) return Promise.reject(new Error('Session not found'));
+
+            const stream = session.promptStreaming(params.input, params.options || {});
+            const chunks = [];
+
+            return consumeStream(stream, chunks, params.sessionId, params.requestId)
+                .then(() => {
+                    return {
+                        result: chunks.join(''),
+                        inputUsage: session.inputUsage,
+                        inputQuota: session.inputQuota
+                    };
+                });
+        }
+
+        async function consumeStream(stream, chunks, sessionId, requestId) {
+            const state = ensureStreamState(sessionId, requestId);
+            for await (const chunk of stream) {
+                console.log('chunk: ', chunk);
+                chunks.push(chunk);
+                state.buffer.push(chunk);
+                flushStreamChunks(state);
+            }
+            state.done = true;
+            flushStreamChunks(state);
+            finalizeStreamState(state);
+            await state.drainPromise;
+        }
+
+        function getStreamKey(sessionId, requestId) {
+            return `${sessionId}:${requestId}`;
+        }
+
+        function ensureStreamState(sessionId, requestId) {
+            const key = getStreamKey(sessionId, requestId);
+            if (!streamStates.has(key)) {
+                let resolveDrain;
+                const drainPromise = new Promise(resolve => {
+                    resolveDrain = resolve;
+                });
+                streamStates.set(key, {
+                    key,
+                    sessionId,
+                    requestId,
+                    buffer: [],
+                    waitingAck: false,
+                    pendingBatchId: null,
+                    batchCounter: 0,
+                    done: false,
+                    resolved: false,
+                    resolveDrain,
+                    drainPromise,
+                });
+            }
+            return streamStates.get(key);
+        }
+
+        function flushStreamChunks(state) {
+            if (state.waitingAck || state.buffer.length === 0) return;
+            state.waitingAck = true;
+            state.pendingBatchId = `${state.requestId}-${++state.batchCounter}`;
+            const chunksToSend = state.buffer.splice(0);
+            model.set('stream_chunk', {
+                sessionId: state.sessionId,
+                requestId: state.requestId,
+                chunks: chunksToSend,
+                batchId: state.pendingBatchId,
+                timestamp: Date.now(),
+            });
+            model.save_changes();
+        }
+
+        function handleStreamChunkAck() {
+            const ack = model.get('stream_chunk_ack');
+            if (!ack || !ack.requestId || !ack.batchId) return;
+            const key = getStreamKey(ack.sessionId, ack.requestId);
+            const state = streamStates.get(key);
+            if (!state || ack.batchId !== state.pendingBatchId) return;
+            state.waitingAck = false;
+            state.pendingBatchId = null;
+            if (state.buffer.length > 0) {
+                flushStreamChunks(state);
+                return;
+            }
+            finalizeStreamState(state);
+        }
+
+        function finalizeStreamState(state) {
+            if (!(state.done && !state.waitingAck && state.buffer.length === 0)) {
+                return;
+            }
+            if (!state.resolved) {
+                state.resolved = true;
+                state.resolveDrain();
+            }
+            streamStates.delete(state.key);
+        }
+
+        model.on('change:stream_chunk_ack', handleStreamChunkAck);
+
+        function appendSession(params) {
+            const session = sessions[params.sessionId];
+            if (!session) return Promise.reject(new Error('Session not found'));
+
+            return session.append(params.input, params.options || {})
+                .then(() => {
+                    return {
+                        inputUsage: session.inputUsage,
+                        inputQuota: session.inputQuota
+                    };
+                });
+        }
+
+        function measureInputUsageSession(params) {
+            const session = sessions[params.sessionId];
+            if (!session) return Promise.reject(new Error('Session not found'));
+
+            return session.measureInputUsage(params.input, params.options || {})
+                .then(usage => {
+                    return { usage: usage };
+                });
+        }
+
+        function cloneSession(params) {
+            const session = sessions[params.sessionId];
+            if (!session) return Promise.reject(new Error('Session not found'));
+
+            return session.clone(params.options || {})
+                .then(cloned => {
+                    const newSessionId = params.newSessionId;
+                    sessions[newSessionId] = cloned;
+
+                    // Set up quota overflow listener for cloned session
+                    cloned.addEventListener('quotaoverflow', () => {
+                        model.set('quota_overflow_event', {
+                            sessionId: newSessionId
+                        });
+                        model.save_changes();
+                    });
+
+                    return {
+                        sessionId: newSessionId,
+                        topK: cloned.topK,
+                        temperature: cloned.temperature,
+                        inputUsage: cloned.inputUsage,
+                        inputQuota: cloned.inputQuota
+                    };
+                });
+        }
+
+        function destroySession(params) {
+            const session = sessions[params.sessionId];
+            if (!session) return Promise.reject(new Error('Session not found'));
+
+            session.destroy();
+            delete sessions[params.sessionId];
+            return Promise.resolve({ success: true });
+        }
+    }
+
+    export default { render };
+    """
+
+    # Traitlets for communication
+    request = traitlets.Dict({}).tag(sync=True)
+    response = traitlets.Dict({}).tag(sync=True)
+    error = traitlets.Dict({}).tag(sync=True)
+    quota_overflow_event = traitlets.Dict({}).tag(sync=True)
+    stream_chunk = traitlets.Dict({}).tag(sync=True)
+    stream_chunk_ack = traitlets.Dict({}).tag(sync=True)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._pending_requests: Dict[str, asyncio.Future] = {}
+        self._stream_chunks: Dict[str, asyncio.Queue] = {}
+        self._stream_request_mapping: Dict[str, str] = {}  # maps main request_id to stream request_id
+
+    @traitlets.observe("response")
+    def _handle_response(self, change):
+        """Handle response from JavaScript."""
+        response = change["new"]
+        if not response or "id" not in response:
+            return
+
+        request_id = response["id"]
+
+        stream_request_id = self._stream_request_mapping.pop(request_id, None)
+        if stream_request_id and stream_request_id in self._stream_chunks:
+            try:
+                self._stream_chunks[stream_request_id].put_nowait(None)
+            except:
+                pass
+
+        if request_id in self._pending_requests:
+            future = self._pending_requests.pop(request_id)
+            if response.get("error"):
+                error = response["error"]
+                future.set_exception(
+                    Exception(
+                        f"{error.get('type', 'Error')}: {error.get('message', 'Unknown error')}"
+                    )
+                )
+            else:
+                future.set_result(response.get("result"))
+        else:
+            print(f"Warning: Received response for unknown request ID: {request_id}")
+
+    @traitlets.observe("error")
+    def _handle_error(self, change):
+        """Handle error from JavaScript."""
+        # print("Handling error: ", change)
+        error = change["new"]
+        if error and error.get("message"):
+            # Global error not tied to a specific request
+            print(f"Error: {error.get('type', 'Error')}: {error.get('message')}")
+
+    @traitlets.observe("stream_chunk")
+    def _handle_stream_chunk(self, change):
+        chunk_data = change["new"]
+        if not chunk_data or "requestId" not in chunk_data:
+            return
+
+        request_id = chunk_data["requestId"]
+        chunks = chunk_data.get("chunks")
+        if chunks is None:
+            single_chunk = chunk_data.get("chunk")
+            chunks = [single_chunk] if single_chunk is not None else []
+
+        queue = self._stream_chunks.get(request_id)
+        if not queue:
+            print(f"Warning: Received chunk for unknown request ID: {request_id}")
+            return
+
+        for chunk in chunks:
+            try:
+                queue.put_nowait(chunk)
+            except asyncio.QueueFull:
+                print(f"Warning: Stream queue full for request {request_id}")
+                break
+
+        batch_id = chunk_data.get("batchId")
+        if batch_id is not None:
+            self.stream_chunk_ack = {
+                "sessionId": chunk_data.get("sessionId"),
+                "requestId": request_id,
+                "batchId": batch_id,
+                "timestamp": time.time(),
+            }
+
+    def wait_for_change(self, value):
+        future = asyncio.Future()
+
+        def getvalue(change):
+            # make the new value available
+            future.set_result(change.new)
+            self.unobserve(getvalue, value)
+
+        self.observe(getvalue, value)
+        return future
+
+    async def send_request(
+        self,
+        method: str,
+        params: Optional[Dict[str, Any]] = None,
+        request_id: Optional[str] = None,
+    ) -> Any:
+        """Send a request to JavaScript and await response."""
+        request_id = request_id or str(uuid.uuid4())
+        future = asyncio.Future()
+        self._pending_requests[request_id] = future
+
+        self.request = {"id": request_id, "method": method, "params": params or {}}
+        # print("Sent request: ", self.request)
+
+        # Yield control to allow the event loop to process traitlet updates
+        # This will avoid blocking the event loop if `%gui asyncio` magic isn't used.
+        # TODO: Some way to warn and use this workaround only if needed?
+        # while not future.done():
+        #     await asyncio.sleep(0)
+
+        return await future
+
+
+class LanguageModel:
+    """Python interface to Chrome's Prompt API Language Model."""
+
+    # init_count = 0
+    _widget_instance: Optional[LanguageModelWidget] = None
+
+    @classmethod
+    def widget(cls) -> LanguageModelWidget:
+        """Get the LanguageModelWidget instance."""
+        # cls.init_count += 1
+        # if cls.init_count > 1:
+        #     print(f"LanguageModel.widget() called {cls.init_count} times.")
+        if cls._widget_instance is None:
+            cls._widget_instance = LanguageModelWidget()
+        return cls._widget_instance # type: ignore
+
+    def __init__(
+        self,
+        session_id: str = str(uuid.uuid4()),
+        top_k: Optional[int] = None,
+        temperature: Optional[float] = None,
+        input_usage: float = 0.0,
+        input_quota: float = float("inf"),
+    ):
+        self._session_id = session_id
+        self._top_k = top_k
+        self._temperature = temperature
+        self._input_usage = input_usage
+        self._input_quota = input_quota
+
+    @classmethod
+    async def availability(
+        cls, options: dict[str, Any] = {}
+    ) -> Optional[List[str]]:
+        """Check availability of the language model with given options."""
+        return await cls.widget().send_request("availability", {"options": options})
+
+
+    @classmethod
+    async def params(cls) -> Optional[dict[str, Any]]:
+        """Get language model parameters."""
+        return await cls.widget().send_request("params")
+
+    @classmethod
+    async def create(
+        cls, options: dict[str, Any] = {}
+    ) -> "LanguageModel":
+        """Create a new language model session."""
+        session_id = str(uuid.uuid4())
+
+        params = {"sessionId": session_id, "options": options}
+
+        result = await cls.widget().send_request("create", params)
+
+        return cls(
+            session_id=session_id,
+            top_k=result.get("topK"),
+            temperature=result.get("temperature"),
+            input_usage=result.get("inputUsage", 0.0),
+            input_quota=result.get("inputQuota", float("inf")),
+        )
+
+    async def prompt(
+        self,
+        input: Union[str, list[dict[str, Any]]],
+        options: Optional[dict[str, Any]] = {},
+    ) -> str:
+        """Prompt the language model and return the result."""
+        input_data = self._prepare_input(input)
+
+        params = {"sessionId": self.session_id, "input": input_data, "options": options}
+        result = await self.widget().send_request("prompt", params)
+
+        self._input_usage = result.get("inputUsage", self._input_usage)
+        self._input_quota = result.get("inputQuota", self._input_quota)
+
+        return result["result"]
+
+    async def prompt_streaming(
+        self,
+        input: Union[str, list[dict[str, Any]]],
+        options: Optional[dict[str, Any]] = {},
+    ) -> AsyncIterator[str]:
+        """Prompt the language model and stream the result."""
+        input_data = self._prepare_input(input)
+
+        stream_request_id = str(uuid.uuid4())
+        queue: asyncio.Queue[Optional[str]] = asyncio.Queue()
+        self.widget()._stream_chunks[stream_request_id] = queue
+
+        params = {
+            "sessionId": self.session_id,
+            "requestId": stream_request_id,
+            "input": input_data,
+            "options": options,
+        }
+
+        main_request_id = str(uuid.uuid4())
+        self.widget()._stream_request_mapping[main_request_id] = stream_request_id
+
+        async def _send():
+            return await self.widget().send_request(
+                "promptStreaming", params, request_id=main_request_id
+            )
+
+        request_task = asyncio.create_task(_send())
+
+        try:
+            while True:
+                chunk = await queue.get()
+                if chunk is None:
+                    break
+                yield chunk
+
+            result = await request_task
+            self._input_usage = result.get("inputUsage", self._input_usage)
+            self._input_quota = result.get("inputQuota", self._input_quota)
+        finally:
+            self.widget()._stream_chunks.pop(stream_request_id, None)
+            self.widget()._stream_request_mapping.pop(main_request_id, None)
+
+
+    async def append(
+        self,
+        input: Union[str, list[dict[str, Any]]],
+        options: Optional[dict[str, Any]] = {},
+    ) -> None:
+        """Append messages to the session without prompting for a response."""
+        input_data = self._prepare_input(input)
+
+        params = {"sessionId": self.session_id, "input": input_data, "options": options}
+        result = await self.widget().send_request("append", params)
+
+        self._input_usage = result.get("inputUsage", self._input_usage)
+        self._input_quota = result.get("inputQuota", self._input_quota)
+
+    async def measure_input_usage(
+        self,
+        input: Union[str, list[dict[str, Any]]],
+        options: Optional[dict[str, Any]] = {},
+    ) -> float:
+        """Measure how many tokens an input will consume."""
+        input_data = self._prepare_input(input)
+
+        params = {"sessionId": self.session_id, "input": input_data, "options": options}
+        result = await self.widget().send_request("measureInputUsage", params)
+
+        return result["usage"]
+
+    @property
+    def session_id(self) -> Optional[str]:
+        """Current session ID."""
+        return self._session_id
+
+    @property
+    def input_usage(self) -> float:
+        """Current input usage in tokens."""
+        return self._input_usage
+
+    @property
+    def input_quota(self) -> float:
+        """Maximum input quota in tokens."""
+        return self._input_quota
+
+    @property
+    def top_k(self) -> Optional[int]:
+        """Top-K sampling parameter."""
+        return self._top_k
+
+    @property
+    def temperature(self) -> Optional[float]:
+        """Temperature sampling parameter."""
+        return self._temperature
+
+    async def clone(
+        self, options: dict[str, Any] = {}
+    ) -> "LanguageModel":
+        """Clone the current session."""
+        new_session_id = str(uuid.uuid4())
+
+        params = {
+            "sessionId": self.session_id,
+            "newSessionId": new_session_id,
+            "options": options,
+        }
+        result = await self.widget().send_request("clone", params)
+        return LanguageModel(
+            session_id=new_session_id,
+            top_k=result.get("topK"),
+            temperature=result.get("temperature"),
+            input_usage=result.get("inputUsage"),
+            input_quota=result.get("inputQuota"),
+        )
+
+    async def destroy(self) -> None:   
+        """Destroy the session and free resources."""
+        params = {"sessionId": self.session_id}
+        await self.widget().send_request("destroy", params)
+
+    def _prepare_input(
+        self, input: Union[str, list[dict[str, Any]]]
+    ) -> Union[str, list[dict[str, Any]]]:
+        """Prepare input for sending to JavaScript."""
+        if isinstance(input, str):
+            return input
+        elif isinstance(input, list):
+            result = []
+            for item in input:
+                if isinstance(item, dict):
+                    result.append(item)
+                else:
+                    raise TypeError(f"Invalid input item type: {type(item)}")
+            return result
+        else:
+            raise TypeError(f"Invalid input type: {type(input)}")
