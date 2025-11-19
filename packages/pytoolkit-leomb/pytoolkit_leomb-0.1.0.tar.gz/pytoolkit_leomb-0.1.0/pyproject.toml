@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pytoolkit-leomb"
+version = "0.1.0"
+description = "A collection of Python-powered CLI tools for the command line."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+
+authors = [
+  { name = "Leonardo Modesto" }
+]
+
+dependencies = [
+    "typer>=0.12.0",
+    "rich>=13.0.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[project.scripts]
+pytoolkit = "pytoolkit.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["pytoolkit"]
