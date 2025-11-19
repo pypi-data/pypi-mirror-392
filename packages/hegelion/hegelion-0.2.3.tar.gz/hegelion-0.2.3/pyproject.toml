@@ -1,0 +1,82 @@
+[project]
+name = "hegelion"
+version = "0.2.3"
+description = "Dialectical reasoning harness for LLMs (thesis → antithesis → synthesis)"
+requires-python = ">=3.10"
+readme = "README.md"
+authors = [
+    { name = "Hunter Bown", email = "hunter@shannonlabs.dev" }
+]
+license = "MIT"
+keywords = ["ai", "llm", "reasoning", "dialectical", "hegelian", "mcp", "anthropic", "openai", "claude", "gpt", "ollama", "gemini"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+
+dependencies = [
+    "mcp>=0.9.0",
+    "openai>=1.0.0",
+    "anthropic>=0.40.0",
+    "google-generativeai>=0.8.3",
+    "httpx>=0.25.0",
+    "sentence-transformers>=2.2.0",
+    "numpy>=1.24.0",
+    "scikit-learn>=1.2.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+    "pytest-cov>=4.0",
+    "black>=23.0",
+    "ruff>=0.1.0",
+    "pre-commit>=3.0",
+    "build>=1.0.0",
+    "twine>=5.0.0"
+]
+
+[project.scripts]
+hegelion = "hegelion.scripts.hegelion_cli:main"
+hegelion-bench = "hegelion.scripts.hegelion_bench:main"
+hegelion-server = "hegelion.mcp_server:main"
+
+[project.urls]
+Homepage = "https://github.com/Hmbown/Hegelion"
+Repository = "https://github.com/Hmbown/Hegelion"
+Documentation = "https://github.com/Hmbown/Hegelion/blob/main/HEGELION_SPEC.md"
+"Bug Tracker" = "https://github.com/Hmbown/Hegelion/issues"
+
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["hegelion", "hegelion.scripts", "hegelion.examples_data"]
+
+[tool.setuptools.package-data]
+"hegelion.examples_data" = ["*.jsonl"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+asyncio_mode = "auto"
+filterwarnings = [
+    "ignore:coroutine 'run_dialectic' was never awaited",
+    "ignore:coroutine 'run_benchmark' was never awaited",
+    "ignore:coroutine 'dialectic' was never awaited",
+    "ignore:coroutine 'quickstart' was never awaited",
+]
+
+[dependency-groups]
+dev = [
+    "build==1.3.0",
+    "twine==6.2.0",
+]
