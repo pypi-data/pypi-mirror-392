@@ -1,0 +1,41 @@
+from pyboot.commons.utils.log import Logger
+from fastapi import Request
+from pyboot.commons.utils.utils import current_millsecond,date2str_yyyymmddhhmmsss,date_datetime_cn # noqa: F401
+from pyboot.dataflow.utils.web.asgi import get_remote_address,getRequestURLPath
+from pyboot.dataflow.module import Context,WebContext
+from pyboot.dataflowx.context.webmvc import filter
+
+_logger = Logger('application.{{package_name}}')
+
+
+@filter(path='/{{project_name}}/api,/{{project_name}}/api/**')
+async def costtime_handler(request: Request, call_next):
+    # ====== 请求阶段 ======
+    start = current_millsecond()
+    # 可选择直接返回，不继续往后走（熔断、IP 黑名单）
+    # if request.client.host in BLACKLIST:
+    #     return JSONResponse({"msg": "blocked"}, 403)
+    
+    path = getRequestURLPath(WebContext.getRequest())
+    _logger.INFO(f"测试过滤器==[{request.url}][{path}]")
+    
+    WebContext.setRequestUserObject(start)
+    
+    # ====== 继续往后走（路由、业务） ======
+    try:
+        response = await call_next(request)
+        # ====== 响应阶段 ======                
+        # response.headers["test-Cost-ms"] = str(cost)
+        return response    
+    finally:
+        cost = (current_millsecond() - start)
+        ip = get_remote_address(request)
+        _logger.INFO(f"测试过滤器==[{request.url}][{ip}]{cost:.2f}ms")
+        WebContext.resetRequestUserObject()
+
+
+@Context.Configurationable(prefix='dataflowx.{{package_name}}')
+def config_all(config):
+    _logger.DEBUG(f'========={config}')
+      
+    

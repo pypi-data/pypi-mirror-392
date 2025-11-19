@@ -1,0 +1,17 @@
+from pyboot.dataflowx.context.datasource.pybatisplus import Mapper
+from pyboot.commons.pybatis.pybatis import PageMode
+from pyboot.commons.utils.utils import PageResult
+
+@Mapper(table='t_config', id_col='id')
+class SampleMapper:
+    def selectConfigById(self, id:str)->dict:
+        pass
+    
+    def selectConfigs(self, id:str, param:dict, pageMode:PageMode)->dict:
+        pass
+    
+    def say(self, word, pageMode:PageMode)->PageResult:
+        return f'{self.name} Say: {word}'
+    
+    def run(self, road)->str:
+        return f'{self.name} run: {road}'

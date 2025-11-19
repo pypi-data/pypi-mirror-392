@@ -1,0 +1,293 @@
+Metadata-Version: 2.4
+Name: pyboot-cli
+Version: 1.3.3
+Summary: PyBoot CLI - Python Spring Boot like framework command line tool
+Author-email: joinsunsoft <793875613@qq.com>
+Maintainer-email: joinsunsoft <inthirties.liu@hotmail.com>
+License-Expression: Apache-2.0
+Project-URL: Homepage, https://gitee.com/pyboot/pyboot-cli
+Project-URL: Repository, https://gitee.com/pyboot/pyboot-cli
+Project-URL: Issues, https://gitee.com/pyboot/pyboot-cli
+Keywords: web,framework,cli,springboot,fastapi
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Libraries :: Application Frameworks
+Requires-Python: >=3.12.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: click>=8.0.0
+Requires-Dist: jinja2>=3.1.6
+Requires-Dist: rich>=10.0.0
+Requires-Dist: typing_extensions==4.15.0
+Provides-Extra: dev
+Requires-Dist: pytest>=6.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=3.0.0; extra == "dev"
+Dynamic: license-file
+
+# PyBoot CLI 创建命令使用文档
+
+## 命令概述
+
+`pyboot create` 命令是 PyBoot CLI 的核心功能之一，用于快速生成标准化的 PyBoot 项目结构和代码文件。
+
+PyBoot CLI 提供以下优势：
+
+- **快速启动**：几秒钟内创建完整的项目结构，无需手动配置
+- **标准化**：遵循 PyBoot 最佳实践和项目结构约定
+- **模板化**：多种项目模板可选，满足不同应用场景
+
+## 安装方法
+
+PyBoot CLI 可以通过 pip 直接安装：
+
+```bash
+pip install pyboot-cli
+```
+
+或者从源码安装：
+
+```bash
+git clone https://gitee.com/pyboot/pyboot-cli.git
+cd pyboot-cli
+pip install -e .
+```
+
+## 使用指南
+
+### 创建应用
+
+使用 `pyboot create app` 命令创建新的 PyBoot 应用项目。
+
+**命令语法：**
+```bash
+pyboot create app NAME [OPTIONS]
+```
+
+**选项说明：**
+
+| 选项 | 缩写 | 说明 |
+|------|------|------|
+| `--directory` | `-d` | 项目输出目录，默认为当前目录 |
+| `--template` | `-t` | 项目模板类型：default, min, advance |
+| `--package` |  | 基础包名，默认为项目名称 |
+| `--description` |  | 项目描述 |
+| `--force` | `-f` | 覆盖已存在的目录 |
+| `--no-input` |  | 非交互模式，使用默认值 |
+
+**使用示例：**
+
+1. **创建基础应用**
+```bash
+pyboot create app myapp
+```
+
+2. **使用特定模板和包名**
+```bash
+pyboot create app myapp -t default --package myapp
+```
+
+3. **在指定目录创建项目**
+```bash
+pyboot create app myapp -d /path/to/projects --description "我的PyBoot项目"
+```
+
+### 创建模块
+
+使用 `pyboot create module` 命令在现有项目中创建新模块。
+
+**命令语法：**
+```bash
+pyboot create module NAME [OPTIONS]
+```
+
+**选项说明：**
+
+
+| 选项 | 缩写 | 说明 |
+|------|------|------|
+| `--directory` | `-d` | 项目输出目录，默认为当前目录 |
+| `--template` | `-t` | 项目模板类型：default, min, advance |
+| `--package` |  | 基础包名，默认为项目名称 |
+| `--description` |  | 项目描述 |
+| `--force` | `-f` | 覆盖已存在的目录 |
+| `--no-input` |  | 非交互模式，使用默认值 |
+
+**使用示例：**
+```bash
+pyboot create module auth --package auth
+```
+
+### 创建组件
+
+使用 `pyboot create component` 命令创建扩展的组件。
+
+**命令语法：**
+```bash
+pyboot create component NAME [OPTIONS]
+```
+
+**选项说明：**
+
+| 选项 | 缩写 | 说明 |
+|------|------|------|
+| `--directory` | `-d` | 项目输出目录，默认为当前目录 |
+| `--template` | `-t` | 项目模板类型：default, min, advance |
+| `--package` |  | 基础包名，默认为项目名称 |
+| `--description` |  | 项目描述 |
+| `--force` | `-f` | 覆盖已存在的目录 |
+| `--no-input` |  | 非交互模式，使用默认值 |
+
+
+**使用示例：**
+```bash
+pyboot create component email 
+```
+
+## 项目模板
+
+PyBoot CLI 提供多种项目模板，满足不同应用场景的需求。
+
+### 默认模板
+标准 PyBoot 项目结构，包含基本配置和示例代码。
+```bash
+pyboot create app myapp -t default
+```
+
+### 简化 模板
+```bash
+pyboot create app myweb -t mini
+```
+
+### 复杂 模板
+```bash
+pyboot create app myapi -t advance
+```
+
+## 项目结构
+
+PyBoot 创建的标准项目结构遵循最佳实践，确保代码组织和维护性。
+
+```
+myproject/
+├── application/
+│   └── myproject/
+│       ├── config/
+│       │   ├── __init__.py
+│       │   ├── config.py
+│       ├── controller/
+│       │   ├── __init__.py
+│       │   └── hello.py
+│       ├── service/
+│       │   ├── __init__.py
+│       │   └── hello.py
+│       ├── model/
+│       │   ├── __init__.py
+│       ├── dao/
+│       │   ├── __init__.py
+│       │   └── hello.py
+│       └── __init__.py
+├── conf/
+│   ├── application.yaml
+│   └── logback.yaml
+├── docs/
+├── logs/
+├── web/
+├── .env
+├── .env.local
+├── .gitignore
+├── LICENSE
+├── pyproject.toml
+├── README.md
+└── requirements.txt
+```
+
+### 关键文件说明
+
+| 文件/目录 | 说明 |
+|-----------|------|
+| `app.py` | 应用入口文件，包含应用启动逻辑 |
+| `pyproject.toml` | 项目配置和依赖管理文件 |
+| `application.yaml` | 应用配置文件，包含数据库、服务器等配置 |
+| `application/` | 源代码目录，遵循包结构组织 |
+| `application/[package]/controller/` | 控制器层，处理 HTTP 请求和响应 |
+| `application/[package]/service/` | 服务层，包含业务逻辑 |
+| `application/[package]/model/` | 数据模型定义 |
+| `application/[package]/config/` | 配置类定义 |
+| `application/[package]/dao/` | dao类定义 |
+| `conf/` | 配置文件目录 |
+| `web/` | 静态资源文件目录 |
+| `logs/` | 日志文件目录 |
+
+## 完整示例
+
+以下是一个完整的 PyBoot 项目创建和使用示例。
+
+### 1. 创建项目
+```bash
+pyboot create app myapp --package myapp --description "示例API项目"
+```
+
+### 2. 进入项目目录
+```bash
+cd myapp
+```
+
+### 3. 安装依赖
+```bash
+pip install -e .
+```
+
+### 4. 运行应用
+```bash
+pyboot[-cli] run --port 8080 --workers 8 --config conf/application.yaml
+```
+
+### 6. 访问应用
+打开浏览器访问以下地址：
+- 应用首页: http://localhost:8080
+- API 文档: http://localhost:8080/docs
+
+## 总结
+
+PyBoot CLI 的 `create` 命令为开发者提供了快速创建标准化项目的能力，大大减少了项目初始化时间，确保了代码结构的一致性。通过多种模板选项和灵活的配置参数，可以满足不同场景下的开发需求。
+
+通过遵循本文档的指南，您可以快速开始使用 PyBoot 框架进行项目开发，享受现代化 Python Web 开发带来的便利和高效。
+
+---
+
+
+*文档版本：1.0.0*  
+*最后更新：2025年*  
+*PyBoot Team © 2025 保留所有权利*
+
+---
+
+
+### 组织介绍
+**组织定位**  
+“PyBoot 组织”是一个面向 Python 开发者的开源技术社区，致力于把 Java SpringBoot 的便捷开发体验迁移到 Python 生态，提供“约定大于配置”的脚手架、插件市场与云原生工具链。
+
+**愿景**  
+让 Python 开发者也能 **一键启动、即刻生产**，享受与 SpringBoot 同等的开发效率与可观测性，同时保持 Python 的灵活与简洁。
+
+### 他们正在使用
+这些公司或软件正在使用我们的开源软件：visual studio code
+
+### 如何加入
+请发送申请邮件至793875613@qq.com
+
+### 捐助
+如果您觉得我们的开源软件对你有所帮助，请扫下方二维码打赏我们一杯咖啡。
+![输入图片说明](https://foruda.gitee.com/images/1763015348385270558/f042d37e_6575697.jpeg "微信图片_20251113124941_99_6.jpg")
+
+
+### 联系
+网站：https://www.ginghan.com
+邮箱:  793875613@qq.com

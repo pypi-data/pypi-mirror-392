@@ -1,0 +1,26 @@
+#!/usr/bin/env python3
+"""
+{{ project_name }} - PyBoot 应用入口
+
+{{ description }}
+"""
+
+import sys
+import pathlib
+from pyboot.dataflow.boot import ApplicationBoot
+
+def main():
+{% if template == 'web' %}
+    print("🚀 启动Web应用 {{ project_name }} ...")
+{% elif template == 'microservice' %}
+    print("🚀 启动微服务模块 {{ project_name }} ...")
+{% endif %}
+    print("📦 包名: {{ package_name }}")
+    
+    # 运行应用    
+    proj_root = pathlib.Path.cwd()          # 假设 cli 就在项目根
+    sys.path.insert(0, str(proj_root)) 
+    ApplicationBoot.Start()
+
+if __name__ == "__main__":
+    main()

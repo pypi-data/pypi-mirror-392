@@ -1,0 +1,61 @@
+{% if template == 'web' %}
+<mapper namespace='application.{{package_name}}.dao.hello.SampleMapper'>
+{% elif template == 'microservice' %}
+<mapper namespace='application.{{package_name}}.dao.SampleMapper'>
+{% endif %}    
+{% raw %}
+    <ref id="selectUserVo">
+        select * from t_config u
+    </ref>
+
+    <select id="selectConfigById">
+	    {$ selectUserVo $}        
+		where u.id = :id
+	</select>
+
+    <select id='say' resultType='datetime'>
+       {$ for_test $}
+    </select>
+
+    <ref id='for_test'>
+        select createtime from t_config
+                    WHERE 1=1
+    </ref>
+    
+    <select id='run'>
+        {$ for_test $}
+    </select>
+
+    <select id='selectConfigs'>
+        select * from t_config u
+            WHERE 1=1
+            {$ where_1 $}
+    </select>
+
+    <ref id='where_1'>
+        AND 
+        (
+            1!=1 
+
+            {% if param.name %}
+            OR (u.id = :param.name and 1=1)
+            {% endif %}
+            
+            {% if param.id %}
+            OR (u.id = :param.id and 2=2)
+            {% endif %}
+
+            {% if param.obj and param.obj.id %}
+            OR (u.id = :param.obj.id and 3=3)
+            {% endif %}
+
+            {% if id %}
+            OR (u.id = :id and 4=4)
+            {% endif %}
+        )
+
+        and 1 = 1
+    </ref>
+
+</mapper>
+{% endraw %}

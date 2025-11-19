@@ -1,0 +1,14 @@
+from pyboot.commons.utils.log import Logger
+from pyboot.dataflow.module import Context
+
+_logger = Logger('dataflowx.context.{{package_name}}')
+
+_logger.DEBUG('加载{{project_name}}模块')
+
+## 可以参考pyboot-redis中dataflowx.context.redis写法
+
+@Context.Configurationable(prefix='dataflowx.{{project_name}}')
+def config_all(config):
+    _logger.DEBUG(f'{{project_name}}组件配置参数========={config}')
+
+    

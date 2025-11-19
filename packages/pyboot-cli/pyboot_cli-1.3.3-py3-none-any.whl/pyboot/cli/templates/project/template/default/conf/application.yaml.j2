@@ -1,0 +1,99 @@
+{%- if template == 'web' -%}
+application:
+  name: {{ project_name }}
+  version: 1.0.1-beta
+  profiles:
+###    active: dev
+  server:
+    port: ${SERVER_PORT:8080}
+    host: ${SERVER_HOST:0.0.0.0}
+    workers: 1
+  
+logging:
+  level: ${LOG_LEVEL:INFO}
+  config: conf/logback.yaml
+
+dataflowx:
+  pybatisplus:
+    root: conf
+    pattern: /**/*Mapper.xml
+  datasource:
+    # ds01:
+    #   url: ${MYSQLDS.url:mysql+pymysql://u:p@localhost:61306/dataflow_test?charset%20utf8mb4}
+    #   # url: ${MYSQLDS.url:mysql+pymysql://u:p@localhost:61306/stock_agent?charset=utf8mb4}
+    #   username: ${env:MYSQLDS.user:stock_agent}
+    #   password: ${env:MYSQLDS.password:stock_agent}
+    #   test: select 1
+    ds01:
+      url: ${SQLITE.url:sqlite:///db/etcdv3.db}
+      test: ${SQLITE.test:select 1}
+    ds04:
+      url: ${SQLITE.url:sqlite:///db/etcdv3.db}
+      test: ${SQLITE.test:select 1}
+  web:
+    cors:
+      allow_origins: 
+        - '*'
+      allow_methods: '*'
+      allow_header: '*'
+      allow_credentials: yes
+      expose_headers: '*'
+    # jwt:
+    #   ttl_minutes: 21600
+    #   secret: 'replace-with-256-bit-secret'      # 32 字节以上
+    static:
+      root: web
+      mapping:
+        # /html3: app/ETCDV3
+        # /app3: app/ETCDV3
+    proxy:
+      enabled: on
+  {{ project_name }}:
+    web:
+      title: DataFlow
+      root: ./
+      num: 100
+      types:
+        - xls
+        - xlsx
+        - docs
+        - doc
+        - pdf
+{%- elif template == 'microservice' -%}
+application:
+  name: {{ project_name }}
+  version: 1.0.1-beta
+  profiles:
+###    active: dev
+  server:
+    port: ${SERVER_PORT:8080}
+    host: ${SERVER_HOST:0.0.0.0}
+    workers: 1
+  
+logging:
+  level: ${LOG_LEVEL:INFO}
+  config: conf/logback.yaml
+
+dataflowx:
+  pybatisplus:
+    root: conf
+    pattern: /**/*Mapper.xml
+  datasource:
+    ds01:
+      url: ${SQLITE.url:sqlite:///db/etcdv3.db}
+      test: ${SQLITE.test:select 1}
+    ds04:
+      url: ${SQLITE.url:sqlite:///db/etcdv3.db}
+      test: ${SQLITE.test:select 1}
+  {{ project_name }}:
+    web:
+      title: DataFlow
+      root: ./
+      num: 100
+      types:
+        - xls
+        - xlsx
+        - docs
+        - doc
+        - pdf
+{%- endif -%}
