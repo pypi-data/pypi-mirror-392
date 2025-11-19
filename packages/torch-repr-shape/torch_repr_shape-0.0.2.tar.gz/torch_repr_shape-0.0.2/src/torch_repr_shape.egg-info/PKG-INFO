@@ -1,0 +1,109 @@
+Metadata-Version: 2.4
+Name: torch_repr_shape
+Version: 0.0.2
+Summary: Patch torch.Tensor.__repr__ to include tensor shape.
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+
+## torch_repr_shape
+
+A tiny utility that patches `torch.Tensor.__repr__` so that every printed tensor shows its shape.
+
+一个很小的工具，用来给 `torch.Tensor.__repr__` 打补丁，让你在 `print(tensor)` 时一眼看到张量的形状。在 VS Code 的 Debugger 中更有用。
+
+示例输出：
+
+```text
+{Tensor:(2, 3)} tensor([[...]])
+```
+
+也就是说，原本的 PyTorch 输出前面会多一段 `{Tensor:(shape)}`。
+
+---
+
+## Features / 特性
+
+- ✅ **Lazy loading / 惰性加载**：可以在导入 `torch` 之前或之后调用，首次导入 `torch` 时自动打补丁。
+- ✅ **Idempotent / 幂等**：多次调用 `enable_torch_repr_shape()` 不会重复打补丁。
+- ✅ **One-click disable / 一键关闭**：通过环境变量 `DISABLE_TORCH_REPR_SHAPE=1` 即可禁用。
+- ✅ **Fail-safe / 安全兜底**：如果补丁失败，会自动忽略错误，不影响你的正常代码。
+
+---
+
+## Installation / 安装
+
+```bash
+pip install torch_repr_shape
+```
+
+请确保你已经在环境中安装了 PyTorch（如 `torch`, `torchvision` 等），本包只对已有的 PyTorch 做输出增强。
+
+---
+
+## Quick Start / 快速上手
+
+在任何需要的地方调用一次 `enable_torch_repr_shape()` 即可：
+
+```python
+from torch_repr_shape import enable_torch_repr_shape
+
+enable_torch_repr_shape()
+
+import torch
+
+x = torch.randn(2, 3)
+print(x)
+```
+
+典型输出类似：
+
+```text
+{Tensor:(2, 3)} tensor([[ 0.1234, -0.5678, ...],
+                        [...,      ...,      ...]])
+```
+
+你也可以在已经导入 `torch` 之后调用，效果相同：
+
+```python
+import torch
+from torch_repr_shape import enable_torch_repr_shape
+
+enable_torch_repr_shape()
+
+print(torch.zeros(4, 5))
+```
+
+---
+
+## Disable via env / 环境变量关闭
+
+如果某些场景下你不想改写 `torch.Tensor.__repr__`，可以通过环境变量一键关闭：
+
+```bash
+DISABLE_TORCH_REPR_SHAPE=1 python your_script.py
+```
+
+当 `DISABLE_TORCH_REPR_SHAPE=1` 时，`enable_torch_repr_shape()` 会直接返回，不做任何修改。
+
+---
+
+## How it works / 实现原理
+
+- 如果此时 `torch` 已经在 `sys.modules` 中，直接给 `torch.Tensor.__repr__` 打补丁。
+- 如果还没有导入 `torch`，临时 hook 内置 `__import__`，在第一次导入 `torch` 时打补丁，然后恢复原来的导入逻辑。
+- 新的 `__repr__` 会在原有输出前面加上 `{Tensor:(shape)}`，比如 `{Tensor:(2, 3, 4)}`。
+- 使用一个内部标记属性 `__repr__adds_shape__` 确保不会重复打补丁。
+
+---
+
+## Use cases / 适用场景
+
+- 快速区分多个 tensor 的尺寸。
+- VS Code Debugger 中显示 tensor shape。
+- 在 REPL / Jupyter / 脚本中频繁 `print(tensor)` 时，更快定位维度错误。
+
+---
+
+## Development / 开发信息
+
+欢迎在 PyPI 上使用 `torch_repr_shape` 并在实际项目中反馈问题或改进建议。
