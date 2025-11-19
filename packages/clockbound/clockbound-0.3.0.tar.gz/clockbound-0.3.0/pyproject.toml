@@ -1,0 +1,47 @@
+[project]
+name = "clockbound"
+version = "0.3.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Hunter Fernandes", email = "hgfern@gmail.com" }
+]
+license = "MIT"
+requires-python = ">=3.13"
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python"
+]
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/hfern/clockbound"
+
+[build-system]
+requires = ["uv_build>=0.8.13,<0.9.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "coverage>=7.11.3",
+    "ruff>=0.14.5",
+]
+
+[tool.uv.build-backend]
+source-exclude = ["**/tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+
+[tool.coverage.run]
+branch = true
+omit = [
+    "*/tests/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+include = [
+    "src/*",
+]
