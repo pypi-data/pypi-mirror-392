@@ -1,0 +1,214 @@
+Metadata-Version: 2.4
+Name: bach-jsearch
+Version: 1.0.1
+Summary: RapidAPI: letscrape-6bRBa3QguO5/jsearch
+Project-URL: Homepage, https://github.com/bachstudio/bach-jsearch
+Project-URL: Repository, https://github.com/bachstudio/bach-jsearch
+Project-URL: Documentation, https://github.com/bachstudio/bach-jsearch#readme
+Requires-Python: >=3.10
+Requires-Dist: fastmcp>=2.0.0
+Requires-Dist: httpx>=0.25.0
+Provides-Extra: dev
+Requires-Dist: black>=23.0.0; extra == 'dev'
+Requires-Dist: pytest>=7.0.0; extra == 'dev'
+Description-Content-Type: text/markdown
+
+# Jsearch MCP Server
+
+RapidAPI: letscrape-6bRBa3QguO5/jsearch
+
+## 简介
+
+这是一个使用 [FastMCP](https://fastmcp.wiki) 自动生成的 MCP 服务器，用于访问 Jsearch API。
+
+- **PyPI 包名**: `bach-jsearch`
+- **版本**: 1.0.1
+- **来源平台**: openapi
+- **传输协议**: stdio
+
+
+## 安装
+
+### 从 PyPI 安装:
+
+```bash
+pip install bach-jsearch
+```
+
+### 从源码安装:
+
+```bash
+pip install -e .
+```
+
+## 运行
+
+### 方式 1: 使用 uvx（推荐，无需预先安装）
+
+```bash
+# 运行（uvx 会自动安装并运行）
+uvx --from bach-jsearch bach_jsearch
+
+# 或指定版本
+uvx --from bach-jsearch@latest bach_jsearch
+
+# 设置环境变量
+API_KEY=your_key uvx --from bach-jsearch bach_jsearch
+```
+
+### 方式 2: 直接运行（开发模式）
+
+```bash
+python server.py
+```
+
+### 方式 3: 安装后作为命令运行
+
+```bash
+# 安装
+pip install bach-jsearch
+
+# 运行（命令名使用下划线）
+bach_jsearch
+
+# 设置环境变量
+API_KEY=your_key bach_jsearch
+```
+
+## 配置
+
+
+### API 认证
+
+此 API 需要认证。请设置环境变量:
+
+```bash
+export API_KEY="your_api_key_here"
+```
+
+
+### 在 Claude Desktop 中使用
+
+编辑 Claude Desktop 配置文件 `claude_desktop_config.json`:
+
+
+```json
+{
+  "mcpServers": {
+    "jsearch": {
+      "command": "python",
+      "args": ["E:\path\to\jsearch\server.py"],
+      "env": {
+        "API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+**注意**: 请将 `E:\path\to\jsearch\server.py` 替换为实际的服务器文件路径。
+
+
+## 可用工具
+
+此服务器提供以下工具:
+
+
+### `job_search`
+
+Search for jobs posted on any public job site across the web on the largest job aggregate in the world (Google for Jobs). Extensive filtering support and most options available on Google for Jobs.
+
+**端点**: `GET /search`
+
+
+**参数**:
+
+- `query` (string): Example value: developer jobs in chicago
+
+- `page` (integer): Example value: 1
+
+- `num_pages` (integer): Example value: 1
+
+- `country` (string): Example value: us
+
+- `date_posted` (string): Example value: all
+
+
+
+---
+
+
+### `job_details`
+
+Get all job details, including additional information such as: application options / links, employer reviews and estimated salaries for similar jobs.
+
+**端点**: `GET /job-details`
+
+
+**参数**:
+
+- `job_id` (string): Example value: n20AgUu1KG0BGjzoAAAAAA==
+
+- `country` (string): Example value: us
+
+
+
+---
+
+
+### `job_salary`
+
+Get estimated salaries / pay for a jobs around a location by job title and location. The salary estimation is returned for several periods, depending on data availability / relevance, and includes: hourly, daily, weekly, monthly, or yearly.
+
+**端点**: `GET /estimated-salary`
+
+
+**参数**:
+
+- `job_title` (string): Example value: nodejs developer
+
+- `location` (string): Example value: new york
+
+- `location_type` (string): Example value: ANY
+
+- `years_of_experience` (string): Example value: ALL
+
+
+
+---
+
+
+### `company_job_salary`
+
+Get estimated job salaries/pay in a specific company by job title and optionally a location and experience level in years.
+
+**端点**: `GET /company-job-salary`
+
+
+**参数**:
+
+- `company` (string): Example value: Amazon
+
+- `job_title` (string): Example value: software developer
+
+- `location_type` (string): Example value: ANY
+
+- `years_of_experience` (string): Example value: ALL
+
+
+
+---
+
+
+
+## 技术栈
+
+- **FastMCP**: 快速、Pythonic 的 MCP 服务器框架
+- **传输协议**: stdio
+- **HTTP 客户端**: httpx
+
+## 开发
+
+此服务器由 [API-to-MCP](https://github.com/yourusername/APItoMCP) 工具自动生成。
+
+生成时间: 1.0.0
