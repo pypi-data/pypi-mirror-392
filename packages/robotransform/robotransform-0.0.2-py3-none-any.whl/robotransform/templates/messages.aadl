@@ -1,0 +1,27 @@
+package messages
+public
+  with Base_Types, Data_Model;
+  {%- for package in packages %}
+    {%- for type in package.types %}
+    data {{ type.name }}
+      features
+        {%- for field in type.fields %}
+          {%- if field.typename in ['real', 'float', 'double'] %}
+        {{ field.name }}: provides data access Base_Types::Float_64;
+          {%- elif field.typename in ['int', 'integer', 'long'] %}
+        {{ field.name }}: provides data access Base_Types::Integer_64;
+          {%- elif field.typename in ['bool', 'boolean'] %}
+        {{ field.name }}: provides data access Base_Types::Boolean;
+          {%- elif field.typename in ['string', 'text'] %}
+        {{ field.name }}: provides data access Data_Model::String;
+          {%- elif field.typename in ['byte', 'bytes'] %}
+        {{ field.name }}: provides data access Base_Types::Unsigned_8;
+          {%- else %}
+        -- Unknown type '{{ field.typename }}'; adjust mapping
+        {{ field.name }}: provides data access Data_Model::Generic_Type;
+          {%- endif %}
+        {%- endfor %}
+    end {{type.name}};
+    {%- endfor %}
+  {%- endfor %}
+end messages;
