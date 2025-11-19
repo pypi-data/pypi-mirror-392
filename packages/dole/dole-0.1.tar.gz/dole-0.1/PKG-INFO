@@ -1,0 +1,87 @@
+Metadata-Version: 2.4
+Name: dole
+Version: 0.1
+Summary: dole
+Home-page: https://github.com/crazy-penguins/dole
+Author: 2ps
+License: BSD
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: System Administrators
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: Unix
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Software Development
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Description-Content-Type: text/markdown
+Requires-Dist: fastmcp
+Requires-Dist: py-key-value-aio
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: coverage; extra == "dev"
+Requires-Dist: flake8; extra == "dev"
+Requires-Dist: pylint; extra == "dev"
+Requires-Dist: raft; extra == "dev"
+Requires-Dist: twine; extra == "dev"
+Requires-Dist: pytest_aspec; extra == "dev"
+Requires-Dist: ipython; extra == "dev"
+Requires-Dist: bumpversion; extra == "dev"
+Requires-Dist: convocations; extra == "dev"
+Requires-Dist: pytest-cov; extra == "dev"
+Dynamic: author
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: license
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: summary
+
+# summary & introduction
+
+this package provides some helper classes needed for using
+fastmcp with azure authentication.  in particular, fastmcp 2.12.5
+has certain problems when trying to use the provided
+`fastmcp.server.auth.AzureProvider` with a py-key-value-aio `RedisStore`
+as described in the [fastmcp documentation](https://gofastmcp.com/servers/storage-backends#redis).
+
+# usage
+
+```python
+from fastmcp import FastMCP
+from dole.azure import azure_auth
+from dole.health import add_health_endpoint, add_logging_health_filter
+
+add_logging_health_filter()
+
+tenant_id = 'my entra tenant id'
+client_id = 'my entra app client id'
+client_secret = '.......'
+redis_host = 'redis'
+redis_db = '0'
+redis_port = '6379'
+base_url = 'http://localhost:8000' # note that we do not include the mcp suffix
+auth = azure_auth(
+    tenant_id, client_id, client_secret, base_url,
+    redis_host, redis_db, redis_port)
+
+mcp = FastMCP(
+    name="my-mcp-server",
+    instructions="""
+    """,
+    auth=auth,
+)
+add_health_endpoint(mcp)
+```
+
+powered by angry penguins.
