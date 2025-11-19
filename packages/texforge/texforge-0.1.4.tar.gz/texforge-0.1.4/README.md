@@ -1,0 +1,541 @@
+# TexForge - Forge Perfect LaTeX Papers
+
+**Automated LaTeX paper compilation, validation, and maintenance**
+
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+
+> **⚠️ Note**: This project is under active construction. Features and APIs may change.
+
+Forge your research with precision and ease:
+- **Modern CLI Tool**: Simple `texforge` command for all operations
+- **Smart Compilation**: LaTeX to PDF with error detection and auto-cleanup
+- **Project Templates**: Physical Review A/L, generic article templates
+- **Validation**: Compilation, references, citations, TODOs
+- **Notifications**: Slack, Telegram, Discord, ntfy.sh (no config file needed!)
+- **Python API**: Use as a library in your own scripts
+
+## 📑 Table of Contents
+
+- [Quick Start](#-quick-start)
+- [Features](#-features)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Configuration](#️-configuration)
+- [Use Cases](#-use-cases)
+- [Documentation](#-documentation)
+- [Contributing](#-contributing)
+- [Support & Troubleshooting](#-support--troubleshooting)
+- [License](#-license)
+
+## 🚀 Quick Start
+
+```bash
+# Clone and install
+git clone https://github.com/Jue-Xu/LaTex-paper-automation.git
+cd LaTex-paper-automation
+pip install -e .
+
+# Create a new paper project
+texforge init quantum-dynamics --template pra
+
+# Write your paper
+cd projects/quantum-dynamics
+mv template.tex main.tex
+# ... edit main.tex, add references.bib ...
+
+# Compile to PDF
+texforge compile
+
+# Send notification (no config needed!)
+export SLACK_WEBHOOK="https://hooks.slack.com/services/..."
+texforge notify --slack "Paper compiled successfully!"
+```
+
+That's it! You're ready to forge perfect LaTeX papers.
+
+## 📋 Features
+
+### 🔨 Core Tools
+
+1. **texforge prove** - Rigorous theorem prover ⭐ NEW ([Guide](docs/PROVER_GUIDE.md))
+   - Reads theorems from your LaTeX files by label
+   - Dual AI agents: Prover + Checker for verification
+   - Specialized for quantum info, complexity theory, information theory
+   - Writes verified proofs back to your .tex files automatically
+   - Example: `texforge prove --label thm:main`
+
+2. **texforge brainstorm** - AI-powered research planning ([Guide](docs/BRAINSTORMING_GUIDE.md))
+   - 6 expert personas evaluate your research idea
+   - 3-round discussion with synthesis and recommendations
+   - Reads references from library/ folder
+   - Generates manuscript outline and detailed logs
+
+3. **texforge arxiv-download** - Multi-format arXiv paper downloader ⭐ NEW
+   - Download papers in LaTeX source, PDF, or HTML format
+   - Supports arXiv IDs or URLs
+   - HTML version from ar5iv.labs.arxiv.org
+   - Perfect for building your research library
+   - Example: `texforge arxiv-download 2301.12345 --format pdf`
+
+4. **texforge compile** - Smart LaTeX compilation
+   - Auto-detects main.tex, handles bibliography
+   - Smart error detection vs. warnings
+   - Auto-cleanup of auxiliary files
+   - Slack notifications with `--notify` flag
+
+5. **texforge init** - Project scaffolding
+   - Physical Review A/L templates (revtex4-2)
+   - Generic article template
+   - Complete project structure with content/ and library/ folders
+
+6. **texforge review** - Peer review simulation ([Guide](docs/APS_REVIEW_GUIDE.md))
+   - 3 expert reviewers for APS journals (PRA, PRB, PRL, PRX, PRR)
+   - Automated compliance checks
+   - Decision: Accept, Minor/Major Revision, or Reject
+
+7. **texforge cover-letter** - Submission letter generator ([Guide](docs/COVER_LETTER_GUIDE.md))
+   - Journal-specific professional cover letters
+   - Pre-configured for PRL, Nature, Science, PRA, PRB, PRX
+   - Outputs .txt and .md formats
+
+8. **texforge polish** - Grammar and word flow checker ⭐ NEW ([Guide](docs/POLISH_GUIDE.md))
+   - Checks grammar, clarity, and flow while preserving technical terminology
+   - Two modes: Report (markdown) or Inline (LaTeX comments)
+   - Severity filtering: critical, major, minor
+   - Configurable terminology preservation
+
+9. **texforge validate** - Quality checks
+   - Compilation, references, citations, TODOs
+
+10. **texforge maintain** - Automated maintenance
+   - Scheduled checks with Git integration
+
+11. **texforge notify** - Multi-channel notifications
+   - Slack, Telegram, Discord, ntfy.sh
+   - Works without config files (env vars)
+
+### 🚧 Planned Features (TODO)
+
+- **texforge simulate** - Dual-implementation simulation verification
+  - Generate and verify numerical simulations in two independent frameworks
+  - Qiskit + NumPy for quantum simulations
+  - Automatic comparison and validation
+  - *Status: Being refactored to use Anthropic SDK directly*
+
+- **texforge generate-figures** - Automated figure generation
+  - AI-powered figure generation from paper context
+  - Publication-quality matplotlib/seaborn plots
+  - Progress-based triggers (e.g., at 50% completion)
+  - *Status: Being refactored to use Anthropic SDK directly*
+
+### 🎯 Key Benefits
+
+- **Zero Configuration Start**: Send notifications using environment variables
+- **Smart Error Detection**: Distinguishes LaTeX warnings from real errors
+- **Clean API**: Use as CLI tool or Python library
+- **Professional Templates**: Journal-ready LaTeX templates
+- **Git Integration**: Auto-commit with detailed messages
+- **Flexible Notifications**: Config file, environment vars, or direct credentials
+
+## 💻 Usage
+
+### Command-Line Interface
+
+```bash
+# Research Planning
+texforge brainstorm                          # Use project goals from README
+texforge brainstorm --idea "..." --journal "PRL"
+
+# Reference Management (NEW!)
+texforge arxiv-download 2301.12345           # Download LaTeX source
+texforge arxiv-download 2301.12345 --format pdf    # Download PDF
+texforge arxiv-download 2301.12345 --format html   # Download HTML
+
+# Paper Development
+texforge init my-paper --template pra        # Initialize project
+texforge compile                             # Compile to PDF
+texforge validate                            # Quality checks
+
+# Theorem Proving (NEW!)
+texforge prove --label thm:main              # Prove theorem from LaTeX
+texforge prove --label lem:bound --file methods.tex
+
+# Grammar and Polish (NEW!)
+texforge polish main.tex                     # Check grammar & flow
+texforge polish main.tex --mode inline       # Add inline comments
+texforge polish main.tex --severity critical # Only critical issues
+
+# Pre-Submission Review
+texforge review --journal prl                # Get peer review feedback
+texforge review --journal prl --strict       # Strict criteria
+
+# Submission Preparation
+texforge cover-letter prl                    # Generate cover letter
+texforge cover-letter nature -i "Context"    # With additional info
+
+# Notifications
+export SLACK_WEBHOOK="https://..."
+texforge notify --slack "Paper ready!"
+
+# Help
+texforge --help
+texforge <command> --help
+```
+
+**📚 Complete Documentation:**
+- **[CLI Guide](CLI_GUIDE.md)** - All commands and options
+- **[Theorem Prover Guide](docs/PROVER_GUIDE.md)** - Rigorous proof generation ⭐ NEW
+- **[Polish Agent Guide](docs/POLISH_GUIDE.md)** - Grammar & word flow checker ⭐ NEW
+- **[Brainstorming Guide](docs/BRAINSTORMING_GUIDE.md)** - Research planning workflow
+- **[APS Review Guide](docs/APS_REVIEW_GUIDE.md)** - Peer review simulation
+- **[Cover Letter Guide](docs/COVER_LETTER_GUIDE.md)** - Submission letters
+
+### Python API
+
+Use TexForge as a library in your own scripts:
+
+```python
+from texforge import PDFCompiler, PaperMaintenanceConfig, NotificationManager
+
+# Compile a paper
+config = PaperMaintenanceConfig.load("config.yaml")
+compiler = PDFCompiler(config)
+result = compiler.compile()
+
+if result.success:
+    print(f"✓ PDF generated: {result.pdf_path}")
+else:
+    print(f"✗ Compilation failed: {result.errors}")
+
+# Send notification
+notifier = NotificationManager(config)
+notifier.send_notification(
+    subject="Build Complete",
+    body="PDF generated successfully",
+    channels=["slack", "ntfy"]
+)
+```
+
+### Available Templates
+
+- **pra** - Physical Review A (two-column, revtex4-2)
+- **prl** - Physical Review Letters (two-column, revtex4-2)
+- **ns** - Nature/Science journals (intro, setup, results, discussion, references, methods, appendix)
+- **tcs** - Theoretical Computer Science (intro with Preliminaries/Previous Work/Contributions subsections)
+- **generic** - Generic article (single-column, article class)
+
+## 🔧 Installation
+
+### Requirements
+
+- **Python 3.8+** with pip
+- **LaTeX** distribution (TeX Live, MiKTeX, etc.)
+- **Git** (for project management)
+
+### Install TexForge
+
+```bash
+# Clone repository
+git clone https://github.com/Jue-Xu/LaTex-paper-automation.git
+cd LaTex-paper-automation
+
+# Install in editable mode (recommended for development)
+pip install -e .
+
+# Or install from PyPI (when published)
+pip install texforge
+```
+
+This installs:
+- `texforge` command-line tool
+- Python package for programmatic use
+- All dependencies (requests, numpy, matplotlib, pyyaml)
+
+### Verify Installation
+
+```bash
+# Check version
+texforge --version
+
+# Get help
+texforge --help
+
+# Test compilation (requires LaTeX)
+texforge init test-paper
+cd projects/test-paper
+mv template.tex main.tex
+texforge compile
+```
+
+## 📖 Complete Workflow Example
+
+From idea to submission in 7 steps:
+
+```bash
+# 1. Create project
+texforge init quantum-entanglement --template pra
+cd quantum-entanglement
+
+# 2. Download references from arXiv
+texforge arxiv-download 2301.12345 --format pdf
+texforge arxiv-download 2302.98765
+cp ~/papers/other-refs/*.pdf library/
+
+# 3. Brainstorm and plan (→ manuscript_outline.md)
+texforge brainstorm --journal "Physical Review A"
+
+# 4. Write paper based on outline
+mv template.tex main.tex
+# ... edit sections using content/manuscript_outline.md as guide ...
+
+# 5. Compile and validate
+texforge compile
+texforge validate
+
+# 6. Polish for grammar and flow
+texforge polish main.tex
+# ... fix critical issues ...
+texforge polish main.tex --severity critical  # Verify fixes
+
+# 7. Get peer review and iterate
+texforge review --journal pra
+# ... address feedback, revise ...
+texforge compile && texforge review --journal pra
+
+# 8. Prepare submission
+texforge cover-letter pra
+# Ready: paper PDF + cover_letter.txt
+```
+
+**See detailed guides for each step:**
+- [Brainstorming Guide](docs/BRAINSTORMING_GUIDE.md) - Steps 2-4
+- [Polish Agent Guide](docs/POLISH_GUIDE.md) - Step 6
+- [APS Review Guide](docs/APS_REVIEW_GUIDE.md) - Step 7
+- [Cover Letter Guide](docs/COVER_LETTER_GUIDE.md) - Step 8
+
+### Advanced Features
+
+```bash
+# Compile with custom configuration
+texforge compile -c custom-config.yaml paper.tex
+
+# Keep auxiliary files for debugging
+texforge compile --no-clean
+
+# Setup macros file
+texforge compile --setup-macros
+
+# Get macro suggestions
+texforge compile --suggest-macros
+
+# Multiple notification channels
+texforge notify --subject "Build Complete" \
+  --slack --telegram --ntfy \
+  "All checks passed!"
+```
+
+## ⚙️ Configuration
+
+TexForge uses YAML configuration files. Each project gets a `.paper-config.yaml`:
+
+```yaml
+# Paper Settings
+paper_directory: /path/to/paper
+main_tex_file: main.tex
+target_journal: Physical Review A
+
+# Schedule
+schedule:
+  run_interval_hours: 6
+  quiet_hours_start: "23:00"
+  quiet_hours_end: "07:00"
+
+# Checks to Run
+checks:
+  compile_check: true
+  citation_check: true
+  math_check: true
+  consistency_check: false
+
+# Git Integration
+git:
+  remote: "origin"
+  branch: "main"
+  commit_prefix: "paper: "
+  auto_push: false
+
+# Notifications (optional - can use env vars instead)
+notifications:
+  slack:
+    enabled: true
+    webhook_url: ""  # or use SLACK_WEBHOOK env var
+  ntfy:
+    enabled: true
+    topic: "my-paper-updates"  # or use NTFY_TOPIC env var
+```
+
+### Notification Setup
+
+**No config file needed!** Use environment variables:
+
+```bash
+# Slack
+export SLACK_WEBHOOK="https://hooks.slack.com/services/..."
+texforge notify --slack "Message"
+
+# ntfy.sh (recommended - no signup!)
+export NTFY_TOPIC="my-paper-updates"
+texforge notify --ntfy "Message"
+
+# Telegram
+export TELEGRAM_BOT_TOKEN="your-token"
+export TELEGRAM_CHAT_ID="your-chat-id"
+texforge notify --telegram "Message"
+
+# Discord
+export DISCORD_WEBHOOK="https://discord.com/api/webhooks/..."
+texforge notify --discord "Message"
+```
+
+Or use direct credentials:
+```bash
+texforge notify --slack-webhook "https://..." "Message"
+texforge notify --ntfy-topic "my-topic" "Message"
+```
+
+## 🎯 Use Cases
+
+### Research Paper Development
+
+Write your paper in LaTeX with automatic compilation and quality checks:
+
+```bash
+texforge init research-paper --template pra
+cd projects/research-paper
+# ... edit main.tex ...
+texforge compile && texforge notify --slack "Draft ready for review!"
+```
+
+### Collaborative Writing
+
+Integrate with Git hooks for automatic validation:
+
+```bash
+# .git/hooks/pre-commit
+#!/bin/bash
+texforge compile || exit 1
+texforge validate || exit 1
+```
+
+### Automated Paper Maintenance
+
+Schedule regular checks with cron:
+
+```bash
+# Run every 6 hours
+0 */6 * * * cd ~/papers/my-paper && texforge maintain -c .paper-config.yaml
+```
+
+### CI/CD Integration
+
+Use in GitHub Actions or other CI systems:
+
+```yaml
+# .github/workflows/latex.yml
+- name: Compile LaTeX
+  run: |
+    pip install texforge
+    texforge compile main.tex
+```
+
+## 📚 Documentation
+
+### Agent Guides
+
+- **[Brainstorming Guide](docs/BRAINSTORMING_GUIDE.md)** - AI research planning
+  - 6 expert personas including Dr. Literature
+  - 3-round discussion process
+  - Output files and iteration workflow
+
+- **[Polish Agent Guide](docs/POLISH_GUIDE.md)** - Grammar and word flow checker ⭐ NEW
+  - Two modes: Report and Inline comments
+  - Preserves technical terminology
+  - Severity filtering and workflow integration
+  - LaTeX-aware grammar checking
+
+- **[APS Review Guide](docs/APS_REVIEW_GUIDE.md)** - Peer review simulation
+  - 3 expert reviewers for APS journals
+  - Compliance checks and decisions
+  - Understanding feedback and iterating
+
+- **[Cover Letter Guide](docs/COVER_LETTER_GUIDE.md)** - Submission letters
+  - Journal-specific letter generation
+  - Customization and best practices
+  - Integration with submission workflow
+
+### General Guides
+
+- **[CLI Guide](CLI_GUIDE.md)** - Complete command reference
+  - All commands with examples
+  - Configuration and troubleshooting
+
+- **Additional docs in [`docs/`](docs/):**
+  - Notification setup
+  - Deployment checklists
+  - Contributing guidelines
+
+## 🤝 Contributing
+
+Contributions welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+**Development setup:**
+```bash
+git clone https://github.com/Jue-Xu/LaTex-paper-automation.git
+cd LaTex-paper-automation
+pip install -e ".[dev]"  # Install with dev dependencies
+```
+
+## 📞 Support
+
+**Need help?**
+
+- **[CLI_GUIDE.md](CLI_GUIDE.md)** - Complete troubleshooting section
+- **[GitHub Issues](https://github.com/Jue-Xu/LaTex-paper-automation/issues)** - Report bugs or request features
+- **[GitHub Discussions](https://github.com/Jue-Xu/LaTex-paper-automation/discussions)** - Ask questions
+
+**Quick diagnostics:**
+```bash
+# Check installation
+texforge --version
+pip list | grep texforge
+
+# Test compilation
+texforge init test && cd projects/test
+mv template.tex main.tex
+texforge compile
+
+# Test notifications
+export SLACK_WEBHOOK="your-webhook"
+texforge notify --slack "Test message"
+```
+
+## 📝 License
+
+GNU General Public License v3.0 - see [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+Built with [Claude Code](https://docs.claude.com) by Anthropic. Inspired by the needs of researchers who want to focus on science, not LaTeX debugging.
+
+---
+
+**TexForge - Forge Perfect LaTeX Papers**
+
+*Made with precision for researchers worldwide*
