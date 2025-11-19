@@ -1,0 +1,294 @@
+import jax
+from typing import Any, TypeGuard
+from jax import lax, numpy as jnp
+from jaxtyping import Bool, DTypeLike, Float, Array, ArrayLike, Shaped, Inexact
+
+import numpy as np
+
+import scipy
+import jax._src.scipy.signal
+
+from ._typing import _WindowSpec
+
+
+def autocorrelate(
+    x: Float[ArrayLike, "..."],
+    /,
+    max_size: int | None = None,
+    axis: int = -1,
+) -> Float[Array, "..."]:
+    """Compute the autocorrelation of the input array along the specified axis.
+
+    Args:
+        x: Input array.
+        max_size: Maximum size of the autocorrelation lags. If `None`, uses the full size.
+        axis: Axis along which to compute the autocorrelation. Default: `-1`.
+
+    Returns:
+        Autocorrelated array.
+    """
+    x = jnp.asarray(x)
+    x = x.swapaxes(-1, axis)
+    n_samples = x.shape[-1]
+    if max_size is None:
+        max_size = n_samples
+
+    with jax.ensure_compile_time_eval():
+        n_fft = 2 ** int(jnp.ceil(jnp.log2(2 * (n_samples - 1))))
+
+    X_f = jnp.fft.rfft(x, n=n_fft, axis=-1)
+    S_f = jnp.conj(X_f) * X_f
+    acf = jnp.fft.irfft(S_f, n=n_fft, axis=-1)
+    return acf[..., :max_size].swapaxes(-1, axis)
+
+
+def frame(
+    x: Float[Array, "*channels n_samples"],
+    /,
+    frame_length: int,
+    hop_length: int,
+) -> Float[
+    Array,
+    "*channels {frame_length} n_frames=1+(n_samples-{frame_length})//{hop_length}",
+]:
+    """Slice a JAX array into overlapping frames.
+
+    Args:
+        x: Input array.
+        frame_length: Length of each frame.
+        hop_length: Number of samples between adjacent frame starts.
+
+    Returns:
+        Array with the last axis sliced into overlapping frames.
+    """
+    n_samples = x.shape[-1]
+    n_frames = 1 + (n_samples - frame_length) // hop_length
+
+    return jax.vmap(
+        lax.dynamic_slice_in_dim, in_axes=(None, 0, None, None), out_axes=-1
+    )(x, jnp.arange(n_frames) * hop_length, frame_length, -1)
+
+
+def overlap_and_add(
+    x: Float[Array, "*channels frame_length n_frames"],
+    hop_length: int,
+) -> Float[Array, "*channels n_samples"]:
+    """Construct a signal from overlapping frames with overlap-and-add.
+
+    Args:
+        x: Input array containing overlappinig frames.
+        hop_length: Number of samples between adjacent frame starts.
+
+    Returns:
+        Constructed time-domain signal.
+    """
+    return jax._src.scipy.signal._overlap_and_add(x.swapaxes(-2, -1), hop_length)
+
+
+def pad_center(
+    x: Float[Array, "*channels n_samples"],
+    /,
+    size: int,
+    pad_kwargs: dict[str, Any] = dict(),
+) -> Float[Array, "*channels {size}"]:
+    """Pad the input array on both sides to center it in a new array of given size.
+
+    Args:
+        x: Input array.
+        size: Desired size of the last axis after padding.
+        pad_kwargs: Additional keyword arguments forwarded to [`jax.numpy.pad`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.pad.html).
+
+    Returns:
+        Array with the last axis center-padded to the desired size.
+    """
+    n_samples = x.shape[-1]
+
+    lpad = int((size - n_samples) // 2)
+
+    lengths = [(0, 0)] * x.ndim
+    lengths[-1] = (lpad, int(size - n_samples - lpad))
+
+    return jnp.pad(x, lengths, **pad_kwargs)
+
+
+def fix_length(
+    x: Float[Array, "*channels n_samples"], /, size: int, **pad_kwargs: Any
+) -> Float[Array, "*channels {size}"]:
+    """Fix the length of the input array to a given size by either trimming or padding.
+
+    Args:
+        x: Input array.
+        size: Desired size of the last axis after fixing length.
+        **pad_kwargs: Additional keyword arguments forwarded to [`jax.numpy.pad`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.pad.html).
+
+    Returns:
+        Array with the last axis fixed to the desired size.
+    """
+    n_samples = x.shape[-1]
+
+    if n_samples < size:
+        lengths = [(0, 0)] * x.ndim
+        lengths[-1] = (0, size - n_samples)
+        return jnp.pad(x, lengths, **pad_kwargs)
+    else:
+        return x[..., :size]
+
+
+def get_window(
+    window: _WindowSpec,
+    Nx: int | None = None,
+    fftbins: bool = True,
+    dtype: DTypeLike | None = None,
+) -> Float[Array, " {Nx}"]:
+    """Return the passed array, or the output of [`scipy.signal.get_window`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.get_window.html) as a JAX array.
+
+    Args:
+        window: Window specification.
+        Nx: Length of the returned window.
+        fftbins: If `True`, return a periodic window for FFT analysis.
+            If `False`, return a symmetric window for filter design. Default: `True`.
+        dtype: Desired data type of the returned array. If none, uses the default JAX
+            floating point type, which might be `float32` or `float64` depending on `jax_enable_x64`.
+
+    Returns:
+        The window as a JAX array.
+    """
+    if is_array(window):
+        win = jnp.asarray(window, dtype=dtype)
+        if Nx is not None:
+            assert len(win) == Nx
+        return win
+    else:
+        assert Nx is not None, "Nx must be specified if window is not an array."
+        win = scipy.signal.get_window(window, Nx, fftbins=fftbins)
+        return jnp.asarray(win, dtype=dtype)
+
+
+def is_array(x: Any) -> TypeGuard[Array | np.ndarray]:
+    """Check if the input is a JAX or NumPy array.
+
+    Args:
+        x: Input value to check.
+
+    Returns:
+        True if the input is a JAX or NumPy array, False otherwise.
+    """
+    return isinstance(x, (jax.Array, np.ndarray))
+
+
+def feps(x: Inexact[ArrayLike, "..."]) -> float:
+    """Get the machine epsilon for the data type of the input array.
+
+    Args:
+        x: Input array.
+
+    Returns:
+        Machine epsilon as a float.
+    """
+    return float(jnp.finfo(jnp.result_type(x)).eps)
+
+
+def normalize(
+    x: Inexact[Array, "*dims"],
+    /,
+    ord: float | str | None = None,
+    axis: int | tuple[int, ...] | None = None,
+    threshold: float | None = None,
+) -> Float[Array, "*dims"]:
+    """Normalize an array by its norm along the specified axis.
+
+    Args:
+        x: Input array.
+        ord: Order of the norm. See `jax.numpy.linalg.norm` for options.
+        axis: Axis or axes along which to compute the norm. If None, normalizes
+            over all axes.
+        threshold: Minimum norm value below which normalization is skipped.
+            If None, uses machine epsilon.
+
+    Returns:
+        Normalized array.
+    """
+    if threshold is None:
+        threshold = feps(x)
+
+    x = jnp.abs(x)
+
+    norm = jnp.linalg.norm(x, ord=ord, axis=axis, keepdims=True)
+    norm = jnp.where(norm < threshold, 1.0, norm)
+    return x / norm  # pyright: ignore[reportOperatorIssue]
+
+
+def expand_to(
+    x: Shaped[ArrayLike, "*"], /, ndim: int, axes: int | tuple[int, ...]
+) -> Shaped[Array, "*expanded_shape"]:
+    """Expand the dimensions of an array to a given number of dimensions by adding singleton dimensions at specified axes.
+
+    Args:
+        x: Input array.
+        ndim: Desired number of dimensions after expansion.
+        axes: Axes at which to add singleton dimensions.
+
+    Returns:
+        Expanded array.
+    """
+    x = jnp.asarray(x)
+    shape = [1] * ndim
+    if isinstance(axes, int):
+        shape[axes] = x.shape[0]
+    else:
+        for i, axis in enumerate(axes):
+            shape[axis] = x.shape[i]
+
+    return x.reshape(shape)
+
+
+def parabolic_peak_shifts(
+    x: Float[Array, "*dims"], /, axis: int
+) -> Float[Array, "*dims"]:
+    """Compute subpixel peak positions using parabolic interpolation.
+
+    Args:
+        x: Input array containing peaks.
+        axis: Axis along which to compute peak shifts.
+
+    Returns:
+        Array of fractional shifts for each position, where each shift indicates
+        the subpixel offset from the integer position to the interpolated peak.
+    """
+    x = x.swapaxes(-1, axis)
+    left_vals = x[..., :-2]
+    center_vals = x[..., 1:-1]
+    right_vals = x[..., 2:]
+
+    a = right_vals + left_vals - 2 * center_vals
+    b = (right_vals - left_vals) / 2
+
+    shifts = -b / (a + feps(x))
+    shifts = jnp.where(jnp.abs(b) >= jnp.abs(a), 0.0, shifts)
+    shifts = jnp.pad(shifts, [(0, 0)] * (shifts.ndim - 1) + [(1, 1)])
+
+    return shifts.swapaxes(-1, axis)
+
+
+def localmin(x: Float[Array, "*dims"], /, axis: int) -> Bool[Array, "*dims"]:
+    """Identify local minima in an array along the specified axis.
+
+    Args:
+        x: Input array.
+        axis: Axis along which to find local minima.
+
+    Returns:
+        Boolean array where True indicates a local minimum.
+    """
+    x = x.swapaxes(-1, axis)
+    left_vals = x[..., :-2]
+    center_vals = x[..., 1:-1]
+    right_vals = x[..., 2:]
+
+    is_min = jnp.logical_and(center_vals < left_vals, center_vals <= right_vals)
+
+    is_min = jnp.pad(
+        is_min, [(0, 0)] * (is_min.ndim - 1) + [(1, 1)], constant_values=False
+    )
+
+    return is_min.swapaxes(-1, axis)
