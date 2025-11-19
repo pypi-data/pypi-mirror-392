@@ -1,0 +1,47 @@
+# Redis configuration for distributed caching
+# Use this file to add Redis to your existing docker-compose setup
+# Command: docker-compose -f docker-compose.yml -f docker-compose.redis.yml up
+
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: ontologia_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./config/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - ontologia_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Optional: Redis Commander for GUI management
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: ontologia_redis_commander
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    depends_on:
+      - redis
+    networks:
+      - ontologia_network
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  ontologia_network:
+    external: true

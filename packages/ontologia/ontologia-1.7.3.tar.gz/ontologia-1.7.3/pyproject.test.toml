@@ -1,0 +1,160 @@
+[tool.pytest.ini_options]
+# 🧪 Modern Pytest Configuration for Ontologia
+
+# Test discovery
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+# Output and reporting
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--verbose",
+    "--tb=short",
+    "--cov=ontologia",
+    "--cov=packages",
+    "--cov-report=html:htmlcov",
+    "--cov-report=term-missing",
+    "--cov-report=xml",
+    "--cov-fail-under=80",
+    "--benchmark-sort=mean",
+    "--benchmark-only",
+]
+
+# Minimum version
+minversion = "7.0"
+
+# Custom markers
+markers = [
+    # 🎯 Test Type Markers
+    "unit: Unit tests (fast, isolated components)",
+    "integration: Integration tests (database, external services)",
+    "e2e: End-to-end tests (slow, full workflows)",
+    "performance: Performance tests and benchmarks",
+    "security: Security and authentication tests",
+    "contract: Contract and API tests",
+
+    # 🐛 Test Category Markers
+    "slow: Slow running tests (run separately)",
+    "expensive: Tests that use significant resources",
+    "flaky: Tests that may be unstable",
+    "manual: Tests requiring manual intervention",
+
+    # 🏗️ Architecture Markers
+    "domain: Domain layer tests",
+    "application: Application service tests",
+    "infrastructure: Infrastructure component tests",
+    "api: API endpoint tests",
+
+    # 🔒 Feature Markers
+    "multi_tenant: Multi-tenancy specific tests",
+    "temporal: Temporal workflow tests",
+    "realtime: Real-time processing tests",
+    "auth: Authentication and authorization tests",
+    "validation: Schema validation tests",
+
+    # 📊 Data Markers
+    "database: Database interaction tests",
+    "cache: Caching tests",
+    "messaging: Message queue tests",
+    "filesystem: File system tests",
+
+    # 🌐 Environment Markers
+    "local: Local development only",
+    "staging: Staging environment tests",
+    "production: Production environment tests",
+]
+
+# Filter warnings
+filterwarnings = [
+    "error",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+
+# Test session configuration
+asyncio_mode = "auto"
+
+# Logging configuration
+log_cli = true
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(name)s: %(message)s"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+
+# Console output style
+console_output_style = "progress"
+
+# File output
+junit_family = "xunit2"
+junit_logging = "all"
+
+# Benchmark configuration
+[tool.benchmark]
+min_rounds = 5
+max_time = 1.0
+min_time = 0.005
+sort_by = "mean"
+histogram = true
+save_data = true
+json_file = "benchmark.json"
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["ontologia", "packages"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/migrations/*",
+    "*/venv/*",
+    "*/.venv/*",
+    "*/site-packages/*",
+    "setup.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+show_missing = true
+precision = 2
+fail_under = 80
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.coverage.xml]
+output = "coverage.xml"
+
+# Parallel execution configuration
+[tool.pytest_parallel]
+workers = "auto"
+disable = false
+
+# Timeout configuration
+[tool.pytest_timeout]
+timeout = 300
+timeout_method = "thread"
+
+# Performance profiling
+[tool.pytest-profiling]
+filename = "profile.stats"
+sort = "cumtime"
+
+# Custom configuration for different environments
+[tool.pytest.env_files]
+development = ".env.test"
+staging = ".env.staging"
+production = ".env.production"

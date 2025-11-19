@@ -1,0 +1,292 @@
+name: 🚀 Modern CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  release:
+    types: [published]
+
+env:
+  PYTHONPATH: packages:.
+  UV_CACHE_DIR: ~/.cache/uv
+
+jobs:
+  # 🔍 Quality Gates
+  quality:
+    name: 🔍 Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: ⚡ Setup UV
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: 📦 Cache Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.UV_CACHE_DIR }}
+          key: ${{ runner.os }}-uv-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-
+
+      - name: 🔄 Sync Dependencies
+        run: uv sync --dev
+
+      - name: 🏗️ Architecture Validation
+        run: python scripts/git-hooks/validate-architecture.py
+
+      - name: 🎨 Format Check (Black)
+        run: uv run black --check .
+
+      - name: 🔍 Lint (Ruff)
+        run: uv run ruff check .
+
+      - name: 📝 Type Check (Ty)
+        run: uv run ty check
+
+      - name: 🔐 Security Check (Bandit)
+        run: uv run bandit -r ontologia/ packages/ -f json -o security-report.json || true
+
+      - name: 📊 Dependency Check (Safety)
+        run: uv run safety check --json --output safety-report.json || true
+
+  # 🧪 Testing Matrix
+  test:
+    name: 🧪 Test Suite
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12', '3.13']
+    needs: quality
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v5
+
+      - name: 🐍 Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: ⚡ Setup UV
+        uses: astral-sh/setup-uv@v3
+
+      - name: 📦 Cache Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.UV_CACHE_DIR }}
+          key: ${{ runner.os }}-uv-${{ matrix.python-version }}-${{ hashFiles('uv.lock') }}
+
+      - name: 🔄 Sync Dependencies
+        run: uv sync --dev
+
+      - name: 🧪 Run Tests
+        run: |
+          uv run pytest tests/ \
+            --cov=ontologia \
+            --cov=packages \
+            --cov-report=xml \
+            --cov-report=html \
+            --cov-report=term-missing \
+            --junitxml=test-results-${{ matrix.python-version }}.xml
+
+      - name: 📊 Upload Coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+  # 🧪 Forward-compat check against next CPython (allowed to fail)
+  test-next:
+    name: 🧪 Test Suite (next Python)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    needs: quality
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v5
+
+      - name: 🐍 Setup Python (3.14-dev)
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14-dev'
+
+      - name: ⚡ Setup UV
+        uses: astral-sh/setup-uv@v3
+
+      - name: 🔄 Sync Dependencies
+        run: uv sync --dev || true
+
+      - name: 🧪 Run Tests (best-effort)
+        run: |
+          uv run pytest -q || true
+
+  # 🏗️ Build and Package
+  build:
+    name: 📦 Build Package
+    runs-on: ubuntu-latest
+    needs: [quality, test]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v5
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: ⚡ Setup UV
+        uses: astral-sh/setup-uv@v3
+
+      - name: 📦 Cache Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.UV_CACHE_DIR }}
+          key: ${{ runner.os }}-uv-build-${{ hashFiles('uv.lock') }}
+
+      - name: 🔄 Sync Dependencies
+        run: uv sync --dev
+
+      - name: 🏗️ Build Package
+        run: uv build
+
+      - name: 📦 Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package
+          path: dist/
+          retention-days: 30
+
+  # 🚀 Deploy (Release only)
+  deploy:
+    name: 🚀 Deploy to PyPI
+    runs-on: ubuntu-latest
+    needs: [quality, test, build]
+    if: github.event_name == 'release'
+    environment: production
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v5
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: ⚡ Setup UV
+        uses: astral-sh/setup-uv@v3
+
+      - name: 🔄 Sync Dependencies
+        run: uv sync --dev
+
+      - name: 📦 Download Build Artifacts
+        uses: actions/download-artifact@v6
+        with:
+          name: python-package
+          path: dist/
+
+      - name: 🚀 Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
+  # 📊 Performance Monitoring
+  performance:
+    name: 📊 Performance Tests
+    runs-on: ubuntu-latest
+    needs: quality
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v5
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: ⚡ Setup UV
+        uses: astral-sh/setup-uv@v3
+
+      - name: 🔄 Sync Dependencies
+        run: uv sync --dev
+
+      - name: 📊 Run Performance Tests
+        run: |
+          uv run pytest tests/performance/ \
+            --benchmark-json=benchmark-results.json \
+            --benchmark-only
+
+      - name: 📈 Upload Benchmark Results
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          tool: 'pytest'
+          output-file-path: benchmark-results.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          comment-on-alert: true
+          alert-threshold: '200%'
+          fail-on-alert: true
+
+  # 📋 Documentation
+  docs:
+    name: 📚 Build Documentation
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v5
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: ⚡ Setup UV
+        uses: astral-sh/setup-uv@v3
+
+      - name: 🔄 Sync Dependencies
+        run: uv sync --dev
+
+      - name: 📚 Build Documentation
+        run: |
+          uv run mkdocs build
+          # Upload to GitHub Pages if on main
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            uv run mkdocs gh-deploy --force
+          fi
+
+  # 🔔 Notifications
+  notify:
+    name: 🔔 Notify Results
+    runs-on: ubuntu-latest
+    needs: [quality, test, build]
+    if: always()
+    steps:
+      - name: 📧 Notify on Success
+        if: ${{ needs.quality.result == 'success' && needs.test.result == 'success' && needs.build.result == 'success' }}
+        run: |
+          echo "✅ All checks passed successfully!"
+          # Add Slack/Discord notification here if needed
+
+      - name: 🚨 Notify on Failure
+        if: ${{ needs.quality.result == 'failure' || needs.test.result == 'failure' || needs.build.result == 'failure' }}
+        run: |
+          echo "❌ Some checks failed!"
+          # Add Slack/Discord notification here if needed

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ontologia.dev/schemas/edge/state.schema.json",
+  "title": "Ontologia Edge STATE v0.1",
+  "type": "object",
+  "required": [
+    "type", "msg_id", "node_id", "state", "timestamp", "nonce", "signature"
+  ],
+  "properties": {
+    "type": { "const": "STATE" },
+    "msg_id": { "type": "string" },
+    "node_id": { "type": "string" },
+    "state": {
+      "type": "object",
+      "properties": {
+        "neighbors": { "type": "array", "items": { "type": "string" } },
+        "capabilities": { "$ref": "./hello.schema.json#/properties/capabilities" },
+        "facts_local": { "type": "array", "items": { "type": "object" } },
+        "config": { "type": "object", "additionalProperties": true }
+      },
+      "additionalProperties": true
+    },
+    "timestamp": { "type": "integer" },
+    "ttl": { "type": ["integer", "null"], "minimum": 0 },
+    "nonce": { "type": "string" },
+    "signature": { "type": "string" }
+  }
+}

@@ -1,0 +1,39 @@
+[project]
+name = "ontologia"
+version = "0.1.0"
+definitions_dir = "templates/project/ontology"
+
+[api]
+host = "127.0.0.1"
+port = 8000
+ontology = "default"
+
+[data]
+duckdb_path = "data/.local/local.duckdb"
+kuzu_path = "data/.local/graph.kuzu"
+
+[services]
+postgres_port = 5432
+temporal_port = 7233
+temporal_web_port = 8233
+
+[sdk]
+output_dir = "ontologia_sdk/ontology"
+auto_generate_on_apply = true
+
+[features]
+use_unified_graph = true
+use_temporal_actions = false
+enable_vector_embeddings = true
+enable_search_indexing = true
+
+[vector_store]
+provider = "elasticsearch"
+address = "http://localhost:9200"
+embedding_dimensions = 1536
+similarity_metric = "cosine"
+index_name = "ontologia_vectors"
+
+[security.abac]
+enabled = true
+role_allowed_tags = { admin = ["*"], viewer = [] }

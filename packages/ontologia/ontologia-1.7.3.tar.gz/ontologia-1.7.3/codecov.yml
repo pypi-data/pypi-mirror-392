@@ -1,0 +1,31 @@
+codecov:
+  require_ci_to_pass: yes
+  notify:
+    after_n_builds: 1
+    wait_for_ci: yes
+
+coverage:
+  precision: 2
+  round: down
+  status:
+    project:
+      default:
+        # Dynamic targets with small allowed drift
+        target: auto
+        threshold: 2%
+    patch:
+      default:
+        # Encourage high coverage for changes
+        target: 80%
+        threshold: 2%
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+  show_critical_paths: true
+
+github_checks:
+  annotations: true

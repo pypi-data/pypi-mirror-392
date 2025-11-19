@@ -1,0 +1,487 @@
+[project]
+name = "ontologia"
+version = "1.7.3"
+description = "An ontology management system built on Registro and SQLModel"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    {name = "Kevin Saltarelli", email = "kevinqz@gmail.com"}
+]
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    # Core dependencies - always required
+    "sqlmodel>=0.0.24",
+    "registro>=0.2.2",
+    "pydantic>=2.0.0",
+    "ulid-py>=1.1.0",
+    "fastapi>=0.118.0",
+    "httpx>=0.28.1",
+    "pyyaml>=6.0.0",
+    "pydantic-settings>=2.3.0",
+    "python-jose[cryptography]>=3.3.0",
+    "python-multipart>=0.0.6",
+    "gitpython>=3.1.0",
+    "jinja2>=3.1.0",
+    "questionary>=2.0.1",
+    "rich>=13.7.0",
+    "typer>=0.12.0",
+    "psutil>=7.1.0",
+    "marimo>=0.17.2",
+    "pandas>=2.3.3",
+    "requests>=2.32.5",
+    "plotly>=6.3.1",
+    "networkx>=3.5",
+    "pyarrow>=22.0.0",
+    "matplotlib>=3.10.7",
+    "openpyxl>=3.1.5",
+    "pyzmq>=27.1.0",
+    "kuzu>=0.11.3",
+    "elasticsearch>=8.0.0",
+    "duckdb>=1.4.1",
+    "pytest-benchmark>=5.1.0",
+    "redis>=7.0.0",
+    "prometheus-client>=0.19.0",
+]
+
+[project.optional-dependencies]
+# Core bundle - minimal setup to get started
+core = [
+    "sqlmodel>=0.0.24",
+    "registro>=0.2.2",
+    "pydantic>=2.0.0",
+    "ulid-py>=1.1.0",
+    "fastapi>=0.118.0",
+    "httpx>=0.28.1",
+    "pyyaml>=6.0.0",
+    "pydantic-settings>=2.3.0",
+    "python-jose[cryptography]>=3.3.0",
+    "python-multipart>=0.0.6",
+    "gitpython>=3.1.0",
+    "jinja2>=3.1.0",
+    "questionary>=2.0.1",
+    "rich>=13.7.0",
+    "typer>=0.12.0",
+]
+
+# Analytics bundle - adds DuckDB + dbt for data processing
+analytics = [
+    "dbt-duckdb>=1.8.0",
+    "duckdb>=1.0.0",
+    "polars>=0.20.0",
+]
+
+# Graph bundle - adds KùzuDB for high-performance graph traversals
+graph = [
+    "kuzu>=0.5.0",
+]
+
+# Search bundle - adds Elasticsearch for advanced search
+search = [
+    "elasticsearch>=8.0.0",
+]
+
+# Workflows bundle - adds Temporal for durable workflow execution
+workflows = [
+    "temporalio>=1.7.0",
+    "grpcio>=1.65.0",
+    "protobuf>=4.25.0",
+]
+
+# Orchestration bundle - adds Dagster for pipeline orchestration
+orchestration = [
+    "dagster>=1.7.0",
+    "dagster-dbt>=0.23.0",
+]
+
+# Realtime bundle - adds streaming and real-time capabilities
+realtime = [
+    "nats-py>=2.7.0",
+    "confluent-kafka>=2.5.0",
+]
+
+# Edge bundle - edge node management and IoT capabilities
+edge = [
+    "redis>=5.0.0",
+    "cryptography>=41.0.0",
+    "ecdsa>=0.18.0",
+    "cbor2>=5.6.0",
+    "pynacl>=1.5.0",
+    "opentelemetry-sdk>=1.25.0",
+    "opentelemetry-exporter-otlp>=1.25.0",
+    "opentelemetry-instrumentation-fastapi>=0.46b0",
+    "opentelemetry-instrumentation-requests>=0.46b0",
+    "nats-py>=2.7.0",
+    "confluent-kafka>=2.5.0",
+]
+
+# MCP integration - Model Context Protocol server
+mcp = [
+    "fastmcp>=0.1.0",
+]
+
+# Full bundle - everything together for enterprise use
+full = [
+    "dbt-duckdb>=1.8.0",
+    "duckdb>=1.0.0",
+    "polars>=0.20.0",
+    "kuzu>=0.5.0",
+    "elasticsearch>=8.0.0",
+    "temporalio>=1.7.0",
+    "grpcio>=1.65.0",
+    "protobuf>=4.25.0",
+    "dagster>=1.7.0",
+    "dagster-dbt>=0.23.0",
+    "redis>=5.0.0",
+    "fastmcp>=0.1.0",
+    "cryptography>=41.0.0",
+    "ecdsa>=0.18.0",
+    "cbor2>=5.6.0",
+    "pynacl>=1.5.0",
+    "opentelemetry-sdk>=1.25.0",
+    "opentelemetry-exporter-otlp>=1.25.0",
+    "opentelemetry-instrumentation-fastapi>=0.46b0",
+    "opentelemetry-instrumentation-requests>=0.46b0",
+    "nats-py>=2.7.0",
+    "confluent-kafka>=2.5.0",
+]
+
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-benchmark>=4.0.0",
+    "requests>=2.31.0",
+    "redis>=5.0.0",
+    "pytest-benchmark>=4.0.0",
+    "pytest-mock>=3.10.0",
+    "pytest-timeout>=2.1.0",
+    "pytest-xdist>=3.3.0",
+    "pytest-profiling>=1.7.0",
+    "factory-boy>=3.3.0",
+    "faker>=19.0.0",
+    "playwright>=1.40.0",
+    "ruff>=0.0.272",
+    "black>=23.3.0",
+    "mypy>=1.3.0",
+    "grpcio-tools>=1.65.0",
+    "ty>=0.0.1a22",
+    "hypothesis>=6.100",
+    "schemathesis>=3.18.4",
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.5.0",
+    "pymdown-extensions>=10.0.0",
+    "pre-commit>=3.7.0",
+    "dbt-duckdb>=1.8.0",
+    "duckdb>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/kevinqz/ontologia"
+Repository = "https://github.com/kevinqz/ontologia"
+Issues = "https://github.com/kevinqz/ontologia/issues"
+
+[project.scripts]
+ontologia-cli = "ontologia_cli.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["ontologia", "packages/ontologia_cli", "packages/ontologia_sdk", "packages/ontologia_mcp", "packages/ontologia_api", "packages/ontologia_edge"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[dependency-groups]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "testcontainers>=4.7.2",
+    "ruff>=0.0.272",
+    "black>=23.3.0",
+    "mypy>=1.3.0",
+    "grpcio-tools>=1.65.0",
+    "ty>=0.0.1a22",
+    "hypothesis>=6.100",
+    "schemathesis>=3.18.4",
+    "pytest-benchmark>=4.0.0",
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.5.0",
+    "pymdown-extensions>=10.0.0",
+    "twine>=6.2.0",
+    "pre-commit>=3.7.0",
+    "dbt-duckdb>=1.8.0",
+    "duckdb>=1.0.0",
+    "build>=1.3.0",
+]
+
+agents = [
+    "pydantic-ai>=0.1.0",
+    "openai>=1.50.0",
+    "fastmcp>=0.1.0",
+]
+realtime = [
+    "confluent-kafka>=2.12.2",
+    "nats-py>=2.12.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "I", "N", "UP", "S", "A", "C90", "BLE", "FBT", "Q"]
+ignore = ["A003", "B008", "N805", "E501", "BLE001", "S110", "C901", "N803", "E402"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "E501", "E402"]
+"examples/**" = ["S101", "BLE001", "B007", "E501", "E402", "F841", "F821", "C901"]
+"example_project/examples/**" = ["S101", "BLE001", "B007", "E501", "E402", "F841", "F821", "C901"]
+"templates/project/examples/**" = ["S101", "BLE001", "B007", "E501", "E402", "F841", "F821", "C901"]
+"packages/ontologia_api/v2/schemas/**" = ["N815"]
+"ontologia/domain/metamodels/types/interface_type.py" = ["N815"]
+"ontologia/domain/metamodels/types/link_type_unified.py" = ["E402"]
+"ontologia/application/sync_service.py" = ["BLE001", "S608", "C901", "FBT003", "F401", "S112", "I001"]
+"ontologia/application/test_settings.py" = ["S105"]
+"packages/ontologia_api/v2/routers/object_types.py" = ["N803"]
+"packages/ontologia_api/main.py" = ["BLE001", "S104"]
+"packages/ontologia_api/v2/routers/objects.py" = ["N803", "S112"]
+"packages/ontologia_api/v2/routers/linked_objects.py" = ["N803"]
+"packages/ontologia_api/v2/routers/link_types.py" = ["N814"]
+"ontologia/domain/metamodels/instances/dtos.py" = ["F821"]
+"ontologia/domain/metamodels/types/object_type.py" = ["E402"]
+"packages/ontologia_api/services/analytics_service.py" = ["BLE001", "S110", "C901"]
+"ai_integration_demo.py" = ["S608"]
+"ontologia/infrastructure/persistence/graph/linked_objects_repository.py" = ["FBT001", "FBT002"]
+"ontologia/infrastructure/persistence/sql/linked_object_adapter.py" = ["N814"]
+"ontologia/infrastructure/persistence/sql/object_instance_adapter.py" = ["N814"]
+"ontologia/ogm/connection.py" = ["F811"]
+"ontologia/ogm/errors.py" = ["N818"]
+"ontologia/ogm/link.py" = ["N806"]
+"ontologia/ogm/migrations.py" = ["A002"]
+"packages/ontologia_api/core/auth.py" = ["S105"]
+"packages/ontologia_api/handlers/instances.py" = ["S112"]
+"packages/ontologia_api/services/data_analysis_service.py" = ["S608"]
+"packages/ontologia_api/services/linked_objects_service.py" = ["N806", "F841", "BLE001", "S110", "C901"]
+"packages/ontologia_api/services/metamodel_service.py" = ["N814", "FBT001", "FBT002"]
+"packages/ontologia_api/services/instances_service.py" = ["S307", "BLE001", "C901", "S110"]
+"ontologia/ogm/**" = ["B007", "F811", "N806", "N818", "A002", "FBT001", "FBT002"]
+## merged above to avoid duplicate keys
+"ontologia_realtime/proto/**/*.py" = ["ALL"]
+"packages/ontologia_realtime/proto/**/*.py" = ["ALL"]
+"packages/ontologia_cli/cli_v2.py" = ["B904", "A002", "FBT001", "FBT002", "FBT003", "F841"]
+"packages/ontologia_cli/main.py" = ["FBT001", "FBT003"]
+"packages/ontologia_cli/playground.py" = ["S103", "S607", "S603"]
+"packages/ontologia_cli/test_cli_v2.py" = ["S101", "S105", "S106"]
+"packages/ontologia_sdk/model_factory.py" = []
+"packages/ontologia_sdk/query_builder.py" = ["S608"]
+"packages/ontologia_sdk/query_optimizer.py" = ["FBT001", "FBT002", "F841"]
+"packages/ontologia_sdk/realtime.py" = ["A001", "A002", "B018"]
+"packages/ontologia_sdk/session.py" = ["B904", "F841"]
+"packages/ontologia_sdk/test_client_v2.py" = ["S101", "S106"]
+"packages/ontologia_sdk/test_model_factory.py" = ["S101"]
+"packages/ontologia_sdk/test_*.py" = ["S101", "S106", "F841", "A001", "FBT003"]
+"playground/**" = ["ALL"]
+"ontologia/application/metamodel_service.py" = ["I001"]
+"ontologia/application/instances_service.py" = ["I001"]
+"ontologia/application/linked_objects_service.py" = ["I001"]
+"ontologia/application/analytics_service.py" = ["S608"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+extend-exclude = '''(?x)(
+  demo_standalone\.py
+)'''
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+strict_optional = true
+
+[tool.ty.environment]
+python-version = "3.11"
+
+[tool.ty.src]
+include = [
+    "ontologia/**",
+    "packages/**",
+    "scripts/**",
+    "playground/**",
+    "tests/**",
+]
+exclude = [
+    "alembic/**",
+    "build/**",
+    "dist/**",
+    "example_project/**",
+    "infra/**",
+    ".venv/**",
+    "__pycache__/**",
+    "*.pyc",
+    "packages/ontologia_edge/proto/**",
+]
+
+[[tool.ty.overrides]]
+include = [
+    "ontologia/**",
+    "packages/ontologia_api/**",
+    "ontologia/application/**",
+    "scripts/**",
+    "ontologia_cli/main.py",
+    "ontologia/infrastructure/persistence/kuzu/repository.py",
+    "playground/notebooks/**",
+]
+
+[tool.ty.overrides.rules]
+unresolved-import = "ignore"
+possibly-missing-attribute = "ignore"
+
+# Core domain packages - strict type checking
+[[tool.ty.overrides]]
+include = [
+    "ontologia/domain/**",
+    "ontologia/application/**",
+]
+
+[tool.ty.overrides.rules]
+# Enable strict checking for core domain
+unresolved-import = "error"
+
+# API packages - allow some flexibility
+[[tool.ty.overrides]]
+include = [
+    "packages/ontologia_api/**",
+    "packages/ontologia_cli/**",
+    "packages/ontologia_sdk/**",
+]
+
+[tool.ty.overrides.rules]
+unresolved-import = "ignore"
+possibly-missing-attribute = "ignore"
+
+# Infrastructure packages - more permissive
+[[tool.ty.overrides]]
+include = [
+    "ontologia/infrastructure/**",
+    "packages/ontologia_realtime/**",
+    "packages/ontologia_dagster/**",
+]
+
+[tool.ty.overrides.rules]
+unresolved-import = "ignore"
+unresolved-attribute = "ignore"
+possibly-missing-attribute = "ignore"
+no-matching-overload = "ignore"
+
+# Playground and demos - most permissive
+[[tool.ty.overrides]]
+include = [
+    "playground/**",
+]
+
+[tool.ty.overrides.rules]
+unresolved-import = "ignore"
+unresolved-attribute = "ignore"
+possibly-missing-attribute = "ignore"
+
+# Tests - allow testing patterns
+[[tool.ty.overrides]]
+include = [
+    "tests/**",
+]
+
+[tool.ty.overrides.rules]
+unresolved-import = "ignore"
+possibly-missing-attribute = "ignore"
+
+[[tool.ty.overrides]]
+include = [
+    "packages/ontologia_realtime/proto/**/*.py",
+    "packages/ontologia_realtime/server.py",
+]
+
+[tool.ty.overrides.rules]
+unresolved-attribute = "ignore"
+possibly-missing-attribute = "ignore"
+
+[[tool.ty.overrides]]
+include = [
+    "packages/ontologia_realtime/**/*.py",
+]
+
+[tool.ty.overrides.rules]
+unresolved-attribute = "ignore"
+possibly-missing-attribute = "ignore"
+
+[[tool.ty.overrides]]
+include = [
+    "packages/ontologia_realtime/proto/**/*.py",
+]
+
+[tool.ty.overrides.rules]
+unresolved-import = "ignore"
+
+[[tool.ty.overrides]]
+include = [
+    "packages/ontologia_realtime/replication.py",
+]
+
+[tool.ty.overrides.rules]
+no-matching-overload = "ignore"
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --strict-markers --strict-config --import-mode=importlib"
+testpaths = ["tests"]
+filterwarnings = [
+    # External dependency warnings - documented but not blocking
+    "ignore:Using `@model_validator`.*deprecated:DeprecationWarning",
+    "ignore:Default value Depends.*serializable:UserWarning:pydantic.json_schema",
+    "ignore:The 'is_flag' and 'flag_value'.*Typer:DeprecationWarning:typer.*",
+    # Future-proof our code - treat warnings as errors in development
+    "error::UserWarning",
+    "error::SyntaxWarning",
+    # Ignore all RuntimeWarnings for now (test mocking issues)
+    "ignore::RuntimeWarning",
+    "error::FutureWarning",
+    "error::ImportWarning",
+    # But allow specific known warnings
+    "ignore::DeprecationWarning:distutils",
+    "ignore::DeprecationWarning:imp",
+    "ignore::DeprecationWarning:typer.*",
+    # Allow the above external warnings despite error::UserWarning
+    "ignore:Using `@model_validator`.*deprecated:UserWarning",
+    "ignore:Default value Depends.*serializable:UserWarning",
+    "ignore:The 'is_flag' and 'flag_value'.*Typer:UserWarning",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "benchmark: marks tests as benchmarks",
+    "asyncio: marks tests that use pytest-asyncio",
+]
+
+[[tool.ty.overrides]]
+include = [
+    "packages/ontologia_dagster/definitions.py",
+]
+
+[tool.ty.overrides.rules]
+unresolved-attribute = "ignore"

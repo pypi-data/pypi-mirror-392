@@ -1,0 +1,63 @@
+version: "3.9"
+services:
+  api:
+    build:
+      context: ../..
+      dockerfile: config/edge/Dockerfile.api
+    ports:
+      - "8001:8001"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - EDGE_SHARED_TOKEN=changeme
+      - EDGE_VERIFY_SIGNATURES=1
+      - EDGE_TRACING=1
+      - EDGE_OTLP_ENDPOINT=http://otelcol:4318
+      - EDGE_CMD_ACK_TIMEOUT=30
+      - EDGE_CMD_MAX_RETRIES=3
+      - EDGE_CMD_RETRY_INTERVAL=5
+    depends_on:
+      - redis
+    networks:
+      - edge
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    networks:
+      - edge
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    networks:
+      - edge
+
+  grafana:
+    image: grafana/grafana:10.4.2
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../../docs/edge/grafana_dashboard.json:/var/lib/grafana/dashboards/edge_dashboard.json:ro
+      - ./grafana_provisioning.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - edge
+
+  otelcol:
+    image: otel/opentelemetry-collector:0.98.0
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4318:4318"
+    networks:
+      - edge
+
+networks:
+  edge: {}

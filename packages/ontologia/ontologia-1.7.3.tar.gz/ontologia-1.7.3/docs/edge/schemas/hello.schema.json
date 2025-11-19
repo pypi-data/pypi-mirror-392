@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ontologia.dev/schemas/edge/hello.schema.json",
+  "title": "Ontologia Edge HELLO v0.1",
+  "type": "object",
+  "required": [
+    "type", "msg_id", "node_id", "public_key", "capabilities",
+    "timestamp", "nonce", "signature"
+  ],
+  "properties": {
+    "type": { "const": "HELLO" },
+    "msg_id": { "type": "string" },
+    "node_id": { "type": "string" },
+    "public_key": { "type": "string", "description": "PEM or base64 raw key" },
+    "capabilities": {
+      "type": "object",
+      "required": ["level"],
+      "properties": {
+        "level": { "enum": ["L0", "L1", "L2"] },
+        "sensors": { "type": "array", "items": { "type": "string" } },
+        "actuators": { "type": "array", "items": { "type": "string" } },
+        "transports": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": true
+    },
+    "software": { "type": "object", "additionalProperties": true },
+    "hw": { "type": "object", "additionalProperties": true },
+    "timestamp": { "type": "integer" },
+    "ttl": { "type": ["integer", "null"], "minimum": 0 },
+    "nonce": { "type": "string" },
+    "signature": { "type": "string" }
+  }
+}

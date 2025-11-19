@@ -1,0 +1,296 @@
+[project]
+name = "my-ontology-enterprise"
+version = "0.1.0"
+description = "Enterprise Workflows for Ontologia with complete stack: search, workflows, real-time, analytics"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+]
+
+dependencies = [
+    # Full Ontologia stack
+    "ontologia[full]>=0.2.4",
+
+    # Search and analytics
+    "elasticsearch>=8.0.0",
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "polars>=0.20.0",
+    "duckdb>=1.0.0",
+
+    # Graph processing
+    "networkx>=3.0.0",
+
+    # Workflow and orchestration
+    "temporalio>=1.7.0",
+    "dagster>=1.7.0",
+    "dagster-dbt>=0.23.0",
+    "dagster-duckdb>=0.23.0",
+
+    # Real-time and caching
+    "redis>=5.0.0",
+    "aioredis>=2.0.0",
+
+    # HTTP client and async
+    "httpx>=0.28.1",
+    "aiohttp>=3.8.0",
+
+    # Environment management
+    "python-dotenv>=1.0.0",
+
+    # Monitoring and observability
+    "prometheus-client>=0.16.0",
+    "opentelemetry-api>=1.20.0",
+    "opentelemetry-sdk>=1.20.0",
+    "opentelemetry-instrumentation-fastapi>=0.41b0",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.10.0",
+
+    # Code quality
+    "ruff>=0.0.272",
+    "black>=23.3.0",
+    "mypy>=1.3.0",
+
+    # Development tools
+    "pre-commit>=3.7.0",
+    "ipython>=8.12.0",
+]
+
+# Data processing and analytics
+analytics = [
+    "dbt-duckdb>=1.8.0",
+    "dbt-core>=1.8.0",
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
+    "plotly>=5.17.0",
+    "altair>=5.0.0",
+]
+
+# Jupyter for data exploration
+jupyter = [
+    "jupyter>=1.0.0",
+    "jupyterlab>=4.0.0",
+    "ipykernel>=6.0.0",
+    "notebook>=7.0.0",
+    "jupyter-widgets>=8.0.0",
+]
+
+# Dashboard and visualization
+dashboard = [
+    "streamlit>=1.28.0",
+    "dash>=2.14.0",
+    "bokeh>=3.2.0",
+]
+
+# Graph visualization
+visualization = [
+    "pyvis>=0.3.0",
+    "graphviz>=0.20.0",
+    "pydot>=1.4.0",
+]
+
+# Message queuing
+messaging = [
+    "celery>=5.3.0",
+    "kombu>=5.3.0",
+    "pika>=1.3.0",
+]
+
+# API gateway and service mesh
+api-gateway = [
+    "fastapi>=0.104.0",
+    "typer>=0.9.0",
+    "rich>=14.0.0",
+    "questionary>=2.0.0",
+]
+
+# Security and authentication
+security = [
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.0",
+    "python-multipart>=0.0.6",
+    "cryptography>=41.0.0",
+]
+
+# Database tools
+database = [
+    "alembic>=1.12.0",
+    "sqlalchemy>=2.0.0",
+    "asyncpg>=0.29.0",
+    "psycopg2-binary>=2.9.0",
+]
+
+# Performance monitoring
+monitoring = [
+    "psutil>=5.9.0",
+    "memory-profiler>=0.61.0",
+    "py-spy>=0.3.0",
+    "line-profiler>=4.1.0",
+]
+
+# Documentation
+docs = [
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.5.0",
+    "mkdocs-mermaid2-plugin>=1.1.0",
+]
+
+# Full enterprise stack
+full = [
+    "dbt-duckdb>=1.8.0",
+    "dbt-core>=1.8.0",
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
+    "plotly>=5.17.0",
+    "altair>=5.0.0",
+    "jupyter>=1.0.0",
+    "jupyterlab>=4.0.0",
+    "ipykernel>=6.0.0",
+    "notebook>=7.0.0",
+    "jupyter-widgets>=8.0.0",
+    "streamlit>=1.28.0",
+    "dash>=2.14.0",
+    "bokeh>=3.2.0",
+    "pyvis>=0.3.0",
+    "graphviz>=0.20.0",
+    "pydot>=1.4.0",
+    "celery>=5.3.0",
+    "kombu>=5.3.0",
+    "pika>=1.3.0",
+    "fastapi>=0.104.0",
+    "typer>=0.9.0",
+    "rich>=14.0.0",
+    "questionary>=2.0.0",
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.0",
+    "python-multipart>=0.0.6",
+    "cryptography>=41.0.0",
+    "alembic>=1.12.0",
+    "sqlalchemy>=2.0.0",
+    "asyncpg>=0.29.0",
+    "psycopg2-binary>=2.9.0",
+    "psutil>=5.9.0",
+    "memory-profiler>=0.61.0",
+    "py-spy>=0.3.0",
+    "line-profiler>=4.1.0",
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.5.0",
+    "mkdocs-mermaid2-plugin>=1.1.0",
+]
+
+# Cloud integrations
+cloud = [
+    "boto3>=1.29.0",
+    "google-cloud-storage>=2.10.0",
+    "azure-storage-blob>=12.19.0",
+    "google-cloud-pubsub>=2.19.0",
+]
+
+# Machine learning
+ml = [
+    "scikit-learn>=1.3.0",
+    "torch>=2.1.0",
+    "transformers>=4.35.0",
+    "sentence-transformers>=2.2.0",
+]
+
+[project.scripts]
+# Enterprise CLI commands
+# my-enterprise = "my_package.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "I", "N", "UP", "S", "A", "C90", "BLE", "FBT", "Q"]
+ignore = ["A003", "B008", "N805", "E501", "BLE001", "S110", "C901", "N803", "E402"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "E501", "E402"]
+"examples/**" = ["S101", "BLE001", "B007", "E501", "E402"]
+"workflows/**" = ["E501", "E402"]
+"notebooks/**" = ["E501", "E402"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_functions = "test_*"
+python_classes = "Test*"
+addopts = [
+    "--cov=ontologia",
+    "--cov-report=html",
+    "--cov-report=term-missing",
+    "--cov-fail-under=80",
+    "--asyncio-mode=auto",
+]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+strict_optional = true
+
+[[tool.mypy.overrides]]
+module = [
+    "elasticsearch.*",
+    "temporalio.*",
+    "dagster.*",
+    "redis.*",
+    "networkx.*",
+    "kuzu.*",
+]
+ignore_missing_imports = true
+
+# Dagster configuration
+[tool.dagster]
+module_name = "dagster"
+code_location_name = "my-ontology-enterprise"
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["ontologia"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/migrations/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]

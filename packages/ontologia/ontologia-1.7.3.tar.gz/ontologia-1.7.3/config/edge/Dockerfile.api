@@ -1,0 +1,18 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1     PYTHONUNBUFFERED=1     PIP_DISABLE_PIP_VERSION_CHECK=on
+
+WORKDIR /app
+
+COPY pyproject.toml uv.lock /app/
+COPY ontologia /app/ontologia
+COPY packages /app/packages
+COPY docs /app/docs
+
+RUN pip install --no-cache-dir --upgrade pip &&     pip install --no-cache-dir -e .[edge]
+
+EXPOSE 8001
+
+ENV EDGE_SHARED_TOKEN=changeme     EDGE_VERIFY_SIGNATURES=1
+
+CMD ["uvicorn", "ontologia_api.main:app", "--host", "0.0.0.0", "--port", "8001"]

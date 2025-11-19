@@ -1,0 +1,290 @@
+# 🧬 Customer Business Domain Schema
+# Example schema for a customer-centric business ontology
+
+object_types:
+  Customer:
+    description: "Business customer account"
+    properties:
+      name:
+        type: string
+        required: true
+        min_length: 2
+        max_length: 100
+      email:
+        type: string
+        format: email
+        required: true
+        unique: true
+      phone:
+        type: string
+        pattern: "^[+]?[1-9]\\d{1,14}$"
+      tier:
+        type: enum
+        values: [basic, premium, enterprise]
+        default: basic
+      status:
+        type: enum
+        values: [active, inactive, suspended]
+        default: active
+      created_at:
+        type: datetime
+        required: true
+        auto_generate: true
+      updated_at:
+        type: datetime
+        auto_update: true
+
+  Product:
+    description: "Products available for sale"
+    properties:
+      sku:
+        type: string
+        required: true
+        unique: true
+        pattern: "^[A-Z0-9]{8,12}$"
+      name:
+        type: string
+        required: true
+        min_length: 1
+        max_length: 200
+      description:
+        type: text
+        max_length: 1000
+      category:
+        type: enum
+        values: [electronics, clothing, books, home, sports, other]
+        required: true
+      price:
+        type: decimal
+        precision: 10
+        scale: 2
+        required: true
+        min_value: 0
+      cost:
+        type: decimal
+        precision: 10
+        scale: 2
+        min_value: 0
+      weight:
+        type: decimal
+        precision: 8
+        scale: 3
+        min_value: 0
+      dimensions:
+        type: object
+        properties:
+          length: {type: decimal, precision: 8, scale: 2}
+          width: {type: decimal, precision: 8, scale: 2}
+          height: {type: decimal, precision: 8, scale: 2}
+      is_active:
+        type: boolean
+        default: true
+      created_at:
+        type: datetime
+        auto_generate: true
+
+  Order:
+    description: "Customer purchase order"
+    properties:
+      order_number:
+        type: string
+        required: true
+        unique: true
+        pattern: "^ORD-[0-9]{8}$"
+      customer:
+        type: reference
+        target: Customer
+        required: true
+      order_date:
+        type: datetime
+        required: true
+        auto_generate: true
+      status:
+        type: enum
+        values: [pending, confirmed, shipped, delivered, cancelled]
+        default: pending
+      total_amount:
+        type: decimal
+        precision: 12
+        scale: 2
+        required: true
+        min_value: 0
+      tax_amount:
+        type: decimal
+        precision: 12
+        scale: 2
+        min_value: 0
+      shipping_address:
+        type: object
+        properties:
+          street: {type: string, required: true}
+          city: {type: string, required: true}
+          state: {type: string, required: true}
+          zip: {type: string, required: true}
+          country: {type: string, default: "US"}
+      tracking_number:
+        type: string
+        pattern: "^[A-Z0-9]{10,20}$"
+      notes:
+        type: text
+        max_length: 500
+
+  Invoice:
+    description: "Billing invoice for orders"
+    properties:
+      invoice_number:
+        type: string
+        required: true
+        unique: true
+        pattern: "^INV-[0-9]{8}$"
+      order:
+        type: reference
+        target: Order
+        required: true
+      issue_date:
+        type: datetime
+        required: true
+        auto_generate: true
+      due_date:
+        type: datetime
+        required: true
+      status:
+        type: enum
+        values: [draft, sent, paid, overdue, cancelled]
+        default: draft
+      subtotal:
+        type: decimal
+        precision: 12
+        scale: 2
+        required: true
+      tax_amount:
+        type: decimal
+        precision: 12
+        scale: 2
+        required: true
+      total_amount:
+        type: decimal
+        precision: 12
+        scale: 2
+        required: true
+      paid_amount:
+        type: decimal
+        precision: 12
+        scale: 2
+        default: 0
+
+link_types:
+  Customer_Purchases:
+    description: "Customer purchases products in an order"
+    source: Customer
+    target: Product
+    properties:
+      order:
+        type: reference
+        target: Order
+        required: true
+      quantity:
+        type: integer
+        required: true
+        min_value: 1
+      unit_price:
+        type: decimal
+        precision: 10
+        scale: 2
+        required: true
+      total_price:
+        type: decimal
+        precision: 12
+        scale: 2
+        required: true
+      discount_percentage:
+        type: decimal
+        precision: 5
+        scale: 2
+        default: 0
+        max_value: 100
+
+  Order_Contains:
+    description: "Order contains multiple products"
+    source: Order
+    target: Product
+    properties:
+      quantity:
+        type: integer
+        required: true
+        min_value: 1
+      unit_price:
+        type: decimal
+        precision: 10
+        scale: 2
+        required: true
+      line_total:
+        type: decimal
+        precision: 12
+        scale: 2
+        required: true
+
+  Customer_Has_Invoice:
+    description: "Customer has billing invoices"
+    source: Customer
+    target: Invoice
+    properties:
+      relationship_type:
+        type: enum
+        values: [billing, payment, dispute]
+        default: billing
+
+  Product_Belongs_To_Category:
+    description: "Product belongs to business category"
+    source: Product
+    target: ProductCategory
+    properties:
+      is_primary:
+        type: boolean
+        default: true
+
+# Business Rules and Constraints
+constraints:
+  - name: "customer_email_unique"
+    description: "Customer email must be unique"
+    object_type: Customer
+    property: email
+    constraint: "unique"
+
+  - name: "order_total_calculation"
+    description: "Order total must equal sum of line items"
+    object_type: Order
+    constraint: "total_amount = SUM(line_total)"
+
+  - name: "invoice_order_match"
+    description: "Invoice total must match order total"
+    object_type: Invoice
+    constraint: "total_amount = order.total_amount"
+
+  - name: "positive_inventory"
+    description: "Product quantity cannot exceed available inventory"
+    link_type: Order_Contains
+    constraint: "quantity <= product.available_quantity"
+
+# Indexes for Performance
+indexes:
+  - object_type: Customer
+    properties: [email]
+    unique: true
+
+  - object_type: Product
+    properties: [sku]
+    unique: true
+
+  - object_type: Order
+    properties: [order_number]
+    unique: true
+
+  - object_type: Order
+    properties: [customer, order_date]
+
+  - object_type: Product
+    properties: [category, is_active]
+
+  - link_type: Customer_Purchases
+    properties: [customer, order_date]

@@ -1,0 +1,13 @@
+- name: detect-duplicate-employees
+  description: Flag employees with same email as possible matches
+  object_types: ["employee"]
+  condition_logic: any
+  when:
+    - component: core
+      field: email
+      operator: is_not_empty
+  actions:
+    - type: system.find_possible_matches
+      payload:
+        match_on: email
+        link_type: possible_match

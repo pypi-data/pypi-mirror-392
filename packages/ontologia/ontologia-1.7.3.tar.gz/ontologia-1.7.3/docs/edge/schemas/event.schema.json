@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ontologia.dev/schemas/edge/event.schema.json",
+  "title": "Ontologia Edge EVENT v0.1",
+  "type": "object",
+  "required": [
+    "type", "msg_id", "node_id", "ont_type",
+    "subject", "predicate", "object", "timestamp",
+    "nonce", "signature"
+  ],
+  "properties": {
+    "type": { "const": "EVENT" },
+    "msg_id": { "type": "string", "description": "ULID for deduplication" },
+    "node_id": { "type": "string" },
+    "ont_type": { "type": "string", "description": "Domain event kind (e.g., temperature_measured)" },
+    "subject": { "type": "string", "description": "Subject IRI or node reference (e.g., node:XYZ)" },
+    "predicate": { "type": "string" },
+    "object": { "description": "Value or node reference", "nullable": true },
+    "unit": { "type": ["string", "null"], "default": null },
+    "components": {
+      "type": "object",
+      "description": "Optional structured payload (e.g., pose, identity)",
+      "additionalProperties": { "type": "object" }
+    },
+    "metadata": { "type": "object", "additionalProperties": true },
+    "timestamp": { "type": "integer", "description": "Unix epoch seconds" },
+    "ttl": { "type": ["integer", "null"], "minimum": 0 },
+    "nonce": { "type": "string" },
+    "signature": { "type": "string", "description": "Detached signature over canonical payload" }
+  }
+}

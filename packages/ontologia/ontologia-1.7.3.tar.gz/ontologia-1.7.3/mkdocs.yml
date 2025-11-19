@@ -1,0 +1,269 @@
+site_name: Ontologia Platform
+site_description: Ontology-as-code platform for unified schema management and runtime graph evaluation
+site_url: https://ontologia.dev
+repo_url: https://github.com/kevinqz/ontologia
+repo_name: kevinqz/ontologia
+
+# Theme configuration
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.tabs
+    - navigation.expand
+    - content.code.copy
+    - content.code.annotate
+    - search.highlight
+    - search.suggest
+    - navigation.top
+    - navigation.footer
+    - navigation.tracking
+    - search.share
+    - search.navigate
+    - content.tabs
+    - content.tooltips
+    - header.autohide
+    - navigation.prune
+    - navigation.path
+    - navigation.indexes
+
+  # Color palette
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+  # Customization
+  font:
+    text: Roboto
+    code: Roboto Mono
+  favicon: assets/favicon.ico
+  logo: assets/logo.svg
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+    download: material/download
+    fullscreen: material/fullscreen
+    share: material/share-variant
+    search: material/magnify
+    home: material/home
+    previous: material/chevron-left
+    next: material/chevron-right
+    link: material/link
+    copy: material/content-copy
+    check: material/check
+    close: material/close
+# Plugins
+plugins:
+  - search
+  - git-revision-date-localized:
+      type: timeago
+      fallback_to_build_date: true
+  - minify:
+      minify_html: true
+      minify_js: true
+      minify_css: true
+  - rss:
+      match_path: "blog/.*"
+      categories:
+        - blog
+      date_from_meta:
+          as_creation: date
+          as_update: git
+
+# Markdown extensions
+markdown_extensions:
+  - admonition
+  - attr_list
+  - codehilite
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+nav:
+  - 🏠 Overview: index.md
+  - 🚀 Getting Started:
+      - 📖 Overview: getting-started/overview.md
+      - ⚡ Quick Start: getting-started/quick-start.md
+      - 🧬 First Ontology: getting-started/first-ontology.md
+      - 🔍 Basic Queries: getting-started/basic-queries.md
+      - 🎯 Next Steps: getting-started/next-steps.md
+  - 🧬 Ontology Design:
+      - 📋 Schema Basics: ontology-design/schema-basics.md
+      - 📏 Business Rules: ontology-design/business-rules.md
+      - 🎨 Design Patterns: ontology-design/design-patterns.md
+      - ✅ Best Practices: ontology-design/best-practices.md
+      - 📚 Examples:
+          - 🛒 Customer Management: ontology-design/examples/customer-management.md
+          - 🏥 Healthcare System: ontology-design/examples/healthcare-system.md
+          - 🏦 Financial Services: ontology-design/examples/financial-services.md
+  - 🏗️ Framework Development:
+      - 🏛️ Architecture: framework-development/architecture.md
+      - 🤝 Contribution Guide: framework-development/contribution-guide.md
+      - 📝 Coding Standards: framework-development/coding-standards.md
+      - 🧪 Testing Strategy: framework-development/testing-strategy.md
+      - ⚡ Performance Guide: framework-development/performance-guide.md
+      - 📚 API Reference:
+          - 📖 Overview: framework-development/api-reference/overview.md
+          - 🏗️ Metamodel API: framework-development/api-reference/metamodel-api.md
+          - 📊 Instances API: framework-development/api-reference/instances-api.md
+          - ⚡ Actions API: framework-development/api-reference/actions-api.md
+          - 🔍 Query API: framework-development/api-reference/query-api.md
+  - 🚀 Deployment:
+      - 📦 Installation: deployment/installation.md
+      - ⚙️ Configuration: deployment/configuration.md
+      - 🏢 Multi-Tenancy: deployment/multi-tenancy.md
+      - 🔒 Security: deployment/security.md
+      - 📊 Monitoring: deployment/monitoring.md
+      - 🔧 Troubleshooting: deployment/troubleshooting.md
+  - 🔧 Integration:
+      - 🗄️ Databases: integration/databases.md
+      - 📊 BI Tools: integration/bi-tools.md
+      - 🌐 APIs: integration/apis.md
+      - 🔗 Webhooks: integration/webhooks.md
+      - 🔄 ETL Pipelines: integration/etl-pipelines.md
+  - 📚 Reference:
+      - 🔧 CLI Reference: reference/cli-reference.md
+      - ⚙️ Configuration Reference: reference/configuration-reference.md
+      - ❌ Error Codes: reference/error-codes.md
+      - 📋 Changelog: reference/changelog.md
+      - 📖 Glossary: reference/glossary.md
+  - 🎓 Tutorials:
+      - 🌱 Beginner:
+          - 💻 Setup Development: tutorials/beginner/setup-development.md
+          - 🧬 Create Simple Ontology: tutorials/beginner/create-simple-ontology.md
+          - 🔍 Explore Data: tutorials/beginner/explore-data.md
+      - 🔧 Intermediate:
+          - 🏗️ Complex Schemas: tutorials/intermediate/complex-schemas.md
+          - ⚡ Custom Actions: tutorials/intermediate/custom-actions.md
+          - 📈 Performance Tuning: tutorials/intermediate/performance-tuning.md
+      - 🚀 Advanced:
+          - 🔌 Custom Extensions: tutorials/advanced/custom-extensions.md
+          - 🔌 Plugin Development: tutorials/advanced/plugin-development.md
+          - 🤝 Contributing to Core: tutorials/advanced/contributing-to-core.md
+  - 📖 Guides:
+      - 🧬 OGM-first (YAML → Python): migration_ogm.md
+      - 🔄 Migration:
+          - 📊 From Relational: guides/migration/from-relational.md
+          - 🕸️ From Graph DB: guides/migration/from-graph-db.md
+          - 📈 Version Upgrades: guides/migration/version-upgrades.md
+      - ⚡ Optimization:
+          - 🔍 Query Optimization: guides/optimization/query-optimization.md
+      - 🏢 Business:
+          - 📋 Data Governance: guides/business/data-governance.md
+          - 📊 Compliance: guides/business/compliance.md
+          - 👥 Collaboration: guides/business/collaboration.md
+  - 🏛️ Architecture:
+      - 📖 Overview: architecture/overview.md
+      - 🏢 Multi-Tenancy Strategy: architecture/multi-tenancy-strategy.md
+      - 🔒 Security Model: architecture/security-model.md
+      - ⚡ Performance Model: architecture/performance-model.md
+      - 📈 Scalability: architecture/scalability.md
+  - 🔌 Event Bus:
+      - 📖 Overview: event_bus.md
+      - 📋 Decision Records:
+          - 🏛️ Architecture Decisions: architecture/decision-records/001-architecture-decisions.md
+          - 🏢 Multi-Tenancy: architecture/decision-records/002-multi-tenancy.md
+          - 🧪 Testing Strategy: architecture/decision-records/003-testing-strategy.md
+  - 📦 Archive:
+      - 📚 Legacy Guides: archive/legacy-guides/README.md
+      - 📜 Project History: archive/project-history.md
+      - ❌ Deprecated Features: archive/deprecated-features.md
+
+# Extra variables
+extra:
+  version: 1.0.0
+  generator: mkdocs
+
+  # Social links
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/kevinqz/ontologia
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/ontologia
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/ontologia
+    - icon: fontawesome/solid/book
+      link: https://docs.ontologia.dev
+
+  # Analytics
+  analytics:
+    provider: google
+    property: G-XXXXXXXXXX
+
+  # Copyright
+  copyright: |
+    &copy; 2025 Ontologia Platform. All rights reserved.
+
+  # Version warning
+  version_warning: "You're viewing the development version of the documentation. For the latest stable version, please visit our <a href='https://ontologia.dev'>main site</a>."
+
+# Build options
+strict: true
+use_directory_urls: true
+
+# Versioning configuration
+plugins:
+  - search
+  - mike:
+      alias: latest
+      version_selector: true
+      canonical_version: latest
+      redirect_template: 'redirect.html'
+
+# Build environment
+dev_addr: '0.0.0.0:8000'
+watch: ['src', 'docs']
+
+# Build hooks
+on_build_start: |
+  echo "Building documentation..."
+
+on_build_end: |
+  echo "Documentation built successfully!"
+
+# Build artifacts
+site_dir: site
+cache_dir: .cache
+remote_branch: gh-pages
+remote_name: origin
+
+# Deployment
+dev_addr: '0.0.0.0:8000'
+
+# Social links in extra section
+social:
+  - icon: fontawesome/brands/docker
+    link: https://hub.docker.com/r/kevinqz/ontologia
+  - icon: fontawesome/brands/github
+    link: https://github.com/kevinqz/ontologia
+  - icon: fontawesome/brands/twitter
+    link: https://twitter.com/ontologia
+  - icon: fontawesome/brands/discord
+    link: https://discord.gg/ontologia
+  - icon: fontawesome/solid/book
+    link: https://docs.ontologia.dev

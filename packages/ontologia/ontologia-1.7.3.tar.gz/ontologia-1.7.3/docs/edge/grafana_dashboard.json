@@ -1,0 +1,38 @@
+{
+  "title": "Ontologia Edge Overview",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "HELLO / STATE / EVENT",
+      "targets": [
+        { "expr": "sum(edge_hello_total)" },
+        { "expr": "sum(edge_state_total)" },
+        { "expr": "sum(edge_event_total)" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Signature Failures",
+      "targets": [{ "expr": "sum(edge_signature_failures_total)" }]
+    },
+    {
+      "type": "stat",
+      "title": "Commands: Enqueued/Delivered/Acked",
+      "targets": [
+        { "expr": "sum(edge_commands_enqueued_total)" },
+        { "expr": "sum(edge_commands_delivered_total)" },
+        { "expr": "sum(edge_commands_acked_total)" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Commands: Retried/Expired",
+      "targets": [
+        { "expr": "sum(edge_commands_retried_total)" },
+        { "expr": "sum(edge_commands_expired_total)" }
+      ]
+    }
+  ],
+  "schemaVersion": 36,
+  "version": 1
+}

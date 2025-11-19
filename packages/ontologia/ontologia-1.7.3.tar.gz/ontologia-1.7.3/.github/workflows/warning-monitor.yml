@@ -1,0 +1,62 @@
+name: Warning Monitor
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run weekly to check for new warnings
+    - cron: "0 6 * * 1"  # Monday 6am UTC
+
+jobs:
+  warning-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -e ".[dev]"
+
+      - name: Run tests with strict warnings
+        run: |
+          pytest --tb=short --disable-warnings 2>&1 | tee warnings.log
+
+      - name: Check for new warnings
+        run: |
+          # Count warnings by type
+          echo "## Warning Summary" >> $GITHUB_STEP_SUMMARY
+          grep -E "Warning|Deprecation" warnings.log | sort | uniq -c | sort -nr >> $GITHUB_STEP_SUMMARY
+
+          # Fail if critical warnings appear
+          if grep -q "RuntimeWarning\|SyntaxWarning\|ImportWarning" warnings.log; then
+            echo "❌ Critical warnings detected!"
+            exit 1
+          fi
+
+      - name: Comment on PR (if applicable)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const warnings = fs.readFileSync('warnings.log', 'utf8');
+
+            if (warnings.includes('Warning')) {
+              const warningCount = (warnings.match(/Warning/g) || []).length;
+              const body = `## ⚠️ Warnings Detected\n\nFound ${warningCount} warnings in test run.\n\n<details>\n<summary>Warning Details</summary>\n\n\`\`\`\n${warnings}\n\`\`\`\n</details>`;
+
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              });
+            }

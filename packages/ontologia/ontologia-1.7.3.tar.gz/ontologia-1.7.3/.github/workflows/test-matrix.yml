@@ -1,0 +1,190 @@
+name: Test Matrix
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  lint:
+    name: Ruff Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v3
+      - name: Run Ruff
+        run: |
+          uv pip install ruff
+          uv run ruff --version
+          uv run ruff check .
+
+  core-sql:
+    name: Core SQL (minimal) (${{ matrix.os }}, py${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.11", "3.12"]
+        include:
+          - os: windows-latest
+            pathsep: ';'
+          - os: ubuntu-latest
+            pathsep: ':'
+          - os: macos-latest
+            pathsep: ':'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: astral-sh/setup-uv@v3
+      - name: Run unit + integration (sql_only)
+        run: |
+          uv run pytest -q tests/unit tests/integration
+        env:
+          STORAGE_MODE: sql_only
+          RUN_BENCHMARK: "0"
+          PYTHONPATH: packages${{ matrix.pathsep }}.
+
+  duckdb:
+    name: Analytics + DuckDB (${{ matrix.os }}, py${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: astral-sh/setup-uv@v3
+      - name: Install DuckDB
+        run: |
+          uv pip install duckdb
+      - name: Run unit (analytics) + performance
+        run: |
+          # Unit tests that were previously skipped will run when duckdb is present
+          uv run pytest -q tests/unit
+          # Performance benchmarks (opt-in)
+          uv run pytest -q tests/performance
+          # Integration tests under DuckDB storage
+          uv run pytest -q tests/integration
+        env:
+          STORAGE_MODE: sql_duckdb
+          RUN_BENCHMARK: "1"
+          PYTHONPATH: packages${{ runner.os == 'Windows' && ';' || ':' }}.
+
+  graph-kuzu:
+    name: Graph (Kùzu) unified reads (${{ matrix.os }}, py${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ runner.os == 'Windows' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: astral-sh/setup-uv@v3
+      - name: Install kuzu
+        run: |
+          uv pip install kuzu
+      - name: Run unified traversal tests
+        run: |
+          uv run pytest -q tests/integration/test_api_v2_traversal_unified.py
+        env:
+          USE_UNIFIED_GRAPH: "1"
+          PYTHONPATH: packages${{ runner.os == 'Windows' && ';' || ':' }}.
+      - name: Run graph write/link property tests
+        run: |
+          uv run pytest -q tests/integration/test_graph_writes_link_properties.py
+        env:
+          USE_UNIFIED_GRAPH: "1"
+          PYTHONPATH: packages${{ runner.os == 'Windows' && ';' || ':' }}.
+
+  redis:
+    name: Redis cache
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - name: Install redis client
+        run: |
+          uv pip install redis
+      - name: Run cache integration tests
+        env:
+          PYTHONPATH: packages:.
+          REDIS_URL: redis://localhost:6379/0
+        run: |
+          uv run pytest -q tests/integration/test_cache_integration.py
+
+  elasticsearch:
+    name: Elasticsearch integration
+    runs-on: ubuntu-latest
+    services:
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.12.1
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: "false"
+        ports: ["9200:9200"]
+        options: >-
+          --health-cmd "curl -s http://localhost:9200 >/dev/null"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - name: Install elasticsearch client
+        run: |
+          uv pip install elasticsearch
+      - name: Run elasticsearch integration tests
+        env:
+          PYTHONPATH: packages:.
+          ELASTICSEARCH_URL: http://localhost:9200
+        run: |
+          uv run pytest -q tests/integration/test_elasticsearch_integration.py
+
+  nats:
+    name: NATS event bus
+    runs-on: ubuntu-latest
+    services:
+      nats:
+        image: nats:2.10
+        ports: ["4222:4222"]
+        options: >-
+          --health-cmd "nats --server nats://localhost:4222 --version || true"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - name: Install nats-py
+        run: |
+          uv pip install nats-py
+      - name: Run NATS unit tests
+        env:
+          PYTHONPATH: packages:.
+        run: |
+          uv run pytest -q tests/unit/test_nats_event_bus.py

@@ -1,0 +1,125 @@
+# Docker Compose - Analytics Mode
+# Extends core mode with DuckDB + dbt for data processing
+# Usage: docker-compose -f docker-compose.core.yml -f docker-compose.analytics.yml up
+
+version: '3.8'
+
+services:
+  # Override API to enable analytics features
+  api:
+    environment:
+      STORAGE_MODE: "sql_duckdb"
+      ENABLE_ORCHESTRATION: "true"  # Enable Dagster for pipelines
+      DUCKDB_PATH: "/app/data/analytics.duckdb"
+    volumes:
+      - ./data:/app/data
+      - ./templates/project/dbt_project:/app/dbt_project
+    command: >
+      sh -c "
+        echo 'Running database migrations...' &&
+        uv run alembic upgrade head &&
+        echo 'Starting API server with analytics support...' &&
+        uv run uvicorn ontologia_api.main:app --host 0.0.0.0 --port 8000 --reload
+      "
+
+  # Dagster for pipeline orchestration
+  dagster-daemon:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ontologia-dagster-daemon
+    environment:
+      DAGSTER_POSTGRES_HOST: postgres
+      DAGSTER_POSTGRES_DB: ontologia
+      DAGSTER_POSTGRES_USER: ontologia
+      DAGSTER_POSTGRES_PASSWORD: ontologia123
+      DUCKDB_PATH: "/app/data/analytics.duckdb"
+    volumes:
+      - ./data:/app/data
+      - ./templates/project/dbt_project:/app/dbt_project
+      - ./packages/ontologia_dagster:/app/packages/ontologia_dagster
+    command: >
+      sh -c "
+        dagster dev -h 0.0.0.0 -p 3000 --daemon
+      "
+    depends_on:
+      - postgres
+    ports:
+      - "3000:3000"  # Dagster UI
+    profiles:
+      - dagster
+
+  # Dagster webserver
+  dagster-webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ontologia-dagster-webserver
+    environment:
+      DAGSTER_POSTGRES_HOST: postgres
+      DAGSTER_POSTGRES_DB: ontologia
+      DAGSTER_POSTGRES_USER: ontologia
+      DAGSTER_POSTGRES_PASSWORD: ontologia123
+    volumes:
+      - ./data:/app/data
+      - ./packages/ontologia_dagster:/app/packages/ontologia_dagster
+    command: >
+      sh -c "
+        dagster dev -h 0.0.0.0 -p 3000
+      "
+    depends_on:
+      - postgres
+      - dagster-daemon
+    ports:
+      - "3001:3000"  # Alternative Dagster UI port
+    profiles:
+      - dagster
+
+  # dbt docs server for documentation
+  dbt-docs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ontologia-dbt-docs
+    working_dir: /app/dbt_project
+    volumes:
+      - ./templates/project/dbt_project:/app/dbt_project
+      - ./data:/app/data
+    command: >
+      sh -c "
+        echo 'Generating dbt documentation...' &&
+        dbt docs generate --target-path /app/docs &&
+        echo 'Starting dbt docs server...' &&
+        dbt docs serve --host 0.0.0.0 --port 8080 --target-path /app/docs
+      "
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    profiles:
+      - tools
+
+  # Jupyter Lab for data exploration
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ontologia-jupyter
+    environment:
+      DUCKDB_PATH: "/app/data/analytics.duckdb"
+      DATABASE_URL: "postgresql://ontologia:ontologia123@postgres:5432/ontologia"
+    volumes:
+      - ./data:/app/data
+      - ./notebooks:/app/notebooks
+      - ./templates/project/dbt_project:/app/dbt_project
+    command: >
+      sh -c "
+        pip install jupyterlab duckdb-engine &&
+        jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token=''
+      "
+    ports:
+      - "8888:8888"
+    depends_on:
+      - postgres
+    profiles:
+      - tools
