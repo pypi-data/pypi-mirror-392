@@ -1,0 +1,63 @@
+[project]
+name = "aitronos-cli"
+version = "0.1.1"
+description = "Unified CLI for managing all Aitronos services"
+authors = [
+    {name = "Aitronos Team", email = "team@aitronos.com"}
+]
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+keywords = ["aitronos", "cli", "streamline", "automation", "ai", "assistants"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    "requests>=2.28.0",
+    "pyyaml>=6.0",
+    "simple-term-menu>=1.6.0",
+    "pyjwt>=2.8.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "coverage>=7.0.0",
+    "ruff>=0.1.0",
+    "bandit>=1.7.0",
+    "pip-audit>=2.6.0",
+    "simple-term-menu>=1.6.0",
+]
+
+[project.urls]
+Homepage = "https://aitronos.com"
+Documentation = "https://docs.aitronos.com/cli"
+Repository = "https://github.com/aitronos/cli"
+Issues = "https://github.com/aitronos/cli/issues"
+
+[project.scripts]
+aitronos = "aitronos_cli.cli:main"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["aitronos_cli", "aitronos_cli.streamline", "aitronos_cli.utils"]
+
+[tool.setuptools.package-data]
+aitronos_cli = ["py.typed"]
+
