@@ -1,0 +1,89 @@
+# DeltaForce 物品价格搜索插件
+
+一个用于搜索 DeltaForce 游戏中各种物品价格的 NoneBot2 插件，适用于QQ适配器。
+
+## 功能特性
+
+- 🔍 **智能搜索**：支持关键词搜索和分类搜索
+- 📂 **分类浏览**：按物品分类查看所有物品
+- 💰 **价格查询**：实时获取物品市场价格
+- 🚀 **缓存优化**：本地缓存减少网络请求
+- 📱 **平台支持**：基于 NoneBot2 框架，支qq官方适配器
+
+## 安装方法
+
+### 方法一：使用 pip 安装
+
+    pip install nonebot-plugin-deltaforce-price-search
+
+## 配置说明
+
+在 NoneBot2 的pyproject.toml文件中添加以下配置：
+
+    在dependencies = [...] 中添加：
+    "nonebot-plugin-deltaforce-price-search>=x.x.x" # 请替换为最新版本号
+    然后在[tool.nonebot.plugins] 添加：
+    "nonebot-plugin-deltaforce-price-search" = ["nonebot_plugin_deltaforce_price_search"]
+
+## 数据配置项 - 可选
+
+    价格数据源URL（可选）
+    price_data_url: [感谢大佬的数据](https://raw.githubusercontent.com/orzice/DeltaForcePrice/master/price.json)
+    缓存文件路径（可选）
+    cache_file: "bullet_price_cache.json"
+    缓存过期时间（秒，可选）
+    cache_expire: 3600
+
+### 使用方法
+
+    搜索命令：
+    --------------------------------------
+    搜索 [关键词] # 搜索物品（如：搜索 M4）
+    搜索 [分类] [关键词] # 在指定分类中搜索（如：搜索 头盔 三级）
+    search [keyword] # 英文搜索命令
+    物品搜索 [关键词] # 完整命令
+    查价 [关键词] # 简写命令
+
+    分类命令：
+    -------------------------------
+    分类 # 显示所有可用分类
+    分类 [分类名] # 查看指定分类的所有物品
+    category [category_name] # 英文分类命令
+    物品分类 [分类名] # 完整命令
+
+    帮助命令：
+    -------------------------
+    搜索帮助 # 显示详细使用说明
+    searchhelp # 英文帮助命令
+    物品搜索帮助 # 完整帮助命令
+    救命 # 紧急帮助
+
+## 支持的主要分类
+
+| 分类 | 关键词 | 示例物品 |
+|------|--------|----------|
+| 🔫 枪械 | 步枪、手枪、冲锋枪等 | M4A1、AK47、沙漠之鹰 |
+| ⛑️ 头盔 | 头盔 | 三级头盔、战术头盔 |
+| 🛡️ 护甲 | 护甲、背心、防弹衣 | 三级甲、防弹背心 |
+| 🔧 配件 | 配件、瞄具、枪口等 | 红点瞄具、消音器、扩容弹匣 |
+| 💥 子弹 | 子弹、弹药 | 5.56mm、7.62mm |
+| 💎 收集品 | 收集品、稀有物品 | 金条、古董 |
+| 🏥 消耗品 | 医疗、药品、食物 | 医疗包、绷带、能量饮料 |
+| 🔑 钥匙 | 钥匙、门卡 | 仓库钥匙、门禁卡 |
+
+## 依赖要求
+
+- Python 3.9+
+- NoneBot2 2.4.4+
+- nonebot-adapter-qq 1.6.5+
+- httpx 0.28.1+
+- pydantic 1.10.0+
+
+## 数据来源
+
+物品价格数据来源于 DeltaForce 游戏社区，通过以下URL获取：
+`https://raw.githubusercontent.com/orzice/DeltaForcePrice/master/price.json`
+
+## 许可证
+
+本项目采用 MIT 许可证，详见 LICENSE 文件。
