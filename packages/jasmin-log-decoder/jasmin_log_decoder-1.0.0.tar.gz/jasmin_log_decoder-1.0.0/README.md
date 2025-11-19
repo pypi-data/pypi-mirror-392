@@ -1,0 +1,184 @@
+Got it. Here’s a slightly optimized version of your README keeping the `Input/Output` block as-is, and addressing the other points:
+
+````markdown
+# Jasmin SMS Decoder
+
+[![Python Version](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+A command-line tool for decoding UTF-16BE encoded SMS messages from [Jasmin SMS Gateway](https://www.jasminsms.com/) log files.
+
+## 🚀 Features
+
+- **Stream Processing** - Handles large log files efficiently without loading everything into memory
+- **Search & Filter** - Quickly find messages containing specific text or phone numbers
+- **Flexible Input** - Read from files or stdin
+- **Tail Support** - Process only the last N lines for faster searches
+- **Clean Output** - Clear formatting showing original log line and decoded messages
+
+Perfect. Here’s an updated **Installation** section for your README including global GitHub installation instructions:
+
+## 📦 Installation
+
+### From GitHub (Recommended for now)
+
+Install for the **current user**:
+
+```bash
+pip install --user git+https://github.com/pbarabadze/jasmin-log-decoder.git
+````
+
+>
+> ```bash
+> export PATH=$PATH:~/.local/bin
+> ```
+
+Install **system-wide** (requires admin privileges):
+
+```bash
+sudo pip install git+https://github.com/pbarabadze/jasmin-log-decoder.git
+```
+
+### From PyPI
+
+```bash
+pip install jasmin-log-decoder
+```
+
+### From Source
+
+```bash
+git clone https://github.com/pbarabadze/jasmin-log-decoder.git
+cd jasmin-log-decoder
+pip install -e .
+```
+
+## 🔧 Usage
+
+### Basic Usage
+
+```bash
+# Decode entire log file
+decode-sms messages.log
+
+# Read from stdin
+cat messages.log | decode-sms
+tail -f messages.log | decode-sms
+```
+
+### Search for Specific Content
+
+```bash
+# Search for a phone number
+decode-sms --search "995577123456" messages.log
+
+# Search in decoded messages
+decode-sms --search "password reset" messages.log
+```
+
+### Process Last N Lines Only
+
+```bash
+# Much faster for large files
+decode-sms --lines 100 messages.log
+
+# Combine with search
+decode-sms --lines 1000 --search "995577123456" messages.log
+```
+
+### All Options
+
+```bash
+decode-sms --help
+```
+
+## 📖 Examples
+
+### Real-World Scenarios
+
+**Find all SMS from a specific number today:**
+
+```bash
+grep "$(date +%Y-%m-%d)" /var/log/jasmin/messages.log | decode-sms --search "995577123456"
+```
+
+**Monitor live SMS in real-time:**
+
+```bash
+tail -f /var/log/jasmin/messages.log | decode-sms
+```
+
+**Search archived logs:**
+
+```bash
+decode-sms --search "verification code" messages.log.2024-11-01
+```
+
+## 🔐 Security & Privacy
+
+This tool reads SMS message content. Please ensure:
+
+* ✅ Proper file permissions on log files
+* ✅ Access controls for who can run this tool
+* ✅ Compliance with data protection regulations (GDPR, etc.)
+
+## 🛠️ Development
+
+### Setup Development Environment
+
+```bash
+git clone https://github.com/pbarabadze/jasmin-log-decoder.git
+cd jasmin-log-decoder
+pip install -e .
+```
+
+### Code Formatting
+
+```bash
+black jasmin_sms_decoder/
+```
+
+## 📝 How It Works
+
+Jasmin SMS Gateway logs contain SMS messages. When messages use non-ASCII characters (Arabic, Georgian, Emojis, etc.), they are encoded as UTF-16BE hex strings. This tool:
+
+1. Reads log files line-by-line (memory efficient)
+2. Finds hex-encoded UTF-16BE payloads using regex
+3. Decodes them to readable text
+4. Filters based on search criteria
+5. Displays formatted output
+
+**Example:**
+
+```
+Input (UTF-8):     [content:b'encoded_bytes']
+Output:            [content:'decoded content']
+```
+
+UTF-8 content appears as plain text in logs, while UTF-16BE content appears as hex and requires decoding.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+* Built for [Jasmin SMS Gateway](https://www.jasminsms.com/) users
+* Inspired by the need to quickly search through SMS logs
+
+## 📬 Contact
+
+Paata Barabadze - [@pbarabadze](https://github.com/pbarabadze)
+
+Project Link: [https://github.com/pbarabadze/jasmin-log-decoder](https://github.com/pbarabadze/jasmin-log-decoder)
