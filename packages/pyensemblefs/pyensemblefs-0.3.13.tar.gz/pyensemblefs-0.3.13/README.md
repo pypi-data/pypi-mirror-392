@@ -1,0 +1,227 @@
+pyensemblefs: a multi-threading Python library for ensemble feature selection. 
+====
+
+This repository hosts **pyensemblefs**, a Python library for *ensemble feature selection*. Supports heterogeneous ensembles, bootstrapped evaluation, and stability analysis across feature selectors.<br> 
+It assists researchers in feature selection tasks without requiring significant programming effort.
+
+---
+
+## Installation and setup
+
+```bash
+pip install pyensemblefs
+```
+
+To download the source code, you can clone it from the GitHub repository:
+
+```bash
+git clone git@github.com:cdchushig/pyensemblefs.git
+```
+
+Requirements: Python ≥ 3.9, scikit-learn ≥ 1.2
+
+---
+
+## Library Highlights
+
+**pyensemblefs** automatically extracts relevant features in datasets using bootstrapping and ensemble aggregation.
+
+* **Intuitive, reproducible workflows:** compatible with scikit-learn pipelines.  
+* **Comprehensive documentation:** each feature selection and aggregation method is fully described.  
+* **Extensible architecture:** easily add custom selection or aggregation strategies.
+
+---
+
+## Main Features
+
+* **Bootstrap-based ensemble selection:** assess variability across resamples.
+
+* **Heterogeneous ensembles:** combine different feature selectors (e.g., ANOVA, MI, Chi²).
+
+* **Unified aggregator API:** aggregate results from scores, ranks, or binary supports.
+
+* **Visualization tools:** plot selection frequency, consensus ranks, and stability matrices.
+
+* **Stability metrics:** compute indices such as Kuncheva, Jaccard, or Spearman correlation.
+
+* **Extensible design:** register custom selectors and aggregators via a single factory call.
+
+---
+
+## Get started
+
+Example using a built-in dataset and a simple configuration:
+
+```python
+import pyensemblefs
+from pyensemblefs.datasets import load_pima_dataset
+
+# Load dataset
+df = load_pima_dataset()
+
+# Retrieve a pre-defined configuration (e.g., Relief filter)
+cfg = pyensemblefs.get_config('relief', n_bootrap=100, fnc_aggregation='voting')
+
+# Compute feature scores
+df_feature_scores = pyensemblefs.compute_scores(cfg, df)
+
+# Extract the most relevant features
+df_filtered = pyensemblefs.extract_features(n_max_features=10)
+```
+
+---
+
+## Heterogeneous ensemble feature selection
+
+```python
+from sklearn.datasets import load_breast_cancer
+from sklearn.feature_selection import SelectKBest, f_classif, mutual_info_classif, chi2
+from pyensemblefs.ensemble.metabootstrapper import MetaBootstrapper
+
+X, y = load_breast_cancer(return_X_y=True)
+
+fs_methods = [
+    SelectKBest(score_func=f_classif, k=10),
+    SelectKBest(score_func=mutual_info_classif, k=10),
+    SelectKBest(score_func=chi2, k=10),
+]
+
+# Assign higher weight to ANOVA
+weights = {"SelectKBest": 2.0}
+
+boot = MetaBootstrapper(
+    fs_methods,
+    n_bootstraps=20,
+    n_jobs=4,
+    random_state=42,
+    strategy="random",
+    normalize_scores=True,
+    method_weights=weights,
+    verbose=True
+)
+
+boot.fit(X, y)
+
+print("First bootstrap method:", boot.results_[0]["method"])
+print("Normalized + weighted scores:", boot.results_[0]["scores"][:10])
+```
+
+---
+
+## Visualization of frequency, top-k, and stability
+
+```python
+from sklearn.datasets import load_breast_cancer
+from sklearn.feature_selection import SelectKBest, mutual_info_classif
+from pyensemblefs.ensemble.bootstrapper import Bootstrapper
+from pyensemblefs.aggregators.rank import MeanRankAggregator
+from pyensemblefs.aggregators.score import MeanAggregator
+from pyensemblefs.viz.visualizer import Visualizer
+
+X, y = load_breast_cancer(return_X_y=True)
+fs = SelectKBest(score_func=mutual_info_classif, k=10)
+boot = Bootstrapper(fs, n_bootstraps=25, n_jobs=2)
+boot.fit(X, y)
+
+# Aggregators
+rank_agg = MeanRankAggregator(top_k=10).fit(boot.results_)
+mean_agg = MeanAggregator(top_k=10).fit(boot.results_)
+
+# Visualizations
+Visualizer.feature_frequency(boot.results_, n_features=X.shape[1], top_k=15)
+Visualizer.consensus_ranking(rank_agg.final_ranking_, top_k=10)
+Visualizer.stability_heatmap(boot.results_, n_features=X.shape[1])
+Visualizer.compare_aggregators({
+    "RankAggregator": rank_agg.final_ranking_,
+    "MeanAggregator": mean_agg.final_ranking_,
+}, top_k=10)
+```
+
+All figures are automatically saved under ./images/.
+
+---
+
+## Stability Metrics
+
+Stability analysis quantifies how consistent the selected features remain across bootstrap samples.
+
+```python
+from pyensemblefs.stats.stability import StabilityEvaluator
+
+stab = StabilityEvaluator(metric="kuncheva")
+stability_score = stab.compute(boot.results_binary_)
+print("Stability (Kuncheva):", stability_score)
+```
+
+Available metrics include Jaccard,Dice, Ochiai, Hamming, Novovicova, Davis, Lustgartn, Phi, Kappa, Nogueira, Yu, and Zucknick.
+They can be directly compared between homogeneous and heterogeneous ensembles.
+
+
+---
+
+## Usage examples (scikit-learn compatible)
+
+```python
+from sklearn.datasets import load_breast_cancer
+from sklearn.feature_selection import SelectKBest, f_classif
+from src.ensemble.bootstrapper import Bootstrapper
+from src.aggregators.score import MeanAggregator
+from src.aggregators.rank import MeanRankAggregator
+
+X, y = load_breast_cancer(return_X_y=True)
+
+fs = SelectKBest(score_func=f_classif, k=10)
+boot = Bootstrapper(fs, n_bootstraps=30, n_jobs=4, random_state=42)
+boot.fit(X, y)
+
+# Aggregate scores and ranks
+mean_agg = MeanAggregator().fit(boot.results_)
+rank_agg = MeanRankAggregator().fit(boot.results_)
+
+print("Consensus scores:", mean_agg.scores_[:10])
+print("Consensus ranks:", rank_agg.rank_[:10])
+```
+
+```python
+from sklearn.feature_selection import SelectKBest, chi2
+from src.ensemble.bootstrapper import Bootstrapper
+from src.aggregators.score import MeanAggregator
+
+fs = SelectKBest(score_func=chi2, k=5)
+boot = Bootstrapper(fs, n_bootstraps=15, n_jobs=2)
+boot.fit(X, y)
+
+mean_agg = MeanAggregator().fit(boot.results_)
+print("Consensus Scores (Chi2):", mean_agg.scores_)
+```
+
+---
+
+## How It Fits Together
+
+Data → Bootstrapper / MetaBootstrapper<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+Aggregators (Score / Rank / Subset)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+Visualizer / StabilityEvaluator → Reports
+
+---
+
+## Citation
+
+If you use pyensemblefs in academic work, please cite:
+
+@software{pyensemblefs2025,<br>
+  author = {Chushig-Muzo, C.D. and collaborators},<br>
+  title  = {pyensemblefs: Ensemble Feature Selection Library},<br>
+  year   = {2025},<br>
+  url    = {https://github.com/cdchushig/pyensemblefs}
+}
+
+
+---
+
+## License
+
+This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
+
