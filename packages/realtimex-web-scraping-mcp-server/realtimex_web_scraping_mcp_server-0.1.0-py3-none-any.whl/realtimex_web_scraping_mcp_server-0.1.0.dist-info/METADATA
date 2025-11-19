@@ -1,0 +1,440 @@
+Metadata-Version: 2.4
+Name: realtimex-web-scraping-mcp-server
+Version: 0.1.0
+Summary: A Model Context Protocol (MCP) server for web scraping using Crawl4AI
+Author-email: RealTimeX <inf@realtimex.ai>
+License: MIT
+Keywords: automation,crawl4ai,data-extraction,mcp,web-scraping
+Requires-Python: >=3.10
+Requires-Dist: crawl4ai>=0.6.0
+Requires-Dist: cssselect>=1.3.0
+Requires-Dist: mcp>=1.0.0
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: structlog>=23.0.0
+Requires-Dist: tenacity>=8.0.0
+Description-Content-Type: text/markdown
+
+# Web Scraping MCP Server
+
+A Model Context Protocol (MCP) server that provides utility tools for web scraping using Crawl4AI as the core engine. Supports multiple extraction modes including markdown generation, HTML processing, structured data extraction via CSS selectors, and AI-powered semantic analysis.
+
+## Features
+
+- **Multiple Extraction Modes**: Support for markdown, HTML, schema-based, and LLM-powered extraction
+- **Advanced Browser Automation**: Connects to a browser via CDP for full control, with proxy support and stealth features
+- **Structured Output**: Returns structured JSON data for programmatic consumption
+- **Session Management**: Persistent sessions for multi-step workflows
+- **Comprehensive Error Handling**: Robust error handling with detailed error information
+- **Type Safety**: Full type hints and Pydantic validation
+- **Cost-Aware LLM Usage**: Smart LLM usage with budget controls and caching
+
+## Supported Extraction Modes
+
+### 1. Markdown Extraction (`markdown`)
+- **Use Case**: Clean content extraction for analysis and documentation
+- **Output**: Clean markdown with citations and structured formatting
+- **Best For**: Articles, blog posts, documentation
+
+### 2. HTML Extraction (`html`)
+- **Variants**: Clean HTML or raw HTML
+- **Use Case**: HTML processing and structure analysis
+- **Best For**: Template extraction, HTML analysis
+
+### 3. Schema-Based Extraction (`schema`)
+- **Use Case**: Structured data extraction using CSS selectors
+- **Output**: JSON array of extracted objects
+- **Best For**: Product catalogs, data tables, listings
+
+### 4. LLM-Powered Extraction (`llm`)
+- **Use Case**: AI-powered semantic extraction and analysis
+- **Output**: Structured JSON or text based on instructions
+- **Best For**: Content analysis, sentiment extraction, complex reasoning
+
+## Quick Start
+
+### Installation
+
+```bash
+# Install via pip
+pip install web-scraping-mcp-server
+
+# Or use with uvx (no installation required)
+uvx web-scraping-mcp-server
+```
+
+### Bootstrap Setup
+
+The server includes automatic bootstrap functionality to ensure crawl4ai and Playwright are properly configured:
+
+```bash
+# Manual bootstrap (optional - server does this automatically)
+web-scraping-mcp-bootstrap
+
+# Skip auto-setup if needed
+export WSMCP_SKIP_AUTO_SETUP=1
+web-scraping-mcp-server
+```
+
+The bootstrap process:
+1. Checks if crawl4ai is installed
+2. Runs `crawl4ai-setup` to install Playwright browsers
+3. Verifies setup with `crawl4ai-doctor`
+4. Falls back to manual Playwright installation if needed
+
+This ensures the server is ready to use immediately after installation.
+
+### MCP Client Configuration
+
+#### Claude Desktop
+
+```json
+{
+  "mcpServers": {
+    "web-scraping": {
+      "command": "uvx",
+      "args": ["web-scraping-mcp-server"],
+      "env": {
+        "LITELLM_API_KEY": "your-litellm-api-key",
+        "LITELLM_API_BASE": "https://api.openai.com/v1"
+      }
+    }
+  }
+}
+```
+
+#### Python MCP Client
+
+```python
+import asyncio
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+
+async def scraping_example():
+    server_params = StdioServerParameters(
+        command="uvx",
+        args=["web-scraping-mcp-server"],
+        env={
+            "LITELLM_API_KEY": "your-litellm-api-key",
+            "LITELLM_API_BASE": "https://api.openai.com/v1"
+        }
+    )
+
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+
+            # List available tools
+            tools = await session.list_tools()
+            print(f"Available tools: {[tool.name for tool in tools.tools]}")
+
+            # Perform web scraping
+            result = await session.call_tool("web_scrape", {
+                "urls": ["https://example.com/article"],
+                "extraction": {
+                    "mode": "markdown"
+                }
+            })
+
+            print(f"Scraped content: {result.content}")
+
+asyncio.run(scraping_example())
+```
+
+## Available Tools
+
+### `web_scrape`
+
+Performs web scraping using Crawl4AI with configurable extraction modes and browser settings.
+
+**Parameters:**
+- `urls` (array, required): List of URLs to scrape (1-100 URLs)
+- `extraction` (object, required): Extraction configuration
+  - `mode` (string): "markdown", "html", "schema", or "llm"
+  - `htmlVariant` (string, optional): "clean" or "raw" (for HTML mode)
+  - `schema` (object, optional): Schema configuration (for schema mode)
+  - `llm` (object, optional): LLM configuration (for LLM mode)
+- `browser` (object, optional): Browser configuration
+- `page` (object, optional): Page interaction settings
+- `retry` (object, optional): Retry configuration
+
+**Example:**
+```json
+{
+  "urls": ["https://example.com/products"],
+  "extraction": {
+    "mode": "schema",
+    "schema": {
+      "baseSelector": ".product-card",
+      "fields": [
+        {"name": "title", "selector": "h3", "type": "text"},
+        {"name": "price", "selector": ".price", "type": "text"},
+        {"name": "url", "selector": "a", "type": "attribute", "attribute": "href"}
+      ]
+    }
+  },
+  "browser": {
+    "headless": true,
+    "userAgentMode": "random"
+  }
+}
+```
+
+### `batch_scrape`
+
+Performs batch web scraping with parallel processing for multiple URLs.
+
+**Parameters:**
+- Same as `web_scrape` but optimized for batch processing
+- `concurrency` (integer, optional): Maximum concurrent requests (default: 3)
+
+### `scrape_with_session`
+
+Performs web scraping using persistent browser sessions for multi-step workflows.
+
+**Parameters:**
+- Same as `web_scrape` plus:
+- `sessionId` (string, required): Unique session identifier
+- `jsCode` (array, optional): JavaScript code to execute
+- `waitFor` (string, optional): Wait condition before extraction
+
+## Configuration Examples
+
+### Basic Markdown Extraction
+
+```json
+{
+  "urls": ["https://example.com/article"],
+  "extraction": {
+    "mode": "markdown"
+  }
+}
+```
+
+### Structured Data Extraction
+
+```json
+{
+  "urls": ["https://shop.example.com/products"],
+  "extraction": {
+    "mode": "schema",
+    "schema": {
+      "baseSelector": ".product-item",
+      "fields": [
+        {"name": "name", "selector": ".product-name", "type": "text"},
+        {"name": "price", "selector": ".price", "type": "text"},
+        {"name": "image", "selector": "img", "type": "attribute", "attribute": "src"}
+      ]
+    }
+  },
+  "browser": {
+    "headless": true,
+    "textMode": true
+  }
+}
+```
+
+### AI-Powered Content Analysis
+
+```json
+{
+  "urls": ["https://news.example.com/article"],
+  "extraction": {
+    "mode": "llm",
+    "llm": {
+      "instruction": "Extract the article title, author, key topics, and sentiment. Return as structured JSON.",
+      "responseFormat": "json",
+      "model": "openai/gpt-4o-mini",
+      "temperature": 0.1
+    }
+  }
+}
+```
+
+### Multi-Step Session Workflow
+
+```json
+{
+  "urls": ["https://example.com/login"],
+  "extraction": {
+    "mode": "markdown"
+  },
+  "sessionId": "workflow_session",
+  "jsCode": [
+    "document.querySelector('#username').value = 'user';",
+    "document.querySelector('#password').value = 'pass';",
+    "document.querySelector('#login').click();"
+  ],
+  "waitFor": "css:.dashboard"
+}
+```
+
+## Response Structure
+
+All scraping tools return structured results:
+
+### Successful Response
+
+```json
+{
+  "success": true,
+  "results": [
+    {
+      "url": "https://example.com",
+      "success": true,
+      "content": "Extracted content based on extraction mode",
+      "metadata": {
+        "title": "Page Title",
+        "status_code": 200,
+        "final_url": "https://example.com",
+        "links": {
+          "internal": ["https://example.com/page1"],
+          "external": ["https://external.com"]
+        },
+        "media": {
+          "images": 5,
+          "videos": 1,
+          "audio": 0
+        }
+      }
+    }
+  ],
+  "summary": {
+    "total_urls": 1,
+    "successful": 1,
+    "failed": 0,
+    "extraction_mode": "markdown"
+  }
+}
+```
+
+### Content by Extraction Mode
+
+- **Markdown**: Clean markdown string with citations
+- **HTML**: Raw or cleaned HTML string
+- **Schema**: Array of structured objects matching the schema
+- **LLM**: Structured JSON or text based on response format
+
+## Environment Variables
+
+### Required for LLM Extraction
+
+```bash
+# LiteLLM Configuration (supports all major LLM providers)
+export LITELLM_API_KEY="your-api-key"        # Required for LLM extraction
+export LITELLM_API_BASE="https://api.openai.com/v1"  # Optional, provider base URL
+
+# Examples for different providers:
+# OpenAI: LITELLM_API_KEY="sk-..." LITELLM_API_BASE="https://api.openai.com/v1"
+# Anthropic: LITELLM_API_KEY="sk-ant-..." LITELLM_API_BASE="https://api.anthropic.com"
+# Groq: LITELLM_API_KEY="gsk_..." LITELLM_API_BASE="https://api.groq.com/openai/v1"
+```
+
+### Optional Configuration
+
+```bash
+# Server configuration
+export WEB_SCRAPING_SERVER_NAME="web-scraping-mcp"
+export WEB_SCRAPING_DEFAULT_TIMEOUT="60000"
+export WEB_SCRAPING_MAX_CONCURRENT="5"
+
+# Browser configuration
+export WEB_SCRAPING_CDP_URL="http://localhost:9222" # Optional: CDP URL for managed browsers
+export WEB_SCRAPING_DEFAULT_HEADLESS="true"
+
+# Logging
+export LOG_LEVEL="INFO"
+```
+
+## Error Handling
+
+The server provides comprehensive error handling:
+
+- **Configuration Errors**: Invalid parameters or missing required fields
+- **Network Errors**: Connection failures, timeouts, DNS issues
+- **Browser Errors**: Page load failures, JavaScript errors
+- **Extraction Errors**: CSS selector failures, LLM API errors
+- **Validation Errors**: Invalid URLs or malformed requests
+
+Error responses include detailed information for debugging:
+
+```json
+{
+  "success": false,
+  "error": "Page load timeout after 60000ms",
+  "error_type": "TimeoutError",
+  "url": "https://example.com/slow-page",
+  "retry_count": 2
+}
+```
+
+## Performance Considerations
+
+### Optimization Strategies
+
+- **Selective Extraction**: Use CSS selectors to extract only needed content
+- **Browser Configuration**: Use headless mode and disable images for faster crawling
+- **Concurrent Processing**: Use batch_scrape for multiple URLs
+- **Session Reuse**: Use scrape_with_session for multi-step workflows
+- **LLM Cost Control**: Use schema extraction when possible, LLM only for semantic analysis
+
+### Resource Management
+
+- **Memory Usage**: Automatic cleanup of browser resources
+- **Network Bandwidth**: Configurable image loading and content filtering
+- **Rate Limiting**: Built-in delays and retry logic
+- **Connection Pooling**: Efficient browser session management
+
+## Security and Ethics
+
+### Respectful Scraping
+
+- **Rate Limiting**: Built-in delays and retry logic
+- **User Agent**: Configurable user agent identification
+- **Robots.txt**: Respect website scraping policies (manual compliance)
+- **Terms of Service**: Comply with website terms of use
+
+### Security Features
+
+- **SSL Verification**: Certificate verification enabled by default
+- **URL Validation**: Input validation and sanitization
+- **Timeout Protection**: Prevents hanging requests
+- **Resource Limits**: Configurable memory and connection limits
+
+## Development
+
+### Setup
+
+```bash
+git clone https://github.com/realtimex/web-scraping-mcp-server
+cd web-scraping-mcp-server
+pip install -e ".[dev]"
+```
+
+### Testing
+
+```bash
+pytest                    # Run all tests
+pytest --cov            # Run with coverage
+pytest -m integration   # Run integration tests
+```
+
+### Debug Mode
+
+```bash
+LITELLM_API_KEY=your-key \
+LITELLM_API_BASE=https://api.openai.com/v1 \
+LOG_LEVEL=DEBUG \
+web-scraping-mcp-server
+```
+
+## License
+
+MIT License - see LICENSE file for details.
+
+## Contributing
+
+Contributions are welcome! Please read our contributing guidelines and submit pull requests to our GitHub repository.
+
+## Support
+
+For support, please open an issue on our GitHub repository or contact support@realtimex.com.
