@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+# ──────────────────────────────────────────────────────────────────────────────
+# $source: cappysan-dotfile-scripts$
+# ──────────────────────────────────────────────────────────────────────────────
+#
+# NAME
+#      clear - clear the terminal with any method available
+#
+# SEE ALSO
+#      clear_console(1), clear(1)
+#
+if test -x /usr/bin/clear_console; then
+  if /usr/bin/clear_console -q "${@}"; then
+    exit 0
+  fi
+fi
+
+if test -x /usr/bin/clear; then
+  /usr/bin/clear "${@}"
+fi
