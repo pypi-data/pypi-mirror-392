@@ -1,0 +1,51 @@
+# SPDX-FileCopyrightText: 2021 Jeff Epler
+#
+# SPDX-License-Identifier: MIT
+
+name: Test
+
+on:
+  push:
+  pull_request:
+  release:
+    types: [published]
+  check_suite:
+    types: [rerequested]
+
+jobs:
+  build:
+    runs-on: arm64
+    container:
+      image: docker.io/library/python:3-trixie
+
+    steps:
+    - name: Set up node
+      run: apt-get update && apt-get install -y --no-install-recommends nodejs
+
+    - uses: actions/checkout@v4
+
+    - name: Set up uv
+      run: pip install --break-system-packages uv
+
+    - name: pre-commit
+      run: uvx prek --all-files
+
+    - name: Make patch
+      if: failure()
+      run: git diff > ~/pre-commit.patch
+
+    - name: Upload patch
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: patch
+        path: ~/pre-commit.patch
+
+    - name: Build release
+      run: uv build
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist
+        path: dist/*
