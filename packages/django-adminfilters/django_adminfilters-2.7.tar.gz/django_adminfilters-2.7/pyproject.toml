@@ -1,0 +1,164 @@
+[build-system]
+build-backend = "hatchling.build"
+requires = [
+  "hatch-vcs>=0.4",
+  "hatchling>=1.25",
+]
+
+[project]
+name = "django-adminfilters"
+description = "Collection of Django Admin filters"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+  "Environment :: Web Environment",
+  "Framework :: Django",
+  "Framework :: Django :: 4.2",
+  "Framework :: Django :: 5.2",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: BSD License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Libraries :: Application Frameworks",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dynamic = [
+  "version",
+]
+dependencies = [
+  "django-stubs>=5.1.3",
+  "django-stubs-ext>=5.1.3",
+]
+
+urls.Documentation = "https://github.com/saxix/django-adminfilters"
+urls.Homepage = "https://github.com/saxix/django-adminfilters"
+
+[dependency-groups]
+dev = [
+  "django-environ",
+  "django-factory-boy",
+  "django-webtest>=1.9.13",
+  "djlint>=1.36.4",
+  "pdbpp>=0.11.7",
+  "pre-commit",
+  "psycopg2-binary",
+  "pyproject-fmt>=2.5.1",
+  "pyquery>=2.0.1",
+  "pytest",
+  "pytest-cov",
+  "pytest-django",
+  "pytest-echo",
+  "pytest-selenium",
+  "ruff>=0.9.9",
+  "tox",
+]
+
+docs = [
+  "markdown-include>=0.8.1",
+  "mdx-gh-links>=0.4",
+  "mkdocs>=1.6.1",
+  "mkdocs-autolinks-plugin>=0.7.1",
+  "mkdocs-autorefs>=1.3.1",
+  "mkdocs-awesome-pages-plugin>=2.10.1",
+  "mkdocs-ezlinks-plugin>=0.1.14",
+  "mkdocs-glightbox>=0.4",
+  "mkdocs-include-markdown-plugin>=6.2.2",
+  "mkdocs-macros-plugin>=1.3.7",
+  "mkdocs-markdownextradata-plugin>=0.2.6",
+  "mkdocs-material>=9.6.5",
+  "mkdocs-material-extensions>=1.3.1",
+  "mkdocstrings>=0.28.1",
+  "mkdocstrings-python>=1.16.1",
+]
+dj = [
+  "django",
+]
+type-check = [
+  "mypy",
+]
+
+[tool.hatch]
+build.hooks.vcs.version-file = "src/adminfilters/version.py"
+version.source = "vcs"
+raw-options = { root = "../.." }
+
+[tool.hatch.build.targets.sdist]
+ignore-vcs = true
+include = [
+  "src/adminfilters/**/*.*",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = [ "src/adminfilters" ]
+
+#[tool.check-wheel-contents]
+#ignore = "W004"
+#
+#[tool.pyproject-fmt]
+#max_supported_python = "3.13"
+#
+#[tool.pytest.ini_options]
+#django_find_project = false
+#pythonpath = [ "./tests/demoapp/", "./src" ]
+#DJANGO_SETTINGS_MODULE = "demo.settings"
+#norecursedirs = [ "demo", ".tox" ]
+#addopts = [
+#  "--selenium",
+#  "--tb=short",
+#  "--capture=no",
+#  "--echo-version=django",
+#  "--echo-attr=django.conf.settings.DATABASES.default.ENGINE",
+#  "--cov=adminfilters",
+#  "--cov-report=html",
+#  "--cov-report=xml",
+#  "--cov-config=tests/.coveragerc",
+#]
+#python_files = "tests/test_*.py tests/**/test_*.py src/*.py"
+#markers = [
+#  "functional: mark a test as functional",
+#  "selenium: selenium test",
+#  "skip: skip test",
+#]
+#
+#[tool.coverage]
+#run.source = [
+#  "adminfilters",
+#]
+#run.dynamic_context = "test_function"
+#run.branch = true
+#run.parallel = true
+#run.plugins = [
+#  "covdefaults",
+#]
+#report.fail_under = 80
+#report.show_missing = true
+#report.exclude_lines = [
+#  "pragma: no cover",
+#]
+#html.show_contexts = true
+#html.skip_covered = false
+#paths.source = [
+#  "src",
+#  ".tox*/*/lib/python*/site-packages",
+#  ".tox*/pypy*/site-packages",
+#  ".tox*\\*\\Lib\\site-packages",
+#  "*/src",
+#  "*\\src",
+#]
+#
+#[tool.mypy]
+#plugins = "mypy_django_plugin.main"
+#mypy_path = "tests/demoapp"
+#[[tool.mypy.overrides]]
+#module = "environ.*"
+#ignore_missing_imports = true
+#
+#[tool.django-stubs]
+#django_settings_module = "demo.settings"
+#
+#[tool.uv]
+#package = true
