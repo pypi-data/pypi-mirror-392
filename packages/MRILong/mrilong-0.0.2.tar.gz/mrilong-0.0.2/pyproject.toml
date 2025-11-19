@@ -1,0 +1,51 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "MRILong"
+version = "0.0.2"
+authors = [
+  { name="Kishore Kumar Tarafdar", email="kishorektarafdar@gmail.com" },
+]
+description = "Longitudinal Analysis of Brain T1 MRI (3D) with Skull‑Strip and Tissue Segmentation"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering",
+  "Intended Audience :: Science/Research"
+]
+license = "GPL-3.0-or-later"
+license-files = [ "LICENSE" ]
+
+# Runtime dependencies
+# Note: TensorFlow is intentionally not pinned here to allow users to choose
+# CPU/GPU variants and versions (see README for TF install guidance).
+dependencies = [
+  "tensorflow>=2.15,<2.20",
+  "numpy>=2.0",
+  "nibabel>=5.0",
+  "scipy>=1.10",
+  "matplotlib>=3.10",
+  "TFDWT>=0.0.9",
+]
+
+# Optional feature groups
+[project.optional-dependencies]
+preproc = [
+  "SimpleITK>=2.2",
+  "scikit-image>=0.21",
+]
+registration = [
+  "SimpleITK>=2.2",
+]
+full = [
+  "SimpleITK>=2.2",
+  "scikit-image>=0.21",
+]
+
+[project.urls]
+Homepage = "https://github.com/multires-cv-graphs/MRILong"
+Issues = "https://github.com/multires-cv-graphs/MRILong/issues"
