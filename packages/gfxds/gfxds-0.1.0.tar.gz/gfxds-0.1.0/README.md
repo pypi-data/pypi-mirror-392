@@ -1,0 +1,41 @@
+# Graphics Datasets in Rust (gfxds)
+![PyPI - Version](https://img.shields.io/pypi/v/gfxds)
+
+This Rust/Python package provides dataloaders for mult-channel image datasets,
+particularly related to material estimation and intrinsic image decomposition.
+Writing it in Rust was a little silly, but I've gotten so tired of working with
+`torch.utils.data.DataLoader`.
+
+This library does as much as possible to make different datasets consistent,
+mapping all RGB color data as gamma=2.2 (not quite sRGB) and all non-color data
+as linear. Images should have reasonable exposure. Shading and albedo maps are
+computed so that `image = albedo * shading / (1 - shading)`. Any flipped normals
+are corrected. Depth maps are rescaled (but not offset) to have a maximum of
+depth of 1. All pixel values are dequantized appropriately with random noise.
+
+All default datasets can be found in `datasets.toml`. If you would like to add
+support for a new dataset, consider opening a PR with a new
+`src/dataset/[whatever dataset].rs` file and entry in the `datasets.toml` config.
+Regardless I would recommend forking this repo if you want to use it in your
+own research, since configuration is limited and most decisions are hard-coded.
+
+# Example
+
+After downloading interiorverse (https://interiorverse.github.io/#download) to a datasets
+folder, you can use the dataloader like so:
+
+```python
+from gfxds import Loader
+
+loader = Loader('/path/to/the/datasets', 'train/interiorverse/85')
+loader.start() # starts background worker threads
+
+for sample in loader:
+    sample.name # identifier for the element of the dataset
+    sample.caption # text description
+    for component, raster in sample.images.items():
+        component # the name of the image (eg roughness, normals, image)
+        raster # the usual float32 h*w*c numpy array
+```
+
+For the full API, see [gfxds.pyi](https://github.com/samsartor/gfxds/blob/main/gfxds.pyi).

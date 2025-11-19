@@ -1,0 +1,31 @@
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "gfxds"
+version = "0.1.0"
+dependencies = [
+    "numpy>=1.21",
+]
+requires-python = ">=3.8"
+description = "Dataloaders for multi-channel graphics datasets"
+readme = "README.md" 
+license = "MIT"
+authors = [
+    { name = "Sam Sartor", email = "me@samsartor.com" },
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Rust",
+]
+
+[project.urls]
+Homepage = "https://github.com/samsartor/gfxds"
+Repository = "https://github.com/samsartor/gfxds"
+
+[tool.maturin]
+manifest-path = "py/Cargo.toml"
+module = true
+features = ["gfxds/hdf5"]
+bindings = "pyo3"

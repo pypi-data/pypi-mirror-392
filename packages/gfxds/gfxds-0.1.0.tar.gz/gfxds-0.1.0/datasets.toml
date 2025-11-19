@@ -1,0 +1,362 @@
+["train/deepmaterials"]
+kind = "MatfusionRasterized"
+dir = "datasets:DeepMaterialsData/trainBlended"
+gamma_on_disk = false
+
+["test/deepmaterials"]
+kind = "MatfusionRasterized"
+dir = "datasets:DeepMaterialsData/testBlended"
+gamma_on_disk = false
+
+["train/matfusion/rast/inria"]
+kind = "MatfusionRasterized"
+dir = "datasets:matfusion/inria_svbrdfs"
+gamma_on_disk = false
+expected_count = 199068
+
+["train/matfusion/rast/cc0"]
+kind = "MatfusionRasterized"
+dir = "datasets:matfusion/cc0_svbrdfs"
+gamma_on_disk = false
+expected_count = 30032
+
+["train/matfusion/rast/mixed"]
+kind = "MatfusionRasterized"
+dir = "datasets:matfusion/mixed_svbrdfs"
+gamma_on_disk = false
+expected_count = 98211
+
+[["train/matfusion/rast"]]
+id = "train/matfusion/rast/inria"
+[["train/matfusion/rast"]]
+id = "train/matfusion/rast/cc0"
+[["train/matfusion/rast"]]
+id = "train/matfusion/rast/mixed"
+
+["test/matfusion/rast"]
+kind = "MatfusionRasterized"
+dir = "datasets:matfusion/test_svbrdfs"
+gamma_on_disk = true
+expected_count = 50 # Corrected from expected_counts
+
+["train/matfusion/flash/inria"]
+kind = "MatfusionGi"
+inherit = "train/matfusion/rast/inria"
+renders = "datasets:matfusion/inria_renders"
+lighting = "Flash"
+center_crop = 0.25
+
+["train/matfusion/flash/cc0"]
+kind = "MatfusionGi"
+inherit = "train/matfusion/rast/cc0"
+renders = "datasets:matfusion/cc0_renders"
+lighting = "Flash"
+center_crop = 0.25
+
+["train/matfusion/flash/mixed"]
+kind = "MatfusionGi"
+inherit = "train/matfusion/rast/mixed"
+renders = "datasets:matfusion/mixed_renders"
+lighting = "Flash"
+center_crop = 0.25
+
+["test/matfusion/flash"]
+kind = "MatfusionGi"
+dir = "datasets:matfusion/test_svbrdfs_manyenv"
+renders = "datasets:matfusion/test_renders_manyenv"
+lighting = "Flash"
+gamma_on_disk = true
+center_crop = 0.25
+expected_count = 400
+
+[["train/matfusion/flash"]]
+id = "train/matfusion/flash/inria"
+[["train/matfusion/flash"]]
+id = "train/matfusion/flash/cc0"
+[["train/matfusion/flash"]]
+id = "train/matfusion/flash/mixed"
+
+["train/matfusion/env/inria"]
+kind = "MatfusionGi"
+inherit = "train/matfusion/rast/inria"
+renders = "datasets:matfusion/inria_renders"
+lighting = "Env"
+center_crop = 0.25
+
+["train/matfusion/env/cc0"]
+kind = "MatfusionGi"
+inherit = "train/matfusion/rast/cc0"
+renders = "datasets:matfusion/cc0_renders"
+lighting = "Env"
+center_crop = 0.25
+
+["train/matfusion/env/mixed"]
+kind = "MatfusionGi"
+inherit = "train/matfusion/rast/mixed"
+renders = "datasets:matfusion/mixed_renders"
+lighting = "Env"
+center_crop = 0.25
+
+[["train/matfusion/env"]]
+id = "train/matfusion/env/inria"
+[["train/matfusion/env"]]
+id = "train/matfusion/env/cc0"
+[["train/matfusion/env"]]
+id = "train/matfusion/env/mixed"
+
+["test/matfusion/env"]
+kind = "MatfusionGi"
+dir = "datasets:matfusion/test_svbrdfs_manyenv"
+renders = "datasets:matfusion/test_renders_manyenv"
+lighting = "Env"
+gamma_on_disk = true
+center_crop = 0.25
+expected_count = 400
+
+["train/matfusion/fnf/inria"]
+kind = "MatfusionGi"
+inherit = "train/matfusion/rast/inria"
+renders = "datasets:matfusion/inria_renders"
+lighting = "FlashNoFlash"
+center_crop = 0.25
+
+["train/matfusion/fnf/cc0"]
+kind = "MatfusionGi"
+inherit = "train/matfusion/rast/cc0"
+renders = "datasets:matfusion/cc0_renders"
+lighting = "FlashNoFlash"
+center_crop = 0.25
+
+["train/matfusion/fnf/mixed"]
+kind = "MatfusionGi"
+inherit = "train/matfusion/rast/mixed"
+renders = "datasets:matfusion/mixed_renders"
+lighting = "FlashNoFlash"
+center_crop = 0.25
+
+[["train/matfusion/fnf"]]
+id = "train/matfusion/fnf/inria"
+[["train/matfusion/fnf"]]
+id = "train/matfusion/fnf/cc0"
+[["train/matfusion/fnf"]]
+id = "train/matfusion/fnf/mixed"
+
+["test/matfusion/fnf"]
+kind = "MatfusionGi"
+dir = "datasets:matfusion/test_svbrdfs_manyenv"
+renders = "datasets:matfusion/test_renders_manyenv"
+lighting = "FlashNoFlash"
+gamma_on_disk = true
+center_crop = 0.25
+expected_count = 400
+
+["train/interiorverse/85"]
+kind = "Interiorverse"
+dir = "datasets:interiorverse/dataset_85"
+split = "train"
+fov = 85
+expected_count = 45073
+
+["train/interiorverse/120"]
+kind = "Interiorverse"
+dir = "datasets:interiorverse/dataset_120"
+split = "train"
+fov = 120
+expected_count = 45073
+
+["val/interiorverse/85"]
+kind = "Interiorverse"
+dir = "datasets:interiorverse/dataset_85"
+split = "val"
+fov = 85
+expected_count = 5024
+
+["val/interiorverse/120"]
+kind = "Interiorverse"
+dir = "datasets:interiorverse/dataset_120"
+split = "val"
+fov = 120
+expected_count = 5024
+
+["test/interiorverse/85"]
+kind = "Interiorverse"
+dir = "datasets:interiorverse/dataset_85"
+split = "test"
+fov = 85
+expected_count = 2672
+
+["test/interiorverse/120"]
+kind = "Interiorverse"
+dir = "datasets:interiorverse/dataset_120"
+split = "test"
+fov = 120
+expected_count = 2672
+
+["train/hypersim"]
+kind = "Hypersim"
+dir = "datasets:hypersim"
+split = "train"
+normalize_depth = true
+expected_count =  59543
+
+["val/hypersim"]
+kind = "Hypersim"
+dir = "datasets:hypersim"
+split = "val"
+normalize_depth = true
+expected_count = 7386
+
+["test/hypersim"]
+kind = "Hypersim"
+dir = "datasets:hypersim"
+split = "test"
+normalize_depth = true
+expected_count = 7690
+
+["train/cgintrinsics"]
+kind = "CGIntrinsics"
+dir = "datasets:cgintrinsics/intrinsics_final"
+normalize_depth = true
+
+[["train/rooms"]]
+id = "train/interiorverse/85"
+weight = 1.0
+[["train/rooms"]]
+id = "train/interiorverse/120"
+weight = 1.0
+[["train/rooms"]]
+id = "train/hypersim"
+weight = 2.0
+[["train/rooms"]]
+id = "train/cgintrinsics"
+weight = 1.0
+
+[["test/rooms"]]
+id = "test/interiorverse/85"
+weight = 1.0
+[["test/rooms"]]
+id = "test/interiorverse/120"
+weight = 1.0
+[["test/rooms"]]
+id = "test/hypersim"
+weight = 2.0
+
+["test/arap"]
+kind = "Arap"
+dir = "datasets:arap"
+
+["train/beyondrgb"]
+kind = "BeyondRgb"
+root = "datasets:beyondRGB"
+split = "train"
+groups = [
+    [8, 4, 0], [9, 5, 1], [10, 6, 2], [11, 7, 3], [12, 14, 4], [13, 15, 5],
+]
+expected_count = 100 # TODO: Verify count
+
+["test/beyondrgb"]
+kind = "BeyondRgb"
+root = "datasets:beyondRGB"
+split = "test"
+groups = [
+    [8, 4, 0], [9, 5, 1], [10, 6, 2], [11, 7, 3], [12, 14, 4], [13, 15, 5],
+]
+expected_count = 100 # TODO: Verify count
+
+["train/cromo"]
+kind = "Cromo"
+scenes = ["datasets:cromo/kitchen", "datasets:cromo/station", "datasets:cromo/facades", "datasets:cromo/park"]
+resize_using_crop = 0.2 # Example random crop range (0.0 to 0.2)
+# expected_count = ? # Add if known
+
+["test/deeppolimage"]
+kind = "DeepPolImage"
+dir = "datasets:deeppolimage/test"
+resize_using_crop = 0.2 # Example random crop range (0.0 to 0.2)
+# expected_count = ? # Add if known
+
+["train/mid"]
+kind = "Mid"
+dir = "datasets:mid"
+is_train = true
+# resize_using_crop = ? # Needs dynamic crop handling
+# expected_count = ? # Add if known
+
+["test/mid"]
+kind = "Mid"
+dir = "datasets:mid_test"
+is_train = false
+input_direction = 0
+gt_direction = 17
+resize_using_crop = 0.0 # No random crop for test
+# expected_count = ? # Add if known
+
+["train/ntire"]
+kind = "Ntire"
+dir = "datasets:ntire_track2/train"
+is_train = true
+apply_gamma = true
+resize_using_crop = 0.1 # Example random crop range (0.0 to 0.1)
+# expected_count = ? # Add if known
+
+["val/ntire"]
+kind = "Ntire"
+dir = "datasets:ntire_track2/validation"
+gt_dir = "datasets:ntire_track2/validation_gt"
+is_train = false
+apply_gamma = true
+resize_using_crop = 0.0 # No random crop for validation
+expected_count = 90
+
+["train/nyudepth"]
+kind = "NyuDepth"
+dir = "datasets:nyudepthv2/train"
+is_train = true
+normalize_depth = true
+# resize_using_crop = ? # Needs dynamic crop handling + careful offset
+# expected_count = ? # Add if known
+
+["val/nyudepth"]
+kind = "NyuDepth"
+dir = "datasets:nyudepthv2/val"
+is_train = false
+normalize_depth = true
+resize_using_crop = 0.0 # No random crop for validation
+# expected_count = ? # Add if known
+
+["train/pixelprose"]
+kind = "PixelProse"
+dir = "datasets:pixelprose"
+is_train = true
+caption_find = "^\\s*This image displays:?\\s*([\\u0020-\\u007E\\s“”’—]+)$"
+caption_replace = "$1"
+resize_using_crop = 0.0 # No random crop specified in original
+# expected_count = ? # Add if known
+
+["val/pixelprose"]
+kind = "PixelProse"
+dir = "datasets:pixelprose"
+is_train = false
+caption_find = "^\\s*This image displays:?\\s*([\\u0020-\\u007E\\s]+)$"
+caption_replace = "$1"
+resize_using_crop = 0.0 # No random crop specified in original
+# expected_count = ? # Add if known
+
+["train/pbrjumble/v0"]
+kind = "PbrJumble"
+renders = "datasets:matfusion/silhouette_renders"
+normalize_depth = true
+expected_count = 64584
+resize_using_crop = 0.1 # Example random crop range (0.0 to 0.1, based on TODO)
+
+["train/infinigen/preview"]
+kind = "Infinigen"
+dir = "datasets:2023_10_13_preview"
+normalize_depth = true
+worldspace_normals_on_disk = false
+
+["train/infinigen/run2"]
+kind = "Infinigen"
+dir = "datasets:infinigen_run2"
+normalize_depth = true
+worldspace_normals_on_disk = true
