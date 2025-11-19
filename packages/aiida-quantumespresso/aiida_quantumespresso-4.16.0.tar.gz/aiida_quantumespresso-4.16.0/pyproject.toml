@@ -1,0 +1,219 @@
+[build-system]
+requires = ['hatchling']
+build-backend = 'hatchling.build'
+
+[project]
+name = 'aiida-quantumespresso'
+dynamic = ['version']
+description = 'The official AiiDA plugin for Quantum ESPRESSO'
+authors = [{name = 'The AiiDA team', email = 'developers@aiida.net'}]
+readme = 'README.md'
+license = {file = 'LICENSE.txt'}
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Framework :: AiiDA',
+    'License :: OSI Approved :: MIT License',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3.14',
+]
+keywords = ['aiida', 'workflows']
+requires-python = '>=3.10'
+dependencies = [
+    'aiida_core[atomic_tools]~=2.3',
+    'aiida-pseudo>=1.7.2,<2',
+    'click~=8.0',
+    'importlib_resources',
+    'jsonschema',
+    'numpy',
+    'pydantic~=2.0',
+    'packaging',
+    'qe-tools~=2.0',
+    'xmlschema~=2.0'
+]
+
+[project.urls]
+Home = 'https://github.com/aiidateam/aiida-quantumespresso'
+Source = 'https://github.com/aiidateam/aiida-quantumespresso'
+Documentation = 'https://aiida-quantumespresso.readthedocs.io'
+
+[project.scripts]
+aiida-quantumespresso = 'aiida_quantumespresso.cli:cmd_root'
+
+[project.entry-points.'aiida.calculations']
+'quantumespresso.cp' = 'aiida_quantumespresso.calculations.cp:CpCalculation'
+'quantumespresso.create_kpoints_from_distance' = 'aiida_quantumespresso.calculations.functions.create_kpoints_from_distance:create_kpoints_from_distance'
+'quantumespresso.create_magnetic_configuration' = 'aiida_quantumespresso.calculations.functions.create_magnetic_configuration:create_magnetic_configuration'
+'quantumespresso.merge_ph_outputs' = 'aiida_quantumespresso.calculations.functions.merge_ph_outputs:merge_ph_outputs'
+'quantumespresso.dos' = 'aiida_quantumespresso.calculations.dos:DosCalculation'
+'quantumespresso.epw' = 'aiida_quantumespresso.calculations.epw:EpwCalculation'
+'quantumespresso.matdyn' = 'aiida_quantumespresso.calculations.matdyn:MatdynCalculation'
+'quantumespresso.namelists' = 'aiida_quantumespresso.calculations.namelists:NamelistsCalculation'
+'quantumespresso.neb' = 'aiida_quantumespresso.calculations.neb:NebCalculation'
+'quantumespresso.ph' = 'aiida_quantumespresso.calculations.ph:PhCalculation'
+'quantumespresso.pp' = 'aiida_quantumespresso.calculations.pp:PpCalculation'
+'quantumespresso.projwfc' = 'aiida_quantumespresso.calculations.projwfc:ProjwfcCalculation'
+'quantumespresso.pw' = 'aiida_quantumespresso.calculations.pw:PwCalculation'
+'quantumespresso.pw2gw' = 'aiida_quantumespresso.calculations.pw2gw:Pw2gwCalculation'
+'quantumespresso.pw2wannier90' = 'aiida_quantumespresso.calculations.pw2wannier90:Pw2wannier90Calculation'
+'quantumespresso.pwimmigrant' = 'aiida_quantumespresso.calculations.pwimmigrant:PwimmigrantCalculation'
+'quantumespresso.q2r' = 'aiida_quantumespresso.calculations.q2r:Q2rCalculation'
+'quantumespresso.seekpath_structure_analysis' = 'aiida_quantumespresso.calculations.functions.seekpath_structure_analysis:seekpath_structure_analysis'
+'quantumespresso.xspectra' = 'aiida_quantumespresso.calculations.xspectra:XspectraCalculation'
+'quantumespresso.open_grid' = 'aiida_quantumespresso.calculations.open_grid:OpenGridCalculation'
+'quantumespresso.bands' = 'aiida_quantumespresso.calculations.bands:BandsCalculation'
+
+[project.entry-points.'aiida.data']
+'quantumespresso.force_constants' = 'aiida_quantumespresso.data.force_constants:ForceConstantsData'
+'quantumespresso.hubbard_structure' = 'aiida_quantumespresso.data.hubbard_structure:HubbardStructureData'
+
+[project.entry-points.'aiida.parsers']
+'quantumespresso.cp' = 'aiida_quantumespresso.parsers.cp:CpParser'
+'quantumespresso.dos' = 'aiida_quantumespresso.parsers.dos:DosParser'
+'quantumespresso.matdyn' = 'aiida_quantumespresso.parsers.matdyn:MatdynParser'
+'quantumespresso.neb' = 'aiida_quantumespresso.parsers.neb:NebParser'
+'quantumespresso.ph' = 'aiida_quantumespresso.parsers.ph:PhParser'
+'quantumespresso.pp' = 'aiida_quantumespresso.parsers.pp:PpParser'
+'quantumespresso.projwfc' = 'aiida_quantumespresso.parsers.projwfc:ProjwfcParser'
+'quantumespresso.pw' = 'aiida_quantumespresso.parsers.pw:PwParser'
+'quantumespresso.pw2gw' = 'aiida_quantumespresso.parsers.pw2gw:Pw2gwParser'
+'quantumespresso.q2r' = 'aiida_quantumespresso.parsers.q2r:Q2rParser'
+'quantumespresso.pw2wannier90' = 'aiida_quantumespresso.parsers.pw2wannier90:Pw2wannier90Parser'
+'quantumespresso.xspectra' = 'aiida_quantumespresso.parsers.xspectra:XspectraParser'
+'quantumespresso.open_grid' = 'aiida_quantumespresso.parsers.open_grid:OpenGridParser'
+'quantumespresso.bands' = 'aiida_quantumespresso.parsers.bands:BandsParser'
+
+[project.entry-points.'aiida.tools.calculations']
+'quantumespresso.pw' = 'aiida_quantumespresso.tools.calculations.pw:PwCalculationTools'
+
+[project.entry-points.'aiida.tools.data.orbitals']
+'spinorbithydrogen' = 'aiida_quantumespresso.tools.data.orbital.spinorbithydrogen:SpinorbitHydrogenOrbital'
+'noncollinearhydrogen' = 'aiida_quantumespresso.tools.data.orbital.noncollinearhydrogen:NoncollinearHydrogenOrbital'
+
+[project.entry-points.'aiida.workflows']
+'quantumespresso.ph.base' = 'aiida_quantumespresso.workflows.ph.base:PhBaseWorkChain'
+'quantumespresso.pw.base' = 'aiida_quantumespresso.workflows.pw.base:PwBaseWorkChain'
+'quantumespresso.pw.relax' = 'aiida_quantumespresso.workflows.pw.relax:PwRelaxWorkChain'
+'quantumespresso.pw.bands' = 'aiida_quantumespresso.workflows.pw.bands:PwBandsWorkChain'
+'quantumespresso.q2r.base' = 'aiida_quantumespresso.workflows.q2r.base:Q2rBaseWorkChain'
+'quantumespresso.matdyn.base' = 'aiida_quantumespresso.workflows.matdyn.base:MatdynBaseWorkChain'
+'quantumespresso.pdos' = 'aiida_quantumespresso.workflows.pdos:PdosWorkChain'
+'quantumespresso.xspectra.base' = 'aiida_quantumespresso.workflows.xspectra.base:XspectraBaseWorkChain'
+'quantumespresso.xps' = 'aiida_quantumespresso.workflows.xps:XpsWorkChain'
+'quantumespresso.xspectra.core' = 'aiida_quantumespresso.workflows.xspectra.core:XspectraCoreWorkChain'
+'quantumespresso.xspectra.crystal' = 'aiida_quantumespresso.workflows.xspectra.crystal:XspectraCrystalWorkChain'
+'quantumespresso.bands.base' = 'aiida_quantumespresso.workflows.bands.base:BandsBaseWorkChain'
+'quantumespresso.neb.base' = 'aiida_quantumespresso.workflows.neb.base:NebBaseWorkChain'
+
+[project.optional-dependencies]
+docs = [
+    'sphinx~=6.2.1',
+    'sphinx-copybutton~=0.5.2',
+    'sphinx-book-theme~=1.0.1',
+    'sphinx-click~=4.4.0',
+    'sphinx-design~=0.4.1',
+    'sphinxcontrib-details-directive~=0.1.0',
+    'sphinx-autoapi~=3.0.0',
+    'myst-parser~=3.0.0',
+]
+tests = [
+    'pgtest~=1.3',
+    'pytest~=8.4',
+    'pytest-regressions~=2.8',
+]
+pre-commit = [
+    'pre-commit>=4.3.0',
+]
+
+[dependency-groups]
+dev = [
+  "aiida-quantumespresso[docs,tests,pre-commit]",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ['src/aiida_quantumespresso']
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+  'docs/',
+  'tests/',
+]
+
+[tool.hatch.version]
+path = 'src/aiida_quantumespresso/__init__.py'
+
+[tool.hatch.envs.default]
+installer = 'uv'
+
+[tool.hatch.envs.pre-commit]
+features = ["pre-commit"]
+scripts.install = 'pre-commit install'
+scripts.run = 'pre-commit run {args}'
+
+[tool.hatch.envs.hatch-test]
+features = ["tests"]
+randomize = false
+parallel = false
+run = "pytest {args}"
+
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.9", "3.10", "3.11", "3.12"]
+
+[tool.hatch.envs.docs]
+features = ["docs"]
+scripts.clean = 'make -C docs clean'
+scripts.build = 'make -C docs html'
+scripts.view = 'make -C docs view'
+
+[tool.ruff]
+line-length = 120
+lint.ignore = [
+    "ARG002",  # https://docs.astral.sh/ruff/rules/unused-method-argument/
+    "ARG004",  # https://docs.astral.sh/ruff/rules/unused-static-method-argument/
+    "B028",    # https://docs.astral.sh/ruff/rules/no-explicit-stacklevel/
+    "BLE001",  # https://docs.astral.sh/ruff/rules/blind-except/
+    "EM101",   # https://docs.astral.sh/ruff/rules/raw-string-in-exception/
+    "EM102",   # https://docs.astral.sh/ruff/rules/f-string-in-exception/
+    "EXE001",  # https://docs.astral.sh/ruff/rules/shebang-not-executable/
+    "FA100",   # https://docs.astral.sh/ruff/rules/future-rewritable-type-annotation/
+    "FBT001",  # https://docs.astral.sh/ruff/rules/boolean-type-hint-positional-argument/
+    "FBT002",  # https://docs.astral.sh/ruff/rules/boolean-default-value-positional-argument/
+    "G004",    # https://docs.astral.sh/ruff/rules/logging-f-string/
+    "N805",    # https://docs.astral.sh/ruff/rules/invalid-first-argument-name-for-method/
+    "PERF401", # https://docs.astral.sh/ruff/rules/manual-list-comprehension/
+    "PLR2004", # https://docs.astral.sh/ruff/rules/magic-value-comparison/
+    "RUF005",  # https://docs.astral.sh/ruff/rules/collection-literal-concatenation/
+    "RUF012",  # https://docs.astral.sh/ruff/rules/mutable-class-default/
+    "RET503",  # https://docs.astral.sh/ruff/rules/implicit-return/
+    "S110",    # https://docs.astral.sh/ruff/rules/try-except-pass/
+    "S318",    # https://docs.astral.sh/ruff/rules/suspicious-xml-mini-dom-usage/
+    "S314",    # https://docs.astral.sh/ruff/rules/suspicious-xml-element-tree-usage/
+    "TID252",  # https://docs.astral.sh/ruff/rules/relative-imports/
+    "TRY004",  # https://docs.astral.sh/ruff/rules/type-check-without-type-error/
+    "TRY003",  # https://docs.astral.sh/ruff/rules/raise-vanilla-args/
+    "TRY301",  # https://docs.astral.sh/ruff/rules/raise-within-try/
+]
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "INP001",  # https://docs.astral.sh/ruff/rules/implicit-namespace-package/
+    "PT009",   # https://docs.astral.sh/ruff/rules/pytest-unittest-assertion/
+    "PT011",   # https://docs.astral.sh/ruff/rules/pytest-raises-too-broad/
+    "PT027",   # https://docs.astral.sh/ruff/rules/pytest-unittest-raises-assertion/
+    "S101",    # https://docs.astral.sh/ruff/rules/assert/
+    "SLF001",  # https://docs.astral.sh/ruff/rules/private-member-access/
+]
+"src/aiida_quantumespresso/parsers/**/*.py" = [
+    "B904",    # https://docs.astral.sh/ruff/rules/raise-without-from-inside-except/
+]
+"src/aiida_quantumespresso/cli/**/*.py" = ["ALL"]
+"docs/**/*.py" = ["ALL"]
+"src/aiida_quantumespresso/parsers/parse_xml/legacy.py" = ["ALL"]
+"src/aiida_quantumespresso/parsers/parse_xml/cp/legacy.py" = ["ALL"]
+"src/aiida_quantumespresso/parsers/parse_raw/__init__.py" = ["ALL"]
+"src/aiida_quantumespresso/calculations/helpers/__init__.py" = ["ALL"]
+
+[tool.ruff.format]
+quote-style = "single"
