@@ -1,0 +1,64 @@
+[project]
+name = "gh-pulse"
+version = "0.1.0"
+description = "GitHub productivity CLI - analyze repos, generate badges, and automate README updates"
+authors = [
+    { name = "Ruslan", email = "ruslan@example.com" }
+]
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+keywords = ["github", "cli", "productivity", "analytics", "badges"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "typer[all]>=0.12.0",
+    "httpx>=0.27.0",
+    "rich>=13.7.0",
+    "pydantic>=2.6.0",
+    "keyring>=25.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.3.0",
+]
+
+[project.scripts]
+gh-pulse = "gitpulse.cli:app"
+gitpulse = "gitpulse.cli:app"  # Keep legacy command for convenience
+
+[project.urls]
+Homepage = "https://github.com/ruslanlap/gitpulse"
+Repository = "https://github.com/ruslanlap/gitpulse"
+Issues = "https://github.com/ruslanlap/gitpulse/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gitpulse"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+asyncio_mode = "auto"

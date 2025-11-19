@@ -1,0 +1,504 @@
+<div align="center">
+
+# 🚀 gh-pulse
+
+**GitHub Productivity CLI** — Analyze repositories, generate badges, and automate README updates
+
+[![PyPI version](https://img.shields.io/pypi/v/gh-pulse?color=blue&logo=pypi&logoColor=white)](https://pypi.org/project/gh-pulse/)
+[![Python Version](https://img.shields.io/pypi/pyversions/gh-pulse?logo=python&logoColor=white)](https://pypi.org/project/gh-pulse/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Downloads](https://img.shields.io/pypi/dm/gh-pulse?color=blue&logo=pypi&logoColor=white)](https://pypi.org/project/gh-pulse/)
+
+[![CI](https://github.com/ruslanlap/gitpulse/workflows/CI/badge.svg)](https://github.com/ruslanlap/gitpulse/actions)
+[![codecov](https://codecov.io/gh/ruslanlap/gitpulse/branch/main/graph/badge.svg)](https://codecov.io/gh/ruslanlap/gitpulse)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
+[![Checked with mypy](https://img.shields.io/badge/mypy-checked-blue)](http://mypy-lang.org/)
+
+[![GitHub Stars](https://img.shields.io/github/stars/ruslanlap/gitpulse?style=social)](https://github.com/ruslanlap/gitpulse/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/ruslanlap/gitpulse?style=social)](https://github.com/ruslanlap/gitpulse/network/members)
+[![GitHub Issues](https://img.shields.io/github/issues/ruslanlap/gitpulse)](https://github.com/ruslanlap/gitpulse/issues)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/ruslanlap/gitpulse/pulls)
+
+**A powerful local analytics hub for your GitHub profile and repositories.**
+
+Pull data from GitHub API, cache it locally, display stats in terminal, and generate ready-to-use fragments for README and CI/CD workflows.
+
+[Installation](#-installation) • [Quick Start](#-quick-start) • [Documentation](#-usage) • [Contributing](#-contributing)
+
+</div>
+
+---
+
+## ✨ Features
+
+- 📊 **Repository Statistics** — stars, forks, issues, releases, and more
+- 👤 **User Profile Analytics** — top repositories, overall activity metrics
+- 🏷️ **Badge Generation** — ready-to-use Markdown shields for your README
+- 💾 **Local Caching** — blazing fast repeated queries with smart cache
+- 📤 **Data Export** — JSON output for CI/CD integration and automation
+- 🎨 **Beautiful Terminal Output** — rich tables and panels with colors
+- 🔒 **Secure Token Storage** — encrypted credential management with keyring
+- ⚡ **High Performance** — async HTTP client with connection pooling
+
+## 📦 Installation
+
+### Install with pip
+
+```bash
+pip install gh-pulse
+```
+
+### Install with uv (Recommended)
+
+[uv](https://github.com/astral-sh/uv) is a blazingly fast Python package installer and resolver.
+
+```bash
+# Install uv if you haven't already
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install gh-pulse
+uv pip install gh-pulse
+
+# Or run without installation
+uvx gh-pulse --help
+```
+
+### Install from source
+
+```bash
+git clone https://github.com/ruslanlap/gitpulse.git
+cd gitpulse
+pip install -e .
+```
+
+## 🚀 Quick Start
+
+### 1. Authenticate
+
+Create a GitHub Personal Access Token:
+
+1. Go to https://github.com/settings/tokens
+2. Click **Generate new token (classic)**
+3. Select scope: `public_repo` (for public repositories)
+4. Copy the generated token
+
+Save your token securely:
+
+```bash
+gh-pulse auth ghp_YOUR_TOKEN_HERE
+```
+
+Token will be stored in `~/.gitpulse/config` with restricted permissions (600).
+
+**Alternative:** Use environment variable
+
+```bash
+export GITHUB_TOKEN=ghp_YOUR_TOKEN_HERE
+```
+
+### 2. Analyze a Repository
+
+```bash
+gh-pulse repo ruslanlap/gitpulse
+```
+
+### 3. Generate Badges
+
+```bash
+gh-pulse badges ruslanlap/gitpulse
+```
+
+### 4. View User Profile
+
+```bash
+gh-pulse user ruslanlap --top 5
+```
+
+## 📖 Usage
+
+### Repository Statistics
+
+Get comprehensive statistics for any GitHub repository:
+
+```bash
+gh-pulse repo owner/repository
+```
+
+**Example output:**
+
+```
+📊 Repository: ruslanlap/PowerToysRun-QuickAi
+┌──────────────────┬────────────┐
+│ Metric           │      Value │
+├──────────────────┼────────────┤
+│ ⭐ Stars         │        145 │
+│ 🍴 Forks         │         12 │
+│ 👀 Watchers      │          8 │
+│ 📖 Open Issues   │          3 │
+│ 💻 Language      │     C#     │
+│ 📦 Size          │   2341 KB  │
+│ 🌿 Default Branch│     main   │
+│ 📅 Created       │ 2024-01-15 │
+│ 🔄 Last Updated  │ 2025-11-10 │
+│ 📤 Last Push     │ 2025-11-12 │
+└──────────────────┴────────────┘
+```
+
+**Options:**
+
+- `--no-cache` — Force refresh data from API (bypass cache)
+
+### User Profile
+
+Analyze GitHub user profiles with top repositories:
+
+```bash
+gh-pulse user username
+gh-pulse user username --top 5  # Show top 5 repositories
+```
+
+**Example output:**
+
+```
+👤 User: @ruslanlap
+┌─────────────────┬─────────┐
+│ Metric          │   Value │
+├─────────────────┼─────────┤
+│ Name            │  Ruslan │
+│ 📚 Public Repos │      42 │
+│ 📝 Public Gists │       8 │
+│ 👥 Followers    │     156 │
+│ ➡️ Following    │      89 │
+│ 📅 Joined       │2020-03-15│
+└─────────────────┴─────────┘
+
+⭐ Top 3 Repositories by Stars
+┌────────────────────┬───────┬──────────┬─────────────────┐
+│ Repository         │ Stars │ Language │ Description     │
+├────────────────────┼───────┼──────────┼─────────────────┤
+│ awesome-project    │  1.2k │   Python │ Cool tool       │
+│ another-repo       │   345 │TypeScript│ Web app         │
+│ third-repo         │   123 │      Go  │ CLI utility     │
+└────────────────────┴───────┴──────────┴─────────────────┘
+
+Total stars from top 3 repos: ⭐ 1,668
+```
+
+**Options:**
+
+- `--top N` or `-n N` — Number of top repositories (default: 3)
+- `--no-cache` — Force refresh data
+
+### Badge Generation
+
+Generate beautiful Markdown badges for your README:
+
+```bash
+gh-pulse badges owner/repository
+```
+
+**Example output:**
+
+```
+✓ Badges generated!
+
+┌──────────────────────────────────────────┐
+│ Markdown Badges                          │
+├──────────────────────────────────────────┤
+│ ![Stars](https://img.shields.io/...)    │
+│ ![Forks](https://img.shields.io/...)    │
+│ ![License](https://img.shields.io/...)  │
+│ ...                                      │
+└──────────────────────────────────────────┘
+
+Copy and paste the above Markdown into your README.md
+```
+
+**Custom badges:**
+
+```bash
+# Select specific badges only
+gh-pulse badges owner/repo --custom stars,forks,license
+```
+
+Available types: `stars`, `forks`, `issues`, `license`, `release`, `language`, `downloads`, `commit`
+
+### Data Export
+
+Export data as JSON for automation and CI/CD workflows:
+
+```bash
+# Export repository statistics
+gh-pulse export --repo owner/repository
+
+# Export user profile
+gh-pulse export --user username
+
+# Save to file
+gh-pulse export --repo owner/repo --output stats.json
+
+# Export both
+gh-pulse export --repo owner/repo --user username -o full.json
+```
+
+**JSON format:**
+
+```json
+{
+  "repository": {
+    "name": "gitpulse",
+    "full_name": "ruslanlap/gitpulse",
+    "stats": {
+      "stars": 123,
+      "forks": 45,
+      "watchers": 12,
+      "open_issues": 3
+    },
+    "language": "Python",
+    "releases": [...]
+  },
+  "user": {
+    "login": "ruslanlap",
+    "stats": {
+      "public_repos": 42,
+      "followers": 156
+    },
+    "top_repos": [...]
+  }
+}
+```
+
+### Cache Management
+
+Clear all cached data:
+
+```bash
+gh-pulse clear-cache
+```
+
+Cache is stored in `~/.gitpulse/cache/` with 1-hour TTL.
+
+## 🔧 Configuration
+
+### File Structure
+
+```
+~/.gitpulse/
+├── config          # GitHub token (secure storage)
+└── cache/          # Cached API responses
+    ├── repo_owner_name.json
+    └── user_username.json
+```
+
+### Environment Variables
+
+- `GITHUB_TOKEN` — GitHub API token (alternative to `gitpulse auth`)
+
+## 🎯 CI/CD Integration
+
+### GitHub Actions — Auto-Update Badges
+
+```yaml
+name: Update README Badges
+
+on:
+    schedule:
+        - cron: "0 0 * * 0" # Weekly on Sunday
+    workflow_dispatch:
+
+jobs:
+    update-badges:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Install uv
+              run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+            - name: Generate badges
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  uvx gh-pulse badges ${{ github.repository }} > badges.md
+
+            - name: Update README
+              run: |
+                  # Insert badges into README...
+                  cat badges.md
+
+            - name: Commit changes
+              run: |
+                  git config user.name "github-actions[bot]"
+                  git config user.email "github-actions[bot]@users.noreply.github.com"
+                  git add README.md
+                  git commit -m "docs: update badges" || exit 0
+                  git push
+```
+
+### Export Metrics for Monitoring
+
+```yaml
+- name: Export GitHub metrics
+  env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  run: |
+      uvx gh-pulse export --repo ${{ github.repository }} -o metrics.json
+
+- name: Upload metrics artifact
+  uses: actions/upload-artifact@v4
+  with:
+      name: github-metrics
+      path: metrics.json
+```
+
+## 🛠️ Development
+
+### Setup Development Environment
+
+```bash
+# Clone the repository
+git clone https://github.com/ruslanlap/gitpulse.git
+cd gitpulse
+
+# Install with development dependencies (using uv)
+uv pip install -e ".[dev]"
+
+# Or with pip
+pip install -e ".[dev]"
+```
+
+### Run Tests
+
+```bash
+# Run tests with pytest
+pytest
+
+# With coverage
+pytest --cov=gitpulse --cov-report=html
+
+# Using uv
+uv run pytest
+```
+
+### Code Quality
+
+```bash
+# Check with ruff
+ruff check src/
+
+# Auto-fix issues
+ruff check src/ --fix
+
+# Format code
+ruff format src/
+```
+
+### Project Structure
+
+```
+gitpulse/
+├── src/gitpulse/
+│   ├── __init__.py       # Package version
+│   ├── cli.py            # Typer CLI application
+│   ├── github_api.py     # GitHub REST API client
+│   ├── models.py         # Pydantic data models
+│   ├── cache.py          # File-based caching
+│   └── badges.py         # Badge generator
+├── tests/
+│   ├── test_github_api.py
+│   └── test_badges.py
+├── pyproject.toml
+├── README.md
+└── LICENSE
+```
+
+## 📚 API Reference
+
+### GitHubClient
+
+```python
+from gitpulse.github_api import GitHubClient
+
+# Initialize client
+with GitHubClient(token="ghp_xxx") as client:
+    # Repository operations
+    stats = client.get_repo_stats("owner/repo")
+    releases = client.get_repo_releases("owner/repo", limit=5)
+
+    # User operations
+    user = client.get_user_stats("username")
+    top_repos = client.get_top_repos("username", limit=3)
+```
+
+### BadgeGenerator
+
+```python
+from gitpulse.badges import BadgeGenerator
+
+gen = BadgeGenerator()
+
+# Generate individual badges
+stars_badge = gen.stars("owner/repo", count=100)
+forks_badge = gen.forks("owner/repo")
+
+# Generate full badge set
+all_badges = gen.generate_full_set("owner/repo")
+
+# Generate custom badge set
+custom_badges = gen.generate_custom("owner/repo", ["stars", "forks", "license"])
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Here's how you can help:
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'feat: add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
+
+### Contribution Guidelines
+
+- Follow the existing code style (Ruff formatting)
+- Write tests for new features
+- Update documentation as needed
+- Use [Conventional Commits](https://www.conventionalcommits.org/) for commit messages
+
+## 📝 License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+Built with awesome open-source tools:
+
+- [typer](https://typer.tiangolo.com/) — CLI framework with beautiful output
+- [rich](https://rich.readthedocs.io/) — Terminal formatting and colors
+- [httpx](https://www.python-httpx.org/) — Modern async HTTP client
+- [pydantic](https://docs.pydantic.dev/) — Data validation and settings management
+- [keyring](https://github.com/jaraco/keyring) — Secure credential storage
+- [uv](https://github.com/astral-sh/uv) — Lightning-fast Python package manager
+
+## 📊 Stats
+
+![Alt](https://repobeats.axiom.co/api/embed/yourhashhere.svg "Repobeats analytics image")
+
+## 🔗 Links
+
+- **Documentation**: [GitHub Wiki](https://github.com/ruslanlap/gitpulse/wiki)
+- **Issue Tracker**: [GitHub Issues](https://github.com/ruslanlap/gitpulse/issues)
+- **PyPI Package**: [pypi.org/project/gh-pulse](https://pypi.org/project/gh-pulse/)
+- **Changelog**: [CHANGELOG.md](CHANGELOG.md)
+
+---
+
+<div align="center">
+
+**Made with ❤️ by [Ruslan](https://github.com/ruslanlap)**
+
+If you find this project useful, please consider giving it a ⭐️
+
+[⬆ Back to Top](#-gh-pulse)
+
+</div>

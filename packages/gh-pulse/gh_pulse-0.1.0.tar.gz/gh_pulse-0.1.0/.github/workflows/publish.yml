@@ -1,0 +1,136 @@
+name: Publish to PyPI and GitHub Releases
+
+on:
+    push:
+        tags:
+            - "v*.*.*" # Triggers on version tags like v0.0.1, v1.2.3
+    workflow_dispatch: # Allow manual triggering
+
+jobs:
+    build-and-publish:
+        name: Build and publish Python package
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write # Required for creating GitHub releases
+            id-token: write # Required for trusted publishing to PyPI
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # Full history for proper versioning
+
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+                  cache: "pip" # Cache pip dependencies
+
+            - name: Install build dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install build twine hatchling
+
+            - name: Verify version consistency
+              if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+              run: |
+                  TAG_VERSION=${GITHUB_REF#refs/tags/v}
+                  PYPROJECT_VERSION=$(grep '^version = ' pyproject.toml | cut -d'"' -f2)
+                  echo "Tag version: $TAG_VERSION"
+                  echo "pyproject.toml version: $PYPROJECT_VERSION"
+                  if [ "$TAG_VERSION" != "$PYPROJECT_VERSION" ]; then
+                    echo "::error::Version mismatch! Tag: v$TAG_VERSION, pyproject.toml: $PYPROJECT_VERSION"
+                    exit 1
+                  fi
+
+            - name: Build package
+              run: python -m build
+
+            - name: Check distribution
+              run: |
+                  twine check dist/*
+                  ls -lh dist/
+
+            - name: Extract version from tag
+              id: get_version
+              run: |
+                  if [ "${{ github.event_name }}" = "push" ]; then
+                    echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+                  else
+                    echo "VERSION=$(grep '^version = ' pyproject.toml | cut -d'"' -f2)" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Create GitHub Release
+              if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+              uses: softprops/action-gh-release@v2
+              with:
+                  files: dist/*
+                  generate_release_notes: true
+                  draft: false
+                  prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
+                  body: |
+                      ## 🚀 gitpulse v${{ steps.get_version.outputs.VERSION }}
+
+                      GitHub productivity CLI - analyze repos, generate badges, and automate README updates.
+
+                      ### Installation
+
+                      ```bash
+                      pip install gitpulse
+                      ```
+
+                      Or with uv (recommended):
+
+                      ```bash
+                      uv pip install gitpulse
+                      ```
+
+                      ### Quick Start
+
+                      ```bash
+                      # Authenticate
+                      gitpulse auth ghp_YOUR_TOKEN
+
+                      # Analyze repository
+                      gitpulse repo owner/repo
+
+                      # Generate badges
+                      gitpulse badges owner/repo
+                      ```
+
+                      See full changelog below ⬇️
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Publish to PyPI
+              if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+              uses: pypa/gh-action-pypi-publish@release/v1
+              with:
+                  password: ${{ secrets.PYPI_API_TOKEN }}
+                  skip-existing: true
+                  print-hash: true
+                  verbose: true
+
+            - name: Verify installation
+              if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+              run: |
+                  pip install gitpulse==${{ steps.get_version.outputs.VERSION }}
+                  gitpulse --version
+                  gitpulse --help
+
+            - name: Create summary
+              if: always()
+              run: |
+                  echo "## 📦 Build Summary" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "- **Version**: ${{ steps.get_version.outputs.VERSION }}" >> $GITHUB_STEP_SUMMARY
+                  echo "- **Python**: $(python --version)" >> $GITHUB_STEP_SUMMARY
+                  echo "- **Build Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  if [ -d "dist" ]; then
+                    echo "### 📁 Distribution Files" >> $GITHUB_STEP_SUMMARY
+                    echo "" >> $GITHUB_STEP_SUMMARY
+                    echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+                    ls -lh dist/ >> $GITHUB_STEP_SUMMARY
+                    echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+                  fi
