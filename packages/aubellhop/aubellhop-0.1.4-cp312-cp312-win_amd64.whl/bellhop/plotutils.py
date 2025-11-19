@@ -1,0 +1,922 @@
+from __future__ import annotations
+
+from typing import Any, List, Tuple
+import numpy as np
+import os as _os
+import warnings as _warnings
+from tempfile import mkstemp as _mkstemp
+import bokeh.plotting as _bplt
+import bokeh.models as _bmodels
+import bokeh.resources as _bres
+import bokeh.io as _bio
+import scipy.signal as _sig
+
+##############################################################################
+#
+# Copyright (c) 2025-, Will Robertson
+# Copyright (c) 2018-2025, Mandar Chitre
+#
+# This file was originally part of arlpy, released under Simplified BSD License.
+# It has been relicensed in this repository to be compatible with the Bellhop licence (GPL).
+#
+##############################################################################
+
+"""Easy-to-use plotting utilities based on `Bokeh <http://bokeh.pydata.org>`_."""
+
+
+light_palette = ['mediumblue', 'crimson', 'forestgreen', 'gold', 'darkmagenta', 'olive', 'palevioletred', 'yellowgreen',
+                 'deepskyblue', 'dimgray', 'indianred', 'mediumaquamarine', 'orange', 'saddlebrown', 'teal', 'mediumorchid']
+dark_palette = ['lightskyblue', 'red', 'limegreen', 'salmon', 'magenta', 'forestgreen', 'silver', 'teal']
+
+_figure = None
+_figures = None
+_hold = False
+_figsize = (600, 400)
+_color = 0
+_notebook = False
+_disable_js = False
+_using_js = False
+_interactive = True
+_static_images = False
+_colors = light_palette
+
+# Detect Jupyter notebook environment
+try:
+    from IPython import get_ipython
+    ipython = get_ipython()
+    _notebook = ipython is not None and "ZMQInteractiveShell" in ipython.__class__.__name__
+    if _notebook:
+        _bplt.output_notebook(resources=_bres.INLINE, hide_banner=True)
+except (ImportError, AttributeError):
+    _notebook = False
+
+def _new_figure(title: str | None, width: int | None, height: int | None, xlabel: str | None, ylabel: str | None, xlim: Tuple[float, float | None], ylim: Tuple[float, float | None], xtype: str | None, ytype: str | None, interactive: bool | None) -> Any:
+    global _color, _figure
+
+    width = width or _figsize[0]
+    height = height or _figsize[1]
+    _color = 0
+    tools: List[str] | str = []
+    interactive = interactive or _interactive
+    if interactive:
+        tools = 'pan,box_zoom,wheel_zoom,reset,save'
+    args = dict(title=title, width=width, height=height, x_range=xlim, y_range=ylim, x_axis_label=xlabel, y_axis_label=ylabel, x_axis_type=xtype, y_axis_type=ytype, tools=tools)
+
+    if _figure is not None:
+        f = _figure
+        if title:
+            f.title.text = title
+        if width:
+            f.width = width
+        if height:
+            f.height = height
+        if xlabel and f.xaxis:
+            f.xaxis[0].axis_label = xlabel
+        if ylabel and f.yaxis:
+            f.yaxis[0].axis_label = ylabel
+        if xlim and hasattr(f, "x_range"):
+            f.x_range.start, f.x_range.end = xlim
+        if ylim and hasattr(f, "y_range"):
+            f.y_range.start, f.y_range.end = ylim
+        return f
+
+    f = _bplt.figure(**{k:v for (k,v) in args.items() if v is not None})
+    f.toolbar.logo = None
+    _figure = f
+    return f
+
+def _process_canvas(figures: List[Any]) -> None:
+    """Replace non-interactive Bokeh canvases with static images in Jupyter notebooks.
+
+    This optimization converts non-interactive plots to static images to reduce
+    JavaScript overhead in notebooks. Only runs if JavaScript is enabled and there
+    are figures without interactive tools.
+    """
+    global _using_js
+
+    if _disable_js or (not figures and _using_js):
+        return
+
+    # Find indices of non-interactive figures
+    disable_indices = [i + 1 for i, f in enumerate(figures) if f is not None and not f.tools]
+
+    if not disable_indices and not _using_js:
+        return
+
+    _using_js = True
+
+    # JavaScript to convert non-interactive canvases to static images
+    js_code = f"""
+    var disable = {disable_indices};
+    var clist = document.getElementsByClassName('bk-canvas');
+    var j = 0;
+    for (var i = 0; i < clist.length; i++) {{
+        if (clist[i].id == '') {{
+            j++;
+            clist[i].id = 'bkc-' + String(i) + '-' + String(+new Date());
+            if (disable.indexOf(j) >= 0) {{
+                var png = clist[i].toDataURL();
+                var img = document.createElement('img');
+                img.src = png;
+                clist[i].parentNode.replaceChild(img, clist[i]);
+            }}
+        }}
+    }}
+    """
+
+    import IPython.display as _ipyd
+    _ipyd.display(_ipyd.Javascript(js_code))
+
+def _show_static_images(f: Any) -> None:
+    fh, fname = _mkstemp(suffix='.png')
+    _os.close(fh)
+    with _warnings.catch_warnings():      # to avoid displaying deprecation warning
+        _warnings.simplefilter('ignore')  #   from bokeh 0.12.16
+        _bio.export_png(f, fname)
+    import IPython.display as _ipyd
+    _ipyd.display(_ipyd.Image(filename=fname, embed=True))
+    _os.unlink(fname)
+
+def _show(f: Any) -> None:
+    if _figures is None:
+        if _static_images:
+            _show_static_images(f)
+        else:
+            _process_canvas([])
+            _bplt.show(f)
+            _process_canvas([f])
+    else:
+        _figures[-1].append(f)
+
+def _hold_enable(enable: bool) -> bool:
+    global _hold, _figure
+    ohold = _hold
+    _hold = enable
+    if not _hold and _figure is not None:
+        _show(_figure)
+        _figure = None
+    return ohold
+
+def theme(name: str) -> None:
+    """Set color theme.
+
+    Parameters
+    ----------
+    name : str
+        Name of theme
+
+    Examples
+    --------
+    >>> import arlpy.plot
+    >>> arlpy.plot.theme('dark')
+    """
+    if name == 'dark':
+        name = 'dark_minimal'
+        set_colors(dark_palette)
+    elif name == 'light':
+        name = 'light_minimal'
+        set_colors(light_palette)
+    _bio.curdoc().theme = name
+
+def figsize(x: int, y: int) -> None:
+    """Set the default figure size in pixels.
+
+    Parameters
+    ----------
+    x : int
+        Figure width
+    y : int
+        Figure height
+    """
+    global _figsize
+    _figsize = (x, y)
+
+def interactive(b: bool) -> None:
+    """Set default interactivity for plots.
+
+    Parameters
+    ----------
+    b : bool
+        True to enable interactivity, False to disable it
+    """
+    global _interactive
+    _interactive = b
+
+def enable_javascript(b: bool) -> None:
+    """Enable/disable Javascript.
+
+    Parameters
+    ----------
+    b : bool
+        True to use Javascript, False to avoid use of Javascript
+
+    Notes
+    -----
+    Jupyterlab does not support Javascript output. To avoid error messages,
+    Javascript can be disabled using this call. This removes an optimization
+    to replace non-interactive plots with static images, but other than that
+    does not affect functionality.
+    """
+    global _disable_js
+    _disable_js = not b
+
+def use_static_images(b: bool = True) -> None:
+    """Use static images instead of dynamic HTML/Javascript in Jupyter notebook.
+
+    Parameters
+    ----------
+    b : bool, default=True
+        True to use static images, False to use HTML/Javascript
+
+    Notes
+    -----
+    Static images are useful when the notebook is to be exported as a markdown,
+    LaTeX or PDF document, since dynamic HTML/Javascript is not rendered in these
+    formats. When static images are used, all interactive functionality is disabled.
+
+    To use static images, you must have the following packages installed:
+    selenium, pillow, phantomjs.
+    """
+    global _static_images, _interactive
+    if not b:
+        _static_images = False
+        return
+    if not _notebook:
+        _warnings.warn('Not running in a Jupyter notebook, static png support disabled')
+        return
+    _interactive = False
+    _static_images = True
+
+def hold(enable: bool = True) -> bool | None:
+    """Combine multiple plots into one.
+
+    Parameters
+    ----------
+    enable : bool, default=True
+        True to hold plot, False to release hold
+
+    Returns
+    -------
+    bool or None
+        Old state of hold if enable is True
+
+    Examples
+    --------
+    >>> import arlpy.plot
+    >>> oh = arlpy.plot.hold()
+    >>> arlpy.plot.plot([0,10], [0,10], color='blue', legend='A')
+    >>> arlpy.plot.plot([10,0], [0,10], marker='o', color='green', legend='B')
+    >>> arlpy.plot.hold(oh)
+    """
+    rv = _hold_enable(enable)
+    return rv if enable else None
+
+class figure:
+    """Create a new figure, and optionally automatically display it.
+
+    Parameters
+    ----------
+    title : str, optional
+        Figure title
+    xlabel : str, optional
+        X-axis label
+    ylabel : str, optional
+        Y-axis label
+    xlim : tuple of float, optional
+        X-axis limits (min, max)
+    ylim : tuple of float, optional
+        Y-axis limits (min, max)
+    xtype : str, default='auto'
+        X-axis type ('auto', 'linear', 'log', etc)
+    ytype : str, default='auto'
+        Y-axis type ('auto', 'linear', 'log', etc)
+    width : int, optional
+        Figure width in pixels
+    height : int, optional
+        Figure height in pixels
+    interactive : bool, optional
+        Enable interactive tools (pan, zoom, etc) for plot
+
+    Notes
+    -----
+    This function can be used in standalone mode to create a figure:
+
+    >>> import arlpy.plot
+    >>> arlpy.plot.figure(title='Demo 1', width=500)
+    >>> arlpy.plot.plot([0,10], [0,10])
+
+    Or it can be used as a context manager to create, hold and display a figure:
+
+    >>> import arlpy.plot
+    >>> with arlpy.plot.figure(title='Demo 2', width=500):
+    >>>     arlpy.plot.plot([0,10], [0,10], color='blue', legend='A')
+    >>>     arlpy.plot.plot([10,0], [0,10], marker='o', color='green', legend='B')
+
+    It can even be used as a context manager to work with Bokeh functions directly:
+
+    >>> import arlpy.plot
+    >>> with arlpy.plot.figure(title='Demo 3', width=500) as f:
+    >>>     f.line([0,10], [0,10], line_color='blue')
+    >>>     f.square([3,7], [4,5], line_color='green', fill_color='yellow', size=10)
+    """
+
+    def __init__(self, title=None, xlabel=None, ylabel=None, xlim=None, ylim=None, xtype='auto', ytype='auto', width=None, height=None, interactive=None):
+        global _figure
+        _figure = _new_figure(title, width, height, xlabel, ylabel, xlim, ylim, xtype, ytype, interactive)
+
+    def __enter__(self):
+        global _hold
+        _hold = True
+        return _figure
+
+    def __exit__(self, *args):
+        global _hold, _figure
+        _hold = False
+        _show(_figure)
+        _figure = None
+
+class many_figures:
+    """Create a grid of many figures.
+
+    Parameters
+    ----------
+    figsize : tuple of int, optional
+        Default size of figure in grid as (width, height)
+
+    Examples
+    --------
+    >>> import arlpy.plot
+    >>> with arlpy.plot.many_figures(figsize=(300,200)):
+    >>>     arlpy.plot.plot([0,10], [0,10])
+    >>>     arlpy.plot.plot([0,10], [0,10])
+    >>>     arlpy.plot.next_row()
+    >>>     arlpy.plot.next_column()
+    >>>     arlpy.plot.plot([0,10], [0,10])
+    """
+
+    def __init__(self, figsize: Tuple[int, int | None] = None):
+        self.figsize = figsize
+        self.old_figsize: Tuple[int, int | None] = None
+
+    def __enter__(self) -> None:
+        global _figures, _figsize
+        _figures = [[]]
+        self.old_figsize = _figsize
+        if self.figsize is not None:
+            _figsize = self.figsize
+
+    def __exit__(self, *args: Any) -> None:
+        global _figures, _figsize
+        if _figures and (len(_figures) > 1 or _figures[0]):
+            # Flatten nested list to get all figures
+            all_figures = [fig for row in _figures for fig in row if fig is not None]
+            gridplot = _bplt.gridplot(_figures, merge_tools=False)
+
+            if _static_images:
+                _show_static_images(gridplot)
+            else:
+                _process_canvas([])
+                _bplt.show(gridplot)
+                _process_canvas(all_figures)
+
+        _figures = None
+        _figsize = self.old_figsize
+
+def next_row() -> None:
+    """Move to the next row in a grid of many figures."""
+    global _figures
+    if _figures is not None:
+        _figures.append([])
+
+def next_column() -> None:
+    """Move to the next column in a grid of many figures."""
+    global _figures
+    if _figures is not None:
+        _figures[-1].append(None)
+
+def gcf() -> Any:
+    """Get the current figure.
+
+    :returns: handle to the current figure
+    """
+    return _figure
+
+def plot(x: Any,
+         y: Any = None,
+         fs: float | None = None,
+         maxpts: int = 10000,
+         pooling: str | None = None,
+         color: str | None = None,
+         style: str = 'solid',
+         thickness: int = 1,
+         marker: str | None = None,
+         filled: bool = False,
+         size: int = 6,
+         mskip: int = 0,
+         title: str | None = None,
+         xlabel: str | None = None,
+         ylabel: str | None = None,
+         xlim: Tuple[float, float | None] = None,
+         ylim: Tuple[float, float | None] = None,
+         xtype: str = 'auto',
+         ytype: str = 'auto',
+         width: int | None = None,
+         height: int | None = None,
+         legend: str | None = None,
+         interactive: bool | None = None,
+         hold: bool = False,
+        ) -> None:
+    """Plot a line graph or time series.
+
+    :param x: x data or time series data (if y is None)
+    :param y: y data or None (if time series)
+    :param fs: sampling rate for time series data
+    :param maxpts: maximum number of points to plot (downsampled if more points provided)
+    :param pooling: pooling for downsampling (None, 'max', 'min', 'mean', 'median')
+    :param color: line color (see `Bokeh colors <https://bokeh.pydata.org/en/latest/docs/reference/colors.html>`_)
+    :param style: line style ('solid', 'dashed', 'dotted', 'dotdash', 'dashdot', None)
+    :param thickness: line width in pixels
+    :param marker: point markers ('.', 'o', 's', '*', 'x', '+', 'd', '^')
+    :param filled: filled markers or outlined ones
+    :param size: marker size
+    :param mskip: number of points to skip marking (to avoid too many markers)
+    :param title: figure title
+    :param xlabel: x-axis label
+    :param ylabel: y-axis label
+    :param xlim: x-axis limits (min, max)
+    :param ylim: y-axis limits (min, max)
+    :param xtype: x-axis type ('auto', 'linear', 'log', etc)
+    :param ytype: y-axis type ('auto', 'linear', 'log', etc)
+    :param width: figure width in pixels
+    :param height: figure height in pixels
+    :param legend: legend text
+    :param interactive: enable interactive tools (pan, zoom, etc) for plot
+    :param hold: if set to True, output is not plotted immediately, but combined with the next plot
+
+    >>> import arlpy.plot
+    >>> import numpy as np
+    >>> arlpy.plot.plot([0,10], [1,-1], color='blue', marker='o', filled=True, legend='A', hold=True)
+    >>> arlpy.plot.plot(np.random.normal(size=1000), fs=100, color='green', legend='B')
+    """
+    global _figure, _color
+    x = np.asarray(x, dtype=np.float64)
+    if y is None:
+        y = x
+        x = np.arange(x.size)
+        if fs is not None:
+            x = x/fs
+            if xlabel is None:
+                xlabel = 'Time (s)'
+        if xlim is None:
+            xlim = (x[0], x[-1])
+    else:
+        y = np.asarray(y, dtype=np.float64)
+
+    if x.ndim == 0:  # 0-dimensional array (scalar)
+        x = np.array([x])
+    if y.ndim == 0:  # 0-dimensional array (scalar)
+        y = np.array([y])
+
+    _figure = _new_figure(title, width, height, xlabel, ylabel, xlim, ylim, xtype, ytype, interactive)
+    if color is None:
+        color = _colors[_color % len(_colors)]
+        _color += 1
+    if x.size > maxpts:
+        n = int(np.ceil(x.size / maxpts))
+        x = x[::n]
+        desc = f'Downsampled by {n}'
+
+        # Apply pooling to reduce data
+        if pooling is None:
+            y = y[::n]
+        else:
+            # Trim data to fit evenly into bins
+            trimmed_size = n * (y.size // n)
+            y_trimmed = y[:trimmed_size].reshape(-1, n)
+
+            pooling_funcs = {
+                'max': np.amax,
+                'min': np.amin,
+                'mean': np.mean,
+                'median': np.median
+            }
+
+            if pooling in pooling_funcs:
+                y = pooling_funcs[pooling](y_trimmed, axis=1)
+                desc += f', {pooling} pooled'
+            else:
+                _warnings.warn(f'Unknown pooling: {pooling}')
+                y = y[::n]
+
+        # Ensure x and y have the same length
+        if len(x) > len(y):
+            x = x[:len(y)]
+
+        _figure.add_layout(_bmodels.Label(
+            x=5, y=5, x_units='screen', y_units='screen',
+            text=desc, text_font_size="8pt", text_alpha=0.5
+        ))
+    if style is not None:
+        if legend is None:
+            _figure.line(x, y, line_color=color, line_dash=style, line_width=thickness)
+        else:
+            _figure.line(x, y, line_color=color, line_dash=style, line_width=thickness, legend_label=legend)
+    if marker is not None:
+        scatter(x[::(mskip+1)], y[::(mskip+1)], marker=marker, filled=filled, size=size, color=color, legend=legend, hold=True)
+    if not hold and not _hold:
+        _show(_figure)
+        _figure = None
+
+def scatter(x: Any, y: Any, marker: str = '.', filled: bool = False, size: int = 6, color: str | None = None, title: str | None = None, xlabel: str | None = None, ylabel: str | None = None, xlim: Tuple[float, float | None] = None, ylim: Tuple[float, float | None] = None, xtype: str = 'auto', ytype: str = 'auto', width: int | None = None, height: int | None = None, legend: str | None = None, hold: bool = False, interactive: bool | None = None) -> None:
+    """Plot a scatter plot.
+
+    :param x: x data
+    :param y: y data
+    :param color: marker color (see `Bokeh colors`_)
+    :param marker: point markers ('.', 'o', 's', '*', 'x', '+', 'd', '^')
+    :param filled: filled markers or outlined ones
+    :param size: marker size
+    :param title: figure title
+    :param xlabel: x-axis label
+    :param ylabel: y-axis label
+    :param xlim: x-axis limits (min, max)
+    :param ylim: y-axis limits (min, max)
+    :param xtype: x-axis type ('auto', 'linear', 'log', etc)
+    :param ytype: y-axis type ('auto', 'linear', 'log', etc)
+    :param width: figure width in pixels
+    :param height: figure height in pixels
+    :param legend: legend text
+    :param interactive: enable interactive tools (pan, zoom, etc) for plot
+    :param hold: if set to True, output is not plotted immediately, but combined with the next plot
+
+    >>> import arlpy.plot
+    >>> import numpy as np
+    >>> arlpy.plot.scatter(np.random.normal(size=100), np.random.normal(size=100), color='blue', marker='o')
+    """
+    global _figure, _color
+    if _figure is None:
+        _figure = _new_figure(title, width, height, xlabel, ylabel, xlim, ylim, xtype, ytype, interactive)
+    x = np.asarray(x, dtype=np.float64)
+    y = np.asarray(y, dtype=np.float64)
+    if color is None:
+        color = _colors[_color % len(_colors)]
+        _color += 1
+    # Build kwargs for marker rendering
+    kwargs = {'size': size, 'line_color': color}
+    if filled:
+        kwargs['fill_color'] = color
+    if legend is not None:
+        kwargs['legend_label'] = legend
+
+    # Map marker types to Bokeh scatter marker names (using modern Bokeh 3.4+ API)
+    marker_map = {
+        '.': 'circle',
+        'o': 'circle',
+        's': 'square',
+        '*': 'star',
+        'x': 'x',
+        '+': 'cross',
+        'd': 'diamond',
+        '^': 'triangle',
+    }
+
+    if marker in marker_map:
+        bokeh_marker = marker_map[marker]
+        # Small dots use smaller size and always filled
+        if marker == '.':
+            _figure.scatter(x, y, marker=bokeh_marker, **{**kwargs, 'size': size/2, 'fill_color': color})
+        else:
+            _figure.scatter(x, y, marker=bokeh_marker, **kwargs)
+    elif marker is not None:
+        _warnings.warn(f'Bad marker type: {marker}')
+    if not hold and not _hold:
+        _show(_figure)
+        _figure = None
+
+def image(img: Any, x: Any | None = None, y: Any | None = None, colormap: str = 'Plasma256', clim: Tuple[float, float | None] = None, clabel: str | None = None, title: str | None = None, xlabel: str | None = None, ylabel: str | None = None, xlim: Tuple[float, float | None] = None, ylim: Tuple[float, float | None] = None, xtype: str = 'auto', ytype: str = 'auto', width: int | None = None, height: int | None = None, hold: bool = False, interactive: bool | None = None) -> None:
+    """Plot a heatmap of 2D scalar data.
+
+    :param img: 2D image data
+    :param x: x-axis range for image data (min, max)
+    :param y: y-axis range for image data (min, max)
+    :param colormap: named color palette or Bokeh ColorMapper (see `Bokeh palettes <https://bokeh.pydata.org/en/latest/docs/reference/palettes.html>`_)
+    :param clim: color axis limits (min, max)
+    :param clabel: color axis label
+    :param title: figure title
+    :param xlabel: x-axis label
+    :param ylabel: y-axis label
+    :param xlim: x-axis limits (min, max)
+    :param ylim: y-axis limits (min, max)
+    :param xtype: x-axis type ('auto', 'linear', 'log', etc)
+    :param ytype: y-axis type ('auto', 'linear', 'log', etc)
+    :param width: figure width in pixels
+    :param height: figure height in pixels
+    :param interactive: enable interactive tools (pan, zoom, etc) for plot
+    :param hold: if set to True, output is not plotted immediately, but combined with the next plot
+
+    >>> import arlpy.plot
+    >>> import numpy as np
+    >>> arlpy.plot.image(np.random.normal(size=(100,100)), colormap='Inferno256')
+    """
+    global _figure
+    if x is None:
+        x = (0, img.shape[1]-1)
+    if y is None:
+        y = (0, img.shape[0]-1)
+    if xlim is None:
+        xlim = x
+    if ylim is None:
+        ylim = y
+    if _figure is None:
+        _figure = _new_figure(title, width, height, xlabel, ylabel, xlim, ylim, xtype, ytype, interactive)
+    if clim is None:
+        clim = [np.amin(img), np.amax(img)]
+    if not isinstance(colormap, _bmodels.ColorMapper):
+        colormap = _bmodels.LinearColorMapper(palette=colormap, low=clim[0], high=clim[1])
+    _figure.image([img], x=x[0], y=y[0], dw=x[-1]-x[0], dh=y[-1]-y[0], color_mapper=colormap)
+    cbar = _bmodels.ColorBar(color_mapper=colormap, location=(0,0), title=clabel)
+    _figure.add_layout(cbar, 'right')
+    if not hold and not _hold:
+        _show(_figure)
+        _figure = None
+
+def vlines(x: Any, color: str = 'gray', style: str = 'dashed', thickness: int = 1, hold: bool = False) -> None:
+    """Draw vertical lines on a plot.
+
+    :param x: x location of lines
+    :param color: line color (see `Bokeh colors`_)
+    :param style: line style ('solid', 'dashed', 'dotted', 'dotdash', 'dashdot')
+    :param thickness: line width in pixels
+    :param hold: if set to True, output is not plotted immediately, but combined with the next plot
+
+    >>> import arlpy.plot
+    >>> arlpy.plot.plot([0, 20], [0, 10], hold=True)
+    >>> arlpy.plot.vlines([7, 12])
+    """
+    global _figure
+    if _figure is None:
+        return
+    x = np.asarray(x, dtype=np.float64)
+    for j in range(x.size):
+        _figure.add_layout(_bmodels.Span(location=x[j], dimension='height', line_color=color, line_dash=style, line_width=thickness))
+    if not hold and not _hold:
+        _show(_figure)
+        _figure = None
+
+def hlines(y: Any, color: str = 'gray', style: str = 'dashed', thickness: int = 1, hold: bool = False) -> None:
+    """Draw horizontal lines on a plot.
+
+    :param y: y location of lines
+    :param color: line color (see `Bokeh colors`_)
+    :param style: line style ('solid', 'dashed', 'dotted', 'dotdash', 'dashdot')
+    :param thickness: line width in pixels
+    :param hold: if set to True, output is not plotted immediately, but combined with the next plot
+
+    >>> import arlpy.plot
+    >>> arlpy.plot.plot([0, 20], [0, 10], hold=True)
+    >>> arlpy.plot.hlines(3, color='red', style='dotted')
+    """
+    global _figure
+    if _figure is None:
+        return
+    y = np.asarray(y, dtype=np.float64)
+    for j in range(y.size):
+        _figure.add_layout(_bmodels.Span(location=y[j], dimension='width', line_color=color, line_dash=style, line_width=thickness))
+    if not hold and not _hold:
+        _show(_figure)
+        _figure = None
+
+def text(x: float, y: float, s: str, color: str = 'gray', size: str = '8pt', hold: bool = False) -> None:
+    """Add text annotation to a plot.
+
+    :param x: x location of left of text
+    :param y: y location of bottom of text
+    :param s: text to add
+    :param color: text color (see `Bokeh colors`_)
+    :param size: text size (e.g. '12pt', '3em')
+    :param hold: if set to True, output is not plotted immediately, but combined with the next plot
+
+    >>> import arlpy.plot
+    >>> arlpy.plot.plot([0, 20], [0, 10], hold=True)
+    >>> arlpy.plot.text(7, 3, 'demo', color='orange')
+    """
+    global _figure
+    if _figure is None:
+        return
+    _figure.add_layout(_bmodels.Label(x=x, y=y, text=s, text_font_size=size, text_color=color))
+    if not hold and not _hold:
+        _show(_figure)
+        _figure = None
+
+def box(left: float | None = None, right: float | None = None, top: float | None = None, bottom: float | None = None, color: str = 'yellow', alpha: float = 0.1, hold: bool = False) -> None:
+    """Add a highlight box to a plot.
+
+    :param left: x location of left of box
+    :param right: x location of right of box
+    :param top: y location of top of box
+    :param bottom: y location of bottom of box
+    :param color: text color (see `Bokeh colors`_)
+    :param alpha: transparency (0-1)
+    :param hold: if set to True, output is not plotted immediately, but combined with the next plot
+
+    >>> import arlpy.plot
+    >>> arlpy.plot.plot([0, 20], [0, 10], hold=True)
+    >>> arlpy.plot.box(left=5, right=10, top=8)
+    """
+    global _figure
+    if _figure is None:
+        return
+    _figure.add_layout(_bmodels.BoxAnnotation(left=left, right=right, top=top, bottom=bottom, fill_color=color, fill_alpha=alpha))
+    if not hold and not _hold:
+        _show(_figure)
+        _figure = None
+
+def color(n: int) -> str:
+    """Get a numbered color to cycle over a set of colors.
+
+    >>> import arlpy.plot
+    >>> arlpy.plot.color(0)
+    'blue'
+    >>> arlpy.plot.color(1)
+    'red'
+    >>> arlpy.plot.plot([0, 20], [0, 10], color=arlpy.plot.color(3))
+    """
+    return _colors[n % len(_colors)]
+
+def set_colors(c: List[str]) -> None:
+    """Provide a list of named colors to cycle over.
+
+    >>> import arlpy.plot
+    >>> arlpy.plot.set_colors(['red', 'blue', 'green', 'black'])
+    >>> arlpy.plot.color(2)
+    'green'
+    """
+    global _colors
+    _colors = c
+
+def specgram(x: Any, fs: float = 2, nfft: int | None = None, noverlap: int | None = None, colormap: str = 'Plasma256', clim: Tuple[float, float | None] = None, clabel: str = 'dB', title: str | None = None, xlabel: str = 'Time (s)', ylabel: str = 'Frequency (Hz)', xlim: Tuple[float, float | None] = None, ylim: Tuple[float, float | None] = None, width: int | None = None, height: int | None = None, hold: bool = False, interactive: bool | None = None) -> None:
+    """Plot spectrogram of a given time series signal.
+
+    :param x: time series signal
+    :param fs: sampling rate
+    :param nfft: FFT size (see `scipy.signal.spectrogram <https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.spectrogram.html>`_)
+    :param noverlap: overlap size (see `scipy.signal.spectrogram`_)
+    :param colormap: named color palette or Bokeh ColorMapper (see `Bokeh palettes`_)
+    :param clim: color axis limits (min, max), or dynamic range with respect to maximum
+    :param clabel: color axis label
+    :param title: figure title
+    :param xlabel: x-axis label
+    :param ylabel: y-axis label
+    :param xlim: x-axis limits (min, max)
+    :param ylim: y-axis limits (min, max)
+    :param width: figure width in pixels
+    :param height: figure height in pixels
+    :param interactive: enable interactive tools (pan, zoom, etc) for plot
+    :param hold: if set to True, output is not plotted immediately, but combined with the next plot
+
+    >>> import arlpy.plot
+    >>> import numpy as np
+    >>> arlpy.plot.specgram(np.random.normal(size=(10000)), fs=10000, clim=30)
+    """
+    f, t, Sxx = _sig.spectrogram(x, fs=fs, nperseg=nfft, noverlap=noverlap)
+    Sxx = 10 * np.log10(Sxx + np.finfo(float).eps)
+
+    # Convert scalar clim to range (for dynamic range specification)
+    if isinstance(clim, (int, float)):
+        max_val = np.max(Sxx)
+        clim = (max_val - clim, max_val)
+
+    image(Sxx, x=(t[0], t[-1]), y=(f[0], f[-1]), title=title, colormap=colormap,
+          clim=clim, clabel=clabel, xlabel=xlabel, ylabel=ylabel, xlim=xlim,
+          ylim=ylim, width=width, height=height, hold=hold, interactive=interactive)
+
+def psd(x: Any, fs: float = 2, nfft: int = 512, noverlap: int | None = None, window: str = 'hann', color: str | None = None, style: str = 'solid', thickness: int = 1, marker: str | None = None, filled: bool = False, size: int = 6, title: str | None = None, xlabel: str = 'Frequency (Hz)', ylabel: str = 'Power spectral density (dB/Hz)', xlim: Tuple[float, float | None] = None, ylim: Tuple[float, float | None] = None, width: int | None = None, height: int | None = None, legend: str | None = None, hold: bool = False, interactive: bool | None = None) -> None:
+    """Plot power spectral density of a given time series signal.
+
+    :param x: time series signal
+    :param fs: sampling rate
+    :param nfft: segment size (see `scipy.signal.welch <https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.welch.html>`_)
+    :param noverlap: overlap size (see `scipy.signal.welch`_)
+    :param window: window to use (see `scipy.signal.welch`_)
+    :param color: line color (see `Bokeh colors`_)
+    :param style: line style ('solid', 'dashed', 'dotted', 'dotdash', 'dashdot')
+    :param thickness: line width in pixels
+    :param marker: point markers ('.', 'o', 's', '*', 'x', '+', 'd', '^')
+    :param filled: filled markers or outlined ones
+    :param size: marker size
+    :param title: figure title
+    :param xlabel: x-axis label
+    :param ylabel: y-axis label
+    :param xlim: x-axis limits (min, max)
+    :param ylim: y-axis limits (min, max)
+    :param width: figure width in pixels
+    :param height: figure height in pixels
+    :param legend: legend text
+    :param interactive: enable interactive tools (pan, zoom, etc) for plot
+    :param hold: if set to True, output is not plotted immediately, but combined with the next plot
+
+    >>> import arlpy.plot
+    >>> import numpy as np
+    >>> arlpy.plot.psd(np.random.normal(size=(10000)), fs=10000)
+    """
+    f, Pxx = _sig.welch(x, fs=fs, nperseg=nfft, noverlap=noverlap, window=window)
+    Pxx = 10 * np.log10(Pxx + np.finfo(float).eps)
+
+    # Set default axis limits if not specified
+    xlim = xlim or (0, fs / 2)
+    if ylim is None:
+        max_pxx = np.max(Pxx)
+        ylim = (max_pxx - 50, max_pxx + 10)
+
+    plot(f, Pxx, color=color, style=style, thickness=thickness, marker=marker,
+         filled=filled, size=size, title=title, xlabel=xlabel, ylabel=ylabel,
+         xlim=xlim, ylim=ylim, maxpts=len(f), width=width, height=height,
+         hold=hold, legend=legend, interactive=interactive)
+
+def iqplot(data: Any, marker: str = '.', color: str | None = None, labels: Any | None = None, filled: bool = False, size: int | None = None, title: str | None = None, xlabel: str | None = None, ylabel: str | None = None, xlim: List[float] = [-2, 2], ylim: List[float] = [-2, 2], width: int | None = None, height: int | None = None, hold: bool = False, interactive: bool | None = None) -> None:
+    """Plot signal points.
+
+    :param data: complex baseband signal points
+    :param marker: point markers ('.', 'o', 's', '*', 'x', '+', 'd', '^')
+    :param color: marker/text color (see `Bokeh colors`_)
+    :param labels: label for each signal point, or True to auto-generate labels
+    :param filled: filled markers or outlined ones
+    :param size: marker/text size (e.g. 5, '8pt')
+    :param title: figure title
+    :param xlabel: x-axis label
+    :param ylabel: y-axis label
+    :param xlim: x-axis limits (min, max)
+    :param ylim: y-axis limits (min, max)
+    :param width: figure width in pixels
+    :param height: figure height in pixels
+    :param interactive: enable interactive tools (pan, zoom, etc) for plot
+    :param hold: if set to True, output is not plotted immediately, but combined with the next plot
+
+    >>> import arlpy
+    >>> import arlpy.plot
+    >>> arlpy.plot.iqplot(arlpy.comms.psk(8))
+    >>> arlpy.plot.iqplot(arlpy.comms.qam(16), color='red', marker='x')
+    >>> arlpy.plot.iqplot(arlpy.comms.psk(4), labels=['00', '01', '11', '10'])
+    """
+    data = np.asarray(data, dtype=np.complex128)
+    if not _hold:
+        figure(title=title, xlabel=xlabel, ylabel=ylabel, xlim=xlim, ylim=ylim, width=width, height=height, interactive=interactive)
+    if labels is None:
+        if size is None:
+            size = 5
+        scatter(data.real, data.imag, marker=marker, filled=filled, color=color, size=size, hold=hold)
+    else:
+        if labels:
+            labels = range(len(data))
+        if color is None:
+            color = 'black'
+        plot([0], [0], hold=True)
+        for i in range(len(data)):
+            text(data[i].real, data[i].imag, str(labels[i]), color=color, size=size, hold=True if i < len(data)-1 else hold)
+
+def freqz(b: Any, a: Any = 1, fs: float = 2.0, worN: int | None = None, whole: bool = False, degrees: bool = True, style: str = 'solid', thickness: int = 1, title: str | None = None, xlabel: str = 'Frequency (Hz)', xlim: Tuple[float, float | None] = None, ylim: Tuple[float, float | None] = None, width: int | None = None, height: int | None = None, hold: bool = False, interactive: bool | None = None) -> None:
+    """Plot frequency response of a filter.
+
+    This is a convenience function to plot frequency response, and internally uses
+    :func:`scipy.signal.freqz` to estimate the response. For further details, see the
+    documentation for :func:`scipy.signal.freqz`.
+
+    :param b: numerator of a linear filter
+    :param a: denominator of a linear filter
+    :param fs: sampling rate in Hz (optional, normalized frequency if not specified)
+    :param worN: see :func:`scipy.signal.freqz`
+    :param whole: see :func:`scipy.signal.freqz`
+    :param degrees: True to display phase in degrees, False for radians
+    :param style: line style ('solid', 'dashed', 'dotted', 'dotdash', 'dashdot')
+    :param thickness: line width in pixels
+    :param title: figure title
+    :param xlabel: x-axis label
+    :param ylabel1: y-axis label for magnitude
+    :param ylabel2: y-axis label for phase
+    :param xlim: x-axis limits (min, max)
+    :param ylim: y-axis limits (min, max)
+    :param width: figure width in pixels
+    :param height: figure height in pixels
+    :param interactive: enable interactive tools (pan, zoom, etc) for plot
+    :param hold: if set to True, output is not plotted immediately, but combined with the next plot
+
+    >>> import arlpy
+    >>> arlpy.plot.freqz([1,1,1,1,1], fs=120000);
+    """
+    w, h = _sig.freqz(b, a, worN, whole)
+    Hxx = 20*np.log10(abs(h)+np.finfo(float).eps)
+    f = w*fs/(2*np.pi)
+    if xlim is None:
+        xlim = (0, fs/2)
+    if ylim is None:
+        ylim = (np.max(Hxx)-50, np.max(Hxx)+10)
+    figure(title=title, xlabel=xlabel, ylabel='Amplitude (dB)', xlim=xlim, ylim=ylim, width=width, height=height, interactive=interactive)
+    _hold_enable(True)
+    plot(f, Hxx, color=color(0), style=style, thickness=thickness, legend='Magnitude')
+    fig = gcf()
+    units = 180/np.pi if degrees else 1
+    fig.extra_y_ranges = {'phase': _bmodels.Range1d(start=-np.pi*units, end=np.pi*units)}
+    fig.add_layout(_bmodels.LinearAxis(y_range_name='phase', axis_label='Phase (degrees)' if degrees else 'Phase (radians)'), 'right')
+    phase = np.angle(h)*units
+    fig.line(f, phase, line_color=color(1), line_dash=style, line_width=thickness, legend_label='Phase', y_range_name='phase')
+    _hold_enable(hold)
