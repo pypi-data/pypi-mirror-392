@@ -1,0 +1,441 @@
+Metadata-Version: 2.4
+Name: QuerySUTRA
+Version: 0.4.3
+Summary: SUTRA
+Author: Aditya Batta
+License: MIT
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pandas>=1.3.0
+Requires-Dist: numpy>=1.21.0
+Requires-Dist: openai>=1.0.0
+Requires-Dist: plotly>=5.0.0
+Requires-Dist: matplotlib>=3.3.0
+Requires-Dist: PyPDF2>=3.0.0
+Requires-Dist: python-docx>=0.8.11
+Requires-Dist: openpyxl>=3.0.0
+Provides-Extra: mysql
+Requires-Dist: sqlalchemy>=1.4.0; extra == "mysql"
+Requires-Dist: mysql-connector-python>=8.0.0; extra == "mysql"
+Provides-Extra: postgres
+Requires-Dist: sqlalchemy>=1.4.0; extra == "postgres"
+Requires-Dist: psycopg2-binary>=2.9.0; extra == "postgres"
+Provides-Extra: embeddings
+Requires-Dist: sentence-transformers>=2.0.0; extra == "embeddings"
+Provides-Extra: all
+Requires-Dist: sqlalchemy>=1.4.0; extra == "all"
+Requires-Dist: mysql-connector-python>=8.0.0; extra == "all"
+Requires-Dist: psycopg2-binary>=2.9.0; extra == "all"
+Requires-Dist: sentence-transformers>=2.0.0; extra == "all"
+Dynamic: license-file
+Dynamic: requires-python
+
+# QuerySUTRA
+
+**SUTRA: Structured-Unstructured-Text-Retrieval-Architecture**
+
+AI-powered data analysis library. Upload PDFs, query with natural language, export to MySQL automatically.
+
+## Installation
+
+```bash
+pip install QuerySUTRA
+pip install QuerySUTRA[mysql]       # For MySQL export
+pip install QuerySUTRA[embeddings]  # For smart caching
+pip install QuerySUTRA[all]         # All features
+```
+
+## Quick Start
+
+```python
+from sutra import SUTRA
+
+sutra = SUTRA(api_key="your-openai-key")
+sutra.upload("data.pdf")
+result = sutra.ask("Show me all people")
+print(result.data)
+```
+
+## Core Features
+
+### 1. Automatic MySQL Export
+
+Database auto-created if not exists.
+
+```python
+# Upload and export to MySQL automatically
+sutra.upload("data.pdf", auto_export_mysql={
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'your_password',
+    'database': 'my_database'  # Auto-creates
+})
+```
+
+### 2. Complete Data Extraction
+
+Processes entire PDF in chunks. Extracts ALL data.
+
+```python
+sutra.upload("large_document.pdf")  # Extracts all 50+ employees
+sutra.tables()
+```
+
+### 3. Natural Language Queries
+
+```python
+result = sutra.ask("Show all people from California")
+result = sutra.ask("Who has Python skills?")
+result = sutra.ask("Count employees by state", viz="pie")
+```
+
+### 4. Custom Visualizations
+
+```python
+result = sutra.ask("Sales by region", viz="pie")
+result = sutra.ask("Trends", viz="line")
+result = sutra.ask("Compare", viz="bar")
+result = sutra.ask("Correlation", viz="scatter")
+result = sutra.ask("Data", viz="table")
+result = sutra.ask("Analysis", viz="heatmap")
+```
+
+### 5. Load Existing Databases
+
+```python
+# Load SQLite
+sutra = SUTRA.load_from_db("data.db", api_key="key")
+
+# Connect to MySQL
+sutra = SUTRA.connect_mysql("localhost", "root", "pass", "database")
+
+# Connect to PostgreSQL  
+sutra = SUTRA.connect_postgres("localhost", "postgres", "pass", "database")
+```
+
+### 6. Fuzzy Matching for Better NLP
+
+Automatically matches similar terms.
+
+```python
+sutra = SUTRA(api_key="your-key", fuzzy_match=True)
+
+# "New York City" automatically matches "New York" in database
+result = sutra.ask("Who are from New York City?")
+# Output: Fuzzy: 'City' -> 'New York'
+```
+
+**How it works:**
+- Uses Python's `difflib.get_close_matches`
+- 60% similarity threshold
+- Matches query terms to actual database values
+- Example: "NYC" → "New York", "Cali" → "California"
+
+### 7. Embeddings for Smart Caching (Saves API Calls)
+
+Cache similar queries to save OpenAI API costs.
+
+```python
+sutra = SUTRA(api_key="your-key", use_embeddings=True)
+
+# First query - calls OpenAI API
+result = sutra.ask("Show sales data")
+
+# Similar query - uses cache (NO API call, FREE!)
+result = sutra.ask("Display sales information")
+# Output: Similar (92%): 'Show sales data'
+```
+
+**How it works:**
+- Uses `sentence-transformers` library
+- Model: `all-MiniLM-L6-v2` (80MB, runs locally)
+- Converts queries to 384-dimensional vectors
+- Similarity threshold: 85%
+- Completely offline (no external API calls)
+
+**Technical details:**
+```
+Query 1: "Show sales" → Vector: [0.23, -0.45, 0.67, ...]
+Query 2: "Display sales" → Vector: [0.25, -0.43, 0.69, ...]
+Similarity: 92% → Uses cached result (saves API call)
+
+Query 3: "What's the weather?" → Vector: [-0.89, 0.12, -0.34, ...]
+Similarity: 15% → New API call (different topic)
+```
+
+**Cost savings:**
+```python
+# Without embeddings: 10 similar queries = 10 API calls = $0.10
+# With embeddings: 10 similar queries = 1 API call = $0.01 (90% savings)
+```
+
+### 8. Irrelevant Query Detection
+
+Detects when queries don't relate to your database.
+
+```python
+sutra = SUTRA(api_key="your-key", check_relevance=True)
+
+result = sutra.ask("What is the weather today?")
+# Output: Warning: Query may be irrelevant to your database
+#         Database contains tables about: employee_data_people, employee_data_skills
+#         Continue anyway? (yes/no):
+```
+
+**How it works:**
+- Sends database context (table names, column names) to AI
+- AI determines if query is relevant
+- Prompts user before wasting API call
+- Can proceed anyway if desired
+
+### 9. Query Caching
+
+Simple caching for exact query matches.
+
+```python
+sutra = SUTRA(api_key="your-key", cache_queries=True)
+
+result = sutra.ask("Show total sales")  # API call
+result = sutra.ask("Show total sales")  # From cache (FREE)
+# Output: From cache
+```
+
+### 10. Direct SQL (Free, No API Cost)
+
+```python
+result = sutra.sql("SELECT * FROM people WHERE state='CA'")
+print(result.data)
+```
+
+## Advanced Configuration
+
+Enable all optional features:
+
+```python
+sutra = SUTRA(
+    api_key="your-openai-key",
+    db="database.db",              # SQLite database path
+    use_embeddings=True,           # Smart caching with embeddings (saves 90% API costs)
+    check_relevance=True,          # Detect irrelevant queries before API call
+    fuzzy_match=True,              # Better NLP matching
+    cache_queries=True             # Cache exact query matches
+)
+```
+
+**Feature comparison:**
+
+| Feature | Benefit | When to Use |
+|---------|---------|-------------|
+| `use_embeddings=True` | Saves 90% on API costs for similar queries | Always recommended |
+| `fuzzy_match=True` | Better query matching | When data has city/location names |
+| `check_relevance=True` | Prevents wasted API calls | When users ask random questions |
+| `cache_queries=True` | Saves on exact query repeats | Always recommended |
+
+## Import SQLite to MySQL
+
+**Step 1: In Colab - Export Database**
+```python
+sutra.upload("data.pdf")
+sutra.export_db("my_data.db", format="sqlite")
+
+from google.colab import files
+files.download("my_data.db")
+```
+
+**Step 2: On Windows - Import to MySQL**
+
+Method A: Using QuerySUTRA
+```python
+sutra = SUTRA.load_from_db("my_data.db", api_key="key")
+sutra.save_to_mysql("localhost", "root", "password", "my_database")
+```
+
+Method B: Using simple_import.py script
+
+Create `simple_import.py`:
+```python
+import sqlite3, mysql.connector, pandas as pd
+
+SQLITE_DB = "my_data.db"
+MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD = "localhost", "root", "password"
+MYSQL_DATABASE = "my_database"
+
+sqlite_conn = sqlite3.connect(SQLITE_DB)
+cursor = sqlite_conn.cursor()
+cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+tables = [row[0] for row in cursor.fetchall()]
+
+temp_conn = mysql.connector.connect(host=MYSQL_HOST, user=MYSQL_USER, password=MYSQL_PASSWORD)
+temp_cursor = temp_conn.cursor()
+temp_cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{MYSQL_DATABASE}`")
+temp_cursor.close()
+temp_conn.close()
+
+mysql_conn = mysql.connector.connect(host=MYSQL_HOST, user=MYSQL_USER, password=MYSQL_PASSWORD, database=MYSQL_DATABASE)
+mysql_cursor = mysql_conn.cursor()
+
+for table in tables:
+    df = pd.read_sql_query(f"SELECT * FROM {table}", sqlite_conn)
+    mysql_cursor.execute(f"DROP TABLE IF EXISTS {table}")
+    
+    cols = [f"`{col}` {'INT' if df[col].dtype == 'int64' else 'FLOAT' if df[col].dtype == 'float64' else 'TEXT'}" for col in df.columns]
+    mysql_cursor.execute(f"CREATE TABLE {table} ({', '.join(cols)})")
+    
+    if len(df) > 0:
+        placeholders = ', '.join(['%s'] * len(df.columns))
+        for _, row in df.iterrows():
+            vals = [None if pd.isna(v) else v for v in row.values]
+            mysql_cursor.execute(f"INSERT INTO {table} VALUES ({placeholders})", vals)
+    mysql_conn.commit()
+
+sqlite_conn.close()
+mysql_cursor.close()
+mysql_conn.close()
+print(f"Complete! Data in MySQL database '{MYSQL_DATABASE}'")
+```
+
+Run: `python simple_import.py`
+
+## Supported Formats
+
+CSV, Excel, JSON, SQL, PDF, Word, Text, Pandas DataFrame
+
+## How Embeddings Work
+
+QuerySUTRA uses **sentence-transformers** to create semantic embeddings of your queries:
+
+**Model:** `all-MiniLM-L6-v2`
+- Size: 80MB (downloads once, cached locally)
+- Embedding dimension: 384
+- Speed: Very fast, runs locally
+- No external API calls
+
+**Process:**
+
+1. Query is converted to a 384-dimensional vector
+2. Compared to cached query vectors using cosine similarity
+3. If similarity > 85%, uses cached result
+4. Otherwise, makes new API call
+
+**Example:**
+
+```python
+sutra = SUTRA(api_key="key", use_embeddings=True)
+
+# Query 1: "Show me sales data"
+# → Embedding: [0.234, -0.456, 0.678, -0.123, ...]
+# → API call made
+# → Result cached
+
+# Query 2: "Display sales information"  
+# → Embedding: [0.238, -0.451, 0.682, -0.119, ...]
+# → Similarity: 92% with Query 1
+# → Uses cached result (NO API CALL)
+
+# Query 3: "What's the weather?"
+# → Embedding: [-0.891, 0.123, -0.345, 0.567, ...]
+# → Similarity: 15% with Query 1
+# → Makes new API call (different topic)
+```
+
+**Cost Comparison:**
+
+Without embeddings:
+```
+10 queries about sales = 10 API calls = $0.10
+```
+
+With embeddings:
+```
+10 similar queries about sales = 1 API call + 9 cached = $0.01 (90% savings)
+```
+
+**Installation:**
+```bash
+pip install QuerySUTRA[embeddings]
+```
+
+**Usage:**
+```python
+sutra = SUTRA(api_key="key", use_embeddings=True)
+
+# All similar queries are cached automatically
+result1 = sutra.ask("Show sales")
+result2 = sutra.ask("Display sales data")      # Cached
+result3 = sutra.ask("Give me sales information") # Cached
+result4 = sutra.ask("Sales data please")        # Cached
+# Only 1 API call for all 4 queries!
+```
+
+## API Reference
+
+**Initialize**
+```python
+SUTRA(
+    api_key: str,                  # OpenAI API key
+    db: str = "sutra.db",         # SQLite database path
+    use_embeddings: bool = False,  # Enable smart caching
+    check_relevance: bool = False, # Check query relevance
+    fuzzy_match: bool = True,      # Enable fuzzy matching
+    cache_queries: bool = True     # Cache exact matches
+)
+```
+
+**Class Methods**
+- `load_from_db(path, api_key, **kwargs)` - Load existing SQLite database
+- `connect_mysql(host, user, password, database, port, api_key, **kwargs)` - Connect to MySQL
+- `connect_postgres(host, user, password, database, port, api_key, **kwargs)` - Connect to PostgreSQL
+
+**Instance Methods**
+- `upload(data, name, extract_entities, auto_export_mysql)` - Upload data
+- `ask(question, viz, table)` - Natural language query
+- `sql(query, viz)` - Direct SQL query
+- `tables()` - List all tables
+- `schema(table)` - Show schema
+- `peek(table, n)` - Preview data
+- `export_db(path, format)` - Export (sqlite/sql/json/excel)
+- `save_to_mysql(...)` - Export to MySQL (auto-creates database)
+- `save_to_postgres(...)` - Export to PostgreSQL
+- `backup(path)` - Create backup
+- `close()` - Close connection
+
+## Troubleshooting
+
+**MySQL database doesn't exist**
+- Fixed - auto-creates automatically
+
+**Only 10 records from large PDF**
+- Fixed - processes entire document in chunks
+
+**connect_mysql() not found**
+- Update: `pip install --upgrade QuerySUTRA`
+
+**Embeddings not working**
+- Install: `pip install QuerySUTRA[embeddings]`
+
+## Requirements
+
+- Python 3.8+
+- OpenAI API key
+- MySQL/PostgreSQL (optional)
+
+## License
+
+MIT License
+
+## Changelog
+
+**v0.4.2**
+- Complete embeddings documentation
+- Simplified workflows
+
+**v0.4.0**
+- Auto-creates MySQL database
+- Complete PDF extraction
+- Chunk processing
+- Auto-export feature
+
+---
+
+**Made by Aditya Batta**
