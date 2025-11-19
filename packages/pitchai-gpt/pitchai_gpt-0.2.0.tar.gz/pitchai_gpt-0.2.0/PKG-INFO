@@ -1,0 +1,82 @@
+Metadata-Version: 2.4
+Name: pitchai-gpt
+Version: 0.2.0
+Summary: Async GPT helpers and the Fast Streaming Agent runtime used across AFASAsk projects.
+Project-URL: Homepage, https://github.com/pitchai
+Project-URL: Source, https://github.com/pitchai/afas_worktree
+Author: PitchAI
+License: Proprietary
+Keywords: agents,fastapi,gemini,gpt,llm
+Classifier: Intended Audience :: Developers
+Classifier: License :: Other/Proprietary License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Requires-Python: >=3.11
+Requires-Dist: boto3>=1.34
+Requires-Dist: dill>=0.3.7
+Requires-Dist: fastapi>=0.110
+Requires-Dist: httpx>=0.27
+Requires-Dist: jinja2>=3.1
+Requires-Dist: numpy>=1.26
+Requires-Dist: openai>=1.0.0
+Requires-Dist: pandas>=2.0
+Requires-Dist: polars>=0.20
+Requires-Dist: pydantic>=1.10
+Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: restrictedpython>=7.0
+Requires-Dist: rich>=13.7
+Requires-Dist: sqlalchemy>=2.0
+Requires-Dist: tiktoken>=0.7
+Description-Content-Type: text/markdown
+
+# pitchai-gpt (`lib_agents`)
+
+Reusable GPT helpers and the Fast Streaming Agent runtime that power AFASAsk deployments. The package bundles two major pieces of functionality:
+
+- `lib_agents.gpt` / `lib_agents.gpt_root`: async GPT helpers with smart prompt loading, Gemini/OpenRouter/Groq/Azure routing, and streaming support.
+- `lib_agents.fast_streaming_agent_root`: the Fast Streaming Agent runtime for dataframe-aware copilots, including dataframe loading, semantic-layer hooks, and templated UI helpers.
+
+Both modules are designed to be shared between repositories (e.g. AFASAsk and AI Price Crawler) so they can evolve in one place and be installed through PyPI. The distribution on PyPI is called **`pitchai-gpt`**, but it exposes the `lib_agents` Python package to avoid breaking existing imports.
+
+## Installation
+
+```bash
+uv pip install pitchai-gpt
+# or
+pip install pitchai-gpt
+```
+
+## Environment variables
+
+The GPT helpers expect API keys/endpoints to be provided through environment variables (or by passing `api_key=` directly when instantiating `GPT`). The most commonly used variables are:
+
+| Provider | Variables |
+| --- | --- |
+| Azure OpenAI | `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_GPT4O_ENDPOINT`, `AZURE_OPENAI_GPT4O_MINI_ENDPOINT`, `AZURE_OPENAI_O3_ENDPOINT`, `AZURE_OPENAI_GPT5_MINI_ENDPOINT`, `AZURE_OPENAI_API_VERSION` |
+| Gemini | `GEMINI_API_KEY_GENERAL` or `GEMINI_API_KEY`, optional `GEMINI_API_BASE_URL` |
+| Groq | `GROQ_API_KEY` |
+| OpenRouter | `OPENROUTER_API_KEY` |
+
+The streaming agent runtime reads configuration from YAML/JSON prompt files, optionally loads `.env` files via `python-dotenv`, and integrates with Pandas/Polars. Make sure your application provides any referenced config modules (e.g. `configs.server_config`, `libs.lib_utils`).
+
+## Usage
+
+```python
+from lib_agents.gpt.gpt import GPT
+
+gpt = GPT(
+    sys_msg="You are a concise assistant.",
+    user_msg="Say READY",
+    model="gemini-2.0-flash",
+)
+response, *_ = asyncio.run(gpt.run())
+print(response)
+```
+
+For streaming agents see `lib_agents.fast_streaming_agent_root.main.FastStreamingAgent` and the demos under `apps/web_app`.
+
+## Development
+
+This project uses [Hatch](https://hatch.pypa.io) via `uv` for building and publishing. See `docs/uv_pypi_publish.md` in the monorepo for a step-by-step release checklist.
