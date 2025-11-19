@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "natsume-ttv"
+version = "0.1.3"
+description = "Near-resonant Analytic TTV Solver for Unknown Mass Estimates"
+readme = "README.md"
+requires-python = ">=3.7"
+license = { text = "MIT" }
+keywords = ["ttv", "mmr", "exoplanets"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent"
+]
+authors = [
+  { name = "Chatdanai Sawangwong", email = "chatdanai.saw@student.mahidol.edu" }
+]
+
+dependencies = [
+  "numpy>=1.25",
+  "scipy>=1.12"
+]
+
+[project.urls]
+Homepage = "https://github.com/chatdanai-s/NATSUME"
+BugTracker = "https://github.com/chatdanai-s/NATSUME/issues"
+# Documentation = "TBA"
+
+[tool.setuptools] # setuptools-specific settings not covered by PEP 621
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["natsume*"]
+exclude = ["__pycache__", "ttv_curvefit", "validation", "example*"]
