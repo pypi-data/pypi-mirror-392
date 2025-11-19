@@ -1,0 +1,117 @@
+[project]
+name = "smlight-cc-flasher"
+dynamic = ["version"]
+description = "Flasher for SMLIGHT CC26xx Devices"
+readme = "README.md"
+authors = [
+	{ name = "Tim Lunn", email = "tl@smlight.tech" },
+	{ name = "Jelmer Tiete", email = "jelmer@tiete.be" }
+]
+license = { file = "LICENSE" }
+classifiers = [
+		"Development Status :: 4 - Beta",
+		"Environment :: Console",
+		"Intended Audience :: End Users/Desktop",
+		"License :: OSI Approved :: Apache Software License",
+		"Operating System :: POSIX :: Linux",
+		"Operating System :: MacOS",
+		"Operating System :: Microsoft :: Windows",
+		"Programming Language :: Python :: 3",
+		"Topic :: Scientific/Engineering",
+]
+
+requires-python = ">=3.12"
+dependencies = [
+	"coloredlogs~=15.0",
+	"gpiod>=2.4.0",
+	"intelhex~=2.3.0",
+	"pyserial-asyncio~=0.6",
+	"pysmlight~=0.2.9",
+	"python_magic~=0.4.27",
+	"tqdm~=4.67.0",
+]
+
+[project.scripts]
+smlight_cc_flasher = "smlight_cc_flasher.__main__:main"
+
+[dependency-groups]
+dev = [
+		"pytest>=8.0.0",
+		"pytest-asyncio>=0.21.0",
+		"pytest-timeout>=2.1.0",
+		"pytest-mock>=3.10.0",
+		"pytest-cov>=4.1.0",
+		"pytest-github-actions-annotate-failures",
+		"scripttest==1.3",
+		"mypy>=1.0.0",
+		"types-tqdm>=4.67.0",
+]
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.targets.wheel]
+packages = ["smlight_cc_flasher"]
+
+[tool.hatch.build.hooks.vcs]
+version-file = "smlight_cc_flasher/_version.py"
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+src = ["smlight_cc_flasher", "tests"]
+
+[tool.ruff.lint]
+select = [
+		# Pyflakes
+		"F",
+		# Pycodestyle
+		"E",
+		"W",
+		# isort
+		"I",
+		# pyupgrade
+		"UP",
+		# Remove unused imports/variables
+		"F401",
+		"F841",
+]
+ignore = ["E203", "E501"]
+
+[tool.ruff.lint.isort]
+force-sort-within-sections = true
+known-first-party = ["smlight_cc_flasher", "tests"]
+forced-separate = ["tests"]
+combine-as-imports = true
+
+[tool.pytest.ini_options]
+addopts = "--showlocals --verbose"
+testpaths = ["tests"]
+timeout = 20
+log_format = "%(asctime)s.%(msecs)03d %(levelname)s %(message)s"
+log_date_format = "%Y-%m-%d %H:%M:%S"
+asyncio_mode = "auto"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+exclude = ["^tests/"]
+
+# Third-party libraries without type stubs
+[[tool.mypy.overrides]]
+module = [
+    "serial_asyncio",
+    "coloredlogs",
+    "intelhex",
+    "magic",
+]
+ignore_missing_imports = true
+
+# Generated version file
+[[tool.mypy.overrides]]
+module = "smlight_cc_flasher._version"
+ignore_missing_imports = true
