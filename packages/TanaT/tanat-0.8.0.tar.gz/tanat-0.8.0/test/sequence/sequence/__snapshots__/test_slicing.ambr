@@ -1,0 +1,440 @@
+# serializer version: 1
+# name: TestGetItemSingleIndex.test_first_entity[event]
+  EventEntity(
+    extent=2023-01-21 00:00:00,
+    settings=EventSequenceSettings(time_column='date', id_column='patient_id', entity_features=['event_type', 'provider'], static_features=['gender', 'age', 'insurance', 'chronic_condition']),
+    value=tuple(
+      'EXAM',
+      'NURSE',
+    ),
+  )
+# ---
+# name: TestGetItemSingleIndex.test_first_entity[interval]
+  IntervalEntity(
+    extent=[2023-01-08 00:00:00, 2023-01-18 00:00:00],
+    settings=IntervalSequenceSettings(id_column='patient_id', entity_features=['medication', 'administration_route', 'dosage'], start_column='start_date', end_column='end_date', anchor=<DateAnchor.START: 1>, static_features=['gender', 'age', 'insurance', 'chronic_condition']),
+    value=tuple(
+      'PAIN_RELIEVER',
+      nan,
+      np.int32(2),
+    ),
+  )
+# ---
+# name: TestGetItemSingleIndex.test_last_entity[event]
+  EventEntity(
+    extent=2023-12-26 00:00:00,
+    settings=EventSequenceSettings(time_column='date', id_column='patient_id', entity_features=['event_type', 'provider'], static_features=['gender', 'age', 'insurance', 'chronic_condition']),
+    value=tuple(
+      'EMERGENCY',
+      nan,
+    ),
+  )
+# ---
+# name: TestGetItemSingleIndex.test_last_entity[interval]
+  IntervalEntity(
+    extent=[2023-09-09 00:00:00, 2023-09-20 00:00:00],
+    settings=IntervalSequenceSettings(id_column='patient_id', entity_features=['medication', 'administration_route', 'dosage'], start_column='start_date', end_column='end_date', anchor=<DateAnchor.START: 1>, static_features=['gender', 'age', 'insurance', 'chronic_condition']),
+    value=tuple(
+      'ANTICOAGULANT',
+      'INTRAVENOUS',
+      np.int32(3),
+    ),
+  )
+# ---
+# name: TestGetItemSingleIndex.test_middle_entity[event]
+  EventEntity(
+    extent=2023-01-22 00:00:00,
+    settings=EventSequenceSettings(time_column='date', id_column='patient_id', entity_features=['event_type', 'provider'], static_features=['gender', 'age', 'insurance', 'chronic_condition']),
+    value=tuple(
+      'FOLLOW_UP',
+      'RADIOLOGIST',
+    ),
+  )
+# ---
+# name: TestGetItemSingleIndex.test_middle_entity[interval]
+  IntervalEntity(
+    extent=[2023-01-12 00:00:00, 2023-01-28 00:00:00],
+    settings=IntervalSequenceSettings(id_column='patient_id', entity_features=['medication', 'administration_route', 'dosage'], start_column='start_date', end_column='end_date', anchor=<DateAnchor.START: 1>, static_features=['gender', 'age', 'insurance', 'chronic_condition']),
+    value=tuple(
+      'ANTICOAGULANT',
+      'CUTANEOUS',
+      np.int32(1),
+    ),
+  )
+# ---
+# name: TestGetItemSingleIndex.test_negative_index[event]
+  EventEntity(
+    extent=2023-12-15 00:00:00,
+    settings=EventSequenceSettings(time_column='date', id_column='patient_id', entity_features=['event_type', 'provider'], static_features=['gender', 'age', 'insurance', 'chronic_condition']),
+    value=tuple(
+      'EMERGENCY',
+      nan,
+    ),
+  )
+# ---
+# name: TestGetItemSingleIndex.test_negative_index[interval]
+  IntervalEntity(
+    extent=[2023-05-23 00:00:00, 2023-05-30 00:00:00],
+    settings=IntervalSequenceSettings(id_column='patient_id', entity_features=['medication', 'administration_route', 'dosage'], start_column='start_date', end_column='end_date', anchor=<DateAnchor.START: 1>, static_features=['gender', 'age', 'insurance', 'chronic_condition']),
+    value=tuple(
+      'ANTIHYPERTENSIVE',
+      'INTRAVENOUS',
+      np.int32(3),
+    ),
+  )
+# ---
+# name: TestGetItemSlice.test_slice_both_negative[event]
+  '''
+  patient_id,date,event_type,provider
+  1,2023-01-22,FOLLOW_UP,RADIOLOGIST
+  1,2023-02-28,EXAM,
+  1,2023-03-29,FOLLOW_UP,RADIOLOGIST
+  1,2023-06-10,VACCINATION,
+  1,2023-07-11,VACCINATION,LABORATORY
+  1,2023-08-03,EMERGENCY,NURSE
+  1,2023-09-15,VACCINATION,SPECIALIST
+  1,2023-12-11,CONSULTATION,NURSE
+  1,2023-12-15,EMERGENCY,
+  
+  '''
+# ---
+# name: TestGetItemSlice.test_slice_both_negative[interval]
+  '''
+  patient_id,start_date,end_date,medication,administration_route,dosage
+  1,2023-01-12,2023-01-28,ANTICOAGULANT,CUTANEOUS,1
+  1,2023-01-20,2023-02-13,ANTIBIOTIC,ORAL,2
+  1,2023-05-23,2023-05-30,ANTIHYPERTENSIVE,INTRAVENOUS,3
+  
+  '''
+# ---
+# name: TestGetItemSlice.test_slice_negative_end[event]
+  '''
+  patient_id,date,event_type,provider
+  1,2023-01-21,EXAM,NURSE
+  1,2023-01-22,FOLLOW_UP,RADIOLOGIST
+  1,2023-02-28,EXAM,
+  1,2023-03-29,FOLLOW_UP,RADIOLOGIST
+  1,2023-06-10,VACCINATION,
+  1,2023-07-11,VACCINATION,LABORATORY
+  1,2023-08-03,EMERGENCY,NURSE
+  1,2023-09-15,VACCINATION,SPECIALIST
+  1,2023-12-11,CONSULTATION,NURSE
+  1,2023-12-15,EMERGENCY,
+  
+  '''
+# ---
+# name: TestGetItemSlice.test_slice_negative_end[interval]
+  '''
+  patient_id,start_date,end_date,medication,administration_route,dosage
+  1,2023-01-08,2023-01-18,PAIN_RELIEVER,,2
+  1,2023-01-12,2023-01-28,ANTICOAGULANT,CUTANEOUS,1
+  1,2023-01-20,2023-02-13,ANTIBIOTIC,ORAL,2
+  1,2023-05-23,2023-05-30,ANTIHYPERTENSIVE,INTRAVENOUS,3
+  
+  '''
+# ---
+# name: TestGetItemSlice.test_slice_negative_start[event]
+  '''
+  patient_id,date,event_type,provider
+  1,2023-12-15,EMERGENCY,
+  1,2023-12-26,EMERGENCY,
+  
+  '''
+# ---
+# name: TestGetItemSlice.test_slice_negative_start[interval]
+  '''
+  patient_id,start_date,end_date,medication,administration_route,dosage
+  1,2023-05-23,2023-05-30,ANTIHYPERTENSIVE,INTRAVENOUS,3
+  1,2023-09-09,2023-09-20,ANTICOAGULANT,INTRAVENOUS,3
+  
+  '''
+# ---
+# name: TestGetItemSlice.test_slice_only_end[event]
+  '''
+  patient_id,date,event_type,provider
+  1,2023-01-21,EXAM,NURSE
+  1,2023-01-22,FOLLOW_UP,RADIOLOGIST
+  
+  '''
+# ---
+# name: TestGetItemSlice.test_slice_only_end[interval]
+  '''
+  patient_id,start_date,end_date,medication,administration_route,dosage
+  1,2023-01-08,2023-01-18,PAIN_RELIEVER,,2
+  1,2023-01-12,2023-01-28,ANTICOAGULANT,CUTANEOUS,1
+  
+  '''
+# ---
+# name: TestGetItemSlice.test_slice_only_start[event]
+  '''
+  patient_id,date,event_type,provider
+  1,2023-02-28,EXAM,
+  1,2023-03-29,FOLLOW_UP,RADIOLOGIST
+  1,2023-06-10,VACCINATION,
+  1,2023-07-11,VACCINATION,LABORATORY
+  1,2023-08-03,EMERGENCY,NURSE
+  1,2023-09-15,VACCINATION,SPECIALIST
+  1,2023-12-11,CONSULTATION,NURSE
+  1,2023-12-15,EMERGENCY,
+  1,2023-12-26,EMERGENCY,
+  
+  '''
+# ---
+# name: TestGetItemSlice.test_slice_only_start[interval]
+  '''
+  patient_id,start_date,end_date,medication,administration_route,dosage
+  1,2023-01-20,2023-02-13,ANTIBIOTIC,ORAL,2
+  1,2023-05-23,2023-05-30,ANTIHYPERTENSIVE,INTRAVENOUS,3
+  1,2023-09-09,2023-09-20,ANTICOAGULANT,INTRAVENOUS,3
+  
+  '''
+# ---
+# name: TestGetItemSlice.test_slice_start_end[event]
+  '''
+  patient_id,date,event_type,provider
+  1,2023-01-22,FOLLOW_UP,RADIOLOGIST
+  1,2023-02-28,EXAM,
+  
+  '''
+# ---
+# name: TestGetItemSlice.test_slice_start_end[interval]
+  '''
+  patient_id,start_date,end_date,medication,administration_route,dosage
+  1,2023-01-12,2023-01-28,ANTICOAGULANT,CUTANEOUS,1
+  1,2023-01-20,2023-02-13,ANTIBIOTIC,ORAL,2
+  
+  '''
+# ---
+# name: TestGetItemSlice.test_slice_with_step[event]
+  '''
+  patient_id,date,event_type,provider
+  1,2023-01-21,EXAM,NURSE
+  1,2023-02-28,EXAM,
+  1,2023-06-10,VACCINATION,
+  1,2023-08-03,EMERGENCY,NURSE
+  1,2023-12-11,CONSULTATION,NURSE
+  1,2023-12-26,EMERGENCY,
+  
+  '''
+# ---
+# name: TestGetItemSlice.test_slice_with_step[interval]
+  '''
+  patient_id,start_date,end_date,medication,administration_route,dosage
+  1,2023-01-08,2023-01-18,PAIN_RELIEVER,,2
+  1,2023-01-20,2023-02-13,ANTIBIOTIC,ORAL,2
+  1,2023-09-09,2023-09-20,ANTICOAGULANT,INTRAVENOUS,3
+  
+  '''
+# ---
+# name: TestHeadMethod.test_head_inplace[event]
+  '''
+  patient_id,date,event_type,provider
+  1,2023-01-21,EXAM,NURSE
+  1,2023-01-22,FOLLOW_UP,RADIOLOGIST
+  
+  '''
+# ---
+# name: TestHeadMethod.test_head_inplace[interval]
+  '''
+  patient_id,start_date,end_date,medication,administration_route,dosage
+  1,2023-01-08,2023-01-18,PAIN_RELIEVER,,2
+  1,2023-01-12,2023-01-28,ANTICOAGULANT,CUTANEOUS,1
+  
+  '''
+# ---
+# name: TestHeadMethod.test_head_negative[event]
+  '''
+  patient_id,date,event_type,provider
+  1,2023-01-21,EXAM,NURSE
+  1,2023-01-22,FOLLOW_UP,RADIOLOGIST
+  1,2023-02-28,EXAM,
+  1,2023-03-29,FOLLOW_UP,RADIOLOGIST
+  1,2023-06-10,VACCINATION,
+  1,2023-07-11,VACCINATION,LABORATORY
+  1,2023-08-03,EMERGENCY,NURSE
+  1,2023-09-15,VACCINATION,SPECIALIST
+  1,2023-12-11,CONSULTATION,NURSE
+  
+  '''
+# ---
+# name: TestHeadMethod.test_head_negative[interval]
+  '''
+  patient_id,start_date,end_date,medication,administration_route,dosage
+  1,2023-01-08,2023-01-18,PAIN_RELIEVER,,2
+  1,2023-01-12,2023-01-28,ANTICOAGULANT,CUTANEOUS,1
+  1,2023-01-20,2023-02-13,ANTIBIOTIC,ORAL,2
+  
+  '''
+# ---
+# name: TestHeadMethod.test_head_one[event]
+  '''
+  patient_id,date,event_type,provider
+  1,2023-01-21,EXAM,NURSE
+  
+  '''
+# ---
+# name: TestHeadMethod.test_head_one[interval]
+  '''
+  patient_id,start_date,end_date,medication,administration_route,dosage
+  1,2023-01-08,2023-01-18,PAIN_RELIEVER,,2
+  
+  '''
+# ---
+# name: TestHeadMethod.test_head_positive[event]
+  '''
+  patient_id,date,event_type,provider
+  1,2023-01-21,EXAM,NURSE
+  1,2023-01-22,FOLLOW_UP,RADIOLOGIST
+  
+  '''
+# ---
+# name: TestHeadMethod.test_head_positive[interval]
+  '''
+  patient_id,start_date,end_date,medication,administration_route,dosage
+  1,2023-01-08,2023-01-18,PAIN_RELIEVER,,2
+  1,2023-01-12,2023-01-28,ANTICOAGULANT,CUTANEOUS,1
+  
+  '''
+# ---
+# name: TestSliceMethod.test_slice_inplace[event]
+  '''
+  patient_id,date,event_type,provider
+  1,2023-01-22,FOLLOW_UP,RADIOLOGIST
+  1,2023-02-28,EXAM,
+  
+  '''
+# ---
+# name: TestSliceMethod.test_slice_inplace[interval]
+  '''
+  patient_id,start_date,end_date,medication,administration_route,dosage
+  1,2023-01-12,2023-01-28,ANTICOAGULANT,CUTANEOUS,1
+  1,2023-01-20,2023-02-13,ANTIBIOTIC,ORAL,2
+  
+  '''
+# ---
+# name: TestSliceMethod.test_slice_only_end[event]
+  '''
+  patient_id,date,event_type,provider
+  1,2023-01-21,EXAM,NURSE
+  1,2023-01-22,FOLLOW_UP,RADIOLOGIST
+  
+  '''
+# ---
+# name: TestSliceMethod.test_slice_only_end[interval]
+  '''
+  patient_id,start_date,end_date,medication,administration_route,dosage
+  1,2023-01-08,2023-01-18,PAIN_RELIEVER,,2
+  1,2023-01-12,2023-01-28,ANTICOAGULANT,CUTANEOUS,1
+  
+  '''
+# ---
+# name: TestSliceMethod.test_slice_only_start[event]
+  '''
+  patient_id,date,event_type,provider
+  1,2023-02-28,EXAM,
+  1,2023-03-29,FOLLOW_UP,RADIOLOGIST
+  1,2023-06-10,VACCINATION,
+  1,2023-07-11,VACCINATION,LABORATORY
+  1,2023-08-03,EMERGENCY,NURSE
+  1,2023-09-15,VACCINATION,SPECIALIST
+  1,2023-12-11,CONSULTATION,NURSE
+  1,2023-12-15,EMERGENCY,
+  1,2023-12-26,EMERGENCY,
+  
+  '''
+# ---
+# name: TestSliceMethod.test_slice_only_start[interval]
+  '''
+  patient_id,start_date,end_date,medication,administration_route,dosage
+  1,2023-01-20,2023-02-13,ANTIBIOTIC,ORAL,2
+  1,2023-05-23,2023-05-30,ANTIHYPERTENSIVE,INTRAVENOUS,3
+  1,2023-09-09,2023-09-20,ANTICOAGULANT,INTRAVENOUS,3
+  
+  '''
+# ---
+# name: TestSliceMethod.test_slice_start_end[event]
+  '''
+  patient_id,date,event_type,provider
+  1,2023-01-22,FOLLOW_UP,RADIOLOGIST
+  1,2023-02-28,EXAM,
+  
+  '''
+# ---
+# name: TestSliceMethod.test_slice_start_end[interval]
+  '''
+  patient_id,start_date,end_date,medication,administration_route,dosage
+  1,2023-01-12,2023-01-28,ANTICOAGULANT,CUTANEOUS,1
+  1,2023-01-20,2023-02-13,ANTIBIOTIC,ORAL,2
+  
+  '''
+# ---
+# name: TestTailMethod.test_tail_inplace[event]
+  '''
+  patient_id,date,event_type,provider
+  1,2023-12-15,EMERGENCY,
+  1,2023-12-26,EMERGENCY,
+  
+  '''
+# ---
+# name: TestTailMethod.test_tail_inplace[interval]
+  '''
+  patient_id,start_date,end_date,medication,administration_route,dosage
+  1,2023-05-23,2023-05-30,ANTIHYPERTENSIVE,INTRAVENOUS,3
+  1,2023-09-09,2023-09-20,ANTICOAGULANT,INTRAVENOUS,3
+  
+  '''
+# ---
+# name: TestTailMethod.test_tail_negative[event]
+  '''
+  patient_id,date,event_type,provider
+  1,2023-02-28,EXAM,
+  1,2023-03-29,FOLLOW_UP,RADIOLOGIST
+  1,2023-06-10,VACCINATION,
+  1,2023-07-11,VACCINATION,LABORATORY
+  1,2023-08-03,EMERGENCY,NURSE
+  1,2023-09-15,VACCINATION,SPECIALIST
+  1,2023-12-11,CONSULTATION,NURSE
+  1,2023-12-15,EMERGENCY,
+  1,2023-12-26,EMERGENCY,
+  
+  '''
+# ---
+# name: TestTailMethod.test_tail_negative[interval]
+  '''
+  patient_id,start_date,end_date,medication,administration_route,dosage
+  1,2023-01-20,2023-02-13,ANTIBIOTIC,ORAL,2
+  1,2023-05-23,2023-05-30,ANTIHYPERTENSIVE,INTRAVENOUS,3
+  1,2023-09-09,2023-09-20,ANTICOAGULANT,INTRAVENOUS,3
+  
+  '''
+# ---
+# name: TestTailMethod.test_tail_one[event]
+  '''
+  patient_id,date,event_type,provider
+  1,2023-12-26,EMERGENCY,
+  
+  '''
+# ---
+# name: TestTailMethod.test_tail_one[interval]
+  '''
+  patient_id,start_date,end_date,medication,administration_route,dosage
+  1,2023-09-09,2023-09-20,ANTICOAGULANT,INTRAVENOUS,3
+  
+  '''
+# ---
+# name: TestTailMethod.test_tail_positive[event]
+  '''
+  patient_id,date,event_type,provider
+  1,2023-12-15,EMERGENCY,
+  1,2023-12-26,EMERGENCY,
+  
+  '''
+# ---
+# name: TestTailMethod.test_tail_positive[interval]
+  '''
+  patient_id,start_date,end_date,medication,administration_route,dosage
+  1,2023-05-23,2023-05-30,ANTIHYPERTENSIVE,INTRAVENOUS,3
+  1,2023-09-09,2023-09-20,ANTICOAGULANT,INTRAVENOUS,3
+  
+  '''
+# ---

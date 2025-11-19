@@ -1,0 +1,364 @@
+# serializer version: 1
+# name: TestConversionChaining.test_event_to_interval_to_event_roundtrip
+  '''
+  patient_id,time,event_type,provider
+  3,2023-01-28,CONSULTATION,RADIOLOGIST
+  3,2023-02-02,FOLLOW_UP,NURSE
+  3,2023-02-10,FOLLOW_UP,LABORATORY
+  3,2023-03-06,CONSULTATION,
+  3,2023-03-22,EMERGENCY,
+  3,2023-05-16,EMERGENCY,NURSE
+  3,2023-06-21,EMERGENCY,NURSE
+  3,2023-08-15,FOLLOW_UP,NURSE
+  3,2023-08-19,EXAM,GENERAL_PRACTITIONER
+  3,2023-09-09,VACCINATION,RADIOLOGIST
+  3,2023-09-14,FOLLOW_UP,SPECIALIST
+  3,2023-10-16,EMERGENCY,LABORATORY
+  3,2023-12-10,CONSULTATION,RADIOLOGIST
+  
+  '''
+# ---
+# name: TestConversionChaining.test_event_to_state_to_event_roundtrip
+  '''
+  patient_id,time,event_type,provider
+  3,2023-01-28,CONSULTATION,RADIOLOGIST
+  3,2023-02-02,FOLLOW_UP,NURSE
+  3,2023-02-10,FOLLOW_UP,LABORATORY
+  3,2023-03-06,CONSULTATION,
+  3,2023-03-22,EMERGENCY,
+  3,2023-05-16,EMERGENCY,NURSE
+  3,2023-06-21,EMERGENCY,NURSE
+  3,2023-08-15,FOLLOW_UP,NURSE
+  3,2023-08-19,EXAM,GENERAL_PRACTITIONER
+  3,2023-09-09,VACCINATION,RADIOLOGIST
+  3,2023-09-14,FOLLOW_UP,SPECIALIST
+  3,2023-10-16,EMERGENCY,LABORATORY
+  3,2023-12-10,CONSULTATION,RADIOLOGIST
+  
+  '''
+# ---
+# name: TestConversionChaining.test_state_to_interval_to_event_chain
+  '''
+  patient_id,time,health_state,condition
+  3,2023-02-17,CONVALESCENCE,CARDIAC
+  3,2023-08-10,CHRONIC_MONITORING,NEUROLOGICAL
+  3,2023-12-23,REMISSION,CARDIAC
+  
+  '''
+# ---
+# name: TestConversionMethods.test_as_event_anchor_end[interval]
+  '''
+  patient_id,time,medication,administration_route,dosage
+  3,2023-04-24,ANTIBIOTIC,INHALATION,3
+  3,2023-10-21,PAIN_RELIEVER,ORAL,2
+  3,2023-11-02,ANTIHYPERTENSIVE,ORAL,2
+  
+  '''
+# ---
+# name: TestConversionMethods.test_as_event_anchor_end[state]
+  '''
+  patient_id,time,health_state,condition
+  3,2023-04-05,CONVALESCENCE,CARDIAC
+  3,2023-12-15,CHRONIC_MONITORING,NEUROLOGICAL
+  3,2023-12-31,REMISSION,CARDIAC
+  
+  '''
+# ---
+# name: TestConversionMethods.test_as_event_anchor_middle[interval]
+  '''
+  patient_id,time,medication,administration_route,dosage
+  3,2023-04-19 12:00:00,ANTIBIOTIC,INHALATION,3
+  3,2023-10-07 12:00:00,PAIN_RELIEVER,ORAL,2
+  3,2023-10-21 12:00:00,ANTIHYPERTENSIVE,ORAL,2
+  
+  '''
+# ---
+# name: TestConversionMethods.test_as_event_anchor_middle[state]
+  '''
+  patient_id,time,health_state,condition
+  3,2023-02-17,CONVALESCENCE,CARDIAC
+  3,2023-08-10,CHRONIC_MONITORING,NEUROLOGICAL
+  3,2023-12-23,REMISSION,CARDIAC
+  
+  '''
+# ---
+# name: TestConversionMethods.test_as_event_anchor_start[event]
+  '''
+  patient_id,date,event_type,provider
+  3,2023-01-28,CONSULTATION,RADIOLOGIST
+  3,2023-02-02,FOLLOW_UP,NURSE
+  3,2023-02-10,FOLLOW_UP,LABORATORY
+  3,2023-03-06,CONSULTATION,
+  3,2023-03-22,EMERGENCY,
+  3,2023-05-16,EMERGENCY,NURSE
+  3,2023-06-21,EMERGENCY,NURSE
+  3,2023-08-15,FOLLOW_UP,NURSE
+  3,2023-08-19,EXAM,GENERAL_PRACTITIONER
+  3,2023-09-09,VACCINATION,RADIOLOGIST
+  3,2023-09-14,FOLLOW_UP,SPECIALIST
+  3,2023-10-16,EMERGENCY,LABORATORY
+  3,2023-12-10,CONSULTATION,RADIOLOGIST
+  
+  '''
+# ---
+# name: TestConversionMethods.test_as_event_anchor_start[interval]
+  '''
+  patient_id,time,medication,administration_route,dosage
+  3,2023-04-15,ANTIBIOTIC,INHALATION,3
+  3,2023-09-24,PAIN_RELIEVER,ORAL,2
+  3,2023-10-10,ANTIHYPERTENSIVE,ORAL,2
+  
+  '''
+# ---
+# name: TestConversionMethods.test_as_event_anchor_start[state]
+  '''
+  patient_id,time,health_state,condition
+  3,2023-01-01,CONVALESCENCE,CARDIAC
+  3,2023-04-05,CHRONIC_MONITORING,NEUROLOGICAL
+  3,2023-12-15,REMISSION,CARDIAC
+  
+  '''
+# ---
+# name: TestConversionMethods.test_as_interval_custom_columns[interval]
+  '''
+  patient_id,start_date,end_date,medication,administration_route,dosage
+  3,2023-04-15,2023-04-24,ANTIBIOTIC,INHALATION,3
+  3,2023-09-24,2023-10-21,PAIN_RELIEVER,ORAL,2
+  3,2023-10-10,2023-11-02,ANTIHYPERTENSIVE,ORAL,2
+  
+  '''
+# ---
+# name: TestConversionMethods.test_as_interval_custom_columns[state]
+  '''
+  patient_id,begin,finish,health_state,condition
+  3,2023-01-01,2023-04-05,CONVALESCENCE,CARDIAC
+  3,2023-04-05,2023-12-15,CHRONIC_MONITORING,NEUROLOGICAL
+  3,2023-12-15,2023-12-31,REMISSION,CARDIAC
+  
+  '''
+# ---
+# name: TestConversionMethods.test_as_interval_identity[interval]
+  '''
+  patient_id,start_date,end_date,medication,administration_route,dosage
+  3,2023-04-15,2023-04-24,ANTIBIOTIC,INHALATION,3
+  3,2023-09-24,2023-10-21,PAIN_RELIEVER,ORAL,2
+  3,2023-10-10,2023-11-02,ANTIHYPERTENSIVE,ORAL,2
+  
+  '''
+# ---
+# name: TestConversionMethods.test_as_interval_identity[state]
+  '''
+  patient_id,start,end,health_state,condition
+  3,2023-01-01,2023-04-05,CONVALESCENCE,CARDIAC
+  3,2023-04-05,2023-12-15,CHRONIC_MONITORING,NEUROLOGICAL
+  3,2023-12-15,2023-12-31,REMISSION,CARDIAC
+  
+  '''
+# ---
+# name: TestConversionMethods.test_event_to_interval_duration_column
+  '''
+  patient_id,start,end,event_type,location,duration_hours
+  101,2023-06-01 09:00:00,2023-06-01 11:30:00,admission,Emergency,0 days 02:30:00
+  101,2023-06-01 14:00:00,2023-06-01 15:30:00,procedure,Surgery,0 days 01:30:00
+  101,2023-06-02 10:00:00,,discharge,Discharge,
+  
+  '''
+# ---
+# name: TestConversionMethods.test_event_to_interval_fixed_duration[duration0]
+  '''
+  patient_id,start,end,event_type,provider
+  3,2023-01-28,2023-01-28 06:00:00,CONSULTATION,RADIOLOGIST
+  3,2023-02-02,2023-02-02 06:00:00,FOLLOW_UP,NURSE
+  3,2023-02-10,2023-02-10 06:00:00,FOLLOW_UP,LABORATORY
+  3,2023-03-06,2023-03-06 06:00:00,CONSULTATION,
+  3,2023-03-22,2023-03-22 06:00:00,EMERGENCY,
+  3,2023-05-16,2023-05-16 06:00:00,EMERGENCY,NURSE
+  3,2023-06-21,2023-06-21 06:00:00,EMERGENCY,NURSE
+  3,2023-08-15,2023-08-15 06:00:00,FOLLOW_UP,NURSE
+  3,2023-08-19,2023-08-19 06:00:00,EXAM,GENERAL_PRACTITIONER
+  3,2023-09-09,2023-09-09 06:00:00,VACCINATION,RADIOLOGIST
+  3,2023-09-14,2023-09-14 06:00:00,FOLLOW_UP,SPECIALIST
+  3,2023-10-16,2023-10-16 06:00:00,EMERGENCY,LABORATORY
+  3,2023-12-10,2023-12-10 06:00:00,CONSULTATION,RADIOLOGIST
+  
+  '''
+# ---
+# name: TestConversionMethods.test_event_to_interval_fixed_duration[duration1]
+  '''
+  patient_id,start,end,event_type,provider
+  3,2023-01-28,2023-01-29,CONSULTATION,RADIOLOGIST
+  3,2023-02-02,2023-02-03,FOLLOW_UP,NURSE
+  3,2023-02-10,2023-02-11,FOLLOW_UP,LABORATORY
+  3,2023-03-06,2023-03-07,CONSULTATION,
+  3,2023-03-22,2023-03-23,EMERGENCY,
+  3,2023-05-16,2023-05-17,EMERGENCY,NURSE
+  3,2023-06-21,2023-06-22,EMERGENCY,NURSE
+  3,2023-08-15,2023-08-16,FOLLOW_UP,NURSE
+  3,2023-08-19,2023-08-20,EXAM,GENERAL_PRACTITIONER
+  3,2023-09-09,2023-09-10,VACCINATION,RADIOLOGIST
+  3,2023-09-14,2023-09-15,FOLLOW_UP,SPECIALIST
+  3,2023-10-16,2023-10-17,EMERGENCY,LABORATORY
+  3,2023-12-10,2023-12-11,CONSULTATION,RADIOLOGIST
+  
+  '''
+# ---
+# name: TestConversionMethods.test_event_to_interval_numeric_duration_with_timesteps
+  '''
+  patient_id,start,end,event_type,severity,duration_units
+  101,0.0,2.5,start,high,5.5
+  101,5.5,8.0,medication,medium,4.5
+  101,10.0,12.5,discharge,low,
+  
+  '''
+# ---
+# name: TestConversionMethods.test_event_to_interval_numeric_duration_with_timesteps.1
+  '''
+  patient_id,start,end,event_type,severity,duration_units
+  101,0.0,5.5,start,high,5.5
+  101,5.5,10.0,medication,medium,4.5
+  101,10.0,,discharge,low,
+  
+  '''
+# ---
+# name: TestConversionMethods.test_event_to_interval_with_drop_duration_feature
+  '''
+  patient_id,start,end,event_type,location
+  101,2023-06-01 09:00:00,2023-06-01 11:30:00,admission,Emergency
+  101,2023-06-01 14:00:00,2023-06-01 15:30:00,procedure,Surgery
+  101,2023-06-02 10:00:00,,discharge,Discharge
+  
+  '''
+# ---
+# name: TestConversionMethods.test_event_to_interval_with_drop_duration_feature.1
+  SequenceMetadata(static_descriptors={}, temporal_descriptor=TemporalDescriptor(temporal_type='datetime', settings=DateTimeSettings(min_value=Timestamp('2023-06-01 09:00:00'), max_value=Timestamp('2023-06-02 10:00:00'), timezone=None, format=None)), granularity=<Granularity.DAY: 3>, entity_descriptors={'event_type': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['admission', 'discharge', 'procedure'], ordered=False)), 'location': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['Discharge', 'Emergency', 'Surgery'], ordered=False))})
+# ---
+# name: TestConversionMethods.test_event_to_interval_with_drop_duration_timesteps
+  '''
+  patient_id,start,end,event_type,severity
+  101,0.0,5.5,start,high
+  101,5.5,10.0,medication,medium
+  101,10.0,,discharge,low
+  
+  '''
+# ---
+# name: TestConversionMethods.test_event_to_interval_with_drop_duration_timesteps.1
+  SequenceMetadata(static_descriptors={}, temporal_descriptor=TemporalDescriptor(temporal_type='timestep', settings=TimestepSettings(min_value=0.0, max_value=10.0, dtype='float64')), granularity=<Granularity.UNIT: 1>, entity_descriptors={'event_type': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['discharge', 'medication', 'start'], ordered=False)), 'severity': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['high', 'low', 'medium'], ordered=False))})
+# ---
+# name: TestConversionMethods.test_event_to_state_custom_columns
+  '''
+  patient_id,begin,finish,event_type,provider
+  3,2023-01-28,2023-02-02,CONSULTATION,RADIOLOGIST
+  3,2023-02-02,2023-02-10,FOLLOW_UP,NURSE
+  3,2023-02-10,2023-03-06,FOLLOW_UP,LABORATORY
+  3,2023-03-06,2023-03-22,CONSULTATION,
+  3,2023-03-22,2023-05-16,EMERGENCY,
+  3,2023-05-16,2023-06-21,EMERGENCY,NURSE
+  3,2023-06-21,2023-08-15,EMERGENCY,NURSE
+  3,2023-08-15,2023-08-19,FOLLOW_UP,NURSE
+  3,2023-08-19,2023-09-09,EXAM,GENERAL_PRACTITIONER
+  3,2023-09-09,2023-09-14,VACCINATION,RADIOLOGIST
+  3,2023-09-14,2023-10-16,FOLLOW_UP,SPECIALIST
+  3,2023-10-16,2023-12-10,EMERGENCY,LABORATORY
+  3,2023-12-10,2024-01-15,CONSULTATION,RADIOLOGIST
+  
+  '''
+# ---
+# name: TestConversionMethods.test_event_to_state_with_end_value
+  '''
+  patient_id,start,end,event_type,provider
+  3,2023-01-28,2023-02-02,CONSULTATION,RADIOLOGIST
+  3,2023-02-02,2023-02-10,FOLLOW_UP,NURSE
+  3,2023-02-10,2023-03-06,FOLLOW_UP,LABORATORY
+  3,2023-03-06,2023-03-22,CONSULTATION,
+  3,2023-03-22,2023-05-16,EMERGENCY,
+  3,2023-05-16,2023-06-21,EMERGENCY,NURSE
+  3,2023-06-21,2023-08-15,EMERGENCY,NURSE
+  3,2023-08-15,2023-08-19,FOLLOW_UP,NURSE
+  3,2023-08-19,2023-09-09,EXAM,GENERAL_PRACTITIONER
+  3,2023-09-09,2023-09-14,VACCINATION,RADIOLOGIST
+  3,2023-09-14,2023-10-16,FOLLOW_UP,SPECIALIST
+  3,2023-10-16,2023-12-10,EMERGENCY,LABORATORY
+  3,2023-12-10,2024-01-15,CONSULTATION,RADIOLOGIST
+  
+  '''
+# ---
+# name: TestConversionMethods.test_interval_state_to_event_with_add_duration[interval]
+  '''
+  patient_id,time,medication,administration_route,dosage,duration
+  3,2023-04-15,ANTIBIOTIC,INHALATION,3,9 days
+  3,2023-09-24,PAIN_RELIEVER,ORAL,2,27 days
+  3,2023-10-10,ANTIHYPERTENSIVE,ORAL,2,23 days
+  
+  '''
+# ---
+# name: TestConversionMethods.test_interval_state_to_event_with_add_duration[interval].1
+  SequenceMetadata(static_descriptors={'gender': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['F', 'M'], ordered=False)), 'age': FeatureDescriptor(feature_type='numerical', settings=NumericalFeatureSettings(loader_type=None, loader_kwargs=None, dtype='Int32', min_value=22.0, max_value=84.0)), 'insurance': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['MIXED', 'PRIVATE', 'PUBLIC'], ordered=False)), 'chronic_condition': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['False', 'True'], ordered=False))}, temporal_descriptor=TemporalDescriptor(temporal_type='datetime', settings=DateTimeSettings(min_value=Timestamp('2023-01-05 00:00:00'), max_value=Timestamp('2023-10-21 00:00:00'), timezone=None, format=None)), granularity=<Granularity.DAY: 3>, entity_descriptors={'medication': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['ANTIBIOTIC', 'ANTICOAGULANT', 'ANTIHYPERTENSIVE', 'CORTICOSTEROID', 'PAIN_RELIEVER'], ordered=False)), 'administration_route': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['CUTANEOUS', 'INHALATION', 'INTRAMUSCULAR', 'INTRAVENOUS', 'ORAL'], ordered=False)), 'dosage': FeatureDescriptor(feature_type='numerical', settings=NumericalFeatureSettings(loader_type=None, loader_kwargs=None, dtype='Int32', min_value=1.0, max_value=3.0)), 'duration': FeatureDescriptor(feature_type='duration', settings=DurationFeatureSettings(loader_type=None, loader_kwargs=None, granularity=<Granularity.WEEK: 4>, min_value=Timedelta('9 days 00:00:00'), max_value=Timedelta('27 days 00:00:00')))})
+# ---
+# name: TestConversionMethods.test_interval_state_to_event_with_add_duration[state]
+  '''
+  patient_id,time,health_state,condition,duration
+  3,2023-01-01,CONVALESCENCE,CARDIAC,94 days
+  3,2023-04-05,CHRONIC_MONITORING,NEUROLOGICAL,254 days
+  3,2023-12-15,REMISSION,CARDIAC,16 days
+  
+  '''
+# ---
+# name: TestConversionMethods.test_interval_state_to_event_with_add_duration[state].1
+  SequenceMetadata(static_descriptors={'gender': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['F', 'M'], ordered=False)), 'age': FeatureDescriptor(feature_type='numerical', settings=NumericalFeatureSettings(loader_type=None, loader_kwargs=None, dtype='Int32', min_value=22.0, max_value=84.0)), 'insurance': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['MIXED', 'PRIVATE', 'PUBLIC'], ordered=False)), 'chronic_condition': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['False', 'True'], ordered=False))}, temporal_descriptor=TemporalDescriptor(temporal_type='datetime', settings=DateTimeSettings(min_value=Timestamp('2023-01-01 00:00:00'), max_value=Timestamp('2023-12-16 00:00:00'), timezone=None, format=None)), granularity=<Granularity.DAY: 3>, entity_descriptors={'health_state': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['CHRONIC_MONITORING', 'CONVALESCENCE', 'HEALTHY', 'REMISSION', 'TREATMENT'], ordered=False)), 'condition': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['CARDIAC', 'DIGESTIVE', 'NEUROLOGICAL', 'RESPIRATORY'], ordered=False)), 'duration': FeatureDescriptor(feature_type='duration', settings=DurationFeatureSettings(loader_type=None, loader_kwargs=None, granularity=<Granularity.MONTH: 5>, min_value=Timedelta('16 days 00:00:00'), max_value=Timedelta('254 days 00:00:00')))})
+# ---
+# name: TestConversionMethods.test_single_event_to_interval
+  '''
+  patient_id,start,end,event_type,provider
+  3,2023-01-28,2023-01-28 06:00:00,CONSULTATION,RADIOLOGIST
+  3,2023-02-02,2023-02-02 06:00:00,FOLLOW_UP,NURSE
+  3,2023-02-10,2023-02-10 06:00:00,FOLLOW_UP,LABORATORY
+  3,2023-03-06,2023-03-06 06:00:00,CONSULTATION,
+  3,2023-03-22,2023-03-22 06:00:00,EMERGENCY,
+  3,2023-05-16,2023-05-16 06:00:00,EMERGENCY,NURSE
+  3,2023-06-21,2023-06-21 06:00:00,EMERGENCY,NURSE
+  3,2023-08-15,2023-08-15 06:00:00,FOLLOW_UP,NURSE
+  3,2023-08-19,2023-08-19 06:00:00,EXAM,GENERAL_PRACTITIONER
+  3,2023-09-09,2023-09-09 06:00:00,VACCINATION,RADIOLOGIST
+  3,2023-09-14,2023-09-14 06:00:00,FOLLOW_UP,SPECIALIST
+  3,2023-10-16,2023-10-16 06:00:00,EMERGENCY,LABORATORY
+  3,2023-12-10,2023-12-10 06:00:00,CONSULTATION,RADIOLOGIST
+  
+  '''
+# ---
+# name: TestConversionMethods.test_single_event_to_state
+  '''
+  patient_id,start,end,event_type,provider
+  3,2023-01-28,2023-02-02,CONSULTATION,RADIOLOGIST
+  3,2023-02-02,2023-02-10,FOLLOW_UP,NURSE
+  3,2023-02-10,2023-03-06,FOLLOW_UP,LABORATORY
+  3,2023-03-06,2023-03-22,CONSULTATION,
+  3,2023-03-22,2023-05-16,EMERGENCY,
+  3,2023-05-16,2023-06-21,EMERGENCY,NURSE
+  3,2023-06-21,2023-08-15,EMERGENCY,NURSE
+  3,2023-08-15,2023-08-19,FOLLOW_UP,NURSE
+  3,2023-08-19,2023-09-09,EXAM,GENERAL_PRACTITIONER
+  3,2023-09-09,2023-09-14,VACCINATION,RADIOLOGIST
+  3,2023-09-14,2023-10-16,FOLLOW_UP,SPECIALIST
+  3,2023-10-16,2023-12-10,EMERGENCY,LABORATORY
+  3,2023-12-10,2024-01-15,CONSULTATION,RADIOLOGIST
+  
+  '''
+# ---
+# name: TestMetadataPreservation.test_entity_metadata_preserved[event]
+  SequenceMetadata(static_descriptors={'gender': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['F', 'M'], ordered=False)), 'age': FeatureDescriptor(feature_type='numerical', settings=NumericalFeatureSettings(loader_type=None, loader_kwargs=None, dtype='Int32', min_value=22.0, max_value=84.0)), 'insurance': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['MIXED', 'PRIVATE', 'PUBLIC'], ordered=False)), 'chronic_condition': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['False', 'True'], ordered=False))}, temporal_descriptor=TemporalDescriptor(temporal_type='datetime', settings=DateTimeSettings(min_value=Timestamp('2023-01-02 00:00:00'), max_value=Timestamp('2023-12-26 00:00:00'), timezone=None, format=None)), granularity=<Granularity.DAY: 3>, entity_descriptors={'event_type': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['CONSULTATION', 'EMERGENCY', 'EXAM', 'FOLLOW_UP', 'VACCINATION'], ordered=False)), 'provider': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['GENERAL_PRACTITIONER', 'LABORATORY', 'NURSE', 'RADIOLOGIST', 'SPECIALIST'], ordered=False))})
+# ---
+# name: TestMetadataPreservation.test_entity_metadata_preserved[interval]
+  SequenceMetadata(static_descriptors={'gender': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['F', 'M'], ordered=False)), 'age': FeatureDescriptor(feature_type='numerical', settings=NumericalFeatureSettings(loader_type=None, loader_kwargs=None, dtype='Int32', min_value=22.0, max_value=84.0)), 'insurance': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['MIXED', 'PRIVATE', 'PUBLIC'], ordered=False)), 'chronic_condition': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['False', 'True'], ordered=False))}, temporal_descriptor=TemporalDescriptor(temporal_type='datetime', settings=DateTimeSettings(min_value=Timestamp('2023-01-05 00:00:00'), max_value=Timestamp('2023-10-21 00:00:00'), timezone=None, format=None)), granularity=<Granularity.DAY: 3>, entity_descriptors={'medication': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['ANTIBIOTIC', 'ANTICOAGULANT', 'ANTIHYPERTENSIVE', 'CORTICOSTEROID', 'PAIN_RELIEVER'], ordered=False)), 'administration_route': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['CUTANEOUS', 'INHALATION', 'INTRAMUSCULAR', 'INTRAVENOUS', 'ORAL'], ordered=False)), 'dosage': FeatureDescriptor(feature_type='numerical', settings=NumericalFeatureSettings(loader_type=None, loader_kwargs=None, dtype='Int32', min_value=1.0, max_value=3.0))})
+# ---
+# name: TestMetadataPreservation.test_entity_metadata_preserved[state]
+  SequenceMetadata(static_descriptors={'gender': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['F', 'M'], ordered=False)), 'age': FeatureDescriptor(feature_type='numerical', settings=NumericalFeatureSettings(loader_type=None, loader_kwargs=None, dtype='Int32', min_value=22.0, max_value=84.0)), 'insurance': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['MIXED', 'PRIVATE', 'PUBLIC'], ordered=False)), 'chronic_condition': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['False', 'True'], ordered=False))}, temporal_descriptor=TemporalDescriptor(temporal_type='datetime', settings=DateTimeSettings(min_value=Timestamp('2023-01-01 00:00:00'), max_value=Timestamp('2023-12-16 00:00:00'), timezone=None, format=None)), granularity=<Granularity.DAY: 3>, entity_descriptors={'health_state': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['CHRONIC_MONITORING', 'CONVALESCENCE', 'HEALTHY', 'REMISSION', 'TREATMENT'], ordered=False)), 'condition': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['CARDIAC', 'DIGESTIVE', 'NEUROLOGICAL', 'RESPIRATORY'], ordered=False))})
+# ---
+# name: TestMetadataPreservation.test_temporal_metadata_preserved[event]
+  SequenceMetadata(static_descriptors={'gender': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['F', 'M'], ordered=False)), 'age': FeatureDescriptor(feature_type='numerical', settings=NumericalFeatureSettings(loader_type=None, loader_kwargs=None, dtype='Int32', min_value=22.0, max_value=84.0)), 'insurance': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['MIXED', 'PRIVATE', 'PUBLIC'], ordered=False)), 'chronic_condition': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['False', 'True'], ordered=False))}, temporal_descriptor=TemporalDescriptor(temporal_type='datetime', settings=DateTimeSettings(min_value=Timestamp('2023-01-02 00:00:00'), max_value=Timestamp('2023-12-26 00:00:00'), timezone='Europe/Paris', format=None)), granularity=<Granularity.DAY: 3>, entity_descriptors={'event_type': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['CONSULTATION', 'EMERGENCY', 'EXAM', 'FOLLOW_UP', 'VACCINATION'], ordered=False)), 'provider': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['GENERAL_PRACTITIONER', 'LABORATORY', 'NURSE', 'RADIOLOGIST', 'SPECIALIST'], ordered=False))})
+# ---
+# name: TestMetadataPreservation.test_temporal_metadata_preserved[interval]
+  SequenceMetadata(static_descriptors={'gender': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['F', 'M'], ordered=False)), 'age': FeatureDescriptor(feature_type='numerical', settings=NumericalFeatureSettings(loader_type=None, loader_kwargs=None, dtype='Int32', min_value=22.0, max_value=84.0)), 'insurance': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['MIXED', 'PRIVATE', 'PUBLIC'], ordered=False)), 'chronic_condition': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['False', 'True'], ordered=False))}, temporal_descriptor=TemporalDescriptor(temporal_type='datetime', settings=DateTimeSettings(min_value=Timestamp('2023-01-05 00:00:00'), max_value=Timestamp('2023-10-21 00:00:00'), timezone='Europe/Paris', format=None)), granularity=<Granularity.DAY: 3>, entity_descriptors={'medication': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['ANTIBIOTIC', 'ANTICOAGULANT', 'ANTIHYPERTENSIVE', 'CORTICOSTEROID', 'PAIN_RELIEVER'], ordered=False)), 'administration_route': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['CUTANEOUS', 'INHALATION', 'INTRAMUSCULAR', 'INTRAVENOUS', 'ORAL'], ordered=False)), 'dosage': FeatureDescriptor(feature_type='numerical', settings=NumericalFeatureSettings(loader_type=None, loader_kwargs=None, dtype='Int32', min_value=1.0, max_value=3.0))})
+# ---
+# name: TestMetadataPreservation.test_temporal_metadata_preserved[state]
+  SequenceMetadata(static_descriptors={'gender': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['F', 'M'], ordered=False)), 'age': FeatureDescriptor(feature_type='numerical', settings=NumericalFeatureSettings(loader_type=None, loader_kwargs=None, dtype='Int32', min_value=22.0, max_value=84.0)), 'insurance': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['MIXED', 'PRIVATE', 'PUBLIC'], ordered=False)), 'chronic_condition': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['False', 'True'], ordered=False))}, temporal_descriptor=TemporalDescriptor(temporal_type='datetime', settings=DateTimeSettings(min_value=Timestamp('2023-01-01 00:00:00'), max_value=Timestamp('2023-12-16 00:00:00'), timezone='Europe/Paris', format=None)), granularity=<Granularity.DAY: 3>, entity_descriptors={'health_state': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['CHRONIC_MONITORING', 'CONVALESCENCE', 'HEALTHY', 'REMISSION', 'TREATMENT'], ordered=False)), 'condition': FeatureDescriptor(feature_type='categorical', settings=CategoricalFeatureSettings(loader_type=None, loader_kwargs=None, categories=['CARDIAC', 'DIGESTIVE', 'NEUROLOGICAL', 'RESPIRATORY'], ordered=False))})
+# ---
