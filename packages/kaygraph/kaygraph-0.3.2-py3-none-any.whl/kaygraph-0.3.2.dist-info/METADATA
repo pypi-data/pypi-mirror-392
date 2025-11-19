@@ -1,0 +1,496 @@
+Metadata-Version: 2.4
+Name: kaygraph
+Version: 0.3.2
+Summary: A context-graph framework for building production-ready AI applications.
+Project-URL: Homepage, https://github.com/KayOS-AI/KayGraph
+Project-URL: Issues, https://github.com/KayOS-AI/KayGraph/issues
+Project-URL: Documentation, https://github.com/KayOS-AI/KayGraph
+Author-email: KayOS Team <team@kayos.ai>
+License: AGPL-3.0
+License-File: LICENSE
+Keywords: agentic,ai,context,graphs,llm,workflow
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: GNU Affero General Public License v3
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.11
+Provides-Extra: dev
+Requires-Dist: pytest-asyncio>=0.21.0; extra == 'dev'
+Requires-Dist: pytest-cov>=4.0.0; extra == 'dev'
+Requires-Dist: pytest>=7.0.0; extra == 'dev'
+Requires-Dist: ruff>=0.1.0; extra == 'dev'
+Description-Content-Type: text/markdown
+
+# KayGraph
+
+**A domain-specific language (DSL) for building context-aware AI applications.**
+
+[![PyPI version](https://img.shields.io/pypi/v/kaygraph)](https://pypi.org/project/kaygraph/)
+![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)
+[![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+
+---
+
+## 📚 New to KayGraph?
+
+**Choose your path:**
+
+| You are... | Start here |
+|-----------|------------|
+| 👤 **Human Developer** | Follow the [10-minute quickstart](#quick-start) below |
+| 🤖 **AI Coding Agent** | Load **[LLM_CONTEXT_KAYGRAPH_DSL.md](LLM_CONTEXT_KAYGRAPH_DSL.md)** first |
+| 🎯 **Task-focused** | "I need to build X" → **[QUICK_FINDER.md](workbooks/QUICK_FINDER.md)** |
+| 📖 **Exploring all examples** | Browse **[70 workbooks in 16 categories](workbooks/WORKBOOK_INDEX_CONSOLIDATED.md)** |
+| ⚠️ **Debugging/stuck** | Check **[Common Patterns & Errors](COMMON_PATTERNS_AND_ERRORS.md)** |
+
+---
+
+## What is KayGraph?
+
+KayGraph is an **opinionated DSL** for expressing business problems as AI agent pipelines. Think of it as **building blocks for AI workflows** - a 500-line core that provides powerful abstractions without the bloat.
+
+**Core Philosophy:**
+- 🎯 **DSL-First**: Express complex AI workflows declaratively
+- 🪶 **Zero Dependencies**: Pure Python standard library (500 lines of core code)
+- 🔧 **Bring Your Own Tools**: Works with any LLM, database, or service
+- 📦 **Production-Ready**: 70 battle-tested examples across 16 categories
+
+---
+
+## Quick Start
+
+### Installation
+
+```bash
+# Using pip
+pip install kaygraph
+
+# Or from source
+git clone https://github.com/KayOS-AI/KayGraph.git
+cd KayGraph
+pip install -e .
+```
+
+### Your First KayGraph Workflow
+
+```python
+from kaygraph import Node, Graph
+
+class AnalyzeNode(Node):
+    def prep(self, shared):
+        """Phase 1: Read from shared context"""
+        return shared.get("text")
+
+    def exec(self, text):
+        """Phase 2: Execute logic (LLM call, API, etc.)"""
+        return f"Analyzed: {text}"
+
+    def post(self, shared, prep_res, exec_res):
+        """Phase 3: Write results back to shared context"""
+        shared["result"] = exec_res
+        return None  # End of workflow
+
+# Build and run
+analyze = AnalyzeNode()
+graph = Graph(analyze)
+
+shared = {"text": "Hello KayGraph!"}
+graph.run(shared)
+print(shared["result"])  # "Analyzed: Hello KayGraph!"
+```
+
+**That's it!** Three phases: `prep()` → `exec()` → `post()`
+
+---
+
+## For Humans: Learning Path
+
+### 1. Start with the Basics (10 minutes)
+
+```bash
+# Try the simplest example
+cd workbooks/01-getting-started/kaygraph-hello-world
+python main.py
+```
+
+### 2. Explore by Use Case
+
+Use the **task-based finder** to jump to what you need:
+
+📋 **[workbooks/QUICK_FINDER.md](workbooks/QUICK_FINDER.md)** - "I need to build..."
+- An AI Agent → Examples + patterns
+- A Chatbot → Chat patterns
+- A RAG System → Retrieval patterns
+- Batch Processing → Data pipeline patterns
+- Production API → Deployment examples
+
+### 3. Browse All 70 Examples
+
+📚 **[workbooks/WORKBOOK_INDEX_CONSOLIDATED.md](workbooks/WORKBOOK_INDEX_CONSOLIDATED.md)** - Complete catalog
+
+**16 Categories:**
+1. Getting Started (1)
+2. Core Patterns (2)
+3. Batch Processing (5)
+4. AI Agents (9)
+5. Workflows (12)
+6. AI Reasoning (4)
+7. Chat & Conversation (4)
+8. Memory Systems (3)
+9. RAG & Retrieval (1)
+10. Code Development (2)
+11. Data & SQL (4)
+12. Tools Integration (7)
+13. Production & Monitoring (8)
+14. UI/UX (4)
+15. Streaming & Realtime (2)
+16. Advanced Patterns (2)
+
+---
+
+## For Coding Agents: DSL Reference
+
+🤖 **[LLM_CONTEXT_KAYGRAPH_DSL.md](LLM_CONTEXT_KAYGRAPH_DSL.md)** - Complete DSL specification for AI agents
+
+This document contains everything a coding agent needs to:
+- Understand the 3-phase node lifecycle
+- Build graphs with proper action routing
+- Use all node types (Async, Batch, Parallel, Validated, Metrics)
+- Follow production patterns
+- Avoid common anti-patterns
+
+**For AI Assistants (Claude, GPT-4, etc.):**
+```
+Load the LLM_CONTEXT_KAYGRAPH_DSL.md file to understand KayGraph's
+domain-specific language and generate production-ready code.
+```
+
+---
+
+## Core Concepts (5-Minute Overview)
+
+### The 3-Phase Node Lifecycle
+
+Every node follows this pattern:
+
+```python
+class MyNode(Node):
+    def prep(self, shared):
+        """
+        Phase 1: READ from shared store
+        - Gather data needed for execution
+        - Access shared context
+        - Return data for exec()
+        """
+        return shared.get("input_data")
+
+    def exec(self, prep_res):
+        """
+        Phase 2: EXECUTE logic (NO shared access!)
+        - Process data (LLM calls, APIs, etc.)
+        - Pure function - can be retried
+        - Return results
+        """
+        return process_data(prep_res)
+
+    def post(self, shared, prep_res, exec_res):
+        """
+        Phase 3: WRITE to shared store and route
+        - Update shared context with results
+        - Return action string for routing
+        - Return None for default/end
+        """
+        shared["output"] = exec_res
+        return "next_action"  # or None
+```
+
+**Why this matters:**
+- `prep()` and `post()` have context, `exec()` is pure
+- `exec()` can be retried independently (resilience!)
+- Clear separation of concerns
+
+### Graph Composition
+
+```python
+# Chain nodes with default flow
+node1 >> node2 >> node3
+
+# Named actions for branching
+decision_node >> ("approve", approval_node)
+decision_node >> ("reject", rejection_node)
+
+# Complex workflows
+extract >> transform >> ("validate", validator)
+validator >> ("success", loader)
+validator >> ("failed", error_handler)
+```
+
+### Shared Store Pattern
+
+```python
+# Simple dictionary for context
+shared = {
+    "user_id": "123",
+    "input": "Analyze this text",
+    "history": []
+}
+
+# Nodes read and write to it
+graph.run(shared)
+
+# Results available after execution
+print(shared["analysis_result"])
+```
+
+---
+
+## Key Features
+
+### Node Types
+
+| Type | Use Case | Example |
+|------|----------|---------|
+| `Node` | Standard sync operations | API calls, file I/O |
+| `AsyncNode` | I/O-bound async operations | Concurrent API calls |
+| `BatchNode` | Process iterables | Process 1000 records |
+| `ParallelBatchNode` | Concurrent batch processing | Parallel data transforms |
+| `ValidatedNode` | Input/output validation | Production pipelines |
+| `MetricsNode` | Performance tracking | Monitoring, profiling |
+
+### Production Features
+
+- ✅ **Retry Logic**: Built-in with `max_retries` and `wait`
+- ✅ **Fallback Handling**: `exec_fallback()` for graceful degradation
+- ✅ **Validation**: Input/output type checking
+- ✅ **Metrics**: Execution time, retry counts, success rates
+- ✅ **Logging**: Comprehensive debug support
+- ✅ **Context Managers**: Resource cleanup
+
+---
+
+## Example Patterns
+
+### Agent Pattern
+
+```python
+# Decision-making loop
+think >> analyze >> ("use_tool", tool_node)
+analyze >> ("respond", response_node)
+tool_node >> think  # Loop back for reasoning
+```
+
+### RAG Pattern
+
+```python
+# Offline indexing
+extract >> chunk >> embed >> store
+
+# Online retrieval
+query >> search >> rerank >> generate
+```
+
+### Workflow Pattern
+
+```python
+# Human-in-the-loop
+process >> review >> ("approve", execute)
+review >> ("reject", notify)
+review >> ("modify", process)  # Loop back
+```
+
+---
+
+## Common Use Cases
+
+| I want to build... | Start here | Combine with |
+|--------------------|------------|--------------|
+| **ChatGPT Clone** | `chat-memory` | `streaming-llm` + `chat-guardrail` |
+| **Research Assistant** | `agent` | `rag` + `tool-search` + `agent-tools` |
+| **Data Pipeline** | `workflow` | `batch` + `validated-pipeline` |
+| **Multi-Agent System** | `multi-agent` | `supervisor` + `agent-memory` |
+| **Production API** | `production-ready-api` | `metrics-dashboard` + `fault-tolerant` |
+
+See **[workbooks/QUICK_FINDER.md](workbooks/QUICK_FINDER.md)** for the complete list.
+
+---
+
+## Scaffolding Tool
+
+Generate production-ready boilerplate instantly:
+
+```bash
+# Generate a basic node
+python scripts/kaygraph_scaffold.py node DataProcessor
+
+# Generate an agent
+python scripts/kaygraph_scaffold.py agent ResearchBot
+
+# Generate a RAG system
+python scripts/kaygraph_scaffold.py rag DocumentQA
+
+# Generate a chat application
+python scripts/kaygraph_scaffold.py chat CustomerSupport
+
+# See all templates
+python scripts/kaygraph_scaffold.py --help
+```
+
+Each template includes:
+- Complete working code
+- Documentation with TODOs
+- requirements.txt with optional dependencies
+- README with quickstart
+
+---
+
+## Documentation
+
+### For Developers
+- 📘 **[CLAUDE.md](CLAUDE.md)** - Development guide for human developers and AI assistants
+- 📕 **[COMMON_PATTERNS_AND_ERRORS.md](COMMON_PATTERNS_AND_ERRORS.md)** - Avoid common mistakes and follow best practices
+- 📗 **[docs/](docs/)** - Architecture, patterns, and best practices
+- 📙 **[CHANGELOG.md](CHANGELOG.md)** - Version history
+
+### For AI Coding Agents
+- 🤖 **[LLM_CONTEXT_KAYGRAPH_DSL.md](LLM_CONTEXT_KAYGRAPH_DSL.md)** - Complete DSL reference
+- 📝 **[workbooks/WORKBOOK_INDEX_CONSOLIDATED.md](workbooks/WORKBOOK_INDEX_CONSOLIDATED.md)** - All 70 examples organized
+- ⚠️ **[COMMON_PATTERNS_AND_ERRORS.md](COMMON_PATTERNS_AND_ERRORS.md)** - Common errors and how to avoid them
+
+### For Quick Tasks
+- 🎯 **[workbooks/QUICK_FINDER.md](workbooks/QUICK_FINDER.md)** - Task-based navigation ("I need to build...")
+- 🚀 **[workbooks/guides/LLM_SETUP.md](workbooks/guides/LLM_SETUP.md)** - Set up local LLMs with Ollama
+
+---
+
+## Why KayGraph?
+
+### The 500-Line Philosophy
+
+KayGraph's core is **intentionally** 500 lines. This isn't a limitation - it's a **feature**.
+
+**Why?**
+- ✅ You can read and understand the entire framework in one sitting
+- ✅ No hidden magic - just Python classes and composition
+- ✅ Easy to debug - it's just your code
+- ✅ No vendor lock-in - bring your own LLM, database, tools
+- ✅ Production-ready patterns without framework bloat
+
+**When humans can specify the graph, AI agents can automate it.**
+
+### Zero Dependencies
+
+The core framework has **zero external dependencies**. All examples that use LLMs, databases, or other services provide implementation templates - you bring your own tools.
+
+This means:
+- 🪶 Tiny install footprint
+- 🔧 Total control over your stack
+- 🎯 Only pay for what you use
+- 🚀 No dependency hell
+
+---
+
+## Project Structure
+
+```
+KayGraph/
+├── kaygraph/                      # Core framework (500 lines!)
+│   └── __init__.py                # All abstractions in one file
+│
+├── workbooks/                     # 70 production examples
+│   ├── 01-getting-started/        # Start here
+│   ├── 04-ai-agents/              # Agent patterns
+│   ├── 09-rag-retrieval/          # RAG systems
+│   └── ...                        # 13 more categories
+│
+├── scripts/                       # Scaffolding tools
+│   └── kaygraph_scaffold.py       # Generate boilerplate
+│
+├── docs/                          # Comprehensive guides
+├── tests/                         # Unit tests
+│
+├── LLM_CONTEXT_KAYGRAPH_DSL.md   # For coding agents
+├── CLAUDE.md                      # For developers
+└── README.md                      # You are here
+```
+
+---
+
+## Testing & Quality
+
+All 70 workbooks are validated for:
+- ✅ Valid structure (README.md + main.py)
+- ✅ Valid Python syntax
+- ✅ All imports resolve
+- ✅ 100% pass rate
+
+Run validation yourself:
+```bash
+python tasks/workbook-testing/validate_all_workbooks.py
+```
+
+---
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Quick Contribution Ideas
+- 🐛 Fix bugs in examples
+- 📝 Improve documentation
+- 💡 Add new workbook examples
+- 🧪 Expand test coverage
+- 🎨 Enhance scaffolding templates
+
+---
+
+## Community & Support
+
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/KayOS-AI/KayGraph/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/KayOS-AI/KayGraph/discussions)
+- 📧 **Email**: [Your contact email]
+
+---
+
+## License
+
+GNU Affero General Public License v3.0 (AGPL-3.0) - see [LICENSE](LICENSE) for details.
+
+This means if you use KayGraph in your software or service, you must share your source code with your users. Perfect for keeping AI workflows open and collaborative!
+
+---
+
+## Quick Reference Card
+
+```python
+# Node Lifecycle
+class MyNode(Node):
+    def prep(self, shared):      # 1. Read context
+        return data
+    def exec(self, prep_res):    # 2. Execute (pure!)
+        return result
+    def post(self, shared, prep_res, exec_res):  # 3. Write & route
+        shared["result"] = exec_res
+        return "action"  # or None
+
+# Graph Building
+node1 >> node2                   # Default flow
+node1 >> ("action", node2)       # Named action
+node1 >> node2 >> node3          # Chain
+
+# Running
+graph = Graph(start_node)
+shared = {"input": "data"}
+graph.run(shared)
+print(shared["output"])
+```
+
+---
+
+**Built with ❤️ by the KayOS Team**
+
+**Ready to build?** Start with [workbooks/01-getting-started/kaygraph-hello-world](workbooks/01-getting-started/kaygraph-hello-world)
