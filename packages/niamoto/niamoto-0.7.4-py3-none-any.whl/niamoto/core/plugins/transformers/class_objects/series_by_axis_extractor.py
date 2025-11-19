@@ -1,0 +1,199 @@
+"""
+Plugin for extracting multiple series by axis from class objects.
+Each series represents a different type (e.g. forest types) measured across a common axis (e.g. elevation).
+"""
+
+from typing import Dict, Any, Literal
+from pydantic import BaseModel, Field, ConfigDict
+import pandas as pd
+
+from niamoto.core.plugins.models import PluginConfig, BasePluginParams
+from niamoto.core.plugins.base import TransformerPlugin, PluginType, register
+from niamoto.common.exceptions import DataTransformError
+
+
+class AxisConfig(BaseModel):
+    """Configuration for the axis"""
+
+    field: str = Field(..., description="Field to use for axis values")
+    output_field: str = Field(..., description="Name of the field in output")
+    numeric: bool = Field(True, description="Convert values to numeric")
+    sort: bool = Field(True, description="Sort axis values")
+
+
+class ClassObjectSeriesByAxisParams(BasePluginParams):
+    """Parameters for series by axis extractor plugin"""
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "description": "Extract multiple series by axis from class objects",
+            "examples": [
+                {
+                    "source": "shape_stats",
+                    "axis": {
+                        "field": "class_name",
+                        "output_field": "altitudes",
+                        "numeric": True,
+                        "sort": True,
+                    },
+                    "types": {
+                        "secondaire": "forest_secondary_elevation",
+                        "mature": "forest_mature_elevation",
+                        "coeur": "forest_core_elevation",
+                    },
+                }
+            ],
+        }
+    )
+
+    source: str = Field(
+        default="shape_stats",
+        description="Transform source name (from transform.yml sources)",
+        json_schema_extra={
+            "ui:widget": "transform-source-select",
+            # Will dynamically load sources from current group_by context
+        },
+    )
+
+    axis: AxisConfig = Field(
+        default=AxisConfig(
+            field="class_name", output_field="altitudes", numeric=True, sort=True
+        ),
+        description="Configuration for the axis",
+        json_schema_extra={"ui:widget": "json"},
+    )
+
+    types: Dict[str, str] = Field(
+        default_factory=dict,
+        description="Mapping of output names to class_objects",
+        json_schema_extra={"ui:widget": "json"},
+    )
+
+
+class ClassObjectSeriesByAxisConfig(PluginConfig):
+    """Configuration for series by axis extractor plugin"""
+
+    plugin: Literal["class_object_series_by_axis_extractor"] = (
+        "class_object_series_by_axis_extractor"
+    )
+    params: ClassObjectSeriesByAxisParams
+
+
+@register("class_object_series_by_axis_extractor", PluginType.TRANSFORMER)
+class ClassObjectSeriesByAxisExtractor(TransformerPlugin):
+    """Plugin for extracting series by axis from class objects"""
+
+    config_model = ClassObjectSeriesByAxisConfig
+
+    def validate_config(self, config: Dict[str, Any]) -> ClassObjectSeriesByAxisConfig:
+        """Validate plugin configuration and return typed config."""
+        try:
+            validated_config = self.config_model(**config)
+
+            # Check for specific validation that tests expect
+            if not validated_config.params.types:
+                raise DataTransformError(
+                    "At least one type must be specified", details={"config": config}
+                )
+
+            return validated_config
+        except DataTransformError:
+            raise
+        except Exception as e:
+            raise DataTransformError(
+                f"Invalid configuration: {str(e)}", details={"config": config}
+            )
+
+    def transform(self, data: pd.DataFrame, config: Dict[str, Any]) -> Dict[str, Any]:
+        """Convert class-object statistics into parallel series indexed by a common axis.
+
+        The ``config`` argument is expected to contain an ``axis`` description and a
+        mapping of output series. Each entry associates an output name with the
+        ``class_object`` value to extract.
+
+        Returns
+        -------
+        dict
+            A dictionary whose keys include the configured axis output field along with a
+            series for each requested class object.
+        """
+        try:
+            # Validate configuration
+            validated_config = self.validate_config(config)
+            params = validated_config.params
+
+            # Get axis configuration
+            axis_config = params.axis
+
+            # Initialize result with the configured output field name
+            result = {axis_config.output_field: []}
+
+            # Get first type to extract axis values
+            first_type = next(iter(params.types.values()))
+            axis_data = data[data["class_object"] == first_type].copy()
+
+            if axis_data.empty:
+                raise DataTransformError(
+                    f"No data found for class_object {first_type}",
+                    details={
+                        "available_class_objects": data["class_object"]
+                        .unique()
+                        .tolist()
+                    },
+                )
+
+            # Convert and sort axis values if configured
+            if axis_config.numeric:
+                try:
+                    axis_data.loc[:, axis_config.field] = pd.to_numeric(
+                        axis_data[axis_config.field]
+                    )
+                except Exception as e:
+                    raise DataTransformError(
+                        "Failed to convert axis values to numeric",
+                        details={"error": str(e)},
+                    )
+
+            if axis_config.sort:
+                axis_data = axis_data.sort_values(axis_config.field)
+
+            # Store axis values
+            result[axis_config.output_field] = axis_data[axis_config.field].tolist()
+
+            # Process each type
+            for output_name, class_object in params.types.items():
+                # Get type data
+                type_data = data[data["class_object"] == class_object].copy()
+
+                if type_data.empty:
+                    raise DataTransformError(
+                        f"No data found for class_object {class_object}",
+                        details={
+                            "available_class_objects": data["class_object"]
+                            .unique()
+                            .tolist()
+                        },
+                    )
+
+                # Convert and sort values
+                if axis_config.numeric:
+                    type_data.loc[:, axis_config.field] = pd.to_numeric(
+                        type_data[axis_config.field]
+                    )
+                if axis_config.sort:
+                    type_data = type_data.sort_values(axis_config.field)
+
+                # Store type values
+                result[output_name] = type_data["class_value"].astype(float).tolist()
+
+            return result
+
+        except Exception as e:
+            # If it's already a DataTransformError, re-raise it to preserve the specific message
+            if isinstance(e, DataTransformError):
+                raise e
+            # Otherwise, wrap it in a generic DataTransformError
+            raise DataTransformError(
+                "Failed to extract series by axis",
+                details={"error": str(e), "config": config},
+            )
