@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "JerProOdooLogParser"
+description = "A library for parsing Odoo logs and collecting test information."
+authors = [
+	{ name = "João Jerónimo", email = "joao.jeronimo.pro@gmail.com" }
+	]
+classifiers = [
+	"Development Status :: 5 - Production/Stable",
+	]
+version='0.1.0'
+readme = 'README.md'
+dependencies = [
+	]
+requires-python = ">=3.7"
+
+[tool.setuptools]
+packages = ["odoo_log_parser"]
+
+[project.scripts]
+OdooLogParser = "odoo_log_parser.cli:entrypoint"
+
+[project.entry-points."odoo_log_parser.echo_modes"]
+pretty = "odoo_log_parser.echo_modes:pretty_digest2string"
+tabular = "odoo_log_parser.echo_modes:tabular_digest2string"
+summary = "odoo_log_parser.echo_modes:summary_digest2string"
