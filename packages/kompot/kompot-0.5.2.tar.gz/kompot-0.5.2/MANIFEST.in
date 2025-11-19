@@ -1,0 +1,25 @@
+include LICENSE
+include README.md
+include setup.cfg
+include pyproject.toml
+include MANIFEST.in
+
+# Include kompot package files only
+recursive-include kompot *.py *.pyi
+include kompot/py.typed
+recursive-include kompot/reporter/templates *.html *.css *.js
+
+# Exclude all build artifacts, caches, and temporary files
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude *.so
+global-exclude .DS_Store
+global-exclude .coverage
+
+# Exclude development files and directories
+prune .ipynb_checkpoints
+prune .pytest_cache
+prune tests
+prune docs
+prune examples
+prune wheel_contents
