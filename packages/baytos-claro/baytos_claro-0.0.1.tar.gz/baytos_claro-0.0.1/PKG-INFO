@@ -1,0 +1,97 @@
+Metadata-Version: 2.4
+Name: baytos-claro
+Version: 0.0.1
+Summary: Python SDK for Claro by Bayt OS
+Author-email: "Bayt, Inc." <support@baytos.ai>
+License-Expression: MIT
+Project-URL: Homepage, https://baytos.ai
+Project-URL: Documentation, https://docs.baytos.ai
+Project-URL: Issues, https://docs.baytos.ai/support
+Keywords: ai,llm,prompts,sdk,baytos,claro
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: requests>=2.25.0
+Provides-Extra: dev
+Requires-Dist: pytest>=6.0; extra == "dev"
+Requires-Dist: pytest-cov>=2.0; extra == "dev"
+Requires-Dist: pytest-mock>=3.0; extra == "dev"
+Requires-Dist: pytest-timeout>=2.0; extra == "dev"
+Requires-Dist: python-dotenv>=0.19.0; extra == "dev"
+Requires-Dist: black>=22.0; extra == "dev"
+Requires-Dist: flake8>=4.0; extra == "dev"
+Requires-Dist: flake8-docstrings>=1.6; extra == "dev"
+Requires-Dist: mypy>=0.900; extra == "dev"
+Requires-Dist: types-requests; extra == "dev"
+Requires-Dist: pip-audit>=2.0; extra == "dev"
+Requires-Dist: build>=0.7; extra == "dev"
+Requires-Dist: twine>=3.0; extra == "dev"
+Requires-Dist: tox>=4.0; extra == "dev"
+Dynamic: license-file
+
+# Claro Python SDK
+
+Official Python SDK for **Claro**, part of [Bayt OS](https://baytos.ai) - The Collaborative Intelligence platform.
+
+## 📚 Documentation
+
+**Complete documentation is available at [docs.baytos.ai](https://docs.baytos.ai)**
+
+## Quick Install
+
+```bash
+pip install baytos-claro
+```
+
+## Quick Example
+
+```python
+from baytos.claro import BaytClient
+import os
+
+# Initialize client
+client = BaytClient(api_key=os.getenv("BAYT_API_KEY"))
+
+# Get a prompt
+prompt = client.get_prompt("@workspace/my-prompt:v1")
+
+# Use it with your LLM
+print(prompt.generator)
+```
+
+## Get Started
+
+1. **[Get your API key](https://claro.baytos.ai)** from Claro
+2. **[Read the quickstart](https://docs.baytos.ai/quickstart)** guide
+3. **[Explore examples](https://docs.baytos.ai/examples/basic-usage)**
+
+## Documentation Links
+
+- **[Installation Guide](https://docs.baytos.ai/sdk/python/installation)** - Setup and requirements
+- **[Quickstart](https://docs.baytos.ai/sdk/python/quickstart)** - Your first API call
+- **[Working with Prompts](https://docs.baytos.ai/sdk/python/prompts)** - Core concepts
+- **[API Reference](https://docs.baytos.ai/sdk/python/api-reference)** - Complete SDK reference
+- **[Examples](https://docs.baytos.ai/examples/basic-usage)** - Production-ready code
+- **[Error Handling](https://docs.baytos.ai/sdk/python/error-handling)** - Robust patterns
+- **[Advanced Features](https://docs.baytos.ai/sdk/python/advanced)** - Performance optimization
+
+## Support
+
+- **Documentation:** [docs.baytos.ai](https://docs.baytos.ai)
+- **Email:** [support@baytos.ai](mailto:support@baytos.ai)
+- **Platform:** [claro.baytos.ai](https://claro.baytos.ai)
+
+## License
+
+Copyright © 2025 Bayt, Inc. All rights reserved.
