@@ -1,0 +1,88 @@
+Metadata-Version: 2.4
+Name: mvarcs
+Version: 1.0.0
+Summary: Python package for providing the MVA Root Certificates Store
+Home-page: https://github.com/markcerts/mvarcs-python
+Author: OllieJC
+Author-email: mvarcs-pypi@olliejc.uk
+License: The Unlicense
+Project-URL: Bug Tracker, https://github.com/markcerts/mvarcs-python/issues
+Project-URL: MVARCS, https://github.com/markcerts/mvarcs
+Keywords: BIMI,VMC,CMC,Verification,Trusted
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: System Administrators
+Classifier: License :: OSI Approved :: The Unlicense (Unlicense)
+Classifier: Programming Language :: Python :: 3
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Security :: Cryptography
+Classifier: Topic :: Utilities
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: keywords
+Dynamic: license
+Dynamic: license-file
+Dynamic: project-url
+Dynamic: requires-python
+Dynamic: summary
+
+# mvarcs: Python Mark Verifying Authority Root Certificates
+
+mvarcs provides a collection of Root Certificates for validating
+the trustworthiness of Mark Certificates such as Verified Mark
+Certificates (VMC) and Common Mark Certificates (CMC) used in BIMI
+(Brand Indicators for Message Identification).
+
+## Installation
+
+``mvarcs`` is available on PyPI. Simply install it with ``pip``:
+
+``` sh
+python -m pip install mvarcs
+```
+
+## Usage
+
+To reference the installed certificate authority (CA) bundle, you can use the
+built-in function:
+
+``` py
+import mvarcs
+mvarcs.where()
+# '/usr/local/lib/python3.13/site-packages/mvarcs/mvarcs/cacerts.pem'
+```
+
+Additionally, you can get the contents directly:
+
+``` py
+import mvarcs
+mvarcs.contents()
+# Issuer: ...
+# ...
+# -----END CERTIFICATE-----
+```
+
+Or from the command line:
+
+``` sh
+python -m mvarcs
+# /usr/local/lib/python3.13/site-packages/mvarcs/mvarcs/cacert.pem
+
+python -m mvarcs -c
+# Issuer: ...
+# ...
+# -----END CERTIFICATE-----
+```
+
+## Addition/Removal of Certificates
+
+See <https://github.com/markcerts/mvarcs>
