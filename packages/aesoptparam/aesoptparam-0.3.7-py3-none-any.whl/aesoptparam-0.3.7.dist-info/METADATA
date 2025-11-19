@@ -1,0 +1,86 @@
+Metadata-Version: 2.4
+Name: aesoptparam
+Version: 0.3.7
+Author-email: Kenneth Loenbaek <kenloen@dtu.dk>
+Maintainer-email: Kenneth Loenbaek <kenloen@dtu.dk>
+Project-URL: Documentation, https://aesopt.pages.windenergy.dtu.dk/aesoptparam
+Project-URL: DTU-Wind-Gitlab, https://gitlab.windenergy.dtu.dk/AESOpt/aesoptparam
+Project-URL: Changelog, https://gitlab.windenergy.dtu.dk/AESOpt/aesoptparam/-/blob/main/CHANGELOG.md
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: param==2.3.0
+Requires-Dist: numpy
+Requires-Dist: scipy
+Provides-Extra: test
+Requires-Dist: pytest; extra == "test"
+Requires-Dist: pytest-cov; extra == "test"
+Requires-Dist: isort; extra == "test"
+Requires-Dist: black; extra == "test"
+Requires-Dist: jsonschema; extra == "test"
+Provides-Extra: docs
+Requires-Dist: sphinx; extra == "docs"
+Requires-Dist: sphinx-design; extra == "docs"
+Requires-Dist: sphinx_book_theme; extra == "docs"
+Requires-Dist: myst-parser; extra == "docs"
+Requires-Dist: sphinx_external_toc; extra == "docs"
+Requires-Dist: sphinxcontrib.bibtex; extra == "docs"
+Requires-Dist: myst-nb; extra == "docs"
+Requires-Dist: markdown; extra == "docs"
+Requires-Dist: jupytext; extra == "docs"
+Requires-Dist: setuptools; extra == "docs"
+Provides-Extra: all
+Requires-Dist: aesoptparam[docs,test]; extra == "all"
+Dynamic: license-file
+
+# AESOpt Param (`aesoptparam`)
+
+[![pipeline status](https://gitlab.windenergy.dtu.dk/AESOpt/aesoptparam/badges/main/pipeline.svg)](https://gitlab.windenergy.dtu.dk/AESOpt/aesoptparam/-/commits/main) [![coverage report](https://gitlab.windenergy.dtu.dk/AESOpt/aesoptparam/badges/main/coverage.svg)](https://gitlab.windenergy.dtu.dk/AESOpt/aesoptparam/-/commits/main) 
+
+Is a light weight extension of the open source [`param`](https://param.holoviz.org/) project.
+
+The `param` project is a library for handling all the user-modifiable parameters, arguments, and attributes that control code. It adds a way to declare parameters via their type while also adding meta data such as documentation, valid range, etc. For a more extensive introduction user are referred to the project homepage: https://param.holoviz.org/ 
+The [`param`](https://param.holoviz.org/) webpage is also where users are expected to look for more detailed use of `aesoptparam`.
+
+`aesoptparam` is purely extending `param`, by adding the following features:
+
+- Make an extended  `Parameterized` -> `AESOptParameterized`, which adds the following features:
+    - Method for getting data as a dict (`.as_dict`) 
+    - Method for serializing data (`.as_serial`). Used for saving data to JSON, YAML, TOML
+    - Method for setting data from a dict (`.from_dict`). Also works for nested dicts
+    - Method for validating numpy array shapes (`.validate_array_shapes`). See `AESOptArray` for more.
+    - Method for interpolating arrays (`.interp`)
+    - Method for setting values in others units than their default units (`.set_val`)
+    - Method for gettting values in others units than their default units (`.get_val`)
+    - HTML rendering of the `AESOptParameterized` instance  content (Name, Documentation, Type, Range, Units, Value)
+    - Adds posibility for setting a parent_object for nested `AESOptParameterized`, which allows others values to refer to any other value however deeply nested it is
+- A set of new/modified parameters:
+    - `SubParameterized`: Parameter to add nested `AESOptParameterized`. It will automatically add the parent object.
+    - `ListOfParameterized`: Parameter to add a list of `AESOptParameterized`. 
+    - `AESOptString`: Adds the following list of attributes or methods:
+        - `default_ref`: Referencing another parameter string
+    - `AESOptBoolean`: Adds the following list of attributes or methods:
+        - `default_ref`: Referencing another parameter string
+    - `AESOptNumber`: Adds the following list of attributes or methods:
+        - `units`
+        - `default_ref`: Referencing another parameter number
+    - `AESOptInteger`: Adds the following list of attributes or methods:
+        - `units`
+        - `default_ref`: Referencing another parameter number
+    - `AESOptArray`: Adds the following list of attributes or methods:
+        - `bounds`, `softbounds`. `inclusive_bounds`, similar to [`param.Number`](https://param.holoviz.org/user_guide/Parameter_Types.html#numbers)
+        - `units`
+        - `dtype`: The array data type
+        - `shape`: The shape of the array. Can also be a reference to another parameter. Used for validating array shape.
+        - `default_full`: Makes the default a array full of a given number. Using `numpy.full`. The first argument can reference others parameters to get their shape.
+        - `default_interp`: The default is to interpolate the array from other arrays. Arguments can both be arrays or references to others arrays.
+        - `default_ref`: Referencing another parameter array
+
+Besides the core features above, it also adds some utility tools:
+
+- `display_json_data` : Function to render JSON compliant data as a HTML table in Jupyter notebooks. It also works for numpy data that has numeric data dtypes.
+- `read_json` : Method for reading JSON data file, which automatically can convert numeric list's to numpy. 
+- `write_json` : Method for writing JSON data file, which automatically can convert numeric numpy arrays and types to list of build-in types.
+
+## Documentation
+
+[AESOpt Param Documentation](https://aesopt.pages.windenergy.dtu.dk/aesoptparam)

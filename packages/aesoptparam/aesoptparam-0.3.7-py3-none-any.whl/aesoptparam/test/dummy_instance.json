@@ -1,0 +1,30 @@
+{
+    "$schema": "./dummy_schema.json",
+    "version": "0.0.0",
+    "name": "New main name",
+    "a": 0.2,
+    "b": "$ref .a",
+    "c": "$ref .sub_list[1].a",
+    "d": [0.0, 1.0, 2.0, 3.2],
+    "e": [1, 2, 10],
+    "f": "Test",
+    "g": "$ref .h",
+    "h": "$function lambda self: self.f + '3'",
+    "sub1": {
+        "a": 0.1,
+        "b": [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
+        "c": "$ref .b",
+        "e": "$function lambda self: np.full_like(self.b, self['..a'])",
+        "f": [0, 1, 2, 3, 4]
+    },
+    "sub2": {
+        "a": 0.3
+    },
+    "sub_list": [
+        {"a": 0.1}, 
+        {"a": 0.3}
+    ],
+    "sub_list2": [
+        {"a": 0.1}
+    ]
+}
