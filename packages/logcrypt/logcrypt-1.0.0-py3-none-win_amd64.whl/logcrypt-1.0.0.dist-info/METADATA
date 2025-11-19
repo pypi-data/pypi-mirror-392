@@ -1,0 +1,219 @@
+Metadata-Version: 2.4
+Name: logcrypt
+Version: 1.0.0
+Summary: Secure Python logging with RC4 encryption
+Author: dileatshicat
+Author-email: dileatshicat@atomicmail.io
+License: Apache License 2.0
+Description-Content-Type: text/markdown
+Requires-Dist: pycryptodome>=3.0.0
+Requires-Dist: colorama>=0.1.1
+Dynamic: author
+Dynamic: author-email
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: license
+Dynamic: requires-dist
+Dynamic: summary
+
+# LogCrypt
+
+**LogCrypt** is a secure, high-performance Python logging package that extends the standard `logging` module with optional RC4 encryption, advanced formatting, traceability, and privacy features. Designed for applications handling sensitive data, it ensures logs remain protected at rest while maintaining usability and performance.
+
+---
+
+## Key Features
+
+- **RC4 Encryption for File Logs**  
+  Encrypts the *entire* log line (timestamp, level, correlation ID, message) using a base64-encoded RC4 key. Includes SHA-256 checksums for tamper detection.
+
+- **Custom Log Levels**  
+  Built-in `SUCCESS` (25) and `FAIL` (45) levels with dedicated methods:  
+  ```python
+  logger.success("Upload completed")
+  logger.fail("Validation error")
+  ```
+
+- **Colored Console Output**  
+  ANSI-colored logs in the terminal for instant visual feedback.
+
+- **Correlation ID Support**  
+  Automatically injects a UUID or custom ID into every log for end-to-end traceability.
+
+- **JSON Log Format**  
+  Optional structured JSON output for easy integration with log aggregators.
+
+- **Asynchronous Logging**  
+  Non-blocking file writes via `QueueHandler` — ideal for high-throughput apps.
+
+- **Sensitive Data Redaction**  
+  Redact PII (emails, IPs, tokens) using regex patterns before logging.
+
+- **Smart Key Management**  
+  Load, validate, or generate secure RC4 keys with automatic fallback.
+
+- **Native Performance Boost**  
+  Precompiled extensions (`cryptography.pyd` / `cryptography.so`) accelerate encryption.
+
+---
+
+## Installation
+
+```bash
+pip install logcrypt
+```
+
+> Dependencies: `colorama`, `pycryptodome`
+
+---
+
+## Package Structure
+
+```
+logcrypt/
+├── __init__.py
+├── core.py
+├── key_manager.py
+├── crypto.py
+├── cryptography.pyd      # Windows optimized RC4
+├── cryptography.so       # Linux optimized RC4
+├── filters.py
+├── formatters.py
+└── decrypt_log.py
+```
+
+---
+
+## Performance Optimization
+
+To improve encryption and decryption speed, **logcrypt** includes precompiled native extensions:
+
+* **`cryptography.pyd`** – Windows  
+* **`cryptography.so`** – Linux  
+
+These modules automatically replace the pure Python `crypto.py` implementation when available, delivering **faster RC4 operations** with lower CPU usage — especially beneficial in high-volume or multithreaded logging scenarios.
+
+No configuration needed. The package detects your platform and loads the optimized version seamlessly.
+
+> These extensions are compiled directly from the open `crypto.py` source for transparency and trust.
+
+---
+
+## Usage
+
+### Basic Setup
+
+```python
+from logcrypt import Logger
+
+logger = Logger(
+    file_name="app.log",
+    log_level="INFO",
+    correlation_id="session-789"
+)
+
+logger.info("User logged in")
+logger.success("Payment processed")
+logger.close()
+```
+
+### Secure Encrypted Logging
+
+```python
+logger = Logger(
+    file_name="secure.log",
+    encrypt_file=True,
+    key_file="secret.key",  # Auto-generated if missing
+    log_level="DEBUG"
+)
+
+logger.error("Access denied for user 42")
+```
+
+### JSON + Encryption + Async
+
+```python
+logger = Logger(
+    file_name="events.json.log",
+    file_format="json",
+    encrypt_file=True,
+    async_logging=True,
+    key_file="secret.key"
+)
+
+for i in range(10000):
+    logger.info(f"Processing event {i}")
+```
+
+### Redact Sensitive Data
+
+```python
+logger = Logger(
+    file_name="safe.log",
+    redact_patterns=[
+        r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',  # Email
+        r'\b\d{1,3}(\.\d{1,3}){3}\b'                            # IPv4
+    ]
+)
+
+logger.info("Login from user@example.com at 192.168.1.100")
+# → "Login from REDACTED at REDACTED"
+```
+
+### Decrypt Logs
+
+```python
+from logcrypt import decrypt_log
+
+entries = decrypt_log("secure.log", encryption_key="your-base64-key")
+for e in entries:
+    print(e["decrypted_line"])
+```
+
+---
+
+## Example Output
+
+**Console (colored):**
+```
+This is an info message          (white)
+This is a debug message          (cyan)
+This is a success message        (green)
+This is a critical message       (bright red)
+```
+
+**File (`app.log`):**
+```
+2025-11-17 03:28:00,123>INFO>session-789>This is an info message
+2025-11-17 03:28:00,124>SUCCESS>session-789>Operation succeeded
+```
+
+---
+
+## Notes & Security
+
+- **Key Security**: Protect your key file:  
+  ```bash
+  chmod 600 secret.key
+  ```
+  Anyone with the key can decrypt logs.
+- **Tamper Protection**: SHA-256 checksum ensures only valid entries are decrypted.
+
+---
+
+## License
+
+MIT License
+
+---
+
+## Dependencies
+
+- Python ≥ 3.8
+- `colorama >= 0.4.6`
+- `pycryptodome >= 3.20.0`
+
+---
+
+**LogCrypt** — Secure. Fast. Traceable.  
+Built for developers who care about privacy and performance.
