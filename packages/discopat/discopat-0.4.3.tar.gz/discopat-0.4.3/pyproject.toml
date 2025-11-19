@@ -1,0 +1,136 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+namespaces = false
+
+
+
+[project]
+name = "discopat"
+version = "0.4.3"
+readme = "README.rst"
+description = "DISCOver PATterns (DISCOPAT)"
+license = {file = "LICENSE"}
+authors = [
+  {name = "Mansour Benbakoura", email = "mansour.benbakoura@inria.fr"}
+]
+classifiers = [
+  "Intended Audience :: Science/Research",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+]
+
+requires-python = ">=3.9"
+
+dependencies = [
+  "filterpy",
+  "h5py",
+  "imageio",
+  "ipykernel",
+  "matplotlib",
+  "numpy",
+  "osfclient",
+  "pycocotools",
+  "PyYAML",
+  "scikit-image",
+  "torch",
+  "torchaudio",
+  "torchvision",
+  "tqdm",
+]
+
+[project.optional-dependencies]
+dev = [
+  "ruff",
+]
+doc = [
+  "sphinx",
+  "sphinx-gallery",
+  "sphinx_rtd_theme",
+]
+test = [
+  "pytest",
+  "pytest-cov",
+]
+
+[project.urls]
+Repository = "https://github.com/mansour-b/discopat"
+Documentation = "https://discopat.readthedocs.io"
+
+[tool.ruff]
+exclude = [
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".git-rewrite",
+  ".hg",
+  ".ipynb_checkpoints",
+  ".mypy_cache",
+  ".nox",
+  ".pants.d",
+  ".pyenv",
+  ".pytest_cache",
+  ".pytype",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  ".vscode",
+  "__pypackages__",
+  "_build",
+  "buck-out",
+  "build",
+  "dist",
+  "node_modules",
+  "site-packages",
+  "venv",
+]
+
+line-length = 80
+indent-width = 4
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+  "ANN204",
+  "COM812",
+  "D100",
+  "D104",
+  "D105",
+  "E501",
+  "EM101",
+  "TRY003",
+]
+
+fixable = ["ALL"]
+unfixable = []
+
+exclude = ["examples"]
+
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**.py" = [
+  "ANN",
+  "D",
+  "FBT",
+  "INP",
+  "S101",
+]
