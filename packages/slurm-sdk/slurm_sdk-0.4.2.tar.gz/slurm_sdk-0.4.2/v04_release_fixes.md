@@ -1,0 +1,18 @@
+
+- [ ] Dry examples - make sure that the packaging options can be set via default_ to Cluster. 
+- [ ] Add Cluster.from_dict that can be used with hydra easily. 
+- [ ] Hide / privatize APIs with _ that do not have to be public - e.g. functions in array_itemts.py context.py
+- [ ] SSH backend exceptions - make all actionable and informative - e.g. timeout should tell how to increase the timeout
+- [ ] Update documentation to not discuss things in a way that assumes knowledge about how the API used to work previously. This is a first major release and past behavior will not be familiar to users.
+   - for example: submitless execution -- 
+   - 
+- [ ] Move imports away from function bodies to the top of the file. For example in array_job.py
+- [ ] Verify benchmarkcallback works with workflows and tasks + results make sense -- add an example
+- [ ] Verify workflows and nested workflows work - add an example
+- [ ] Remove slurmfiles - but verify that we can do everything programmatically 
+- [ ] move integration_test_task.py and integration_test_workflow.py into tests instead of examples
+- [ ] verify workflow graph visualization callback / example works and switch to using mermaid.js
+- [ ] add --from-file to argparse options
+- [ ] verify the diagnose helper works for cluster
+- [ ] remove auto packaging option
+- [ ] Optimize hello_torch.py dockerfile
