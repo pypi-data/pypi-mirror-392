@@ -1,0 +1,48 @@
+Metronome Application Help
+
+Menu Bar Usage:
+
+(1) To open a JSON file with saved Metronome settings (Beats Per Minute and Rhythm), select File | Open... from the menu bar.
+(2) To save a JSON file with the current Metronome settings, select File | Save or File | Save As... from the menu bar.
+(3) To exit the Metronome Application, select File | Exit from the menu bar.
+(4) To view this help content, select Help | View Help... from the menu bar.
+(5) To see information about the Metronome application, select Help | About... from the menu bar.
+
+Metronome Usage:
+
+(1) Use the slide control to change the beats per minute of the metronome.
+(2) Optionally, type a rhythm specification (see below) into the text box, and press the <tab> key to enter the rhythm.
+(3) Click the Start button to start the metronome beating. While the metronome is beating, it will audibly beep and flash the beacon
+    to indicate the beats.
+(4) While the metronome is beating, you can adjust the beats per minute, but not the rhythm.
+(5) Click the Stop button to stop the metronome from beating.
+
+Rhythm Specification:
+
+The rhythm specification is a string of text characters following this key:
+	
+	"W": One full beat of the metronome, stressed
+	"w": One full beat of the metronome, unstressed
+	"r": Rest full beat of the metronome, stressed or unstressed does not apply
+	"H": One half beat of the metronome, stressed
+	"h": One half beat of the metronome, unstressed
+	"Q": One quarter beat of the metronome, stressed
+	"q": One quarter beat of the metronome, unstressed
+
+If you want the metronome to simply beat at a regular interval, it is suficient to simply enter "w" as the rhythm, and the
+metronome will beat every 60 s / <beats per minute>, with no stressed beats. This would be counted as 1...2...3...4.
+
+If you want the metronome to beat a regular 4/4 time while stressing the first beat of each measure, the you should
+enter a rhythm specification of "Wwww". This would be counted as 1...2...3...4, and all beats would be a quarter note,
+but the first beat would be stressed.
+
+If you want the metronome to beat a typical 3/4 rhythm, you could enter a rhythm specification of "Whhhh".
+This would be counted as 1&...2&...3&. The first beat would be a stressed quarter note, and then 4 eighth notes would follow.
+
+It should be noted that the beats per minute and the beat lengths set by the rhythm specification are not independent.
+For example, 60 beats per minute with a rhythm of "w" is equivalent to 30 beats per minute with a rhythm of "h".
+
+If you wish to rest for less than a full beat, this can be accomplished by using a longer less-then-full beat.
+For example in 4/4 time:
+	
+	eighth note, eighth note, eighth rest, eighth note, eighth note, eighth rest, eighth note, eighth note ... = "Hwhwhh"

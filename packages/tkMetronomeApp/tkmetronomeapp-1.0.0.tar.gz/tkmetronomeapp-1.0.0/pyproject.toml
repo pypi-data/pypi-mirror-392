@@ -1,0 +1,58 @@
+[build-system]
+requires = [
+    "pdm-backend >= 2.4.0",
+]
+build-backend = "pdm.backend"
+
+[tool.pdm.build]
+includes = [
+    "src/tkMetronomeApp/*.py",
+]
+source-includes = [
+    "tests/",
+    "src/tkMetronomeApp/Documentation/*",
+    "src/tkMetronomeApp/Help/*",
+    "src/tkMetronomeApp/MetronomeApp.sln",
+    "src/tkMetronomeApp/MetronomeApp.pyproj",
+]
+
+[tool.pdm.build.wheel-data]
+data = [
+    { path = "src/tkMetronomeApp/Help/**/*", relative-to = "src/tkMetronomeApp/" },
+]
+
+[project]
+name = "tkMetronomeApp"
+version = "1.0.0"
+dependencies = [
+    "tkAppFramework>=0.9.0",
+]
+authors = [
+    { name = "Kevin R. Geurts", email = "kevin.r.geurts@gmail.com" },
+]
+description = "tkMetronomeApp is a python package that provides a tkinter based metronome application for musicians."
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Win32 (MS Windows)",
+    "Environment :: X11 Applications",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Artistic Software",
+]
+license = "MIT"
+license-files = [
+    "LICEN[CS]E*",
+]
+keywords = [
+    "query",
+    "console",
+    "input",
+    "response",
+]
+
+[project.urls]
+Homepage = "https://github.com/KevinRGeurts/tkMetronomeApp"
+Issues = "https://github.com/KevinRGeurts/tkMetronomeApp/issues"

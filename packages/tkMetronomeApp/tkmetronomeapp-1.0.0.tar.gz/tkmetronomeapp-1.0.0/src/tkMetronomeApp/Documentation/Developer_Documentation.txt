@@ -1,0 +1,69 @@
+Developer Documentation
+
+Requirements (thoughts?) on adding ability to set a rhythm for the metronome.
+1. Define a rhythm using a text string, encoded as follows:
+	a. "W": One full beat of the metronome, stressed
+	b. "w": One full beat of the metronome, unstressed
+	c. "r": Rest full beat of the metronome, stressed or unstressed is n/a
+	d. "H": One half beat of the metronome, stressed
+	e. "h": One half beat of the metronome, unstressed
+	f. "Q": One quarter beat of the metronome, stressed
+	g. "q": One quarter beat of the metronome, unstressed
+2. For now, assume that resting for less than a full beat can be accomplished by using a longer less-then-full beat.
+   For example in 4/4 time, eight note, eight note, eight rest, eight note, eight note, eight rest, eight note ... = 'Hwhw.
+2. Note that as an example, if the metronome were set to beat at 60 bpm, and a half beat was coded, then the next beat
+   would occur at (1/2) / ( 60 bpm X (1 min/60 sec) ) seconds.
+3. After each beat of the metronome, the metronome will read the next character from the string to set the timing for
+   the next beat.
+4. A "pointer" is kept to the current location in the string. When the end of the string is reached, the pointer is
+   returned to the beginning.
+5. Stressed or unstressed. Stressed beats will be louder (?) and visually different.
+
+Some possible additional new features:
+1. Display count along with flash, like 1 ... 2 ... 3 ... 4 ... 1 ... 2 ... 3 ... 4
+	a. Issue ... counts should only be on W/w beats, or shorter that sum to that?
+2. Should the count be like W=1, H=&, Q=e-a ?
+
+UML Type Information:
+tkApp:
+	is-a ttk.Frame
+	has-a master that is-a top level tkinter widget
+MetronomeApp:
+	is-a tkApp
+tkViewManager:
+	is-a ttk.Frame and an Observer
+	has-a master that is-a MetronomeApp
+tkMetronomeViewManager:
+	is-a tkViewManager
+tkHelpViewer:
+	is-a tk.TopLevel or tkViewManager
+	has-a master that is-a ?
+
+
+9/25/2025:
+Enhanced tkAppFramework to use Model subclass so that it is a Model-View-Controller (MVC) design pattern.
+In this case the View and Controller are both represented by tkViewManager subclasses. This was intended to 
+regularize the data / business logic architecture, whereas prior, MetronomeApp had "rolled its own" data and business logic
+architecture.
+
+Since tkViewManger subclasses now observe both Model subclasses and widgets, this requires some thinking about
+how updates are handled. For example:
+
+Imagine the user changes the tempo using the BPM Widget. The BPM Widget will notify the tkMetronomeViewManager.
+The registered handler in tkMetronomeViewManager will update the Metronome (which is a Model subclass).
+The Metronome will notify the tkMetronomeViewManager. If the tkMetronomeViewManager updates the BPM Widget, we are
+in an infinite loop. (Note, an example of an update to Metronome model that is not initiated by a widget will be
+when a saved Metronome state is loaded from a file.)
+
+A possible solution is to have the update handler functions in tkMetronomeViewManager check for consistency between
+the Model data and the Widget data before updating the Widget or the Model. If they are consistent, do nothing.
+
+10/9/2025:
+TODO before publishing on GitHub: (not in any particular order)
+(1) Write HelpFile.txt help content. Include need to tab away from Rhythm widget when setting a new rhythm.
+(2) Finish creating content for README.md
+(3) Research packaging and environments as the way for the Metronome getting access to the tkAppFramework.
+(4) Move LICENSE.txt to project's root folder.
+(5) Decide if main.py is still needed.
+(6) Improve comments and docstrings as needed throughout.
+(7) What else?
