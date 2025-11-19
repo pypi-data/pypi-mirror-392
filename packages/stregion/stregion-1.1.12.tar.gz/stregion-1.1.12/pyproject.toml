@@ -1,0 +1,46 @@
+[project]
+name = 'stregion'
+description = 'python parser for ds9 region files'
+readme = 'README.md'
+requires-python = '>=3.9'
+license = { file = 'LICENSE.txt' }
+authors = [{ name = 'Jae-Joon Lee', email = 'lee.j.joon@gmail.com' }]
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Intended Audience :: Science/Research',
+    'License :: OSI Approved :: MIT License',
+    'Operating System :: MacOS :: MacOS X',
+    'Operating System :: POSIX :: Linux',
+    'Programming Language :: Cython',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Topic :: Scientific/Engineering :: Astronomy',
+]
+dependencies = [
+    'numpy',
+    'pyparsing>=3.0.0'
+]
+dynamic = ['version']
+
+[project.urls]
+'repository' = 'http://github.com/spacetelescope/stregion'
+'download' = 'http://github.com/spacetelescope/stregion/releases'
+
+[build-system]
+requires = [
+    'Cython',
+    'numpy>=2.0',
+    'setuptools >=61',
+    'setuptools_scm[toml] >=3.4',
+    'wheel',
+]
+build-backend = 'setuptools.build_meta'
+
+[tool.setuptools_scm]
+write_to = 'stregion/version.py'
+
+[tool.setuptools.packages.find]
+where = ['.']
+
+[tool.cibuildwheel]
+skip = ["cp*t-*"]
