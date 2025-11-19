@@ -1,0 +1,38 @@
+name: Validate CI workflows
+
+on:
+  pull_request:
+    paths: [.github/workflows/*]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # renovate: datasource=pypi depName=uv
+  UV_VERSION: '0.9.10'
+  # renovate: datasource=pypi depName=zizmor
+  ZIZMOR_VERSION: '1.16.3'
+
+permissions: {}
+
+jobs:
+  validate-ci-workflows:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@5a7eac68fb9809dea845d802897dc5c723910fa3 # v7
+        with:
+          version: ${{ env.UV_VERSION }}
+
+      - name: Run zizmor
+        run: uvx zizmor@${ZIZMOR_VERSION} .
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
