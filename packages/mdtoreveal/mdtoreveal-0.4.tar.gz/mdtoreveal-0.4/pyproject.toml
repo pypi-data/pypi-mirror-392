@@ -1,0 +1,81 @@
+[build-system]
+requires = ["setuptools >= 70.1.0", "setuptools-scm[simple]>=8"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+
+[project]
+name = "mdtoreveal"
+description = "Transform a flat markdown to a reveal.js presentation."
+readme = "README.md"
+authors = [
+    {name = "Julien Palard", email = "julien@palard.fr"},
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+]
+license = "MIT"
+requires-python = ">= 3.6"
+dependencies = [
+    "jinja2",
+    "requests",
+    "markdown",
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://git.afpy.org/mdk/mdtoreveal"
+
+[project.scripts]
+mdtoreveal = "mdtoreveal:main"
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "build",
+    "isort",
+    "mypy",
+    "pylint",
+    "pytest",
+    "tox",
+    "twine",
+    "types-requests",
+]
+
+[tool.setuptools]
+py-modules = ["mdtoreveal"]
+include-package-data = false
+
+[tool.isort]
+profile = "black"
+
+[tool.tox]
+envlist = ["py39", "py310", "py311", "py312", "py313", "py314", "mypy", "black", "pylint", "isort", "ruff"]
+skip_missing_interpreters = true
+
+[tool.tox.env_run_base]
+deps = ["pytest"]
+commands = [["pytest"]]
+
+[tool.tox.env.mypy]
+deps = [".[dev]"]
+commands = [["mypy", "mdtoreveal.py"]]
+
+[tool.tox.env.black]
+deps = ["black"]
+commands = [["black", "--check", "--diff", "mdtoreveal.py", "tests/"]]
+
+[tool.tox.env.pylint]
+deps = [".[dev]"]
+commands = [["pylint", "mdtoreveal.py", "tests/"]]
+
+[tool.tox.env.isort]
+deps = ["isort"]
+commands = [["isort", "--check", "mdtoreveal.py", "tests/"]]
+
+[tool.tox.env.ruff]
+deps = ["ruff"]
+commands = [["ruff", "check", "mdtoreveal.py", "tests/", "pyproject.toml"]]
