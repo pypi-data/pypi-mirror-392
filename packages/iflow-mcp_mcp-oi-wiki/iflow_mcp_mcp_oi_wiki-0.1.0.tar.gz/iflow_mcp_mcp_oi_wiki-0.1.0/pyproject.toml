@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iflow-mcp_mcp-oi-wiki"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastembed>=0.6.1",
+    "mcp[cli]>=1.6.0",
+    "openai>=1.76.0",
+    "pymilvus>=2.5.7",
+    "transformers>=4.51.3",
+]
+
+[project.scripts]
+mcp-oi-wiki = "main:main"
+
+[tool.setuptools.packages.find]
+include = ["main.py", "database.py"]
+exclude = ["db*", "script*", "OI-wiki*"]
+
+[tool.setuptools]
+py-modules = ["main", "database"]
