@@ -1,0 +1,253 @@
+# TableClone
+
+Data synchronization tool for heterogeneous platforms (Airtable, Bubble, PostgreSQL, SQLite, Excel, Google Drive, etc.).
+
+TableClone enables bidirectional data synchronization between different data platforms using a unified abstraction layer. It handles type conversions, schema mapping, and data normalization automatically.
+
+## Features
+
+- **Multi-platform support**: Airtable, Bubble.io, PostgreSQL, SQLite, Excel, Google Drive, and more
+- **Flexible sync modes**: Insert (append), Update, Upsert
+- **Schema mapping**: Automatic or explicit column mapping
+- **Type conversion**: Automatic handling of dates, numbers, booleans, null values
+- **Batch operations**: Efficient bulk insert/update with configurable batch sizes
+- **Backup operations**: Full container backup with attachment download support
+
+## Supported Platforms
+
+| Platform     | Read | Write | Create | Backup |
+|--------------|------|-------|--------|--------|
+| Airtable     | ✅   | ✅    | ✅     | ✅     |
+| Bubble.io    | ✅   | ✅    | ✅     | ✅     |
+| PostgreSQL   | ✅   | ✅    | ✅     | ❌     |
+| SQLite       | ✅   | ✅    | ✅     | ✅     |
+| Excel        | ✅   | ✅    | ✅     | ✅     |
+| Google Drive | ✅   | ✅    | ✅     | ❌     |
+
+## Installation
+
+### Using pip
+
+```bash
+pip install tableclone
+```
+
+### Using uv (recommended for development)
+
+```bash
+# Install uv if not already installed
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install tableclone
+uv pip install tableclone
+```
+
+## Quick Start
+
+### Table Synchronization
+
+```bash
+# Sync from Airtable to SQLite
+tableclone sync config.json
+
+# Or pass config as JSON string
+tableclone sync '{"source": {...}, "destination": {...}}'
+```
+
+Example configuration (`config.json`):
+
+```json
+{
+    "source": {
+        "platform": "airtable",
+        "table": {
+            "alias": "source_table",
+            "api_identifier": "baseId/tableId",
+            "platform": {
+                "secret_string": "$AIRTABLE_API_KEY",
+                "options": {}
+            }
+        }
+    },
+    "destination": {
+        "platform": "sqlite",
+        "table": {
+            "alias": "dest_table",
+            "api_identifier": "table_name",
+            "platform": {
+                "platform_root_path": "/path/to/database.sqlite"
+            },
+            "options": {
+                "unique_id_column": "id"
+            }
+        }
+    },
+    "options": {
+        "mapping_auto": true,
+        "append_mode": true,
+        "update_mode": true
+    }
+}
+```
+
+### Full Backup
+
+```bash
+# Backup entire Bubble app to Excel files
+tableclone full_backup backup_config.json
+```
+
+## Development Setup
+
+### Prerequisites
+
+- Python 3.10 or higher
+- [uv](https://github.com/astral-sh/uv) (recommended) or pip
+
+### Setup with uv (recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/vlebert/bubbleio.git
+cd tableclone
+
+# Create virtual environment with uv
+uv venv .venv
+
+# Activate virtual environment
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install package in editable mode with dev dependencies
+uv pip install -e ".[dev]"
+
+# Verify installation
+tableclone --help
+```
+
+### Setup with pip (alternative)
+
+```bash
+# Create virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install in editable mode with dev dependencies
+pip install -e ".[dev]"
+```
+
+### Development Dependencies
+
+The `[dev]` extra includes:
+- `pytest` and `pytest-cov` for testing
+- `ruff` for linting and formatting
+- `basedpyright` for type checking
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest tests/ -v
+
+# Run integration tests (requires credentials)
+pytest tests/integration/ -v
+
+# Run with coverage
+pytest tests/ --cov=tableclone --cov-report=html
+
+# Run only fast tests (exclude integration)
+pytest tests/ -m "not integration"
+```
+
+See `tests/README.md` for detailed test setup instructions (Airtable credentials, etc.).
+
+### Code Quality
+
+```bash
+# Lint with ruff
+ruff check .
+
+# Format with ruff
+ruff format .
+
+# Type check with basedpyright
+basedpyright tableclone/
+```
+
+## Project Structure
+
+```
+tableclone/
+├── tableclone/
+│   ├── platforms/          # Platform implementations (Airtable, Bubble, etc.)
+│   ├── tasking/            # Task orchestration (sync, backup)
+│   ├── cli_v2.py           # CLI entry point
+│   └── utils.py            # Options system and utilities
+├── tests/
+│   ├── integration/        # Integration tests
+│   ├── fixtures/           # Test data
+│   └── helpers/            # Test utilities
+├── pyproject.toml          # Project configuration
+├── CLAUDE.md               # Development guide for Claude Code
+└── REFACTORING_ANALYSIS.md # Refactoring plan
+```
+
+## Documentation
+
+- **[CLAUDE.md](CLAUDE.md)**: Development guide and architecture overview
+- **[REFACTORING_ANALYSIS.md](REFACTORING_ANALYSIS.md)**: Detailed refactoring plan
+- **[tests/README.md](tests/README.md)**: Test setup and usage
+
+## Configuration
+
+### Environment Variables
+
+Credentials can be passed via environment variables in config files:
+
+```json
+{
+    "platform": {
+        "secret_string": "$AIRTABLE_API_KEY"
+    }
+}
+```
+
+Supported variables:
+- `AIRTABLE_API_KEY`
+- `BUBBLE_API_KEY`
+- `POSTGRES_CONNECTION_STRING`
+- Any custom variable prefixed with `$`
+
+### Options
+
+Each platform and table supports options for customization. See `CLAUDE.md` for detailed options documentation.
+
+## Contributing
+
+This project is currently in a refactoring phase. See `REFACTORING_ANALYSIS.md` for the roadmap.
+
+### Current Phase
+
+**Phase 1: Stabilization** (Months 1-2)
+- ✅ Integration tests created
+- ⏳ Documentation in progress
+- ⏳ Code cleanup (remove dead code)
+
+### Roadmap
+
+- **Phase 2**: Simplify architecture (replace Pandas with lightweight data model)
+- **Phase 3**: Decouple credentials and configuration
+- **Phase 4**: Add observability (structured logging, metrics)
+
+## License
+
+MIT License - see LICENSE file for details
+
+## Author
+
+Valérian LEBERT
+
+## Links
+
+- **Homepage**: https://tableclone.com
+- **Repository**: https://github.com/vlebert/bubbleio
+- **Issues**: https://github.com/vlebert/bubbleio/issues

@@ -1,0 +1,144 @@
+# TableClone Development Rules
+
+## Project Overview
+TableClone is a Python-based data transfer tool that enables synchronization and migration between different database platforms and APIs.
+It provides an abstraction layer over various platforms to facilitate seamless data operations.
+
+## Supported Platforms
+- Airtable
+- BaseRow
+- Bubble
+- KSAAR
+- PostgreSQL
+- SQLite
+- TimeTonic
+- Excel files
+- Google Drive
+
+## Architecture Principles
+
+### 1. Platform Abstraction
+- All platform implementations must inherit from the abstract `Platform` class in `platforms/abstracts.py`
+- Each platform has its own dedicated file in `platforms/` directory
+- Use the factory pattern (`platforms/factory.py`) for platform instantiation
+- Maintain consistent interface across all platforms
+
+### 2. Task System
+- All tasks must inherit from `TaskInterface` in `tasking/abstract_task.py`
+- Currently implemented tasks:
+  - `table_sync_task.py`: Synchronization between two tables
+  - `full_backup.py`: Complete database backup (multiple tables)
+- Each task should be self-contained and configurable
+
+### 3. Configuration Management
+- Use `OptionSet` and `OptionValues` for platform and task configuration
+- Maintain backward compatibility with existing configurations
+
+### 4. Options System (utils.py)
+The options system provides a structured way to define and validate configuration parameters:
+
+#### Option Class
+- Defines individual configuration parameters with validation rules
+- Supports type checking, default values, required fields, and enums
+- Can specify incompatible options to prevent conflicting configurations
+
+#### OptionSet Class
+- Contains a collection of related `Option` objects
+- Used to define all available options for platforms, tasks, or operations
+- Provides structure for configuration validation
+
+#### OptionValues Class
+- Validates provided configuration values against an `OptionSet`
+- Performs comprehensive validation:
+  - Required options presence
+  - Type checking
+  - Enum value validation
+  - Incompatible option detection
+- Provides safe access to configuration values with defaults
+
+#### Usage Pattern
+1. Define options using `Option` class with appropriate constraints
+2. Group related options into an `OptionSet`
+3. Validate user-provided values using `OptionValues`
+4. Access validated configuration through `OptionValues.get()`
+
+## Development Guidelines
+
+### Code Structure
+- Follow the existing modular architecture
+- Keep platform-specific logic isolated in respective platform files
+- Use abstract classes to define interfaces
+- Implement proper error handling and logging
+
+### Adding New Platforms
+1. Create new file in `platforms/` directory
+2. Inherit from `Platform` abstract class
+3. Implement all required abstract methods
+4. Add platform to factory pattern
+5. Create comprehensive tests
+
+### Adding New Tasks
+1. Create new file in `tasking/` directory
+2. Inherit from `TaskInterface` abstract class
+3. Define task-specific options using `OptionSet`
+4. Implement configuration validation
+5. Add proper logging and error handling
+
+### CLI Integration
+- Primary CLI interface is in `cli_v2.py`
+- Maintain backward compatibility with existing CLI commands
+- Use structured logging for debugging
+
+### Testing
+- Add tests in `_tests/` directory
+- Test configurations should go in `test-configs/`
+- Include both unit tests and integration tests
+- Test with real API endpoints when possible
+
+## Best Practices
+- Use pandas DataFrames for data manipulation
+- Implement rate limiting for API calls
+- Handle authentication securely (no hardcoded secrets)
+- Use proper logging levels (DEBUG, INFO, WARNING, ERROR)
+- Follow Python PEP 8 style guidelines
+- Document all public methods and classes using Google-style docstrings (keep them simple and concise)
+
+
+## File Organization
+```
+tableclone/
+├── platforms/          # Platform implementations
+├── tasking/            # Task implementations
+├── processing/         # Data processing utilities
+├── cli_v2.py          # Main CLI interface
+├── utils.py           # Core utilities and options system
+```
+
+### Key Files
+- `utils.py`: Contains the options system (`Option`, `OptionSet`, `OptionValues`), logging utilities, and helper functions
+
+## Dependencies
+- Core: pandas, numpy, requests
+- Database: psycopg2 (PostgreSQL), sqlite3
+- Configuration: managed through OptionSet system (utils.py)
+- Logging: Python standard logging module with custom setup (utils.py)
+
+## Performance Guidelines
+- Use batch operations when possible
+- Implement proper pagination for large datasets
+- Add progress indicators for long-running operations
+- Consider memory usage with large DataFrames
+
+## Utility Functions (utils.py)
+- `setup_logging()`: Standardized logging configuration across the application
+- `get_logger()`: Consistent logger creation for modules
+- `merge_two_dicts()`: Dictionary merging utility
+- `create_columns_if_not_exists()`: DataFrame column management helper
+
+## Configuration Best Practices
+- Always use `OptionSet` to define available configuration parameters
+- Validate all user inputs through `OptionValues` before processing
+- Define clear option descriptions and appropriate default values
+- Use enums for restricted value sets
+- Specify incompatible options to prevent configuration conflicts
+- Group related options logically in separate `OptionSet` instances

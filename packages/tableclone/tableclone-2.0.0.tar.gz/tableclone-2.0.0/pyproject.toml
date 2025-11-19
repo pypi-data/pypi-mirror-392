@@ -1,0 +1,169 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tableclone"
+version = "2.0.0"
+description = "Data synchronization tool for heterogeneous platforms (Airtable, Bubble, PostgreSQL, SQLite, Excel, etc.)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Valérian LEBERT", email = "" }
+]
+keywords = ["data", "sync", "airtable", "bubble", "postgresql", "sqlite", "excel"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "pandas",
+    "xlsxwriter",
+    "bubbleio>=0.6.0",
+    "oauth2client",
+    "gspread",
+    "psycopg2>=2.9.5",
+    "sqlalchemy>=1.4.46",
+    "google-cloud-pubsub",
+    "openpyxl",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "ruff",
+    "basedpyright",
+]
+
+[project.scripts]
+tableclone = "tableclone.cli_v2:main"
+
+# ============================================================================
+# Hatch configuration
+# ============================================================================
+
+[tool.hatch.build.targets.wheel]
+packages = ["tableclone"]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "/.git",
+    "/.github",
+    "/docs",
+    "/_tests",
+    "/tests",
+    "/.venv",
+    "/venv",
+    "*.pyc",
+    "__pycache__",
+]
+
+# ============================================================================
+# Ruff configuration (linting & formatting)
+# ============================================================================
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+]
+ignore = []
+
+[tool.ruff.lint.isort]
+known-first-party = ["tableclone"]
+
+# ============================================================================
+# Basedpyright configuration (type checking)
+# ============================================================================
+
+[tool.basedpyright]
+typeCheckingMode = "standard"  # "basic" | "standard" | "strict"
+reportUnknownParameterType = true
+pythonVersion = "3.10"
+pythonPlatform = "All"
+
+# Exclude patterns
+exclude = [
+    "**/__pycache__",
+    "**/node_modules",
+    ".venv",
+    "venv",
+    "build",
+    "dist",
+]
+
+# ============================================================================
+# Pytest configuration
+# ============================================================================
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "-ra",
+    "--tb=short",
+    "--strict-markers",
+    "-W", "default",
+    # Ignore ResourceWarnings for SQLite connections
+    # Python 3.13+ emits ResourceWarnings for unclosed SQLite connections even when using
+    # context managers. This happens because pandas.read_sql() creates internal references
+    # that persist after the context manager exits. The warnings are raised during garbage
+    # collection (delayed), making them appear as "unraisable exceptions" that bypass
+    # pytest's normal filterwarnings mechanism. Using -W at the interpreter level catches them.
+    # See: https://github.com/pytest-dev/pytest/issues/9825
+    # See: https://github.com/pandas-dev/pandas/issues/23086
+    "-W", "ignore::ResourceWarning",
+    "--color=yes",
+]
+markers = [
+    "integration: Integration tests (may be slow, require external services)",
+    "airtable: Tests that require Airtable credentials",
+    "sqlite: Tests that use SQLite",
+    "postgresql: Tests that require PostgreSQL",
+    "bubble: Tests that require Bubble.io",
+    "excel: Tests that use Excel files",
+    "slow: Tests that take more than 10 seconds",
+    "skip_ci: Tests that should be skipped in CI/CD",
+]
+
+# ============================================================================
+# Coverage configuration
+# ============================================================================
+
+[tool.coverage.run]
+source = ["tableclone"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/venv/*",
+    "*/env/*",
+    "*/.venv/*",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+# Uncomment to enforce minimum coverage
+# fail_under = 70
+
+[tool.coverage.html]
+directory = "htmlcov"
