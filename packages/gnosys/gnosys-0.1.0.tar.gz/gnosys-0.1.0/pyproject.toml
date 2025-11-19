@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gnosys"
+version = "0.1.0"
+description = "GNO.SYS - Compound Intelligence Ecosystem Meta-Package"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "GNOSYS Personal Builder License (GPBL) v1.0"}
+authors = [
+    {name = "Isaac Wostrel-Rubin", email = "isaac@sanctuary.systems"}
+]
+dependencies = [
+    # MCP Orchestrator
+    "gnosys-strata",
+
+    # MCP Servers (console scripts)
+    "carton-mcp",
+    "emergence-engine-mcp",
+    "canopy-mcp",
+    "opera-mcp",
+    "flightsim-mcp",
+    "brain-agent",
+    "sanctuary-system-mcp",
+
+    # MCP Servers (python modules)
+    "starlog-mcp",
+    "starship-mcp",
+    "payload-discovery",
+    "starsystem",
+    "hyperon-mcp",
+    "giint-llm-intelligence",
+    "heaven-framework",
+    "toot-mcp",
+    "pydantic-stack-core",
+    "seed-mcp",
+
+    # Local/unpublished (will be published)
+    # "context-alignment-mcp",  # TODO: Publish first
+    # "mcpify",  # TODO: Publish first
+    # "heaven-treeshell-mcp",  # TODO: Publish first
+
+    # Supporting libraries
+    "python-dotenv",
+    "rich",  # For nice CLI output
+]
+
+[project.scripts]
+gnosys = "gnosys.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "black",
+    "ruff",
+]
