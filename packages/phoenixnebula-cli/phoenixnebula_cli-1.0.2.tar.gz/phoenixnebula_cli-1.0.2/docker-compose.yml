@@ -1,0 +1,48 @@
+
+services:
+  phoenixnebula:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nobodydeveloper/phoenixnebula:latest
+    container_name: phoenixnebula
+    stdin_open: true
+    tty: true
+    
+    volumes:
+      - .:/app
+      # Mount home directory for shell history and config
+      - phoenixnebula:/home/phoenixnebula
+      # Mount themes directory
+      - phoenixnebula:/home/phoenixnebula/.phoenixnebula/themes
+    
+    environment:
+      - PYTHONUNBUFFERED=1
+      - HISTFILE=/home/phoenixnebula/.phoenixnebula_history
+      - PHOENIXNEBULA_DEV=1
+    
+    working_dir: /app
+    
+    # Restart policy for development
+    restart: no
+    
+    # Resource limits (development - higher)
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 512M
+
+volumes:
+  phoenixnebula-home:
+    driver: local
+  phoenixnebula-themes:
+    driver: local
+
+networks:
+  default:
+    name: phoenixnebula
+    driver: bridge
