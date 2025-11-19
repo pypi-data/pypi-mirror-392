@@ -1,0 +1,57 @@
+# /your_project/pyproject.toml
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fast_data_pipeline"
+version = "0.2.0"
+authors = [
+  { name="Bora Pilav", email="bbpilav@gmail.com" },
+]
+description = "A package for processing MF4 and Rosbag data to HDF5 format with merging capabilities."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+keywords = ["mf4", "rosbag", "hdf5", "data-pipeline", "automotive", "ros2"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "asammdf>=8.6.0",
+    "h5py>=3.14.0",
+    "joblib>=1.5.0",
+    "loguru>=0.7.0",
+    "numpy>=2.0.0",
+    "opencv-python-headless>=4.11.0",
+    "pandas>=2.3.0",
+    "PyYAML>=6.0.0",
+    "rosbags>=0.10.0",
+    "tables>=3.10.0",
+    "tqdm>=4.67.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4.0",
+    "build>=1.0.0",
+    "twine>=4.0.0",
+]
+
+
+
+[tool.setuptools.packages.find]
+where = ["."] 
+exclude = ["test*", "sample_data*", "ros-utils*"]
