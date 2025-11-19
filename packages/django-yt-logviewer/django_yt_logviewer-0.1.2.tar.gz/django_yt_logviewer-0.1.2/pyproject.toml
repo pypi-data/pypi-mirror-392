@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "django-yt-logviewer"
+version = "0.1.2"
+description = "Reusable Django app providing a web UI for viewing log files."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Lilong Zhang", email = "and2long@gmail.com" }
+]
+classifiers = [
+    "Framework :: Django",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "django>=4.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/and2long/django-logviewer"
+Source = "https://github.com/and2long/django-logviewer"
+Issues = "https://github.com/and2long/django-logviewer/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["logviewer*"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+logviewer = [
+    "templates/**/*.html",
+]

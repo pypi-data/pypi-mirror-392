@@ -1,0 +1,45 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <style>
+        .log-level-debug { color: #60a5fa; }
+        .log-level-info { color: #22c55e; font-weight: 600; }
+        .log-level-warning { color: #eab308; font-weight: 600; }
+        .log-level-error { color: #ef4444; font-weight: 600; }
+        .log-level-critical { color: #7f1d1d; font-weight: 700; }
+    </style>
+{% endblock %}
+
+{% block content_title %}<h1>{% trans "Log files" %}</h1>{% endblock %}
+
+{% block content %}
+<div class="module">
+    {% if log_dir_exists and log_files %}
+        <form method="get" class="log-selector" style="margin-bottom: 1rem;">
+            <label for="id_log_file" style="margin-right: 0.5rem;">{% trans "Log file" %}</label>
+            <select name="filename" id="id_log_file" onchange="this.form.submit()" style="margin-right: 0.5rem;">
+                {% for log_file in log_files %}
+                    <option value="{{ log_file }}" {% if log_file == selected_log_file %}selected{% endif %}>{{ log_file }}</option>
+                {% endfor %}
+            </select>
+            <a class="button" href="?filename={{ selected_log_file }}&amp;download=1">{% trans "Download" %}</a>
+        </form>
+        {% if selected_log_file %}
+            <p class="quiet" style="margin-bottom: 0.5rem;">
+                {% blocktrans with size=formatted_log_file_size selected_log_file=selected_log_file %}
+                File size of {{ selected_log_file }}: {{ size }}
+                {% endblocktrans %}
+            </p>
+        {% endif %}
+        <div class="log-output" style="border: 1px solid #d9d9d9; background: #ffffff; padding: 1rem; max-height: 32rem; overflow: auto;">
+            <pre style="white-space: pre-wrap;">{{ log_content_html|safe }}</pre>
+        </div>
+    {% elif log_dir_exists %}
+        <p>{% trans "No log files were found." %}</p>
+    {% else %}
+        <p>{% blocktrans %}The log directory ({{ log_dir }}) does not exist.{% endblocktrans %}</p>
+    {% endif %}
+</div>
+{% endblock %}
