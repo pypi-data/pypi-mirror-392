@@ -1,0 +1,75 @@
+Metadata-Version: 2.4
+Name: swift-actor-critic
+Version: 0.1.4
+Summary: Python bindings for Swift Actor-Critic algorithm
+Author-email: Khurram Javed <kjaved@example.com>
+License: MIT
+Project-URL: Homepage, https://github.com/kjaved0/swift-actor-critic
+Project-URL: Repository, https://github.com/kjaved0/swift-actor-critic
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+
+# Swift Actor-Critic
+
+Python bindings for the Swift Actor-Critic algorithm - a fast and robust reinforcement learning algorithm.
+
+## Installation
+
+```bash
+pip install swift-actor-critic
+```
+
+## Usage
+
+```python
+from swift_actor_critic import SwiftActorCritic
+
+# Initialize the actor-critic
+ac = SwiftActorCritic(
+    num_features=100,
+    num_actions=4,
+    lambda_=0.9,
+    alpha=0.01,
+    epsilon=1e-5,
+    meta_step_size=1e-3,
+    eta=0.1,
+    eta_actor=0.1,
+    decay=0.999,
+    action_prob_at_init=0.1,
+    seed=42
+)
+
+# Take a step with feature indices, reward, and discount factor
+action = ac.step(
+    feature_indices=[1, 5, 10],  # Active feature indices
+    reward=1.0,
+    gamma=0.99
+)
+
+print(f"Selected action: {action}")
+```
+
+## Features
+
+- Fast C++ implementation with Python bindings
+- Efficient handling of sparse feature representations
+- Adaptive step-size algorithm
+- Support for eligibility traces (lambda parameter)
+
+## License
+
+MIT License
+
+## Links
+
+- GitHub: https://github.com/kjaved0/swift-actor-critic
+- SwiftTD (related project): https://github.com/kjaved0/swifttd
+
