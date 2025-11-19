@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: 2021 Jeff Epler
+#
+# SPDX-License-Identifier: MIT
+
+name: Release on pypi
+
+on:
+  push:
+    tags:
+      - "[0-9]*"
+
+jobs:
+  release:
+    runs-on: arm64
+    container:
+      image: docker.io/library/python:3-trixie
+
+    environment: release
+    permissions:
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
+
+    steps:
+    - name: Set up node
+      run: apt-get update && apt-get install -y --no-install-recommends nodejs
+
+    - uses: actions/checkout@v3
+
+    - name: Set up uv
+      run: pip install --break-system-packages uv
+
+    - name: Build release
+      run: uv build
+
+    - name: Upload release
+      uses: https://github.com/pypa/gh-action-pypi-publish@release/v1
+      with:
+        packages-dir: dist/
