@@ -1,0 +1,526 @@
+# CCPM Plugin Metadata
+# Controlled Concurrent Project Management for AI Agents
+#
+# This plugin provides a worktree-based issue isolation system with comprehensive
+# safeguards for AI agents working on ANY GitHub repository.
+#
+# Version: 2.0.0 (Phase 1 - Cross-Platform Python Edition)
+# Last Updated: 2025-01-17
+# Status: Development (Local Only - NOT for distribution yet)
+#
+# ═══════════════════════════════════════════════════════════════════════════
+# v2.0.0 KEY FEATURES:
+# ═══════════════════════════════════════════════════════════════════════════
+# ✅ Cross-Platform: Python 3.6+ (Windows, macOS, Linux) - NO Bash required
+# ✅ Project-Agnostic: Auto-detects project from git remote URL
+# ✅ 46 GitHub Labels: Complete taxonomy with usage rules
+# ✅ CRITICAL VERIFICATION PROTOCOL (NEW):
+#    - MANDATORY 8-step verification before closing ANY issue
+#    - ALWAYS reproduce original issue to verify fix
+#    - ALWAYS run full test suite to detect regressions
+#    - ALWAYS check for backward compatibility breaking changes
+#    - ALWAYS ask user approval for breaking changes (with @mention)
+#    - ALWAYS check if fix also solved related issues
+#    - NEVER close issue without completing all verification steps
+# ✅ Zero Dependencies: Uses only Python standard library
+# ✅ Complete Audit Trail: JSON logs of all agent actions
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: ccpm
+version: 2.0.0
+phase: 1
+description: Cross-platform Controlled Concurrent Project Management for AI Agents
+
+# Plugin metadata
+metadata:
+  author: CCPM Plugin Development Team
+  repository: claude-code-plugins/ccpm
+  license: MIT (Planned - currently local only)
+  created: 2025-01-14
+  last_updated: 2025-01-17
+  languages: Python 3.6+
+  platforms: Windows, macOS, Linux
+  project_agnostic: true
+
+# Architecture
+architecture:
+  type: worktree-based-isolation
+  worktree_location: ~/.cache/ccpm-worktrees/{owner}-{project}/
+  audit_log_location: ~/.cache/ccpm-audit-logs/{owner}-{project}/
+  concurrency_model: mutex-locked-per-issue
+  branch_workflow: 5-branch-promotion-pipeline
+  auto_detection: Auto-detects project from git remote URL
+
+# Critical Verification Protocol (v2.0.0)
+verification_protocol:
+  name: Step 7 - Verify Fix After PR Merged
+  status: MANDATORY before closing any issue
+  location: skills/issue-management.md (Step 7)
+  size: 280 lines, 8 steps
+
+  steps:
+    7.1: Pull latest changes from dev branch
+    7.2: Reproduce original issue again (EXACT steps OR temp test script)
+    7.3: Run ALL tests for regressions (pytest tests/ -v)
+    7.4: Check for backward compatibility / API breaking changes
+    7.5: Check if fix also solved related open issues
+    7.6: Complete final verification checklist
+    7.7: Close issue ONLY after ALL checks pass
+    7.8: Reopen immediately if ANY verification fails
+
+  mandatory_actions:
+    - Reproduce original bug OR test new feature with temp script
+    - Run full test suite (no failing tests allowed)
+    - Check function signatures, APIs, CLI args, configs, output formats
+    - Search for related issues and test if also fixed
+    - Get user approval for ANY breaking changes (with @mention)
+    - Bump major version if breaking changes approved
+    - Create migration guide for breaking changes
+    - Update CHANGELOG.md and documentation
+    - Delete temp test scripts after verification
+
+  forbidden_actions:
+    - Closing issue without reproducing original issue again
+    - Ignoring failing tests or regressions
+    - Merging breaking changes without user approval
+    - Skipping related issue checks
+    - Declaring feature complete without testing it
+
+  escalation_required:
+    - ANY breaking changes detected (ask user approval)
+    - Regressions that cannot be fixed backward-compatibly
+    - Related issues found that also need fixing
+    - Test failures that require test updates
+
+# Documentation (REQUIRED READING for agents)
+documentation:
+  readme: ccpm/README.md
+  primary_skill: ccpm/skills/issue-management.md (1,124 lines - READ THIS FIRST)
+
+  getting_started:
+    - Read ccpm/README.md for overview
+    - Read ccpm/skills/issue-management.md (complete guide)
+    - Run python ccpm/commands/setup_labels.py (first time only)
+    - Follow the 8-step workflow in issue-management.md
+
+  critical_sections:
+    - README.md: Critical Rules for Agents
+    - issue-management.md: Step 7 - Critical Verification Protocol (280 lines)
+    - issue-management.md: Label Usage Rules (200 lines)
+    - issue-management.md: Common Mistakes to Avoid
+
+  never_skip:
+    - Step 1: Check for duplicates (MANDATORY)
+    - Step 2: Reproduce issue (MANDATORY)
+    - Step 7: Critical Verification Protocol (MANDATORY before closing)
+    - Breaking change approval (MANDATORY if detected)
+
+# Skills (Agent Education)
+skills:
+  - name: 5-branch-workflow
+    path: skills/5-branch-workflow.md
+    purpose: Teach agents the branch hierarchy and promotion rules
+    topics:
+      - Branch hierarchy (dev/testing/review/master/main)
+      - Agent permissions per branch
+      - Quality expectations
+      - Forbidden operations
+
+  - name: promotion-rules
+    path: skills/promotion-rules.md
+    purpose: Explain how code moves through the pipeline
+    topics:
+      - Promotion commands (just promote-*)
+      - Merge-based workflow
+      - CI integration
+      - Version bumping
+
+  - name: release-process
+    path: skills/release-process.md
+    purpose: Document release system (agents observe only)
+    topics:
+      - Multi-channel releases (alpha/beta/rc/stable)
+      - git-cliff changelog generation
+      - PyPI publication safety
+      - What agents must NEVER do
+
+  - name: recovery-procedures
+    path: skills/recovery-procedures.md
+    purpose: Recovery procedures for common mistakes
+    topics:
+      - 11 failure scenarios
+      - Detection and recovery steps
+      - Emergency commands
+      - Human escalation criteria
+
+  - name: issue-management
+    path: skills/issue-management.md
+    purpose: Complete issue lifecycle management for agents
+    size: 1124 lines
+    topics:
+      - Step 0: Ensure labels are set up (setup_labels.py)
+      - Step 1: Check for duplicates (MANDATORY before working)
+      - Step 2: Reproduce issues (mandatory 3-attempt policy)
+      - Step 3: Handle non-reproducible issues (3 attempts → close)
+      - Step 4: Label taxonomy (46 labels across 8 categories)
+      - Label usage rules (when to add/remove, exclusive vs coexist)
+      - Status label workflow (state machine transitions)
+      - Valid and invalid label combinations
+      - Step 5: Issue workflow commands (gh CLI)
+      - Step 6: Working on the issue (after reproduction)
+      - Step 7: CRITICAL VERIFICATION PROTOCOL (280 lines, 8 steps)
+      - Step 8: Communication best practices
+      - Complete example workflow
+      - Common mistakes to avoid
+    critical_rules:
+      - NEVER close issue without completing Step 7 verification
+      - ALWAYS reproduce original issue again to verify fix
+      - ALWAYS run all tests to check for regressions
+      - ALWAYS check for backward compatibility breaking changes
+      - ALWAYS ask user approval for breaking changes (with @mention)
+      - ALWAYS check if fix also solved related open issues
+      - ALWAYS create temp test scripts for new features
+      - NEVER merge without user approval if breaking changes detected
+
+# Safeguards (Safety Mechanisms)
+safeguards:
+  - name: protected-files.txt
+    path: rules/protected-files.txt
+    type: blacklist
+    purpose: List of files agents cannot modify
+    enforced_by: pre-commit-safety.sh
+
+  - name: pre-commit-safety
+    path: hooks/pre_commit_safety.py
+    type: pre-commit-hook
+    purpose: Block commits that modify protected files
+    enforcement: automatic
+    language: Python 3.6+
+
+  - name: pre-flight-check
+    path: hooks/pre_flight_check.py
+    type: validation
+    purpose: Validate preconditions before starting work
+    language: Python 3.6+
+    checks:
+      - Issue exists and assigned
+      - No conflicting agent locks
+      - Target branch allowed
+      - No conflicting PRs
+      - Repository state clean
+
+  - name: post-flight-check
+    path: hooks/post_flight_check.py
+    type: validation
+    purpose: Quality checks before creating PR
+    language: Python 3.6+
+    checks:
+      - Tests pass (pytest)
+      - Linting passes (ruff check)
+      - Formatting correct (ruff format)
+      - No secrets (trufflehog)
+      - Correct branch
+      - No protected files modified
+    note: |
+      This runs BEFORE creating PR. After PR is merged, agents MUST
+      complete the Critical Verification Protocol (Step 7) before
+      closing the issue. See verification_protocol section above.
+
+  - name: audit-log
+    path: hooks/audit_log.py
+    type: logging
+    purpose: Log all agent actions to JSON
+    language: Python 3.6+
+    format: JSON Lines
+    location: ~/.cache/ccpm-audit-logs/{owner}-{project}/YYYY-MM-DD.json
+
+# Commands (Agent Workflows)
+commands:
+  - name: setup-labels
+    path: commands/setup_labels.py
+    usage: python setup_labels.py [--force]
+    purpose: Set up standard GitHub labels for issue management in ANY repository
+    language: Python 3.6+
+    cross_platform: true
+    categories:
+      - Status (10 labels)
+      - Type (7 labels)
+      - Priority (4 labels)
+      - Component (8 labels)
+      - Effort (5 labels)
+      - Contribution (4 labels)
+      - Platform (4 labels)
+      - Standard (4 labels)
+    total_labels: 46
+
+  - name: issue-start
+    path: commands/issue_start.py
+    usage: python issue_start.py <issue-number> [target-branch]
+    purpose: Start work on GitHub issue in isolated worktree
+    language: Python 3.6+
+    cross_platform: true
+    steps:
+      - Run pre-flight checks
+      - Create worktree
+      - Create mutex lock
+      - Install pre-commit hook
+      - Log action
+
+  - name: issue-finish
+    path: commands/issue_finish.py
+    usage: python issue_finish.py <issue-number> [--keep-worktree]
+    purpose: Complete work, push changes, create PR
+    language: Python 3.6+
+    cross_platform: true
+    steps:
+      - Run post-flight checks
+      - Push commits
+      - Create Draft PR
+      - Remove lock
+      - Optionally remove worktree
+      - Log action
+
+  - name: issue-abort
+    path: commands/issue_abort.py
+    usage: python issue_abort.py <issue-number> [--force]
+    purpose: Abort work and cleanup worktree
+    language: Python 3.6+
+    cross_platform: true
+    steps:
+      - Show uncommitted changes
+      - Confirm abort
+      - Remove lock
+      - Remove worktree
+      - Log action
+
+  - name: issue-status
+    path: commands/issue_status.py
+    usage: python issue_status.py [--verbose]
+    purpose: Show status of all active worktrees
+    language: Python 3.6+
+    cross_platform: true
+    displays:
+      - Issue numbers and titles
+      - Agent IDs and locks
+      - Git status
+      - Associated PRs
+      - Stale lock detection
+
+# Protected Files (Never Modify)
+protected_files:
+  infrastructure:
+    - justfile
+    - scripts/release.sh
+    - cliff.toml
+  github:
+    - .github/workflows/*
+  generated:
+    - CHANGELOG.md
+    - .release-notes-*.md
+  configuration:
+    - pyproject.toml
+  security:
+    - .github/SECURITY.md
+  self:
+    - ccpm/**
+
+# Branch Permissions
+branch_permissions:
+  dev:
+    agent_allowed: true
+    ci_enabled: false
+    quality: work-in-progress
+    operations:
+      - create_feature_branches
+      - commit_experimental_code
+      - break_tests_temporarily
+      - add_dependencies
+
+  testing:
+    agent_allowed: true
+    ci_enabled: false
+    quality: mostly-working
+    operations:
+      - fix_bugs
+      - improve_tests
+      - add_documentation
+
+  review:
+    agent_allowed: supervised-only
+    ci_enabled: true
+    quality: production-ready
+    operations:
+      - critical_bug_fixes_only
+
+  master:
+    agent_allowed: false
+    ci_enabled: true
+    quality: stable
+    operations:
+      - none_except_hotfix
+
+  main:
+    agent_allowed: false
+    ci_enabled: true
+    quality: stable
+    operations:
+      - none_readonly_mirror
+
+# Forbidden Operations
+forbidden_operations:
+  never_run:
+    - just equalize
+    - just publish
+    - git push --force
+    - git commit --amend (except pre-commit fixes)
+  never_modify:
+    - protected files (see protected_files)
+    - CHANGELOG.md
+    - version in pyproject.toml
+  never_merge:
+    - own PRs
+    - without human approval
+
+# Dependencies
+dependencies:
+  required:
+    - git (worktree support)
+    - bash (>=4.0)
+    - jq (JSON parsing)
+  recommended:
+    - gh (GitHub CLI for PR/issue management)
+    - pytest (testing)
+    - ruff (linting and formatting)
+    - trufflehog (secret scanning)
+
+# Phase Roadmap
+phases:
+  phase_1:
+    status: in-progress
+    duration: Week 1-2
+    deliverables:
+      - Skills documentation
+      - Safeguard scripts
+      - Command suite
+      - Manual testing
+    agent_capabilities:
+      - Read documentation
+      - Understand workflow
+      - Execute commands with supervision
+
+  phase_2:
+    status: planned
+    duration: Week 3-4
+    deliverables:
+      - Agent integration
+      - Test on safe issues
+      - Audit log analysis
+    agent_capabilities:
+      - Start work on assigned issues
+      - Make supervised commits
+      - Create Draft PRs
+
+  phase_3:
+    status: planned
+    duration: Week 5-6
+    deliverables:
+      - Supervised bug fixes
+      - Quality metrics
+      - Process refinement
+    agent_capabilities:
+      - Fix bugs on dev/testing
+      - Run quality checks
+      - Request promotions
+
+  phase_4:
+    status: planned
+    duration: Week 7
+    deliverables:
+      - GitHub branch protection
+      - CI integration
+      - Human review workflow
+    agent_capabilities:
+      - Work with branch protection
+      - Respond to CI failures
+      - Coordinate with humans
+
+  phase_5:
+    status: future
+    duration: Week 8+
+    deliverables:
+      - Autonomous agent work
+      - Performance monitoring
+      - Continuous improvement
+    agent_capabilities:
+      - Work independently on simple issues
+      - Self-recover from errors
+      - Escalate when needed
+
+# Safety Principles
+safety_principles:
+  - fail-fast: Let failures propagate immediately
+  - git-is-time-machine: Everything is recoverable with reflog
+  - push-frequently: GitHub is source of truth
+  - one-issue-one-worktree: Complete isolation per issue
+  - mutex-locks: Prevent concurrent work on same issue
+  - human-oversight: Critical operations require human approval
+  - audit-everything: Log all agent actions
+  - protected-infrastructure: Core files are off-limits
+
+# Audit Log Schema
+audit_log_schema:
+  base_fields:
+    - timestamp (ISO 8601)
+    - agent_id
+    - session_id
+    - action
+    - repository
+    - branch
+    - commit
+    - hostname
+    - user
+
+  action_types:
+    - worktree_create
+    - worktree_remove
+    - commit
+    - push
+    - pr_create
+    - pr_update
+    - branch_switch
+    - file_modify
+    - error
+
+# Known Limitations (Phase 1)
+limitations:
+  - No GitHub branch protection yet
+  - No automatic cleanup of stale worktrees
+  - No integration with CI webhooks
+  - Manual promotion commands only
+  - No multi-agent coordination beyond mutex locks
+
+# Future Enhancements
+future_enhancements:
+  - Automatic stale worktree cleanup
+  - GitHub branch protection integration
+  - CI failure auto-investigation
+  - Multi-agent collaboration protocol
+  - Performance metrics dashboard
+  - Automatic recovery suggestions
+  - Integration with project management tools
+
+# Support
+support:
+  documentation:
+    - ccpm/skills/*.md
+    - DEVELOPMENT.md
+    - CONTRIBUTING.md
+  commands:
+    - ccpm/commands/issue-status.sh (check status)
+    - ccpm/commands/issue-start.sh (begin work)
+    - ccpm/commands/issue-finish.sh (complete work)
+    - ccpm/commands/issue-abort.sh (cancel work)
+  logs:
+    - ~/.cache/svg2fbf-audit-logs/ (audit logs)
+  recovery:
+    - ccpm/skills/recovery-procedures.md (11 scenarios)
