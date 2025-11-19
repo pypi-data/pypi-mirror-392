@@ -1,0 +1,64 @@
+[project]
+name = "quli-quiz"
+version = "2.1.0"
+description = "CLI quiz app powered by Gemini Flash 2.5"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Jakeer C", email = "jakeer.builds@gmail.com" }]
+keywords = ["quiz", "cli", "gemini", "education"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "pydantic>=2.0.0",
+    "google-genai==1.49.0",
+    "rich>=13.0.0",
+    "click>=8.0.0",
+    "python-dotenv>=1.0.0",
+    "prompt-toolkit>=3.0.0",
+    "streamlit>=1.28.0",
+    "plotly>=5.0.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0.0"]
+
+[project.scripts]
+quli = "quli_quiz.cli:main"
+quli-streamlit = "quli_quiz.streamlit_app:run_streamlit"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "SIM"]
+ignore = ["E501"]
+# Exclude some directories
+exclude = [".venv", "__pycache__", "migrations"]
+
+# Format imports automatically
+[tool.ruff.isort]
+known-first-party = ["src"]
+combine-as-imports = true
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+skip-magic-trailing-comma = false
+docstring-code-format = true
+
+[dependency-groups]
+dev = ["twine>=6.2.0"]
