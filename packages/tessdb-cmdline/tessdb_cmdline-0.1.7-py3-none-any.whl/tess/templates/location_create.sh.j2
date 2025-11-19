@@ -1,0 +1,6 @@
+#!/bin/bash
+{% for loc in locations -%}
+# {{ loc.tess }}
+uv run tess-location --console create -lo {{loc.longitude}} -la {{loc.latitude}} {% if loc.height -%} -he {{loc.height}} {% endif -%} {% if loc.place -%} -pl "{{loc.place}}" {% endif -%} {% if loc.town -%} -to "{{loc.town}}" {% endif -%} {% if loc.sub_region -%} -su "{{loc.sub_region}}" {% endif -%} {% if loc.region -%} -re "{{loc.region}}" {% endif -%}  {% if loc.country -%} -co "{{loc.country}}" {% endif %} {% if loc.timezone -%} -tz "{{loc.timezone}}" {% endif %} -ne 200
+
+{% endfor %}

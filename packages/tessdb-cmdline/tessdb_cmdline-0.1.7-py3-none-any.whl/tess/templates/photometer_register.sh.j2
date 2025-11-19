@@ -1,0 +1,8 @@
+#!/bin/bash
+{% for ph in photometers -%}
+{% if ph.model != "TESS4C"-%}
+uv run tess-photometer --console register -ts "{{ph.tstamp}}" -na {{ph.name}} -ma {{ph.mac}} -mo {{ph.model}} -fi "{{ph.firmware}}" --zp1 {{ph.zp1}}
+{% else -%}
+uv run tess-photometer --console register -ts "{{ph.tstamp}}" -na {{ph.name}} -ma {{ph.mac}} -mo {{ph.model}} -fi "{{ph.firmware}}" --zp1 {{ph.zp1}} --zp2 {{ph.zp2}} --zp3 {{ph.zp3}} --zp4 {{ph.zp4}}
+{% endif -%}
+{% endfor %}

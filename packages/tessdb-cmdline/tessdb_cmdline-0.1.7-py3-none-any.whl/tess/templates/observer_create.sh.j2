@@ -1,0 +1,4 @@
+#!/bin/bash
+{% for obs in observers -%}
+uv run tess-observer --console create -ty {{obs.type}} -na "{{obs.name}}" {% if obs.affiliation -%} -af "{{obs.affiliation}}" {% endif -%} {% if obs.acronym -%} -ac "{{obs.acronym}}" {% endif -%} {% if obs.website_url -%} -we "{{obs.website_url}}" {% endif -%}  {% if obs.email -%} -em "{{obs.email}}" {% endif %}
+{% endfor %}
