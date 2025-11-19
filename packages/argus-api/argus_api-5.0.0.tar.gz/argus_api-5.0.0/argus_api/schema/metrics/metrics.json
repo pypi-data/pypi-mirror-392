@@ -1,0 +1,2815 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Argus API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.mnemonic.no"
+    }
+  ],
+  "security": [
+    {
+      "ApiKeyScheme": []
+    }
+  ],
+  "paths": {
+    "/metrics/v1/descriptor/{descriptor}": {
+      "get": {
+        "tags": [
+          "metrics/v1"
+        ],
+        "summary": "Fetch metric descriptor. (PUBLIC)",
+        "description": "",
+        "operationId": "getMetricDescriptor",
+        "parameters": [
+          {
+            "name": "descriptor",
+            "in": "path",
+            "description": "ID or short name of metric descriptor",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "descriptorDomain",
+            "in": "query",
+            "description": "Domain which is used if short name is specified for 'descriptor' parameter. Defaults to current user domain.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Fetch metric descriptor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.metric.spi.response.MetricDescriptor"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Object not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewCustomerMetricDescriptor",
+          "viewDomainMetricDescriptor"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      },
+      "put": {
+        "tags": [
+          "metrics/v1"
+        ],
+        "summary": "Update existing metric descriptor. (INTERNAL)",
+        "description": "",
+        "operationId": "updateMetricDescriptor",
+        "parameters": [
+          {
+            "name": "descriptor",
+            "in": "path",
+            "description": "Shortname or ID of descriptor",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "descriptorDomain",
+            "in": "query",
+            "description": "Domain which is used if short name is specified for 'descriptor' parameter. Defaults to current user domain.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.MetricDescriptorUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Update existing metric descriptor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.metric.spi.response.MetricDescriptor"
+                }
+              }
+            }
+          },
+          "220": {
+            "description": "No values updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.metric.spi.response.MetricDescriptor"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Object not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "updateMetricDescriptor"
+        ],
+        "x-Argus-ApiStatus": "INTERNAL"
+      },
+      "delete": {
+        "tags": [
+          "metrics/v1"
+        ],
+        "summary": "Delete metric descriptor (INTERNAL)",
+        "description": "",
+        "operationId": "deleteMetricDescriptor",
+        "parameters": [
+          {
+            "name": "descriptor",
+            "in": "path",
+            "description": "Shortname or ID of descriptor",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "descriptorDomain",
+            "in": "query",
+            "description": "Domain which is used if short name is specified for 'descriptor' parameter. Defaults to current user domain.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Delete metric descriptor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.metric.spi.response.MetricDescriptor"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Object not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "deleteMetricDescriptor"
+        ],
+        "x-Argus-ApiStatus": "INTERNAL"
+      }
+    },
+    "/metrics/v1/descriptor": {
+      "get": {
+        "tags": [
+          "metrics/v1"
+        ],
+        "summary": "Fetch metric descriptor based on criteria (PUBLIC)",
+        "description": "",
+        "operationId": "getMetricDescriptors",
+        "parameters": [
+          {
+            "name": "descriptorDomain",
+            "in": "query",
+            "description": "Restrict search to entries bound to specified domains (domain ID or shortname)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            }
+          },
+          {
+            "name": "customer",
+            "in": "query",
+            "description": "Restrict search to entries bound to specified customers (customer ID or shortname)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            }
+          },
+          {
+            "name": "keywords",
+            "in": "query",
+            "description": "Search by keywords",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of returned results",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Fetch metric descriptor based on criteria",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.services.metric.spi.response.MetricDescriptor"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewCustomerMetricDescriptor",
+          "viewDomainMetricDescriptor"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      },
+      "post": {
+        "tags": [
+          "metrics/v1"
+        ],
+        "summary": "Add new metric descriptor. (INTERNAL)",
+        "description": "",
+        "operationId": "addMetricDescriptor",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.MetricDescriptorAddRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "201": {
+            "description": "Add new metric descriptor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.metric.spi.response.MetricDescriptor"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "addCustomerMetricDescriptor",
+          "addDomainMetricDescriptor"
+        ],
+        "x-Argus-ApiStatus": "INTERNAL"
+      }
+    },
+    "/metrics/v1/descriptor/search": {
+      "post": {
+        "tags": [
+          "metrics/v1"
+        ],
+        "summary": "Fetch metric descriptor based on criteria (PUBLIC)",
+        "description": "",
+        "operationId": "searchMetricDescriptors",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.MetricDescriptorSearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Fetch metric descriptor based on criteria",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.services.metric.spi.response.MetricDescriptor"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewCustomerMetricDescriptor",
+          "viewDomainMetricDescriptor"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/metrics/v1/metric/{descriptor}/aggregate": {
+      "post": {
+        "tags": [
+          "metrics/v1"
+        ],
+        "summary": "Fetch metrics that matches given aggregation criteria (PUBLIC)",
+        "description": "",
+        "operationId": "aggregateMetrics",
+        "parameters": [
+          {
+            "name": "descriptor",
+            "in": "path",
+            "description": "Shortname or ID of descriptor",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "descriptorDomain",
+            "in": "query",
+            "description": "Domain which is used if short name is specified for 'descriptor' parameter. Defaults to current user domain.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.MetricAggregationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Fetch metrics that matches given aggregation criteria",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.services.metric.spi.response.MetricAggregate"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Object not found",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewMetric"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/metrics/v1/metric/{descriptor}/search": {
+      "post": {
+        "tags": [
+          "metrics/v1"
+        ],
+        "summary": "Search the submitted metrics for a specific descriptor. (PUBLIC)",
+        "description": "",
+        "operationId": "searchMetrics",
+        "parameters": [
+          {
+            "name": "descriptor",
+            "in": "path",
+            "description": "Shortname or ID of descriptor",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "descriptorDomain",
+            "in": "query",
+            "description": "Domain which is used if short name is specified for 'descriptor' parameter. Defaults to current user domain.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.MetricSearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Search the submitted metrics for a specific descriptor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.services.metric.spi.response.MetricRecord"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Object not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewMetric"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/metrics/v1/metric/{descriptor}": {
+      "post": {
+        "tags": [
+          "metrics/v1"
+        ],
+        "summary": "Submit new metric (PUBLIC)",
+        "description": "",
+        "operationId": "submitMetric",
+        "parameters": [
+          {
+            "name": "descriptor",
+            "in": "path",
+            "description": "ID or short name of metric descriptor",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "descriptorDomain",
+            "in": "query",
+            "description": "Domain which is used if short name is specified for 'descriptor' parameter. Defaults to current user domain.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.MetricSubmissionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "201": {
+            "description": "Submit new metric",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.metric.spi.response.MetricSubmissionStatsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "submitMetric"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "no.mnemonic.services.argus.common.spi.response.CustomerInfo": {
+        "type": "object",
+        "description": "SPI CustomerInfo",
+        "properties": {
+          "domain": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.DomainInfo",
+            "description": "Domain that this customer belongs to."
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the response object."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the customer."
+          },
+          "shortName": {
+            "type": "string",
+            "description": "Shortname of the customer."
+          }
+        }
+      },
+      "no.mnemonic.services.argus.common.spi.response.DomainInfo": {
+        "type": "object",
+        "description": "SPI DomainInfo",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "description": "ID of the response object."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the domain."
+          }
+        }
+      },
+      "no.mnemonic.services.argus.common.spi.response.FunctionInfo": {
+        "type": "object",
+        "description": "SPI FunctionInfo",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the response object."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the function."
+          }
+        }
+      },
+      "no.mnemonic.services.metric.spi.response.MetricDescriptor": {
+        "type": "object",
+        "description": "Metric descriptor provides information about the structure of the metric, it's keys and values.",
+        "properties": {
+          "adminFunction": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.FunctionInfo",
+            "description": "Function required to update this metric descriptor."
+          },
+          "category": {
+            "type": "string",
+            "description": "Category of the metric descriptor.",
+            "enum": [
+              "CASE",
+              "EVENT",
+              "ASSET",
+              "SAMPLE",
+              "OTHER"
+            ]
+          },
+          "customer": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.CustomerInfo",
+            "description": "Customer that the metric descriptor belongs to."
+          },
+          "deduplicationFunction": {
+            "type": "string",
+            "description": "Function used while submitting a metric record, to calculate value if duplicates within same time frame appear.",
+            "enum": [
+              "none",
+              "first",
+              "last"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the metric descriptor."
+          },
+          "domain": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.DomainInfo",
+            "description": "Domain that the metric descriptor belongs to."
+          },
+          "flags": {
+            "type": "array",
+            "description": "Flags assigned to the metric descriptor.",
+            "items": {
+              "type": "string",
+              "description": "Flags assigned to the metric descriptor.",
+              "enum": [
+                "deleted",
+                "usingSeparateIndex",
+                "keepBackup",
+                "keepAuditData",
+                "global"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the response object."
+          },
+          "keys": {
+            "type": "array",
+            "description": "Descriptors for metric keys.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.response.MetricDescriptorKey"
+            }
+          },
+          "localizedDescription": {
+            "type": "string",
+            "description": "Description of the metric descriptor based on the current user's language settings."
+          },
+          "localizedDescriptions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "All available descriptions of the metric descriptor"
+            },
+            "description": "All available descriptions of the metric descriptor"
+          },
+          "localizedName": {
+            "type": "string",
+            "description": "Name of the metric descriptor based on the current user's language settings."
+          },
+          "localizedNames": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "All available names of the metric descriptor"
+            },
+            "description": "All available names of the metric descriptor"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the metric descriptor. This does not need to be unique."
+          },
+          "readFunction": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.FunctionInfo",
+            "description": "Function required to fetch metric record and this metric descriptor."
+          },
+          "shortName": {
+            "type": "string",
+            "description": "Short name of the metric descriptor. This name is unique per domain."
+          },
+          "timeFrameSize": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Time period given in the timeFrameSizeUnit and is used for normalizing the timestamp of submitted metric records."
+          },
+          "timeFrameSizeUnit": {
+            "type": "string",
+            "description": "Largest full time unit that can be made from the timeFrameSize.",
+            "enum": [
+              "milliseconds",
+              "seconds",
+              "minutes",
+              "hours",
+              "days"
+            ]
+          },
+          "values": {
+            "type": "array",
+            "description": "Descriptors for metric values.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.response.MetricDescriptorValue"
+            }
+          },
+          "writeFunction": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.FunctionInfo",
+            "description": "Function required to submit metric record."
+          }
+        }
+      },
+      "no.mnemonic.services.metric.spi.response.MetricDescriptorKey": {
+        "type": "object",
+        "description": "Metric descriptor Key provides information about the metric key.",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Description of the key."
+          },
+          "language": {
+            "type": "string",
+            "description": "Language used for the human readable string.",
+            "enum": [
+              "english",
+              "norwegian"
+            ]
+          },
+          "localizedDescription": {
+            "type": "string",
+            "description": "Description of the metric key based on the current user's language settings."
+          },
+          "localizedDescriptions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "All available descriptions of the metric key"
+            },
+            "description": "All available descriptions of the metric key"
+          },
+          "localizedName": {
+            "type": "string",
+            "description": "Name of the metric key based on the current user's language settings."
+          },
+          "localizedNames": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "All available names of the metric key"
+            },
+            "description": "All available names of the metric key"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the metric key."
+          },
+          "translator": {
+            "type": "string",
+            "description": "Translator for key value to human readable string.",
+            "enum": [
+              "none",
+              "caseCategory",
+              "componentHostName",
+              "eventFilter",
+              "sensorHostName",
+              "sensorType",
+              "serviceName",
+              "monthOfYear",
+              "dayOfWeek",
+              "assetName",
+              "alarmName",
+              "hourOfDay",
+              "casePriority",
+              "assetGroup",
+              "vulnerabilityIdentifier",
+              "logSource"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of the metric key.",
+            "enum": [
+              "ip",
+              "hostName",
+              "integer",
+              "string",
+              "uuid"
+            ]
+          }
+        }
+      },
+      "no.mnemonic.services.metric.spi.response.MetricDescriptorValue": {
+        "type": "object",
+        "description": "Metric descriptor value provides information about the metric value.",
+        "properties": {
+          "defaultAggregationFunction": {
+            "type": "string",
+            "description": "Default function applied to calculate values for resolution specified in aggregation request. This property is used only for aggregation queries.",
+            "enum": [
+              "sum",
+              "avg",
+              "min",
+              "max",
+              "wavg",
+              "sumOfSquares",
+              "last"
+            ]
+          },
+          "defaultWeightByValue": {
+            "type": "string",
+            "description": "Default value used as weight when aggregating using a weighted average function."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the value."
+          },
+          "localizedDescription": {
+            "type": "string",
+            "description": "Description of the metric value based on the current user's language settings."
+          },
+          "localizedDescriptions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "All available descriptions of the metric value"
+            },
+            "description": "All available descriptions of the metric value"
+          },
+          "localizedName": {
+            "type": "string",
+            "description": "Name of the metric value based on the current user's language settings."
+          },
+          "localizedNames": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "All available names of the metric value"
+            },
+            "description": "All available names of the metric value"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the metric value."
+          },
+          "unit": {
+            "type": "string",
+            "description": "The unit in which the value is measured",
+            "enum": [
+              "count",
+              "milliseconds",
+              "seconds",
+              "minutes",
+              "hours",
+              "bytes"
+            ]
+          }
+        }
+      },
+      "no.mnemonic.services.metric.spi.request.MetricDescriptorSearchRequest": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "type": "array",
+            "description": "Restrict search to entries bound to specified customers (customer ID or shortname).",
+            "items": {
+              "type": "string",
+              "description": "Restrict search to entries bound to specified customers (customer ID or shortname)."
+            },
+            "uniqueItems": true
+          },
+          "domain": {
+            "type": "array",
+            "description": "Restrict search to entries bound to specified domains (domain ID or shortname).",
+            "items": {
+              "type": "string",
+              "description": "Restrict search to entries bound to specified domains (domain ID or shortname)."
+            },
+            "uniqueItems": true
+          },
+          "excludeFlags": {
+            "type": "array",
+            "description": "Exclude descriptors which have excludeFlags set.",
+            "items": {
+              "type": "string",
+              "description": "Exclude descriptors which have excludeFlags set.",
+              "enum": [
+                "deleted",
+                "usingSeparateIndex",
+                "keepBackup",
+                "keepAuditData",
+                "global"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "includeDeleted": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include descriptors which have been deleted."
+          },
+          "includeFlags": {
+            "type": "array",
+            "description": "Include descriptors which have includeFlags set.",
+            "items": {
+              "type": "string",
+              "description": "Include descriptors which have includeFlags set.",
+              "enum": [
+                "deleted",
+                "usingSeparateIndex",
+                "keepBackup",
+                "keepAuditData",
+                "global"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "keywordFieldStrategy": {
+            "type": "array",
+            "default": "All supported fields",
+            "description": "Defines which fields will be searched by keywords",
+            "items": {
+              "type": "string",
+              "default": "All supported fields",
+              "description": "Defines which fields will be searched by keywords",
+              "enum": [
+                "shortName",
+                "description",
+                "all"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "keywordMatchStrategy": {
+            "type": "string",
+            "default": "Match all keywords",
+            "description": "Defines the MatchStrategy for keywords.",
+            "enum": [
+              "any",
+              "all"
+            ]
+          },
+          "keywords": {
+            "type": "array",
+            "description": "Restrict search to entries containing keywords in description.",
+            "items": {
+              "type": "string",
+              "description": "Restrict search to entries containing keywords in description."
+            },
+            "uniqueItems": true
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "default": 25,
+            "description": "Set this value to set max number of results."
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Set this value to skip the first (offset) objects. By default, return result from first object."
+          },
+          "subCriteria": {
+            "type": "array",
+            "default": "OR",
+            "description": "Set additional criterias to be applied as specified in the subcriteria object(s) (AND, AND NOT, OR).",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.MetricDescriptorSearchRequestSubCriteria"
+            },
+            "uniqueItems": true
+          }
+        }
+      },
+      "no.mnemonic.services.metric.spi.request.MetricDescriptorSearchRequestSubCriteria": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "type": "array",
+            "description": "Restrict search to entries bound to specified customers (customer ID or shortname).",
+            "items": {
+              "type": "string",
+              "description": "Restrict search to entries bound to specified customers (customer ID or shortname)."
+            },
+            "uniqueItems": true
+          },
+          "domain": {
+            "type": "array",
+            "description": "Restrict search to entries bound to specified domains (domain ID or shortname).",
+            "items": {
+              "type": "string",
+              "description": "Restrict search to entries bound to specified domains (domain ID or shortname)."
+            },
+            "uniqueItems": true
+          },
+          "exclude": {
+            "type": "boolean",
+            "description": "If set to true, objects matching this subcriteria object will be excluded."
+          },
+          "excludeFlags": {
+            "type": "array",
+            "description": "Exclude descriptors which have excludeFlags set.",
+            "items": {
+              "type": "string",
+              "description": "Exclude descriptors which have excludeFlags set.",
+              "enum": [
+                "deleted",
+                "usingSeparateIndex",
+                "keepBackup",
+                "keepAuditData",
+                "global"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "includeFlags": {
+            "type": "array",
+            "description": "Include descriptors which have includeFlags set.",
+            "items": {
+              "type": "string",
+              "description": "Include descriptors which have includeFlags set.",
+              "enum": [
+                "deleted",
+                "usingSeparateIndex",
+                "keepBackup",
+                "keepAuditData",
+                "global"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "keywordFieldStrategy": {
+            "type": "array",
+            "default": "All supported fields",
+            "description": "Defines which fields will be searched by keywords",
+            "items": {
+              "type": "string",
+              "default": "All supported fields",
+              "description": "Defines which fields will be searched by keywords",
+              "enum": [
+                "shortName",
+                "description",
+                "all"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "keywordMatchStrategy": {
+            "type": "string",
+            "default": "Match all keywords",
+            "description": "Defines the MatchStrategy for keywords.",
+            "enum": [
+              "any",
+              "all"
+            ]
+          },
+          "keywords": {
+            "type": "array",
+            "description": "Restrict search to entries containing keywords in description.",
+            "items": {
+              "type": "string",
+              "description": "Restrict search to entries containing keywords in description."
+            },
+            "uniqueItems": true
+          },
+          "required": {
+            "type": "boolean",
+            "description": "If set to true, objects matching this subcriteria are required (AND-ed together with parent criteria)."
+          }
+        }
+      },
+      "no.mnemonic.services.metric.spi.response.MetricAggregate": {
+        "type": "object",
+        "description": "Metric aggregate is used to return result of aggregation.",
+        "properties": {
+          "customer": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.CustomerInfo",
+            "description": "Customer that the metric aggregate belongs to or null if cross-customer aggregate."
+          },
+          "keys": {
+            "type": "array",
+            "description": "Keys associated to the metric aggregate.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.response.MetricRecordKey"
+            }
+          },
+          "metricDescriptorID": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier of the metric descriptor."
+          },
+          "metricTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Timestamp of metric aggregate. 0 if query is not time-based."
+          },
+          "values": {
+            "type": "array",
+            "description": "Measured values for the metric aggregate.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.response.MetricRecordValue"
+            }
+          }
+        }
+      },
+      "no.mnemonic.services.metric.spi.response.MetricRecordKey": {
+        "type": "object",
+        "description": "Metric record key provides value of the metric key.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the metric key."
+          },
+          "translation": {
+            "type": "string",
+            "description": "Translation of the key value to a human readable string."
+          },
+          "value": {
+            "type": "string",
+            "description": "Value of the metric key."
+          }
+        }
+      },
+      "no.mnemonic.services.metric.spi.response.MetricRecordValue": {
+        "type": "object",
+        "description": "Metric record value provides information about metric values.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the metric value."
+          },
+          "unit": {
+            "type": "string",
+            "description": "The unit in which the value is measured",
+            "enum": [
+              "count",
+              "milliseconds",
+              "seconds",
+              "minutes",
+              "hours",
+              "bytes"
+            ]
+          },
+          "value": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual value of the metric value."
+          }
+        }
+      },
+      "no.mnemonic.services.metric.spi.request.KeyCriteriaRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the 'key' type field the interval is set on."
+          },
+          "values": {
+            "type": "array",
+            "description": "Set of discrete values the records will be filtered with. This field uses 'Where value in' logic. Please make sure the values type is congruent with the key field type. For IP addresses only single IPs are allowed. Can't be used with ranges.",
+            "items": {
+              "type": "string",
+              "description": "Set of discrete values the records will be filtered with. This field uses 'Where value in' logic. Please make sure the values type is congruent with the key field type. For IP addresses only single IPs are allowed. Can't be used with ranges."
+            },
+            "uniqueItems": true
+          },
+          "gt": {
+            "type": "string",
+            "description": "Include only records with the key values larger than the value in this field."
+          },
+          "lt": {
+            "type": "string",
+            "description": "Include only records with the key values smaller than the value in this field."
+          },
+          "gte": {
+            "type": "string",
+            "description": "Include only records with the key values larger then or equal to the value in this field. Can't be used together with 'gt'"
+          },
+          "lte": {
+            "type": "string",
+            "description": "Include only records with the key values smaller then or equal to the value in this field. Can't be used together with 'lt'"
+          },
+          "cidrs": {
+            "type": "array",
+            "description": "CIDR masks. Logically OR'd together. Only for keys holding ip addresses. Can't be used together with ranges or discrete values.",
+            "items": {
+              "type": "string",
+              "description": "CIDR masks. Logically OR'd together. Only for keys holding ip addresses. Can't be used together with ranges or discrete values."
+            },
+            "uniqueItems": true
+          },
+          "cidr": {
+            "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.KeyCriteriaRequest",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "no.mnemonic.services.metric.spi.request.MetricAggregationGroupByRequest": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Name of the key you want to have the results grouped by, results will return one bucket for each found key value.\nAdditionally supports 'customer' as an option.\n"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "default": 10,
+            "description": "Set this value to set max number of results. Min 1, max 10000",
+            "maximum": 10000,
+            "minimum": 1
+          },
+          "keyName": {
+            "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.MetricAggregationGroupByRequest",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "key"
+        ]
+      },
+      "no.mnemonic.services.metric.spi.request.MetricAggregationRequest": {
+        "type": "object",
+        "properties": {
+          "calendarInterval": {
+            "type": "string",
+            "default": "null",
+            "description": "States the calendar interval the aggregation results should be sorted by, such as month or year.It only allows for a resolution of 1, and overrides the resolution unit such that if calendar interval is week, then the result will be in intervals of 1 whole week, expanding backwards in time for start and forwards for end. It is by defaults not used and set to null.",
+            "enum": [
+              "second",
+              "minute",
+              "hour",
+              "day",
+              "week",
+              "month",
+              "quarter",
+              "year"
+            ]
+          },
+          "customer": {
+            "type": "array",
+            "description": "Restrict result set to records bound to specified customers. The list accepts both ID or shortname for the customers. For global metrics, this field will be ignored and overridden with customer with id 0.",
+            "items": {
+              "type": "string",
+              "description": "Restrict result set to records bound to specified customers. The list accepts both ID or shortname for the customers. For global metrics, this field will be ignored and overridden with customer with id 0."
+            },
+            "uniqueItems": true
+          },
+          "customerDomain": {
+            "type": "string",
+            "description": "Restrict result set to records with customers from the specific domain. The field accepts ID or shortname for the domain."
+          },
+          "endTimestamp": {
+            "type": "string",
+            "default": "now",
+            "description": "Restrict result set to records submitted before this time. Allows the use of unix timestamp (milliseconds), ISO timestamp, or relative time.  Allows to specify a unix timestamp (milliseconds), ISO timestamp, or relative time.",
+            "externalDocs": {
+              "description": "See documentation",
+              "url": "https://docs.mnemonic.no/api/general_integration_guide/08-time_fields.html#api-iguide-general-time-search"
+            }
+          },
+          "groupBy": {
+            "type": "array",
+            "description": "List of descriptor's key names for aggregating the result. The result will be grouped into key buckets up to the limit given.The buckets themselves will be ordered in a descending order based on the values aggregated.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.MetricAggregationGroupByRequest"
+            }
+          },
+          "groupByCustomer": {
+            "type": "boolean",
+            "default": false,
+            "deprecated": true,
+            "description": "States whether Metric records will be aggregated by customers. Deprecated, use the groupBy field."
+          },
+          "includeOthers": {
+            "type": "boolean",
+            "default": true,
+            "description": "States whether the aggregation results will contain buckets for the data not included in the keys given by the groupBy field.Is not used if the groupBy field is empty. It defaults to true."
+          },
+          "keyIntervals": {
+            "type": "array",
+            "default": "null",
+            "description": "List of key intervals, to filter the aggregation on.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.KeyCriteriaRequest"
+            }
+          },
+          "keys": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Restrict result set to records with these key names and key values. Must match the keys given in the descriptor, but IP type allows using IP ranges, such as 192.168.0.0/16 for IPv4 or 2001:db8::/48 for IPv6. Deprecated, use keyIntervals instead."
+            },
+            "description": "Restrict result set to records with these key names and key values. Must match the keys given in the descriptor, but IP type allows using IP ranges, such as 192.168.0.0/16 for IPv4 or 2001:db8::/48 for IPv6. Deprecated, use keyIntervals instead."
+          },
+          "resolution": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Aggregation resolution period in units specified by 'resolutionUnit' property. If 0 the resolution is the entire time span given by the start and end timestamps. If the expected combination of timestamps, resolution, and resolution unit would result in more buckets than ElasticSearch permits, which is 10000, then the request will be denied. Note that the initial calculation on this is rough, and that ES might still deny the request. In which case lower the resolution.",
+            "minimum": 0
+          },
+          "resolutionUnit": {
+            "type": "string",
+            "default": "millisecond",
+            "description": "Units for aggregation resolution.",
+            "enum": [
+              "millisecond",
+              "second",
+              "minute",
+              "hour",
+              "day",
+              "milliseconds",
+              "seconds",
+              "minutes",
+              "hours",
+              "days"
+            ]
+          },
+          "skipKeyTranslation": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to skip key translation and return the raw value."
+          },
+          "sortBy": {
+            "type": "array",
+            "description": "Specify the order of results. Prefix with '-' to order descending.",
+            "items": {
+              "type": "string",
+              "description": "Specify the order of results. Prefix with '-' to order descending."
+            }
+          },
+          "startTimestamp": {
+            "type": "string",
+            "description": "Restrict result set to records submitted after this time.Allows the use of unix timestamp (milliseconds), ISO timestamp, or relative time.  Allows to specify a unix timestamp (milliseconds), ISO timestamp, or relative time.",
+            "externalDocs": {
+              "description": "See documentation",
+              "url": "https://docs.mnemonic.no/api/general_integration_guide/08-time_fields.html#api-iguide-general-time-search"
+            }
+          },
+          "subCriteria": {
+            "type": "array",
+            "default": "OR",
+            "description": "Set additional criterias to be applied as specified in the subcriteria object(s) (AND, AND NOT, OR).",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.MetricSearchRequestSubCriteria"
+            },
+            "uniqueItems": true
+          },
+          "timeZone": {
+            "type": "string",
+            "default": "null",
+            "description": "Settable Timezone. For more information please refer to official java documentation\nhttps://docs.oracle.com/middleware/12211/wcs/tag-ref/MISC/TimeZones.html\nIf not set the data will be localized according to user's timezone."
+          },
+          "values": {
+            "type": "array",
+            "description": "Descriptor's values included in aggregation result.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.MetricAggregationRequestValue"
+            },
+            "maxItems": 2147483647,
+            "minItems": 1
+          }
+        },
+        "required": [
+          "endTimestamp",
+          "startTimestamp",
+          "values"
+        ]
+      },
+      "no.mnemonic.services.metric.spi.request.MetricAggregationRequestValue": {
+        "type": "object",
+        "properties": {
+          "aggregationFunction": {
+            "type": "string",
+            "description": "Aggregation function used for aggregating the result. Defaults to the metric descriptor's 'defaultAggregationFunction'.",
+            "enum": [
+              "sum",
+              "avg",
+              "min",
+              "max",
+              "wavg",
+              "sumOfSquares",
+              "last"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the 'value' type field the aggregation should be performed on."
+          },
+          "weightByValue": {
+            "type": "string",
+            "description": "Which 'value' type field should be used as weight. This field is required for wavg aggregate function, it is not used by other functions."
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "no.mnemonic.services.metric.spi.request.MetricSearchRequestSubCriteria": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "type": "array",
+            "description": "Restrict result set to records bound to specified customers. The list accepts both ID or shortname for the customers. For global metrics, this field will be ignored and overridden with customer with id 0.",
+            "items": {
+              "type": "string",
+              "description": "Restrict result set to records bound to specified customers. The list accepts both ID or shortname for the customers. For global metrics, this field will be ignored and overridden with customer with id 0."
+            },
+            "uniqueItems": true
+          },
+          "customerDomain": {
+            "type": "string",
+            "description": "Restrict result set to records with customers from the specific domain. The field accepts ID or shortname for the domain."
+          },
+          "exclude": {
+            "type": "boolean",
+            "description": "If set to true, objects matching this subcriteria object will be excluded."
+          },
+          "keyIntervals": {
+            "type": "array",
+            "default": "null",
+            "description": "List of key intervals, to filter the aggregation on.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.KeyCriteriaRequest"
+            }
+          },
+          "keys": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Restrict result set to records with these key names and key values. Must match the keys given in the descriptor, but IP type allows using IP ranges, such as 192.168.0.0/16 for IPv4 or 2001:db8::/48 for IPv6. Deprecated, use keyIntervals instead."
+            },
+            "description": "Restrict result set to records with these key names and key values. Must match the keys given in the descriptor, but IP type allows using IP ranges, such as 192.168.0.0/16 for IPv4 or 2001:db8::/48 for IPv6. Deprecated, use keyIntervals instead."
+          },
+          "required": {
+            "type": "boolean",
+            "description": "If set to true, objects matching this subcriteria are required (AND-ed together with parent criteria)."
+          }
+        }
+      },
+      "no.mnemonic.services.argus.common.spi.response.UserInfo": {
+        "type": "object",
+        "description": "SPI UserInfo",
+        "properties": {
+          "customer": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.CustomerInfo",
+            "description": "The customer the subject belongs to"
+          },
+          "domain": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.DomainInfo",
+            "description": "The subject's domain"
+          },
+          "flags": {
+            "type": "array",
+            "description": "The subject's flags",
+            "items": {
+              "type": "string",
+              "description": "The subject's flags",
+              "enum": [
+                "deleted"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the response object."
+          },
+          "name": {
+            "type": "string",
+            "description": "The subject's name"
+          },
+          "shortName": {
+            "type": "string",
+            "description": "The subject's short name"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of the subject",
+            "enum": [
+              "user",
+              "group"
+            ],
+            "readOnly": true
+          }
+        }
+      },
+      "no.mnemonic.services.metric.spi.response.MetricDescriptorInfo": {
+        "type": "object",
+        "description": "Metric descriptor info provides shortened information about the descriptor.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the response object."
+          },
+          "shortName": {
+            "type": "string",
+            "description": "Short name of the  metric descriptor. This name is unique per domain."
+          }
+        }
+      },
+      "no.mnemonic.services.metric.spi.response.MetricRecord": {
+        "type": "object",
+        "description": "Metric record is used to return result of metric search.",
+        "properties": {
+          "customer": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.CustomerInfo",
+            "description": "Customer that the metric record belongs to."
+          },
+          "descriptor": {
+            "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.response.MetricDescriptorInfo",
+            "description": "Descriptor that the metric record belongs to."
+          },
+          "id": {
+            "type": "string",
+            "description": "ID of the metric as required by ES"
+          },
+          "keys": {
+            "type": "array",
+            "description": "List of key associated to the metric record.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.response.MetricRecordKey"
+            }
+          },
+          "metricTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Timestamp of the metric record provided by client."
+          },
+          "submissionTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Timestamp of the metric record submission."
+          },
+          "submittedByUser": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.UserInfo",
+            "description": "User which submitted the metric record."
+          },
+          "values": {
+            "type": "array",
+            "description": "List of measured values for a given metricTimestamp.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.response.MetricRecordValue"
+            }
+          }
+        }
+      },
+      "no.mnemonic.services.metric.spi.request.MetricSearchRequest": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "type": "array",
+            "description": "Restrict result set to records bound to specified customers. The list accepts both ID or shortname for the customers. For global metrics, this field will be ignored and overridden with customer with id 0.",
+            "items": {
+              "type": "string",
+              "description": "Restrict result set to records bound to specified customers. The list accepts both ID or shortname for the customers. For global metrics, this field will be ignored and overridden with customer with id 0."
+            },
+            "uniqueItems": true
+          },
+          "customerDomain": {
+            "type": "string",
+            "description": "Restrict result set to records with customers from the specific domain. The field accepts ID or shortname for the domain."
+          },
+          "endTimestamp": {
+            "type": "string",
+            "default": "now",
+            "description": "Restrict result set to records submitted before this time. Allows the use of unix timestamp (milliseconds), ISO timestamp, or relative time.  Allows to specify a unix timestamp (milliseconds), ISO timestamp, or relative time.",
+            "externalDocs": {
+              "description": "See documentation",
+              "url": "https://docs.mnemonic.no/api/general_integration_guide/08-time_fields.html#api-iguide-general-time-search"
+            }
+          },
+          "keyIntervals": {
+            "type": "array",
+            "default": "null",
+            "description": "List of key intervals, to filter the aggregation on.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.KeyCriteriaRequest"
+            }
+          },
+          "keys": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Restrict result set to records with these key names and key values. Must match the keys given in the descriptor, but IP type allows using IP ranges, such as 192.168.0.0/16 for IPv4 or 2001:db8::/48 for IPv6. Deprecated, use keyIntervals instead."
+            },
+            "description": "Restrict result set to records with these key names and key values. Must match the keys given in the descriptor, but IP type allows using IP ranges, such as 192.168.0.0/16 for IPv4 or 2001:db8::/48 for IPv6. Deprecated, use keyIntervals instead."
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "default": 25,
+            "description": "Set this value to set max number of results. Cannot exceed 10000 which is the Elasticsearch search window.",
+            "maximum": 10000
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Set this value to skip the first (offset) objects. By default, return result from first object.Cannot, in combination with the limit, exceed 10000, as this will exceed the Elasticsearch search window.",
+            "maximum": 9999
+          },
+          "skipKeyTranslation": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to skip key translation and return the raw value."
+          },
+          "sortBy": {
+            "type": "array",
+            "description": "Specify the order of results. Prefix with '-' to order descending.",
+            "items": {
+              "type": "string",
+              "description": "Specify the order of results. Prefix with '-' to order descending."
+            }
+          },
+          "startTimestamp": {
+            "type": "string",
+            "description": "Restrict result set to records submitted after this time.Allows the use of unix timestamp (milliseconds), ISO timestamp, or relative time.  Allows to specify a unix timestamp (milliseconds), ISO timestamp, or relative time.",
+            "externalDocs": {
+              "description": "See documentation",
+              "url": "https://docs.mnemonic.no/api/general_integration_guide/08-time_fields.html#api-iguide-general-time-search"
+            }
+          },
+          "subCriteria": {
+            "type": "array",
+            "default": "OR",
+            "description": "Set additional criterias to be applied as specified in the subcriteria object(s) (AND, AND NOT, OR).",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.MetricSearchRequestSubCriteria"
+            },
+            "uniqueItems": true
+          },
+          "timeZone": {
+            "type": "string",
+            "default": "null",
+            "description": "Settable Timezone. For more information please refer to official java documentation\nhttps://docs.oracle.com/middleware/12211/wcs/tag-ref/MISC/TimeZones.html\nIf not set the data will be localized according to user's timezone."
+          }
+        },
+        "required": [
+          "endTimestamp",
+          "startTimestamp"
+        ]
+      },
+      "no.mnemonic.services.metric.spi.request.MetricDescriptorAddRequest": {
+        "type": "object",
+        "properties": {
+          "adminFunction": {
+            "type": "string",
+            "description": "Function required to update this metric descriptor."
+          },
+          "category": {
+            "type": "string",
+            "default": "other",
+            "description": "Category of metric descriptor",
+            "enum": [
+              "CASE",
+              "EVENT",
+              "ASSET",
+              "SAMPLE",
+              "OTHER"
+            ]
+          },
+          "customer": {
+            "type": "string",
+            "description": "ID or shortname of customer bound to this metric descriptor. If not specified, descriptor is domain global"
+          },
+          "deduplicationFunction": {
+            "type": "string",
+            "default": "none",
+            "description": "Function used while submitting a metric record, to calculate value if duplicates within same time frame appear.",
+            "enum": [
+              "none",
+              "first",
+              "last"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the metric descriptor.",
+            "pattern": "[\\s\\w\\{\\}\\$\\-\\(\\)\\.\\[\\]\"\\'_/\\\\,\\*\\+\\#:@!?;=]*"
+          },
+          "domain": {
+            "type": "string",
+            "default": "Current user domain",
+            "description": "ID or shortname of domain bound to this metric descriptor."
+          },
+          "globalDescriptor": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether this descriptor is intended for records that are not customer specific."
+          },
+          "keepAuditData": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to maintain a record of data useful for auditing."
+          },
+          "keepBackup": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to keep a separate record of the metric as a backup outside ElasticSearch."
+          },
+          "keys": {
+            "type": "array",
+            "description": "Descriptors for metric keys.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.MetricDescriptorRequestKey"
+            },
+            "maxItems": 2147483647,
+            "minItems": 1
+          },
+          "localizedDescriptions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Metric descriptor descriptions mapped by language. Supported languages are: english, norwegian."
+            },
+            "description": "Metric descriptor descriptions mapped by language. Supported languages are: english, norwegian."
+          },
+          "localizedNames": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Metric descriptor names mapped by language. Supported languages are: english, norwegian."
+            },
+            "description": "Metric descriptor names mapped by language. Supported languages are: english, norwegian."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the metric descriptor. Does not need to be unique."
+          },
+          "readFunction": {
+            "type": "string",
+            "description": "Function required to fetch metric descriptor and associated records."
+          },
+          "shortName": {
+            "type": "string",
+            "description": "Short name of the metric descriptor. Must be unique per domain.",
+            "pattern": "[a-zA-Z0-9_:\\-\\.]*"
+          },
+          "timeFrameSize": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Time period used for setting up time frames. For each time frame, deduplicationFunction property is used to determine value(s) of metric record."
+          },
+          "timeFrameSizeUnit": {
+            "type": "string",
+            "default": "milliseconds",
+            "description": "Unit of the timeFrameSize value, this is used as the default resolution unit during aggregation.",
+            "enum": [
+              "milliseconds",
+              "seconds",
+              "minutes",
+              "hours",
+              "days"
+            ]
+          },
+          "useSeparateIndex": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether the separate index for metric records is used or not."
+          },
+          "values": {
+            "type": "array",
+            "description": "Descriptors for metric values.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.MetricDescriptorRequestValue"
+            },
+            "maxItems": 2147483647,
+            "minItems": 1
+          },
+          "writeFunction": {
+            "type": "string",
+            "description": "Function required to submit metric record."
+          }
+        },
+        "required": [
+          "adminFunction",
+          "deduplicationFunction",
+          "description",
+          "keys",
+          "readFunction",
+          "shortName",
+          "values",
+          "writeFunction"
+        ]
+      },
+      "no.mnemonic.services.metric.spi.request.MetricDescriptorRequestKey": {
+        "type": "object",
+        "description": "Request to create a metric descriptor key",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Description of the key.",
+            "pattern": "[\\s\\w\\{\\}\\$\\-\\(\\)\\.\\[\\]\"\\'_/\\\\,\\*\\+\\#:@!?;=]*"
+          },
+          "language": {
+            "type": "string",
+            "default": "ENGLISH",
+            "description": "Language of the translation used on the key value.",
+            "enum": [
+              "english",
+              "norwegian"
+            ]
+          },
+          "localizedDescriptions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Metric descriptor key descriptions mapped by language. Supported languages are: english, norwegian."
+            },
+            "description": "Metric descriptor key descriptions mapped by language. Supported languages are: english, norwegian."
+          },
+          "localizedNames": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Metric descriptor key names mapped by language. Supported languages are: english, norwegian."
+            },
+            "description": "Metric descriptor key names mapped by language. Supported languages are: english, norwegian."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the metric key. Will be validated against a list of reserved names, which include 'customer'.",
+            "pattern": "[a-zA-Z0-9_:\\-\\.]*"
+          },
+          "translator": {
+            "type": "string",
+            "default": "none",
+            "description": "Translator that can be used for the key value.",
+            "enum": [
+              "none",
+              "caseCategory",
+              "componentHostName",
+              "eventFilter",
+              "sensorHostName",
+              "sensorType",
+              "serviceName",
+              "monthOfYear",
+              "dayOfWeek",
+              "assetName",
+              "alarmName",
+              "hourOfDay",
+              "casePriority",
+              "assetGroup",
+              "vulnerabilityIdentifier",
+              "logSource"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "default": "string",
+            "description": "Type of the metric key, IP allows both IPv4 and IPv6.",
+            "enum": [
+              "ip",
+              "hostName",
+              "integer",
+              "string",
+              "uuid"
+            ]
+          }
+        },
+        "required": [
+          "description",
+          "language",
+          "name",
+          "translator",
+          "type"
+        ]
+      },
+      "no.mnemonic.services.metric.spi.request.MetricDescriptorRequestValue": {
+        "type": "object",
+        "description": "Request to create a metric descriptor value",
+        "properties": {
+          "defaultAggregationFunction": {
+            "type": "string",
+            "default": "sum",
+            "description": "Default function applied to calculate values for resolution specified in aggregation request. This property is used only for aggregation queries.",
+            "enum": [
+              "sum",
+              "avg",
+              "min",
+              "max",
+              "wavg",
+              "sumOfSquares",
+              "last"
+            ]
+          },
+          "defaultWeightByValue": {
+            "type": "string",
+            "description": "Default value used as weight when aggregating using a weighted average function."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the value.",
+            "pattern": "[\\s\\w\\{\\}\\$\\-\\(\\)\\.\\[\\]\"\\'_/\\\\,\\*\\+\\#:@!?;=]*"
+          },
+          "localizedDescriptions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Metric descriptor value descriptions mapped by language. Supported languages are: english, norwegian."
+            },
+            "description": "Metric descriptor value descriptions mapped by language. Supported languages are: english, norwegian."
+          },
+          "localizedNames": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Metric descriptor value names mapped by language. Supported languages are: english, norwegian."
+            },
+            "description": "Metric descriptor value names mapped by language. Supported languages are: english, norwegian."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the metric value.",
+            "pattern": "[a-zA-Z0-9_:\\-\\.]*"
+          },
+          "unit": {
+            "type": "string",
+            "default": "count",
+            "description": "The unit in which the value is measured",
+            "enum": [
+              "count",
+              "milliseconds",
+              "seconds",
+              "minutes",
+              "hours",
+              "bytes"
+            ]
+          }
+        },
+        "required": [
+          "description",
+          "name"
+        ]
+      },
+      "no.mnemonic.services.metric.spi.request.MetricDescriptorRequestUpdateKey": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "New description of the key.",
+            "pattern": "[\\s\\w\\{\\}\\$\\-\\(\\)\\.\\[\\]\"\\'_/\\\\,\\*\\+\\#:@!?;=]*"
+          },
+          "language": {
+            "type": "string",
+            "description": "New Language for the key value.",
+            "enum": [
+              "english",
+              "norwegian"
+            ]
+          },
+          "localizedDescriptions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Metric descriptor key descriptions mapped by language. Supported languages are: english, norwegian."
+            },
+            "description": "Metric descriptor key descriptions mapped by language. Supported languages are: english, norwegian."
+          },
+          "localizedNames": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Metric descriptor key names mapped by language. Supported languages are: english, norwegian."
+            },
+            "description": "Metric descriptor key names mapped by language. Supported languages are: english, norwegian."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the metric key. Used to identify, not update, the key.",
+            "pattern": "[a-zA-Z0-9_:\\-\\.]*"
+          },
+          "translator": {
+            "type": "string",
+            "description": "Translator that can be used for the key value.",
+            "enum": [
+              "none",
+              "caseCategory",
+              "componentHostName",
+              "eventFilter",
+              "sensorHostName",
+              "sensorType",
+              "serviceName",
+              "monthOfYear",
+              "dayOfWeek",
+              "assetName",
+              "alarmName",
+              "hourOfDay",
+              "casePriority",
+              "assetGroup",
+              "vulnerabilityIdentifier",
+              "logSource"
+            ]
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "no.mnemonic.services.metric.spi.request.MetricDescriptorRequestUpdateValue": {
+        "type": "object",
+        "description": "Request to update a descriptor a sub-set of a value's, identified by name, fields",
+        "properties": {
+          "defaultAggregationFunction": {
+            "type": "string",
+            "description": "Default function applied to calculate values for resolution specified in aggregation request. This property is used only for aggregation queries.",
+            "enum": [
+              "sum",
+              "avg",
+              "min",
+              "max",
+              "wavg",
+              "sumOfSquares",
+              "last"
+            ]
+          },
+          "defaultWeightByValue": {
+            "type": "string",
+            "description": "Default value used as weight when aggregating using a weighted average function."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the value.",
+            "pattern": "[\\s\\w\\{\\}\\$\\-\\(\\)\\.\\[\\]\"\\'_/\\\\,\\*\\+\\#:@!?;=]*"
+          },
+          "localizedDescriptions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Metric descriptor value descriptions mapped by language. Supported languages are: english, norwegian."
+            },
+            "description": "Metric descriptor value descriptions mapped by language. Supported languages are: english, norwegian."
+          },
+          "localizedNames": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Metric descriptor value names mapped by language. Supported languages are: english, norwegian."
+            },
+            "description": "Metric descriptor value names mapped by language. Supported languages are: english, norwegian."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the metric value. Used to identify, not update, the value."
+          },
+          "unit": {
+            "type": "string",
+            "description": "The unit in which the value is measured",
+            "enum": [
+              "count",
+              "milliseconds",
+              "seconds",
+              "minutes",
+              "hours",
+              "bytes"
+            ]
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "no.mnemonic.services.metric.spi.request.MetricDescriptorUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "addKeys": {
+            "type": "array",
+            "description": "Descriptors for metric keys to add. Previously accepted metrics will still exist and considered valid, but new submissions must match the changed descriptor.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.MetricDescriptorRequestKey"
+            }
+          },
+          "addValues": {
+            "type": "array",
+            "description": "Descriptors for metric values to add. Previously accepted metrics will still exist and considered valid, but new submissions must match the changed descriptor.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.MetricDescriptorRequestValue"
+            }
+          },
+          "adminFunction": {
+            "type": "string",
+            "description": "Function required to update this metric descriptor."
+          },
+          "category": {
+            "type": "string",
+            "description": "Category of metric descriptor.",
+            "enum": [
+              "CASE",
+              "EVENT",
+              "ASSET",
+              "SAMPLE",
+              "OTHER"
+            ]
+          },
+          "deduplicationFunction": {
+            "type": "string",
+            "description": "Function used while submitting a metric record, to calculate value if duplicates within same time frame appear.",
+            "enum": [
+              "none",
+              "first",
+              "last"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the metric descriptor.",
+            "pattern": "[\\s\\w\\{\\}\\$\\-\\(\\)\\.\\[\\]\"\\'_/\\\\,\\*\\+\\#:@!?;=]*"
+          },
+          "keepAuditData": {
+            "type": "boolean",
+            "description": "Whether to maintain a record of data useful for auditing."
+          },
+          "keepBackup": {
+            "type": "boolean",
+            "description": "Whether to keep a separate record of the metric as a backup outside ElasticSearch."
+          },
+          "localizedDescriptions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Metric descriptor descriptions mapped by language. Supported languages are: english, norwegian."
+            },
+            "description": "Metric descriptor descriptions mapped by language. Supported languages are: english, norwegian."
+          },
+          "localizedNames": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Metric descriptor names mapped by language. Supported languages are: english, norwegian."
+            },
+            "description": "Metric descriptor names mapped by language. Supported languages are: english, norwegian."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the metric descriptor. Does not need to be unique."
+          },
+          "readFunction": {
+            "type": "string",
+            "description": "Function required to fetch metric descriptor and associated records."
+          },
+          "removeKeys": {
+            "type": "array",
+            "description": "Descriptors for metric keys to remove. Previously accepted metrics will still exist and considered valid, but new submissions must match the changed descriptor.",
+            "items": {
+              "type": "string",
+              "description": "Descriptors for metric keys to remove. Previously accepted metrics will still exist and considered valid, but new submissions must match the changed descriptor."
+            },
+            "uniqueItems": true
+          },
+          "removeValues": {
+            "type": "array",
+            "description": "Descriptors for metric values to remove. Previously accepted metrics will still exist and considered valid, but new submissions must match the changed descriptor.",
+            "items": {
+              "type": "string",
+              "description": "Descriptors for metric values to remove. Previously accepted metrics will still exist and considered valid, but new submissions must match the changed descriptor."
+            },
+            "uniqueItems": true
+          },
+          "shortName": {
+            "type": "string",
+            "description": "Short name of the metric descriptor. Must be unique per domain.",
+            "pattern": "[a-zA-Z0-9_:\\-\\.]*"
+          },
+          "timeFrameSize": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Time period used for setting up time frames. For each time frame, deduplicationFunction property is used to determine value(s) of metric record."
+          },
+          "timeFrameSizeUnit": {
+            "type": "string",
+            "default": "milliseconds",
+            "description": "Unit of the timeFrameSize value, this is used as the default resolution unit during aggregation.",
+            "enum": [
+              "milliseconds",
+              "seconds",
+              "minutes",
+              "hours",
+              "days"
+            ]
+          },
+          "updateKeys": {
+            "type": "array",
+            "description": "Descriptors for metric keys to update. Only the translator and language can be updated while name is used to identify the key to modify.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.MetricDescriptorRequestUpdateKey"
+            }
+          },
+          "updateValues": {
+            "type": "array",
+            "description": "Descriptors for metric values to update. Only the default aggregation and value by weight can be updated while the name is used to identify the value to modify.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.MetricDescriptorRequestUpdateValue"
+            }
+          },
+          "useSeparateIndex": {
+            "type": "boolean",
+            "description": "Whether the separate index for metric records is used or not. If value of this property is 'true', changing is not permitted."
+          },
+          "writeFunction": {
+            "type": "string",
+            "description": "Function required to submit metric record."
+          }
+        }
+      },
+      "no.mnemonic.services.metric.spi.response.MetricSubmissionErrorInformation": {
+        "type": "object",
+        "description": "MetricSubmissionErrorInformation provides information about submission problems.",
+        "properties": {
+          "errorMessages": {
+            "type": "array",
+            "description": "String message of error cause.",
+            "items": {
+              "type": "string",
+              "description": "String message of error cause."
+            }
+          },
+          "submissionIndex": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Index of the submission as it appears in the submission request."
+          }
+        }
+      },
+      "no.mnemonic.services.metric.spi.response.MetricSubmissionStatsResponse": {
+        "type": "object",
+        "description": "MetricSubmissionStatsResponse provides information about success and fail or record submissions.",
+        "properties": {
+          "errorInformationList": {
+            "type": "array",
+            "description": "Information regarding any metrics that failed during submission.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.response.MetricSubmissionErrorInformation"
+            }
+          },
+          "failed": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of failed metric records."
+          },
+          "success": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of successfully submitted metric records."
+          }
+        }
+      },
+      "no.mnemonic.services.metric.spi.request.MetricSubmissionRequest": {
+        "type": "object",
+        "properties": {
+          "ignoreOnFailed": {
+            "type": "boolean",
+            "default": false,
+            "description": "Set this value for successful response even failures occur while submitting."
+          },
+          "records": {
+            "type": "array",
+            "description": "Metric records for submission.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.request.MetricSubmissionRequestRecord"
+            },
+            "maxItems": 2147483647,
+            "minItems": 1
+          }
+        },
+        "required": [
+          "records"
+        ]
+      },
+      "no.mnemonic.services.metric.spi.request.MetricSubmissionRequestRecord": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "type": "string",
+            "default": "Current user customer",
+            "description": "ID or shortname of customer owning the metric record. This will default to current user's customer if not set. For global metrics, this field should not be set."
+          },
+          "customerDomain": {
+            "type": "string",
+            "default": "Current user domain",
+            "description": "ID or shortname of domain for customer owning the metric record."
+          },
+          "keys": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Keys for the metric record."
+            },
+            "description": "Keys for the metric record."
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64",
+            "default": "now",
+            "description": "Timestamp of the metric record.",
+            "minimum": 1
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Measured values for the metric record."
+            },
+            "description": "Measured values for the metric record."
+          }
+        },
+        "required": [
+          "keys",
+          "values"
+        ]
+      },
+      "no.mnemonic.services.argus.common.rest.model.ResultMessage": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Message text"
+          },
+          "messageTemplate": {
+            "type": "string",
+            "description": "Message template"
+          },
+          "type": {
+            "type": "string",
+            "description": "Message type",
+            "enum": [
+              "FIELD_ERROR",
+              "ACTION_ERROR",
+              "WARNING",
+              "NOTIFICATION",
+              "INFO"
+            ]
+          },
+          "field": {
+            "type": "string",
+            "description": "Field which this message applies to"
+          },
+          "parameter": {
+            "type": "string",
+            "description": "The affected parameter"
+          }
+        }
+      },
+      "no.mnemonic.services.argus.common.rest.model.ResultStash": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "type": "object",
+            "description": "Returned results (might be an array or a single object)"
+          }
+        }
+      },
+      "ResultStash-no.mnemonic.services.metric.spi.response.MetricDescriptor": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.response.MetricDescriptor",
+            "description": "Metric descriptor provides information about the structure of the metric, it's keys and values."
+          }
+        }
+      },
+      "ResultStash-list-no.mnemonic.services.metric.spi.response.MetricDescriptor": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.response.MetricDescriptor",
+              "description": "Metric descriptor provides information about the structure of the metric, it's keys and values."
+            }
+          }
+        }
+      },
+      "ResultStash-list-no.mnemonic.services.metric.spi.response.MetricAggregate": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.response.MetricAggregate",
+              "description": "Metric aggregate is used to return result of aggregation."
+            }
+          }
+        }
+      },
+      "ResultStash-list-no.mnemonic.services.metric.spi.response.MetricRecord": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.response.MetricRecord",
+              "description": "Metric record is used to return result of metric search."
+            }
+          }
+        }
+      },
+      "ResultStash-no.mnemonic.services.metric.spi.response.MetricSubmissionStatsResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "$ref": "#/components/schemas/no.mnemonic.services.metric.spi.response.MetricSubmissionStatsResponse",
+            "description": "MetricSubmissionStatsResponse provides information about success and fail or record submissions."
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyScheme": {
+        "type": "apiKey",
+        "name": "Argus-API-Key",
+        "in": "header"
+      }
+    }
+  },
+  "x-ResultStash-converted": true
+}

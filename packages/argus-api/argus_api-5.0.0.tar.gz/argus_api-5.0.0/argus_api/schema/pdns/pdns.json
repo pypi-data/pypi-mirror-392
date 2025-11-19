@@ -1,0 +1,1279 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Argus API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.mnemonic.no"
+    }
+  ],
+  "security": [
+    {
+      "ApiKeyScheme": []
+    }
+  ],
+  "paths": {
+    "/pdns/v3/cof/{query}": {
+      "get": {
+        "tags": [
+          "pdns/v3"
+        ],
+        "summary": "Search against PassiveDNS and return matching records in PDNS COF format (PUBLIC)",
+        "description": "This endpoint behaves exactly like searchRecordsSimplified, but follows the Passive DNS Common Output Format as specified in Internet Draft draft-dulaunoy-dnsop-passive-dns-cof-06.\nThis means that the return format of this endpoint is a newline-separated list of JSON objects.",
+        "operationId": "searchRecordsSimplifiedCOF",
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "query",
+            "in": "path",
+            "description": "Search by query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "aggregate",
+            "in": "query",
+            "description": "Whether aggregate records",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "includeAnonymous",
+            "in": "query",
+            "description": "Whether include anonymous records",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "rrClass",
+            "in": "query",
+            "description": "Search by recordClass (rrclass)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "in"
+                ]
+              },
+              "uniqueItems": true
+            }
+          },
+          {
+            "name": "rrType",
+            "in": "query",
+            "description": "Search by type (rrtype)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "a",
+                  "aaaa",
+                  "cname",
+                  "dname",
+                  "mx",
+                  "naptr",
+                  "ns",
+                  "ptr",
+                  "rp",
+                  "soa",
+                  "srv",
+                  "txt"
+                ]
+              },
+              "uniqueItems": true
+            }
+          },
+          {
+            "name": "customerID",
+            "in": "query",
+            "description": "Search by customerID",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "uniqueItems": true
+            }
+          },
+          {
+            "name": "tlp",
+            "in": "query",
+            "description": "Search by TLP",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "white",
+                  "green",
+                  "amber",
+                  "red"
+                ]
+              },
+              "uniqueItems": true
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Skip a number of records",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Max number of records to be returned",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "queryMatchStrategy",
+            "in": "query",
+            "description": "Query match strategy, partial must be set to use the wildcard",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "exact",
+                "includeSubdomains"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Search against PassiveDNS and return matching records in PDNS COF format",
+            "content": {
+              "application/json": {},
+              "text/csv": {}
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {},
+              "text/csv": {}
+            }
+          },
+          "402": {
+            "description": "Resource limit exceeded",
+            "content": {
+              "application/json": {},
+              "text/csv": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {},
+              "text/csv": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {},
+              "text/csv": {}
+            }
+          }
+        },
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/pdns/v3/{query}/seen": {
+      "get": {
+        "tags": [
+          "pdns/v3"
+        ],
+        "summary": "Search against PassiveDNS and return true if matching records are found (PUBLIC)",
+        "description": "Search against PassiveDNS and return true if matching records are found. If user exceeds current resource limits, this operation may return status code 402. If that happens, the metaData key millisUntilResourcesAvailable gives a hint as to how long the client needs to wait before attempting again.",
+        "operationId": "existsRecordsOfTlpLevels",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "path",
+            "description": "Search by query, can be IP, not subnet, or domain",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tlp",
+            "in": "query",
+            "description": "Search by TLP",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "default": "white",
+                "enum": [
+                  "white",
+                  "green",
+                  "amber",
+                  "red"
+                ]
+              },
+              "uniqueItems": true
+            }
+          },
+          {
+            "name": "ignoreOwnRecords",
+            "in": "query",
+            "description": "Whether to ignore user's customer's own records, defaults to true",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Search against PassiveDNS and return true if matching records are found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.pdns.spi.response.PDNSExistsRecordsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "402": {
+            "description": "Resource limit exceeded",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/pdns/v3/search": {
+      "post": {
+        "tags": [
+          "pdns/v3"
+        ],
+        "summary": "Search against PassiveDNS with criteria and return matching records (PUBLIC)",
+        "description": "Search against PassiveDNS with criteria and return matching records. If user exceeds current resource limits, this operation may return status code 402. If that happens, the metaData key millisUntilResourcesAvailable gives a hint as to how long the client needs to wait before attempting again. The results are sorted based on the lastSeenTimestamp in descending order.",
+        "operationId": "searchRecords",
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.jargus.criteria.reputation.PassiveDNSSearchCriteriaV1"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Search against PassiveDNS with criteria and return matching records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.jargus.model.passivedns.PassiveDNSRecordV3"
+                }
+              },
+              "text/csv": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.jargus.model.passivedns.PassiveDNSRecordV3"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {},
+              "text/csv": {}
+            }
+          },
+          "402": {
+            "description": "Resource limit exceeded.",
+            "content": {
+              "application/json": {},
+              "text/csv": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {},
+              "text/csv": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {},
+              "text/csv": {}
+            }
+          }
+        },
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/pdns/v3/{query}": {
+      "get": {
+        "tags": [
+          "pdns/v3"
+        ],
+        "summary": "Search against PassiveDNS and return matching records (PUBLIC)",
+        "description": "Search against PassiveDNS with criteria and return matching records. If user exceeds current resource limits, this operation may return status code 402. If that happens, the metaData key millisUntilResourcesAvailable gives a hint as to how long the client needs to wait before attempting again. The results are sorted based on the lastSeenTimestamp in descending order.",
+        "operationId": "searchRecordsSimplified",
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "query",
+            "in": "path",
+            "description": "Search by query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "aggregate",
+            "in": "query",
+            "description": "Whether aggregate records",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "includeAnonymous",
+            "in": "query",
+            "description": "Whether include anonymous records",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "rrClass",
+            "in": "query",
+            "description": "Search by recordClass (rrclass)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "in"
+                ]
+              },
+              "uniqueItems": true
+            }
+          },
+          {
+            "name": "rrType",
+            "in": "query",
+            "description": "Search by type (rrtype)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "a",
+                  "aaaa",
+                  "cname",
+                  "dname",
+                  "mx",
+                  "naptr",
+                  "ns",
+                  "ptr",
+                  "rp",
+                  "soa",
+                  "srv",
+                  "txt"
+                ]
+              },
+              "uniqueItems": true
+            }
+          },
+          {
+            "name": "customerID",
+            "in": "query",
+            "description": "Search by customerID",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "uniqueItems": true
+            }
+          },
+          {
+            "name": "tlp",
+            "in": "query",
+            "description": "Search by TLP",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "white",
+                  "green",
+                  "amber",
+                  "red"
+                ]
+              },
+              "uniqueItems": true
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Skip a number of records",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Max number of records to be returned",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "queryMatchStrategy",
+            "in": "query",
+            "description": "Query match strategy, partial must be set to use the wildcard",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "exact",
+                "includeSubdomains"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Search against PassiveDNS and return matching records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.jargus.model.passivedns.PassiveDNSRecordV3"
+                }
+              },
+              "text/csv": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.jargus.model.passivedns.PassiveDNSRecordV3"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {},
+              "text/csv": {}
+            }
+          },
+          "402": {
+            "description": "Resource limit exceeded",
+            "content": {
+              "application/json": {},
+              "text/csv": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {},
+              "text/csv": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {},
+              "text/csv": {}
+            }
+          }
+        },
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/pdns/v3/record": {
+      "post": {
+        "tags": [
+          "pdns/v3"
+        ],
+        "summary": "Submit PassiveDNS records in a bulk operation (INTERNAL)",
+        "description": "",
+        "operationId": "submitPDNSRecordsBulk",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.pdns.spi.request.PDNSBulkSubmissionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Submit PassiveDNS records in a bulk operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.pdns.spi.response.PDNSBulkSubmissionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "submitPDNSRecord"
+        ],
+        "x-Argus-ApiStatus": "INTERNAL"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "no.mnemonic.services.pdns.spi.response.PDNSExistsRecordsResponse": {
+        "type": "object",
+        "description": "Contains information about whether a record exists",
+        "properties": {
+          "exists": {
+            "type": "boolean",
+            "description": "Does records that match the query exist."
+          }
+        }
+      },
+      "no.mnemonic.jargus.model.CustomerInfo": {
+        "type": "object",
+        "description": "The customer that submitted this record",
+        "properties": {
+          "domain": {
+            "$ref": "#/components/schemas/no.mnemonic.jargus.model.DomainInfo"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "shortName": {
+            "type": "string"
+          }
+        }
+      },
+      "no.mnemonic.jargus.model.DomainInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "no.mnemonic.jargus.model.passivedns.PassiveDNSRecordV3": {
+        "type": "object",
+        "description": "Response containing PDNS record information",
+        "properties": {
+          "answer": {
+            "type": "string",
+            "description": "The answer section this record represents"
+          },
+          "createdTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The timestamp when the record was created"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/no.mnemonic.jargus.model.CustomerInfo",
+            "description": "The customer that submitted this record"
+          },
+          "firstSeenTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The timestamp when the record was first seen"
+          },
+          "flags": {
+            "type": "array",
+            "description": "The flags for this record",
+            "items": {
+              "type": "string",
+              "description": "The flags for this record",
+              "enum": [
+                "partialResult"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "lastSeenTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The timestamp when the record was last seen"
+          },
+          "lastUpdatedTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The timestamp when the record was last updated"
+          },
+          "maxTtl": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The maximum time-to-live of this record"
+          },
+          "minTtl": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The minimum time-to-live of this record"
+          },
+          "query": {
+            "type": "string",
+            "description": "The query section this record represents"
+          },
+          "rrclass": {
+            "type": "string",
+            "description": "The class of this record",
+            "enum": [
+              "in"
+            ]
+          },
+          "rrtype": {
+            "type": "string",
+            "description": "The type of this record",
+            "enum": [
+              "a",
+              "aaaa",
+              "cname",
+              "dname",
+              "mx",
+              "naptr",
+              "ns",
+              "ptr",
+              "rp",
+              "soa",
+              "srv",
+              "txt"
+            ]
+          },
+          "times": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The number of times this record has been seen"
+          },
+          "tlp": {
+            "type": "string",
+            "description": "The TLP of this record",
+            "enum": [
+              "white",
+              "green",
+              "amber",
+              "red"
+            ]
+          }
+        }
+      },
+      "no.mnemonic.jargus.criteria.reputation.PassiveDNSSearchCriteriaV1": {
+        "type": "object",
+        "description": "Request to search for PDNS records",
+        "properties": {
+          "aggregateResult": {
+            "type": "boolean",
+            "description": "Whether aggregate results (default true)"
+          },
+          "customerID": {
+            "type": "array",
+            "description": "Lookup for specified customer IDs",
+            "items": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Lookup for specified customer IDs"
+            },
+            "uniqueItems": true
+          },
+          "includeAnonymousResults": {
+            "type": "boolean",
+            "description": "Whether include anonymous results (default true)"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Max number of results to be returned, default unset means default limit 25 will be used, 0 means unlimited"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0,
+            "description": "Number of results to be skipped first, default 0",
+            "minimum": 0
+          },
+          "query": {
+            "type": "string",
+            "description": "Lookup query"
+          },
+          "queryMatchStrategy": {
+            "type": "string",
+            "default": "exact",
+            "description": "Query match strategy, partial must be set to use the wildcard",
+            "enum": [
+              "exact",
+              "includeSubdomains"
+            ]
+          },
+          "rrClass": {
+            "type": "array",
+            "description": "Lookup with specified record classes",
+            "items": {
+              "type": "string",
+              "description": "Lookup with specified record classes",
+              "enum": [
+                "in"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "rrType": {
+            "type": "array",
+            "description": "Lookup with specified record types",
+            "items": {
+              "type": "string",
+              "description": "Lookup with specified record types",
+              "enum": [
+                "a",
+                "aaaa",
+                "cname",
+                "dname",
+                "mx",
+                "naptr",
+                "ns",
+                "ptr",
+                "rp",
+                "soa",
+                "srv",
+                "txt"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "sortBy": {
+            "type": "array",
+            "description": "Specify the order of results. Prefix with '-' to order descending.",
+            "items": {
+              "type": "string",
+              "description": "Specify the order of results. Prefix with '-' to order descending.",
+              "enum": [
+                "rrClass",
+                "rrType",
+                "customerID",
+                "tlp",
+                "count",
+                "lastSeen",
+                "firstSeen",
+                "created",
+                "-rrClass",
+                "-rrType",
+                "-customerID",
+                "-tlp",
+                "-count",
+                "-lastSeen",
+                "-firstSeen",
+                "-created"
+              ]
+            }
+          },
+          "tlp": {
+            "type": "array",
+            "description": "Lookup with specified TLPs, public usage only TLP white allowed",
+            "items": {
+              "type": "string",
+              "description": "Lookup with specified TLPs, public usage only TLP white allowed",
+              "enum": [
+                "white",
+                "green",
+                "amber",
+                "red"
+              ]
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "no.mnemonic.services.pdns.spi.response.PDNSBulkSubmissionResponse": {
+        "type": "object",
+        "description": "Contains information on the bulk submit results",
+        "properties": {
+          "accepted": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of successfully submitted records."
+          },
+          "errorInformationList": {
+            "type": "array",
+            "description": "Information regarding any records that rejected during validation.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.pdns.spi.response.PDNSRecordErrorInformation"
+            }
+          },
+          "rejected": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of records that failed validation."
+          }
+        }
+      },
+      "no.mnemonic.services.pdns.spi.response.PDNSRecordErrorInformation": {
+        "type": "object",
+        "description": "Contains error information from a bulk submit request",
+        "properties": {
+          "errorMessages": {
+            "type": "array",
+            "description": "String message of error cause.",
+            "items": {
+              "type": "string",
+              "description": "String message of error cause."
+            }
+          },
+          "submissionIndex": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Index of the submission as it appears in the submission request."
+          }
+        }
+      },
+      "no.mnemonic.services.pdns.spi.request.PDNSBulkSubmissionRequest": {
+        "type": "object",
+        "description": "Request to bulk submit PDNS records",
+        "properties": {
+          "ignoreOnFailed": {
+            "type": "boolean",
+            "default": false,
+            "description": "Set this value for successful response even failures occur while submitting."
+          },
+          "records": {
+            "type": "array",
+            "description": "PDNS records for submission.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.pdns.spi.request.PDNSRequestRecord"
+            },
+            "maxItems": 2147483647,
+            "minItems": 1
+          }
+        },
+        "required": [
+          "records"
+        ]
+      },
+      "no.mnemonic.services.pdns.spi.request.PDNSRequestRecord": {
+        "type": "object",
+        "description": "Request containing PDNS record information to be submitted",
+        "properties": {
+          "answer": {
+            "type": "string",
+            "description": "Answering address"
+          },
+          "customer": {
+            "type": "string",
+            "description": "ID or shortname of customer"
+          },
+          "firstSeen": {
+            "type": "integer",
+            "format": "int64",
+            "default": "now",
+            "description": "First time record was seen, usually is set by agent. Accepts ISO-8601 timestamp string."
+          },
+          "lastSeen": {
+            "type": "integer",
+            "format": "int64",
+            "default": "now",
+            "description": "Last seen, defaults to reception from agent. Accepts ISO-8601 timestamp string."
+          },
+          "maxTTLSec": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Max Time to leave in seconds.",
+            "minimum": 0
+          },
+          "minTTLSec": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Minimum Time to leave in seconds.",
+            "minimum": 0
+          },
+          "query": {
+            "type": "string",
+            "description": "Querying address"
+          },
+          "recordClass": {
+            "type": "string",
+            "default": "in",
+            "description": "Record class type",
+            "enum": [
+              "in"
+            ]
+          },
+          "recordType": {
+            "type": "string",
+            "description": "Record recordType",
+            "enum": [
+              "a",
+              "aaaa",
+              "cname",
+              "dname",
+              "mx",
+              "naptr",
+              "ns",
+              "ptr",
+              "rp",
+              "soa",
+              "srv",
+              "txt"
+            ]
+          },
+          "times": {
+            "type": "integer",
+            "format": "int64",
+            "default": 1,
+            "description": "Incident count",
+            "minimum": 1
+          },
+          "tlp": {
+            "type": "string",
+            "description": "Traffic Light Protocol",
+            "enum": [
+              "white",
+              "green",
+              "amber",
+              "red"
+            ]
+          }
+        },
+        "required": [
+          "answer",
+          "query",
+          "recordClass",
+          "recordType",
+          "tlp"
+        ]
+      },
+      "no.mnemonic.services.argus.common.rest.model.ResultMessage": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Message text"
+          },
+          "messageTemplate": {
+            "type": "string",
+            "description": "Message template"
+          },
+          "type": {
+            "type": "string",
+            "description": "Message type",
+            "enum": [
+              "FIELD_ERROR",
+              "ACTION_ERROR",
+              "WARNING",
+              "NOTIFICATION",
+              "INFO"
+            ]
+          },
+          "field": {
+            "type": "string",
+            "description": "Field which this message applies to"
+          },
+          "parameter": {
+            "type": "string",
+            "description": "The affected parameter"
+          }
+        }
+      },
+      "no.mnemonic.services.argus.common.rest.model.ResultStash": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "type": "object",
+            "description": "Returned results (might be an array or a single object)"
+          }
+        }
+      },
+      "ResultStash-no.mnemonic.services.pdns.spi.response.PDNSExistsRecordsResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "$ref": "#/components/schemas/no.mnemonic.services.pdns.spi.response.PDNSExistsRecordsResponse",
+            "description": "Contains information about whether a record exists"
+          }
+        }
+      },
+      "ResultStash-list-no.mnemonic.jargus.model.passivedns.PassiveDNSRecordV3": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.jargus.model.passivedns.PassiveDNSRecordV3",
+              "description": "Response containing PDNS record information"
+            }
+          }
+        }
+      },
+      "ResultStash-no.mnemonic.services.pdns.spi.response.PDNSBulkSubmissionResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "$ref": "#/components/schemas/no.mnemonic.services.pdns.spi.response.PDNSBulkSubmissionResponse",
+            "description": "Contains information on the bulk submit results"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyScheme": {
+        "type": "apiKey",
+        "name": "Argus-API-Key",
+        "in": "header"
+      }
+    }
+  },
+  "x-ResultStash-converted": true
+}

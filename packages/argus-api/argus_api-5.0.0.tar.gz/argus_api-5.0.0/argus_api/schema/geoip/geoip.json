@@ -1,0 +1,2289 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Argus API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.mnemonic.no"
+    }
+  ],
+  "security": [
+    {
+      "ApiKeyScheme": []
+    }
+  ],
+  "paths": {
+    "/geoip/v1/country": {
+      "get": {
+        "tags": [
+          "/geoip/v1"
+        ],
+        "summary": "List GeoIP countries (INTERNAL)",
+        "description": "",
+        "operationId": "listCountries",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Max number of items to return",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "The amount of items to skip from the beginning",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Fields to sort results by (without a sign is ascending, with '-' sign is descending, supported fields are: id, countryName, countryCode)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "fromID",
+            "in": "query",
+            "description": "Only return countries with numeric ID greater than or equal to this value",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "List GeoIP countries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.jargus.model.geoip.Country"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewGeoIPData"
+        ],
+        "x-Argus-ApiStatus": "INTERNAL"
+      }
+    },
+    "/geoip/v1/country/search": {
+      "post": {
+        "tags": [
+          "/geoip/v1"
+        ],
+        "summary": "Find GeoIP countries (INTERNAL)",
+        "description": "",
+        "operationId": "searchCountries",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.geoip.spi.request.CountrySearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Find GeoIP countries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.jargus.model.geoip.Country"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewGeoIPData"
+        ],
+        "x-Argus-ApiStatus": "INTERNAL"
+      }
+    },
+    "/geoip/v1/location/{id}": {
+      "get": {
+        "tags": [
+          "/geoip/v1"
+        ],
+        "summary": "Lookup location (INTERNAL)",
+        "description": "",
+        "operationId": "getLocation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Location ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Lookup location",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.jargus.model.geoip.GeoLocation"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Object not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewGeoIPData"
+        ],
+        "x-Argus-ApiStatus": "INTERNAL"
+      }
+    },
+    "/geoip/v1/location": {
+      "get": {
+        "tags": [
+          "/geoip/v1"
+        ],
+        "summary": "List locations (INTERNAL)",
+        "description": "",
+        "operationId": "listLocations",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Max number of items to return",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "The amount of items to skip from the beginning",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Fields to sort results by (without a sign is ascending, with '-' sign is descending, supported fields are: id, externalID, countryCode, regionCode)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "fromID",
+            "in": "query",
+            "description": "Only return locations with numeric ID greater than or equal to this value",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "List locations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.jargus.model.geoip.GeoLocation"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewGeoIPData"
+        ],
+        "x-Argus-ApiStatus": "INTERNAL"
+      }
+    },
+    "/geoip/v1/location/search": {
+      "post": {
+        "tags": [
+          "/geoip/v1"
+        ],
+        "summary": "Find locations (INTERNAL)",
+        "description": "",
+        "operationId": "searchLocations",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.geoip.spi.request.LocationSearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Find locations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.jargus.model.geoip.GeoLocation"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewGeoIPData"
+        ],
+        "x-Argus-ApiStatus": "INTERNAL"
+      }
+    },
+    "/geoip/v1/ranges/search": {
+      "post": {
+        "tags": [
+          "/geoip/v1"
+        ],
+        "summary": "Find IP ranges (INTERNAL)",
+        "description": "",
+        "operationId": "findRanges",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.geoip.spi.request.IPRangeSearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Find IP ranges",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.jargus.model.geoip.GeoIPRange"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewGeoIPData"
+        ],
+        "x-Argus-ApiStatus": "INTERNAL"
+      }
+    },
+    "/geoip/v1/ranges": {
+      "get": {
+        "tags": [
+          "/geoip/v1"
+        ],
+        "summary": "List IP ranges (INTERNAL)",
+        "description": "",
+        "operationId": "listRanges",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Max number of items to return",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "The amount of items to skip from the beginning",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Fields to sort results by (without a sign is ascending, with '-' sign is descending, supported fields are: id, startIP, endIP, locationID)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "List IP ranges",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.jargus.model.geoip.GeoIPRange"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewGeoIPData"
+        ],
+        "x-Argus-ApiStatus": "INTERNAL"
+      }
+    },
+    "/geoip/v1/ranges/{ip}": {
+      "get": {
+        "tags": [
+          "/geoip/v1"
+        ],
+        "summary": "Lookup IP range (INTERNAL)",
+        "description": "",
+        "operationId": "lookupIP",
+        "parameters": [
+          {
+            "name": "ip",
+            "in": "path",
+            "description": "IP-address that has to be covered by the range",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Lookup IP range",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.jargus.model.geoip.GeoIPRange"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Object not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewGeoIPData"
+        ],
+        "x-Argus-ApiStatus": "INTERNAL"
+      }
+    },
+    "/geoip/v2/asn/{asnOrIP}": {
+      "get": {
+        "tags": [
+          "geoip/v2"
+        ],
+        "summary": "Fetch an autonomous system by ASN or IP (DEV)",
+        "description": "",
+        "operationId": "getAutonomousSystem",
+        "parameters": [
+          {
+            "name": "asnOrIP",
+            "in": "path",
+            "description": "The ASN or IP of the autonomous system to fetch",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Fetch an autonomous system by ASN or IP",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.geoip.spi.v2.response.AutonomousSystemResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Object not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewAutonomousSystems"
+        ],
+        "x-Argus-ApiStatus": "DEV"
+      }
+    },
+    "/geoip/v2/asn/{asnOrIP}/networks": {
+      "get": {
+        "tags": [
+          "geoip/v2"
+        ],
+        "summary": "Fetch autonomous system networks for a single autonomous system by ASN or IP (DEV)",
+        "description": "",
+        "operationId": "getAutonomousSystemNetworks",
+        "parameters": [
+          {
+            "name": "asnOrIP",
+            "in": "path",
+            "description": "Identifier of the AS",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Limit the amount of returned networks",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Skip the first $offset networks",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Fetch autonomous system networks for a single autonomous system by ASN or IP",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.services.geoip.spi.v2.response.AutonomousSystemNetworkResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Object not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewAutonomousSystems"
+        ],
+        "x-Argus-ApiStatus": "DEV"
+      }
+    },
+    "/geoip/v2/asn/networks": {
+      "get": {
+        "tags": [
+          "geoip/v2"
+        ],
+        "summary": "Search for autonomous system networks with query parameters (DEV)",
+        "description": "",
+        "operationId": "listAutonomousSystemNetworks",
+        "parameters": [
+          {
+            "name": "asn",
+            "in": "query",
+            "description": "Only return networks matching the given ASNs",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "uniqueItems": true
+            }
+          },
+          {
+            "name": "ip",
+            "in": "query",
+            "description": "Only return networks where one of the provided IPs belongs to the network",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Limit the amount of returned networks",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Skip the first $offset networks",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "includeDeleted",
+            "in": "query",
+            "description": "If true include networks marked as deleted",
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Sort the returned entries. Prefix with '-' to sort descending",
+            "schema": {
+              "type": "array",
+              "enum": [
+                "asn",
+                "ip",
+                "createdTimestamp",
+                "lastUpdatedTimestamp",
+                "deletedTimestamp",
+                "-asn",
+                "-ip",
+                "-createdTimestamp",
+                "-lastUpdatedTimestamp",
+                "-deletedTimestamp"
+              ],
+              "items": {
+                "type": "string",
+                "default": "ip"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Search for autonomous system networks with query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.services.geoip.spi.v2.response.AutonomousSystemNetworkResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewAutonomousSystems"
+        ],
+        "x-Argus-ApiStatus": "DEV"
+      }
+    },
+    "/geoip/v2/asn": {
+      "get": {
+        "tags": [
+          "geoip/v2"
+        ],
+        "summary": "Search for autonomous system with query parameters (DEV)",
+        "description": "",
+        "operationId": "listAutonomousSystems",
+        "parameters": [
+          {
+            "name": "asn",
+            "in": "query",
+            "description": "Only return AS matching the given ASNs",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "uniqueItems": true
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Limit the amount of returned AS",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Skip the first $offset AS",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "includeDeleted",
+            "in": "query",
+            "description": "If true include AS marked as deleted",
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Sort the returned entries. Prefix with '-' to sort descending",
+            "schema": {
+              "type": "array",
+              "enum": [
+                "asn",
+                "name",
+                "createdTimestamp",
+                "lastUpdatedTimestamp",
+                "deletedTimestamp",
+                "-asn",
+                "-name",
+                "-createdTimestamp",
+                "-lastUpdatedTimestamp",
+                "-deletedTimestamp"
+              ],
+              "items": {
+                "type": "string",
+                "default": "asn"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Search for autonomous system with query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.services.geoip.spi.v2.response.AutonomousSystemResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewAutonomousSystems"
+        ],
+        "x-Argus-ApiStatus": "DEV"
+      }
+    },
+    "/geoip/v2/asn/networks/search": {
+      "post": {
+        "tags": [
+          "geoip/v2"
+        ],
+        "summary": "Search for autonomous system networks with an AutonomousSystemNetworkSearchRequest (DEV)",
+        "description": "",
+        "operationId": "searchAutonomousSystemNetworks",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.geoip.spi.v2.request.AutonomousSystemNetworkSearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Search for autonomous system networks with an AutonomousSystemNetworkSearchRequest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.services.geoip.spi.v2.response.AutonomousSystemNetworkResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewAutonomousSystems"
+        ],
+        "x-Argus-ApiStatus": "DEV"
+      }
+    },
+    "/geoip/v2/asn/search": {
+      "post": {
+        "tags": [
+          "geoip/v2"
+        ],
+        "summary": "Search for autonomous systems with an AutonomousSystemSearchRequest (DEV)",
+        "description": "",
+        "operationId": "searchAutonomousSystems",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.geoip.spi.v2.request.AutonomousSystemSearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Search for autonomous systems with an AutonomousSystemSearchRequest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.services.geoip.spi.v2.response.AutonomousSystemResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewAutonomousSystems"
+        ],
+        "x-Argus-ApiStatus": "DEV"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "no.mnemonic.jargus.model.geoip.Country": {
+        "type": "object",
+        "description": "Contains basic data about a country.",
+        "properties": {
+          "countryCode": {
+            "type": "string",
+            "description": "The two-letter country-code."
+          },
+          "countryName": {
+            "type": "string",
+            "description": "The name of the country."
+          },
+          "flag": {
+            "type": "integer",
+            "format": "int64",
+            "writeOnly": true
+          },
+          "flags": {
+            "type": "array",
+            "description": "Flags assigned to the object.",
+            "items": {
+              "type": "string",
+              "description": "Flags assigned to the object.",
+              "enum": [
+                "DELETED",
+                "deleted"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastUpdatedTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The timestamp when this country was last updated."
+          }
+        }
+      },
+      "no.mnemonic.services.geoip.spi.request.CountrySearchRequest": {
+        "type": "object",
+        "description": "Request to search for countries",
+        "properties": {
+          "excludeFlags": {
+            "type": "array",
+            "description": "A set of excluded enumerated flags of the searched countries.",
+            "items": {
+              "type": "string",
+              "description": "A set of excluded enumerated flags of the searched countries.",
+              "enum": [
+                "deleted"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "fromID": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Only return countries with IDs greater than or equal to this ID.",
+            "minimum": 0
+          },
+          "includeDeleted": {
+            "type": "boolean",
+            "description": "If true, also include countries marked as deleted."
+          },
+          "includeFlags": {
+            "type": "array",
+            "description": "A set of included enumerated flags of the searched countries.",
+            "items": {
+              "type": "string",
+              "description": "A set of included enumerated flags of the searched countries.",
+              "enum": [
+                "deleted"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Max number of results.",
+            "minimum": 0
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Skip the first (offset) objects. By default, return result from first object.",
+            "minimum": 0
+          },
+          "sortBy": {
+            "type": "array",
+            "description": "Specify the order of results. Prefix with '-' to order descending.",
+            "items": {
+              "type": "string",
+              "description": "Specify the order of results. Prefix with '-' to order descending.",
+              "enum": [
+                "id",
+                "countryName",
+                "countryCode",
+                "-id",
+                "-countryName",
+                "-countryCode"
+              ]
+            }
+          }
+        }
+      },
+      "no.mnemonic.jargus.model.geoip.GeoLocation": {
+        "type": "object",
+        "description": "Location is a subunit of a region. It contains data about the location and also the region and country it belongs to.",
+        "properties": {
+          "cityName": {
+            "type": "string",
+            "deprecated": true,
+            "description": "Use locationName instead"
+          },
+          "countryCode": {
+            "type": "string",
+            "description": "The two-letter code of the country where this location is in."
+          },
+          "extID": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The external ID of the location (0 if not set)."
+          },
+          "flags": {
+            "type": "array",
+            "description": "Flags assigned to the object.",
+            "items": {
+              "type": "string",
+              "description": "Flags assigned to the object.",
+              "enum": [
+                "deleted",
+                "disabled"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastModified": {
+            "type": "integer",
+            "format": "int64",
+            "deprecated": true,
+            "description": "Use lastUpdatedTimestamp instead"
+          },
+          "lastUpdatedTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The timestamp when this location was last updated."
+          },
+          "locationName": {
+            "type": "string",
+            "description": "The name of the the location."
+          }
+        }
+      },
+      "no.mnemonic.services.geoip.spi.request.LocationSearchRequest": {
+        "type": "object",
+        "description": "Request to search for locations",
+        "properties": {
+          "countTimeout": {
+            "type": "integer",
+            "format": "int32",
+            "default": -1,
+            "description": "Max wait in seconds for the count query to run. Set the value to -1 to skip counting (count will be returned -1). Set the value to 0 to execute the count query as long as the service allows, max allowed timeout value is 30 (seconds), default value is -1.",
+            "maximum": 30,
+            "minimum": -1
+          },
+          "country": {
+            "type": "array",
+            "description": "Only return locations from these countries (by country ID or two-letter code).",
+            "items": {
+              "type": "string",
+              "description": "Only return locations from these countries (by country ID or two-letter code)."
+            },
+            "uniqueItems": true
+          },
+          "endTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Search for locations having lastUpdatedTimestamp lower than or equal to this timestamp."
+          },
+          "excludeFlags": {
+            "type": "array",
+            "description": "A set of excluded enumerated flags of the searched locations.",
+            "items": {
+              "type": "string",
+              "description": "A set of excluded enumerated flags of the searched locations.",
+              "enum": [
+                "deleted",
+                "disabled",
+                "withoutExtID"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "extID": {
+            "type": "array",
+            "description": "Only return locations bound to these external IDs.",
+            "items": {
+              "type": "integer",
+              "format": "int32",
+              "description": "Only return locations bound to these external IDs."
+            },
+            "uniqueItems": true
+          },
+          "fromID": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Only return locations with IDs greater than or equal to this ID.",
+            "minimum": 0
+          },
+          "includeDeleted": {
+            "type": "boolean",
+            "description": "If true, also include locations marked as deleted."
+          },
+          "includeFlags": {
+            "type": "array",
+            "description": "A set of included enumerated flags of the searched locations.",
+            "items": {
+              "type": "string",
+              "description": "A set of included enumerated flags of the searched locations.",
+              "enum": [
+                "deleted",
+                "disabled",
+                "withoutExtID"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Max number of results.",
+            "minimum": 0
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Skip the first (offset) objects. By default, return result from first object.",
+            "minimum": 0
+          },
+          "sortBy": {
+            "type": "array",
+            "description": "Specify the order of results. Prefix with '-' to order descending.",
+            "items": {
+              "type": "string",
+              "description": "Specify the order of results. Prefix with '-' to order descending.",
+              "enum": [
+                "id",
+                "externalID",
+                "countryCode",
+                "regionCode",
+                "-id",
+                "-externalID",
+                "-countryCode",
+                "-regionCode"
+              ]
+            }
+          },
+          "startTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Search for locations having lastUpdatedTimestamp greater than or equal to this timestamp."
+          }
+        }
+      },
+      "no.mnemonic.jargus.model.geoip.GeoIPRange": {
+        "type": "object",
+        "description": "Combines IP-address range (from- and to-address) with country and location data.",
+        "properties": {
+          "countryCode": {
+            "type": "string",
+            "description": "The two-letter code of the country where this IP-range is located."
+          },
+          "flags": {
+            "type": "array",
+            "description": "Flags assigned to the object.",
+            "items": {
+              "type": "string",
+              "description": "Flags assigned to the object.",
+              "enum": [
+                "deleted"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastUpdatedTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The timestamp when this IP-range was last updated."
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Geographic latitude of the spot where this IP-range is located (0.0 if not set)."
+          },
+          "locationID": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The location ID associated with this IP-range."
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "description": "Geographic longitude of the spot where this IP-range is located (0.0 if not set)."
+          },
+          "range": {
+            "$ref": "#/components/schemas/no.mnemonic.jargus.net.IPRange"
+          }
+        }
+      },
+      "no.mnemonic.jargus.net.IPAddress": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "host": {
+            "type": "boolean"
+          },
+          "ipv6": {
+            "type": "boolean"
+          },
+          "maskBits": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "multicast": {
+            "type": "boolean"
+          },
+          "public": {
+            "type": "boolean"
+          }
+        }
+      },
+      "no.mnemonic.jargus.net.IPRange": {
+        "type": "object",
+        "properties": {
+          "fromAddress": {
+            "$ref": "#/components/schemas/no.mnemonic.jargus.net.IPAddress"
+          },
+          "toAddress": {
+            "$ref": "#/components/schemas/no.mnemonic.jargus.net.IPAddress"
+          }
+        }
+      },
+      "no.mnemonic.services.geoip.spi.request.IPRangeSearchRequest": {
+        "type": "object",
+        "description": "Request to search for IP-address ranges",
+        "properties": {
+          "addressFamily": {
+            "type": "string",
+            "description": "Only return ranges for this address family range (ipv4 or ipv6).",
+            "enum": [
+              "IPv4",
+              "IPv6"
+            ]
+          },
+          "countTimeout": {
+            "type": "integer",
+            "format": "int32",
+            "default": -1,
+            "description": "Max wait in seconds for the count query to run. Set the value to -1 to skip counting (count will be returned -1). Set the value to 0 to execute the count query as long as the service allows, max allowed timeout value is 30 (seconds), default value is -1.",
+            "maximum": 30,
+            "minimum": -1
+          },
+          "country": {
+            "type": "array",
+            "description": "Only return ranges from these countries (by country ID or two-letter code).",
+            "items": {
+              "type": "string",
+              "description": "Only return ranges from these countries (by country ID or two-letter code)."
+            },
+            "uniqueItems": true
+          },
+          "endTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Search for ranges having lastUpdatedTimestamp less than or equal to this timestamp."
+          },
+          "excludeFlags": {
+            "type": "array",
+            "description": "A set of excluded enumerated flags of the searched ranges.",
+            "items": {
+              "type": "string",
+              "description": "A set of excluded enumerated flags of the searched ranges.",
+              "enum": [
+                "deleted"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "fromIP": {
+            "type": "string",
+            "description": "Only return ranges where the range start address is greater than or equal to this IP-address. [format:ip]",
+            "x-Argus-Format": "ip"
+          },
+          "includeDeleted": {
+            "type": "boolean",
+            "description": "If true, also include ranges marked as deleted."
+          },
+          "includeFlags": {
+            "type": "array",
+            "description": "A set of included enumerated flags of the searched ranges.",
+            "items": {
+              "type": "string",
+              "description": "A set of included enumerated flags of the searched ranges.",
+              "enum": [
+                "deleted"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "ipAddress": {
+            "type": "array",
+            "description": "Only return ranges which cover any of these IP-addresses. [format:ip]",
+            "items": {
+              "type": "string",
+              "description": "Only return ranges which cover any of these IP-addresses."
+            },
+            "uniqueItems": true,
+            "x-Argus-Format": "ip"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Max number of results.",
+            "minimum": 0
+          },
+          "locationID": {
+            "type": "array",
+            "description": "Only return ranges from these locations (by location ID).",
+            "items": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Only return ranges from these locations (by location ID)."
+            },
+            "uniqueItems": true
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Skip the first (offset) objects. By default, return result from first object.",
+            "minimum": 0
+          },
+          "rangeID": {
+            "type": "array",
+            "description": "Only return specific ranges (by ID).",
+            "items": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Only return specific ranges (by ID)."
+            },
+            "uniqueItems": true
+          },
+          "regionID": {
+            "type": "array",
+            "description": "Only return ranges from these regions (by region ID).",
+            "items": {
+              "type": "integer",
+              "format": "int32",
+              "description": "Only return ranges from these regions (by region ID)."
+            },
+            "uniqueItems": true
+          },
+          "sortBy": {
+            "type": "array",
+            "description": "Specify the order of results. Prefix with '-' to order descending.",
+            "items": {
+              "type": "string",
+              "description": "Specify the order of results. Prefix with '-' to order descending.",
+              "enum": [
+                "id",
+                "startIP",
+                "endIP",
+                "locationID",
+                "-id",
+                "-startIP",
+                "-endIP",
+                "-locationID"
+              ]
+            }
+          },
+          "startIPAddress": {
+            "type": "array",
+            "description": "Only return ranges where the range start address matches one of these IP-addresses. [format:ip]",
+            "items": {
+              "type": "string",
+              "description": "Only return ranges where the range start address matches one of these IP-addresses."
+            },
+            "uniqueItems": true,
+            "x-Argus-Format": "ip"
+          },
+          "startTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Search for ranges having lastUpdatedTimestamp greater than or equal to this timestamp."
+          },
+          "toIP": {
+            "type": "string",
+            "description": "Only return ranges where the range start address is less than or equal to this IP-address. [format:ip]",
+            "x-Argus-Format": "ip"
+          }
+        }
+      },
+      "no.mnemonic.services.geoip.spi.v2.response.AutonomousSystemResponse": {
+        "type": "object",
+        "description": "Response model representing an autonomous system",
+        "properties": {
+          "asn": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The autonomous system number"
+          },
+          "createdTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Timestamp when the AS was first registered in the database"
+          },
+          "deletedTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Timestamp when the AS was removed from the database"
+          },
+          "flags": {
+            "type": "array",
+            "description": "Flags defined for the autonomous system",
+            "items": {
+              "type": "string",
+              "description": "Flags defined for the autonomous system",
+              "enum": [
+                "deleted"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "lastUpdatedTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Timestamp when the AS was last updated/changed in the database"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the autonomous system"
+          }
+        }
+      },
+      "no.mnemonic.services.geoip.spi.v2.response.AutonomousSystemInfo": {
+        "type": "object",
+        "description": "Compact representation of an autonomous system",
+        "properties": {
+          "asn": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The autonomous system number"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the autonomous system"
+          }
+        }
+      },
+      "no.mnemonic.services.geoip.spi.v2.response.AutonomousSystemNetworkResponse": {
+        "type": "object",
+        "description": "Response model representing an autonomous system network",
+        "properties": {
+          "autonomousSystem": {
+            "$ref": "#/components/schemas/no.mnemonic.services.geoip.spi.v2.response.AutonomousSystemInfo",
+            "description": "The autonomous system this network is part of"
+          },
+          "createdTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Timestamp when the network was first registered in the database"
+          },
+          "deletedTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Timestamp when the network was removed from the database"
+          },
+          "flags": {
+            "type": "array",
+            "description": "Flags defined for the autonomous system network",
+            "items": {
+              "type": "string",
+              "description": "Flags defined for the autonomous system network",
+              "enum": [
+                "deleted"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Argus-specific unique identifier"
+          },
+          "lastUpdatedTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Timestamp when the network was last updated/changed in the database"
+          },
+          "network": {
+            "$ref": "#/components/schemas/no.mnemonic.services.geoip.spi.v2.response.IPNetworkResponse",
+            "description": "Network represented by the AS"
+          }
+        }
+      },
+      "no.mnemonic.services.geoip.spi.v2.response.IPNetworkResponse": {
+        "type": "object",
+        "description": "Response model representing a network IP",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Start IP of the network"
+          },
+          "mask": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Net mask (CIDR)"
+          }
+        }
+      },
+      "no.mnemonic.services.geoip.spi.v2.request.AutonomousSystemNetworkSearchRequest": {
+        "type": "object",
+        "description": "Request used for autonomous system network search",
+        "properties": {
+          "asn": {
+            "type": "array",
+            "description": "Only return networks matching the given ASNs",
+            "items": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Only return networks matching the given ASNs"
+            },
+            "uniqueItems": true
+          },
+          "includeDeleted": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true include networks marked as deleted"
+          },
+          "ip": {
+            "type": "array",
+            "description": "Only return networks where one of the provided IPs belongs to the network [format:ip]",
+            "items": {
+              "type": "string",
+              "description": "Only return networks where one of the provided IPs belongs to the network"
+            },
+            "uniqueItems": true,
+            "x-Argus-Format": "ip"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "default": 25,
+            "description": "Limit the amount of returned networks",
+            "minimum": 0
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0,
+            "description": "Skip the first $offset networks",
+            "minimum": 0
+          },
+          "sortBy": {
+            "type": "array",
+            "description": "Specify the order of results. Prefix with '-' to order descending.",
+            "items": {
+              "type": "string",
+              "description": "Specify the order of results. Prefix with '-' to order descending.",
+              "enum": [
+                "asn",
+                "ip",
+                "createdTimestamp",
+                "lastUpdatedTimestamp",
+                "deletedTimestamp",
+                "-asn",
+                "-ip",
+                "-createdTimestamp",
+                "-lastUpdatedTimestamp",
+                "-deletedTimestamp"
+              ]
+            }
+          }
+        }
+      },
+      "no.mnemonic.services.geoip.spi.v2.request.AutonomousSystemSearchRequest": {
+        "type": "object",
+        "description": "Request used for autonomous system search",
+        "properties": {
+          "asn": {
+            "type": "array",
+            "description": "Only return AS matching the given ASNs",
+            "items": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Only return AS matching the given ASNs"
+            },
+            "uniqueItems": true
+          },
+          "includeDeleted": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true include AS marked as deleted"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "default": 25,
+            "description": "Limit the amount of returned AS",
+            "minimum": 0
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0,
+            "description": "Skip the first $offset AS",
+            "minimum": 0
+          },
+          "sortBy": {
+            "type": "array",
+            "description": "Specify the order of results. Prefix with '-' to order descending.",
+            "items": {
+              "type": "string",
+              "description": "Specify the order of results. Prefix with '-' to order descending.",
+              "enum": [
+                "asn",
+                "name",
+                "createdTimestamp",
+                "lastUpdatedTimestamp",
+                "deletedTimestamp",
+                "-asn",
+                "-name",
+                "-createdTimestamp",
+                "-lastUpdatedTimestamp",
+                "-deletedTimestamp"
+              ]
+            }
+          }
+        }
+      },
+      "no.mnemonic.services.argus.common.rest.model.ResultMessage": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Message text"
+          },
+          "messageTemplate": {
+            "type": "string",
+            "description": "Message template"
+          },
+          "type": {
+            "type": "string",
+            "description": "Message type",
+            "enum": [
+              "FIELD_ERROR",
+              "ACTION_ERROR",
+              "WARNING",
+              "NOTIFICATION",
+              "INFO"
+            ]
+          },
+          "field": {
+            "type": "string",
+            "description": "Field which this message applies to"
+          },
+          "parameter": {
+            "type": "string",
+            "description": "The affected parameter"
+          }
+        }
+      },
+      "no.mnemonic.services.argus.common.rest.model.ResultStash": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "type": "object",
+            "description": "Returned results (might be an array or a single object)"
+          }
+        }
+      },
+      "ResultStash-list-no.mnemonic.jargus.model.geoip.Country": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.jargus.model.geoip.Country",
+              "description": "Contains basic data about a country."
+            }
+          }
+        }
+      },
+      "ResultStash-no.mnemonic.jargus.model.geoip.GeoLocation": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "$ref": "#/components/schemas/no.mnemonic.jargus.model.geoip.GeoLocation",
+            "description": "Location is a subunit of a region. It contains data about the location and also the region and country it belongs to."
+          }
+        }
+      },
+      "ResultStash-list-no.mnemonic.jargus.model.geoip.GeoLocation": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.jargus.model.geoip.GeoLocation",
+              "description": "Location is a subunit of a region. It contains data about the location and also the region and country it belongs to."
+            }
+          }
+        }
+      },
+      "ResultStash-list-no.mnemonic.jargus.model.geoip.GeoIPRange": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.jargus.model.geoip.GeoIPRange",
+              "description": "Combines IP-address range (from- and to-address) with country and location data."
+            }
+          }
+        }
+      },
+      "ResultStash-no.mnemonic.jargus.model.geoip.GeoIPRange": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "$ref": "#/components/schemas/no.mnemonic.jargus.model.geoip.GeoIPRange",
+            "description": "Combines IP-address range (from- and to-address) with country and location data."
+          }
+        }
+      },
+      "ResultStash-no.mnemonic.services.geoip.spi.v2.response.AutonomousSystemResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "$ref": "#/components/schemas/no.mnemonic.services.geoip.spi.v2.response.AutonomousSystemResponse",
+            "description": "Response model representing an autonomous system"
+          }
+        }
+      },
+      "ResultStash-list-no.mnemonic.services.geoip.spi.v2.response.AutonomousSystemNetworkResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.geoip.spi.v2.response.AutonomousSystemNetworkResponse",
+              "description": "Response model representing an autonomous system network"
+            }
+          }
+        }
+      },
+      "ResultStash-list-no.mnemonic.services.geoip.spi.v2.response.AutonomousSystemResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.geoip.spi.v2.response.AutonomousSystemResponse",
+              "description": "Response model representing an autonomous system"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyScheme": {
+        "type": "apiKey",
+        "name": "Argus-API-Key",
+        "in": "header"
+      }
+    }
+  },
+  "x-ResultStash-converted": true
+}
