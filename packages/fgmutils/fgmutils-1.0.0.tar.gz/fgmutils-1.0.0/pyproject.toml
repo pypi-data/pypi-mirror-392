@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fgmutils"
+version = "1.0.0"
+description = "Forest Growth Model Utilities"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "GPL-2" }
+authors = [
+  {name = "Clayton Vieira Fraga Filho", email = "forestgrowthsoftware@gmail.com"},
+  {name = "Ana Paula Simiqueli"},
+  {name = "Gilson Fernandes da Silva"},
+  {name = "Miqueias Fernandes"},
+  {name = "Wagner Amorim da Silva Altoe"}
+]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering",
+  "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12"
+]
+keywords = ["Forest Inventory", "Growth Models"]
+dependencies = [
+  "numpy>=1.23",
+  "pandas>=2.0",
+  "statsmodels>=0.14"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.4",
+  "pytest-cov>=4.1",
+  "ruff>=0.2",
+  "black>=24.2"
+]
+
+[project.urls]
+Homepage = "https://github.com/forestgrowthsoftware/fgmutils"
+Issues = "https://github.com/forestgrowthsoftware/fgmutils/issues"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+
+[tool.black]
+target-version = ["py39"]
+line-length = 100
