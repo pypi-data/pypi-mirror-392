@@ -1,0 +1,278 @@
+{
+  "metadata": {
+    "total_test_files": 11,
+    "total_test_classes": 33,
+    "total_test_methods": 98
+  },
+  "components": {
+    "total": 32,
+    "by_group": {
+      "API": 3,
+      "Parsers": 5,
+      "Serializers": 2,
+      "Validators": 2,
+      "Factory": 1,
+      "Calculation": 8,
+      "Parsers_Calc": 5,
+      "Data": 1,
+      "Trade": 1,
+      "Crafting": 1,
+      "Infrastructure": 3
+    }
+  },
+  "integrations": {
+    "covered": [
+      {
+        "component_a": "PathOfBuildingAPI",
+        "component_b": "CalculationEngine"
+      },
+      {
+        "component_a": "BuildModifier",
+        "component_b": "CalculationEngine"
+      },
+      {
+        "component_a": "PathOfBuildingAPI",
+        "component_b": "BuildXMLSerializer"
+      },
+      {
+        "component_a": "PathOfBuildingAPI",
+        "component_b": "ImportCodeGenerator"
+      },
+      {
+        "component_a": "BuildBuilder",
+        "component_b": "BuildXMLSerializer"
+      },
+      {
+        "component_a": "BuildModifier",
+        "component_b": "BuildXMLSerializer"
+      },
+      {
+        "component_a": "CalculationEngine",
+        "component_b": "ModifierSystem"
+      },
+      {
+        "component_a": "ModifierSystem",
+        "component_b": "DamageCalculator"
+      },
+      {
+        "component_a": "ModifierSystem",
+        "component_b": "DefenseCalculator"
+      },
+      {
+        "component_a": "ModifierSystem",
+        "component_b": "ResourceCalculator"
+      },
+      {
+        "component_a": "ModifierSystem",
+        "component_b": "SkillStatsCalculator"
+      },
+      {
+        "component_a": "ModifierSystem",
+        "component_b": "MinionCalculator"
+      },
+      {
+        "component_a": "ModifierSystem",
+        "component_b": "PartyCalculator"
+      },
+      {
+        "component_a": "GameDataLoader",
+        "component_b": "PassiveTreeParser"
+      },
+      {
+        "component_a": "GameDataLoader",
+        "component_b": "ItemModifierParser"
+      },
+      {
+        "component_a": "InputValidator",
+        "component_b": "BuildInfoParser"
+      },
+      {
+        "component_a": "XMLValidator",
+        "component_b": "BuildInfoParser"
+      },
+      {
+        "component_a": "BuildFactory",
+        "component_b": "BuildBuilder"
+      }
+    ],
+    "total_possible": 496,
+    "coverage_percentage": 3.6290322580645165
+  },
+  "test_files": [
+    {
+      "file": "test_api_calculation_engine_integration.py",
+      "test_classes": [
+        "TestAPICalculationEngineIntegration",
+        "TestBuildModifierCalculationIntegration"
+      ],
+      "test_methods": 7,
+      "components": [
+        "CalculationEngine"
+      ]
+    },
+    {
+      "file": "test_build_modifier_serializer_integration.py",
+      "test_classes": [
+        "TestBuildModifierSerializerIntegration",
+        "TestBuildFactoryBuilderIntegration"
+      ],
+      "test_methods": 6,
+      "components": [
+        "BuildFactory",
+        "BuildXMLSerializer",
+        "ImportCodeGenerator",
+        "PathOfBuildingAPI"
+      ]
+    },
+    {
+      "file": "test_calculator_components_integration.py",
+      "test_classes": [
+        "TestCalculatorComponentsIntegration",
+        "TestGameDataLoaderIntegration",
+        "TestAdditionalCalculatorIntegrations"
+      ],
+      "test_methods": 15,
+      "components": [
+        "CalculationEngine",
+        "ItemModifierParser",
+        "ModifierSystem",
+        "PartyCalculator",
+        "PassiveTreeParser"
+      ]
+    },
+    {
+      "file": "test_calculator_modifier_integration.py",
+      "test_classes": [
+        "TestModifierSystemCalculatorIntegrations",
+        "TestCalculationEngineModifierSystemIntegration",
+        "TestCalculatorCrossIntegration"
+      ],
+      "test_methods": 10,
+      "components": [
+        "CalculationEngine",
+        "DamageCalculator",
+        "DefenseCalculator",
+        "MinionCalculator",
+        "ModifierSystem",
+        "PartyCalculator",
+        "ResourceCalculator",
+        "SkillStatsCalculator"
+      ]
+    },
+    {
+      "file": "test_crafting_api_integration.py",
+      "test_classes": [
+        "TestCraftingAPIPathOfBuildingAPIIntegration"
+      ],
+      "test_methods": 6,
+      "components": [
+        "CalculationEngine",
+        "ItemCraftingAPI",
+        "PathOfBuildingAPI"
+      ]
+    },
+    {
+      "file": "test_infrastructure_integration.py",
+      "test_classes": [
+        "TestHTTPClientBuildFactoryIntegration",
+        "TestCacheIntegration",
+        "TestHTTPClientCacheIntegration",
+        "TestInfrastructureErrorHandling"
+      ],
+      "test_methods": 10,
+      "components": [
+        "AsyncHTTPClient",
+        "BuildFactory",
+        "Cache",
+        "HTTPClient",
+        "PathOfBuildingAPI"
+      ]
+    },
+    {
+      "file": "test_integration.py",
+      "test_classes": [
+        "TestValidatorParserIntegration",
+        "TestParserBuilderIntegration",
+        "TestFactoryIntegration",
+        "TestFullWorkflow",
+        "TestErrorHandlingIntegration"
+      ],
+      "test_methods": 11,
+      "components": [
+        "BuildFactory",
+        "BuildInfoParser",
+        "DefaultBuildParser",
+        "InputValidator",
+        "ItemsParser",
+        "SkillsParser",
+        "TreesParser",
+        "XMLValidator"
+      ]
+    },
+    {
+      "file": "test_parser_api_integration.py",
+      "test_classes": [
+        "TestItemModifierParserAPIIntegration",
+        "TestUniqueItemParserAPIIntegration",
+        "TestJewelParserAPIIntegration",
+        "TestParserModifierSystemIntegration"
+      ],
+      "test_methods": 9,
+      "components": [
+        "CalculationEngine",
+        "ItemModifierParser",
+        "ModifierSystem",
+        "PassiveTreeParser",
+        "PathOfBuildingAPI",
+        "UniqueItemParser"
+      ]
+    },
+    {
+      "file": "test_parser_serializer_integration.py",
+      "test_classes": [
+        "TestParserSerializerIntegration",
+        "TestBuildBuilderSerializerIntegration"
+      ],
+      "test_methods": 6,
+      "components": [
+        "BuildXMLSerializer",
+        "ImportCodeGenerator",
+        "PathOfBuildingAPI"
+      ]
+    },
+    {
+      "file": "test_trade_api_integration.py",
+      "test_classes": [
+        "TestTradeAPIPathOfBuildingAPIIntegration"
+      ],
+      "test_methods": 8,
+      "components": [
+        "PathOfBuildingAPI",
+        "TradeAPI"
+      ]
+    },
+    {
+      "file": "test_trees_parser_integration.py",
+      "test_classes": [
+        "TestTreesParserAPIIntegration",
+        "TestTreesParserDefaultBuildParserIntegration",
+        "TestTreesParserBuildFactoryIntegration",
+        "TestTreesParserCalculationEngineIntegration",
+        "TestTreesParserPassiveTreeParserIntegration",
+        "TestTreesParserFullIntegration"
+      ],
+      "test_methods": 10,
+      "components": [
+        "BuildFactory",
+        "BuildInfoParser",
+        "CalculationEngine",
+        "DefaultBuildParser",
+        "ItemsParser",
+        "PassiveTreeParser",
+        "PathOfBuildingAPI",
+        "SkillsParser",
+        "TreesParser"
+      ]
+    }
+  ]
+}
