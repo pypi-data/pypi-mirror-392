@@ -1,0 +1,2277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>pgwkit API documentation</title>
+<meta name="description" content="This encapsulates the webkit import and failure thereof" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>pgwkit</code></h1>
+</header>
+<section id="section-intro">
+<p>This encapsulates the webkit import and failure thereof</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#!/usr/bin/env python
+
+&#39;&#39;&#39; This encapsulates the webkit import and failure thereof &#39;&#39;&#39;
+
+import os, sys, getopt, signal, random, time, warnings
+import inspect
+
+#realinc = os.path.realpath(os.path.dirname(__file__) + os.sep + &#34;../pycommon&#34;)
+#sys.path.append(realinc)
+
+from pgutils import  *
+from pggui import  *
+from pgsimp import  *
+from pgtextview import  *
+
+import gi
+gi.require_version(&#34;Gtk&#34;, &#34;3.0&#34;)
+
+from gi.repository import Gtk
+from gi.repository import Gdk
+from gi.repository import GLib
+from gi.repository import GObject
+from gi.repository import Pango
+
+WebKit2 = None
+
+class dummywebview(Gtk.VBox):
+
+    def __int__(self):
+        super().__init__(self)
+        #self.pack_start(Gtk.Label(label=&#34;No WebView&#34;), 1, 1, 0)
+    def set_editable(self, flag):
+        self.pack_start(Gtk.Label(label=&#34;No WebView Available&#34;), 1, 1, 0)
+        pass
+    def load_html(self, ff, kk = None):
+        pass
+    def connect(self, aa, bb):
+        pass
+
+class dummywebkit():
+    WebView = dummywebview
+
+try:
+    gi.require_version(&#34;WebKit2&#34;, &#39;4.1&#39;)
+    from gi.repository import WebKit2
+    #present = 1
+except:
+    try:
+        #print(&#34;Trying V 4.0:&#34;, sys.exc_info())
+        gi.require_version(&#34;WebKit2&#34;, &#39;4.0&#39;)
+        from gi.repository import WebKit2
+    except:
+        try:
+            #print(&#34;Trying with jno qualifier&#34;)
+            #gi.require_version(&#34;WebKit2&#34;, &#39;4.0&#39;)
+            from gi.repository import WebKit2
+        except:
+            # Giving up, patch fake one
+            print(&#34;Cannot import:&#34;, sys.exc_info())
+            print(&#34;WebWiew is not available.&#34;)
+            try:
+                WebKit2 = dummywebkit
+            except:
+                print(&#34;Fake kit Exc:&#34;, sys.exc_info())
+            #print(&#34;Fake kit:&#34;, WebKit2)
+            #raise
+
+ui_def = &#34;&#34;&#34;
+        &lt;ui&gt;
+            &lt;toolbar name=&#34;toolbar_format&#34;&gt;
+                &lt;toolitem action=&#34;cut&#34; /&gt;
+                &lt;toolitem action=&#34;copy&#34; /&gt;
+                &lt;toolitem action=&#34;paste&#34; /&gt;
+                &lt;separator /&gt;
+                &lt;toolitem action=&#34;removeformat&#34; /&gt;
+                &lt;toolitem action=&#34;bold&#34; /&gt;
+                &lt;toolitem action=&#34;italic&#34; /&gt;
+                &lt;toolitem action=&#34;underline&#34; /&gt;
+                &lt;toolitem action=&#34;strikethrough&#34; /&gt;
+                &lt;separator /&gt;
+                &lt;toolitem action=&#34;justifyleft&#34; /&gt;
+                &lt;toolitem action=&#34;justifyright&#34; /&gt;
+                &lt;toolitem action=&#34;justifycenter&#34; /&gt;
+                &lt;toolitem action=&#34;justifyfull&#34; /&gt;
+                &lt;separator /&gt;
+                &lt;toolitem action=&#34;undo&#34; /&gt;
+                &lt;toolitem action=&#34;redo&#34; /&gt;
+                &lt;separator /&gt;
+                &lt;toolitem action=&#34;font&#34; /&gt;
+                &lt;toolitem action=&#34;fontsize&#34; /&gt;
+                &lt;toolitem action=&#34;color&#34; /&gt;
+                &lt;toolitem action=&#34;backgroundcolor&#34; /&gt;
+                &lt;separator /&gt;
+                &lt;toolitem action=&#34;insertimage&#34; /&gt;
+                &lt;toolitem action=&#34;insertlink&#34; /&gt;
+                &lt;toolitem action=&#34;inserttable&#34; /&gt;
+                &lt;toolitem action=&#34;editmarker&#34; /&gt;
+                &lt;toolitem action=&#34;H1&#34; /&gt;
+                &lt;toolitem action=&#34;H2&#34; /&gt;
+                &lt;toolitem action=&#34;H3&#34; /&gt;
+                &lt;toolitem action=&#34;H4&#34; /&gt;
+            &lt;/toolbar&gt;
+        &lt;/ui&gt;
+        &#34;&#34;&#34;
+
+#unmask_reserved =   Gdk.ModifierType.GDK_MODIFIER_RESERVED_13_MASK | \
+#                    Gdk.ModifierType.GDK_MODIFIER_RESERVED_14_MASK | \
+#                    Gdk.ModifierType.GDK_MODIFIER_RESERVED_15_MASK | \
+#                    Gdk.ModifierType.GDK_MODIFIER_RESERVED_16_MASK | \
+#                    Gdk.ModifierType.GDK_MODIFIER_RESERVED_17_MASK | \
+#                    Gdk.ModifierType.GDK_MODIFIER_RESERVED_18_MASK | \
+#                    Gdk.ModifierType.GDK_MODIFIER_RESERVED_19_MASK | \
+#                    Gdk.ModifierType.GDK_MODIFIER_RESERVED_20_MASK | \
+#                    Gdk.ModifierType.GDK_MODIFIER_RESERVED_21_MASK | \
+#                    Gdk.ModifierType.GDK_MODIFIER_RESERVED_22_MASK | \
+#                    Gdk.ModifierType.GDK_MODIFIER_RESERVED_23_MASK | \
+#                    Gdk.ModifierType.GDK_MODIFIER_RESERVED_24_MASK | \
+#                    Gdk.ModifierType.GDK_MODIFIER_RESERVED_25_MASK
+
+# These are not setting the modified flag
+
+navkeys = [   \
+                Gdk.KEY_Up,         Gdk.KEY_KP_Up,
+                Gdk.KEY_Down,       Gdk.KEY_KP_Down ,
+                Gdk.KEY_Left,       Gdk.KEY_KP_Left,
+                Gdk.KEY_Right,      Gdk.KEY_KP_Right,
+                Gdk.KEY_Page_Up,    Gdk.KEY_KP_Page_Up,
+                Gdk.KEY_Page_Down,  Gdk.KEY_KP_Page_Down,
+                Gdk.KEY_Home,       Gdk.KEY_KP_Home,
+                Gdk.KEY_End,        Gdk.KEY_KP_End,
+
+                # Also the modifier keys themselves
+                Gdk.KEY_Alt_L,      Gdk.KEY_Alt_R,
+                Gdk.KEY_Control_L,  Gdk.KEY_Control_R,
+                Gdk.KEY_Super_L,    Gdk.KEY_Super_R,
+                Gdk.KEY_Shift_L,    Gdk.KEY_Shift_R,
+
+          ]
+
+# ------------------------------------------------------------------------
+
+class pgwebw(WebKit2.WebView):
+
+    &#39;&#39;&#39; Define our override of the webkit class &#39;&#39;&#39;
+
+    def __init__(self, xlink=None):
+        try:
+            GObject.GObject.__init__(self)
+        except:
+            print(&#34;Cannot ??? in parent object&#34;, sys.exc_info())
+            pass
+        self.xlink = xlink
+        self.set_editable(True)
+
+        #if editable:
+        #    self.set_editable(True)
+
+        self.fname = &#34;&#34;
+        self.load_html(&#34;&#34;, &#34;file:///&#34;)
+        self.ui = self.generate_ui()
+        self.connect(&#34;key-release-event&#34;,  self.keypress)
+        self.modified = False
+
+    def  _get_response_data_finish(self, resource, result, user_data=None):
+        self.old_html = resource.get_data_finish(result)
+        #print((self.old_html))
+
+    def keypress(self, arg, arg2):
+
+        &#39;&#39;&#39; Here we imitate the way the accelerator works &#39;&#39;&#39;
+
+        state = arg2.get_state() &amp; Gdk.ModifierType.MODIFIER_MASK
+        key = arg2.get_keyval()[1]
+        #print(&#34;key&#34;,  key, &#34;state&#34;, state)
+
+        #GDK_MODIFIER_RESERVED_25_MASK
+
+        # Feeding off the accelarator&#39;s definitions
+        ag = self.ui.get_action_groups()[0]
+        acts = ag.list_actions()
+
+        # Scan - Fire
+        for aa in acts:
+            if aa.accel:
+                #print(nnn, aa.accel, aa.accel_parsed)
+                if state == aa.accel_parsed[1]:
+                    #print(&#34;state match&#34;)
+                    if key == aa.accel_parsed[0]:
+                        #print(&#34;Fire &#34;, aa.get_name(), aa.get_label())
+                        #lab = aa.get_label()
+                        aa.activate()
+                        break   # Only one accel the other is a mistake
+
+        # See if nav key
+        navkey = False
+        for aa in navkeys:
+            if key == aa:
+                #print(&#34;Navkey&#34;, aa)
+                navkey = True
+        if not navkey:
+            # Exclude Ctrl-s
+            if state == Gdk.ModifierType.CONTROL_MASK and key == 115:
+                #print(&#34;Control s&#34;)
+                pass
+            else:
+                #print(&#34;set on key&#34;, key)
+                self.modified =  True
+
+    def do_ready_to_show(self):
+        print(&#34;do_ready_to_show() was called&#34;)
+        pass
+
+    def do_load_changed(self, status):
+
+        #print(&#34;do_load_changed()&#34;, status)
+        if status == WebKit2.LoadEvent.FINISHED:
+            &#39;&#39;&#39; Create a shadow of content &#39;&#39;&#39;
+
+            # This gets it without spaces
+            #resource = self.get_main_resource()
+            #resource.get_data(None, self._get_response_data_finish, None)
+
+            # Get it by JS
+            def completion(html, user_data):
+                self.old_html = html
+            self.get_html(completion, &#39;&#39;)
+
+
+        if self.get_uri():
+            if self.xlink:
+                self.xlink.set_status(&#34;Loading ... &#34; + self.get_uri()[:64])
+
+        if status == 3: #WebKit2.LoadEvent.WEBKIT_LOAD_FINISHED:
+            #print(&#34;got WEBKIT_LOAD_FINISHED&#34;)
+            if self.get_uri():
+                if self.xlink:
+                    self.xlink.edit.set_text(self.get_uri()[:64])
+                    self.xlink.set_status(&#34;Finished: &#34; + self.get_uri()[:64])
+            self.grab_focus()
+
+    def do_load_failed(self, load_event, failing_uri, error):
+        print(&#34;do_load_failed() was called&#34;, failing_uri)
+        if self.xlink:
+            self.xlink.set_status(&#34;Failed: &#34; + failing_uri[:64])
+
+    def on_header(self, action):
+        #print(&#34;on_aheader&#34;, action.get_name())
+        ddd = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY)
+        ccc = None
+        while True:
+            #target = Gdk.Atom.intern (&#34;text/html&#34;, True);
+            #ccc = ddd.wait_for_contents(target)
+            #if ccc:
+            #    break
+            target2 = Gdk.Atom.intern (&#34;text/plain&#34;, True);
+            ccc = ddd.wait_for_contents(target2)
+            if ccc:
+                break
+            break
+
+        if not ccc:
+            return
+
+        dddd = ccc.get_data().decode()
+        if not dddd:
+            return
+        #print(&#34;dddd&#34;, dddd)
+        htmlx = &#34;&lt;%s&gt;%s&lt;/%s&gt;&#34; % (action.get_name(), dddd, action.get_name())
+        self.run_javascript(&#34;document.execCommand \
+                            (&#39;insertHTML&#39;, null, &#39;%s&#39;);&#34; % htmlx)
+        Gtk.Clipboard.clear(ddd)
+        self.modified = True
+
+    def on_action(self, action):
+        #print(&#34;on_action&#34;, action.get_name())
+        # Make it caller neutral
+        if type(action) == str:
+            nnn = action
+        else:
+            nnn = action.get_name()
+        self.run_javascript(&#34;document.execCommand(&#39;%s&#39;, false, false);&#34; % nnn)
+        self.modified = True
+
+    def on_paste(self, action = &#34;&#34;):
+        print(&#34;Paste&#34;)
+        self.execute_editing_command(WebKit2.EDITING_COMMAND_PASTE)
+
+    def on_new(self, action):
+        self.load_html(&#34;&#34;, &#34;file:///&#34;)
+        self.modified = False
+
+    def on_fontsize(self, action):
+        #print(&#34;on_fontsize&#34;)
+        sizex = sizedialog()
+        #print(&#34;sizex&#34;, sizex)
+        if not sizex:
+            return
+
+        c = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY)
+        sel = c.wait_for_targets()
+        #print(&#34;sel&#34;, sel)
+        target = Gdk.Atom.intern (&#34;text/plain&#34;, True);
+        ccc = c.wait_for_contents(target)
+        if not ccc:
+            htmlx = &#34;&lt;span style=\&#34;font-size: %dpx;\&#34;&gt;%s&lt;/span&gt;&#34; % (int(sizex), &#34;&#34;)
+            self.run_javascript(&#34;document.execCommand(&#39;insertHTML&#39;, null, &#39;%s&#39;);&#34; % htmlx)
+            return
+
+        ddd = ccc.get_data().decode()
+        if not ddd:
+            return
+
+        #print(&#34;ddd&#34;, ddd)
+        htmlx = &#34;&lt;span style=\&#34;font-size: %dpx;\&#34;&gt;%s&lt;/span&gt;&#34; % (int(sizex), ddd)
+        self.run_javascript(&#34;document.execCommand(&#39;insertHTML&#39;, null, &#39;%s&#39;);&#34; % htmlx)
+        Gtk.Clipboard.clear(c)
+        self.modified = True
+
+    def on_select_font(self, action):
+        dialog = Gtk.FontChooserDialog(&#34;Select a font&#34;)
+        if dialog.run() == Gtk.ResponseType.OK:
+            fname = dialog.get_font_desc().get_family()
+            fsize = dialog.get_font_desc().get_size() / Pango.SCALE
+            ttt = int(1 + round(fsize / 10)) % 9
+            print(&#34;Setting font&#34;, fname, fsize, ttt)
+            self.run_javascript(&#34;document.execCommand(&#39;fontname&#39;, null, &#39;%s&#39;);&#34; % fname)
+            self.run_javascript(&#34;document.execCommand(&#39;fontsize&#39;, null, &#39;%s&#39;);&#34; % ttt)
+        dialog.destroy()
+
+    def on_select_color(self, action):
+        dialog = Gtk.ColorChooserDialog(&#34;Select Color&#34;)
+        if dialog.run() == Gtk.ResponseType.OK:
+            (r, g, b, a) = dialog.get_rgba()
+            color = &#34;#%0.2x%0.2x%0.2x%0.2x&#34; % (
+                int(r * 255),
+                int(g * 255),
+                int(b * 255),
+                int(a * 255))
+            self.run_javascript(&#34;document.execCommand(&#39;forecolor&#39;, null, &#39;%s&#39;);&#34; % color)
+        dialog.destroy()
+
+    def on_select_bgcolor(self, action):
+        dialog = Gtk.ColorChooserDialog(&#34;Select Background Color&#34;)
+        if dialog.run() == Gtk.ResponseType.OK:
+            (r, g, b, a) = dialog.get_rgba()
+            color = &#34;#%0.2x%0.2x%0.2x%0.2x&#34; % (
+                int(r * 255),
+                int(g * 255),
+                int(b * 255),
+                int(a * 255))
+            self.run_javascript(&#34;document.execCommand(&#39;backcolor&#39;, null, &#39;%s&#39;);&#34; % color)
+        dialog.destroy()
+
+    def on_edit_marker(self, action):
+        print(&#34;on_edit_marker&#34;, action.get_name())
+
+        c = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY)
+        sel = c.wait_for_targets()
+        target = Gdk.Atom.intern (&#34;text/html&#34;, True);
+        ccc = c.wait_for_contents(target)
+        #print(&#34;sel&#34;, ccc.get_data())
+        #ccc.free()
+        htmlx = markdialog(ccc.get_data().decode())
+        if htmlx:
+            print(&#34;markdialog result:\n&#34;, htmlx)
+            self.run_javascript(&#34;document.execCommand(&#39;insertHTML&#39;, null, &#39;%s&#39;);&#34; % htmlx)
+
+    def on_insert_table(self, action):
+        htmlx = &#34;&lt;table align=center border=0 contentEditable=true&gt;&#34; + \
+                &#34;&lt;tr&gt;&lt;td&gt;TR1 C1 &lt;td&gt;| TR1 C2 &lt;tr&gt;&lt;td&gt;TR2 C1&lt;td&gt;| TR2 C1&lt;/table&gt;&lt;br&gt;&#34;
+
+        #print(&#34;table&#34;, htmlx)
+        self.run_javascript(&#34;document.execCommand(&#39;insertHTML&#39;, null, &#39;%s&#39;);&#34; % htmlx)
+        self.modified = True
+
+    def on_insert_link(self, action):
+        dialog = Gtk.Dialog(&#34;   Enter a URL:   &#34;, None, 0,
+        (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK))
+
+        entry = Gtk.Entry()
+        dialog.vbox.pack_start(Gtk.Label(&#34;  &#34;), False, False, 0)
+        hbox = Gtk.HBox()
+        hbox.pack_start(Gtk.Label(&#34;  &#34;), False, False, 0)
+        hbox.pack_start(entry, False, False, 0)
+        hbox.pack_start(Gtk.Label(&#34;  &#34;), False, False, 0)
+        dialog.vbox.pack_start(hbox, False, False, 0)
+
+        dialog.vbox.pack_start(Gtk.Label(&#34;  &#34;), False, False, 0)
+        dialog.show_all()
+
+        if dialog.run() == Gtk.ResponseType.OK:
+            self.run_javascript(
+                &#34;document.execCommand(&#39;createLink&#39;, True, &#39;%s&#39;);&#34; % entry.get_text())
+        dialog.destroy()
+        self.modified = True
+
+    def on_insert_image(self, action):
+        dialog = Gtk.FileChooserDialog(&#34;Select an image file&#34;, None, Gtk.FileChooserAction.OPEN,
+        (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+
+        if dialog.run() == Gtk.ResponseType.OK:
+            fn = dialog.get_filename()
+            if os.path.exists(fn):
+                self.run_javascript(
+                &#34;document.execCommand(&#39;insertImage&#39;, null, &#39;%s&#39;);&#34; % fn)
+        dialog.destroy()
+        self.modified = True
+
+    def on_open(self, action):
+        dialog = Gtk.FileChooserDialog(&#34;Select an HTML file&#34;, self, Gtk.FileChooserAction.OPEN,
+        (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+
+        if dialog.run() == Gtk.ResponseType.OK:
+            fn = dialog.get_filename()
+            if os.path.exists(fn):
+                self.fname = fn
+                with open(fn) as fd:
+                    self.load_html(fd.read(), &#34;file:///&#34;)
+        dialog.destroy()
+
+    def on_save(self, action):
+        def completion(html, user_data):
+            open_mode = user_data
+            with open(self.fname, open_mode) as fd:
+                fd.write(html)
+
+        if self.fname:
+            self.get_html(completion, &#39;w&#39;)
+        else:
+            dialog = Gtk.FileChooserDialog(&#34;Select an HTML file&#34;, None,
+                    Gtk.FileChooserAction.SAVE,
+                        (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                            Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
+
+            if dialog.run() == Gtk.ResponseType.OK:
+                self.fname = dialog.get_filename()
+                print(&#34;Saving&#34;, self.fname)
+                self.get_html(completion, &#34;w+&#34;)
+            dialog.destroy()
+
+    def get_html(self, completion_function, user_data):
+
+        #print(&#34;get_html&#34;)
+        def javascript_completion(obj, result, user_data):
+            #print(&#34;javascript_completion&#34;, result)
+            fin = self.run_javascript_finish(result)
+            #print(&#34;fin&#34;, fin)
+            html = fin.get_js_value().to_string()
+            #print(&#34;len html&#34;, len(html), &#34;\n&#34;)
+            completion_function(html, user_data)
+        self.run_javascript(&#34;document.documentElement.innerHTML;&#34;,
+                                   None,
+                                   javascript_completion,
+                                   user_data)
+
+    def get_lastmod(self, completion_function, user_data):
+
+        print(&#34;get_lastmod&#34;)
+        def javascript_completion(obj, result, user_data):
+            print(&#34;javascript_completion&#34;, result)
+            fin = self.run_javascript_finish(result)
+            #print(&#34;fin&#34;, fin)
+            html = fin.get_js_value().to_string()
+            print(&#34;lastmod&#34;, html, &#34;\n&#34;)
+            #completion_function(html, user_data)
+        self.run_javascript(&#34;document.lastModified&#34;,
+                                   None,
+                                   javascript_completion,
+                                   user_data)
+
+
+    def generate_ui(self):
+
+        &#39;&#39;&#39; define toolbar items and actions here &#39;&#39;&#39;
+
+        actions = Gtk.ActionGroup(&#34;Actions&#34;)
+    # ----------------------------------------------------------------
+    # Name,     Stock Icon,   Accelerator,  ToolTip,   Action
+
+    # Some already has app accels
+
+        accel_arr = [ \
+
+    #(&#34;menuFile&#34;,    None, &#34;_File&#34;),
+    #(&#34;menuEdit&#34;,    None, &#34;_Edit&#34;),
+    #(&#34;menuInsert&#34;,  None, &#34;_Insert&#34;),
+    #(&#34;menuFormat&#34;,  None, &#34;_Format&#34;),
+    #(&#34;new&#34;,         Gtk.STOCK_NEW, &#34;_New&#34;, None, None, self.on_new),
+    #(&#34;open&#34;,        Gtk.STOCK_OPEN, &#34;_Open&#34;, None, None, self.on_open),
+    #(&#34;save&#34;,        Gtk.STOCK_SAVE, &#34;_Save&#34;, None, None, self.on_save),
+
+    (&#34;cut&#34;,         Gtk.STOCK_CUT, &#34;_Cut&#34;, None, None, self.on_action),
+    (&#34;copy&#34;,        Gtk.STOCK_COPY, &#34;_Copy&#34;, None, None, self.on_action),
+    (&#34;paste&#34;,       Gtk.STOCK_PASTE, &#34;_Paste&#34;, None, None, self.on_paste),
+
+    (&#34;undo&#34;,        Gtk.STOCK_UNDO, &#34;_Undo&#34;, &#34;&lt;Control&gt;z&#34;, &#34;Undo Last Edit&#34;, self.on_action),
+    (&#34;redo&#34;,        Gtk.STOCK_REDO, &#34;_Redo&#34;, &#34;&lt;Control&gt;y&#34;, &#34;Redo Last Undo&#34;, self.on_action),
+
+    (&#34;removeformat&#34;, Gtk.STOCK_PROPERTIES, &#34;_removeFormat&#34;, &#34;&lt;Control&gt;M&#34;, &#34;Remove Formatting&#34;, self.on_action),
+    (&#34;bold&#34;,        Gtk.STOCK_BOLD, &#34;_Bold&#34;, &#34;&#34;, &#34;Bold / UnBold Selection&#34;, self.on_action),
+    (&#34;italic&#34;,      Gtk.STOCK_ITALIC, &#34;_Italic&#34;, &#34;&#34;, None, self.on_action),
+    (&#34;underline&#34;,       Gtk.STOCK_UNDERLINE, &#34;_Underline&#34;, &#34;&#34;, None, self.on_action),
+    (&#34;strikethrough&#34;, Gtk.STOCK_STRIKETHROUGH, &#34;_Strike&#34;, &#34;&#34;, None, self.on_action),
+    (&#34;font&#34;,        Gtk.STOCK_SELECT_FONT, &#34;Select _Font&#34;, &#34;&#34;, None, self.on_select_font),
+    (&#34;fontsize&#34;,    None, &#34;Select Font _Size&#34;, &#34;&lt;Control&gt;f&#34;, &#34;Set Absolute Size (removes color)&#34;, self.on_fontsize),
+    (&#34;color&#34;,       Gtk.STOCK_SELECT_COLOR, &#34;Select _Color&#34;, None, None, self.on_select_color),
+    (&#34;backgroundcolor&#34;, Gtk.STOCK_COLOR_PICKER, &#34;Select Back Color&#34;, None, None, self.on_select_bgcolor),
+
+    (&#34;justifyleft&#34;,  Gtk.STOCK_JUSTIFY_LEFT, &#34;Justify _Left&#34;, None, None, self.on_action),
+    (&#34;justifyright&#34;, Gtk.STOCK_JUSTIFY_RIGHT, &#34;Justify _Right&#34;, None, None, self.on_action),
+    (&#34;justifycenter&#34;, Gtk.STOCK_JUSTIFY_CENTER, &#34;Justify _Center&#34;, None, None, self.on_action),
+    (&#34;justifyfull&#34;,   Gtk.STOCK_JUSTIFY_FILL, &#34;Justify _Full&#34;, None, None, self.on_action),
+
+    # Pad Images by name (may not be present in all styles)
+    (&#34;insertimage&#34;, &#34;insert-image&#34;, &#34;Insert _Image&#34;, None, None, self.on_insert_image),
+    (&#34;insertlink&#34;, &#34;insert-link&#34;, &#34;Insert _Link&#34;, None, None, self.on_insert_link),
+    (&#34;inserttable&#34;, &#34;insert-table&#34;, &#34;Insert _Table&#34;, None, None, self.on_insert_table),
+    (&#34;editmarker&#34;, &#34;edit-marker&#34;, &#34;edit _Marker&#34;, None, None, self.on_edit_marker),
+
+    (&#34;H1&#34;,   Gtk.STOCK_EXECUTE, &#34;Header 1&#34;, None, &#34;Insert Header 1&#34;, self.on_header),
+    (&#34;H2&#34;,   Gtk.STOCK_EXECUTE, &#34;Header 2&#34;, None, &#34;Insert Header 2&#34;, self.on_header),
+    (&#34;H3&#34;,   Gtk.STOCK_EXECUTE, &#34;Header 3&#34;, None, &#34;Insert Header 3&#34;, self.on_header),
+    (&#34;H4&#34;,   Gtk.STOCK_EXECUTE, &#34;Header 4&#34;, None, &#34;Insert Header 4&#34;, self.on_header),
+
+    ]
+
+        actions.add_actions(accel_arr)
+
+        #print(dir(actions))
+        for aa in accel_arr:
+        #    print(&#34;acc arr&#34;, dir(aa))
+        #    break
+        #    act = actions.get_action(aa[0])
+        #    print(&#34;act&#34;, act.get_name(), act.get_tooltip())
+            pass
+        #    try:
+        #        act = Gtk.Action.new(aa[0], aa[2], aa[4], aa[1])
+        #        actions.add_action_with_accel(act, aa[3])
+        #    except:
+        #        #print(&#34;Exc on&#34;, aa)
+        #        pass
+
+        actions.get_action(&#34;insertimage&#34;).set_property(&#34;icon-name&#34;, &#34;insert-image&#34;)
+        actions.get_action(&#34;insertlink&#34;).set_property(&#34;icon-name&#34;, &#34;insert-link&#34;)
+        actions.get_action(&#34;inserttable&#34;).set_property(&#34;icon-name&#34;, &#34;appointment-new&#34;)
+        actions.get_action(&#34;editmarker&#34;).set_property(&#34;icon-name&#34;, &#34;text-editor&#34;)
+        actions.get_action(&#34;fontsize&#34;).set_property(&#34;icon-name&#34;, &#34;preferences-desktop-font&#34;)
+        actions.get_action(&#34;removeformat&#34;).set_property(&#34;icon-name&#34;, &#34;text-direction&#34;)
+
+        ui = Gtk.UIManager()
+        ui.insert_action_group(actions)
+        ui.add_ui_from_string(ui_def)
+
+        # Fill in defaults
+        xxx = ui.get_action_groups()[0].list_actions()
+        for aa in xxx:
+            nnn = aa.get_name()
+            # Find the original, patth missing info
+            for bb in accel_arr:
+                # Convert tuple
+                bbb = list(bb)
+                if bb[0] == nnn:
+                    # Pad for this round
+                    for cc in range(5 - len(bbb)):
+                        bbb.append(&#34;&#34;)
+
+                    #print(&#34;lab&#34;, bb[2], aa.get_label())
+                    #print(&#34;found&#34;, nnn, bbb[3])
+
+                    setattr(aa, &#34;accel&#34;, bbb[3])
+                    if bbb[3]:
+                        try:
+                            nn, ss = Gtk.accelerator_parse(bbb[3])
+                            setattr(aa, &#34;accel_parsed&#34;, (nn, ss))
+                        except:
+                            pass
+
+            # Pad it with capitalize name if not there
+            if  not aa.get_tooltip():
+                aa.set_tooltip(nnn[0].upper() + nnn[1:])
+
+        return ui
+
+# This is kicked in if there is no library  (is it used?)
+
+class pgwebw_fake(Gtk.VBox):
+
+    def __init__(self):
+        super(pgwebw_fake, self).__init__();
+        pass
+
+    def load_uri(self, url):
+        pass
+
+def markdialog(sss):
+
+    spaceneed = 64
+    # Wrap tesxt if long
+    ssss = &#34;&#34;
+    cnt = 0; fff = 0
+    for aa in sss:
+        if cnt &gt; spaceneed:
+            fff = 1
+        if fff and aa.isspace():
+            cnt = 0; fff = 0
+            ssss += &#34;\n&#34;
+        ssss += aa
+        cnt += 1
+
+    dialog = Gtk.Dialog(&#34;   Edit markup   &#34;, None, 0,
+    (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK))
+
+    textview = Gtk.TextView()
+    textview.set_editable(True)
+
+    textbuffer = textview.get_buffer()
+    textbuffer.set_text(ssss)
+
+    scrolledwindow = Gtk.ScrolledWindow()
+    scrolledwindow.set_hexpand(True)
+    scrolledwindow.set_vexpand(True)
+    scrolledwindow.add(textview)
+    scrolledwindow.set_size_request(640, 480)
+
+    hhh = &#34;\n          &#34; \
+            &#34;In general, any valid html can go here. Keep it simple.\n&#34; \
+            &#34;The editor already decorated this sufficiently, &#34;\
+              &#34;try to edit existing items in place.\n&#34;
+
+    lll = Gtk.Label(hhh)
+    fd = Pango.FontDescription(&#34;Sans 9&#34;)
+    lll.override_font(fd)
+    thbox = Gtk.HBox()
+    thbox.pack_start(lll, 1, 1, 1)
+    dialog.vbox.pack_start(thbox, False, False, 0)
+    hbox = Gtk.HBox()
+    hbox.pack_start(Gtk.Label(&#34; &#34;), False, False, 0)
+    hbox.pack_start(scrolledwindow, 1, 1, 0)
+    hbox.pack_start(Gtk.Label(&#34; &#34;), False, False, 0)
+    dialog.vbox.pack_start(hbox, 1, 1, 0)
+    #dialog.vbox.pack_start(Gtk.Label(&#34; &#34;), False, False, 0)
+    dialog.show_all()
+
+    htmlx = &#34;&#34;
+    if dialog.run() == Gtk.ResponseType.OK:
+        bi = textbuffer.get_start_iter()
+        ei = textbuffer.get_end_iter()
+        htmlx = textbuffer.get_text(bi, ei, False)
+
+    dialog.destroy()
+
+    # Unwrap it
+    usss = &#34;&#34;
+    cnt = 0; fff = 0
+    for aa in htmlx:
+        if aa == &#39;\n&#39;:
+            pass
+        else:
+            usss += aa
+    return usss
+
+def treecallb(ddd):
+    global sizex
+    #print(&#34;tree cb&#34;, ddd[0])
+    sizex = ddd[0]
+
+def sizedialog():
+
+    &#39;&#39;&#39; Present a selection Dialog for font sizes &#39;&#39;&#39;
+
+    dialog = Gtk.Dialog(&#34;  Font Size   &#34;, None, 0, () )
+
+    #(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK))
+
+    global sizex
+    sizex = &#34;&#34;
+    treedat = [&#34;8&#34;, &#34;9&#34;, &#34;10&#34;, &#34;12&#34;, &#34;14&#34;, &#34;20&#34;, &#34;24&#34;, &#34;32&#34;, &#34;48&#34;, &#34;56&#34;, &#34;64&#34;,
+                    &#34;72&#34;, &#34;96&#34;, &#34;128&#34;]
+
+    tree = SimpleTree([&#34;Font Sizes&#34;])
+    for aa in treedat:
+        tree.append((aa,))
+
+    def actcallb(ddd):
+        #print(&#34;Activate cb&#34;, ddd, dialog)
+        dialog.response(Gtk.ResponseType.OK)
+        #print(&#34;Activate cb2&#34;, ddd, dialog)
+
+    scrolledwindow = Gtk.ScrolledWindow()
+    scrolledwindow.set_hexpand(True)
+    scrolledwindow.set_vexpand(True)
+    scrolledwindow.add(tree)
+    scrolledwindow.set_size_request(120, 300)
+
+    tree.setcallb(treecallb)
+    tree.setActcallb(actcallb)
+
+    hhh = &#34;\n          &#34; \
+            &#34;In general, any valid html can go here. Keep it simple.\n&#34; \
+            &#34;The editor already decorated this sufficiently, &#34;\
+              &#34;try to edit existing items in place.\n&#34;
+
+    lll = Gtk.Label(hhh)
+    fd = Pango.FontDescription(&#34;Sans 9&#34;)
+    lll.override_font(fd)
+    thbox = Gtk.HBox()
+    thbox.pack_start(lll, 1, 1, 1)
+    #dialog.vbox.pack_start(thbox, False, False, 0)
+
+    hbox = Gtk.HBox()
+    hbox.pack_start(Gtk.Label(&#34; &#34;), False, False, 0)
+    hbox.pack_start(scrolledwindow, 1, 1, 0)
+    hbox.pack_start(Gtk.Label(&#34; &#34;), False, False, 0)
+    dialog.vbox.pack_start(hbox, 1, 1, 0)
+    #dialog.vbox.pack_start(Gtk.Label(&#34; &#34;), False, False, 0)
+    dialog.show_all()
+
+    if dialog.run() == Gtk.ResponseType.OK:
+        #print(&#34;ok&#34;, sizex)
+        pass
+    else:
+        sizex = 0
+
+    dialog.destroy()
+    return sizex
+
+# EOF</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="pgwkit.markdialog"><code class="name flex">
+<span>def <span class="ident">markdialog</span></span>(<span>sss)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def markdialog(sss):
+
+    spaceneed = 64
+    # Wrap tesxt if long
+    ssss = &#34;&#34;
+    cnt = 0; fff = 0
+    for aa in sss:
+        if cnt &gt; spaceneed:
+            fff = 1
+        if fff and aa.isspace():
+            cnt = 0; fff = 0
+            ssss += &#34;\n&#34;
+        ssss += aa
+        cnt += 1
+
+    dialog = Gtk.Dialog(&#34;   Edit markup   &#34;, None, 0,
+    (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK))
+
+    textview = Gtk.TextView()
+    textview.set_editable(True)
+
+    textbuffer = textview.get_buffer()
+    textbuffer.set_text(ssss)
+
+    scrolledwindow = Gtk.ScrolledWindow()
+    scrolledwindow.set_hexpand(True)
+    scrolledwindow.set_vexpand(True)
+    scrolledwindow.add(textview)
+    scrolledwindow.set_size_request(640, 480)
+
+    hhh = &#34;\n          &#34; \
+            &#34;In general, any valid html can go here. Keep it simple.\n&#34; \
+            &#34;The editor already decorated this sufficiently, &#34;\
+              &#34;try to edit existing items in place.\n&#34;
+
+    lll = Gtk.Label(hhh)
+    fd = Pango.FontDescription(&#34;Sans 9&#34;)
+    lll.override_font(fd)
+    thbox = Gtk.HBox()
+    thbox.pack_start(lll, 1, 1, 1)
+    dialog.vbox.pack_start(thbox, False, False, 0)
+    hbox = Gtk.HBox()
+    hbox.pack_start(Gtk.Label(&#34; &#34;), False, False, 0)
+    hbox.pack_start(scrolledwindow, 1, 1, 0)
+    hbox.pack_start(Gtk.Label(&#34; &#34;), False, False, 0)
+    dialog.vbox.pack_start(hbox, 1, 1, 0)
+    #dialog.vbox.pack_start(Gtk.Label(&#34; &#34;), False, False, 0)
+    dialog.show_all()
+
+    htmlx = &#34;&#34;
+    if dialog.run() == Gtk.ResponseType.OK:
+        bi = textbuffer.get_start_iter()
+        ei = textbuffer.get_end_iter()
+        htmlx = textbuffer.get_text(bi, ei, False)
+
+    dialog.destroy()
+
+    # Unwrap it
+    usss = &#34;&#34;
+    cnt = 0; fff = 0
+    for aa in htmlx:
+        if aa == &#39;\n&#39;:
+            pass
+        else:
+            usss += aa
+    return usss</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.sizedialog"><code class="name flex">
+<span>def <span class="ident">sizedialog</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Present a selection Dialog for font sizes</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sizedialog():
+
+    &#39;&#39;&#39; Present a selection Dialog for font sizes &#39;&#39;&#39;
+
+    dialog = Gtk.Dialog(&#34;  Font Size   &#34;, None, 0, () )
+
+    #(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK))
+
+    global sizex
+    sizex = &#34;&#34;
+    treedat = [&#34;8&#34;, &#34;9&#34;, &#34;10&#34;, &#34;12&#34;, &#34;14&#34;, &#34;20&#34;, &#34;24&#34;, &#34;32&#34;, &#34;48&#34;, &#34;56&#34;, &#34;64&#34;,
+                    &#34;72&#34;, &#34;96&#34;, &#34;128&#34;]
+
+    tree = SimpleTree([&#34;Font Sizes&#34;])
+    for aa in treedat:
+        tree.append((aa,))
+
+    def actcallb(ddd):
+        #print(&#34;Activate cb&#34;, ddd, dialog)
+        dialog.response(Gtk.ResponseType.OK)
+        #print(&#34;Activate cb2&#34;, ddd, dialog)
+
+    scrolledwindow = Gtk.ScrolledWindow()
+    scrolledwindow.set_hexpand(True)
+    scrolledwindow.set_vexpand(True)
+    scrolledwindow.add(tree)
+    scrolledwindow.set_size_request(120, 300)
+
+    tree.setcallb(treecallb)
+    tree.setActcallb(actcallb)
+
+    hhh = &#34;\n          &#34; \
+            &#34;In general, any valid html can go here. Keep it simple.\n&#34; \
+            &#34;The editor already decorated this sufficiently, &#34;\
+              &#34;try to edit existing items in place.\n&#34;
+
+    lll = Gtk.Label(hhh)
+    fd = Pango.FontDescription(&#34;Sans 9&#34;)
+    lll.override_font(fd)
+    thbox = Gtk.HBox()
+    thbox.pack_start(lll, 1, 1, 1)
+    #dialog.vbox.pack_start(thbox, False, False, 0)
+
+    hbox = Gtk.HBox()
+    hbox.pack_start(Gtk.Label(&#34; &#34;), False, False, 0)
+    hbox.pack_start(scrolledwindow, 1, 1, 0)
+    hbox.pack_start(Gtk.Label(&#34; &#34;), False, False, 0)
+    dialog.vbox.pack_start(hbox, 1, 1, 0)
+    #dialog.vbox.pack_start(Gtk.Label(&#34; &#34;), False, False, 0)
+    dialog.show_all()
+
+    if dialog.run() == Gtk.ResponseType.OK:
+        #print(&#34;ok&#34;, sizex)
+        pass
+    else:
+        sizex = 0
+
+    dialog.destroy()
+    return sizex</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.treecallb"><code class="name flex">
+<span>def <span class="ident">treecallb</span></span>(<span>ddd)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def treecallb(ddd):
+    global sizex
+    #print(&#34;tree cb&#34;, ddd[0])
+    sizex = ddd[0]</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="pgwkit.dummywebkit"><code class="flex name class">
+<span>class <span class="ident">dummywebkit</span></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class dummywebkit():
+    WebView = dummywebview</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="pgwkit.dummywebkit.WebView"><code class="name">var <span class="ident">WebView</span></code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>VBox(**properties)
+new(homogeneous:bool, spacing:int) -&gt; Gtk.Widget
+</code></pre></div>
+</dd>
+</dl>
+</dd>
+<dt id="pgwkit.dummywebview"><code class="flex name class">
+<span>class <span class="ident">dummywebview</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>VBox(**properties)
+new(homogeneous:bool, spacing:int) -&gt; Gtk.Widget
+</code></pre>
+<p>Initializer for a GObject based classes with support for property
+sets through the use of explicit keyword arguments.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class dummywebview(Gtk.VBox):
+
+    def __int__(self):
+        super().__init__(self)
+        #self.pack_start(Gtk.Label(label=&#34;No WebView&#34;), 1, 1, 0)
+    def set_editable(self, flag):
+        self.pack_start(Gtk.Label(label=&#34;No WebView Available&#34;), 1, 1, 0)
+        pass
+    def load_html(self, ff, kk = None):
+        pass
+    def connect(self, aa, bb):
+        pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.VBox</li>
+<li>gi.overrides.Gtk.Box</li>
+<li>gi.repository.Gtk.Box</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gi.repository.Gtk.Orientable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pgwkit.dummywebview.connect"><code class="name flex">
+<span>def <span class="ident">connect</span></span>(<span>self, aa, bb)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def connect(self, aa, bb):
+    pass</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.dummywebview.load_html"><code class="name flex">
+<span>def <span class="ident">load_html</span></span>(<span>self, ff, kk=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_html(self, ff, kk = None):
+    pass</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.dummywebview.set_editable"><code class="name flex">
+<span>def <span class="ident">set_editable</span></span>(<span>self, flag)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_editable(self, flag):
+    self.pack_start(Gtk.Label(label=&#34;No WebView Available&#34;), 1, 1, 0)
+    pass</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pgwkit.pgwebw"><code class="flex name class">
+<span>class <span class="ident">pgwebw</span></span>
+<span>(</span><span>xlink=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define our override of the webkit class</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class pgwebw(WebKit2.WebView):
+
+    &#39;&#39;&#39; Define our override of the webkit class &#39;&#39;&#39;
+
+    def __init__(self, xlink=None):
+        try:
+            GObject.GObject.__init__(self)
+        except:
+            print(&#34;Cannot ??? in parent object&#34;, sys.exc_info())
+            pass
+        self.xlink = xlink
+        self.set_editable(True)
+
+        #if editable:
+        #    self.set_editable(True)
+
+        self.fname = &#34;&#34;
+        self.load_html(&#34;&#34;, &#34;file:///&#34;)
+        self.ui = self.generate_ui()
+        self.connect(&#34;key-release-event&#34;,  self.keypress)
+        self.modified = False
+
+    def  _get_response_data_finish(self, resource, result, user_data=None):
+        self.old_html = resource.get_data_finish(result)
+        #print((self.old_html))
+
+    def keypress(self, arg, arg2):
+
+        &#39;&#39;&#39; Here we imitate the way the accelerator works &#39;&#39;&#39;
+
+        state = arg2.get_state() &amp; Gdk.ModifierType.MODIFIER_MASK
+        key = arg2.get_keyval()[1]
+        #print(&#34;key&#34;,  key, &#34;state&#34;, state)
+
+        #GDK_MODIFIER_RESERVED_25_MASK
+
+        # Feeding off the accelarator&#39;s definitions
+        ag = self.ui.get_action_groups()[0]
+        acts = ag.list_actions()
+
+        # Scan - Fire
+        for aa in acts:
+            if aa.accel:
+                #print(nnn, aa.accel, aa.accel_parsed)
+                if state == aa.accel_parsed[1]:
+                    #print(&#34;state match&#34;)
+                    if key == aa.accel_parsed[0]:
+                        #print(&#34;Fire &#34;, aa.get_name(), aa.get_label())
+                        #lab = aa.get_label()
+                        aa.activate()
+                        break   # Only one accel the other is a mistake
+
+        # See if nav key
+        navkey = False
+        for aa in navkeys:
+            if key == aa:
+                #print(&#34;Navkey&#34;, aa)
+                navkey = True
+        if not navkey:
+            # Exclude Ctrl-s
+            if state == Gdk.ModifierType.CONTROL_MASK and key == 115:
+                #print(&#34;Control s&#34;)
+                pass
+            else:
+                #print(&#34;set on key&#34;, key)
+                self.modified =  True
+
+    def do_ready_to_show(self):
+        print(&#34;do_ready_to_show() was called&#34;)
+        pass
+
+    def do_load_changed(self, status):
+
+        #print(&#34;do_load_changed()&#34;, status)
+        if status == WebKit2.LoadEvent.FINISHED:
+            &#39;&#39;&#39; Create a shadow of content &#39;&#39;&#39;
+
+            # This gets it without spaces
+            #resource = self.get_main_resource()
+            #resource.get_data(None, self._get_response_data_finish, None)
+
+            # Get it by JS
+            def completion(html, user_data):
+                self.old_html = html
+            self.get_html(completion, &#39;&#39;)
+
+
+        if self.get_uri():
+            if self.xlink:
+                self.xlink.set_status(&#34;Loading ... &#34; + self.get_uri()[:64])
+
+        if status == 3: #WebKit2.LoadEvent.WEBKIT_LOAD_FINISHED:
+            #print(&#34;got WEBKIT_LOAD_FINISHED&#34;)
+            if self.get_uri():
+                if self.xlink:
+                    self.xlink.edit.set_text(self.get_uri()[:64])
+                    self.xlink.set_status(&#34;Finished: &#34; + self.get_uri()[:64])
+            self.grab_focus()
+
+    def do_load_failed(self, load_event, failing_uri, error):
+        print(&#34;do_load_failed() was called&#34;, failing_uri)
+        if self.xlink:
+            self.xlink.set_status(&#34;Failed: &#34; + failing_uri[:64])
+
+    def on_header(self, action):
+        #print(&#34;on_aheader&#34;, action.get_name())
+        ddd = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY)
+        ccc = None
+        while True:
+            #target = Gdk.Atom.intern (&#34;text/html&#34;, True);
+            #ccc = ddd.wait_for_contents(target)
+            #if ccc:
+            #    break
+            target2 = Gdk.Atom.intern (&#34;text/plain&#34;, True);
+            ccc = ddd.wait_for_contents(target2)
+            if ccc:
+                break
+            break
+
+        if not ccc:
+            return
+
+        dddd = ccc.get_data().decode()
+        if not dddd:
+            return
+        #print(&#34;dddd&#34;, dddd)
+        htmlx = &#34;&lt;%s&gt;%s&lt;/%s&gt;&#34; % (action.get_name(), dddd, action.get_name())
+        self.run_javascript(&#34;document.execCommand \
+                            (&#39;insertHTML&#39;, null, &#39;%s&#39;);&#34; % htmlx)
+        Gtk.Clipboard.clear(ddd)
+        self.modified = True
+
+    def on_action(self, action):
+        #print(&#34;on_action&#34;, action.get_name())
+        # Make it caller neutral
+        if type(action) == str:
+            nnn = action
+        else:
+            nnn = action.get_name()
+        self.run_javascript(&#34;document.execCommand(&#39;%s&#39;, false, false);&#34; % nnn)
+        self.modified = True
+
+    def on_paste(self, action = &#34;&#34;):
+        print(&#34;Paste&#34;)
+        self.execute_editing_command(WebKit2.EDITING_COMMAND_PASTE)
+
+    def on_new(self, action):
+        self.load_html(&#34;&#34;, &#34;file:///&#34;)
+        self.modified = False
+
+    def on_fontsize(self, action):
+        #print(&#34;on_fontsize&#34;)
+        sizex = sizedialog()
+        #print(&#34;sizex&#34;, sizex)
+        if not sizex:
+            return
+
+        c = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY)
+        sel = c.wait_for_targets()
+        #print(&#34;sel&#34;, sel)
+        target = Gdk.Atom.intern (&#34;text/plain&#34;, True);
+        ccc = c.wait_for_contents(target)
+        if not ccc:
+            htmlx = &#34;&lt;span style=\&#34;font-size: %dpx;\&#34;&gt;%s&lt;/span&gt;&#34; % (int(sizex), &#34;&#34;)
+            self.run_javascript(&#34;document.execCommand(&#39;insertHTML&#39;, null, &#39;%s&#39;);&#34; % htmlx)
+            return
+
+        ddd = ccc.get_data().decode()
+        if not ddd:
+            return
+
+        #print(&#34;ddd&#34;, ddd)
+        htmlx = &#34;&lt;span style=\&#34;font-size: %dpx;\&#34;&gt;%s&lt;/span&gt;&#34; % (int(sizex), ddd)
+        self.run_javascript(&#34;document.execCommand(&#39;insertHTML&#39;, null, &#39;%s&#39;);&#34; % htmlx)
+        Gtk.Clipboard.clear(c)
+        self.modified = True
+
+    def on_select_font(self, action):
+        dialog = Gtk.FontChooserDialog(&#34;Select a font&#34;)
+        if dialog.run() == Gtk.ResponseType.OK:
+            fname = dialog.get_font_desc().get_family()
+            fsize = dialog.get_font_desc().get_size() / Pango.SCALE
+            ttt = int(1 + round(fsize / 10)) % 9
+            print(&#34;Setting font&#34;, fname, fsize, ttt)
+            self.run_javascript(&#34;document.execCommand(&#39;fontname&#39;, null, &#39;%s&#39;);&#34; % fname)
+            self.run_javascript(&#34;document.execCommand(&#39;fontsize&#39;, null, &#39;%s&#39;);&#34; % ttt)
+        dialog.destroy()
+
+    def on_select_color(self, action):
+        dialog = Gtk.ColorChooserDialog(&#34;Select Color&#34;)
+        if dialog.run() == Gtk.ResponseType.OK:
+            (r, g, b, a) = dialog.get_rgba()
+            color = &#34;#%0.2x%0.2x%0.2x%0.2x&#34; % (
+                int(r * 255),
+                int(g * 255),
+                int(b * 255),
+                int(a * 255))
+            self.run_javascript(&#34;document.execCommand(&#39;forecolor&#39;, null, &#39;%s&#39;);&#34; % color)
+        dialog.destroy()
+
+    def on_select_bgcolor(self, action):
+        dialog = Gtk.ColorChooserDialog(&#34;Select Background Color&#34;)
+        if dialog.run() == Gtk.ResponseType.OK:
+            (r, g, b, a) = dialog.get_rgba()
+            color = &#34;#%0.2x%0.2x%0.2x%0.2x&#34; % (
+                int(r * 255),
+                int(g * 255),
+                int(b * 255),
+                int(a * 255))
+            self.run_javascript(&#34;document.execCommand(&#39;backcolor&#39;, null, &#39;%s&#39;);&#34; % color)
+        dialog.destroy()
+
+    def on_edit_marker(self, action):
+        print(&#34;on_edit_marker&#34;, action.get_name())
+
+        c = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY)
+        sel = c.wait_for_targets()
+        target = Gdk.Atom.intern (&#34;text/html&#34;, True);
+        ccc = c.wait_for_contents(target)
+        #print(&#34;sel&#34;, ccc.get_data())
+        #ccc.free()
+        htmlx = markdialog(ccc.get_data().decode())
+        if htmlx:
+            print(&#34;markdialog result:\n&#34;, htmlx)
+            self.run_javascript(&#34;document.execCommand(&#39;insertHTML&#39;, null, &#39;%s&#39;);&#34; % htmlx)
+
+    def on_insert_table(self, action):
+        htmlx = &#34;&lt;table align=center border=0 contentEditable=true&gt;&#34; + \
+                &#34;&lt;tr&gt;&lt;td&gt;TR1 C1 &lt;td&gt;| TR1 C2 &lt;tr&gt;&lt;td&gt;TR2 C1&lt;td&gt;| TR2 C1&lt;/table&gt;&lt;br&gt;&#34;
+
+        #print(&#34;table&#34;, htmlx)
+        self.run_javascript(&#34;document.execCommand(&#39;insertHTML&#39;, null, &#39;%s&#39;);&#34; % htmlx)
+        self.modified = True
+
+    def on_insert_link(self, action):
+        dialog = Gtk.Dialog(&#34;   Enter a URL:   &#34;, None, 0,
+        (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK))
+
+        entry = Gtk.Entry()
+        dialog.vbox.pack_start(Gtk.Label(&#34;  &#34;), False, False, 0)
+        hbox = Gtk.HBox()
+        hbox.pack_start(Gtk.Label(&#34;  &#34;), False, False, 0)
+        hbox.pack_start(entry, False, False, 0)
+        hbox.pack_start(Gtk.Label(&#34;  &#34;), False, False, 0)
+        dialog.vbox.pack_start(hbox, False, False, 0)
+
+        dialog.vbox.pack_start(Gtk.Label(&#34;  &#34;), False, False, 0)
+        dialog.show_all()
+
+        if dialog.run() == Gtk.ResponseType.OK:
+            self.run_javascript(
+                &#34;document.execCommand(&#39;createLink&#39;, True, &#39;%s&#39;);&#34; % entry.get_text())
+        dialog.destroy()
+        self.modified = True
+
+    def on_insert_image(self, action):
+        dialog = Gtk.FileChooserDialog(&#34;Select an image file&#34;, None, Gtk.FileChooserAction.OPEN,
+        (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+
+        if dialog.run() == Gtk.ResponseType.OK:
+            fn = dialog.get_filename()
+            if os.path.exists(fn):
+                self.run_javascript(
+                &#34;document.execCommand(&#39;insertImage&#39;, null, &#39;%s&#39;);&#34; % fn)
+        dialog.destroy()
+        self.modified = True
+
+    def on_open(self, action):
+        dialog = Gtk.FileChooserDialog(&#34;Select an HTML file&#34;, self, Gtk.FileChooserAction.OPEN,
+        (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+
+        if dialog.run() == Gtk.ResponseType.OK:
+            fn = dialog.get_filename()
+            if os.path.exists(fn):
+                self.fname = fn
+                with open(fn) as fd:
+                    self.load_html(fd.read(), &#34;file:///&#34;)
+        dialog.destroy()
+
+    def on_save(self, action):
+        def completion(html, user_data):
+            open_mode = user_data
+            with open(self.fname, open_mode) as fd:
+                fd.write(html)
+
+        if self.fname:
+            self.get_html(completion, &#39;w&#39;)
+        else:
+            dialog = Gtk.FileChooserDialog(&#34;Select an HTML file&#34;, None,
+                    Gtk.FileChooserAction.SAVE,
+                        (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                            Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
+
+            if dialog.run() == Gtk.ResponseType.OK:
+                self.fname = dialog.get_filename()
+                print(&#34;Saving&#34;, self.fname)
+                self.get_html(completion, &#34;w+&#34;)
+            dialog.destroy()
+
+    def get_html(self, completion_function, user_data):
+
+        #print(&#34;get_html&#34;)
+        def javascript_completion(obj, result, user_data):
+            #print(&#34;javascript_completion&#34;, result)
+            fin = self.run_javascript_finish(result)
+            #print(&#34;fin&#34;, fin)
+            html = fin.get_js_value().to_string()
+            #print(&#34;len html&#34;, len(html), &#34;\n&#34;)
+            completion_function(html, user_data)
+        self.run_javascript(&#34;document.documentElement.innerHTML;&#34;,
+                                   None,
+                                   javascript_completion,
+                                   user_data)
+
+    def get_lastmod(self, completion_function, user_data):
+
+        print(&#34;get_lastmod&#34;)
+        def javascript_completion(obj, result, user_data):
+            print(&#34;javascript_completion&#34;, result)
+            fin = self.run_javascript_finish(result)
+            #print(&#34;fin&#34;, fin)
+            html = fin.get_js_value().to_string()
+            print(&#34;lastmod&#34;, html, &#34;\n&#34;)
+            #completion_function(html, user_data)
+        self.run_javascript(&#34;document.lastModified&#34;,
+                                   None,
+                                   javascript_completion,
+                                   user_data)
+
+
+    def generate_ui(self):
+
+        &#39;&#39;&#39; define toolbar items and actions here &#39;&#39;&#39;
+
+        actions = Gtk.ActionGroup(&#34;Actions&#34;)
+    # ----------------------------------------------------------------
+    # Name,     Stock Icon,   Accelerator,  ToolTip,   Action
+
+    # Some already has app accels
+
+        accel_arr = [ \
+
+    #(&#34;menuFile&#34;,    None, &#34;_File&#34;),
+    #(&#34;menuEdit&#34;,    None, &#34;_Edit&#34;),
+    #(&#34;menuInsert&#34;,  None, &#34;_Insert&#34;),
+    #(&#34;menuFormat&#34;,  None, &#34;_Format&#34;),
+    #(&#34;new&#34;,         Gtk.STOCK_NEW, &#34;_New&#34;, None, None, self.on_new),
+    #(&#34;open&#34;,        Gtk.STOCK_OPEN, &#34;_Open&#34;, None, None, self.on_open),
+    #(&#34;save&#34;,        Gtk.STOCK_SAVE, &#34;_Save&#34;, None, None, self.on_save),
+
+    (&#34;cut&#34;,         Gtk.STOCK_CUT, &#34;_Cut&#34;, None, None, self.on_action),
+    (&#34;copy&#34;,        Gtk.STOCK_COPY, &#34;_Copy&#34;, None, None, self.on_action),
+    (&#34;paste&#34;,       Gtk.STOCK_PASTE, &#34;_Paste&#34;, None, None, self.on_paste),
+
+    (&#34;undo&#34;,        Gtk.STOCK_UNDO, &#34;_Undo&#34;, &#34;&lt;Control&gt;z&#34;, &#34;Undo Last Edit&#34;, self.on_action),
+    (&#34;redo&#34;,        Gtk.STOCK_REDO, &#34;_Redo&#34;, &#34;&lt;Control&gt;y&#34;, &#34;Redo Last Undo&#34;, self.on_action),
+
+    (&#34;removeformat&#34;, Gtk.STOCK_PROPERTIES, &#34;_removeFormat&#34;, &#34;&lt;Control&gt;M&#34;, &#34;Remove Formatting&#34;, self.on_action),
+    (&#34;bold&#34;,        Gtk.STOCK_BOLD, &#34;_Bold&#34;, &#34;&#34;, &#34;Bold / UnBold Selection&#34;, self.on_action),
+    (&#34;italic&#34;,      Gtk.STOCK_ITALIC, &#34;_Italic&#34;, &#34;&#34;, None, self.on_action),
+    (&#34;underline&#34;,       Gtk.STOCK_UNDERLINE, &#34;_Underline&#34;, &#34;&#34;, None, self.on_action),
+    (&#34;strikethrough&#34;, Gtk.STOCK_STRIKETHROUGH, &#34;_Strike&#34;, &#34;&#34;, None, self.on_action),
+    (&#34;font&#34;,        Gtk.STOCK_SELECT_FONT, &#34;Select _Font&#34;, &#34;&#34;, None, self.on_select_font),
+    (&#34;fontsize&#34;,    None, &#34;Select Font _Size&#34;, &#34;&lt;Control&gt;f&#34;, &#34;Set Absolute Size (removes color)&#34;, self.on_fontsize),
+    (&#34;color&#34;,       Gtk.STOCK_SELECT_COLOR, &#34;Select _Color&#34;, None, None, self.on_select_color),
+    (&#34;backgroundcolor&#34;, Gtk.STOCK_COLOR_PICKER, &#34;Select Back Color&#34;, None, None, self.on_select_bgcolor),
+
+    (&#34;justifyleft&#34;,  Gtk.STOCK_JUSTIFY_LEFT, &#34;Justify _Left&#34;, None, None, self.on_action),
+    (&#34;justifyright&#34;, Gtk.STOCK_JUSTIFY_RIGHT, &#34;Justify _Right&#34;, None, None, self.on_action),
+    (&#34;justifycenter&#34;, Gtk.STOCK_JUSTIFY_CENTER, &#34;Justify _Center&#34;, None, None, self.on_action),
+    (&#34;justifyfull&#34;,   Gtk.STOCK_JUSTIFY_FILL, &#34;Justify _Full&#34;, None, None, self.on_action),
+
+    # Pad Images by name (may not be present in all styles)
+    (&#34;insertimage&#34;, &#34;insert-image&#34;, &#34;Insert _Image&#34;, None, None, self.on_insert_image),
+    (&#34;insertlink&#34;, &#34;insert-link&#34;, &#34;Insert _Link&#34;, None, None, self.on_insert_link),
+    (&#34;inserttable&#34;, &#34;insert-table&#34;, &#34;Insert _Table&#34;, None, None, self.on_insert_table),
+    (&#34;editmarker&#34;, &#34;edit-marker&#34;, &#34;edit _Marker&#34;, None, None, self.on_edit_marker),
+
+    (&#34;H1&#34;,   Gtk.STOCK_EXECUTE, &#34;Header 1&#34;, None, &#34;Insert Header 1&#34;, self.on_header),
+    (&#34;H2&#34;,   Gtk.STOCK_EXECUTE, &#34;Header 2&#34;, None, &#34;Insert Header 2&#34;, self.on_header),
+    (&#34;H3&#34;,   Gtk.STOCK_EXECUTE, &#34;Header 3&#34;, None, &#34;Insert Header 3&#34;, self.on_header),
+    (&#34;H4&#34;,   Gtk.STOCK_EXECUTE, &#34;Header 4&#34;, None, &#34;Insert Header 4&#34;, self.on_header),
+
+    ]
+
+        actions.add_actions(accel_arr)
+
+        #print(dir(actions))
+        for aa in accel_arr:
+        #    print(&#34;acc arr&#34;, dir(aa))
+        #    break
+        #    act = actions.get_action(aa[0])
+        #    print(&#34;act&#34;, act.get_name(), act.get_tooltip())
+            pass
+        #    try:
+        #        act = Gtk.Action.new(aa[0], aa[2], aa[4], aa[1])
+        #        actions.add_action_with_accel(act, aa[3])
+        #    except:
+        #        #print(&#34;Exc on&#34;, aa)
+        #        pass
+
+        actions.get_action(&#34;insertimage&#34;).set_property(&#34;icon-name&#34;, &#34;insert-image&#34;)
+        actions.get_action(&#34;insertlink&#34;).set_property(&#34;icon-name&#34;, &#34;insert-link&#34;)
+        actions.get_action(&#34;inserttable&#34;).set_property(&#34;icon-name&#34;, &#34;appointment-new&#34;)
+        actions.get_action(&#34;editmarker&#34;).set_property(&#34;icon-name&#34;, &#34;text-editor&#34;)
+        actions.get_action(&#34;fontsize&#34;).set_property(&#34;icon-name&#34;, &#34;preferences-desktop-font&#34;)
+        actions.get_action(&#34;removeformat&#34;).set_property(&#34;icon-name&#34;, &#34;text-direction&#34;)
+
+        ui = Gtk.UIManager()
+        ui.insert_action_group(actions)
+        ui.add_ui_from_string(ui_def)
+
+        # Fill in defaults
+        xxx = ui.get_action_groups()[0].list_actions()
+        for aa in xxx:
+            nnn = aa.get_name()
+            # Find the original, patth missing info
+            for bb in accel_arr:
+                # Convert tuple
+                bbb = list(bb)
+                if bb[0] == nnn:
+                    # Pad for this round
+                    for cc in range(5 - len(bbb)):
+                        bbb.append(&#34;&#34;)
+
+                    #print(&#34;lab&#34;, bb[2], aa.get_label())
+                    #print(&#34;found&#34;, nnn, bbb[3])
+
+                    setattr(aa, &#34;accel&#34;, bbb[3])
+                    if bbb[3]:
+                        try:
+                            nn, ss = Gtk.accelerator_parse(bbb[3])
+                            setattr(aa, &#34;accel_parsed&#34;, (nn, ss))
+                        except:
+                            pass
+
+            # Pad it with capitalize name if not there
+            if  not aa.get_tooltip():
+                aa.set_tooltip(nnn[0].upper() + nnn[1:])
+
+        return ui</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.WebKit2.WebView</li>
+<li>gi.repository.WebKit2.WebViewBase</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pgwkit.pgwebw.do_load_changed"><code class="name flex">
+<span>def <span class="ident">do_load_changed</span></span>(<span>self, status)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>load_changed(self, load_event:WebKit2.LoadEvent)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def do_load_changed(self, status):
+
+    #print(&#34;do_load_changed()&#34;, status)
+    if status == WebKit2.LoadEvent.FINISHED:
+        &#39;&#39;&#39; Create a shadow of content &#39;&#39;&#39;
+
+        # This gets it without spaces
+        #resource = self.get_main_resource()
+        #resource.get_data(None, self._get_response_data_finish, None)
+
+        # Get it by JS
+        def completion(html, user_data):
+            self.old_html = html
+        self.get_html(completion, &#39;&#39;)
+
+
+    if self.get_uri():
+        if self.xlink:
+            self.xlink.set_status(&#34;Loading ... &#34; + self.get_uri()[:64])
+
+    if status == 3: #WebKit2.LoadEvent.WEBKIT_LOAD_FINISHED:
+        #print(&#34;got WEBKIT_LOAD_FINISHED&#34;)
+        if self.get_uri():
+            if self.xlink:
+                self.xlink.edit.set_text(self.get_uri()[:64])
+                self.xlink.set_status(&#34;Finished: &#34; + self.get_uri()[:64])
+        self.grab_focus()</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.pgwebw.do_load_failed"><code class="name flex">
+<span>def <span class="ident">do_load_failed</span></span>(<span>self, load_event, failing_uri, error)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>load_failed(self, load_event:WebKit2.LoadEvent, failing_uri:str, error:error) -&gt; bool</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def do_load_failed(self, load_event, failing_uri, error):
+    print(&#34;do_load_failed() was called&#34;, failing_uri)
+    if self.xlink:
+        self.xlink.set_status(&#34;Failed: &#34; + failing_uri[:64])</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.pgwebw.do_ready_to_show"><code class="name flex">
+<span>def <span class="ident">do_ready_to_show</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ready_to_show(self)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def do_ready_to_show(self):
+    print(&#34;do_ready_to_show() was called&#34;)
+    pass</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.pgwebw.generate_ui"><code class="name flex">
+<span>def <span class="ident">generate_ui</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>define toolbar items and actions here</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def generate_ui(self):
+
+    &#39;&#39;&#39; define toolbar items and actions here &#39;&#39;&#39;
+
+    actions = Gtk.ActionGroup(&#34;Actions&#34;)
+# ----------------------------------------------------------------
+# Name,     Stock Icon,   Accelerator,  ToolTip,   Action
+
+# Some already has app accels
+
+    accel_arr = [ \
+
+#(&#34;menuFile&#34;,    None, &#34;_File&#34;),
+#(&#34;menuEdit&#34;,    None, &#34;_Edit&#34;),
+#(&#34;menuInsert&#34;,  None, &#34;_Insert&#34;),
+#(&#34;menuFormat&#34;,  None, &#34;_Format&#34;),
+#(&#34;new&#34;,         Gtk.STOCK_NEW, &#34;_New&#34;, None, None, self.on_new),
+#(&#34;open&#34;,        Gtk.STOCK_OPEN, &#34;_Open&#34;, None, None, self.on_open),
+#(&#34;save&#34;,        Gtk.STOCK_SAVE, &#34;_Save&#34;, None, None, self.on_save),
+
+(&#34;cut&#34;,         Gtk.STOCK_CUT, &#34;_Cut&#34;, None, None, self.on_action),
+(&#34;copy&#34;,        Gtk.STOCK_COPY, &#34;_Copy&#34;, None, None, self.on_action),
+(&#34;paste&#34;,       Gtk.STOCK_PASTE, &#34;_Paste&#34;, None, None, self.on_paste),
+
+(&#34;undo&#34;,        Gtk.STOCK_UNDO, &#34;_Undo&#34;, &#34;&lt;Control&gt;z&#34;, &#34;Undo Last Edit&#34;, self.on_action),
+(&#34;redo&#34;,        Gtk.STOCK_REDO, &#34;_Redo&#34;, &#34;&lt;Control&gt;y&#34;, &#34;Redo Last Undo&#34;, self.on_action),
+
+(&#34;removeformat&#34;, Gtk.STOCK_PROPERTIES, &#34;_removeFormat&#34;, &#34;&lt;Control&gt;M&#34;, &#34;Remove Formatting&#34;, self.on_action),
+(&#34;bold&#34;,        Gtk.STOCK_BOLD, &#34;_Bold&#34;, &#34;&#34;, &#34;Bold / UnBold Selection&#34;, self.on_action),
+(&#34;italic&#34;,      Gtk.STOCK_ITALIC, &#34;_Italic&#34;, &#34;&#34;, None, self.on_action),
+(&#34;underline&#34;,       Gtk.STOCK_UNDERLINE, &#34;_Underline&#34;, &#34;&#34;, None, self.on_action),
+(&#34;strikethrough&#34;, Gtk.STOCK_STRIKETHROUGH, &#34;_Strike&#34;, &#34;&#34;, None, self.on_action),
+(&#34;font&#34;,        Gtk.STOCK_SELECT_FONT, &#34;Select _Font&#34;, &#34;&#34;, None, self.on_select_font),
+(&#34;fontsize&#34;,    None, &#34;Select Font _Size&#34;, &#34;&lt;Control&gt;f&#34;, &#34;Set Absolute Size (removes color)&#34;, self.on_fontsize),
+(&#34;color&#34;,       Gtk.STOCK_SELECT_COLOR, &#34;Select _Color&#34;, None, None, self.on_select_color),
+(&#34;backgroundcolor&#34;, Gtk.STOCK_COLOR_PICKER, &#34;Select Back Color&#34;, None, None, self.on_select_bgcolor),
+
+(&#34;justifyleft&#34;,  Gtk.STOCK_JUSTIFY_LEFT, &#34;Justify _Left&#34;, None, None, self.on_action),
+(&#34;justifyright&#34;, Gtk.STOCK_JUSTIFY_RIGHT, &#34;Justify _Right&#34;, None, None, self.on_action),
+(&#34;justifycenter&#34;, Gtk.STOCK_JUSTIFY_CENTER, &#34;Justify _Center&#34;, None, None, self.on_action),
+(&#34;justifyfull&#34;,   Gtk.STOCK_JUSTIFY_FILL, &#34;Justify _Full&#34;, None, None, self.on_action),
+
+# Pad Images by name (may not be present in all styles)
+(&#34;insertimage&#34;, &#34;insert-image&#34;, &#34;Insert _Image&#34;, None, None, self.on_insert_image),
+(&#34;insertlink&#34;, &#34;insert-link&#34;, &#34;Insert _Link&#34;, None, None, self.on_insert_link),
+(&#34;inserttable&#34;, &#34;insert-table&#34;, &#34;Insert _Table&#34;, None, None, self.on_insert_table),
+(&#34;editmarker&#34;, &#34;edit-marker&#34;, &#34;edit _Marker&#34;, None, None, self.on_edit_marker),
+
+(&#34;H1&#34;,   Gtk.STOCK_EXECUTE, &#34;Header 1&#34;, None, &#34;Insert Header 1&#34;, self.on_header),
+(&#34;H2&#34;,   Gtk.STOCK_EXECUTE, &#34;Header 2&#34;, None, &#34;Insert Header 2&#34;, self.on_header),
+(&#34;H3&#34;,   Gtk.STOCK_EXECUTE, &#34;Header 3&#34;, None, &#34;Insert Header 3&#34;, self.on_header),
+(&#34;H4&#34;,   Gtk.STOCK_EXECUTE, &#34;Header 4&#34;, None, &#34;Insert Header 4&#34;, self.on_header),
+
+]
+
+    actions.add_actions(accel_arr)
+
+    #print(dir(actions))
+    for aa in accel_arr:
+    #    print(&#34;acc arr&#34;, dir(aa))
+    #    break
+    #    act = actions.get_action(aa[0])
+    #    print(&#34;act&#34;, act.get_name(), act.get_tooltip())
+        pass
+    #    try:
+    #        act = Gtk.Action.new(aa[0], aa[2], aa[4], aa[1])
+    #        actions.add_action_with_accel(act, aa[3])
+    #    except:
+    #        #print(&#34;Exc on&#34;, aa)
+    #        pass
+
+    actions.get_action(&#34;insertimage&#34;).set_property(&#34;icon-name&#34;, &#34;insert-image&#34;)
+    actions.get_action(&#34;insertlink&#34;).set_property(&#34;icon-name&#34;, &#34;insert-link&#34;)
+    actions.get_action(&#34;inserttable&#34;).set_property(&#34;icon-name&#34;, &#34;appointment-new&#34;)
+    actions.get_action(&#34;editmarker&#34;).set_property(&#34;icon-name&#34;, &#34;text-editor&#34;)
+    actions.get_action(&#34;fontsize&#34;).set_property(&#34;icon-name&#34;, &#34;preferences-desktop-font&#34;)
+    actions.get_action(&#34;removeformat&#34;).set_property(&#34;icon-name&#34;, &#34;text-direction&#34;)
+
+    ui = Gtk.UIManager()
+    ui.insert_action_group(actions)
+    ui.add_ui_from_string(ui_def)
+
+    # Fill in defaults
+    xxx = ui.get_action_groups()[0].list_actions()
+    for aa in xxx:
+        nnn = aa.get_name()
+        # Find the original, patth missing info
+        for bb in accel_arr:
+            # Convert tuple
+            bbb = list(bb)
+            if bb[0] == nnn:
+                # Pad for this round
+                for cc in range(5 - len(bbb)):
+                    bbb.append(&#34;&#34;)
+
+                #print(&#34;lab&#34;, bb[2], aa.get_label())
+                #print(&#34;found&#34;, nnn, bbb[3])
+
+                setattr(aa, &#34;accel&#34;, bbb[3])
+                if bbb[3]:
+                    try:
+                        nn, ss = Gtk.accelerator_parse(bbb[3])
+                        setattr(aa, &#34;accel_parsed&#34;, (nn, ss))
+                    except:
+                        pass
+
+        # Pad it with capitalize name if not there
+        if  not aa.get_tooltip():
+            aa.set_tooltip(nnn[0].upper() + nnn[1:])
+
+    return ui</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.pgwebw.get_html"><code class="name flex">
+<span>def <span class="ident">get_html</span></span>(<span>self, completion_function, user_data)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_html(self, completion_function, user_data):
+
+    #print(&#34;get_html&#34;)
+    def javascript_completion(obj, result, user_data):
+        #print(&#34;javascript_completion&#34;, result)
+        fin = self.run_javascript_finish(result)
+        #print(&#34;fin&#34;, fin)
+        html = fin.get_js_value().to_string()
+        #print(&#34;len html&#34;, len(html), &#34;\n&#34;)
+        completion_function(html, user_data)
+    self.run_javascript(&#34;document.documentElement.innerHTML;&#34;,
+                               None,
+                               javascript_completion,
+                               user_data)</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.pgwebw.get_lastmod"><code class="name flex">
+<span>def <span class="ident">get_lastmod</span></span>(<span>self, completion_function, user_data)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_lastmod(self, completion_function, user_data):
+
+    print(&#34;get_lastmod&#34;)
+    def javascript_completion(obj, result, user_data):
+        print(&#34;javascript_completion&#34;, result)
+        fin = self.run_javascript_finish(result)
+        #print(&#34;fin&#34;, fin)
+        html = fin.get_js_value().to_string()
+        print(&#34;lastmod&#34;, html, &#34;\n&#34;)
+        #completion_function(html, user_data)
+    self.run_javascript(&#34;document.lastModified&#34;,
+                               None,
+                               javascript_completion,
+                               user_data)</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.pgwebw.keypress"><code class="name flex">
+<span>def <span class="ident">keypress</span></span>(<span>self, arg, arg2)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Here we imitate the way the accelerator works</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def keypress(self, arg, arg2):
+
+    &#39;&#39;&#39; Here we imitate the way the accelerator works &#39;&#39;&#39;
+
+    state = arg2.get_state() &amp; Gdk.ModifierType.MODIFIER_MASK
+    key = arg2.get_keyval()[1]
+    #print(&#34;key&#34;,  key, &#34;state&#34;, state)
+
+    #GDK_MODIFIER_RESERVED_25_MASK
+
+    # Feeding off the accelarator&#39;s definitions
+    ag = self.ui.get_action_groups()[0]
+    acts = ag.list_actions()
+
+    # Scan - Fire
+    for aa in acts:
+        if aa.accel:
+            #print(nnn, aa.accel, aa.accel_parsed)
+            if state == aa.accel_parsed[1]:
+                #print(&#34;state match&#34;)
+                if key == aa.accel_parsed[0]:
+                    #print(&#34;Fire &#34;, aa.get_name(), aa.get_label())
+                    #lab = aa.get_label()
+                    aa.activate()
+                    break   # Only one accel the other is a mistake
+
+    # See if nav key
+    navkey = False
+    for aa in navkeys:
+        if key == aa:
+            #print(&#34;Navkey&#34;, aa)
+            navkey = True
+    if not navkey:
+        # Exclude Ctrl-s
+        if state == Gdk.ModifierType.CONTROL_MASK and key == 115:
+            #print(&#34;Control s&#34;)
+            pass
+        else:
+            #print(&#34;set on key&#34;, key)
+            self.modified =  True</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.pgwebw.on_action"><code class="name flex">
+<span>def <span class="ident">on_action</span></span>(<span>self, action)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_action(self, action):
+    #print(&#34;on_action&#34;, action.get_name())
+    # Make it caller neutral
+    if type(action) == str:
+        nnn = action
+    else:
+        nnn = action.get_name()
+    self.run_javascript(&#34;document.execCommand(&#39;%s&#39;, false, false);&#34; % nnn)
+    self.modified = True</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.pgwebw.on_edit_marker"><code class="name flex">
+<span>def <span class="ident">on_edit_marker</span></span>(<span>self, action)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_edit_marker(self, action):
+    print(&#34;on_edit_marker&#34;, action.get_name())
+
+    c = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY)
+    sel = c.wait_for_targets()
+    target = Gdk.Atom.intern (&#34;text/html&#34;, True);
+    ccc = c.wait_for_contents(target)
+    #print(&#34;sel&#34;, ccc.get_data())
+    #ccc.free()
+    htmlx = markdialog(ccc.get_data().decode())
+    if htmlx:
+        print(&#34;markdialog result:\n&#34;, htmlx)
+        self.run_javascript(&#34;document.execCommand(&#39;insertHTML&#39;, null, &#39;%s&#39;);&#34; % htmlx)</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.pgwebw.on_fontsize"><code class="name flex">
+<span>def <span class="ident">on_fontsize</span></span>(<span>self, action)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_fontsize(self, action):
+    #print(&#34;on_fontsize&#34;)
+    sizex = sizedialog()
+    #print(&#34;sizex&#34;, sizex)
+    if not sizex:
+        return
+
+    c = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY)
+    sel = c.wait_for_targets()
+    #print(&#34;sel&#34;, sel)
+    target = Gdk.Atom.intern (&#34;text/plain&#34;, True);
+    ccc = c.wait_for_contents(target)
+    if not ccc:
+        htmlx = &#34;&lt;span style=\&#34;font-size: %dpx;\&#34;&gt;%s&lt;/span&gt;&#34; % (int(sizex), &#34;&#34;)
+        self.run_javascript(&#34;document.execCommand(&#39;insertHTML&#39;, null, &#39;%s&#39;);&#34; % htmlx)
+        return
+
+    ddd = ccc.get_data().decode()
+    if not ddd:
+        return
+
+    #print(&#34;ddd&#34;, ddd)
+    htmlx = &#34;&lt;span style=\&#34;font-size: %dpx;\&#34;&gt;%s&lt;/span&gt;&#34; % (int(sizex), ddd)
+    self.run_javascript(&#34;document.execCommand(&#39;insertHTML&#39;, null, &#39;%s&#39;);&#34; % htmlx)
+    Gtk.Clipboard.clear(c)
+    self.modified = True</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.pgwebw.on_header"><code class="name flex">
+<span>def <span class="ident">on_header</span></span>(<span>self, action)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_header(self, action):
+    #print(&#34;on_aheader&#34;, action.get_name())
+    ddd = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY)
+    ccc = None
+    while True:
+        #target = Gdk.Atom.intern (&#34;text/html&#34;, True);
+        #ccc = ddd.wait_for_contents(target)
+        #if ccc:
+        #    break
+        target2 = Gdk.Atom.intern (&#34;text/plain&#34;, True);
+        ccc = ddd.wait_for_contents(target2)
+        if ccc:
+            break
+        break
+
+    if not ccc:
+        return
+
+    dddd = ccc.get_data().decode()
+    if not dddd:
+        return
+    #print(&#34;dddd&#34;, dddd)
+    htmlx = &#34;&lt;%s&gt;%s&lt;/%s&gt;&#34; % (action.get_name(), dddd, action.get_name())
+    self.run_javascript(&#34;document.execCommand \
+                        (&#39;insertHTML&#39;, null, &#39;%s&#39;);&#34; % htmlx)
+    Gtk.Clipboard.clear(ddd)
+    self.modified = True</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.pgwebw.on_insert_image"><code class="name flex">
+<span>def <span class="ident">on_insert_image</span></span>(<span>self, action)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_insert_image(self, action):
+    dialog = Gtk.FileChooserDialog(&#34;Select an image file&#34;, None, Gtk.FileChooserAction.OPEN,
+    (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+
+    if dialog.run() == Gtk.ResponseType.OK:
+        fn = dialog.get_filename()
+        if os.path.exists(fn):
+            self.run_javascript(
+            &#34;document.execCommand(&#39;insertImage&#39;, null, &#39;%s&#39;);&#34; % fn)
+    dialog.destroy()
+    self.modified = True</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.pgwebw.on_insert_link"><code class="name flex">
+<span>def <span class="ident">on_insert_link</span></span>(<span>self, action)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_insert_link(self, action):
+    dialog = Gtk.Dialog(&#34;   Enter a URL:   &#34;, None, 0,
+    (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK))
+
+    entry = Gtk.Entry()
+    dialog.vbox.pack_start(Gtk.Label(&#34;  &#34;), False, False, 0)
+    hbox = Gtk.HBox()
+    hbox.pack_start(Gtk.Label(&#34;  &#34;), False, False, 0)
+    hbox.pack_start(entry, False, False, 0)
+    hbox.pack_start(Gtk.Label(&#34;  &#34;), False, False, 0)
+    dialog.vbox.pack_start(hbox, False, False, 0)
+
+    dialog.vbox.pack_start(Gtk.Label(&#34;  &#34;), False, False, 0)
+    dialog.show_all()
+
+    if dialog.run() == Gtk.ResponseType.OK:
+        self.run_javascript(
+            &#34;document.execCommand(&#39;createLink&#39;, True, &#39;%s&#39;);&#34; % entry.get_text())
+    dialog.destroy()
+    self.modified = True</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.pgwebw.on_insert_table"><code class="name flex">
+<span>def <span class="ident">on_insert_table</span></span>(<span>self, action)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_insert_table(self, action):
+    htmlx = &#34;&lt;table align=center border=0 contentEditable=true&gt;&#34; + \
+            &#34;&lt;tr&gt;&lt;td&gt;TR1 C1 &lt;td&gt;| TR1 C2 &lt;tr&gt;&lt;td&gt;TR2 C1&lt;td&gt;| TR2 C1&lt;/table&gt;&lt;br&gt;&#34;
+
+    #print(&#34;table&#34;, htmlx)
+    self.run_javascript(&#34;document.execCommand(&#39;insertHTML&#39;, null, &#39;%s&#39;);&#34; % htmlx)
+    self.modified = True</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.pgwebw.on_new"><code class="name flex">
+<span>def <span class="ident">on_new</span></span>(<span>self, action)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_new(self, action):
+    self.load_html(&#34;&#34;, &#34;file:///&#34;)
+    self.modified = False</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.pgwebw.on_open"><code class="name flex">
+<span>def <span class="ident">on_open</span></span>(<span>self, action)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_open(self, action):
+    dialog = Gtk.FileChooserDialog(&#34;Select an HTML file&#34;, self, Gtk.FileChooserAction.OPEN,
+    (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+
+    if dialog.run() == Gtk.ResponseType.OK:
+        fn = dialog.get_filename()
+        if os.path.exists(fn):
+            self.fname = fn
+            with open(fn) as fd:
+                self.load_html(fd.read(), &#34;file:///&#34;)
+    dialog.destroy()</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.pgwebw.on_paste"><code class="name flex">
+<span>def <span class="ident">on_paste</span></span>(<span>self, action='')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_paste(self, action = &#34;&#34;):
+    print(&#34;Paste&#34;)
+    self.execute_editing_command(WebKit2.EDITING_COMMAND_PASTE)</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.pgwebw.on_save"><code class="name flex">
+<span>def <span class="ident">on_save</span></span>(<span>self, action)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_save(self, action):
+    def completion(html, user_data):
+        open_mode = user_data
+        with open(self.fname, open_mode) as fd:
+            fd.write(html)
+
+    if self.fname:
+        self.get_html(completion, &#39;w&#39;)
+    else:
+        dialog = Gtk.FileChooserDialog(&#34;Select an HTML file&#34;, None,
+                Gtk.FileChooserAction.SAVE,
+                    (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                        Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
+
+        if dialog.run() == Gtk.ResponseType.OK:
+            self.fname = dialog.get_filename()
+            print(&#34;Saving&#34;, self.fname)
+            self.get_html(completion, &#34;w+&#34;)
+        dialog.destroy()</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.pgwebw.on_select_bgcolor"><code class="name flex">
+<span>def <span class="ident">on_select_bgcolor</span></span>(<span>self, action)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_select_bgcolor(self, action):
+    dialog = Gtk.ColorChooserDialog(&#34;Select Background Color&#34;)
+    if dialog.run() == Gtk.ResponseType.OK:
+        (r, g, b, a) = dialog.get_rgba()
+        color = &#34;#%0.2x%0.2x%0.2x%0.2x&#34; % (
+            int(r * 255),
+            int(g * 255),
+            int(b * 255),
+            int(a * 255))
+        self.run_javascript(&#34;document.execCommand(&#39;backcolor&#39;, null, &#39;%s&#39;);&#34; % color)
+    dialog.destroy()</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.pgwebw.on_select_color"><code class="name flex">
+<span>def <span class="ident">on_select_color</span></span>(<span>self, action)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_select_color(self, action):
+    dialog = Gtk.ColorChooserDialog(&#34;Select Color&#34;)
+    if dialog.run() == Gtk.ResponseType.OK:
+        (r, g, b, a) = dialog.get_rgba()
+        color = &#34;#%0.2x%0.2x%0.2x%0.2x&#34; % (
+            int(r * 255),
+            int(g * 255),
+            int(b * 255),
+            int(a * 255))
+        self.run_javascript(&#34;document.execCommand(&#39;forecolor&#39;, null, &#39;%s&#39;);&#34; % color)
+    dialog.destroy()</code></pre>
+</details>
+</dd>
+<dt id="pgwkit.pgwebw.on_select_font"><code class="name flex">
+<span>def <span class="ident">on_select_font</span></span>(<span>self, action)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_select_font(self, action):
+    dialog = Gtk.FontChooserDialog(&#34;Select a font&#34;)
+    if dialog.run() == Gtk.ResponseType.OK:
+        fname = dialog.get_font_desc().get_family()
+        fsize = dialog.get_font_desc().get_size() / Pango.SCALE
+        ttt = int(1 + round(fsize / 10)) % 9
+        print(&#34;Setting font&#34;, fname, fsize, ttt)
+        self.run_javascript(&#34;document.execCommand(&#39;fontname&#39;, null, &#39;%s&#39;);&#34; % fname)
+        self.run_javascript(&#34;document.execCommand(&#39;fontsize&#39;, null, &#39;%s&#39;);&#34; % ttt)
+    dialog.destroy()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pgwkit.pgwebw_fake"><code class="flex name class">
+<span>class <span class="ident">pgwebw_fake</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>:Constructors:</p>
+<p>::</p>
+<pre><code>VBox(**properties)
+new(homogeneous:bool, spacing:int) -&gt; Gtk.Widget
+</code></pre>
+<p>Initializer for a GObject based classes with support for property
+sets through the use of explicit keyword arguments.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class pgwebw_fake(Gtk.VBox):
+
+    def __init__(self):
+        super(pgwebw_fake, self).__init__();
+        pass
+
+    def load_uri(self, url):
+        pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>gi.repository.Gtk.VBox</li>
+<li>gi.overrides.Gtk.Box</li>
+<li>gi.repository.Gtk.Box</li>
+<li>gi.overrides.Gtk.Container</li>
+<li>gi.repository.Gtk.Container</li>
+<li>gi.overrides.Gtk.Widget</li>
+<li>gi.repository.Gtk.Widget</li>
+<li>gi.repository.GObject.InitiallyUnowned</li>
+<li>gi.overrides.GObject.Object</li>
+<li>gi.repository.GObject.Object</li>
+<li>gi._gi.GObject</li>
+<li>gi.repository.Atk.ImplementorIface</li>
+<li>gi.repository.Gtk.Buildable</li>
+<li>gi.repository.Gtk.Orientable</li>
+<li>gobject.GInterface</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pgwkit.pgwebw_fake.load_uri"><code class="name flex">
+<span>def <span class="ident">load_uri</span></span>(<span>self, url)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_uri(self, url):
+    pass</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="pgwkit.markdialog" href="#pgwkit.markdialog">markdialog</a></code></li>
+<li><code><a title="pgwkit.sizedialog" href="#pgwkit.sizedialog">sizedialog</a></code></li>
+<li><code><a title="pgwkit.treecallb" href="#pgwkit.treecallb">treecallb</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="pgwkit.dummywebkit" href="#pgwkit.dummywebkit">dummywebkit</a></code></h4>
+<ul class="">
+<li><code><a title="pgwkit.dummywebkit.WebView" href="#pgwkit.dummywebkit.WebView">WebView</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pgwkit.dummywebview" href="#pgwkit.dummywebview">dummywebview</a></code></h4>
+<ul class="">
+<li><code><a title="pgwkit.dummywebview.connect" href="#pgwkit.dummywebview.connect">connect</a></code></li>
+<li><code><a title="pgwkit.dummywebview.load_html" href="#pgwkit.dummywebview.load_html">load_html</a></code></li>
+<li><code><a title="pgwkit.dummywebview.set_editable" href="#pgwkit.dummywebview.set_editable">set_editable</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pgwkit.pgwebw" href="#pgwkit.pgwebw">pgwebw</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pgwkit.pgwebw.do_load_changed" href="#pgwkit.pgwebw.do_load_changed">do_load_changed</a></code></li>
+<li><code><a title="pgwkit.pgwebw.do_load_failed" href="#pgwkit.pgwebw.do_load_failed">do_load_failed</a></code></li>
+<li><code><a title="pgwkit.pgwebw.do_ready_to_show" href="#pgwkit.pgwebw.do_ready_to_show">do_ready_to_show</a></code></li>
+<li><code><a title="pgwkit.pgwebw.generate_ui" href="#pgwkit.pgwebw.generate_ui">generate_ui</a></code></li>
+<li><code><a title="pgwkit.pgwebw.get_html" href="#pgwkit.pgwebw.get_html">get_html</a></code></li>
+<li><code><a title="pgwkit.pgwebw.get_lastmod" href="#pgwkit.pgwebw.get_lastmod">get_lastmod</a></code></li>
+<li><code><a title="pgwkit.pgwebw.keypress" href="#pgwkit.pgwebw.keypress">keypress</a></code></li>
+<li><code><a title="pgwkit.pgwebw.on_action" href="#pgwkit.pgwebw.on_action">on_action</a></code></li>
+<li><code><a title="pgwkit.pgwebw.on_edit_marker" href="#pgwkit.pgwebw.on_edit_marker">on_edit_marker</a></code></li>
+<li><code><a title="pgwkit.pgwebw.on_fontsize" href="#pgwkit.pgwebw.on_fontsize">on_fontsize</a></code></li>
+<li><code><a title="pgwkit.pgwebw.on_header" href="#pgwkit.pgwebw.on_header">on_header</a></code></li>
+<li><code><a title="pgwkit.pgwebw.on_insert_image" href="#pgwkit.pgwebw.on_insert_image">on_insert_image</a></code></li>
+<li><code><a title="pgwkit.pgwebw.on_insert_link" href="#pgwkit.pgwebw.on_insert_link">on_insert_link</a></code></li>
+<li><code><a title="pgwkit.pgwebw.on_insert_table" href="#pgwkit.pgwebw.on_insert_table">on_insert_table</a></code></li>
+<li><code><a title="pgwkit.pgwebw.on_new" href="#pgwkit.pgwebw.on_new">on_new</a></code></li>
+<li><code><a title="pgwkit.pgwebw.on_open" href="#pgwkit.pgwebw.on_open">on_open</a></code></li>
+<li><code><a title="pgwkit.pgwebw.on_paste" href="#pgwkit.pgwebw.on_paste">on_paste</a></code></li>
+<li><code><a title="pgwkit.pgwebw.on_save" href="#pgwkit.pgwebw.on_save">on_save</a></code></li>
+<li><code><a title="pgwkit.pgwebw.on_select_bgcolor" href="#pgwkit.pgwebw.on_select_bgcolor">on_select_bgcolor</a></code></li>
+<li><code><a title="pgwkit.pgwebw.on_select_color" href="#pgwkit.pgwebw.on_select_color">on_select_color</a></code></li>
+<li><code><a title="pgwkit.pgwebw.on_select_font" href="#pgwkit.pgwebw.on_select_font">on_select_font</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pgwkit.pgwebw_fake" href="#pgwkit.pgwebw_fake">pgwebw_fake</a></code></h4>
+<ul class="">
+<li><code><a title="pgwkit.pgwebw_fake.load_uri" href="#pgwkit.pgwebw_fake.load_uri">load_uri</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
