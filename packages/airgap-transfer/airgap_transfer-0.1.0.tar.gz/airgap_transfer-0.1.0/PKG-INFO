@@ -1,0 +1,478 @@
+Metadata-Version: 2.4
+Name: airgap-transfer
+Version: 0.1.0
+Summary: Bi-directional file transfer tools for air-gapped and isolated environments
+Project-URL: Homepage, https://github.com/RLHQ/airgap-transfer
+Project-URL: Repository, https://github.com/RLHQ/airgap-transfer.git
+Project-URL: Issues, https://github.com/RLHQ/airgap-transfer/issues
+Author: airgap-transfer contributors
+License: MIT
+License-File: LICENSE
+Keywords: air-gapped,airgap,bastion,file-transfer,isolated,keyboard-input,qrcode,security,vdi
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Information Technology
+Classifier: Intended Audience :: System Administrators
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Security
+Classifier: Topic :: System :: Networking
+Classifier: Topic :: System :: Systems Administration
+Requires-Python: >=3.9
+Requires-Dist: pynput>=1.7.0
+Provides-Extra: all
+Requires-Dist: opencv-python>=4.5.0; extra == 'all'
+Requires-Dist: pyzbar>=0.1.9; extra == 'all'
+Requires-Dist: qrcode[pil]>=7.0; extra == 'all'
+Provides-Extra: dev
+Requires-Dist: black>=23.0; extra == 'dev'
+Requires-Dist: build>=0.10.0; extra == 'dev'
+Requires-Dist: mypy>=1.0; extra == 'dev'
+Requires-Dist: pytest-cov>=4.0; extra == 'dev'
+Requires-Dist: pytest>=7.0; extra == 'dev'
+Requires-Dist: ruff>=0.1.0; extra == 'dev'
+Requires-Dist: twine>=4.0.0; extra == 'dev'
+Provides-Extra: qrcode
+Requires-Dist: opencv-python>=4.5.0; extra == 'qrcode'
+Requires-Dist: pyzbar>=0.1.9; extra == 'qrcode'
+Requires-Dist: qrcode[pil]>=7.0; extra == 'qrcode'
+Description-Content-Type: text/markdown
+
+# Airgap Transfer
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/RLHQ/airgap-transfer/releases)
+[![Status](https://img.shields.io/badge/status-beta-orange.svg)](https://github.com/RLHQ/airgap-transfer)
+
+**Bi-directional file transfer tools for air-gapped and isolated environments.**
+
+Transfer files to and from isolated systems (VDI, bastion hosts, air-gapped networks) using keyboard input simulation and QR code video streams.
+
+[中文文档](README_CN.md) | [English](README.md)
+
+## Features
+
+### 🎹 Keyboard Transfer
+- **Transfer files via keyboard input** - Send files by simulating keyboard typing
+- **Auto-execution** - Scripts execute automatically on the remote system
+- **SHA256 verification** - Built-in checksum validation
+- **Speed presets** - Optimized for different connection types (local VM, remote desktop, etc.)
+
+### 📱 QR Code Transfer
+- **Encode files to QR codes** - Generate video streams for screen sharing
+- **Decode from video** - Extract files from screen recordings
+- **High error correction** - Robust against video quality issues
+- **Progress tracking** - Real-time feedback during encoding/decoding
+
+### 🛠️ Professional Design
+- **Unified CLI** - Single `airgap` command with intuitive subcommands
+- **Clean Python API** - Use as a library in your own projects
+- **Type hints** - Full type annotations for better IDE support
+- **Modular** - Well-organized codebase for easy contribution
+
+## Quick Start
+
+### Installation
+
+> **Note**: This project is currently in v0.1.0 and not yet published to PyPI. Install from source:
+
+```bash
+# Clone the repository
+git clone https://github.com/RLHQ/airgap-transfer.git
+cd airgap-transfer
+
+# Install using uv (recommended)
+uv sync                              # Base package
+uv sync --extra all                  # With QR code support
+uv sync --extra all --extra dev      # With development tools
+
+# Or using pip (compatible way)
+pip install -e .
+pip install -e ".[all]"
+pip install -e ".[all,dev]"
+```
+
+**Once published to PyPI (future):**
+```bash
+pip install airgap-transfer         # Base package
+pip install airgap-transfer[all]    # With QR code support
+```
+
+### Usage Examples
+
+#### Keyboard Transfer
+
+```bash
+# Development environment (using uv)
+uv run airgap send myfile.pdf
+
+# Specify output path on remote system
+uv run airgap send myfile.pdf --output /tmp/received.pdf
+
+# Use speed presets
+uv run airgap send myfile.pdf --fast    # For local VMs
+uv run airgap send myfile.pdf --slow    # For high-latency connections
+
+# Custom countdown
+uv run airgap send myfile.pdf --countdown 10
+
+# Production (after installation)
+airgap send myfile.pdf
+```
+
+#### QR Code Transfer
+
+```bash
+# Development environment (using uv)
+uv run airgap qr-encode myfile.pdf | ffplay -framerate 1 -f image2pipe -i -
+
+# Or save as video
+uv run airgap qr-encode myfile.pdf | ffmpeg -framerate 1 -f image2pipe -i - output.mp4
+
+# Decode from recording (receiver side)
+uv run airgap qr-decode recording.mp4 output.pdf
+
+# Verify against original
+uv run airgap qr-decode recording.mp4 output.pdf --verify original.pdf
+
+# VDI environment (using python3 with qrcode only)
+python3 ~/airgap_tools/qr_sender.py myfile.pdf 5 | ffplay -framerate 1 -f image2pipe -i -
+```
+
+#### Installer Bundle
+
+```bash
+# Generate installation bundle for VDI/air-gapped environments
+uv run airgap install --generate
+# Creates sender-bundle/ with install.sh, qr_sender.py, and README.txt
+
+# Transfer self-contained installer to remote via keyboard
+uv run airgap install --transfer
+# Transfers install.sh (which includes embedded QR sender)
+# Only ONE file needs to be transferred!
+
+# In remote terminal after transfer:
+bash install.sh
+# Installs QR sender to ~/airgap_tools/qr_sender.py
+```
+
+### Python API
+
+```python
+from airgap_transfer import KeyboardTransfer, QREncoder, QRDecoder
+
+# Keyboard transfer
+transfer = KeyboardTransfer("myfile.pdf")
+stats = transfer.send(countdown=5)
+print(f"Transferred in {stats['elapsed_time']:.1f}s")
+
+# QR encoding
+import sys
+encoder = QREncoder("myfile.pdf")
+encoder.encode_to_stream(sys.stdout.buffer)
+
+# QR decoding
+decoder = QRDecoder("recording.mp4")
+success = decoder.decode_to_file("output.pdf")
+if success:
+    print("File successfully decoded!")
+```
+
+### Complete Workflow Example
+
+**Scenario**: Transfer a configuration file to a VDI environment
+
+```bash
+# 1. On your external machine
+git clone https://github.com/RLHQ/airgap-transfer.git
+cd airgap-transfer
+uv sync  # Install dependencies using uv
+
+# 2. Start the transfer (you have 5 seconds to switch windows)
+uv run airgap send config.yaml --output /home/user/config.yaml
+
+# 3. Switch to VDI terminal window and keep it focused
+# 4. Script automatically types and executes
+# 5. Verify output on VDI terminal:
+#    ✓ File transfer successful! Checksum verified
+#    File saved to: /home/user/config.yaml
+```
+
+## Use Cases
+
+### Scenario 1: VDI Access (Common Use Case)
+
+You need to transfer files to/from a Virtual Desktop Infrastructure (VDI) with:
+- ✅ Screen sharing enabled
+- ✅ Keyboard input allowed
+- ❌ File transfer disabled
+- ❌ Clipboard sharing disabled
+
+**Solution**: Use keyboard transfer or QR codes
+
+#### Sending files TO VDI (External → VDI):
+```bash
+# On external machine, run:
+uv run airgap send document.pdf --countdown 10
+
+# The script will automatically type into the VDI terminal
+# File will be decoded and verified with SHA256
+```
+
+#### Getting files FROM VDI (VDI → External):
+
+**Step 1**: Transfer sender tools to VDI (one-time setup)
+```bash
+# On external machine, generate and transfer the installation bundle
+uv run airgap install --transfer
+
+# This transfers a self-contained install.sh script that:
+# - Contains embedded QR sender tool
+# - Only requires ONE keyboard transfer
+# - Automatically installs to ~/airgap_tools/qr_sender.py
+```
+
+**Alternative**: Manual transfer (if preferred)
+```bash
+# On external machine, send just the encoder script
+uv run airgap send sender-bundle/qr_sender.py --output ~/qr_sender.py
+```
+
+**Step 2**: Generate QR codes in VDI
+```bash
+# In VDI terminal (only needs python3 and qrcode package)
+python3 ~/airgap_tools/qr_sender.py myfile.pdf 5 | ffplay -framerate 1 -f image2pipe -i -
+```
+
+**Step 3**: Decode on external machine
+```bash
+# Record the QR code video, then:
+uv run airgap qr-decode recording.mp4 output.pdf --verify original.pdf
+```
+
+### Scenario 2: Bastion Host
+
+Transfer files through a jump server/bastion host with strict security controls.
+
+```bash
+# Transfer script to bastion
+uv run airgap send deployment_script.sh --output /tmp/deploy.sh
+```
+
+### Scenario 3: Air-Gapped Network
+
+Transfer files to completely isolated networks with no connectivity.
+
+```bash
+# Encode file on connected system (development environment)
+uv run airgap qr-encode sensitive_data.gpg | ffplay -framerate 1 -f image2pipe -i -
+
+# Record screen in air-gapped environment
+# Decode on air-gapped system (development environment)
+uv run airgap qr-decode recording.mp4 sensitive_data.gpg
+
+# Or use python3 on air-gapped system (only needs qrcode package)
+python3 qr_sender.py sensitive_data.gpg 5 | ffplay -framerate 1 -f image2pipe -i -
+```
+
+## How It Works
+
+### Keyboard Transfer
+
+1. **Encode**: File is base64-encoded and wrapped in a bash script
+2. **Generate**: Script includes decoding and verification logic
+3. **Type**: Content is typed character-by-character via simulated keyboard
+4. **Execute**: Script auto-executes on the remote terminal
+5. **Verify**: SHA256 checksum confirms successful transfer
+
+### QR Code Transfer
+
+1. **Chunk**: File is split into QR-code-sized chunks
+2. **Encode**: Each chunk is encoded as a QR code image
+3. **Stream**: QR codes are displayed as a video sequence
+4. **Capture**: Screen recording captures the QR code sequence
+5. **Decode**: Video is processed to extract and reassemble the file
+
+## Requirements
+
+### System Requirements
+- **Development environment**: Python 3.9 or higher
+- **VDI/Air-gapped environment**: Python 3.8 or higher (QR sender only)
+- Linux, macOS, or Windows (with GUI support for keyboard transfer)
+
+### Python Dependencies
+
+**Development Environment** (local machine):
+- Package manager: Use `uv` for dependency management
+- Base package: `pynput` (keyboard transfer)
+- QR code full features: `qrcode`, `opencv-python`, `pyzbar`
+- Run commands: Use `uv run` prefix
+
+**VDI/Air-gapped Environment** (isolated systems, QR sender only):
+- Only requires: `qrcode` package
+- Python version: 3.8+ compatible
+- Run commands: Use `python3` command
+- Not needed: `opencv-python`, `pyzbar` (only for decoder side)
+
+### External Tools (for QR video)
+- `ffplay` or `ffmpeg` (for playing/recording QR code videos)
+- Screen recording software (OBS, QuickTime, etc.) for capturing QR codes
+
+### Performance Expectations
+
+| File Size | Transfer Method | Estimated Time | Recommended |
+|-----------|----------------|----------------|-------------|
+| < 10 KB   | Keyboard       | < 1 minute     | ⭐⭐⭐⭐⭐ |
+| 10-100 KB | Keyboard       | 1-10 minutes   | ⭐⭐⭐⭐ |
+| < 10 KB   | QR Code        | < 30 seconds   | ⭐⭐⭐⭐⭐ |
+| 10-50 KB  | QR Code        | 30s-2 minutes  | ⭐⭐⭐⭐ |
+| > 100 KB  | Either         | > 10 minutes   | ⭐⭐ (compress first) |
+
+## Migrating from Legacy Scripts
+
+If you were using the old standalone scripts:
+
+```bash
+# Old way
+python transfer_file_v2.py myfile.pdf
+
+# New way (development environment)
+uv run airgap send myfile.pdf
+
+# Old way
+python qrtest_pipe.py myfile.pdf 5 | ffplay -framerate 1 -f image2pipe -i -
+
+# New way (development environment)
+uv run airgap qr-encode myfile.pdf | ffplay -framerate 1 -f image2pipe -i -
+
+# VDI environment (using python3 only)
+python3 qr_sender.py myfile.pdf 5 | ffplay -framerate 1 -f image2pipe -i -
+
+# Old way
+python qrdecode_video.py recording.mp4 output.pdf
+
+# New way (development environment)
+uv run airgap qr-decode recording.mp4 output.pdf
+```
+
+The legacy scripts are still available in the repository for reference.
+
+## Development
+
+```bash
+# Clone repository
+git clone https://github.com/RLHQ/airgap-transfer.git
+cd airgap-transfer
+
+# Install all dependencies using uv (recommended)
+uv sync --extra all --extra dev
+
+# Run tests (coming soon)
+uv run pytest
+
+# Format code
+uv run black src/ tests/
+uv run ruff check src/ tests/
+
+# Type checking
+uv run mypy src/
+
+# Build package
+uv run python -m build
+```
+
+## Project Structure
+
+```
+airgap-transfer/
+├── src/airgap_transfer/     # Main package
+│   ├── keyboard/            # Keyboard transfer module
+│   ├── qrcode/              # QR code transfer module
+│   ├── cli/                 # Command-line interface
+│   ├── utils/               # Utility functions
+│   └── installer/           # Installer module (planned)
+├── tests/                   # Test suite
+├── examples/                # Example scripts
+├── docs/                    # Documentation
+└── scripts/                 # Development scripts
+```
+
+## Roadmap
+
+### v0.1.0 (Current)
+- ✅ Keyboard transfer
+- ✅ QR code transfer
+- ✅ Unified CLI
+- ✅ Python API
+- ✅ Professional project structure
+
+### v0.2.0 (Planned)
+- 🔄 Installer module for air-gapped environments
+- 🔄 Standalone sender package generation
+- 🔄 Configuration file support
+- 🔄 Enhanced documentation
+
+### v0.3.0 (Future)
+- 📋 Batch transfer support
+- 📋 Resume/retry functionality
+- 📋 Compression support
+- 📋 Encryption options
+
+## Environment Notes
+
+This project is optimized for two different environments:
+
+### Development Environment (Local/External Machine)
+- **Python version**: 3.9+
+- **Package manager**: `uv` (recommended) or `pip`
+- **Run commands**: `uv run airgap <command>`
+- **Features**: Full functionality (keyboard transfer + QR encode/decode)
+- **Dependencies**: All packages (pynput, qrcode, opencv-python, pyzbar)
+
+### VDI/Air-gapped Environment (Isolated Systems)
+- **Python version**: 3.8+ (using system python3)
+- **Package manager**: System pip (usually restricted)
+- **Run commands**: `python3 <script>.py`
+- **Features**: QR encoding only (for exporting files from VDI)
+- **Dependencies**: Only `qrcode` package (usually pre-installed)
+- **Characteristics**: Lightweight, minimal dependencies, suitable for restricted environments
+
+## Security Considerations
+
+⚠️ **Important Security Notes**:
+
+- This tool is designed for **legitimate administrative access** to isolated systems
+- All transfers should comply with your organization's security policies
+- Files are **not encrypted** by default - use GPG or similar if needed
+- Screen recordings may be visible to others - be aware of your surroundings
+- Keyboard transfer creates **temporary files** on the remote system
+- Always **verify checksums** to ensure data integrity
+
+## Contributing
+
+Contributions are welcome! Areas where we'd love help:
+- 📖 Documentation improvements
+- 🧪 More test coverage
+- 🐛 Bug reports and fixes
+- 💡 Feature suggestions
+- 🌍 Translations
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Inspired by real-world challenges in accessing isolated environments
+- Built with [pynput](https://pypi.org/project/pynput/), [qrcode](https://pypi.org/project/qrcode/), and [OpenCV](https://opencv.org/)
+- Thanks to all contributors and users!
+
+---
+
+**Note**: This tool is for authorized use only. Always obtain proper permissions before transferring files to/from isolated systems.
