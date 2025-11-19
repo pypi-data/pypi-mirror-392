@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aton-format"
+version = "1.0.2"
+description = "ATON FORMAT - Adaptive Token-Oriented Notation - Data format optimized for LLMs with 56% token reduction"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Stefano D'Agostino", email = "dago.stefano@gmail.com"}
+]
+maintainers = [
+    {name = "Stefano D'Agostino", email = "dago.stefano@gmail.com"}
+]
+keywords = [
+    "aton",
+    "llm",
+    "token-optimization",
+    "data-format",
+    "serialization",
+    "json-alternative",
+    "gpt",
+    "claude",
+    "ai",
+    "machine-learning"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: General",
+]
+requires-python = ">=3.8"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "black>=23.0",
+    "flake8>=6.0",
+    "mypy>=1.0",
+]
+
+[project.urls]
+Homepage = "https://www.atonformat.com"
+Documentation = "https://www.atonformat.com/documentation.html"
+Repository = "https://github.com/dagoSte/aton-format"
+
+[tool.setuptools]
+packages = ["aton"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311','py312']
