@@ -1,0 +1,72 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "goro"
+dynamic = ["version"]
+description = "A TUI-based tool for managing multiple Git repositories in one place with an intuitive interface"
+authors = [
+    { name = "Angelo E DZ", email = "user4302@users.noreply.gitlab.com" },
+]
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "textual>=0.40.0",
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "isort>=5.0.0",
+    "mypy>=1.0.0",
+    "pytest-cov>=4.0.0",
+    "hatch-vcs",
+]
+
+[tool.hatch.build]
+packages = ["src/goro"]
+
+[tool.hatch.version]
+path = "src/goro/__init__.py"
+
+[project.scripts]
+goro = "goro.cli:app"
+
+[tool.black]
+line-length = 88
+target-version = ["py38"]
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+show_error_codes = true
