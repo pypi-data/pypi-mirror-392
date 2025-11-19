@@ -1,0 +1,289 @@
+Metadata-Version: 2.4
+Name: escrowai-encrypt
+Version: 0.0.2
+Summary: CLI tool and Python library for encrypting algorithms and datasets with AES-256-GCM for secure computation on EscrowAI
+Home-page: https://github.com/BeeKeeperAI/escrowai-encrypt
+Author: BeeKeeperAI
+Author-email: engineering@beekeeperai.com
+License: MIT
+Project-URL: Bug Reports, https://github.com/BeeKeeperAI/escrowai-encrypt/issues
+Project-URL: Source, https://github.com/BeeKeeperAI/escrowai-encrypt
+Project-URL: Documentation, https://github.com/BeeKeeperAI/escrowai-encrypt#readme
+Keywords: encryption,aes,gcm,azure,blob-storage,escrowai,algorithm-encryption,dataset-encryption,secure-computation,cryptography
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Security :: Cryptography
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: System :: Archiving :: Compression
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: azure-storage-blob
+Requires-Dist: cryptography
+Requires-Dist: pyyaml
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: keywords
+Dynamic: license
+Dynamic: project-url
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+# escrowai-encrypt
+
+A Python package and CLI tool for encrypting algorithms and datasets for use with EscrowAI. Implements secure encryption practices using AES-256-GCM for data encryption and RSA-OAEP for key wrapping.
+
+## Overview
+
+The escrowai-encrypt package provides:
+- **Command-line tool** for encrypting/decrypting files and datasets
+- **Python library** for integrating encryption into your workflows
+- **Azure Blob Storage integration** for secure cloud data handling
+- **Algorithm protection** with selective file encryption and secrets management
+
+## Installation
+
+```bash
+pip install escrowai-encrypt
+```
+
+This installs both the `escrowai-encrypt` CLI tool and the Python library.
+
+## Quick Start (CLI)
+
+### 1. Generate an Encryption Key
+
+```bash
+escrowai-encrypt generate-key --key-output my.key
+```
+
+### 2. Encrypt an Algorithm
+
+Encrypt your algorithm code while excluding configuration files:
+
+```bash
+escrowai-encrypt encrypt-algorithm \
+  --input ./my-algorithm \
+  --key my.key \
+  --output ./encrypted-algorithm \
+  --exclude Dockerfile requirements.txt run.sh
+```
+
+This creates an encrypted version of your algorithm with a `secrets.yaml` manifest.
+
+### 3. Create a Packaged Algorithm
+
+Encrypt and package your algorithm as a zip file:
+
+```bash
+escrowai-encrypt encrypt-algorithm \
+  --input ./my-algorithm \
+  --key my.key \
+  --exclude Dockerfile requirements.txt \
+  --zip algorithm-encrypted.zip
+```
+
+### 4. Encrypt and Upload Dataset to Azure
+
+```bash
+escrowai-encrypt encrypt \
+  --input ./my-dataset \
+  --key my.key \
+  --sas-url "https://storage.blob.core.windows.net/container?sv=..."
+```
+
+### 5. Decrypt Dataset from Azure
+
+```bash
+escrowai-encrypt decrypt \
+  --sas-url "https://storage.blob.core.windows.net/container?sv=..." \
+  --key my.key \
+  --output ./decrypted-data
+```
+
+## CLI Reference
+
+### Commands
+
+**`generate-key`** - Generate a new Content Encryption Key (CEK)
+```bash
+escrowai-encrypt generate-key [--key-output FILENAME]
+```
+
+**`encrypt-algorithm`** - Encrypt an algorithm directory with selective exclusions
+```bash
+escrowai-encrypt encrypt-algorithm \
+  --input INPUT_FOLDER \
+  --key KEY_FILE \
+  --output OUTPUT_FOLDER \
+  [--exclude FILE1 FILE2 ...] \
+  [--zip OUTPUT.zip] \
+  [--debug]
+```
+
+**`encrypt`** - Encrypt and upload dataset to Azure Blob Storage
+```bash
+escrowai-encrypt encrypt \
+  --input LOCAL_FOLDER \
+  --key KEY_FILE \
+  --sas-url AZURE_SAS_URL \
+  [--debug]
+
+# Or encrypt from one blob storage to another
+escrowai-encrypt encrypt \
+  --source-sas-url SOURCE_AZURE_SAS_URL \
+  --key KEY_FILE \
+  --sas-url TARGET_AZURE_SAS_URL
+```
+
+**`decrypt`** - Decrypt and download dataset from Azure Blob Storage
+```bash
+escrowai-encrypt decrypt \
+  --sas-url AZURE_SAS_URL \
+  --key KEY_FILE \
+  --output LOCAL_FOLDER \
+  [--debug]
+```
+
+### Options
+
+- `--input` - Input file or folder path
+- `--key` - Content Encryption Key file path
+- `--output` - Output path for decrypted files or encrypted algorithms
+- `--sas-url` - Azure Blob Storage SAS URL
+- `--source-sas-url` - Source Azure Blob Storage SAS URL (for blob-to-blob encryption)
+- `--key-output` - Output filename for generated key
+- `--exclude` - List of file names to exclude from algorithm encryption (e.g., Dockerfile, requirements.txt)
+- `--zip` - Create a zip file of the encrypted algorithm
+- `--debug` - Enable debug output
+
+## Python API
+
+For advanced use cases, you can use the Python library directly in your code.
+
+### Key Management
+
+```python
+from escrowai_encrypt.encryption import generate_content_encryption_key
+
+# Generate a new encryption key
+generate_content_encryption_key('my_key.key')
+```
+
+### Algorithm Encryption
+
+```python
+from escrowai_encrypt.encryption import encrypt_algorithm
+
+# Encrypt an algorithm directory
+encrypt_algorithm(
+    algorithm_directory='path/to/algorithm',
+    content_encryption_key='my_key.key',
+    filename='encrypted_algorithm.zip'
+)
+```
+
+### Dataset Encryption
+
+```python
+from escrowai_encrypt.encryption import encrypt_upload_dataset
+
+# Encrypt and upload a dataset to Azure Blob Storage
+encrypt_upload_dataset(
+    dataset_directory='path/to/dataset',
+    content_encryption_key='my_key.key',
+    dataset_sas_uri='https://storage-account.blob.core.windows.net/container?sv=...'
+)
+```
+
+### Blob-to-Blob Encryption
+
+```python
+from escrowai_encrypt.encryption import encrypt_upload_dataset_from_blob
+
+# Encrypt data from one blob storage to another
+encrypt_upload_dataset_from_blob(
+    dataset_sas_uri_unencrypted='https://source.blob.core.windows.net/container?sv=...',
+    content_encryption_key='my_key.key',
+    dataset_sas_uri='https://target.blob.core.windows.net/container?sv=...'
+)
+```
+
+### Decryption
+
+```python
+from escrowai_encrypt.decryption import decrypt_secret
+
+# Decrypt an encrypted file
+decrypt_secret(
+    secret='encrypted_file.bkenc',
+    content_encryption_key='my_key.key',
+    filename='decrypted_file.txt'
+)
+```
+
+### Key Wrapping
+
+```python
+from escrowai_encrypt.encryption import generate_wrapped_content_encryption_key
+
+# Wrap a CEK with a Key Encryption Key (KEK)
+generate_wrapped_content_encryption_key(
+    content_encryption_key='my_key.key',
+    key_encryption_key='public_key.pem',
+    filename='wrapped_key.bkenc'
+)
+```
+
+## Examples
+
+See the [`examples/`](examples/) folder for more comprehensive usage examples, including a full-featured CLI implementation that demonstrates advanced patterns.
+
+## Security Features
+
+- **AES-256-GCM encryption** for all data
+- **PBKDF2 key derivation** with 10,000 iterations and random salts
+- **RSA-OAEP key wrapping** for secure key management
+- **16MB chunk processing** for efficient handling of large files
+- **Salted encryption** - All encrypted files include a random 8-byte salt
+
+## Algorithm Encryption Features
+
+When encrypting algorithms with `encrypt-algorithm`:
+- **Selective exclusion** - Exclude files like `Dockerfile`, `requirements.txt`, or `run.sh`
+- **Automatic Dockerfile detection** - Dockerfiles are automatically excluded
+- **secrets.yaml generation** - Creates a manifest mapping encrypted files to originals
+- **Optional packaging** - Use `--zip` to create a ready-to-deploy package
+
+## Requirements
+
+- Python >= 3.6
+- Dependencies (automatically installed):
+  - `azure-storage-blob` - Azure Blob Storage integration
+  - `cryptography` - Encryption primitives
+  - `pyyaml` - YAML file generation
+
+## License
+
+MIT License - Copyright (c) 2024 BeeKeeperAI, Inc.
+
+## Support
+
+For issues and questions, please visit the [GitHub repository](https://github.com/BeeKeeperAI/escrowai-encrypt).
