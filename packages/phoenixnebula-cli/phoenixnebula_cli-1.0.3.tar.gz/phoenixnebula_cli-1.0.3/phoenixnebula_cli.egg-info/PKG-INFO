@@ -1,0 +1,471 @@
+Metadata-Version: 2.4
+Name: phoenixnebula-cli
+Version: 1.0.3
+Summary: A feature-rich, customizable Unix shell with themes and job control
+Home-page: https://github.com/SysTechSalihY/phoenixnebula
+Author: Salih
+Author-email: salihyilboga98@gmail.com
+License: MIT
+Project-URL: Bug Tracker, https://github.com/SysTechSalihY/phoenixnebula/issues
+Project-URL: Documentation, https://github.com/SysTechSalihY/phoenixnebula
+Project-URL: Source Code, https://github.com/SysTechSalihY/phoenixnebula
+Keywords: shell terminal bash cli interactive
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Operating System :: MacOS
+Classifier: Operating System :: POSIX :: BSD
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: System Administrators
+Classifier: Topic :: System :: Shells
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: keywords
+Dynamic: license-file
+Dynamic: project-url
+Dynamic: requires-python
+Dynamic: summary
+
+# PhoenixNebula 🐚
+
+A feature-rich, customizable Unix shell implementation written in Python with theme support, job control, and comprehensive command handling.
+
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PyPI version](https://img.shields.io/pypi/v/phoenixnebula-cli.svg)](https://pypi.org/project/phoenixnebula-cli/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+## Features ✨
+
+- **Interactive Command Execution** - Full support for executing system commands with proper I/O handling
+- **Theme Support** - 5 built-in themes (Dracula, Solarized Dark, Nord, Monokai, Gruvbox) plus custom themes
+- **Job Control** - Background and foreground job management with `jobs`, `fg`, and `bg` commands
+- **Pipeline Support** - Chain commands using the pipe operator (`|`)
+- **Output Redirection** - Redirect output and error streams to files (`>`, `>>`, `2>`, `2>>`)
+- **Command Aliases** - Create and manage command aliases
+- **History Management** - Full command history with persistence and custom history files
+- **Tab Completion** - Smart tab completion for commands and file paths
+- **Signal Handling** - Proper handling of SIGINT, SIGTSTP, SIGQUIT, and SIGWINCH
+- **PTY Support** - Interactive programs (vim, git, ssh, etc.) run with proper terminal control
+- **Security** - No external dependencies, safe input handling, no eval/exec
+
+## Installation 📦
+
+### Via pip (Recommended)
+
+```bash
+pip install phoenixnebula-cli
+phoenixnebula
+```
+
+### Via git + setup.py
+
+```bash
+git clone https://github.com/SysTechSalihY/phoenixnebula.git
+cd phoenixnebula
+sudo python3 setup.py install
+phoenixnebula
+```
+
+### Via Docker
+
+```bash
+docker pull nobodydeveloper/phoenixnebula:latest
+docker run -it nobodydeveloper/phoenixnebula:latest
+```
+## Binary Distribution 🛠️
+
+PhoenixNebula can be distributed as a **standalone binary**, so users can run it without installing Python.
+
+### Build with PyInstaller (Recommended)
+
+Install PyInstaller:
+
+```bash
+pip install pyinstaller
+git clone https://github.com/SysTechSalihY/phoenixnebula.git
+cd phoenixnebula
+pyinstaller --onefile phoenixnebula/phoenixnebula.py
+Run it directly: ./dist/phoenixnebula
+
+### From source (Development)
+
+```bash
+git clone https://github.com/SysTechSalihY/phoenixnebula.git
+cd phoenixnebula
+pip install -e .
+phoenixnebula
+```
+
+## Quick Start 🚀
+
+### Basic Commands
+
+```bash
+$ echo "Hello, World!"
+Hello, World!
+
+$ pwd
+/home/user
+
+$ cd Documents
+
+$ ls -la
+```
+
+### Background Jobs
+
+Append `&` to run a command in the background:
+
+```bash
+$ sleep 100 &
+[1] 12345
+
+$ jobs
+[1]  Running  sleep 100
+
+$ fg %1
+```
+
+### Piping Commands
+
+```bash
+$ cat file.txt | grep "search_term" | wc -l
+```
+
+### Output Redirection
+
+```bash
+$ echo "text" > output.txt          # Write to file
+$ echo "text" >> output.txt         # Append to file
+$ command 2> errors.txt             # Redirect stderr
+$ command 2>> errors.txt            # Append stderr
+```
+
+### Themes
+
+```bash
+$ theme list
+Available themes:
+  - dracula *
+  - nord
+  - solarized_dark
+  - monokai
+  - gruvbox
+
+$ theme set nord
+Theme applied: Nord
+```
+
+## Configuration 🎨
+
+### Shell Configuration File
+
+Create `~/.phoenixnebularc` for aliases and settings:
+
+```bash
+alias ll=ls -la
+alias ..=cd ..
+alias gs=git status
+export PS1="\u@\h \w\$ "
+```
+
+### Themes
+
+PhoenixNebula comes with 5 built-in themes. Create custom themes at `~/.phoenixnebula/themes/mytheme.json`:
+
+```json
+{
+  "name": "My Custom Theme",
+  "background": "#1e1e1e",
+  "foreground": "#e0e0e0",
+  "cursor_color": "#e0e0e0",
+  "black": "#000000",
+  "red": "#ff0000",
+  "green": "#00ff00",
+  "yellow": "#ffff00",
+  "blue": "#0000ff",
+  "purple": "#ff00ff",
+  "cyan": "#00ffff",
+  "white": "#ffffff",
+  "bright_black": "#808080",
+  "bright_red": "#ff8080",
+  "bright_green": "#80ff80",
+  "bright_yellow": "#ffff80",
+  "bright_blue": "#8080ff",
+  "bright_purple": "#ff80ff",
+  "bright_cyan": "#80ffff",
+  "bright_white": "#ffffff",
+  "prompt_user": "#00ff00",
+  "prompt_host": "#00ffff",
+  "prompt_path": "#ffff00",
+  "prompt_symbol": "#ff00ff"
+}
+```
+
+Then apply it:
+
+```bash
+$ theme set mytheme
+```
+
+## Built-in Commands 💻
+
+### Navigation & Execution
+
+| Command | Usage | Description |
+|---------|-------|-------------|
+| `cd` | `cd [directory]` | Change current directory |
+| `pwd` | `pwd` | Print working directory |
+| `echo` | `echo [text]` | Print text to output |
+| `exit` | `exit [code]` | Exit the shell |
+| `type` | `type <command>` | Display command type |
+| `clear` | `clear` | Clear terminal screen |
+
+### Command History
+
+| Command | Usage | Description |
+|---------|-------|-------------|
+| `history` | `history [n]` | Show last n commands |
+| `history -r <file>` | Load history from file |
+| `history -w <file>` | Write history to file |
+| `history -a <file>` | Append history to file |
+
+### Aliases
+
+| Command | Usage | Description |
+|---------|-------|-------------|
+| `alias` | `alias` | List all aliases |
+| `alias [name]=[value]` | `alias ll='ls -la'` | Create alias |
+| `unalias` | `unalias <n>` | Remove alias |
+
+### Environment & Variables
+
+| Command | Usage | Description |
+|---------|-------|-------------|
+| `export` | `export VAR=value` | Set environment variable |
+| `unset` | `unset VAR` | Unset environment variable |
+| `set` | `set [VAR=value]` | Get/set shell variables |
+
+### Job Control
+
+| Command | Usage | Description |
+|---------|-------|-------------|
+| `jobs` | `jobs` | List background jobs |
+| `fg` | `fg %jobid` | Bring job to foreground |
+| `bg` | `bg %jobid` | Resume job in background |
+
+### Themes
+
+| Command | Usage | Description |
+|---------|-------|-------------|
+| `theme` | `theme` | Show available themes |
+| `theme list` | List all themes |
+| `theme set <n>` | `theme set dracula` | Apply theme |
+| `theme current` | Show current theme |
+
+## Advanced Features 🔧
+
+### Pipeline Operations
+
+Chain multiple commands with pipes:
+
+```bash
+$ cat data.txt | sort | uniq | wc -l
+```
+
+### Variable Expansion
+
+Expand environment variables:
+
+```bash
+$ echo $HOME
+/home/user
+
+$ echo ${PATH}
+/usr/local/bin:/usr/bin:/bin
+```
+
+### Tilde Expansion
+
+Home directory shortcut:
+
+```bash
+$ cd ~/Documents
+$ cat ~/.bashrc
+```
+
+### Interactive Programs
+
+The shell automatically detects and runs interactive programs with proper terminal control:
+
+```bash
+$ vim file.txt
+$ git commit
+$ python3
+```
+
+## Security 🔒
+
+- **No External Dependencies** - Uses only Python standard library
+- **Safe Input Handling** - All input is validated and parsed safely using `shlex`
+- **No Code Injection** - Never uses `eval()`, `exec()`, or `__import__()`
+- **Secure Variable Expansion** - Variables are safely expanded with fallbacks
+- **Signal Safety** - Proper signal handling without race conditions
+- **Process Isolation** - Background jobs properly isolated using process groups
+
+See [SECURITY.md](SECURITY.md) for detailed security information.
+
+## Testing 🧪
+
+Run the comprehensive test suite:
+
+```bash
+# Install test dependencies
+pip install pytest pytest-cov
+
+# Run all tests
+pytest tests/ -v
+
+# Run with coverage report
+pytest tests/ -v --cov=phoenixnebula
+
+# Run specific test class
+pytest tests/test_phoenixnebula.py::TestSecurityInputValidation -v
+```
+
+## Project Structure 📁
+
+```
+phoenixnebula/
+├── phoenixnebula/
+│   ├── __init__.py
+│   └── phoenixnebula.py
+├── tests/
+│   └── test_phoenixnebula.py
+├── Dockerfile
+├── Dockerfile.prod
+├── docker-compose.yml
+├── setup.py
+├── setup.cfg
+├── pyproject.toml
+├── MANIFEST.in
+├── README.md
+├── LICENSE
+└── .gitignore
+```
+
+## Keyboard Shortcuts ⌨️
+
+- `Ctrl+C` - Cancel current command
+- `Ctrl+Z` - Suspend current command
+- `Ctrl+D` - Exit shell (EOF)
+- `Tab` - Auto-complete command or file path
+- `Up/Down Arrows` - Navigate command history
+- `Ctrl+R` - Reverse history search (if supported)
+
+## Environment Variables 🌍
+
+| Variable | Description |
+|----------|-------------|
+| `PATH` | Search path for executables |
+| `HOME` | User's home directory |
+| `HISTFILE` | Location of command history file |
+| `SHELL` | Current shell name |
+| `USER` | Current user name |
+| `HOSTNAME` | System hostname |
+
+## Troubleshooting 🔧
+
+### Shell Exits Unexpectedly
+
+Check your `~/.phoenixnebularc` file for errors:
+
+```bash
+cat ~/.phoenixnebularc
+```
+
+### History Not Saving
+
+Ensure the history file location is writable:
+
+```bash
+export HISTFILE=~/.phoenixnebula_history
+```
+
+### Tab Completion Not Working
+
+Verify Python readline module is available:
+
+```bash
+python3 -c "import readline; print('readline available')"
+```
+
+### Interactive Programs Not Working Properly
+
+Ensure your terminal emulator supports ANSI escape codes and PTY operations. Try clearing the screen:
+
+```bash
+clear
+```
+
+### Theme Colors Not Applying
+
+Try resetting the terminal:
+
+```bash
+reset
+phoenixnebula
+```
+
+## Contributing 🤝
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License 📜
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments 🙏
+
+- Inspired by bash, zsh, and other Unix shells
+- Theme colors from popular terminal themes
+- Built with Python's standard library
+
+## Support 💬
+
+For issues, questions, or suggestions:
+
+1. Check existing [GitHub Issues](https://github.com/SysTechSalihY/phoenixnebula/issues)
+2. Create a new issue with detailed description
+3. Submit a Pull Request with improvements
+
+
+## Security Policy 🔐
+
+If you discover a security vulnerability, please email salihyilboga98@gmail.com instead of using the issue tracker.
+
+---
+
+**Enjoy using PhoenixNebula!** 🎉
+
+For more information and advanced usage, visit the [GitHub repository](https://github.com/SysTechSalihY/phoenixnebula).

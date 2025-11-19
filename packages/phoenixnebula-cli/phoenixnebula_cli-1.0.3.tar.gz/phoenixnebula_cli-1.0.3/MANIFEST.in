@@ -1,0 +1,65 @@
+# Include documentation
+include README.md
+include CHANGELOG.md
+include LICENSE
+include SECURITY.md
+
+# Include configuration files
+include setup.py
+include setup.cfg
+include pyproject.toml
+
+# Include all Python files in myshell package
+recursive-include phoenixnebula *.py
+include phoenixnebula/py.typed
+
+# Include test files
+recursive-include tests *.py
+
+# Include Docker files
+include Dockerfile
+include Dockerfile.prod
+include Dockerfile.alpine
+include docker-compose.yml
+include docker-compose.prod.yml
+include .dockerignore
+
+# Include git configuration
+include .gitignore
+include .gitattributes
+
+# Include CI/CD configuration
+recursive-include .github *.yml *.yaml
+
+# Exclude compiled Python files
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude *$py.class
+global-exclude .DS_Store
+
+# Exclude virtual environments
+global-exclude venv
+global-exclude env
+global-exclude .venv
+
+# Exclude IDE and editor files
+global-exclude .vscode
+global-exclude .idea
+global-exclude *.swp
+global-exclude *.swo
+global-exclude *~
+global-exclude .idea
+
+# Exclude build artifacts
+global-exclude build
+global-exclude dist
+global-exclude *.egg-info
+
+# Exclude test artifacts
+global-exclude .pytest_cache
+global-exclude .coverage
+global-exclude htmlcov
+
+# Exclude temporary files
+global-exclude *.tmp
+global-exclude *.bak
