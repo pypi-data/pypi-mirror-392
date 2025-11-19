@@ -1,0 +1,137 @@
+[project]
+name = "qpmpc_layers"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Stéphane Caron", email = "stephane.caron@inria.fr"},
+    {name = "Valentin Tordjman--Levavasseur", email = "valentin.tordjman-levavasseur@inria.fr"},
+]
+maintainers = [
+    {name = "Stéphane Caron", email = "stephane.caron@normalesup.org"},
+]
+dynamic = ['version', 'description']
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "proxsuite >=0.6.1",
+    "qpsolvers >=1.8.0",
+    "torch >=2.4.1",
+]
+keywords = ["differentiable", "model", "predictive", "control", "linear", "time-varying"]
+
+[build-system]
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.module]
+name = "qpmpc_layers"
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64", "linux-aarch64"]
+
+[tool.pixi.dependencies]
+python = "<3.14"  # ProxSuite requirement
+valmix = "*"
+
+[tool.pixi.pypi-dependencies]
+qpmpc_layers = { path = ".", editable = true }
+
+[tool.pixi.feature.coverage.dependencies]
+coveralls = ">=4.0.0"
+pytest = "*"
+pytest-cov = "*"
+
+[tool.pixi.feature.coverage.tasks]
+coverage = "pytest --cov=qpmpc_layers --cov-report=html"
+coverage-open = { cmd = "xdg-open htmlcov/index.html", depends-on = "coverage" }
+coveralls = { cmd = "coveralls --service=github", depends-on = "coverage" }
+
+[tool.pixi.feature.docs.dependencies]
+graphviz = "*"
+sphinx = ">=8.0.0"
+sphinx-autodoc-typehints = "*"
+
+[tool.pixi.feature.docs.pypi-dependencies]
+sphinx-material = "*"
+sphinx-mathjax-offline = "*"
+
+[tool.pixi.feature.docs.tasks]
+figures = "cd docs && make"
+docs-build = { cmd = "sphinx-build docs/ docs/_build", depends-on = "figures" }
+docs-open = { cmd = "xdg-open docs/_build/index.html", depends-on = "docs-build" }
+
+[tool.pixi.feature.lint.dependencies]
+ruff = "*"
+
+[tool.pixi.feature.lint.tasks]
+lint = "ruff check qpmpc_layers"
+
+[tool.pixi.feature.py39.dependencies]
+python = "3.9.*"
+
+[tool.pixi.feature.py310.dependencies]
+python = "3.10.*"
+
+[tool.pixi.feature.py310.pypi-dependencies]
+setuptools = "*"
+
+[tool.pixi.feature.py311.dependencies]
+python = "3.11.*"
+
+[tool.pixi.feature.py312.dependencies]
+python = "3.12.*"
+
+[tool.pixi.feature.py313.dependencies]
+python = "3.13.*"
+
+[tool.pixi.feature.test.dependencies]
+pytest = "*"
+
+[tool.pixi.feature.test.tasks]
+test = "pytest ."
+
+[tool.pixi.environments]
+coverage = { features = ["coverage"], solve-group = "default" }
+default = { features = [], solve-group = "default" }
+docs = { features = ["docs"], solve-group = "default" }
+lint = { features = ["lint"], solve-group = "default" }
+py310 = { features = ["py310", "test"], solve-group = "py310" }
+py311 = { features = ["py311", "test"], solve-group = "py311" }
+py312 = { features = ["py312", "test"], solve-group = "py312" }
+py313 = { features = ["py313", "test"], solve-group = "py313" }
+py39 = { features = ["py39", "test"], solve-group = "py39" }
+
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.lint]
+ignore = [
+    "D401",  # good for methods but not for class docstrings
+    "D405",  # British-style section names are also "proper"!
+]
+select = [
+    # pyflakes
+    "F",
+    # pycodestyle
+    "E",
+    "W",
+    # isort
+    "I001",
+    # pydocstyle
+    "D"
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
