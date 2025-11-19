@@ -1,0 +1,164 @@
+[project]
+name = "asdf-astropy"
+description = "ASDF serialization support for astropy"
+readme = 'README.rst'
+license-files = ['LICENSE.rst']
+authors = [{ name = 'The Astropy Developers', email = 'astropy.team@gmail.com' }]
+requires-python = '>=3.11'
+classifiers = [
+  'Development Status :: 5 - Production/Stable',
+  'Programming Language :: Python',
+  "Programming Language :: Python :: 3",
+]
+dynamic = [
+  'version',
+]
+dependencies = [
+  "asdf>=3.3.0",
+  "asdf-coordinates-schemas>=0.4",
+  "asdf-transform-schemas>=0.6",
+  "asdf-standard>=1.1.0",
+  "astropy>=5.3.0",
+  "numpy>=1.26",
+  "packaging>=19",
+]
+[project.optional-dependencies]
+docs = [
+  "docutils",
+  "graphviz",
+  "matplotlib",
+  "sphinx",
+  "sphinx-asdf",
+  "sphinx-astropy",
+  "sphinx-automodapi",
+  "tomli",
+]
+test = [
+  "coverage",
+  "pytest-astropy",
+  "pytest-asdf-plugin",
+  "pytest",
+  "scipy",  # indirect requirement via astropy
+]
+[project.urls]
+'documentation' = 'https://asdf-astropy.readthedocs.io/en/latest/'
+'repository' = 'https://github.com/astropy/asdf-astropy'
+'tracker' = 'https://github.com/astropy/asdf-astropy/issues'
+[project.entry-points]
+'asdf.extensions' = {asdf-astropy = 'asdf_astropy.integration:get_extensions'}
+'asdf.resource_mappings' = {asdf-astropy = 'asdf_astropy.integration:get_resource_mappings'}
+
+[build-system]
+build-backend = 'setuptools.build_meta'
+requires = [
+  "setuptools>77",
+  "setuptools_scm[toml]>=3.4",
+]
+
+[tool.setuptools.packages.find]
+include = ["asdf_astropy*"]
+
+[tool.setuptools.package-data]
+"asdf_astropy.resources" = ["asdf_astropy/resources/**/**/*.yaml"]
+
+[tool.setuptools_scm]
+write_to = "asdf_astropy/_version.py"
+
+[tool.black]
+line-length = 120
+force-exclude = '''
+^/(
+  (
+      \.eggs
+    | \.git
+    | \.pytest_cache
+    | \.tox
+  )/
+)
+'''
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+extend-exclude = ["docs/*"]
+
+[tool.ruff.lint]
+select = [
+    "ERA",
+    "YTT",
+    "S",
+    "BLE",
+    "FBT",
+    "B",
+    "A",
+    "COM",
+    "C4",
+    "CPY",
+    "T10",
+    "EM",
+    "EXE",
+    "INT",
+    "ISC",
+    "ICN",
+    "LOG",
+    "G",
+    "INP",
+    "PIE",
+    "T20",
+    "PYI",
+    "PT",
+    "Q",
+    "RSE",
+    "RET",
+    "SLF",
+    "SLOT",
+    "TID",
+    "PTH",
+    "FLY",
+    "I",
+    "NPY",
+    "N",
+    "PERF",
+    "E",
+    "W",
+    "DOC",
+    "F",
+    "PGH",
+    "PL",
+    "UP",
+    "FURB",
+    "RUF",
+    "TRY",
+]
+extend-ignore = [
+    # Individually ignored checks
+    "SLF001", # private-member-access
+    "FBT001", # boolean positional arguments in function definition
+    "RUF012", # mutable class attributes should be annotated with typing.ClassVar
+    "PTH123", # replace open with Path.open
+    "B905", # zip with strict
+    "UP038", # isinstance with | instead of ,
+    "A005", # shadow builtin modules
+    "PLC0415", # import should be at the top-level of a file
+]
+
+[tool.ruff.lint.per-file-ignores]
+"test_*.py" = ["S101"]
+"asdf_astropy/testing/helpers.py" = ["S101"]
+"scripts/generate_manifest.py" = ["S101", "SLOT000"]
+
+[tool.pytest.ini_options]
+testpaths = ['asdf_astropy', 'docs']
+astropy_header = true
+doctest_plus = 'enabled'
+text_file_format = 'rst'
+filterwarnings = [
+    'error',
+    'ignore:numpy.ndarray size changed:RuntimeWarning',
+]
+addopts = '--color=yes --doctest-rst'
+asdf_schema_root = 'asdf_astropy/resources/schemas'
+asdf_schema_tests_enabled = true
+
+[tool.codespell]
+skip="*.pdf,*.fits,*.asdf,*.egg-info,.tox,build,./tags,.git,./docs/_build"

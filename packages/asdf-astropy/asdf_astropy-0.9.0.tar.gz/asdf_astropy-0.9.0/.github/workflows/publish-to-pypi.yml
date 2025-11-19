@@ -1,0 +1,21 @@
+name: Release
+
+on:
+  release:
+    types: [released]
+
+permissions:
+  contents: read
+
+jobs:
+  build-n-publish:
+    permissions:
+      contents: none
+    if: (github.event_name == 'release')
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish_pure_python.yml@d9b81a07e789d1b1921ab5fe33de2ddcbbd02c3f  # v2.3.0
+    with:
+      upload_to_pypi: true
+      test_extras: test
+      test_command: pytest --pyargs asdf_astropy
+    secrets:
+      pypi_token: ${{ secrets.PYPI_PASSWORD }}
