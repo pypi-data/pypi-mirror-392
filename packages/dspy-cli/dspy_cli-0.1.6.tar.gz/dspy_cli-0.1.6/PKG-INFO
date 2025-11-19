@@ -1,0 +1,102 @@
+Metadata-Version: 2.4
+Name: dspy-cli
+Version: 0.1.6
+Summary: A CLI tool for creating and serving DSPy projects
+Author: DSPy CLI Contributors
+License-Expression: MIT
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: dspy-ai>=3.0.3
+Requires-Dist: click>=8.0
+Requires-Dist: fastapi>=0.100
+Requires-Dist: uvicorn[standard]>=0.20
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: python-dotenv>=1.0
+Requires-Dist: pydantic>=2.0
+Requires-Dist: requests>=2.28
+Requires-Dist: fastmcp>=2.0.0
+Requires-Dist: asgi-lifespan>=2.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.21; extra == "dev"
+Requires-Dist: httpx>=0.24; extra == "dev"
+Requires-Dist: black>=23.0; extra == "dev"
+Requires-Dist: ruff>=0.1.0; extra == "dev"
+Provides-Extra: docs
+Requires-Dist: mkdocs>=1.6.0; extra == "docs"
+Requires-Dist: mkdocs-material>=9.5.0; extra == "docs"
+Requires-Dist: mkdocstrings[python]>=0.24.0; extra == "docs"
+Requires-Dist: pymdown-extensions>=10.7.0; extra == "docs"
+Dynamic: license-file
+
+# dspy-cli
+
+CLI for deploying DSPy programs as HTTP APIs. Auto-generates endpoints, OpenAPI specs, and Docker configs.
+
+Reduces deployment setup from hours to minutes for developers embedding LLM features in applications.
+
+## Quick Start
+
+```bash
+# Install
+uv tool install dspy-cli
+
+# Create project
+dspy-cli new blog-tagger -s "post -> tags: list[str]"
+cd blog-tagger
+
+# Serve locally
+dspy-cli serve
+```
+
+Test the endpoint:
+
+```bash
+curl -X POST http://localhost:8000/BlogTaggerPredict \
+  -H "Content-Type: application/json" \
+  -d '{"post": "How to build Chrome extensions with AI..."}'
+```
+
+Response:
+
+```json
+{
+  "tags": ["chrome-extensions", "ai", "development", "javascript"]
+}
+```
+
+## Features
+
+- Auto-discovery of modules as HTTP endpoints
+- Docker configs and OpenAPI specs generated
+- Hot reload development server
+- Model switching via config file
+- MCP tool support
+
+## Commands
+
+```bash
+dspy-cli new <name> [-s "input -> output"]    # Create project
+dspy-cli serve [--ui]                          # Start HTTP server
+dspy-cli g scaffold <program> [-m CoT]         # Add module to project
+```
+
+See [Command Reference](docs/commands/) for complete documentation.
+
+## Documentation
+
+- [Getting Started](docs/getting-started.md) - Quickstart guide
+- [Commands](docs/commands/) - CLI reference
+- [Deployment](docs/deployment.md) - Production deployment
+- [Configuration](docs/configuration.md) - Model and environment settings
+- [Examples](examples/) - Sample projects
+
+## License
+
+MIT
