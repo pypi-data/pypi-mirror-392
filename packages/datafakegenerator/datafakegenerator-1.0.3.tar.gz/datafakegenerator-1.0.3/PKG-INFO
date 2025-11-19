@@ -1,0 +1,1805 @@
+Metadata-Version: 2.4
+Name: datafakegenerator
+Version: 1.0.3
+Summary: A powerful, flexible Python library for generating realistic fake data across 700+ data types with multi-format export capabilities.
+Home-page: https://github.com/ikigamisama/DataFakeGenerator
+Author: Franz Monzales
+Author-email: ikigamidevs@gmail.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: license-file
+
+# DataFakeGenerator by Iki
+
+> A powerful, flexible Python library for generating realistic fake data across 700+ data types with multi-format export capabilities.
+
+## ✨ Features
+
+- 🎯 **700+ Data Types** spanning 20+ categories (Personal, Commerce, IT, Health, Finance, Nature, Travel, etc.)
+- 🔧 **Flexible Schema Definition** with customizable options per field
+- 📦 **Multiple Export Formats**: CSV, JSON, SQL, CQL, Firebase, Excel, XML, DBUnit, Tab-Delimited, parquet, duckDB
+- 🎲 **Statistical Distributions**: Normal, Poisson, Binomial, Exponential, Geometric
+- 🌍 **Location-Aware**: Country-specific phones, addresses, postal codes
+- 💼 **Enterprise Ready**: IBAN, SWIFT codes, stock data, medical codes (ICD-9/10)
+
+## 🚀 Quick Start
+
+```python
+from core import DataFakeGenerator
+
+schema = [
+    {
+        "label": "id",
+        "key_label": "row_number",
+        "group": "basic",
+        "options": {"blank_percentage": 0}
+    },
+    {
+        "label": "first_name",
+        "key_label": "first_name",
+        "group": "personal",
+        "options": {"blank_percentage": 0}
+    },
+    {
+        "label": "email",
+        "key_label": "email_address",
+        "group": "it",
+        "options": {"blank_percentage": 0}
+    }
+]
+
+# Generate 100 records and export to all formats
+DataFakeGenerator(schema).many(100).export(
+    table_name="users",
+    output_dir="output"
+)
+```
+
+## 📚 Schema Structure
+
+Each field in your schema requires:
+
+| Property    | Description                                 | Required |
+| ----------- | ------------------------------------------- | -------- |
+| `label`     | Column name in output                       | ✅       |
+| `key_label` | Data type identifier (see categories below) | ✅       |
+| `group`     | Category group                              | ✅       |
+| `options`   | Field-specific parameters                   | ✅       |
+
+### Common Options
+
+- `blank_percentage`: Probability of null values (0-100)
+- Format-specific options vary by `key_label` (see below)
+
+## 🎨 Data Categories & Examples
+
+### 🔹 Basic
+
+| Label                    | Key Label                  | Description                                                                                | Examples                                    |
+| ------------------------ | -------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------- |
+| Exponential Distribution | `exponential_distribution` | Generates numbers based on an exponential distribution with a specific λ rate              | `0.5`, `2.3`, `5.7`                         |
+| ULID                     | `ulid`                     | Universally Unique Lexicographically-sortable Identifier                                   | `01ARZ3NDEKTSV4RRFFQ69G5FAV`                |
+| Time                     | `time`                     | Random time values                                                                         | `3:30 PM`, `15:30`, `08:45:30`              |
+| Short Hex Color          | `short_hex_color`          | 3-character hex color codes                                                                | `#14b`, `#a32`, `#926`                      |
+| Sequence                 | `sequence`                 | Generates a sequence of numbers with adjustable step and repeat options                    | `1`, `2`, `3`, `4`                          |
+| Sentences                | `sentences`                | Chosen randomly from lorem ipsum                                                           | `Lorem ipsum dolor sit amet.`               |
+| Row Number               | `row_number`               | Sequential row numbers                                                                     | `1`, `2`, `3`                               |
+| Poisson Distribution     | `poisson_distribution`     | Generates numbers based on a Poisson distribution with a specific mean value               | `3`, `5`, `7`                               |
+| Password Hash            | `password_hash`            | The bcrypt hash of a randomly generated password                                           | `$2b$10$N9qo8uLOickgx2ZMRZoMy...`           |
+| Password                 | `password`                 | Generate passwords with customizable requirements                                          | `P@ssw0rd123`, `Secure#Pass99`              |
+| Paragraphs               | `paragraphs`               | Chosen randomly from lorem ipsum                                                           | `Lorem ipsum dolor sit amet...`             |
+| Number                   | `number`                   | Random numerical values                                                                    | `0.25`, `5.2`, `1000`                       |
+| Normal Distribution      | `normal_distribution`      | Generates random numbers in a normal distribution using the Box-Muller algorithm           | `170.5`, `165.2`, `180.3`                   |
+| Frequency                | `frequency`                | Frequency values                                                                           | `Daily`, `Weekly`, `Monthly`, `Yearly`      |
+| Nato Phonetic            | `nato_phonetic`            | NATO phonetic alphabet                                                                     | `Whiskey`, `Alpha`, `Bravo`                 |
+| ISBN                     | `isbn`                     | International Standard Book Number                                                         | `574398570-7`, `938492119-X`, `758622794-2` |
+| Hex Color                | `hex_color`                | 6-character hex color codes                                                                | `#142a0b`, `#F0F0F0`, `#0066FF`             |
+| Address Line 2           | `address_line_2`           | Room, Apt, Floor, Suite, or PO box number                                                  | `Apt 5B`, `Suite 200`, `Floor 3`            |
+| Binomial Distribution    | `binomial_distribution`    | Generates numbers based on a binomial distribution with a specific probability of success  | `5`, `7`, `3`                               |
+| Blank                    | `blank`                    | Always generates a null value                                                              | `null`, `NULL`, ``                          |
+| Boolean                  | `boolean`                  | True or false values                                                                       | `true`, `false`                             |
+| Color                    | `color`                    | Color names                                                                                | `Red`, `Blue`, `Black`                      |
+| Custom List              | `custom_list`              | Picks items randomly or sequentially from a custom list of values                          | User-defined values                         |
+| Datetime                 | `datetime`                 | Date and time values                                                                       | `07/04/2013`, `4.7.2013`, `04-Jul-2013`     |
+| Geometric Distribution   | `geometric_distribution`   | Generates numbers based on a geometric distribution with a specific probability of success | `2`, `5`, `8`                               |
+| Encrypt                  | `encrypt`                  | Simulates encrypted text                                                                   | `U2FsdGVkX1...`, `aGVsbG8gd29ybGQ=`         |
+| MongoDB ObjectID         | `mongodb_objectid`         | Globally unique identifiers for MongoDB objects                                            | `507f1f77bcf86cd799439011`                  |
+| Dice Roll                | `dice_roll`                | Random dice roll results (1-6)                                                             | `1`, `6`, `4`                               |
+| Words                    | `words`                    | Chosen randomly from lorem ipsum                                                           | `Lorem`, `ipsum`, `dolor`                   |
+| Sentiment                | `sentiment`                | Sentiment analysis categories                                                              | `Positive`, `Negative`, `Neutral`           |
+| Month                    | `month`                    | Months of the year                                                                         | `January`, `June`, `December`               |
+| Metric Prefix            | `metric_prefix`            | Metric system prefixes                                                                     | `kilo`, `mega`, `giga`, `milli`             |
+| Duration                 | `duration`                 | Time duration formats                                                                      | `2h 30m`, `45 seconds`, `3 days`            |
+| Dimension                | `dimension`                | Physical dimensions                                                                        | `1920x1080`, `8.5x11`, `50x30x20`           |
+| Day of Week              | `day_of_week`              | Days of the week                                                                           | `Monday`, `Friday`, `Sunday`                |
+| Weight                   | `weight`                   | Weight measurements with units                                                             | `150 lbs`, `68 kg`, `12 oz`                 |
+| Height                   | `height`                   | Height measurements with units                                                             | `5'10"`, `170 cm`, `6 feet`                 |
+| Weather Condition        | `weather_condition`        | Weather descriptions                                                                       | `Sunny`, `Rainy`, `Cloudy`                  |
+| Temperature              | `temperature`              | Temperature values with units                                                              | `72°F`, `22°C`, `-5°C`                      |
+| Paper Size               | `paper_size`               | Paper sizes                                                                                | `A4`, `Letter`, `Legal`                     |
+| Season                   | `season`                   | Four seasons of the year                                                                   | `Spring`, `Summer`, `Fall`, `Winter`        |
+| Punctuation              | `punctuation`              | Punctuation marks                                                                          | `Period`, `Comma`, `Exclamation`            |
+| Emoji                    | `emoji`                    | Random emoji characters                                                                    | `😀`, `🎉`, `❤️`                            |
+| Priority Level           | `priority_level`           | Priority classifications                                                                   | `Low`, `Medium`, `High`, `Critical`         |
+| Rating                   | `rating`                   | Numerical ratings (0-5 stars)                                                              | `4.5`, `3.8`, `5.0`                         |
+
+**Options Examples:**
+
+```python
+# Datetime with range and format
+{
+    "label": "created_at",
+    "key_label": "datetime",
+    "group": "basic",
+    "options": {
+        "from_date": "2023-01-01",
+        "to_date": "2024-12-31",
+        "format": "m/d/yyyy"  # or "d.m.yyyy", "dd-MMM-yyyy", etc.
+    }
+}
+
+# Time with format options
+{
+    "label": "shift_start",
+    "key_label": "time",
+    "group": "basic",
+    "options": {
+        "from": "08:00",
+        "to": "17:00",
+        "format": "24 Hour"  # "24 Hour w/seconds", "12 Hour", "12 Hour w/millis", etc.
+    }
+}
+
+# Password with requirements
+{
+    "label": "password",
+    "key_label": "password",
+    "group": "basic",
+    "options": {
+        "min_length": 12,
+        "upper": True,
+        "lower": True,
+        "numbers": True,
+        "symbols": True
+    }
+}
+
+# Password Hash
+{
+    "label": "hashed_password",
+    "key_label": "password_hash",
+    "group": "basic",
+    "options": {
+        "min_length": 8,
+        "max_length": 20
+    }
+}
+
+# Sequence with advanced options
+{
+    "label": "seq_id",
+    "key_label": "sequence",
+    "group": "basic",
+    "options": {
+        "start_at": 1000,
+        "step": 10,
+        "repeat": 2,
+        "restart_at": 5000
+    }
+}
+
+# Words with range
+{
+    "label": "keywords",
+    "key_label": "words",
+    "group": "basic",
+    "options": {
+        "at_least": 3,
+        "but_no_more_than": 7
+    }
+}
+
+# Custom List
+{
+    "label": "status",
+    "key_label": "custom_list",
+    "group": "basic",
+    "options": {
+        "format": ["active", "pending", "suspended", "archived"]
+    }
+}
+
+# Dimension
+{
+    "label": "screen_size",
+    "key_label": "dimension",
+    "group": "basic",
+    "options": {
+        "type": "screen"  # or "paper", "product", etc.
+    }
+}
+```
+
+### 📈 Statistical Distributions
+
+**Key Labels:** `normal_distribution`, `binomial_distribution`, `poisson_distribution`, `exponential_distribution`, `geometric_distribution`
+
+```python
+# Normal Distribution
+{
+    "label": "height_cm",
+    "key_label": "normal_distribution",
+    "group": "basic",
+    "options": {
+        "mean": 170,
+        "standard_deviation": 10,
+        "decimals": 1
+    }
+}
+
+# Binomial Distribution
+{
+    "label": "success_count",
+    "key_label": "binomial_distribution",
+    "group": "basic",
+    "options": {
+        "success_probability": 0.7  # Decimal between 0 and 1
+    }
+}
+
+# Poisson Distribution
+{
+    "label": "events_per_hour",
+    "key_label": "poisson_distribution",
+    "group": "basic",
+    "options": {
+        "mean": 5
+    }
+}
+
+# Exponential Distribution
+{
+    "label": "wait_time",
+    "key_label": "exponential_distribution",
+    "group": "basic",
+    "options": {
+        "lambda": 0.5
+    }
+}
+
+# Geometric Distribution
+{
+    "label": "attempts_until_success",
+    "key_label": "geometric_distribution",
+    "group": "basic",
+    "options": {
+        "success_probability": 0.3  # Decimal between 0 and 1
+    }
+}
+```
+
+### 🚀 Advanced
+
+| Label              | Key Label            | Description                                                                          | Examples                                      |
+| ------------------ | -------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------- |
+| Digit Sequence     | `digit_sequence`     | Create simple sequences of characters, digits, and symbols                           | `12345`, `99999`, `00001`                     |
+| Template           | `template`           | Concatenate values from several columns into one                                     | `{first_name} {last_name}`, `User-{id}`       |
+| JSON Array         | `json_array`         | Generates an array of objects in JSON format                                         | `[{"id": 1}, {"id": 2}]`                      |
+| Naughty String     | `naughty_string`     | Strings which have a high probability of causing issues when used as user-input data | `<script>alert()</script>`, `', DROP TABLE--` |
+| Regular Expression | `regular_expression` | Generate random data based on a regular expression                                   | `[A-Z]{3}-[0-9]{4}` matches `ABC-1234`        |
+| Character Sequence | `character_sequence` | Create simple sequences of characters, digits, and symbols                           | `ABCDE`, `AAA-111`, `XYZ123`                  |
+
+```python
+# Template concatenation
+{
+    "label": "display_name",
+    "key_label": "template",
+    "group": "advanced",
+    "options": {
+        "format": "{first_name} {last_name} ({employee_id})"
+    }
+}
+
+# JSON Array
+{
+    "label": "tags",
+    "key_label": "json_array",
+    "group": "advanced",
+    "options": {
+        "min_elements": 2,
+        "max_elements": 5
+    }
+}
+
+# Regular Expression
+{
+    "label": "serial_number",
+    "key_label": "regular_expression",
+    "group": "advanced",
+    "options": {
+        "format": "[A-Z]{3}-[0-9]{4}"
+    }
+}
+
+# Character Sequence
+{
+    "label": "code_seq",
+    "key_label": "character_sequence",
+    "group": "advanced",
+    "options": {
+        "format": "ABC-###-XYZ"  # # for digits, A for letters
+    }
+}
+```
+
+### 👤 Personal
+
+| Label                  | Key Label              | Description                                        | Examples                                                |
+| ---------------------- | ---------------------- | -------------------------------------------------- | ------------------------------------------------------- |
+| Conference Name        | `conference_name`      | Conference and event names                         | `TechCrunch Disrupt`, `CES`, `SXSW`                     |
+| Catch Phrase           | `catch_phrase`         | Multiple buzzwords strung together                 | `Seamless cloud-native solutions`                       |
+| Performance Rating     | `performance_rating`   | Performance ratings                                | `Exceeds Expectations`, `Meets`, `Needs Improvement`    |
+| Event Type             | `event_type`           | Event categories                                   | `Wedding`, `Birthday`, `Conference`                     |
+| Business Type          | `business_type`        | Legal business entity types                        | `LLC`, `Corporation`, `Sole Proprietorship`             |
+| Degree                 | `degree`               | Academic degree names                              | `Bachelor of Science`, `Master of Arts`, `PhD`          |
+| Education Level        | `education_level`      | Levels of educational attainment                   | `High School`, `Bachelor's Degree`, `Master's Degree`   |
+| Age Group              | `age_group`            | Demographic age ranges                             | `18-24`, `25-34`, `55-64`                               |
+| Industry               | `industry`             | Business industry classifications                  | `Healthcare`, `Technology`, `Manufacturing`             |
+| Employment Status      | `employment_status`    | Employment status categories                       | `Full-time`, `Part-time`, `Contractor`                  |
+| Hair Color             | `hair_color`           | Hair color types                                   | `Blonde`, `Brown`, `Black`, `Red`                       |
+| Race                   | `race`                 | Racial categories                                  | `Filipino`, `Venezuelan`, `Asian`                       |
+| Contract Type          | `contract_type`        | Employment contract types                          | `Permanent`, `Fixed-term`, `Freelance`                  |
+| Company Name           | `company_name`         | Real company names                                 | `Google`, `Home Depot`, `General Electric`              |
+| Religion               | `religion`             | Religious affiliations                             | `Christianity`, `Islam`, `Buddhism`                     |
+| Hashtag                | `hashtag`              | Social media hashtags                              | `#travel`, `#foodie`, `#fitness`                        |
+| Team Name              | `team_name`            | Team name patterns                                 | `Marketing Team`, `Development Squad`                   |
+| Salary Range           | `salary_range`         | Salary ranges for job positions                    | `$50000-$75000`, `$100000-$150000`                      |
+| Pronoun                | `pronoun`              | Personal pronouns                                  | `he/him`, `she/her`, `they/them`                        |
+| LinkedIn Skill         | `linkedin_skill`       | LinkedIn skills                                    | `Algorithms`, `Sports Nutrition`, `Payroll`             |
+| Pet Name               | `pet_name`             | Common pet names                                   | `Max`, `Bella`, `Charlie`                               |
+| Last Name              | `last_name`            | Last names                                         | `Smith`, `Jones`, `Miller`                              |
+| Income Level           | `income_level`         | Income brackets                                    | `Low`, `Middle`, `High`                                 |
+| Language Code          | `language_code`        | ISO language codes                                 | `de`, `en`, `es`                                        |
+| Nationality            | `nationality`          | National identities                                | `American`, `Japanese`, `Brazilian`                     |
+| Job Title              | `job_title`            | Job titles                                         | `Design Engineer`, `General Manager`                    |
+| Mood                   | `mood`                 | Emotional states and moods                         | `Happy`, `Anxious`, `Excited`                           |
+| Pet Type               | `pet_type`             | Pet categories                                     | `Dog`, `Cat`, `Bird`, `Fish`                            |
+| Political Party        | `political_party`      | Political parties                                  | `Democratic`, `Republican`, `Independent`               |
+| Department (Corporate) | `department_corporate` | Corporate departments                              | `Human Resources`, `Accounting`, `Engineering`          |
+| Military Rank          | `military_rank`        | Military rank titles                               | `Sergeant`, `Captain`, `Colonel`                        |
+| Language               | `language`             | Language names                                     | `German`, `English`, `Spanish`                          |
+| Buzzword               | `buzzword`             | Business buzzwords                                 | `contextually-based`, `radical`, `proactive`            |
+| Interview Stage        | `interview_stage`      | Recruitment stages                                 | `Phone Screen`, `Technical`, `Final Round`              |
+| Zodiac Sign            | `zodiac_sign`          | Astrological zodiac signs                          | `Aries`, `Taurus`, `Gemini`                             |
+| Dream Job              | `dream_job`            | Aspirational job roles                             | `Astronaut`, `CEO`, `Data Scientist`                    |
+| Personality Trait      | `personality_trait`    | Behavioral personality types                       | `Introvert`, `Extrovert`, `Analytical`                  |
+| DUNS Number            | `duns_number`          | Randomly generated DUNS numbers                    | `12-345-6789`, `98-765-4321`                            |
+| EIN                    | `ein`                  | Randomly generated employer identification numbers | `12-3456789`, `98-7654321`                              |
+| Project Status         | `project_status`       | Project statuses                                   | `Not Started`, `In Progress`, `Completed`               |
+| Quote                  | `quote`                | Famous quotes                                      | `To be or not to be`, `The only limit is...`            |
+| Marital Status         | `marital_status`       | Marital status categories                          | `Single`, `Married`, `Divorced`                         |
+| Reaction               | `reaction`             | Social media reactions                             | `Like`, `Love`, `Angry`, `Sad`                          |
+| Fake Company Name      | `fake_company_name`    | Fictional company names                            | `Morar Group`, `Stark-Glover`, `Sawayn and Sons`        |
+| Relationship Type      | `relationship_type`    | Relationship categories                            | `Friend`, `Colleague`, `Family`                         |
+| Role                   | `role`                 | System roles                                       | `Admin`, `User`, `Moderator`                            |
+| First Name             | `first_name`           | First names (any gender)                           | `Jim`, `Mark`, `Sasha`                                  |
+| First Name (Female)    | `first_name_female`    | Female first names                                 | `Susan`, `Jessica`, `Sasha`                             |
+| First Name (Male)      | `first_name_male`      | Male first names                                   | `Mark`, `Bob`, `Tim`                                    |
+| Daily Habit            | `daily_habit`          | Regular daily routines                             | `Morning Run`, `Reading`, `Meditation`                  |
+| University             | `university`           | University names                                   | `The Johns Hopkins University`, `Pepperdine University` |
+| Suffix                 | `suffix`               | Name suffixes                                      | `Jr`, `Sr`, `III`                                       |
+| Organization Type      | `organization_type`    | Organization categories                            | `Nonprofit`, `Government`, `Private`                    |
+| Occupation             | `occupation`           | Occupations                                        | `Teacher`, `Engineer`, `Nurse`                          |
+| Shirt Size             | `shirt_size`           | Shirt sizes                                        | `S`, `M`, `L`                                           |
+| Shoe Size              | `shoe_size`            | Shoe sizes                                         | `8`, `10.5`, `42`                                       |
+| Gender (Facebook)      | `gender_facebook`      | The Facebook gender list as of 2021                | `Male`, `Female`, `Non-binary`, `Custom`                |
+| Title                  | `title`                | Name titles                                        | `Mr`, `Ms`, `Dr`                                        |
+| Gender (abbrev)        | `gender_abbrev`        | Abbreviated genders                                | `M`, `F`                                                |
+| Gender (Binary)        | `gender_binary`        | Binary gender options                              | `Female`, `Male`                                        |
+| Full Name              | `full_name`            | Full names                                         | `Nancy Smith`, `Tim Fisher`, `Al Jones`                 |
+| Life Stage             | `life_stage`           | Human life stages                                  | `Infant`, `Teenager`, `Adult`, `Senior`                 |
+| Slogan                 | `slogan`               | Randomly generated marketing slogans               | `Just Do It`, `Think Different`                         |
+| SSN                    | `ssn`                  | Social Security Numbers                            | `678-59-9455`, `312-20-4597`                            |
+| Legal Entity           | `legal_entity`         | Legal entity types                                 | `Individual`, `Partnership`, `Corporation`              |
+| Gender                 | `gender`               | Gender options                                     | `Female`, `Male`, `Non-binary`                          |
+| Hobby                  | `hobby`                | Common hobbies and interests                       | `Photography`, `Hiking`, `Cooking`                      |
+
+**Options Examples:**
+
+```python
+# Employee ID (EIN)
+{
+    "label": "employee_id",
+    "key_label": "ein",
+    "group": "personal",
+    "options": {"blank_percentage": 0}
+}
+
+# Shoe Size with type
+{
+    "label": "shoe_size",
+    "key_label": "shoe_size",
+    "group": "personal",
+    "options": {
+        "type": "US"  # or "EU"
+    }
+}
+
+# Tax ID with type
+{
+    "label": "tax_id",
+    "key_label": "tax_id",
+    "group": "personal",
+    "options": {
+        "type": "SSN"  # or "EIN"
+    }
+}
+```
+
+### 🛍️ Commerce
+
+| Label                        | Key Label                      | Description                                    | Examples                                                             |
+| ---------------------------- | ------------------------------ | ---------------------------------------------- | -------------------------------------------------------------------- |
+| Water Type                   | `water_type`                   | Water types                                    | `Tap`, `Spring`, `Distilled`                                         |
+| Postal Service               | `postal_service`               | Shipping carriers                              | `USPS`, `FedEx`, `UPS`, `DHL`                                        |
+| Payment Status               | `payment_status`               | Payment statuses                               | `Paid`, `Pending`, `Failed`                                          |
+| Membership Level             | `membership_level`             | Membership tiers                               | `Free`, `Basic`, `Premium`                                           |
+| Office Supply                | `office_supply`                | Office supplies                                | `Stapler`, `Notebook`, `Pen`                                         |
+| Warranty Period              | `warranty_period`              | Warranty durations                             | `1 Year`, `90 Days`, `Lifetime`                                      |
+| Sales Channel                | `sales_channel`                | Sales channels                                 | `Online`, `Retail`, `Wholesale`                                      |
+| Delivery Time Window         | `delivery_time_window`         | Estimated delivery time windows                | `9AM-12PM`, `1PM-5PM`                                                |
+| IBAN                         | `iban`                         | International Bank Account Number              | `FR73 5960 2948 07N1 L9TC PVYX E17`, `SE85 4302 3680 7231 4238 1624` |
+| Department (Retail)          | `department_retail`            | Retail department names                        | `Grocery`, `Books`, `Health & Beauty`                                |
+| Currency Code                | `currency_code`                | ISO currency codes                             | `USD`, `EUR`, `MXN`                                                  |
+| Currency                     | `currency`                     | Currency names                                 | `Dollar`, `Euro`, `Peso`                                             |
+| Credit Card Type             | `credit_card_type`             | Credit card brand                              | `visa`, `mastercard`, `americanexpress`                              |
+| Credit Card #                | `credit_card_number`           | Valid credit card numbers                      | `4017959045824`, `5349690971837932`                                  |
+| Meal Type                    | `meal_type`                    | Meal categories                                | `Breakfast`, `Lunch`, `Dinner`                                       |
+| Customer Feedback Score      | `customer_feedback_score`      | Feedback or satisfaction scores                | `1`, `5`, `10`                                                       |
+| Bundle Type                  | `bundle_type`                  | Product bundle classifications                 | `Buy1Take1`, `Starter Pack`, `Premium Bundle`                        |
+| Promo Expiry Date            | `promo_expiry_date`            | Expiration dates for promotions                | `2025-12-31`, `2026-01-15`                                           |
+| Return Reason                | `return_reason`                | Reasons for product returns                    | `Damaged`, `Wrong Item`, `Defective`                                 |
+| Money                        | `money`                        | Monetary values with currency symbols          | `$3.00`, `£12.94`, `€127,54`                                         |
+| Loyalty Tier                 | `loyalty_tier`                 | Customer loyalty levels                        | `Bronze`, `Silver`, `Gold`, `Platinum`                               |
+| Recipe Name                  | `recipe_name`                  | Recipe titles                                  | `Chocolate Chip Cookies`, `Spaghetti Carbonara`                      |
+| Ingredient                   | `ingredient`                   | Cooking ingredients                            | `Flour`, `Sugar`, `Butter`                                           |
+| Stock Symbol                 | `stock_symbol`                 | Stock ticker symbols                           | `MSFT`, `NTAP`, `TBBK`                                               |
+| Stock Sector                 | `stock_sector`                 | Stock market sectors                           | `Technology`, `Capital Goods`, `Finance`                             |
+| Stock Name                   | `stock_name`                   | Company stock names                            | `Microsoft Corporation`, `NetApp, Inc.`                              |
+| Stock Market Cap             | `stock_market_cap`             | Market capitalization                          | `$33.03B`, `$54.29M`, `$41.02M`                                      |
+| Stock Market                 | `stock_market`                 | Stock exchange names                           | `NYSE`, `NASDAQ`                                                     |
+| Stock Industry               | `stock_industry`               | Industry classifications                       | `Semiconductors`, `Major Banks`                                      |
+| Product Subcategory          | `product_subcategory`          | Product subcategory names                      | `Plant-Based Beverages`, `Gourmet Snacks`                            |
+| Inventory Status             | `inventory_status`             | Inventory statuses                             | `In Stock`, `Out of Stock`, `Backordered`                            |
+| Product Name                 | `product_name`                 | Product names                                  | `Classic Black Trousers`, `Lemon Dill Salmon`                        |
+| Product Description          | `product_description`          | Product descriptions                           | `Savory lentil chips with BBQ flavor`                                |
+| Product Category             | `product_category`             | Product categories                             | `Toys`, `Clothing - Outerwear`, `Outdoor`                            |
+| Barcode (EAN-13)             | `barcode_ean13`                | 13-digit European Article Number with checksum | `5901234123457`, `4006381333931`                                     |
+| Barcode (UPC)                | `barcode_upc`                  | 12-digit Universal Product Code with checksum  | `012345678905`, `614141007349`                                       |
+| Coupon Code                  | `coupon_code`                  | Promotional discount codes                     | `SAVE20`, `FREESHIP`, `WELCOME10`                                    |
+| Invoice Number               | `invoice_number`               | Invoice identification numbers                 | `INV-2024-001`, `INV-20241031-4523`                                  |
+| Product Price                | `product_price`                | The price of a product                         | `$29.99`, `€45.50`, `£12.99`                                         |
+| Currency Symbol              | `currency_symbol`              | Currency symbols                               | `$`, `€`, `¥`, `£`                                                   |
+| Order Status                 | `order_status`                 | E-commerce order status                        | `Processing`, `Shipped`, `Delivered`                                 |
+| Furniture Type               | `furniture_type`               | Furniture categories                           | `Sofa`, `Desk`, `Chair`                                              |
+| Fabric Type                  | `fabric_type`                  | Textile fabric types                           | `Cotton`, `Polyester`, `Silk`                                        |
+| Discount Percentage          | `discount_percentage`          | Discount amounts                               | `10%`, `25%`, `50%`                                                  |
+| Delivery Status              | `delivery_status`              | Package delivery statuses                      | `Out for Delivery`, `In Transit`, `Delivered`                        |
+| Coffee Type                  | `coffee_type`                  | Coffee drink types                             | `Espresso`, `Cappuccino`, `Latte`                                    |
+| Track Number                 | `tracking_number`              | Shipping tracking numbers                      | `1Z999AA10123456784`                                                 |
+| Subscription Plan            | `subscription_plan`            | Subscription tier names                        | `Basic`, `Premium`, `Enterprise`                                     |
+| Gem Stone                    | `gem_stone`                    | Precious stones                                | `Diamond`, `Ruby`, `Emerald`                                         |
+| Review Text                  | `review_text`                  | Fake product/service review text               | `Great product!`, `Highly recommend`                                 |
+| Payment Method               | `payment_method`               | Payment method types                           | `Credit Card`, `PayPal`, `Apple Pay`                                 |
+| Restaurant Type              | `restaurant_type`              | Restaurant cuisine categories                  | `Italian`, `Mexican`, `Japanese`                                     |
+| Shipping Method              | `shipping_method`              | Shipping delivery options                      | `Standard`, `Express`, `Overnight`                                   |
+| SKU                          | `sku`                          | Stock Keeping Unit identifiers                 | `SKU-12345-ABC`, `PRD-2024-789`                                      |
+| Package Weight               | `package_weight`               | Weight of packaged products                    | `2.5 kg`, `12 lb`                                                    |
+| Delivery Route Code          | `delivery_route_code`          | Route identifiers for delivery networks        | `RT-22A`, `MX-501`, `SEA-LAX-07 `                                    |
+| Freight Mode                 | `freight_mode`                 | Method of goods transportation                 | `Air`, `Sea`, `Ground`, `Rail`                                       |
+| Price Sensitivity Level      | `price_sensitivity_level`      | User sensitivity to price changes              | `Low`,`Medium` `High`                                                |
+| Click Depth                  | `click_depth`                  | Depth of navigation from entry                 | `1`,`3`,`6`                                                          |
+| Recommendation Slot Position | `recommendation_slot_position` | UI location of recommendation                  | `Top Banner`, `Sidebar`, `Footer`                                    |
+
+**Options Examples:**
+
+```python
+# Money with range and currency
+{
+    "label": "price",
+    "key_label": "money",
+    "group": "commerce",
+    "options": {
+        "min": 10.00,
+        "max": 1000.00,
+        "currency": "USD"  # USD, EUR, GBP, etc.
+    }
+}
+
+# Credit Card with specific types
+{
+    "label": "card_number",
+    "key_label": "credit_card_number",
+    "group": "commerce",
+    "options": {
+        "card_types": ["visa", "mastercard"],
+        "country": "Canada"  # or "Australia"
+    }
+}
+
+# IBAN with region
+{
+    "label": "bank_account",
+    "key_label": "iban",
+    "group": "commerce",
+    "options": {
+        "group": "central_western_eu"
+        # Options: "central_western_eu", "southern_eu", "nordic",
+        # "eastern_eu", "uk_islands", "middle_east", "africa", "asia"
+    }
+}
+```
+
+### 💻 IT
+
+| Label                 | Key Label                     | Description                                           | Examples                                                           |
+| --------------------- | ----------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------ |
+| Hardware Type         | `hardware_type`               | Computer hardware components                          | `CPU`, `GPU`, `RAM`, `SSD`                                         |
+| URL                   | `url`                         | Web URLs                                              | `https://facebook.com`, `http://google.com/path?foo=bar`           |
+| User Agent            | `user_agent`                  | A user agent string from a popular web browser or bot | `Mozilla/5.0 (Windows NT 10.0, Win64, x64)...`                     |
+| JSON Web Token        | `json_web_token`              | JWT token format                                      | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`                          |
+| Base64 Image URL      | `base64_image_url`            | Base64 encoded image urls                             | `data:image/png,base64,iVBORwoA...`                                |
+| Top Level Domain      | `top_level_domain`            | Domain extensions                                     | `com`, `edu`, `org`                                                |
+| Programming Language  | `programming_language`        | Programming language names                            | `Python`, `JavaScript`, `Java`                                     |
+| Port Number           | `port_number`                 | Network port numbers                                  | `8080`, `3000`, `443`                                              |
+| Operating System      | `operating_system`            | Operating system names and versions                   | `Windows 11`, `macOS Sonoma`, `Ubuntu 22.04`                       |
+| IoT Device Type       | `iot_device_type`             | Internet of Things device categories                  | `Smart Thermostat`, `Security Camera`, `Smart Speaker`             |
+| HTTP Status Code      | `http_status_code`            | Standard HTTP status codes                            | `200`, `404`, `500`                                                |
+| Incident Type         | `incident_type`               | IT incident categories                                | `Outage`, `Security Breach`, `Hardware Failure`                    |
+| IP Address v4 CIDR    | `ip_address_v4_cidr`          | IPv4 with CIDR notation                               | `188.245.97.43/27`                                                 |
+| App Version           | `app_version`                 | Random 2 and 3 part app version numbers               | `1.0`, `2.5.3`, `10.15.7`                                          |
+| App Name              | `app_name`                    | Fake app names                                        | `Taskify`, `CloudSync`, `DataVault`                                |
+| App Bundle ID         | `app_bundle_id`               | Three part app bundle id                              | `com.google.powerflex`, `com.microsoft.prodder`                    |
+| Security Question     | `security_question`           | Common security questions                             | `What is your mother's maiden name?`                               |
+| Server Name           | `server_name`                 | Server hostname patterns                              | `web-server-01`, `db-prod-03`                                      |
+| Slack Channel         | `slack_channel`               | Slack channel name patterns                           | `#general`, `#random`, `#engineering`                              |
+| Verification Code     | `verification_code`           | 6-digit verification codes                            | `123456`, `847291`                                                 |
+| WiFi SSID             | `wifi_ssid`                   | WiFi network name patterns                            | `Home_Network_5G`, `CoffeeShop_Guest`                              |
+| App Store Category    | `app_store_category`          | Mobile app categories                                 | `Productivity`, `Games`, `Social Networking`                       |
+| Battery Level         | `battery_level`               | Device battery percentage                             | `85%`, `42%`, `15%`                                                |
+| Cloud Storage         | `cloud_storage`               | Cloud storage services                                | `Dropbox`, `Google Drive`, `OneDrive`                              |
+| Cookie Name           | `cookie_name`                 | HTTP cookie names                                     | `session_id`, `user_token`, `preferences`                          |
+| CSS Class Name        | `css_class_name`              | CSS class naming patterns                             | `.container`, `.btn-primary`, `.header`                            |
+| CSS Color Name        | `css_color_name`              | Named CSS colors                                      | `AliceBlue`, `Crimson`, `DarkSlateGray`                            |
+| HTTP Method           | `http_method`                 | HTTP request methods                                  | `GET`, `POST`, `PUT`, `DELETE`                                     |
+| Font Family           | `font_family`                 | Common font family names                              | `Arial`, `Helvetica`, `Times New Roman`                            |
+| Keyboard Layout       | `keyboard_layout`             | Keyboard layouts                                      | `QWERTY`, `AZERTY`, `DVORAK`                                       |
+| IP Address v4         | `ip_address_v4`               | IPv4 addresses                                        | `121.150.202.132`                                                  |
+| Resolution            | `resolution`                  | Screen resolutions                                    | `1920x1080`, `4K`, `1080p`                                         |
+| Response Time         | `response_time`               | API response times                                    | `50ms`, `2s`, `300ms`                                              |
+| Screen Size           | `screen_size`                 | Screen sizes                                          | `15 inch`, `27 inch`, `6.5 inch`                                   |
+| Social Media Platform | `social_media_platform`       | Social platforms                                      | `Facebook`, `Instagram`, `Twitter`, `X`                            |
+| Software License      | `software_license`            | Software license types                                | `Commercial`, `Open Source`, `Freeware`                            |
+| Storage Type          | `storage_type`                | Storage technologies                                  | `HDD`, `SSD`, `NVMe`                                               |
+| Subject Line          | `subject_line`                | Email subject lines                                   | `Meeting Tomorrow`, `Your Invoice`, `Welcome!`                     |
+| Technology Stack      | `technology_stack`            | Tech stacks                                           | `MEAN`, `LAMP`, `JAMstack`                                         |
+| Ticket Priority       | `ticket_priority`             | Support ticket priorities                             | `Low`, `Normal`, `High`, `Critical`                                |
+| Uptime Percentage     | `uptime_percentage`           | System uptime                                         | `99.9%`, `99.99%`, `95%`                                           |
+| API Key               | `api_key`                     | Randomly generated API keys with common prefixes      | `sk_live_51H7z2E...`, `AIzaSyD-9tSrke72PouQMnMX...`                |
+| Data Center           | `data_center`                 | Data center region codes                              | `US-East-1`, `EU-West-2`, `Asia-Pacific-1`                         |
+| MIME Type             | `mime_type`                   | MIME types                                            | `text/plain`, `image/png`, `application/pdf`                       |
+| MD5                   | `md5`                         | Random hex encoded MD5 hash                           | `5d41402abc4b2a76b9719d911017c592`                                 |
+| MAC Address           | `mac_address`                 | MAC addresses                                         | `2C-D6-9B-77-E5-0B`, `2C:D6:9B:77:E5:0B`                           |
+| Browser               | `browser`                     | Popular web browser names and versions                | `Chrome 118.0`, `Firefox 119.0`, `Safari 17.0`                     |
+| IP Address v6 CIDR    | `ip_address_v6_cidr`          | IPv6 with CIDR notation                               | `9ea4:2b0b:11ba:47a3:47a8:ede4:2ddd:c5f8/115`                      |
+| IP Address v6         | `ip_address_v6`               | IPv6 addresses                                        | `770:44c0:1c4:9996:2fd:6907:3045:9627`                             |
+| Protocol Version      | `protocol_version`            | Protocol versions                                     | `HTTP/1.1`, `HTTP/2`, `IPv4`, `IPv6`                               |
+| Domain Name           | `domain_name`                 | Domain names                                          | `google.com`, `wikipedia.org`, `nih.gov`                           |
+| Cloud Provider        | `cloud_provider`              | Major cloud service provider names                    | `AWS`, `Azure`, `Google Cloud`                                     |
+| SHA1                  | `sha1`                        | Random hex encoded SHA1 hash                          | `2fd4e1c67a2d28fced849ee1bb76e7391b93eb12`                         |
+| Laptop Brand          | `laptop_brand`                | Laptop manufacturers                                  | `Dell`, `HP`, `Lenovo`                                             |
+| License Type          | `license_type`                | Software licenses                                     | `MIT`, `GPL`, `Apache`                                             |
+| Dummy Image URL       | `dummy_image_url`             | Image url from dummyimage.com                         | `http://dummyimage.com/250x100`                                    |
+| Memory Size           | `memory_size`                 | Memory capacity                                       | `8GB`, `16GB`, `32GB`                                              |
+| Microservice Name     | `microservice_name`           | Microservice naming                                   | `auth-service`, `payment-api`, `user-mgmt`                         |
+| Network Protocol      | `network_protocol`            | Network protocols                                     | `HTTP`, `FTP`, `SMTP`, `TCP`                                       |
+| Email Address         | `email_address`               | Email addresses                                       | `jdoe@gmail.com`, `twilliams@hotmail.com`                          |
+| File Size             | `file_size`                   | Human-readable file sizes                             | `2.5 MB`, `1.3 GB`, `847 KB`                                       |
+| File Extension        | `file_extension`              | Common file extensions                                | `.pdf`, `.jpg`, `.xlsx`                                            |
+| Notification Type     | `notification_type`           | Notification channels                                 | `Email`, `Push`, `SMS`                                             |
+| File Name             | `file_name`                   | File names                                            | `lobortis.pptx`, `erat_volutpat.csv`                               |
+| Error Message         | `error_message`               | Common error messages for applications                | `Connection timeout`, `File not found`                             |
+| Docker Image          | `docker_image`                | Docker container image names with tags                | `nginx:latest`, `postgres:14`, `node:18-alpine`                    |
+| Package Manager       | `package_manager`             | Software package managers                             | `npm`, `pip`, `Maven`                                              |
+| Password Strength     | `password_strength`           | Password strength levels                              | `Weak`, `Medium`, `Strong`                                         |
+| Permission Level      | `permission_level`            | Access permissions                                    | `Read`, `Write`, `Admin`                                           |
+| Power Source          | `power_source`                | Power sources                                         | `Battery`, `AC Adapter`, `Solar`                                   |
+| SHA256                | `sha256`                      | Random hex encoded SHA256 hash                        | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| Database Type         | `database_type`               | Database management system names                      | `PostgreSQL`, `MongoDB`, `Redis`                                   |
+| Printer Type          | `printer_type`                | Printer types                                         | `Laser`, `Inkjet`, `3D`                                            |
+| Device Model          | `device_model`                | Device model names                                    | `iPhone 15 Pro`, `Galaxy S23`, `Pixel 8`                           |
+| Framework             | `framework`                   | Software frameworks                                   | `React`, `Django`, `Laravel`                                       |
+| Document Type         | `document_type`               | Business document types                               | `Invoice`, `Contract`, `Receipt`                                   |
+| API Endpoint Path     | `api_endpoint_path`           | RESTful API endpoint paths                            | `/api/v1/users`, `/auth/login`                                     |
+| Git Commit Hash       | `git_commit_hash`             | Unique Git commit SHA identifiers                     | `a3c9f7d`, `1b2e3c4d`                                              |
+| Log Level             | `log_level`                   | Logging severity levels                               | `INFO`, `WARN`, `ERROR`                                            |
+| DNS Record Type       | `dns_record_type`             | DNS record types                                      | `A`, `CNAME`, `MX`, `TXT`                                          |
+| API Version           | `api_version`                 | Version numbers for API versions                      | `v1`, `v2`, `v1.2`                                                 |
+| Form Factor           | `form_factor`                 | Device form factors                                   | `Desktop`, `Laptop`, `Tablet`                                      |
+| Container ID          | `container_id`                | Docker container unique IDs                           | `7c1a2b3c4d5e`, `e8f9g0h1i2`                                       |
+| Username              | `username`                    | Usernames                                             | `jdoe`, `twilliams`, `jfang`                                       |
+| UUID v1               | `uuid_v1`                     | Version 1 UUID format                                 | `1b4e28ba-2fa1-11d2-883f-0016d3cca427`                             |
+| UUID v4               | `uuid_v4`                     | Version 4 UUID format                                 | `550e8400-e29b-41d4-a716-446655440000`                             |
+| Electrical Component  | `electrical_component`        | Electronic components                                 | `Resistor`, `Capacitor`, `Transistor`                              |
+| Encryption Algorithm  | `encryption_algorithm`        | Encryption methods                                    | `AES-256`, `RSA`, `SHA-512`                                        |
+| Fingerprint ID        | `fingerprint_id`              | Biometric fingerprint identifiers                     | `FP-12345`, `BIO-987654`                                           |
+| Firmware Version      | `firmware_version`            | Firmware version numbers                              | `v2.1.5`, `FW-3.0.1`                                               |
+| Sensor Type           | `sensor_type`                 | Common IoT sensor device categories                   | `Temperature`,`communication` `Motion`                             |
+| Sensor Reading        | `sensor_reading`              | Numeric readings from sensors                         | `23.8`,`0.02`, `98.5 `                                             |
+| Device Location       | `device_location`             | Physical placement of IoT device                      | `Warehouse Floor A`                                                |
+| Power State           | `power_state`                 | System power state                                    | `Active`, `Idle`, `Off`                                            |
+| Firmware Build        | `firmware_build`              | Device firmware build identifiers                     | `FW-2025.03.18-3412`                                               |
+| Smart Device Brand    | `smart_device_brand`          | Brands of smart home devices                          | `Philips Hue`, `Ring`, `Nest`                                      |
+| Smart Device Type     | `smart_device_type`           | Types of smart home IoT devices                       | `Smart Bulb`, `Door Camera`                                        |
+| Automation Trigger    | `automation_trigger`          | Condition that initiates an automated action          | `Motion Detected`, `Sunset`                                        |
+| Automation Action     | `automation_action`           | Resulting action in an automation scenario            | `Turn Lights On`, `Lock Door`                                      |
+| Energy Mode           | `energy_mode`                 | Power-saving operational mode statuses                | `Eco`, `Comfort`, `Sleep`                                          |
+| Feature Usage Event   | `feature_usage_event`         | A user event representing app feature usage           | `Dashboard Opened`, `Report Exported`                              |
+| Subscription Renewal  | `subscription_renewal_status` | Renewal behavior of SaaS subscriptions                | `Auto-renew`, `Canceled`, `Expired`                                |
+| User Cohort           | `user_cohort`                 | Grouping based on signup period                       | `2024-Q1`, `2023-Q4`                                               |
+| Engagement Level      | `engagement_level`            | System-defined engagement score tier                  | `Low`, `Medium`, `High`, `Elite`                                   |
+| Churn Risk Score      | `churn_risk_score`            | Probability a user will churn                         | `0.12`, `0.48`, `0.90`                                             |
+
+**Options Examples:**
+
+```python
+# URL with custom components
+{
+    "label": "website",
+    "key_label": "url",
+    "group": "it",
+    "options": {
+        "protocol": "https",
+        "host": "example.com",
+        "path": True,
+        "query_string": True
+    }
+}
+
+# API Key with prefix
+{
+    "label": "api_token",
+    "key_label": "api_key",
+    "group": "it",
+    "options": {
+        "prefix": "sk_live_"
+    }
+}
+
+# Verification Code with custom length
+{
+    "label": "otp_code",
+    "key_label": "verification_code",
+    "group": "it",
+    "options": {
+        "length": 6  # Options: 4, 5, 6, 7, 8
+    }
+}
+```
+
+### 🩺 Health
+
+| Label                   | Key Label                 | Description                                                | Examples                                            |
+| ----------------------- | ------------------------- | ---------------------------------------------------------- | --------------------------------------------------- |
+| ICD10 Dx Desc (Long)    | `icd10_dx_desc_long`      | Long description of diagnosis from ICD10. Source: cms.gov  | `Essential (primary) hypertension`                  |
+| ICD10 Diagnosis Code    | `icd10_diagnosis_code`    | ICD10 diagnosis code. Source: cms.gov                      | `I10`, `E11.9`, `J18.9`                             |
+| Hospital Street Address | `hospital_street_address` | The street address of a US-based hospital                  | `123 Medical Center Drive`                          |
+| ICD10 Proc Desc (Short) | `icd10_proc_desc_short`   | Short description of procedure from ICD10. Source: cms.gov | `Open heart surgery`                                |
+| Hospital State          | `hospital_state`          | The state of a US-based hospital                           | `CA`, `NY`, `TX`                                    |
+| ICD10 Procedure Code    | `icd10_procedure_code`    | ICD10 procedure code. Source: cms.gov                      | `0W9G00Z`, `0DTJ0ZZ`                                |
+| ICD10 Dx Desc (Short)   | `icd10_dx_desc_short`     | Short description of diagnosis from ICD10. Source: cms.gov | `Hypertension`                                      |
+| ICD10 Proc Desc (Long)  | `icd10_proc_desc_long`    | Long description of procedure from ICD10. Source: cms.gov  | `Excision of appendix, open approach`               |
+| Hospital Department     | `hospital_department`     | Hospital departments                                       | `Emergency`, `Cardiology`, `Pediatrics`             |
+| ICD9 Dx Desc (Short)    | `icd9_dx_desc_short`      | Short description of diagnosis from ICD9. Source: cms.gov  | `Diabetes`                                          |
+| ICD9 Proc Desc (Long)   | `icd9_proc_desc_long`     | Long description of procedure from ICD9. Source: cms.gov   | `Total hip replacement, left`                       |
+| Hospital Postal Code    | `hospital_postal_code`    | The postal code of a US-based hospital                     | `90210`, `10001`, `60601`                           |
+| ICD9 Proc Desc (Short)  | `icd9_proc_desc_short`    | Short description of procedure from ICD9. Source: cms.gov  | `Hip replacement`                                   |
+| ICD9 Procedure Code     | `icd9_procedure_code`     | ICD9 procedure code. Source: cms.gov                       | `81.51`, `45.23`                                    |
+| Allergy                 | `allergy`                 | Common allergies                                           | `Peanuts`, `Shellfish`, `Latex`                     |
+| Body Part               | `body_part`               | Human body parts                                           | `Heart`, `Liver`, `Knee`                            |
+| Calorie Count           | `calorie_count`           | Caloric values                                             | `250 cal`, `1500 cal`, `89 cal`                     |
+| Chromosome              | `chromosome`              | Human chromosomes                                          | `Chromosome 1`, `X Chromosome`, `Y Chromosome`      |
+| ICD9 Diagnosis Code     | `icd9_diagnosis_code`     | ICD9 diagnosis code. Source: cms.gov                       | `250.00`, `401.9`                                   |
+| Hospital NPI            | `hospital_npi`            | The NPI of a US-based hospital                             | `1234567890`, `9876543210`                          |
+| Drug Company            | `drug_company`            | Pharmaceutical companies                                   | `Eli Lilly and Company`, `Novartis Pharmaceuticals` |
+| Hospital City           | `hospital_city`           | The city of a US-based hospital                            | `Los Angeles`, `New York`, `Chicago`                |
+| Hormone                 | `hormone`                 | Human hormones                                             | `Insulin`, `Testosterone`, `Estrogen`               |
+| Prescription ID         | `prescription_id`         | Prescription identification codes                          | `RX123456`, `MED987654`                             |
+| Vaccination Type        | `vaccination_type`        | Types of vaccines administered                             | `COVID-19`, `Flu`, `Tetanus`                        |
+| Hospital Name           | `hospital_name`           | Hospital or medical center names                           | `St. Luke's`, `Mayo Clinic`                         |
+| Medical Device ID       | `medical_device_id`       | Hospital equipment identifiers                             | `MD-34215`, `EQ-90872`                              |
+| Blood Pressure Reading  | `blood_pressure_reading`  | Blood pressure measurements                                | `120/80`, `140/90`                                  |
+| Dietary Restriction     | `dietary_restriction`     | Dietary preferences                                        | `Vegetarian`, `Gluten-Free`, `Vegan`                |
+| Drug Name (Brand)       | `drug_name_brand`         | Brand name medications                                     | `Cialis`, `Nexium`, `Lipitor`                       |
+| Drug Name (Generic)     | `drug_name_generic`       | Generic medication names                                   | `Naproxen Sodium`, `Selenium Sulfide`               |
+| FDA NDC Code            | `fda_ndc_code`            | FDA National Drug Code                                     | `58443-0022`, `58517-001`                           |
+| Blood Type              | `blood_type`              | Human blood types including Rh factor                      | `A+`, `O-`, `AB+`                                   |
+| Disease Name            | `disease_name`            | Common disease and condition names                         | `Hypertension`, `Diabetes`, `Influenza`             |
+| Medication Dosage       | `medication_dosage`       | Medication dosage instructions                             | `500mg`, `10mg twice daily`, `1 tablet`             |
+| Pain Level              | `pain_level`              | Pain scale from 1-10                                       | `1`, `5`, `10`                                      |
+| Vitamin                 | `vitamin_name`            | Vitamin names                                              | `Vitamin C`, `Vitamin D`, `B12`                     |
+| HCPCS Code              | `hcpcs_code`              | An HCPCS code                                              | `J0129`, `A4250`                                    |
+| HCPCS Name              | `hcpcs_name`              | An HCPCS procedure name                                    | `Injection, abatacept`                              |
+| Disability Type         | `disability_type`         | Disability categories                                      | `Visual Impairment`, `Mobility`, `Hearing Loss`     |
+| ICD9 Dx Desc (Long)     | `icd9_dx_desc_long`       | Long description of diagnosis from ICD9. Source: cms.gov   | `Diabetes mellitus without mention of complication` |
+| Organ                   | `organ`                   | Human organs                                               | `Heart`, `Lung`, `Kidney`                           |
+| Heart Rate              | `heart_rate`              | Heart rate measurements                                    | `72 bpm`, `110 bpm`, `58 bpm`                       |
+| Workout Duration        | `workout_duration`        | Exercise durations                                         | `30 minutes`, `1 hour`, `45 min`                    |
+| Symptom                 | `symptom`                 | Medical symptoms                                           | `Fever`, `Cough`, `Headache`                        |
+| Pharmacy Name           | `pharmacy_name`           | Pharmacy names                                             | `CVS`, `Walgreens`, `Rite Aid`                      |
+| Emergency Type          | `emergency_type`          | Emergency categories                                       | `Fire`, `Medical`, `Security`                       |
+| Nutrient                | `nutrient`                | Nutrients                                                  | `Calcium`, `Iron`, `Vitamin A`                      |
+| Mental Health Condition | `mental_health_condition` | Mental health diagnoses                                    | `Anxiety`, `Depression`, `PTSD`                     |
+| Medical Specialty       | `medical_specialty`       | Medical specialties                                        | `Cardiology`, `Dermatology`, `Neurology`            |
+| Macro Nutrient          | `macro_nutrient`          | Nutritional macros                                         | `Protein`, `Carbohydrates`, `Fat`                   |
+| Health Insurance Plan   | `health_insurance_plan`   | Health insurance types                                     | `PPO`, `HMO`, `EPO`                                 |
+| Lab Test                | `lab_test`                | Medical tests                                              | `Blood Test`, `X-Ray`, `MRI`                        |
+| Medicare Beneficiary ID | `medicare_beneficiary_id` | MBI used in the US Medicare System                         | `1EG4-TE5-MK73`                                     |
+| NHS Number              | `nhs_number`              | 10-digit NHS number with mod11 checksum                    | `1234567890`                                        |
+| Exercise Type           | `exercise_type`           | Exercise categories                                        | `Cardio`, `Strength Training`, `Yoga`               |
+| Diet Type               | `diet_type`               | Dietary lifestyle categories                               | `Keto`, `Vegan`, `Paleo`                            |
+| Serving Size            | `serving_size`            | Standard food serving size descriptions                    | `1 cup`, 2`00g`, `1 plate `                         |
+| Meal Rating             | `meal_rating`             | Rating score for food or dining experience                 | `3.2`,` 4.8`, `5.0`                                 |
+| Blood Pressure Category | `blood_pressure_category` | Heart BP category                                          | `Normal`, `Elevated`, `Stage 1`, `Stage 2`          |
+| Allergy Flag            | `allergy_flag`            | Whether user has known allergies                           | `Yes`, `No`                                         |
+| Appointment Status      | `appointment_status`      | Medical visit status                                       | `Scheduled`, `Completed`, `Canceled`                |
+| Lab Test Type           | `lab_test_type`           | Kind of diagnostic test                                    | `CBC`, `Lipid Panel`, `A1C`                         |
+| Lab Result Value        | `lab_result_value`        | Quantitative lab result                                    | `5.6`, `180`, `13.2`                                |
+| Triage Level            | `triage_level`            | Urgency level in ER                                        | `Low`, `Medium`, `High`, `Critical`                 |
+
+### 💰 Finance
+
+| Label                  | Key Label                | Description                                    | Examples                                        |
+| ---------------------- | ------------------------ | ---------------------------------------------- | ----------------------------------------------- |
+| Risk Level             | `risk_level`             | Risk assessment levels                         | `Low`, `Medium`, `High`                         |
+| Tax Type               | `tax_type`               | Tax categories                                 | `Income Tax`, `Sales Tax`, `Property Tax`       |
+| Transaction Type       | `transaction_type`       | Transaction categories                         | `Deposit`, `Withdrawal`, `Transfer`             |
+| Investment Return Rate | `investment_return_rate` | Percentage return on investment                | `5%`, `12.5%`, `-3%`                            |
+| Expense Amount         | `expense_amount`         | Financial expense values                       | `1250.75`, `500.00`                             |
+| Investment Strategy    | `investment_strategy`    | Investment approaches                          | `Growth`, `Value`, `Income`                     |
+| Bank Country Code      | `bank_country_code`      | Bank country codes                             | `US`, `CA`, `UK`                                |
+| Bank Name              | `bank_name`              | Bank names                                     | `BANK OF AMERICA`, `WELLS FARGO`                |
+| Bank RIAD Code         | `bank_riad_code`         | The RIAD Code of a European bank               | `RIAD123456`, `RIAD789012`                      |
+| Bank Routing Number    | `bank_routing_number`    | The routing number of a US-based bank          | `011000138`, `011100106`                        |
+| Bank State             | `bank_state`             | For US-based banks, the state code             | `CA`, `NY`, `TX`                                |
+| Bank Street Address    | `bank_street_address`    | Bank street addresses                          | `195 MARKET STREET`, `601 PENN STREET`          |
+| Bank SWIFT BIC         | `bank_swift_bic`         | The SWIFT code of a bank                       | `BOFAUS3N`, `NFBKUS33`                          |
+| Bank LEI               | `bank_lei`               | The Legal Entity Identifier of a European bank | `529900T8BM49AURSDO55`                          |
+| Insurance Type         | `insurance_type`         | Insurance categories                           | `Life`, `Auto`, `Home`, `Health`                |
+| Payment Term           | `payment_term`           | Payment terms                                  | `Net 30`, `Due on Receipt`, `Net 60`            |
+| Expense Category       | `expense_category`       | Expense classifications                        | `Travel`, `Food`, `Utilities`                   |
+| Asset Type             | `asset_type`             | Investment asset categories                    | `Stocks`, `Bonds`, `Real Estate`                |
+| Account Number         | `account_number`         | Bank account numbers                           | `1234567890`, `9876543210`                      |
+| Tax ID                 | `tax_id`                 | Tax identification numbers                     | `12-3456789`, `98-7654321`                      |
+| Loan Type              | `loan_type`              | Types of financial loans                       | `Mortgage`, `Personal Loan`, `Auto Loan`        |
+| Credit Score           | `credit_score`           | Credit scores ranging from 300-850             | `720`, `650`, `800`                             |
+| Bank City              | `bank_city`              | Bank city locations                            | `SAN FRANCISCO`, `PHILADELPHIA`, `CHICAGO`      |
+| Bank Branch Code       | `bank_branch_code`       | Branch identification codes                    | `001`, `215`, `307`                             |
+| Insurance Policy ID    | `insurance_policy_id`    | Unique insurance policy identifiers            | `POL-123456`, `INS-987654`                      |
+| Grant Type             | `grant_type`             | Grant categories                               | `Research Grant`, `Small Business`, `Education` |
+| Spending Behavior      | `spending_behavior`      | Patterned consumer spending behavior           | `Saver`, `Budgeter`, `Spender`                  |
+| Investment Persona     | `investment_persona`     | Investment style persona profile               | `Conservative`, `Balanced`, `Aggressive`        |
+| Transaction Pattern    | `transaction_pattern`    | Pattern of recurring transactions              | `Daily Small`, `Weekly Bulk`, `Monthly Bills`   |
+| Credit Utilization     | `credit_utilization`     | Portion of credit limit being used             | `12%`, `45%`, `88%`                             |
+| Financial Goal         | `financial_goal`         | Stated savings/investment objective            | `Retirement`, `Emergency Fund`, `Travel`        |
+| Account Type           | `account_type`           | Type of bank account                           | `Savings`, `Checking`, `Time Deposit `          |
+| Transfer Channel       | `transfer_channel`       | Medium used for transfer                       | `Mobile`, `ATM`,` Online Commerce`              |
+| Fraud Score            | `fraud_score`            | Risk score for fraudulent behavior             | `0.12`, `0.86`,`0.44`                           |
+| AML Risk Category      | `aml_risk_category`      | Anti-money laundering risk class               | `Low`, `Moderate`, `High`                       |
+| Spending Category      | `spending_category`      | Grouped spending type                          | `Groceries`, `Travel`, `Utilities`              |
+| Savings Goal           | `savings_goal`           | Purpose of savings                             | `Emergency Fund`, `Car`, `Education`            |
+| Credit Score Band      | `credit_score_band`      | Credit score group                             | `Poor`, `Fair`, `Good`, `Excellent`             |
+| KYC Status             | `kyc_status`             | Know Your Customer verification state          | `Verified`, `Pending`, `Failed`                 |
+| Wealth Segment         | `wealth_segment`         | Customer net-worth category                    | `Mass Market`, `Affluent`, `HNW`                |
+
+**Options Examples:**
+
+```python
+# Investment Return Rate with range
+{
+    "label": "roi",
+    "key_label": "investment_return_rate",
+    "group": "finance",
+    "options": {
+        "min_return": -5.0,
+        "max_return": 15.0
+    }
+}
+```
+
+### 📍 Location
+
+| Label                       | Key Label                     | Description                                                    | Examples                                               |
+| --------------------------- | ----------------------------- | -------------------------------------------------------------- | ------------------------------------------------------ |
+| State (abbrev)              | `state_abbrev`                | Two character state/province abbreviations, US and worldwide   | `CA`, `NY`, `TX`                                       |
+| State                       | `state`                       | State/Province names, US and worldwide                         | `California`, `New York`, `Texas`                      |
+| Elevation                   | `elevation`                   | Elevation measurements                                         | `5280 ft`, `1000 m`, `Sea Level`                       |
+| Continent                   | `continent`                   | Seven continents                                               | `Asia`, `Europe`, `Africa`                             |
+| Subregion                   | `subregion`                   | Sub Region continents                                          | `Southern Asia`, `Northern Europe`, `Northern America` |
+| Timezone Abbreviation       | `timezone_abbrev`             | Three-letter timezone codes                                    | `PST`, `EST`, `GMT`, `UTC`                             |
+| Postal Code                 | `postal_code`                 | Region-specific postal codes (not available for all locations) | `90210`, `10001`, `SW1A 1AA`                           |
+| City                        | `city`                        | City names                                                     | `New York`, `Berlin`, `London`                         |
+| Phone                       | `phone`                       | Phone numbers                                                  | `8-(598)633-6672`, `+1-555-123-4567`                   |
+| Compass Direction           | `compass_direction`           | Compass directions                                             | `North`, `Southwest`, `East-Northeast`                 |
+| Federal Holiday             | `federal_holiday`             | National holidays                                              | `Independence Day`, `Thanksgiving`, `Christmas`        |
+| Facility Type               | `facility_type`               | Facility categories                                            | `Hospital`, `School`, `Warehouse`                      |
+| Country                     | `country`                     | Country names                                                  | `Germany`, `France`, `Japan`                           |
+| Time Zone                   | `time_zone`                   | Time zone identifiers                                          | `America/Los_Angeles`, `Europe/Budapest`               |
+| Venue Type                  | `venue_type`                  | Venue categories                                               | `Arena`, `Theater`, `Convention Center`                |
+| Timezone Offset             | `timezone_offset`             | Timezone offsets                                               | `UTC+8`, `GMT-5`, `UTC+0`                              |
+| Road Type                   | `road_type`                   | Road types                                                     | `Highway`, `Avenue`, `Boulevard`                       |
+| Property Type               | `property_type`               | Real estate types                                              | `House`, `Condo`, `Land`                               |
+| Floor Number                | `floor_number`                | Building floor levels                                          | `1st Floor`, `Ground`, `Basement`                      |
+| Holiday                     | `holiday`                     | Holiday names                                                  | `New Year's Day`, `Easter`, `Halloween`                |
+| Home Type                   | `home_type`                   | Housing types                                                  | `Single Family`, `Apartment`, `Condo`                  |
+| Street Suffix               | `street_suffix`               | Street suffixes                                                | `Drive`, `Terrace`, `Street`                           |
+| Street Number               | `street_number`               | A street number between 1 and 5 digits                         | `6449`, `123`, `45678`                                 |
+| Street Name                 | `street_name`                 | A street name (excluding the suffix)                           | `Pine View`, `Main`, `Oak`                             |
+| Street Address              | `street_address`              | Street number, name, and suffix                                | `6449 Pine View Drive`                                 |
+| Longitude                   | `longitude`                   | Geographic longitude                                           | `-45.15259533671917`, `115.70563293321999`             |
+| Country Code                | `country_code`                | ISO country codes                                              | `ES`, `GR`, `FR`                                       |
+| Latitude                    | `latitude`                    | Geographic latitude                                            | `48.52469361225269`, `72.26886762838888`               |
+| Geo Zone                    | `geo_zone`                    | City zoning classification                                     | `Residential`, `Industrial`, `Commercial`              |
+| Street Type                 | `street_type`                 | Type of roadway                                                | `Highway`, `Avenue`, `Alley`                           |
+| Traffic Flow Level          | `traffic_flow_level`          | Real-time congestion rating                                    | `Light`, `Moderate`, `Heavy`                           |
+| Noise Level                 | `noise_level`                 | Urban sound intensity level (dB)                               | `30`, `65`, `92`                                       |
+| Noise Source                | `noise_source`                | Source of noise                                                | `Whisper`, `Quiet office`,` Normal conversatio`n       |
+| Noise Category              | `noise_category`              | Category or type noise                                         | `Very Quiet`, `Quiet`, `Loud`                          |
+| Urban Land Use              | `urban_land_use`              | Land use planning category                                     | `Park`, `Housing`, `Transport Depot`                   |
+| Public Service Request Type | `public_service_request_type` | Type of city support ticket                                    | `Garbage Pickup`, `Streetlight Repair `                |
+
+**Options Examples:**
+
+```python
+# Phone with format
+{
+    "label": "contact",
+    "key_label": "phone",
+    "group": "location",
+    "options": {
+        "format": "(###) ###-####"
+        # Options: "###-###-####", "(###) ###-####", "(### ### ####)",
+        # "+# ### ### ####", "+# (###) ###-####", "+#-###-###-####",
+        # "#-(###)-###-####", "##########"
+    }
+}
+```
+
+### 🚗 Car
+
+| Label             | Key Label           | Description                                                 | Examples                                 |
+| ----------------- | ------------------- | ----------------------------------------------------------- | ---------------------------------------- |
+| Car VIN           | `car_vin`           | A random car VIN number, not correlated to other car fields | `1HGBH41JXMN109186`, `5XXGM4A70CG123456` |
+| Car Base Model    | `car_base_model`    | Base car model names                                        | `Model S`, `Safari Passenger`, `Pontiac` |
+| Transmission Type | `transmission_type` | Vehicle transmission types                                  | `Automatic`, `Manual`, `CVT`             |
+| Gas Type          | `gas_type`          | Gasoline types                                              | `Regular`, `Premium`, `Diesel`           |
+| Car Make          | `car_make`          | Car manufacturer                                            | `Honda`, `Ford`, `Pontiac`               |
+| Car Model         | `car_model`         | Car model name                                              | `Prelude`, `Mustang`, `Trans Am`         |
+| Car Model Year    | `car_model_year`    | Car production year                                         | `1994`, `2008`, `2001`                   |
+| License Plate     | `license_plate`     | Vehicle license plate numbers by region                     | `ABC-1234`, `7XYZ123`                    |
+| Fuel Type         | `fuel_type`         | Vehicle fuel types                                          | `Gasoline`, `Diesel`, `Electric`         |
+| Engine Type       | `engine_type`       | Vehicle engine types                                        | `V6`, `Electric`, `Hybrid`               |
+| Vehicle Type      | `vehicle_type`      | Vehicle body style categories                               | `Sedan`, `SUV`, `Truck`                  |
+
+### 🎮 Gaming
+
+| Label                    | Key Label                  | Description                     | Examples                                            |
+| ------------------------ | -------------------------- | ------------------------------- | --------------------------------------------------- |
+| Badge                    | `badge`                    | Gaming badges and achievements  | `Achievement Unlocked`, `Level 50`, `Master`        |
+| Game Genre               | `game_genre`               | Video game genres               | `RPG`, `FPS`, `Strategy`                            |
+| Console Platform         | `console_platform`         | Gaming console names            | `PlayStation 5`, `Xbox Series X`, `Nintendo Switch` |
+| Avatar Class             | `avatar_class`             | In-game character class         | `Mage`, `Warrior`, `Rogue`                          |
+| Skill Level              | `skill_level`              | Player skill progression tier   | `Beginner`, `Intermediate`, `Expert`, `Master`      |
+| Quest Completion Rate    | `quest_completion_rate`    | Fraction of tasks completed     | `0.42`, `0.88`, `1.0 `                              |
+| In-Game Currency Balance | `in_game_currency_balance` | Amount of virtual currency      | `120`, `8450`, `230000`                             |
+| Match Result             | `match_result`             | Outcome of last session         | `Win`, `Loss`, `Draw`                               |
+| Player Role              | `player_role`              | Player role in multiplayer      | `Tank`, `Support`, `DPS`                            |
+| Guild Name               | `guild_name`               | In-game clan or guild           | `NightWatch`, `DragonRiders`                        |
+| Achievement Title        | `achievement_title`        | Unlocked in-game milestone      | `Slayer of Titans`, `Grand Explorer`                |
+| Session Outcome          | `session_outcome`          | Overall session result          | `Success`, `Failure`                                |
+| Leaderboard Rank         | `leaderboard_rank`         | Position in competitive ranking | `12`, `120`, `4583`                                 |
+
+### 🏅 Sports
+
+| Label          | Key Label        | Description          | Examples                                             |
+| -------------- | ---------------- | -------------------- | ---------------------------------------------------- |
+| Athlete Name   | `athlete_name`   | Famous athlete names | `Michael Jordan`, `Serena Williams`, `Lionel Messi`  |
+| Sport          | `sport`          | Sports types         | `Basketball`, `Soccer`, `Tennis`                     |
+| Equipment Type | `equipment_type` | Sports equipment     | `Baseball Bat`, `Tennis Racket`, `Soccer Ball`       |
+| Stadium Name   | `stadium_name`   | Sports venues        | `Madison Square Garden`, `Wembley`, `Yankee Stadium` |
+| League         | `league`         | Sports leagues       | `NFL`, `NBA`, `Premier League`                       |
+| Olympic Sport  | `olympic_sport`  | Olympic sports       | `Swimming`, `Athletics`, `Gymnastics`                |
+
+### ✈️ Travel
+
+| Label                         | Key Label                       | Description                        | Examples                                                  |
+| ----------------------------- | ------------------------------- | ---------------------------------- | --------------------------------------------------------- |
+| Airport Country Code          | `airport_country_code`          | Airport country codes              | `US`, `CA`, `DE`                                          |
+| Airport Continent             | `airport_continent`             | Airport continent codes            | `NA`, `AF`, `EU`                                          |
+| Airport Coordinate            | `airport_coordinate`            | Airport GPS coordinates            | `4.305599212646484, -112.16500091552734`                  |
+| Airport Code                  | `airport_code`                  | IATA airport codes                 | `LAX`, `NWR`, `JFK`                                       |
+| Flight Departure Airport Code | `flight_departure_airport_code` | Departure airport codes            | `JFK`, `LAX`, `ORD`                                       |
+| Flight Departure Airport      | `flight_departure_airport`      | Departure airport names            | `John F. Kennedy International Airport`                   |
+| Flight Arrival Country        | `flight_arrival_country`        | Arrival country names              | `United States`, `France`, `Japan`                        |
+| Flight Arrival City           | `flight_arrival_city`           | Arrival city names                 | `Chicago`, `San Francisco`, `Dallas`                      |
+| Flight Arrival Airport Code   | `flight_arrival_airport_code`   | Arrival airport codes              | `SFO`, `DFW`, `LHR`                                       |
+| Flight Arrival Airport        | `flight_arrival_airport`        | Arrival airport names              | `Chicago O'Hare International Airport`                    |
+| Flight Airline Name           | `flight_airline_name`           | Airline names                      | `American Airlines`, `Delta Air Lines`, `United Airlines` |
+| Flight Airline Code           | `flight_airline_code`           | Airline codes                      | `AA`, `DL`, `UA`                                          |
+| Ticket Type                   | `ticket_type`                   | Airline ticket types               | `Economy`, `Business`, `First Class`                      |
+| Flight Departure City         | `flight_departure_city`         | Departure city names               | `New York`, `Los Angeles`, `Chicago`                      |
+| Flight Status                 | `flight_status`                 | Flight status descriptions         | `On Time`, `Delayed`, `Cancelled`                         |
+| Room Type                     | `room_type`                     | Hotel room categories              | `Single Room`, `Deluxe Suite`, `Standard Double`          |
+| Airport Municipality          | `airport_municipality`          | Airport city/municipality          | `Wenzhou`, `Singleton`, `Melbourne`                       |
+| Amenity                       | `amenity`                       | Hotel or property amenities        | `Free WiFi`, `Pool`, `Gym`                                |
+| Bed Size                      | `bed_size`                      | Bed size types                     | `King`, `Queen`, `Twin`                                   |
+| Parking Type                  | `parking_type`                  | Parking options                    | `Valet`, `Self-Park`, `Street`                            |
+| Flight Number                 | `flight_number`                 | Flight numbers                     | `AA1234`, `DL456`, `UA789`                                |
+| Flight Duration (Hours)       | `flight_duration_hours`         | Flight duration in hours           | `2.5`, `5.75`, `12.0`                                     |
+| Flight Departure Time         | `flight_departure_time`         | Departure time                     | `08:45 AM`, `14:30 PM`, `23:15 PM`                        |
+| Airport GPS Code              | `airport_gps_code`              | Airport GPS codes                  | `WAOP`, `YGDN`, `ZGXN`                                    |
+| Airport Terminal              | `airport_terminal`              | Airport terminal identifiers       | `Terminal 1`, `T3`                                        |
+| Seat Number                   | `seat_number`                   | Assigned seat numbers on transport | `12A`, `24C`, `7B`                                        |
+| Travel Duration               | `travel_duration`               | Duration of travel time            | `2h 45m`, `12h 30m`                                       |
+| Flight Departure Country      | `flight_departure_country`      | Departure country names            | `United States`, `Canada`, `United Kingdom`               |
+| Airport Region Code           | `airport_region_code`           | Airport region codes               | `US-PA`, `AU-QLD`, `MY-13`                                |
+| Airport Name                  | `airport_name`                  | Airport names                      | `Kodiak Airport`, `Van Nuys Airport`                      |
+| Boarding Gate                 | `boarding_gate`                 | Boarding gate designations         | `Gate 15`, `A12`, `C7`                                    |
+| Airport Elevation (Feet)      | `airport_elevation_feet`        | Airport elevation in feet          | `11`, `200`, `123`                                        |
+| Transport Mode                | `transport_mode`                | Primary travel type                | `Car`, `Bus`, `Train`, `Bicycle`                          |
+
+### 🌿 Nature
+
+| Label                  | Key Label                | Description                                | Examples                                          |
+| ---------------------- | ------------------------ | ------------------------------------------ | ------------------------------------------------- |
+| Plant Common Name      | `plant_common_name`      | Common plant names                         | `Abietinella Moss`, `Silver Fir`, `Sedge`         |
+| Plant Family           | `plant_family`           | Plant family names                         | `Thuidiaceae`, `Pinaceae`, `Cyperaceae`           |
+| Wavelength             | `wavelength`             | Light wavelength measurements              | `380nm`, `700nm`, `550nm`                         |
+| Wind Speed             | `wind_speed`             | Wind speed measurements                    | `15 mph`, `30 km/h`, `5 m/s`                      |
+| Biome                  | `biome`                  | Ecological biomes                          | `Rainforest`, `Desert`, `Tundra`                  |
+| Bird Species           | `bird_species`           | Common bird species names                  | `Robin`, `Eagle`, `Penguin`                       |
+| Constellation          | `constellation`          | Star constellation names                   | `Orion`, `Ursa Major`, `Cassiopeia`               |
+| Dog Breed              | `dog_breed`              | Dog breed names                            | `Labrador`, `German Shepherd`, `Golden Retriever` |
+| Ecosystem              | `ecosystem`              | Ecosystem types                            | `Coral Reef`, `Wetland`, `Grassland`              |
+| Element State          | `element_state`          | States of matter                           | `Solid`, `Liquid`, `Gas`, `Plasma`                |
+| Energy Source          | `energy_source`          | Energy types                               | `Solar`, `Wind`, `Nuclear`, `Fossil Fuel`         |
+| Environmental Issue    | `environmental_issue`    | Environmental concerns                     | `Climate Change`, `Deforestation`, `Pollution`    |
+| Fish Species           | `fish_species`           | Fish species names                         | `Salmon`, `Tuna`, `Clownfish`                     |
+| Flower Type            | `flower_type`            | Flower species                             | `Rose`, `Tulip`, `Sunflower`                      |
+| Insect Species         | `insect_species`         | Insect types                               | `Butterfly`, `Ant`, `Bee`                         |
+| Moon Phase             | `moon_phase`             | Lunar phases                               | `Full Moon`, `New Moon`, `Crescent`               |
+| Ocean                  | `ocean`                  | World oceans                               | `Pacific`, `Atlantic`, `Indian`                   |
+| Particle               | `particle`               | Subatomic particles                        | `Electron`, `Proton`, `Neutron`                   |
+| Precipitation Type     | `precipitation_type`     | Precipitation types                        | `Rain`, `Snow`, `Sleet`, `Hail`                   |
+| Chemical Symbol        | `chemical_symbol`        | Two-letter chemical element symbols        | `H`, `C`, `O`                                     |
+| Satellite              | `satellite`              | Satellites                                 | `ISS`, `Hubble`, `GPS`                            |
+| Chemical Element       | `chemical_element`       | Chemical element names from periodic table | `Hydrogen`, `Carbon`, `Oxygen`                    |
+| Planet                 | `planet`                 | Planets in our solar system                | `Earth`, `Mars`, `Jupiter`                        |
+| Tree Species           | `tree_species`           | Tree types                                 | `Oak`, `Pine`, `Maple`                            |
+| Wind Direction         | `wind_direction`         | Wind directions                            | `North`, `Southeast`, `West`                      |
+| Plant Scientific Name  | `plant_scientific_name`  | Scientific plant names                     | `Abietinella abietina`, `Abies alba`              |
+| Species                | `species`                | Biological species                         | `Homo Sapiens`, `Canis Lupus`, `Felis Catus`      |
+| Animal Scientific Name | `animal_scientific_name` | Scientific animal names                    | `Vombatus ursinus`, `Nyctea scandiaca`            |
+| Natural Resource       | `natural_resource`       | Extracted natural resources                | `Coal`, `Water`, `Oil`                            |
+| Vegetation Type        | `vegetation_type`        | Vegetation categories                      | `Grassland`, `Shrubland`, `Forest`                |
+| Animal Habitat         | `animal_habitat`         | Natural living environments                | `Forest`, `Ocean`, `Desert`                       |
+| Animal Common Name     | `animal_common_name`     | Common animal names                        | `Wombat, common`, `Owl, snowy`, `Jungle kangaroo` |
+| Geological Formation   | `geological_formation`   | Landform types                             | `Canyon`, `Plateau`, `Valley`                     |
+| Climate Zone           | `climate_zone`           | Climate classification zones               | `Tropical`, `Temperate`, `Polar`                  |
+| Air Quality Index      | `air_quality_index`      | Environmental air quality index            | `42`, `118`, `212`                                |
+| Air Quality Category   | `air_quality_category`   | Category of Air Quality                    | `Good`, `Moderate`,`Unhealthy`                    |
+| Hazard Risk Zone       | `hazard_risk_zone`       | Disaster exposure category                 | `Flood Zone`,` Landslide Are`a                    |
+
+**Options Examples:**
+
+```python
+# Wind Speed with unit
+{
+    "label": "wind",
+    "key_label": "wind_speed",
+    "group": "nature",
+    "options": {
+        "unit": "mph"  # Options: "mph", "km/h", "m/s"
+    }
+}
+```
+
+### 🏗️ Construction
+
+| Label                             | Key Label                           | Description            | Examples                                        |
+| --------------------------------- | ----------------------------------- | ---------------------- | ----------------------------------------------- |
+| Building Type                     | `building_type`                     | Types of buildings     | `Residential`, `Commercial`, `Industrial`       |
+| Material Type                     | `material_type`                     | Building materials     | `Wood`, `Steel`, `Concrete`                     |
+| Construction Role                 | `construction_role`                 | Construction job roles | `Construction Manager`, `Supervisor`            |
+| Construction Material             | `construction_material`             | Construction materials | `Glass`, `Plastic`, `Aluminum`                  |
+| Construction Trade                | `construction_trade`                | Construction trades    | `Stucco Mason`, `Welder`, `Ironworker`          |
+| Construction Subcontract Category | `construction_subcontract_category` | Subcontract categories | `Masonry`, `Roofing (Asphalt)`, `EIFS`          |
+| Construction Standard Cost Code   | `construction_standard_cost_code`   | Standard cost codes    | `11-200 - Water Supply and Treatment Equipment` |
+| Construction Heavy Equipment      | `construction_heavy_equipment`      | Heavy equipment types  | `Compactor`, `Grader`, `Trencher`               |
+| Tool Type                         | `tool_type`                         | Construction tools     | `Hammer`, `Screwdriver`, `Drill`                |
+
+### 🪙 Crypto
+
+| Label                 | Key Label               | Description                               | Examples                                                                                    |
+| --------------------- | ----------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------- |
+| NFT Token ID          | `nft_token_id`          | Non-fungible token identification numbers | `#3421`, `#8765`, `#1234`                                                                   |
+| Tezos Account         | `tezos_account`         | A random Tezos account                    | `tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb`                                                      |
+| Tezos Signature       | `tezos_signature`       | A random Tezos signature                  | `edsigtkpiSSschcaCt9pUVrpNPf7TTcgvgDEDD6NCEHMy8NNQJCGnMfLZzYoQj4BsL1A7p8DDeTQgTn4wZXPAw1Z9` |
+| Tezos Operation       | `tezos_operation`       | A random Tezos operation                  | `ood2Y1FLHH9izvYghVcDGGAkvJFo1CgSEjPfWvGsaz3qypCmeUj`                                       |
+| Tezos Contract        | `tezos_contract`        | A random Tezos contract                   | `KT1BEqzn5Wx8uJrZNvuS9DVHmLvG9td3fDLi`                                                      |
+| Tezos Block           | `tezos_block`           | A random Tezos block                      | `BLockGenesisGenesisGenesisGenesisGenesisb83baZgbyZe`                                       |
+| Cryptocurrency Wallet | `cryptocurrency_wallet` | Crypto wallet providers                   | `MetaMask`, `Coinbase Wallet`, `Trust Wallet`                                               |
+| Ethereum Address      | `ethereum_address`      | A random Ethereum address                 | `0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb`                                                 |
+| Bitcoin Address       | `bitcoin_address`       | Bitcoin wallet addresses                  | `1EZ5PdVcsVEaaKYH37t8toLodJc97eooy6`                                                        |
+| Cryptocurrency Symbol | `cryptocurrency_symbol` | Cryptocurrency ticker symbols             | `BTC`, `ETH`, `ADA`                                                                         |
+| Cryptocurrency Name   | `cryptocurrency_name`   | Popular cryptocurrency names              | `Bitcoin`, `Ethereum`, `Cardano`                                                            |
+
+### 🎓 Education
+
+| Label               | Key Label            | Description                 | Examples                                        |
+| ------------------- | -------------------- | --------------------------- | ----------------------------------------------- |
+| Classroom Number    | `classroom_number`   | Classroom identifiers       | `Room 101`, `Lab 3B`, `Lecture Hall A`          |
+| Certification       | `certification`      | Professional certifications | `PMP`, `AWS Certified`, `CPA`                   |
+| Attendance Status   | `attendance_status`  | Class attendance statuses   | `Present`, `Absent`, `Tardy`                    |
+| Academic Subject    | `academic_subject`   | School subject names        | `Mathematics`, `Biology`, `History`             |
+| E-Learning Platform | `elearning_platform` | Online learning platforms   | `Coursera`, `Udemy`, `Khan Academy`             |
+| Grade Level         | `grade_level`        | School grade levels         | `1st Grade`, `8th Grade`, `12th Grade`          |
+| Qualification       | `qualification`      | Qualifications              | `Diploma`, `Certificate`, `License`             |
+| School Type         | `school_type`        | School levels               | `Elementary`, `Middle`, `High School`           |
+| Semester            | `semester`           | Academic semesters          | `Fall`, `Spring`, `Summer`                      |
+| College Major       | `college_major`      | University majors           | `Computer Science`, `Psychology`, `Engineering` |
+| GPA                 | `gpa`                | Grade Point Average         | `3.5`, `4.0`, `2.8`                             |
+
+**Options Examples:**
+
+```python
+# Classroom Number with format
+{
+    "label": "classroom",
+    "key_label": "classroom_number",
+    "group": "education",
+    "options": {
+        "format": "Room"  # Options: "Room", "Lab", "Lecture"
+    }
+}
+```
+
+### 📦 Products
+
+| Label                      | Key Label                    | Description                              | Examples                                            |
+| -------------------------- | ---------------------------- | ---------------------------------------- | --------------------------------------------------- |
+| Movie Title                | `movie_title`                | Movie titles                             | `Goodfellas`, `Titanic`, `Silverado`                |
+| Product (Grocery)          | `product_grocery`            | Grocery product names                    | `Tomato - Green`, `Spinach - Baby`, `Avocado`       |
+| Movie Genres               | `movie_genres`               | Movie genre classifications              | `Action \| Suspense`, `Thriller`, `Comedy`          |
+| Video Quality              | `video_quality`              | Video resolution qualities               | `720p`, `1080p`, `4K`, `8K`                         |
+| Mobile Device OS           | `mobile_device_os`           | Mobile operating systems                 | `Android`, `iOS`                                    |
+| News Category              | `news_category`              | News categories                          | `Politics`, `Sports`, `Entertainment`               |
+| Musical Instrument         | `musical_instrument`         | Musical instruments                      | `Piano`, `Guitar`, `Drums`, `Violin`                |
+| Sound Effect               | `sound_effect`               | Audio effects                            | `Explosion`, `Footsteps`, `Door Creak`              |
+| Supernatural Creature      | `supernatural_creature`      | Mythical creatures                       | `Vampire`, `Werewolf`, `Ghost`                      |
+| Video Format               | `video_format`               | Video file formats                       | `MP4`, `AVI`, `MOV`                                 |
+| Musical Genre              | `musical_genre`              | Music genres                             | `Rock`, `Jazz`, `Hip Hop`, `Classical`              |
+| Mobile Device Release Date | `mobile_device_release_date` | Device release years                     | `2014`, `2015`, `2016`                              |
+| Media Format               | `media_format`               | Media formats                            | `Blu-ray`, `DVD`, `Streaming`                       |
+| Magazine Title             | `magazine_title`             | Magazine names                           | `Time`, `National Geographic`, `Vogue`              |
+| Guitar Type                | `guitar_type`                | Guitar types                             | `Acoustic`, `Electric`, `Bass`                      |
+| Parental Rating            | `parental_rating`            | Game and content ratings                 | `E`, `T`, `M`                                       |
+| Episode Number             | `episode_number`             | TV episode identifiers                   | `S01E01`, `Episode 5`, `Season 2 Episode 8`         |
+| Broadcast Network          | `broadcast_network`          | Television networks                      | `NBC`, `BBC`, `CNN`                                 |
+| Book Title                 | `book_title`                 | Famous book titles                       | `To Kill a Mockingbird`, `1984`, `The Great Gatsby` |
+| Book Genre                 | `book_genre`                 | Book genre categories                    | `Mystery`, `Romance`, `Science Fiction`             |
+| Award Name                 | `award_name`                 | Award and prize names                    | `Oscar`, `Grammy`, `Nobel Prize`                    |
+| Streaming Service          | `streaming_service`          | Video streaming platform names           | `Netflix`, `Disney+`, `Hulu`                        |
+| Podcast Name               | `podcast_name`               | Podcast titles                           | `The Daily`, `Serial`, `Radiolab`                   |
+| Game Title                 | `game_title`                 | Video game titles                        | `The Legend of Zelda`, `Minecraft`, `FIFA 24`       |
+| Game Publisher             | `game_publisher`             | Video game publisher                     | `Sony Computer Entertainment`, `Electronic Arts`    |
+| Mobile Device Brand        | `mobile_device_brand`        | Mobile device manufacturers              | `Sony`, `Samsung`, `Apple`                          |
+| Mobile Device Model        | `mobile_device_model`        | Mobile device models                     | `Xperia Z3`, `Galaxy S5`, `iPhone 6`                |
+| Content Rating             | `content_rating`             | Content rating classifications           | `G`, `PG-13`, `R`, `TV-MA`                          |
+| Record Label               | `record_label`               | Record labels                            | `Universal`, `Sony Music`, `Warner`                 |
+| Stock Reorder Flag         | `stock_reorder_flag`         | Whether item stock requires replenishing | `Yes`, `No`                                         |
+| Shelf Location             | `shelf_location`             | Location inside warehouse/store          | `Aisle 12` - `Rack C, Row 4 - Bin 8`                |
+| Product Grade              | `product_grade`              | Quality grade of products/materials      | `A`, `B`, `C`, `Industrial`                         |
+| Demand Forecast            | `demand_forecast`            | Projected demand classification          | `Low`, `Moderate`, `High`, `Critical`               |
+| Supplier Contract          | `supplier_contract`          | Contract types with product suppliers    | `Spot`, `Annual`, `Subscription Supply`             |
+
+### 🏛️ Political
+
+| Label                      | Key Label                    | Description                                              | Examples                                           |
+| -------------------------- | ---------------------------- | -------------------------------------------------------- | -------------------------------------------------- |
+| Election Type              | `election_type`              | Election categories                                      | `Presidential`, `Midterm`, `Local`                 |
+| Political Ideology         | `political_ideology`         | Core political belief system                             | `Liberal`, `Conservative`, `Socialist`, `Centrist` |
+| Political Party            | `political_party`            | Organized political group affiliation                    | `Democratic Party`, `Republican Party`             |
+| Party Affiliation Strength | `party_affiliation_strength` | Level of loyalty to a political party                    | `Strong Loyalist`, `Moderate`, `Independent`       |
+| Government Branch          | `government_branch`          | Structural division of government power                  | `Executive`, `Legislative`, `Judiciary`            |
+| Head of State              | `head_of_state`              | Symbolic or formal leader of a nation                    | `President`, `Monarch`                             |
+| Head of Government         | `head_of_government`         | Leader managing executive governance                     | `Prime Minister`, `President`                      |
+| Cabinet Position           | `cabinet_position`           | Official role in national executive leadership           | `Defense Minister`, `Finance Secretary  `          |
+| Voter Eligibility          | `voter_eligibility`          | Requirements to be allowed to vote                       | `18+`, `Citizen`, `Registered Voter `              |
+| Voter Turnout              | `voter_turnout`              | Percentage of eligible voters who voted                  | `61%`, `78%`                                       |
+| Campaign Funding Source    | `campaign_funding_source`    | Source of financial support for campaigns                | `Public Funding`, `Private Donation`s, `PACs`      |
+| Lobbying Influence Level   | `lobbying_influence_level`   | Impact of lobbying on policy decisions                   | `Low`, `Medium`, `High`                            |
+| Policy Domain              | `policy_domain`              | Area of government policy focus                          | `Healthcare`, `Education`, `Defense`               |
+| Approval Rating            | `approval_rating`            | Measure of public support for political figure or policy | `42%`, `68%`, `55%`                                |
+| Diplomatic Relationship    | `diplomatic_relationship`    | State-to-state political relationship status             | `Allied`, `Neutral`, `Sanctioned`                  |
+| Treaty Type                | `treaty_type`                | Category of formal agreement between states              | `Trade Treaty`, `Peace Accor`d, `Defense Pact`     |
+| Sanction Type              | `sanction_type`              | Imposed economic or diplomatic penalty                   | `Travel Ban`, `Asset Freeze`, `Trade Block`        |
+| Border Control Status      | `border_control_status`      | Government stance on national border entry               | `Open`, `Restricted`, `Closed`                     |
+| Military Alliance          | `military_alliance`          | Defense cooperation agreement among nations              | `NATO`, `ASEAN Defense Pact`                       |
+| Geopolitical Region        | `geopolitical_region`        | Political or strategic geographical grouping             | `EU`, `ASEAN`, `Middle East `                      |
+
+### 📣 Marketing
+
+| Label                           | Key Label                         | Description                                             | Examples                                              |
+| ------------------------------- | --------------------------------- | ------------------------------------------------------- | ----------------------------------------------------- |
+| Recommended Product             | `recommended_product`             | Suggests a product as if recommended for a user         | Wireless Earbuds, Yoga Mat, Gaming Mouse              |
+| Recommendation Reason           | `recommendation_reason`           | Explanation of why an item is recommended               | Frequently bought together, Similar to past purchases |
+| Recommendation Confidence Score | `recommendation_confidence_score` | Confidence score (0-1 or %) from recommendation model   | 0.82, 0.95, 73%                                       |
+| Next Best Action                | `next_best_action`                | Predictive recommended user action                      | Add to Cart, Upgrade Plan, Schedule Appointment       |
+| User Preference Tag             | `user_preference_tag`             | Tags reflecting inferred or explicit user tastes        | Eco-Friendly, Sports Enthusiast, Minimalist           |
+| Promotion Type                  | `promotion_type`                  | Category of marketing promotion offered                 | Discount, Bundle Deal, Free Shipping                  |
+| Discount Value                  | `discount_value`                  | Numeric value of offered discount                       | 10%, 25%, $5 off                                      |
+| Engagement Score                | `engagement_score`                | Measure of user interaction with marketing content      | 0.31, 0.77, 0.99                                      |
+| Customer Segment                | `customer_segment`                | Market grouping defined by behavior or profile          | Budget Shoppers, High-Value, Students                 |
+| Channel Source                  | `channel_source`                  | Channel through which user was reached                  | Email, SMS, In-App, Social Media                      |
+| Ad Click Count                  | `ad_click_count`                  | Number of ads clicked by the user                       | 0, 3, 12                                              |
+| Ad Impression Count             | `ad_impression_count`             | Number of ads shown to the user                         | 10, 450, 1200                                         |
+| Conversion Status               | `conversion_status`               | Whether user completed the desired action               | Converted, Not Converted, Retarget                    |
+| Conversion Value                | `conversion_value`                | Value gained from a successful conversion               | $12.99, $299.00, 4 credits                            |
+| Churn Risk                      | `churn_risk`                      | Predicted likelihood of customer disengagement          | Low, Medium, High                                     |
+| Preferred Communication Channel | `preferred_communication_channel` | Best channel to reach the user                          | Email, SMS, Phone Call, App Notification              |
+| Recent Search Term              | `recent_search_term`              | Most recent keyword or item searched                    | Running Shoes, Laptop Stand, Protein Powder           |
+| Cart Abandonment Status         | `cart_abandonment_status`         | Whether user left items in cart                         | Abandoned, Completed, Active                          |
+| Product Affinity Score          | `product_affinity_score`          | Strength of product-to-product association              | 0.12, 0.64, 0.91                                      |
+| Cross-Sell Opportunity          | `cross_sell_opportunity`          | Likelihood to encourage complementary product purchases | Low, Medium, High                                     |
+| Upsell Opportunity              | `upsell_opportunity`              | Likelihood to encourage higher-tier product purchases   | Low, Medium, High                                     |
+| Customer Lifetime Value         | `customer_lifetime_value`         | Predicted long-term value of a customer                 | $120, $960, $4,230                                    |
+| Average Order Value             | `average_order_value`             | Average spending per order                              | $17.45, $88.90, $310.12                               |
+| Browsing Duration               | `browsing_duration`               | Total time spent viewing products                       | 17s, 4m, 12m                                          |
+| Session Count                   | `session_count`                   | Number of user browsing sessions                        | 1, 4, 22                                              |
+| Product View Count              | `product_view_count`              | Times a product page was viewed                         | 3, 18, 245                                            |
+| Click-Through Rate              | `click_through_rate`              | Ratio of clicks to impressions                          | 1.2%, 4.7%, 12%                                       |
+| Email Open Rate                 | `email_open_rate`                 | Percentage of opened emails                             | 5%, 33%, 82%                                          |
+| SMS Response Status             | `sms_response_status`             | User engagement with SMS campaigns                      | Clicked Link, Viewed Only, No Engagement              |
+| Coupon Usage Status             | `coupon_usage_status`             | Whether user redeemed coupons                           | Redeemed, Expired, Not Used                           |
+| Referral Source                 | `referral_source`                 | Origin of user acquisition                              | Google Search, TikTok, Referral Link                  |
+| Influencer Attribution          | `influencer_attribution`          | Whether purchase influenced by a creator or influencer  | Influencer A, Influencer B, None                      |
+| Customer Feedback Rating        | `customer_feedback_rating`        | User satisfaction score                                 | 1, 3, 5                                               |
+| Return Rate                     | `return_rate`                     | Percentage of items returned                            | 0%, 12%, 47%                                          |
+| Loyalty Points Balance          | `loyalty_points_balance`          | Accumulated loyalty program points                      | 120, 540, 2,310                                       |
+| Last Purchase Date              | `last_purchase_date`              | Most recent purchase date                               | 2025-02-01, 2024-11-22                                |
+| Time Since Last Purchase        | `time_since_last_purchase`        | Elapsed time since last purchase                        | 2 days, 3 weeks, 7 months                             |
+| Preferred Product Category      | `preferred_product_category`      | Product category most engaged with                      | Electronics, Fitness, Home Decor                      |
+| Seasonal Interest               | `seasonal_interest`               | User engagement pattern based on seasonal events        | Holiday, Back-to-School, Summer Sale                  |
+| Price Sensitivity               | `price_sensitivity`               | Responsiveness to changes in price                      | Low, Medium, High                                     |
+| Engagement Recency              | `engagement_recency`              | Time since last meaningful interaction                  | 1 hour ago, 5 days, 3 months                          |
+| Customer Mood Intent            | `customer_mood_intent`            | Inferred emotional tone of recent behavior              | Excited, Browsing, Hesitant                           |
+
+### 💬 Communication
+
+| Label                 | Key Label               | Description                                      | Examples                                      |
+| --------------------- | ----------------------- | ------------------------------------------------ | --------------------------------------------- |
+| SIM Card Type         | `sim_card_type`         | Types of mobile SIM cards                        | Nano SIM, Micro SIM, eSIM                     |
+| Mobile Carrier        | `mobile_carrier`        | Telecom carriers / service providers             | AT&T, Globe, T-Mobile, Vodafone               |
+| Data Plan             | `data_plan`             | Mobile subscription data bundles                 | 5GB/month, Unlimited, 10GB prepaid            |
+| IMEI Number           | `imei_number`           | 15-digit mobile hardware identifier              | 356938035643809                               |
+| Signal Strength       | `signal_strength`       | Network signal levels                            | 1 bar, 3 bars, 5 bars                         |
+| Network Type          | `network_type`          | Mobile network generation or standard            | 3G, 4G LTE, 5G NR                             |
+| WiFi Standard         | `wifi_standard`         | Wireless network protocol version                | 802.11n, 802.11ac, 802.11ax                   |
+| WiFi Band             | `wifi_band`             | Wireless frequency bands supported               | 2.4GHz, 5GHz, Dual Band                       |
+| Bluetooth Version     | `bluetooth_version`     | Supported Bluetooth protocol version             | 4.2, 5.0, 5.3                                 |
+| NFC Support           | `nfc_support`           | Whether device supports Near Field Communication | Supported, Not Supported                      |
+| Hotspot Capability    | `hotspot_capability`    | Ability to share mobile data with other devices  | Enabled, Disabled                             |
+| Roaming Status        | `roaming_status`        | Whether device/carrier is in roaming mode        | Roaming, Home Network                         |
+| Carrier Lock Status   | `carrier_lock_status`   | Whether device is locked to a mobile carrier     | Locked, Unlocked                              |
+| VoLTE Support         | `volte_support`         | Support for Voice-over-LTE calling               | Supported, Not Supported                      |
+| WiFi Calling Support  | `wifi_calling_support`  | Ability to place calls over WiFi                 | Enabled, Not Enabled                          |
+| Dual SIM Capability   | `dual_sim_capability`   | Ability to use two SIM cards simultaneously      | Single SIM, Dual SIM Hybrid, Dual SIM Standby |
+| eSIM Profiles Count   | `esim_profiles_count`   | Number of eSIM profiles device can store         | 1, 3, 7                                       |
+| APN Settings          | `apn_settings`          | Access point configuration for mobile data       | internet.globe.com.ph, fast.t-mobile.com      |
+| Network Operator Code | `network_operator_code` | Carrier network identifier code                  | 51502, 310260                                 |
+| Call Quality Rating   | `call_quality_rating`   | Perceived clarity and stability of voice calls   | Low, Medium, High                             |
+| Latency               | `latency`               | Delay of data transmission over network          | 20ms, 50ms, 120ms                             |
+| Download Speed        | `download_speed`        | Rate of data download over network               | 10 Mbps, 50 Mbps, 300 Mbps                    |
+| Upload Speed          | `upload_speed`          | Rate of data upload over network                 | 5 Mbps, 20 Mbps, 100 Mbps                     |
+
+### 🤖 AI
+
+| Label                       | Key Label                     | Description                                                 | Examples                                |
+| --------------------------- | ----------------------------- | ----------------------------------------------------------- | --------------------------------------- |
+| Model Type                  | `model_type`                  | Type of machine learning system                             | XGBoost, CNN, Transformer, LSTM         |
+| Model Version               | `model_version`               | Internal versioning for deployed models                     | v1.3.7, model_2025_02_14                |
+| Inference Result            | `inference_result`            | Output category from model prediction                       | Approved, Spam, Fraud, Healthy          |
+| Model Confidence            | `model_confidence`            | Probability score of prediction outcome                     | 0.72, 0.96, 0.40                        |
+| Model Deployment Env        | `model_deployment_env`        | Runtime environment type                                    | Cloud, Edge Device, On-Prem             |
+| Model Task                  | `model_task`                  | Primary function of the model                               | Classification, Regression, Clustering  |
+| Model Input Format          | `model_input_format`          | Type of data format accepted by the model                   | Image, Text, Tabular                    |
+| Model Output Format         | `model_output_format`         | Structure of model-generated output                         | Label, Score Vector, Bounding Box       |
+| Model Latency               | `model_latency`               | Time taken to return inference                              | 12ms, 200ms, 3s                         |
+| Compute Precision           | `compute_precision`           | Numerical precision used during inference                   | FP32, FP16, INT8                        |
+| GPU Utilization             | `gpu_utilization`             | Percentage of GPU resources consumed during inference       | 34%, 78%, 91%                           |
+| CPU Utilization             | `cpu_utilization`             | Percentage of CPU resources used                            | 12%, 56%, 89%                           |
+| Memory Footprint            | `memory_footprint`            | Amount of system memory required to operate the model       | 350MB, 2.1GB                            |
+| Model Framework             | `model_framework`             | Software library used to build the model                    | TensorFlow, PyTorch, XGBoost            |
+| Model Owner                 | `model_owner`                 | Team or role responsible for the model                      | AI Research Team, ML Ops Team           |
+| Retraining Frequency        | `retraining_frequency`        | How often the model is retrained                            | Daily, Weekly, On-Demand                |
+| Data Drift Score            | `data_drift_score`            | Measure of how current data differs from training data      | 0.02, 0.15, 0.61                        |
+| Concept Drift Status        | `concept_drift_status`        | Indicator of model performance shift from expected patterns | Stable, Warning, Drift Detected         |
+| Model Explainability Method | `model_explainability_method` | Approach for interpreting model outputs                     | SHAP, LIME, Attention Weights           |
+| Inference Endpoint          | `inference_endpoint`          | Serving endpoint used for model prediction calls            | https://api.example.com/v1/predict      |
+| Model Training Dataset      | `model_training_dataset`      | Primary dataset used to train the model                     | ImageNet, COCO, Custom Internal Dataset |
+| Model Lifecycle Stage       | `model_lifecycle_stage`       | Current phase in the ML lifecycle                           | Development, Staging, Production        |
+
+### ⚖️ Legal
+
+| Label                   | Key Label                 | Description                                  | Examples                                            |
+| ----------------------- | ------------------------- | -------------------------------------------- | --------------------------------------------------- |
+| Law Type                | `law_type`                | Category or nature of a law                  | Criminal Law, Civil Law, Labor Law                  |
+| Court Level             | `court_level`             | Jurisdiction level of the court              | Supreme Court, Appeals Court, Municipal Court       |
+| Legislation Status      | `legislation_status`      | Current stage of a bill or law               | Draft, Proposed, Enacted, Repealed                  |
+| Legal Jurisdiction      | `legal_jurisdiction`      | Authority governing law application          | Federal, State, Local, International                |
+| Case Reference Number   | `case_reference_number`   | Official court case identifier               | G.R. No. 229762, Case #14-CR-225                    |
+| Evidence Type           | `evidence_type`           | Form of evidence presented in a case         | Documentary, Testimonial, Digital, Physical         |
+| Legal Representation    | `legal_representation`    | Type of counsel representing a party         | Public Defender, Private Attorney, Self-Represented |
+| Verdict                 | `verdict`                 | Formal decision or judgment in a case        | Guilty, Not Guilty, Dismissed                       |
+| Penalty Type            | `penalty_type`            | Government-imposed penalty after conviction  | Imprisonment, Fine, Community Service               |
+| Appeal Status           | `appeal_status`           | Whether or not a verdict is being challenged | No Appeal, Pending Appeal, Upheld, Reversed         |
+| Contract Type           | `contract_type`           | Type of legal agreement between parties      | Lease Contract, Employment Contract, NDA            |
+| Notary Status           | `notary_status`           | Whether a document has been notarized        | Notarized, Pending, Unverified                      |
+| Legal Compliance Status | `legal_compliance_status` | Status of compliance with legal requirements | Compliant, Non-Compliant, Under Review              |
+| Regulatory Agency       | `regulatory_agency`       | Authority enforcing regulation               | SEC, FDA, NTC                                       |
+| Legal Filing Type       | `legal_filing_type`       | Type of document submitted in legal process  | Petition, Motion, Affidavit, Complaint              |
+| Legal Fee Category      | `legal_fee_category`      | Classification of legal expenses             | Filing Fee, Attorney Fee, Court Costs               |
+| Bail Status             | `bail_status`             | Defendant release condition before trial     | Posted, Denied, Revoked                             |
+
+## 📄 Export Methods & Formats
+
+### Generate Data
+
+```python
+dfg = DataFakeGenerator(schema)
+
+# Generate single record
+dfg.one()
+
+# Generate multiple records
+dfg.many(1000)
+
+# Access generated data
+data = dfg.data
+```
+
+### Export Data
+
+```python
+# Export to all formats (default)
+dfg.export(table_name="users", output_dir="output")
+
+# Export to specific formats
+dfg.export(
+    table_name="users",
+    output_dir="output",
+    formats=["csv", "json", "sql"]
+)
+
+# SQL export with CREATE TABLE
+dfg.export(
+    table_name="users",
+    output_dir="output",
+    formats=["sql"],
+    create_table=True
+)
+
+# XML export with custom elements
+dfg.export(
+    table_name="users",
+    output_dir="output",
+    formats=["xml"],
+    row_element="user",
+    record_element="users"
+)
+```
+
+### Available Export Formats
+
+| Format          | Extension        | Description              |
+| --------------- | ---------------- | ------------------------ |
+| `csv`           | `.csv`           | Comma-separated values   |
+| `tab_delimited` | `.txt`           | Tab-delimited text file  |
+| `json`          | `.json`          | JSON array of objects    |
+| `sql`           | `.sql`           | SQL INSERT statements    |
+| `cql`           | `.cql`           | Cassandra CQL statements |
+| `firebase`      | `_firebase.json` | Firebase-compatible JSON |
+| `excel`         | `.xlsx`          | Excel workbook           |
+| `xml`           | `.xml`           | XML document             |
+| `dbunit`        | `_dbunit.xml`    | DBUnit XML dataset       |
+| `parquet`       | `.parquet`       | Parquet Format           |
+| `duckdb`        | `.duckdb`        | Duckdb Format            |
+
+## 💡 Complete Examples
+
+### E-commerce Platform
+
+```python
+schema = [
+    {"label": "order_id", "key_label": "guid", "group": "basic", "options": {}},
+    {"label": "customer_name", "key_label": "full_name", "group": "personal", "options": {}},
+    {"label": "email", "key_label": "email_address", "group": "it", "options": {}},
+    {"label": "product", "key_label": "product_name", "group": "commerce", "options": {}},
+    {"label": "category", "key_label": "product_category", "group": "commerce", "options": {}},
+    {"label": "price", "key_label": "money", "group": "commerce", "options": {"min": 10, "max": 500, "currency": "USD"}},
+    {"label": "discount", "key_label": "discount_percentage", "group": "commerce", "options": {}},
+    {"label": "status", "key_label": "order_status", "group": "commerce", "options": {}},
+    {"label": "payment", "key_label": "payment_method", "group": "commerce", "options": {}},
+    {"label": "tracking", "key_label": "track_number", "group": "commerce", "options": {}},
+    {"label": "ordered_at", "key_label": "datetime", "group": "basic", "options": {"from_date": "2024-01-01", "to_date": "2024-12-31"}}
+]
+
+DataFakeGenerator(schema).many(5000).export("orders", "exports", formats=["csv", "json", "excel"])
+```
+
+### Healthcare Records System
+
+```python
+schema = [
+    {"label": "patient_id", "key_label": "medicare_beneficiary_id", "group": "health", "options": {}},
+    {"label": "nhs_id", "key_label": "nhs_number", "group": "health", "options": {}},
+    {"label": "name", "key_label": "full_name", "group": "personal", "options": {}},
+    {"label": "dob", "key_label": "datetime", "group": "basic", "options": {"from_date": "1940-01-01", "to_date": "2020-12-31"}},
+    {"label": "blood_type", "key_label": "blood_type", "group": "health", "options": {}},
+    {"label": "diagnosis_code", "key_label": "icd10_diagnosis_code", "group": "health", "options": {}},
+    {"label": "diagnosis_desc", "key_label": "icd10_dx_desc_short", "group": "health", "options": {}},
+    {"label": "procedure_code", "key_label": "icd10_procedure_code", "group": "health", "options": {}},
+    {"label": "medication", "key_label": "drug_name_brand", "group": "health", "options": {}},
+    {"label": "dosage", "key_label": "medication_dosage", "group": "health", "options": {}},
+    {"label": "hospital", "key_label": "hospital_name", "group": "health", "options": {}},
+    {"label": "department", "key_label": "hospital_department", "group": "health", "options": {}},
+    {"label": "admission_date", "key_label": "datetime", "group": "basic", "options": {}}
+]
+
+DataFakeGenerator(schema).many(1000).export("patients", "medical_data")
+```
+
+### Financial Transactions
+
+```python
+schema = [
+    {"label": "txn_id", "key_label": "uuid_v4", "group": "basic", "options": {}},
+    {"label": "account", "key_label": "account_number", "group": "finance", "options": {}},
+    {"label": "iban", "key_label": "iban", "group": "commerce", "options": {"group": "central_western_eu"}},
+    {"label": "amount", "key_label": "money", "group": "commerce", "options": {"min": -5000, "max": 5000, "currency": "USD"}},
+    {"label": "type", "key_label": "transaction_type", "group": "finance", "options": {}},
+    {"label": "bank", "key_label": "bank_name", "group": "finance", "options": {}},
+    {"label": "swift", "key_label": "bank_swift_bic", "group": "finance", "options": {}},
+    {"label": "routing", "key_label": "bank_routing_number", "group": "finance", "options": {}},
+    {"label": "credit_score", "key_label": "credit_score", "group": "finance", "options": {}},
+    {"label": "timestamp", "key_label": "datetime", "group": "basic", "options": {}}
+]
+
+DataFakeGenerator(schema).many(10000).export("transactions", "finance")
+```
+
+### Travel Booking System
+
+```python
+schema = [
+    {"label": "booking_id", "key_label": "guid", "group": "basic", "options": {}},
+    {"label": "passenger", "key_label": "full_name", "group": "personal", "options": {}},
+    {"label": "email", "key_label": "email_address", "group": "it", "options": {}},
+    {"label": "flight_num", "key_label": "flight_number", "group": "travel", "options": {}},
+    {"label": "airline", "key_label": "flight_airline_name", "group": "travel", "options": {}},
+    {"label": "departure_airport", "key_label": "flight_departure_airport", "group": "travel", "options": {}},
+    {"label": "departure_time", "key_label": "flight_departure_time", "group": "travel", "options": {}},
+    {"label": "arrival_airport", "key_label": "flight_arrival_airport", "group": "travel", "options": {}},
+    {"label": "duration", "key_label": "flight_duration_hours", "group": "travel", "options": {}},
+    {"label": "seat", "key_label": "seat_number", "group": "travel", "options": {}},
+    {"label": "ticket_type", "key_label": "ticket_type", "group": "travel", "options": {}},
+    {"label": "status", "key_label": "flight_status", "group": "travel", "options": {}}
+]
+
+DataFakeGenerator(schema).many(2000).export("bookings", "travel_data")
+```
+
+### IT Infrastructure Monitoring
+
+```python
+schema = [
+    {"label": "server_id", "key_label": "server_name", "group": "it", "options": {}},
+    {"label": "ip_address", "key_label": "ip_address_v4", "group": "it", "options": {}},
+    {"label": "mac_address", "key_label": "mac_address", "group": "it", "options": {}},
+    {"label": "os", "key_label": "operating_system", "group": "it", "options": {}},
+    {"label": "cpu_usage", "key_label": "normal_distribution", "group": "basic", "options": {"mean": 45, "standard_deviation": 15, "decimals": 2}},
+    {"label": "memory_size", "key_label": "memory_size", "group": "it", "options": {}},
+    {"label": "storage_type", "key_label": "storage_type", "group": "it", "options": {}},
+    {"label": "uptime", "key_label": "uptime_percentage", "group": "it", "options": {}},
+    {"label": "log_level", "key_label": "log_level", "group": "it", "options": {}},
+    {"label": "last_check", "key_label": "datetime", "group": "basic", "options": {}}
+]
+
+DataFakeGenerator(schema).many(500).export("servers", "monitoring")
+```
+
+### Employee Database
+
+```python
+schema = [
+    {"label": "emp_id", "key_label": "ein", "group": "personal", "options": {}},
+    {"label": "ssn", "key_label": "ssn", "group": "personal", "options": {}},
+    {"label": "first_name", "key_label": "first_name", "group": "personal", "options": {}},
+    {"label": "last_name", "key_label": "last_name", "group": "personal", "options": {}},
+    {"label": "email", "key_label": "email_address", "group": "it", "options": {}},
+    {"label": "phone", "key_label": "phone", "group": "location", "options": {"format": "+1 (###) ###-####"}},
+    {"label": "job_title", "key_label": "job_title", "group": "personal", "options": {}},
+    {"label": "department", "key_label": "department_corporate", "group": "personal", "options": {}},
+    {"label": "employment_status", "key_label": "employment_status", "group": "personal", "options": {}},
+    {"label": "contract_type", "key_label": "contract_type", "group": "personal", "options": {}},
+    {"label": "salary", "key_label": "money", "group": "commerce", "options": {"min": 30000, "max": 150000, "currency": "USD"}},
+    {"label": "hire_date", "key_label": "datetime", "group": "basic", "options": {"from_date": "2015-01-01", "to_date": "2024-12-31"}},
+    {"label": "performance", "key_label": "performance_rating", "group": "personal", "options": {}}
+]
+
+DataFakeGenerator(schema).many(3000).export("employees", "hr_data")
+```
+
+### Cryptocurrency Trading Platform
+
+```python
+schema = [
+    {"label": "trade_id", "key_label": "uuid_v4", "group": "basic", "options": {}},
+    {"label": "user_id", "key_label": "guid", "group": "basic", "options": {}},
+    {"label": "wallet_address", "key_label": "ethereum_address", "group": "crypto", "options": {}},
+    {"label": "btc_address", "key_label": "bitcoin_address", "group": "crypto", "options": {}},
+    {"label": "crypto", "key_label": "cryptocurrency_name", "group": "crypto", "options": {}},
+    {"label": "symbol", "key_label": "cryptocurrency_symbol", "group": "crypto", "options": {}},
+    {"label": "amount", "key_label": "normal_distribution", "group": "basic", "options": {"mean": 100, "standard_deviation": 50, "decimals": 8}},
+    {"label": "price_usd", "key_label": "money", "group": "commerce", "options": {"min": 0.01, "max": 50000, "currency": "USD"}},
+    {"label": "nft_token", "key_label": "nft_token_id", "group": "crypto", "options": {}},
+    {"label": "timestamp", "key_label": "datetime", "group": "basic", "options": {}}
+]
+
+DataFakeGenerator(schema).many(5000).export("crypto_trades", "blockchain")
+```
+
+### Education Management System
+
+```python
+schema = [
+    {"label": "student_id", "key_label": "sequence", "group": "basic", "options": {"start_at": 10000, "step": 1}},
+    {"label": "name", "key_label": "full_name", "group": "personal", "options": {}},
+    {"label": "email", "key_label": "email_address", "group": "it", "options": {}},
+    {"label": "major", "key_label": "college_major", "group": "education", "options": {}},
+    {"label": "gpa", "key_label": "gpa", "group": "education", "options": {}},
+    {"label": "grade_level", "key_label": "grade_level", "group": "education", "options": {}},
+    {"label": "semester", "key_label": "semester", "group": "education", "options": {}},
+    {"label": "classroom", "key_label": "classroom_number", "group": "education", "options": {"format": "Room"}},
+    {"label": "attendance", "key_label": "attendance_status", "group": "education", "options": {}},
+    {"label": "university", "key_label": "university", "group": "personal", "options": {}},
+    {"label": "enrollment_date", "key_label": "datetime", "group": "basic", "options": {}}
+]
+
+DataFakeGenerator(schema).many(1500).export("students", "education_data")
+```
+
+### IoT Sensor Data
+
+```python
+schema = [
+    {"label": "device_id", "key_label": "ulid", "group": "basic", "options": {}},
+    {"label": "device_type", "key_label": "iot_device_type", "group": "it", "options": {}},
+    {"label": "mac_address", "key_label": "mac_address", "group": "it", "options": {}},
+    {"label": "ip_address", "key_label": "ip_address_v4", "group": "it", "options": {}},
+    {"label": "location", "key_label": "city", "group": "location", "options": {}},
+    {"label": "temperature", "key_label": "temperature", "group": "basic", "options": {}},
+    {"label": "humidity", "key_label": "normal_distribution", "group": "basic", "options": {"mean": 60, "standard_deviation": 15, "decimals": 1}},
+    {"label": "battery", "key_label": "battery_level", "group": "it", "options": {}},
+    {"label": "status", "key_label": "custom_list", "group": "basic", "options": {"format": ["online", "offline", "maintenance", "error"]}},
+    {"label": "last_ping", "key_label": "datetime", "group": "basic", "options": {}}
+]
+
+DataFakeGenerator(schema).many(10000).export("iot_sensors", "sensor_data")
+```
+
+### Real Estate Listings
+
+```python
+schema = [
+    {"label": "listing_id", "key_label": "guid", "group": "basic", "options": {}},
+    {"label": "property_type", "key_label": "property_type", "group": "location", "options": {}},
+    {"label": "address", "key_label": "street_address", "group": "location", "options": {}},
+    {"label": "city", "key_label": "city", "group": "location", "options": {}},
+    {"label": "state", "key_label": "state", "group": "location", "options": {}},
+    {"label": "postal_code", "key_label": "postal_code", "group": "location", "options": {}},
+    {"label": "price", "key_label": "money", "group": "commerce", "options": {"min": 100000, "max": 2000000, "currency": "USD"}},
+    {"label": "bedrooms", "key_label": "number", "group": "basic", "options": {}},
+    {"label": "bathrooms", "key_label": "number", "group": "basic", "options": {}},
+    {"label": "area_sqft", "key_label": "normal_distribution", "group": "basic", "options": {"mean": 2000, "standard_deviation": 500, "decimals": 0}},
+    {"label": "listing_date", "key_label": "datetime", "group": "basic", "options": {}}
+]
+
+DataFakeGenerator(schema).many(2000).export("properties", "real_estate")
+```
+
+## 📋 Format-Specific Options Reference
+
+### Phone Formats
+
+```
+###-###-####
+(###) ###-####
+(### ### ####)
++# ### ### ####
++# (###) ###-####
++#-###-###-####
+#-(###)-###-####
+##########
+```
+
+### IBAN Region Groups
+
+```
+central_western_eu
+southern_eu
+nordic
+eastern_eu
+uk_islands
+middle_east
+africa
+asia
+```
+
+### Time Formats
+
+```
+24 Hour
+24 Hour w/seconds
+24 Hour w/millis
+12 Hour
+12 Hour w/seconds
+12 Hour w/millis
+```
+
+### Verification Code Lengths
+
+```
+4, 5, 6, 7, 8
+```
+
+### Shoe Size Types
+
+```
+US
+EU
+```
+
+### Tax ID Types
+
+```
+SSN
+EIN
+```
+
+### Credit Card Countries
+
+```
+Australia
+Canada
+```
+
+### Wind Speed Units
+
+```
+mph
+km/h
+m/s
+```
+
+### Classroom Number Formats
+
+```
+Room
+Lab
+Lecture
+```
+
+### Dimension Types
+
+```
+screen
+paper
+product
+```
+
+## 📦 Output Structure
+
+When exporting with all formats, your output directory will contain:
+
+```
+output/
+├── tablename.csv
+├── tablename.txt                 # Tab-delimited
+├── tablename.json
+├── tablename.sql
+├── tablename.cql
+├── tablename_firebase.json
+├── tablename.xlsx
+├── tablename.xml
+└── tablename_dbunit.xml
+└── tablename.parquet
+└── tablename.duckdb
+```
+
+## 🛠️ Development
+
+The project follows a modular architecture:
+
+```
+core/
+├── datafake_generator.py  # Main entry point
+├── base_generator.py      # Core generation logic
+└── exporters.py          # Format-specific exporters
+```
+
+## 🎯 Best Practices
+
+### 1. Use Appropriate Blank Percentages
+
+```python
+# Critical fields should never be blank
+{"label": "id", "key_label": "guid", "group": "basic", "options": {"blank_percentage": 0}}
+
+# Optional fields can have higher blank rates
+{"label": "middle_name", "key_label": "first_name", "group": "personal", "options": {"blank_percentage": 30}}
+```
+
+### 2. Leverage Templates for Complex Fields
+
+```python
+# Combine multiple fields into one
+{
+    "label": "full_address",
+    "key_label": "template",
+    "group": "advanced",
+    "options": {
+        "format": "{street_address}, {city}, {state} {postal_code}"
+    }
+}
+```
+
+### 3. Use Distributions for Realistic Data
+
+```python
+# Age distribution
+{
+    "label": "age",
+    "key_label": "normal_distribution",
+    "group": "basic",
+    "options": {
+        "mean": 35,
+        "standard_deviation": 12,
+        "decimals": 0
+    }
+}
+```
+
+### 4. Custom Lists for Domain-Specific Values
+
+```python
+{
+    "label": "priority",
+    "key_label": "custom_list",
+    "group": "basic",
+    "options": {
+        "format": ["P0-Critical", "P1-High", "P2-Medium", "P3-Low", "P4-Trivial"]
+    }
+}
+```
+
+### 5. Sequential IDs with Custom Patterns
+
+```python
+{
+    "label": "invoice_num",
+    "key_label": "sequence",
+    "group": "basic",
+    "options": {
+        "start_at": 1000,
+        "step": 1,
+        "repeat": 1,
+        "restart_at": 9999
+    }
+}
+```
+
+## 🔍 Advanced Features
+
+### Statistical Analysis Ready
+
+Generate data that follows real-world statistical patterns:
+
+```python
+# Normal distribution for heights
+{"key_label": "normal_distribution", "options": {"mean": 170, "standard_deviation": 10}}
+
+# Poisson for event counts
+{"key_label": "poisson_distribution", "options": {"mean": 5}}
+
+# Exponential for wait times
+{"key_label": "exponential_distribution", "options": {"lambda": 0.5}}
+```
+
+### Regex-Based Generation
+
+Create custom formats with regular expressions:
+
+```python
+{
+    "label": "product_code",
+    "key_label": "regular_expression",
+    "group": "advanced",
+    "options": {
+        "format": "[A-Z]{2}[0-9]{4}-[A-Z]{3}"  # Example: AB1234-XYZ
+    }
+}
+```
+
+### JSON Nested Structures
+
+Generate complex nested data:
+
+```python
+{
+    "label": "metadata",
+    "key_label": "json_array",
+    "group": "advanced",
+    "options": {
+        "min_elements": 1,
+        "max_elements": 5
+    }
+}
+```
+
+## 🚨 Common Pitfalls to Avoid
+
+1. **Don't forget blank_percentage**: All options objects should include it
+2. **Date format consistency**: Ensure date ranges are valid (from_date < to_date)
+3. **Currency matching**: Use appropriate currency codes with money fields
+4. **Phone format**: Choose formats appropriate for your region
+5. **Sequence restarts**: Ensure restart_at > start_at
+
+## 📊 Performance Tips
+
+- Generate data in batches for very large datasets (>100k records)
+- Use specific export formats rather than all formats to save time
+- Leverage statistical distributions instead of random for more realistic data
+- Use sequences for IDs rather than GUIDs for better performance
+
+## 📄 License
+
+MIT
+
+## 🙏 Acknowledgments
+
+- Data sources: CMS.gov (ICD codes)
+- Built with ❤️ by Iki
+
+## 📞 Support
+
+- Email: ikigamidevs@gmail.com
+
+---
+
+**DataFakeGenerator** - Making test data generation simple and powerful
