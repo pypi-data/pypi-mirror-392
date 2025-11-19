@@ -1,0 +1,83 @@
+Metadata-Version: 2.4
+Name: openkitx403-agent
+Version: 1.0.0
+Summary: AI Agent toolkit for OpenKitx403 Solana wallet authentication
+License: MIT
+Keywords: solana,blockchain,wallet,authentication,ai,agent,langchain,web3
+Author: OpenKitx403
+Author-email: support@openkitx403.dev
+Requires-Python: >=3.8,<4.0
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Classifier: Topic :: Security :: Cryptography
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Provides-Extra: langchain
+Requires-Dist: httpx (>=0.24.0,<0.25.0)
+Requires-Dist: openkitx403-client (>=0.1.5,<0.2.0)
+Requires-Dist: pydantic (>=2.0.0,<3.0.0)
+Project-URL: Bug Tracker, https://github.com/openkitx403/openkitx403/issues
+Project-URL: Changelog, https://github.com/openkitx403/openkitx403/blob/main/CHANGELOG.md
+Project-URL: Documentation, https://openkitx403.dev/docs
+Project-URL: Homepage, https://openkitx403.dev
+Project-URL: Repository, https://github.com/openkitx403/openkitx403
+Description-Content-Type: text/markdown
+
+# openkitx403-agent
+
+AI Agent toolkit for OpenKitx403 Solana wallet authentication.
+
+## Installation
+
+pip install openkitx403-agent
+
+With LangChain support
+pip install openkitx403-agent[langchain]
+
+
+
+## Usage
+
+### Standalone Agent
+
+from solders.keypair import Keypair
+from openkitx403_agent import OpenKit403Agent, AgentExecuteOptions
+
+keypair = Keypair()
+agent = OpenKit403Agent(keypair, auto_connect=True)
+
+result = await agent.execute(
+AgentExecuteOptions(resource="https://api.example.com/protected")
+)
+print(result)
+
+
+
+### LangChain Integration
+
+from solders.keypair import Keypair
+from openkitx403_agent import SolanaWalletAuthTool
+from langchain.agents import initialize_agent, AgentType
+from langchain.llms import OpenAI
+
+keypair = Keypair()
+tools = [SolanaWalletAuthTool(keypair)]
+llm = OpenAI(temperature=0)
+
+agent = initialize_agent(tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION)
+result = agent.run("Connect wallet and fetch profile from https://api.example.com/profile")
+
+
+
+## API
+
+See [full documentation](https://openkitx403.dev).
+
