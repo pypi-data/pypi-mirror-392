@@ -1,0 +1,43 @@
+# Protected Files - DO NOT MODIFY
+#
+# This list contains critical infrastructure files that agents must NEVER modify.
+# Any attempt to commit changes to these files will be blocked by pre-commit-safety.sh
+#
+# Format: One file/pattern per line
+# - Exact paths: justfile
+# - Glob patterns: .github/workflows/*
+# - Comments: Lines starting with #
+#
+# Last updated: 2025-01-14
+
+# Build and release infrastructure
+justfile
+scripts/release.sh
+cliff.toml
+
+# GitHub Actions CI/CD
+.github/workflows/*
+.github/workflows/test.yml
+.github/workflows/publish.yml
+
+# Auto-generated changelog
+CHANGELOG.md
+
+# Core project configuration (except dependencies with approval)
+pyproject.toml
+
+# Git configuration
+.gitignore
+.gitattributes
+
+# Security
+.github/SECURITY.md
+
+# CCPM plugin itself (agents don't modify their own code)
+ccpm/rules/protected-files.txt
+ccpm/hooks/pre-commit-safety.sh
+ccpm/hooks/pre-flight-check.sh
+ccpm/hooks/post-flight-check.sh
+
+# Release notes (temporary files during release)
+.release-notes-*.md
