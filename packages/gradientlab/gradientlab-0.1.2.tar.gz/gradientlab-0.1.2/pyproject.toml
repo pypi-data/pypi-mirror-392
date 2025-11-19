@@ -1,0 +1,37 @@
+[project]
+name = "gradientlab"
+version = "0.1.2"
+description = "A lab where gradients flow and models go to prod."
+readme = "README.md"
+authors = [
+    { name = "Mauro Sciancalepore", email = "maurosciancalepore98@gmail.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "accelerate>=1.10.1",
+    "datasets>=4.2.0",
+    "ipykernel>=7.0.1",
+    "matplotlib>=3.10.7",
+    "pydantic<2.12",
+    "setuptools>=80.9.0",
+    "torch>=2.9.0",
+    "torchvision>=0.24.0",
+    "trackio>=0.6.0",
+    "transformers>=4.57.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.3,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+wheel-exclude = ["data", ".env"]
+source-exclude = ["data", ".env"]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.0.1",
+]
+fla = [
+    "flash-linear-attention>=0.4.0"
+]
