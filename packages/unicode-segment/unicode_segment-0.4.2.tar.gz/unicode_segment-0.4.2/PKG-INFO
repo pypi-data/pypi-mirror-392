@@ -1,0 +1,123 @@
+Metadata-Version: 2.4
+Name: unicode-segment
+Version: 0.4.2
+Summary: Segment text with Unicode TR29-compliant segmenters.
+Author-email: Lionel Rowe <lionel.rowe@gmail.com>
+Maintainer-email: Lionel Rowe <lionel.rowe@gmail.com>
+License: MIT License
+        
+        Copyright (c) 2025 Lionel Rowe
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Project-URL: Homepage, https://github.com/lionel-rowe/unicode-segment
+Project-URL: Bug Reports, https://github.com/lionel-rowe/unicode-segment/issues
+Project-URL: Source, https://github.com/lionel-rowe/unicode-segment/
+Keywords: unicode,text-segmentation,segmenter,tr29,sentence,i18n
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Classifier: Topic :: Text Processing
+Classifier: Topic :: Text Processing :: General
+Classifier: Topic :: Software Development :: Internationalization
+Classifier: Topic :: Software Development :: Localization
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE.txt
+Requires-Dist: regex>=2025.11.3
+Dynamic: license-file
+
+# Unicode Segment
+
+Segment text with Unicode [TR29](https://www.unicode.org/reports/tr29/)-compliant segmenters.
+
+Currently segmenters are available for grapheme clusters (`GraphemeSegmenter`), words (`WordSegmenter`), and sentences (`SentenceSegmenter`).
+
+Segmenters pass all tests from the Unicode Character Database (UCD) test data files as of Unicode 17.0.0, but do not currently support locale-specific tailoring.
+
+## Usage
+
+```py
+from unicode_segment import WordSegmenter, SentenceSegmenter
+
+segmenter = SentenceSegmenter()
+
+text = (
+    "“How do you know I’m mad?”, said Alice. “You must be,” said the Cat, "
+    "“or you wouldn’t have come here.”"
+)
+assert list(segmenter.segment(text)) == [
+    (0, "“How do you know I’m mad?”, said Alice. "),
+    (40, "“You must be,” said the Cat, “or you wouldn’t have come here.”"),
+]
+
+text = (
+    "此次学术会议汇聚了来自世界各地的茂盛植物被精心布置在各个工位之间无缝穿梭，相互配合，确保珍稀物种的"
+    "保存和景观似乎都闪烁着倒影。潮湿的泥土和新鲜雨水的抚慰，提醒我们注意自然循环中固有的平和节奏。随着大"
+    "幕拉开，剧院的灯光迎接着夜晚的到来，郊区生活的平静和安宁。"
+)
+assert list(segmenter.segment(text)) == [
+    (
+        0,
+        "此次学术会议汇聚了来自世界各地的茂盛植物被精心布置在各个工位之间无缝穿梭，相互配合，确保珍稀"
+        "物种的保存和景观似乎都闪烁着倒影。",
+    ),
+    (
+        63,
+        "潮湿的泥土和新鲜雨水的抚慰，提醒我们注意自然循环中固有的平和节奏。",
+    ),
+    (
+        96,
+        "随着大幕拉开，剧院的灯光迎接着夜晚的到来，郊区生活的平静和安宁。",
+    ),
+]
+
+text = (
+    "ሻጮች በሚያቀርቡት ድምፅ ሆኖ አገልግሏል፣ ይህም በረዶው ከቀለጠ በኋላ ጎብኚዎች ምቹ ጎጆ ከውጭው ዓለም "
+    "ሙሉ በሙሉ በወቅቱ አስማት ያበራ ይመስላል፣ በተጋገሩ ደስታዎች ላይ ተዘርግቷል ፣ የጨዋታ ድንኳኖች ተሞልተው "
+    "እያንዳንዱ ክፍል የክህሎት እና ተግሣጽ፣ በስብሰባው ላይ አፅንዖት ይሰጣል፣ ያለፈውን፣ ሸራዎችን እያስተካከሉ "
+    "እና ቅዝቃዜን ሰጥቷል። የተወሳሰቡ ቅርጻ ቅርጾች እና ከአዲስ የተጠበሰ ዳቦ መዓዛ ተሰብሳቢዎቹ እንዲዝናኑ "
+    "ይጋብዛሉ። አየሩ በሳር፣ በሁሉም ዝርዝር ውስጥ ፣በፈጠራ እና በእውቀት መሬቱን ይንከባከባሉ, ዲዛይኑ "
+    "በታማኝነት መፈጸሙን አረጋግጠዋል."
+)
+assert list(segmenter.segment(text)) == [
+    (
+        0,
+        "ሻጮች በሚያቀርቡት ድምፅ ሆኖ አገልግሏል፣ ይህም በረዶው ከቀለጠ በኋላ ጎብኚዎች ምቹ ጎጆ ከውጭው "
+        "ዓለም ሙሉ በሙሉ በወቅቱ አስማት ያበራ ይመስላል፣ በተጋገሩ ደስታዎች ላይ ተዘርግቷል ፣ የጨዋታ "
+        "ድንኳኖች ተሞልተው እያንዳንዱ ክፍል የክህሎት እና ተግሣጽ፣ በስብሰባው ላይ አፅንዖት ይሰጣል፣ "
+        "ያለፈውን፣ ሸራዎችን እያስተካከሉ እና ቅዝቃዜን ሰጥቷል። ",
+    ),
+    (
+        219,
+        "የተወሳሰቡ ቅርጻ ቅርጾች እና ከአዲስ የተጠበሰ ዳቦ መዓዛ ተሰብሳቢዎቹ እንዲዝናኑ ይጋብዛሉ። ",
+    ),
+    (
+        278,
+        "አየሩ በሳር፣ በሁሉም ዝርዝር ውስጥ ፣በፈጠራ እና በእውቀት መሬቱን ይንከባከባሉ, ዲዛይኑ በታማኝነት መፈጸሙን "
+        "አረጋግጠዋል.",
+    ),
+]
+```
