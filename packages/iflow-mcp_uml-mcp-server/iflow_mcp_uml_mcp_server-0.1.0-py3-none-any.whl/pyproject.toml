@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "iflow-mcp_uml-mcp-server"
+version = "0.1.0"
+description = "UML diagram generation tool based on MCP (Model Context Protocol)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1.2.0",
+    "requests>=2.28.0",
+    "python-dateutil>=2.8.2"
+]
+
+[project.scripts]
+iflow-mcp_uml-mcp-server = "uml_mcp_server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
