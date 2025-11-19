@@ -1,0 +1,58 @@
+Metadata-Version: 2.4
+Name: eoxelements
+Version: 0.2.3
+Summary: Jupyter notebook wrapper for EOxElements web components
+Author-email: EOX <silvester.pari@eox.at>
+License-Expression: MIT
+Project-URL: Homepage, https://github.com/EOX-A/EOxElements-Jupyter
+Project-URL: Issues, https://github.com/EOX-A/EOxElements-Jupyter/issues
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: anywidget>=0.9.0
+Requires-Dist: ipywidgets>=8.0.0
+Requires-Dist: traitlets
+Dynamic: license-file
+
+# EOxElements Jupyter
+
+A minimal Python package for using [EOxElements web components](https://github.com/EOX-A/EOxElements/) inside Jupyter Notebooks. Inspired by ipyleaflet and ipyopenlayers, this package provides a simple API for inclduing EOxElements.
+
+## Features
+- Easy-to-use Python wrappers for EOxElements web components
+- Version pinning for JS components via CDN
+- Designed for use in Jupyter Notebooks
+
+## Installation
+
+```bash
+pip install eoxelements
+```
+
+> **Note:** In Jupyter, you might need to restart the kernel/server before continuing after installing.
+
+## Usage
+
+```python
+from eoxelements import EOxMapWithControl
+
+# Define map layers
+map_layers = [
+    {
+        "type": "Tile",
+        "properties": {"id": "osm", "title": "OSM"},
+        "source": {"type": "OSM"},
+    }
+]
+
+# Create and display the widget
+m = EOxMapWithControl(layers=map_layers)
+display(m)
+```
+
+## Development & Release Automation
+- JS component versions are pinned in `eoxelements/_version.py` and updated via CI/CD.
+- Publishing to PyPI is automated using GitHub Actions (`.github/workflows/publish.yml`).
+
+## License
+MIT
