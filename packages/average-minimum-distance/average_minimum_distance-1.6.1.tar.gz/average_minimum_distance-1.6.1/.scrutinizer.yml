@@ -1,0 +1,32 @@
+checks:
+    python:
+        code_rating: true
+        duplicate_code: true
+
+build:
+    environment:
+        python:
+            version: "3.9"
+    dependencies:
+        override:
+            - "pip install -r requirements.txt"
+            - "pip install pytest"
+            - "pip install ."
+    nodes:
+        analysis:
+            tests:
+                override:
+                    - py-scrutinizer-run
+                    - 
+                        command: pylint-run
+                        use_website_config: false
+
+        coverage:
+            tests:
+                override: 
+                    - command: 'pytest'
+
+filter:
+    excluded_paths:
+        - '*/docs/*'
+        - '*/tests/*'
