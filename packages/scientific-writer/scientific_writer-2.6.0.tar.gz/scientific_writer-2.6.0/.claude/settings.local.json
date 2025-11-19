@@ -1,0 +1,48 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Skill(research-lookup)",
+      "Bash(python research_lookup.py:*)",
+      "WebSearch",
+      "Bash(pdflatex:*)",
+      "Bash(bibtex:*)",
+      "Skill(peer-review)",
+      "Skill(research-grants)",
+      "Skill(citation-management)",
+      "Skill(clinical-reports)",
+      "Skill(document-skills)",
+      "Skill(hypothesis-generation)",
+      "Skill(latex-posters)",
+      "Skill(literature-review)",
+      "Skill(markitdown)",
+      "Skill(paper-2-web)",
+      "Skill(scholar-evaluation)",
+      "Skill(scientific-critical-thinking)",
+      "Skill(scientific-schematics)",
+      "Skill(scientific-writing)",
+      "Skill(treatment-plans)",
+      "Skill(venue-templates)",
+      "Bash(python /Users/vinayak/Documents/claude-scientific-writer/.claude/skills/research-lookup/research_lookup.py \"AI applications in scientific research drug discovery materials science 2024\" --force-model pro)",
+      "Bash(python /Users/vinayak/Documents/claude-scientific-writer/.claude/skills/research-lookup/research_lookup.py:*)",
+      "Bash(python create_presentation.py:*)",
+      "Bash(libreoffice:*)",
+      "Bash(python3 -c \"from pptx import Presentation; prs = Presentation(''/Users/vinayak/Documents/claude-scientific-writer/paper_outputs/20241113_ai_science_space_market/drafts/ai_science_space_presentation.pptx''); print(f''✅ Presentation valid: {len(prs.slides)} slides''); [print(f''  Slide {i+1}: {prs.slides[i].shapes[0].text if prs.slides[i].shapes else \"\"(content slide)\"\"}'') for i in range(min(3, len(prs.slides)))]\")",
+      "Bash(tree:*)"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Evaluate if Claude should stop. Check if all tasks are complete."
+          }
+        ]
+      }
+    ]
+  }
+}
