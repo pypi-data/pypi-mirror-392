@@ -1,0 +1,65 @@
+[project]
+name = "elite-relay"
+version = "0.2.1"
+description = "Elite: Dangerous Journal Event Handler"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "jmespath>=1.0.1",
+    "orjson>=3.11.4",
+    "pydantic>=2.12.4",
+    "pydantic-settings[yaml]>=2.11.0",
+    "pyperclip>=1.11.0",
+    "requests>=2.32.5",
+]
+
+[dependency-groups]
+dev = [
+    "black>=25.9.0",
+    "cx-freeze>=8.4.1",
+    "ipython>=9.7.0",
+    "isort>=7.0.0",
+    "mypy>=1.18.2",
+    "pytest>=9.0.1",
+    "pytest-cov>=7.0.0",
+    "pytest-mock>=3.15.1",
+    "types-jmespath>=1.0.2.20250809",
+    "types-pyperclip>=1.9.0.20250801",
+    "types-requests>=2.32.4.20250913",
+]
+
+[project.scripts]
+elite-relay = "elite_relay.main:run"
+
+[tool.uv]
+package = true
+
+[tool.cxfreeze]
+executables = [
+    {script = "elite_relay/main.py", base = "console"}
+]
+
+[tool.isort]
+py_version=313
+profile = "black"
+combine_as_imports = true
+
+[tool.black]
+target_version = ['py313']
+exclude = '(\.eggs|\.git|\.hg|.cache|__pycache__|\.venv|build|dist)'
+skip-string-normalization = true
+
+[tool.mypy]
+python_version = "3.13"
+no_namespace_packages = true
+no_implicit_reexport = true
+follow_imports = "silent"
+warn_redundant_casts = true
+warn_unused_configs = true
+implicit_reexport = true
+cache_dir = ".cache/mypy/"
+disable_error_code = ['misc', 'empty-body', 'annotation-unchecked']
+plugins = ['pydantic.mypy']
+
+[tool.pytest.ini_options]
+addopts = "-s --cov=elite_relay"
