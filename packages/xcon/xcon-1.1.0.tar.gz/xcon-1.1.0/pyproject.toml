@@ -1,0 +1,91 @@
+[tool.poetry]
+name = "xcon"
+version = "1.1.0"
+description = "Dynamic configuration retreiver."
+authors = ["Josh Orr <josh@orr.blue>"]
+packages = [{include = "xcon"}]
+readme = "Readme.md"
+repository = "https://github.com/xyngular/py-xcon"
+keywords = ["settings", "configuration", "lazy", "boto", "aws", "secrets manager", "param store", "ssm"]
+classifiers = [
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: The Unlicense (Unlicense)"
+]
+
+
+
+[tool.poetry.dependencies]
+python = "^3.11"
+xbool = "^1.1.0"
+xloop = "^1.1.0"
+xsentinels = "^1.2.2"
+xinject = "^1.4.1"
+xboto = "^1.1.1"
+xsettings = "^1.4.0"
+ciso8601 = "^2.3.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest-ordering = "^0.6"
+tomlkit = "^0"
+pdoc3 = "*"
+black = {version = "*", allow-prereleases = true}
+moto = {version = "*", extras = ["dynamodb2", "ssm", "secretsmanager"] }
+boto3-stubs = { extras = ["essential"], version = "*" }
+mkdocstrings = { extras = ["python"], version = "^0" }
+mkdocs-autorefs = "^1"
+mkdocs-git-revision-date-plugin = "^0"
+mkdocs = "^1.4.2"
+mkdocs-material = "^9.0.12"
+pytest = "^8"
+mike = "^2"
+pytest-mock = "^3.10.0"
+pytest-order = "^1.0.1"
+pytest-pycodestyle = "^2.3.1"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+
+# By default, reuse db schema
+# (speeds up unit test starts after first unit test run)
+# If test-db schmea gets messed up, drop `--reuse-db`
+# and it will recreate db next time you run unit tests.
+addopts = "--verbose --pycodestyle"
+
+testpaths = ["tests", "xcon"]
+python_files = "tests.py test_*.py *_tests.py tests/*"
+norecursedirs = "lib/* tests/scripts .serverless .eggs dist/* node_modules"
+
+[tool.poetry.plugins]
+pytest11 = { xcon_pytest_plugin = "xcon.pytest_plugin"}
+
+[tool.custom.xpublish]
+extra-module-docs = ['xsentinels', 'xloop', 'xinject', 'xbool', 'xsettings']
+
+[tool.black]
+line-length = 119
+target_version = ['py38']
+skip-string-normalization = 1
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+  | foo.py           # also separately exclude a file named foo.py in
+                     # the root of the project
+)
+'''
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
