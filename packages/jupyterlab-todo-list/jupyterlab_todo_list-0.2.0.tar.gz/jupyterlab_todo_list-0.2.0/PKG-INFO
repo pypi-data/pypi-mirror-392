@@ -1,0 +1,127 @@
+Metadata-Version: 2.4
+Name: jupyterlab_todo_list
+Version: 0.2.0
+Summary: A JupyterLab side panel for to-dos with checkbox import from notebooks.
+Project-URL: Homepage, https://github.com/xlt208/jupyterlab-todo-list
+Project-URL: Bug Tracker, https://github.com/xlt208/jupyterlab-todo-list/issues
+Project-URL: Repository, https://github.com/xlt208/jupyterlab-todo-list.git
+Author-email: xlt208 <lingtao.xie0@gmail.com>
+License: BSD 3-Clause License
+        
+        Copyright (c) 2025, xlt208
+        All rights reserved.
+        
+        Redistribution and use in source and binary forms, with or without
+        modification, are permitted provided that the following conditions are met:
+        
+        1. Redistributions of source code must retain the above copyright notice, this
+           list of conditions and the following disclaimer.
+        
+        2. Redistributions in binary form must reproduce the above copyright notice,
+           this list of conditions and the following disclaimer in the documentation
+           and/or other materials provided with the distribution.
+        
+        3. Neither the name of the copyright holder nor the names of its
+           contributors may be used to endorse or promote products derived from
+           this software without specific prior written permission.
+        
+        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+        AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+        IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+        DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+        FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+        DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+        SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+        CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+        OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+        OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+License-File: LICENSE
+Keywords: jupyter,jupyterlab,jupyterlab-extension
+Classifier: Framework :: Jupyter
+Classifier: Framework :: Jupyter :: JupyterLab
+Classifier: Framework :: Jupyter :: JupyterLab :: 4
+Classifier: Framework :: Jupyter :: JupyterLab :: Extensions
+Classifier: Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Requires-Python: >=3.9
+Requires-Dist: jupyter-server>=2.0.0
+Description-Content-Type: text/markdown
+
+# jupyterlab_todo_list
+
+[![Build Status](https://github.com/xlt208/jupyterlab-todo-list/workflows/Build/badge.svg)](https://github.com/xlt208/jupyterlab-todo-list/actions/workflows/build.yml)
+
+Keep lightweight to-dos inside JupyterLab. This extension adds a persistent side panel that lets you add, check off, and delete tasks while working in notebooks. Items are cached locally and synced to a small REST endpoint so they follow you between sessions.
+
+## Requirements
+
+- JupyterLab >= 4.0.0
+
+## Install
+
+```bash
+pip install jupyterlab_todo_list
+```
+
+This installs both the Python server extension (for storing todos under your Jupyter data directory) and the prebuilt frontend bundle.
+
+## Use
+
+1. Launch JupyterLab.
+2. Open the command palette or launcher and run **Open To-Do List**.
+3. Add tasks in the left side panel. Items are saved automatically.
+
+The panel reopens on the next Lab session and restores your last task list.
+
+## Uninstall
+
+```bash
+pip uninstall jupyterlab_todo_list
+```
+
+## Contributing
+
+### Development install
+
+The `jlpm` command is JupyterLab's pinned version of [Yarn](https://yarnpkg.com/) and is already bundled with Lab. NodeJS (>=18) must be available on your PATH.
+
+```bash
+git clone https://github.com/xlt208/jupyterlab-todo-list.git
+cd jupyterlab_todo_list
+
+python -m venv .venv
+source .venv/bin/activate
+pip install --editable ".[test]"
+
+jlpm install
+jlpm build
+jupyter labextension develop . --overwrite
+```
+
+During development you can keep the TS build and Lab running in watch mode:
+
+```bash
+jlpm watch   # terminal 1
+jupyter lab  # terminal 2
+```
+
+To undo the editable install run `pip uninstall jupyterlab_todo_list` and remove the `jupyterlab-todo-list` symlink reported by `jupyter labextension list`.
+
+### Testing the extension
+
+```bash
+jlpm test          # Jest unit tests
+jlpm lint:check    # prettier + eslint + stylelint
+jlpm playwright test # UI tests (see ui-tests/README.md for setup)
+```
+
+### Packaging the extension
+
+See [RELEASE](RELEASE.md)
