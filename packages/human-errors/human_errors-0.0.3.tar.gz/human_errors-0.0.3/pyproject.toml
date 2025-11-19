@@ -1,0 +1,84 @@
+[project]
+name = "human-errors"
+version = "0.0.3"
+description = "everyone makes mistakes, show the errors to them "
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "NSPC911" }]
+keywords = ["exception", "config", "json", "yaml", "toml"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Utilities",
+  "Topic :: File Formats",
+  "Topic :: File Formats :: JSON",
+  "Topic :: Text Processing"
+]
+dependencies = [
+    "poethepoet>=0.37.0",
+    "rich>=14.2.0",
+]
+
+[project.scripts]
+human-errors = "human_errors.parse_file:main"
+
+[project.urls]
+Issues = "https://github.com/NSPC911/human-errors/issues"
+Source = "https://github.com/NSPC911/human-errors"
+
+[build-system]
+requires = ["uv_build>=0.9.5,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+toml = [
+    "toml>=0.9.0",
+]
+orjson = [
+    "orjson>=3.10.0",
+]
+yaml = [
+    "pyyaml>=6.0.0",
+]
+dev = [
+    "poethepoet>=0.37.0",
+    "ruff>=0.14.2",
+    "ty>=0.0.1a24",
+]
+
+[tool.ruff.lint]
+select = [
+  "ASYNC251",
+  "ANN",
+  "COM819",
+  "C400",
+  "DOC",
+  "D404",
+  "E",
+  "F",
+  "I",
+  "N801", "N802", "N805",
+  "PLE1142",
+  "Q",
+  "SIM",
+  "TD",
+  "W",
+]
+ignore = ["W505", "E501", "ANN002", "ANN003", "TD002", "TD003"]
+preview = true
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+preview = true
+
+[tool.ty.rules]
+possibly-missing-import = "ignore"
+unresolved-reference = "ignore" # handled by ruff
+unresolved-attribute = "ignore"
+
+[tool.poe.tasks]
+run = "human-errors"
