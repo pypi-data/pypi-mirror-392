@@ -1,0 +1,53 @@
+Metadata-Version: 2.4
+Name: energnn
+Version: 0.1.0
+Summary: A Graph Neural Network library for real-life energy networks.
+Author-email: Balthazar DONON <balthazar.donon@rte-france.com>, Geoffroy JAMGOTCHIAN <geoffroy.jamgotchian@rte-france.com>, Hugo KULESZA <hugo.kulesza@rte-france.com>, Steve NOUATIN <steve.nouatin_externe@rte-france.com>
+License-File: LICENSE
+Requires-Python: >=3.10
+Requires-Dist: chex==0.1.87
+Requires-Dist: cloudpickle<3
+Requires-Dist: diffrax==0.6.0
+Requires-Dist: flatdict==4.0.1
+Requires-Dist: flax==0.8.5
+Requires-Dist: furo==2024.8.6
+Requires-Dist: hydra-core==1.3.2
+Requires-Dist: jax==0.4.30
+Requires-Dist: neptune-scale==0.13.0
+Requires-Dist: neptune==1.13.0
+Requires-Dist: optax>=0.2.3
+Requires-Dist: pandas>=2.2.2
+Requires-Dist: sphinx==8.1.3
+Requires-Dist: tqdm==4.67.0
+Provides-Extra: gpu
+Requires-Dist: jax[cuda12]; extra == 'gpu'
+Description-Content-Type: text/markdown
+
+# EnerGNN
+A Graph Neural Network library for real-life energy networks.
+
+## Build
+
+To build this package locally, you can use one of the following commands at the root of the project:
+
+```cmd
+uv sync
+```
+
+```cmd
+uv sync --extra gpu
+```
+
+The first one will install the `energnn` package with only CPU support.
+
+Use the second one to also install the GPU extra dependencies (obtained from `jax[cuda12]`).
+
+## Documentation
+
+To build and access the documentation, run the following:
+
+```shell
+cd docs
+make html
+open _build/html/index.html
+```
