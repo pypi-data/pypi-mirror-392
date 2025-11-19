@@ -1,0 +1,95 @@
+Metadata-Version: 2.4
+Name: roboherd
+Version: 0.1.13
+Summary: A Fediverse bot framework
+Project-URL: Documentation, https://bovine.codeberg.page/roboherd/
+Project-URL: Repository, https://codeberg.org/bovine/roboherd
+Requires-Python: >=3.11
+Requires-Dist: almabtrieb>=0.2
+Requires-Dist: apscheduler>=3.11.0
+Requires-Dist: click>=8.1.8
+Requires-Dist: cron-descriptor>=1.4.5
+Requires-Dist: dynaconf>=3.2.6
+Requires-Dist: fast-depends>=3.0.0
+Requires-Dist: pydantic==2.12.3
+Requires-Dist: tomli-w>=1.1.0
+Provides-Extra: amqp
+Requires-Dist: almabtrieb[amqp]>=0.2.8; extra == 'amqp'
+Provides-Extra: bovine
+Requires-Dist: bovine>=0.5.15; extra == 'bovine'
+Requires-Dist: markdown>=3.7; extra == 'bovine'
+Provides-Extra: dev
+Requires-Dist: aiohttp>=3.11.12; extra == 'dev'
+Requires-Dist: watchfiles>=1.0.4; extra == 'dev'
+Provides-Extra: mqtt
+Requires-Dist: almabtrieb[mqtt]>=0.2.8; extra == 'mqtt'
+Description-Content-Type: text/markdown
+
+# Roboherd
+
+Roboherd is a framework for building Fediverse bots
+using the [Cattle Drive Protocol](https://bovine.codeberg.page/cattle_grid/cattle_drive/).
+
+For more information, see the [documentation](https://bovine.codeberg.page/roboherd/) or the [repository](https://codeberg.org/bovine/roboherd/).
+
+## Developping with cattle_grid
+
+In your catle_grid `config` directory add a roboherd user, e.g.
+a file `testing.toml` with content
+
+```toml
+[testing]
+enable = true
+
+[[testing.accounts]]
+name = "herd"
+password = "pass"
+permissions = ["admin"]
+```
+
+Configure roboherd via `roboherd.toml`, e.g.
+
+```toml
+base_url = "http://abel"
+connection_string = "ws://herd:pass@localhost:3000/ws/"
+
+[cow.rooster]
+bot = "roboherd.examples.rooster:bot"
+```
+
+This will trigger a periodic message to cattle_grid.
+
+### nginx for cattle_grid
+
+The nginx in the `cattle_grid` configuration should forward the path `/ws/` to
+rabbitmq (supporting mqtt over websockets)
+
+```nginx
+server {
+    listen 80;
+    
+    location /ws/ {
+        proxy_pass http://rabbitmq:15675;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_read_timeout 86400; # neccessary to avoid websocket timeout disconnect
+        proxy_send_timeout 86400; # neccessary to avoid websocket timeout disconnect
+        proxy_redirect off;
+        proxy_buffering off;
+    }
+}
+```
+
+similarly `nginx` should forward port 80 to 3000 (in the docker compose file).
+
+## BDD Tests
+
+Start the pasture currently from containers. Run a runner container via
+
+```bash
+docker run --rm -it -e UV_PROJECT_ENVIRONMENT=/tmp/venv\
+    -v .:/app --workdir /app\
+    --network fediverse-pasture\
+    ghcr.io/astral-sh/uv:alpine /bin/sh
+```
