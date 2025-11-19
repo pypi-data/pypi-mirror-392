@@ -1,0 +1,73 @@
+Metadata-Version: 2.4
+Name: web-file-uploader
+Version: 0.1.1
+Summary: A FastAPI web file uploader
+Author-email: Derek Hsu <derekhsu@hotmail.com>
+License: MIT
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Framework :: FastAPI
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: fastapi
+Requires-Dist: uvicorn[standard]
+Requires-Dist: python-multipart
+
+# Web File Uploader
+
+一個使用 FastAPI 建構的簡單網頁檔案上傳器。
+
+## 安裝 uv
+
+如果尚未安裝 uv，請先安裝：
+
+```bash
+# 使用 pip 安裝 uv
+pip install uv
+
+# 或使用官方安裝腳本
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+## 開發和除錯
+
+### 使用虛擬環境開發
+
+1. 安裝依賴到現有的虛擬環境：
+   ```bash
+   cd web-file-uploader
+   & ..\venv\Scripts\Activate.ps1
+   uv pip install -e .
+   ```
+
+2. 啟動開發伺服器（支援自動重新載入）：
+   ```bash
+   uvicorn main:app --reload --host 0.0.0.0 --port 8000
+   ```
+
+### 使用 uvx 部署
+
+在專案目錄中執行：
+
+```bash
+uvx --from . web-file-uploader
+```
+
+這將安裝依賴並啟動 FastAPI 伺服器在 http://localhost:8000
+
+## API 端點
+
+- `GET /`: 歡迎訊息和 API 文檔鏈接
+- `POST /upload`: 上傳檔案（支援 txt, pdf, jpg, jpeg, png, gif, zip）
+- `GET /files`: 列出已上傳的檔案
+- `DELETE /files/{filename}`: 刪除指定檔案
+
+## API 文檔
+
+啟動伺服器後，訪問 `http://localhost:8000/docs` 查看完整的互動式 API 文檔。
