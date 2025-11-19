@@ -1,0 +1,273 @@
+# Web Search MCP Server
+
+A Model Context Protocol (MCP) server that provides utility tools for performing web searches via APIs. Supports multiple search providers including Google, Bing, DuckDuckGo, SerpAPI, Serply, SearXNG, and Tavily with configurable result filtering.
+
+## Features
+
+- **Multiple Search Providers**: Support for 7+ search providers with unified interface
+- **Structured Output**: Returns structured JSON data for programmatic consumption
+- **Provider Fallbacks**: Automatic fallback to alternative providers on failure
+- **Flexible Configuration**: Environment-based configuration with provider-specific settings
+- **Rate Limiting**: Built-in rate limiting and retry logic
+- **Error Handling**: Comprehensive error handling with detailed error information
+- **Type Safety**: Full type hints and Pydantic validation
+
+## Supported Search Providers
+
+### 1. Google Custom Search (`google`)
+- **API**: Google Custom Search API
+- **Required**: `GOOGLE_SEARCH_API_KEY`, `GOOGLE_CSE_ID`
+- **Free Tier**: 100 searches/day
+
+### 2. Bing Search (`bing`)
+- **API**: Microsoft Bing Search API
+- **Required**: `BING_SEARCH_API_KEY`
+- **Features**: Web and news search
+
+### 3. DuckDuckGo (`duckduckgo`)
+- **API**: DuckDuckGo Instant Answer API
+- **Required**: None (public API)
+- **Features**: Privacy-focused search
+
+### 4. SerpAPI (`serpapi`)
+- **API**: SerpAPI for Google results
+- **Required**: `SERPAPI_API_KEY`
+- **Features**: Google results without Google API setup
+
+### 5. Serply (`serply`)
+- **API**: Serply Search API
+- **Required**: `SERPLY_API_KEY`
+- **Features**: Fast and reliable search results
+
+### 6. SearXNG (`searxng`)
+- **API**: SearXNG open-source metasearch
+- **Required**: `SEARXNG_BASE_URL`
+- **Features**: Open-source, self-hosted option
+
+### 7. Tavily (`tavily`)
+- **API**: Tavily Search API
+- **Required**: `TAVILY_API_KEY`
+- **Features**: AI-optimized search results
+
+## Quick Start
+
+### Installation
+
+```bash
+# Install via pip
+pip install web-search-mcp-server
+
+# Or use with uvx (no installation required)
+uvx web-search-mcp-server
+```
+
+### Configuration
+
+Set required environment variables for your preferred search providers:
+
+```bash
+# Google Custom Search (recommended)
+export GOOGLE_SEARCH_API_KEY="your-google-api-key"
+export GOOGLE_CSE_ID="your-custom-search-engine-id"
+
+# Bing Search
+export BING_SEARCH_API_KEY="your-bing-api-key"
+
+# SerpAPI
+export SERPAPI_API_KEY="your-serpapi-key"
+
+# Serply
+export SERPLY_API_KEY="your-serply-key"
+
+# SearXNG
+export SEARXNG_BASE_URL="https://your-searxng-instance.com"
+
+# Tavily
+export TAVILY_API_KEY="your-tavily-key"
+
+# DuckDuckGo requires no configuration
+```
+
+### MCP Client Configuration
+
+#### Claude Desktop
+
+```json
+{
+  "mcpServers": {
+    "web-search": {
+      "command": "uvx",
+      "args": ["web-search-mcp-server"],
+      "env": {
+        "GOOGLE_SEARCH_API_KEY": "your-google-api-key",
+        "GOOGLE_CSE_ID": "your-cse-id"
+      }
+    }
+  }
+}
+```
+
+#### Python MCP Client
+
+```python
+import asyncio
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+
+async def search_example():
+    server_params = StdioServerParameters(
+        command="uvx",
+        args=["web-search-mcp-server"],
+        env={
+            "GOOGLE_SEARCH_API_KEY": "your-api-key",
+            "GOOGLE_CSE_ID": "your-cse-id"
+        }
+    )
+
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+
+            # List available tools
+            tools = await session.list_tools()
+            print(f"Available tools: {[tool.name for tool in tools.tools]}")
+
+            # Perform a web search
+            result = await session.call_tool("web_search", {
+                "query": "artificial intelligence trends 2024",
+                "provider": "google",
+                "max_results": 10
+            })
+
+            # Access structured results
+            if hasattr(result, "content"):
+                search_results = result.content
+                print(f"Found {len(search_results.get('results', []))} results")
+
+asyncio.run(search_example())
+```
+
+## Available Tools
+
+### `web_search`
+
+Performs web searches using the specified provider with configurable options.
+
+**Parameters:**
+- `query` (string, required): Search query
+- `provider` (string, optional): Search provider name (default: "google")
+- `max_results` (integer, optional): Maximum results to return (1-100, default: 10)
+- `search_type` (string, optional): "search" or "news" (default: "search")
+- `timeout` (integer, optional): Request timeout in seconds (default: 30)
+
+**Example:**
+```json
+{
+  "query": "machine learning tutorials",
+  "provider": "google",
+  "max_results": 15,
+  "search_type": "search"
+}
+```
+
+### `search_with_fallback`
+
+Performs web searches with automatic fallback to alternative providers on failure.
+
+**Parameters:**
+- `query` (string, required): Search query
+- `primary_provider` (string, optional): Primary provider (default: "google")
+- `fallback_providers` (array, optional): List of fallback providers
+- `max_results` (integer, optional): Maximum results to return (default: 10)
+
+**Example:**
+```json
+{
+  "query": "latest tech news",
+  "primary_provider": "google",
+  "fallback_providers": ["serpapi", "duckduckgo"],
+  "max_results": 20
+}
+```
+
+## Result Structure
+
+All search tools return structured JSON with the following format:
+
+```json
+{
+  "success": true,
+  "provider": "google",
+  "query": "artificial intelligence trends 2024",
+  "total_results": 1250000,
+  "results_returned": 10,
+  "search_time": 0.45,
+  "results": [
+    {
+      "title": "AI Trends 2024: What to Expect",
+      "url": "https://example.com/ai-trends-2024",
+      "snippet": "Comprehensive overview of artificial intelligence trends...",
+      "position": 1,
+      "date": "2024-01-15",
+      "source": "Example Tech Blog"
+    }
+  ],
+  "metadata": {
+    "language": "en",
+    "region": "us",
+    "search_type": "web"
+  }
+}
+```
+
+## Error Handling
+
+The server provides comprehensive error handling:
+
+- **Configuration Errors**: Missing API keys or invalid settings
+- **API Errors**: Rate limits, authentication failures, service outages
+- **Network Errors**: Timeouts, connection failures
+- **Validation Errors**: Invalid parameters or malformed requests
+
+Error responses include detailed information for debugging:
+
+```json
+{
+  "success": false,
+  "error": "Google Search API quota exceeded",
+  "error_type": "QuotaExceededError",
+  "provider": "google",
+  "retry_after": 3600
+}
+```
+
+## Development
+
+### Setup
+
+```bash
+git clone https://github.com/realtimex/web-search-mcp-server
+cd web-search-mcp-server
+pip install -e ".[dev]"
+```
+
+### Testing
+
+```bash
+pytest                    # Run all tests
+pytest --cov            # Run with coverage
+pytest -m integration   # Run integration tests
+```
+
+### Debug Mode
+
+```bash
+GOOGLE_SEARCH_API_KEY=your-key \
+GOOGLE_CSE_ID=your-cse-id \
+LOG_LEVEL=DEBUG \
+web-search-mcp-server
+```
+
+## License
+
+MIT License - see LICENSE file for details.
