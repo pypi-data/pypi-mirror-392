@@ -1,0 +1,83 @@
+# CHANGELOG
+
+<!-- version list -->
+
+## v2.3.0 (2025-11-18)
+
+### Features
+
+- **tile**: Implement multi-framebuffer support for matrix devices
+  ([`16a69ca`](https://github.com/Djelibeybi/lifx-emulator/commit/16a69cacbdf0472d8f7116eb0acfda9808431c5c))
+
+
+## v2.2.1 (2025-11-18)
+
+### Bug Fixes
+
+- **tile**: Preserve SUNRISE sky type in GetEffect responses
+  ([`70b2d48`](https://github.com/Djelibeybi/lifx-emulator/commit/70b2d48c1ee037591688abb345020e0cd515d2f1))
+
+
+## v2.2.0 (2025-11-18)
+
+### Features
+
+- **products**: Add per-product firmware version defaults to specs.yml
+  ([`336692c`](https://github.com/Djelibeybi/lifx-emulator/commit/336692c381b94956ab29235d81e358fcb2c91089))
+
+
+## v2.1.0 (2025-11-18)
+
+### Documentation
+
+- Add mkdocs-llmstxt to generate llms.txt and llms-full.txt
+  ([`4ddea81`](https://github.com/Djelibeybi/lifx-emulator/commit/4ddea813cf269991857d4871554839b5447404ae))
+
+### Features
+
+- **protocol**: Add Sky Effect support and protocol quirks
+  ([`09422ab`](https://github.com/Djelibeybi/lifx-emulator/commit/09422ab8ab200b555ff7308c37ba087ff2e848e3))
+
+
+## v2.0.0 (2025-11-12)
+
+### Documentation
+
+- Restructure docs to improve logical flow
+  ([`3b412c0`](https://github.com/Djelibeybi/lifx-emulator/commit/3b412c00ddde0b4ee6218c0a37a098f5ff123c2e))
+
+### Refactoring
+
+- Implement layered architecture with repository pattern and modular organization
+  ([`53bf62e`](https://github.com/Djelibeybi/lifx-emulator/commit/53bf62ed36871f147ae1f6ff1dfdef95c556a8b8))
+
+### Breaking Changes
+
+- `EmulatedLifxServer` now requires `DeviceManager` as second parameter instead of
+  `DeviceRepository`
+
+
+## v1.0.2 (2025-11-10)
+
+### Bug Fixes
+
+- Extended_multizone added to products correctly by generator
+  ([`b6c4f78`](https://github.com/Djelibeybi/lifx-emulator/commit/b6c4f78c7353313b961acdb4283023a595141151))
+
+
+## v1.0.1 (2025-11-10)
+
+### Bug Fixes
+
+- Scenarios are now properly applied to initial devices
+  ([`4808512`](https://github.com/Djelibeybi/lifx-emulator/commit/480851231dbfe6c01b215e3938fa8067c9864227))
+
+### Documentation
+
+- Replace lifx-async with lifx-emulator and update README.md
+  ([`64ab6b6`](https://github.com/Djelibeybi/lifx-emulator/commit/64ab6b62dae6422774d8dc72f8f8020f0b6bb705))
+
+
+## v1.0.0 (2025-11-06)
+
+- Initial Release
