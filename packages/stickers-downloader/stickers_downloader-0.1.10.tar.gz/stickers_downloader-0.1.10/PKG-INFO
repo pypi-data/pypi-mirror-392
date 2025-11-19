@@ -1,0 +1,154 @@
+Metadata-Version: 2.4
+Name: stickers-downloader
+Version: 0.1.10
+Summary: A Python package to download and convert Telegram animated stickers (TGS) to GIFs.
+Author: Ali Ayati Qaffari
+Author-email: Ali Ayati Qaffari <ayatiali910@gmail.com>
+License-Expression: MIT
+Project-URL: Homepage, https://github.com/MrAAQPy/StickersDownloader
+Project-URL: Repository, https://github.com/MrAAQPy/StickersDownloader
+Project-URL: Issues, https://github.com/MrAAQPy/StickersDownloader/issues
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Multimedia :: Graphics
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: aiohttp>=3.8.0
+Requires-Dist: rlottie-python>=1.0.0
+Requires-Dist: rich>=13.0.0
+Dynamic: license-file
+
+# StickersDownloader
+
+## 📌 معرفی (فارسی)
+
+**StickersDownloader** یک بسته پایتون برای دانلود و تبدیل استیکرهای متحرک تلگرام (TGS) به GIF است. با این ابزار می‌توانید کل پک استیکرها را دانلود کنید یا استیکرهای خاص را انتخاب کنید. همچنین در حین پردازش، یک نوار پیشرفت رنگی و زیبا نمایش داده می‌شود.
+
+### ویژگی‌ها
+
+- دانلود استیکرهای متحرک تلگرام (`.tgs`) از هر پک استیکر.
+- تبدیل خودکار استیکرها به GIF.
+- امکان دانلود همه استیکرها یا انتخاب استیکرهای خاص.
+- خروجی زیبا و رنگی در کنسول با استفاده از `rich`.
+- مدیریت خودکار خطاهای شبکه و محدودیت‌های API تلگرام.
+
+### نصب
+
+```bash
+pip install StickersDownloader
+````
+
+> نیاز به Python 3.8 یا بالاتر دارد.
+
+### استفاده در کد پایتون
+
+```python
+from StickersDownloader import TelegramStickerDownloader
+import asyncio
+
+TOKEN = "توکن-ربات-تلگرام-شما"
+STICKER_PACK_LINK = "https://t.me/addstickers/YourStickerPack"
+
+downloader = TelegramStickerDownloader(TOKEN, STICKER_PACK_LINK)
+
+async def main():
+    # دانلود همه استیکرها
+    await downloader.run()
+    
+    # یا دانلود استیکرهای خاص با شماره شاخص
+    selected_indexes = [0, 2, 5]
+    await downloader.run(selected_indexes=selected_indexes)
+
+asyncio.run(main())
+```
+
+### استفاده از طریق خط فرمان (CLI)
+
+```bash
+python -m StickersDownloader <TOKEN> <STICKER_PACK_LINK>
+```
+
+با این دستور، لیست استیکرها نمایش داده می‌شود و می‌توانید انتخاب کنید کدام استیکرها دانلود شوند.
+
+---
+
+## 📌 Features (English)
+
+**StickersDownloader** is a Python package to download and convert Telegram animated stickers (TGS) to GIFs. It allows you to download an entire sticker pack or select specific stickers. A colorful progress bar shows while processing.
+
+### Features
+
+* Download Telegram animated stickers (`.tgs`) from any sticker pack.
+* Automatically convert stickers to GIF.
+* Download all stickers or select specific ones.
+* Beautiful console output with progress bars using `rich`.
+* Handles network errors and Telegram API restrictions.
+
+### Installation
+
+```bash
+pip install StickersDownloader
+```
+
+> Requires Python 3.8+.
+
+### Usage in Python
+
+```python
+from StickersDownloader import TelegramStickerDownloader
+import asyncio
+
+TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
+STICKER_PACK_LINK = "https://t.me/addstickers/YourStickerPack"
+
+downloader = TelegramStickerDownloader(TOKEN, STICKER_PACK_LINK)
+
+async def main():
+    # Download all stickers
+    await downloader.run()
+    
+    # Or select specific stickers by index
+    selected_indexes = [0, 2, 5]
+    await downloader.run(selected_indexes=selected_indexes)
+
+asyncio.run(main())
+```
+
+### CLI Usage
+
+```bash
+python -m StickersDownloader <TOKEN> <STICKER_PACK_LINK>
+```
+
+It will show a preview of all stickers, letting you select which ones to download.
+
+---
+
+## Dependencies
+
+* [`aiohttp`](https://pypi.org/project/aiohttp/)
+* [`rlottie-python`](https://pypi.org/project/rlottie-python/)
+* [`rich`](https://pypi.org/project/rich/)
+
+---
+
+## License
+
+MIT License © Ali Ayati Qaffari
+
+---
+
+## Links
+
+* [GitHub Repository](https://github.com/MrAAQPy/StickersDownloader)
+* [Issues](https://github.com/MrAAQPy/StickersDownloader/issues)
+
