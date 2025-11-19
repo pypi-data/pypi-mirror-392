@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iflow-mcp_obsidian_mcp_tool"
+version = "1.0.0"
+authors = [
+  { name="Rwb3n / Gemini 2.5 pro" },
+]
+description = "An MCP server exposing tools to interact with an Obsidian vault."
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Office/Business",
+    "Topic :: Scientific/Engineering :: Interface Engine/Protocol Translator",
+]
+dependencies = [
+    "mcp",
+    "pydantic-settings",
+    "python-dotenv",
+    "pyyaml",
+    "fastapi", # Required by mcp[fastmcp]
+    "uvicorn[standard]", # Required by mcp[fastmcp]
+    "aiofiles", # Although not explicitly used, good for potential future async file ops
+    "h11>=0.16.0"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Rwb3n/obsidian-mcp" 
+"Bug Tracker" = "https://github.com/Rwb3n/obsidian-mcp/issues" 
+
+# Define entry point for command-line script
+[project.scripts]
+obsidian-mcp-server = "obsidian_mcp_server.main:main"
