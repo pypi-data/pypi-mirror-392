@@ -1,0 +1,32 @@
+---
+CompileFlags:
+  CompilationDatabase: ./build
+  Remove:
+    - -march=*
+    - -mtune=*
+
+Index:
+  Background: Build
+
+Diagnostics:
+  ClangTidy:
+    Add:
+      - readability-*
+      - bugprone-*
+    Remove:
+      - readability-magic-numbers
+      - readability-identifier-length
+  Suppress:
+    - pp_file_not_found
+    - undeclared_var_use
+    - expected_class_name
+    - unknown_typename
+    - fatal_too_many_errors
+
+InlayHints:
+  Enabled: true
+  ParameterNames: true
+  DeducedTypes: true
+
+Hover:
+  ShowAKA: true
