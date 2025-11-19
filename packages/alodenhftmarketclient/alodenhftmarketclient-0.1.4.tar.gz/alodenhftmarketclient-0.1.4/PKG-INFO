@@ -1,0 +1,135 @@
+Metadata-Version: 2.1
+Name: alodenhftmarketclient
+Version: 0.1.4
+Summary: Python client for the HFT Simulator bridge server (REST + WebSockets helpers)
+Home-page: https://hft-simulator.fr
+License: Proprietary
+Author: Aloden
+Requires-Python: >=3.10,<4.0
+Classifier: License :: Other/Proprietary License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Dist: httpx (>=0.24)
+Requires-Dist: websockets (>=10)
+Project-URL: Repository, https://github.com/Al0den/hft-simulator
+Description-Content-Type: text/markdown
+
+# market-client (Python)
+
+High-level async Python client for the new Market bridge server (`server/`). The client hides HTTP and WebSocket details, logs in via `/login`, and exposes ergonomic helpers for common operations (symbols, book, orders, candles) plus simple streaming hooks for market data and per-user unicast events.
+
+Key features:
+- Performs `/login` and reuses the session cookie automatically for subsequent REST calls.
+- Async helpers for `/symbols`, `/book/{sym}`, `/order.place`, `/order.cancel`, `/orders`, `/order.history`, `/portfolio`, and `/candles`.
+- Optional MD (`/ws/md`) and unicast (`/ws/unicast`) WebSocket listeners with simple hook registration.
+- Lightweight in-memory ring buffer that records unicast events; configurable capacity plus helper methods to inspect or clear the buffer.
+
+## Install
+
+This package depends on `httpx` and `websockets`.
+
+Editable install for local development:
+
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -e ./market-client
+```
+
+Or install the runtime requirements directly:
+
+```bash
+pip install httpx>=0.24 websockets>=10
+```
+
+## Quickstart
+
+```python
+import asyncio
+from market_client import MarketClient
+
+
+async def main():
+    client = MarketClient("http://localhost:8000")
+    await client.login()  # obtains gw_uid cookie + user/session ids
+
+    symbols = await client.get_symbols()
+    print("symbols:", [s["sym"] for s in symbols[:3]])
+
+    if symbols:
+        sym = symbols[0]["sym"]
+        book = await client.get_book(sym, depth=10)
+        print(sym, "book bids:", book.get("bids", [])[:2])
+
+    # Optional streaming hooks
+    async def on_unicast(evt):
+        print("unicast:", evt.get("event"))
+    await client.connect_unicast(on_event=on_unicast)
+
+    # Clean up when done
+    await client.aclose()
+
+asyncio.run(main())
+```
+
+See `examples/simple.py` for a minimal sample and `examples/order_flow.py` for a more involved orchestrator that drives several agents concurrently.
+
+## API highlights
+
+- `await MarketClient.connect(base_url, connect_md=False, connect_unicast=False, ...)`
+  - Convenience classmethod that instantiates the client, calls `login()`, and optionally attaches MD/unicast listeners.
+- `await login()` -> `LoginInfo`
+  - Performs `POST /login` and stores `user`/`session` ids for later use (i.e., `/ws/unicast?user=...`).
+- High-level REST helpers (all async):
+  - `get_symbols(force_refresh=False)` -> list of symbol dicts
+  - `get_book(sym, depth=20, side="both")` -> book snapshot payload
+  - `place_order(...)`, `cancel_order(...)`, `list_orders()`, `order_history(...)`
+  - `get_portfolio()`, `get_candles(...)`
+- Streaming:
+  - `connect_md(symbols=None, on_event=None)` / `disconnect_md()`
+  - `connect_unicast(on_event=None)` / `disconnect_unicast()`
+  - `set_md_hook(handler)` and `set_event_hook(handler)` register global callbacks invoked for each MD/unicast event before the per-stream handler.
+- `send(op, payload)` / `api_request(...)`
+  - Compatibility helpers that translate well-known ops (e.g., `symbols.list`, `book.get`, `order.place`, `candles.get`, `admin.*`) into the appropriate REST call. Responses are wrapped in a legacy envelope (`{"type":"response","payload":...}`) so existing scripts that expect the older format keep working.
+- Transactions ring buffer (unicast events only):
+  - `configure_transactions(capacity=1000)`
+  - `get_transactions(limit=None)`
+  - `clear_transactions()`
+
+## Transactions ring buffer example
+
+```python
+from market_client import MarketClient
+
+client = MarketClient("http://localhost:8000")
+await client.login()
+client.configure_transactions(capacity=5000)
+
+def on_unicast(evt):
+    print("evt:", evt.get("event"))
+
+await client.connect_unicast(on_event=on_unicast)
+
+# Later...
+recent = client.get_transactions(limit=100)
+client.clear_transactions()
+await client.aclose()
+```
+
+## Server assumptions
+
+Matches the FastAPI bridge server in `server/` with routes:
+- `POST /login`
+- `GET /symbols`
+- `GET /book/{sym}`
+- `POST /order.place`
+- `POST /order.cancel`
+- `GET /orders`
+- `GET /order.history`
+- `GET /portfolio`
+- `GET /candles`
+- `POST /admin/*` (requires `as_role="admin"` in `send()`)
+- WebSockets: `/ws/md?symbols=...`, `/ws/unicast?user=...`
+
