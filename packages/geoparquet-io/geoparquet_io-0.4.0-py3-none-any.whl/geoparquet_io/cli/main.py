@@ -1,0 +1,1560 @@
+import click
+
+from geoparquet_io.cli.decorators import (
+    compression_options,
+    dry_run_option,
+    output_format_options,
+    partition_options,
+    verbose_option,
+)
+from geoparquet_io.core.add_bbox_column import add_bbox_column as add_bbox_column_impl
+from geoparquet_io.core.add_bbox_metadata import add_bbox_metadata as add_bbox_metadata_impl
+from geoparquet_io.core.add_h3_column import add_h3_column as add_h3_column_impl
+from geoparquet_io.core.add_kdtree_column import add_kdtree_column as add_kdtree_column_impl
+from geoparquet_io.core.check_parquet_structure import check_all as check_structure_impl
+from geoparquet_io.core.check_spatial_order import check_spatial_order as check_spatial_impl
+from geoparquet_io.core.convert import convert_to_geoparquet
+from geoparquet_io.core.hilbert_order import hilbert_order as hilbert_impl
+from geoparquet_io.core.inspect_utils import (
+    extract_columns_info,
+    extract_file_info,
+    extract_geo_info,
+    format_json_output,
+    format_terminal_output,
+    get_column_statistics,
+    get_preview_data,
+)
+from geoparquet_io.core.partition_admin_hierarchical import (
+    partition_by_admin_hierarchical as partition_admin_hierarchical_impl,
+)
+from geoparquet_io.core.partition_by_h3 import partition_by_h3 as partition_by_h3_impl
+from geoparquet_io.core.partition_by_kdtree import partition_by_kdtree as partition_by_kdtree_impl
+from geoparquet_io.core.partition_by_string import (
+    partition_by_string as partition_by_string_impl,
+)
+
+# Version info
+__version__ = "0.4.0"
+
+
+@click.group()
+@click.version_option(version=__version__, prog_name="geoparquet-io")
+def cli():
+    """Fast I/O and transformation tools for GeoParquet files."""
+    pass
+
+
+# Check commands group
+@cli.group()
+def check():
+    """Commands for checking GeoParquet files for best practices."""
+    pass
+
+
+@check.command(name="all")
+@click.argument("parquet_file")
+@click.option("--verbose", is_flag=True, help="Print full metadata and details")
+@click.option(
+    "--random-sample-size",
+    default=100,
+    show_default=True,
+    help="Number of rows in each sample for spatial order check.",
+)
+@click.option(
+    "--limit-rows",
+    default=500000,
+    show_default=True,
+    help="Max number of rows to read for spatial order check.",
+)
+def check_all(parquet_file, verbose, random_sample_size, limit_rows):
+    """Run all checks on a GeoParquet file."""
+    check_structure_impl(parquet_file, verbose)
+    click.echo("\nSpatial Order Analysis:")
+    ratio = check_spatial_impl(parquet_file, random_sample_size, limit_rows, verbose)
+    if ratio is not None:
+        if ratio < 0.5:
+            click.echo(click.style("✓ Data appears to be spatially ordered", fg="green"))
+        else:
+            click.echo(
+                click.style(
+                    "⚠️  Data may not be optimally spatially ordered\n"
+                    "Consider running 'gpio sort hilbert' to improve spatial locality",
+                    fg="yellow",
+                )
+            )
+
+
+@check.command(name="spatial")
+@click.argument("parquet_file")
+@click.option(
+    "--random-sample-size",
+    default=100,
+    show_default=True,
+    help="Number of rows in each sample for spatial order check.",
+)
+@click.option(
+    "--limit-rows",
+    default=500000,
+    show_default=True,
+    help="Max number of rows to read for spatial order check.",
+)
+@click.option("--verbose", is_flag=True, help="Print additional information.")
+def check_spatial(parquet_file, random_sample_size, limit_rows, verbose):
+    """Check if a GeoParquet file is spatially ordered."""
+    ratio = check_spatial_impl(parquet_file, random_sample_size, limit_rows, verbose)
+    if ratio is not None:
+        if ratio < 0.5:
+            click.echo(click.style("✓ Data appears to be spatially ordered", fg="green"))
+        else:
+            click.echo(
+                click.style(
+                    "⚠️  Data may not be optimally spatially ordered\n"
+                    "Consider running 'gpio sort hilbert' to improve spatial locality",
+                    fg="yellow",
+                )
+            )
+
+
+@check.command(name="compression")
+@click.argument("parquet_file")
+@click.option("--verbose", is_flag=True, help="Print additional information.")
+def check_compression_cmd(parquet_file, verbose):
+    """Check compression settings for geometry column."""
+    from geoparquet_io.core.check_parquet_structure import check_compression
+
+    check_compression(parquet_file, verbose)
+
+
+@check.command(name="bbox")
+@click.argument("parquet_file")
+@click.option("--verbose", is_flag=True, help="Print additional information.")
+def check_bbox_cmd(parquet_file, verbose):
+    """Check GeoParquet metadata version and bbox structure."""
+    from geoparquet_io.core.check_parquet_structure import check_metadata_and_bbox
+
+    check_metadata_and_bbox(parquet_file, verbose)
+
+
+@check.command(name="row-group")
+@click.argument("parquet_file")
+@click.option("--verbose", is_flag=True, help="Print additional information.")
+def check_row_group_cmd(parquet_file, verbose):
+    """Check row group optimization."""
+    from geoparquet_io.core.check_parquet_structure import check_row_groups
+
+    check_row_groups(parquet_file, verbose)
+
+
+# Convert command
+@cli.command()
+@click.argument("input_file", type=click.Path(exists=True))
+@click.argument("output_file", type=click.Path())
+@click.option(
+    "--skip-hilbert",
+    is_flag=True,
+    help="Skip Hilbert spatial ordering (faster but less optimal for spatial queries)",
+)
+@click.option(
+    "--wkt-column",
+    help="CSV/TSV: Column name containing WKT geometry (auto-detected if not specified)",
+)
+@click.option(
+    "--lat-column",
+    help="CSV/TSV: Column name containing latitude values (requires --lon-column)",
+)
+@click.option(
+    "--lon-column",
+    help="CSV/TSV: Column name containing longitude values (requires --lat-column)",
+)
+@click.option(
+    "--delimiter",
+    help="CSV/TSV: Delimiter character (auto-detected if not specified). Common: ',' (comma), '\\t' (tab), ';' (semicolon), '|' (pipe)",
+)
+@click.option(
+    "--crs",
+    default="EPSG:4326",
+    show_default=True,
+    help="CSV/TSV: CRS for geometry data (WGS84 assumed for lat/lon)",
+)
+@click.option(
+    "--skip-invalid",
+    is_flag=True,
+    help="CSV/TSV: Skip rows with invalid geometries instead of failing",
+)
+@verbose_option
+@compression_options
+def convert(
+    input_file,
+    output_file,
+    skip_hilbert,
+    wkt_column,
+    lat_column,
+    lon_column,
+    delimiter,
+    crs,
+    skip_invalid,
+    verbose,
+    compression,
+    compression_level,
+):
+    """
+    Convert vector formats to optimized GeoParquet.
+
+    Automatically applies best practices:
+
+      • ZSTD compression (configurable)
+
+      • 100,000 row groups
+
+      • Bbox column with proper metadata
+
+      • Hilbert spatial ordering
+
+      • GeoParquet 1.1.0 metadata
+
+    Supported input formats (auto-detected):
+
+      • Shapefile (.shp)
+
+      • GeoJSON (.geojson, .json)
+
+      • GeoPackage (.gpkg)
+
+      • File Geodatabase (.gdb)
+
+      • CSV/TSV (.csv, .tsv, .txt)
+
+    For CSV/TSV files, geometry is auto-detected from:
+
+      • WKT columns (named: wkt, geometry, geom, the_geom, shape)
+
+      • Lat/lon pairs (named: lat/lon, latitude/longitude, y/x)
+
+    Examples:
+
+      \b
+      # Basic conversion
+      geoparquet-io convert input.shp output.parquet
+
+      \b
+      # CSV with auto-detected WKT column
+      geoparquet-io convert points.csv output.parquet
+
+      \b
+      # CSV with explicit lat/lon columns
+      geoparquet-io convert data.csv output.parquet --lat-column lat --lon-column lng
+
+      \b
+      # TSV with custom delimiter and skip invalid geometries
+      geoparquet-io convert data.txt output.parquet --delimiter '|' --skip-invalid
+
+      \b
+      # With verbose output and validation
+      geoparquet-io convert input.geojson output.parquet --verbose
+
+      \b
+      # Skip Hilbert ordering for faster conversion
+      geoparquet-io convert large.gpkg output.parquet --skip-hilbert
+
+      \b
+      # Custom compression
+      geoparquet-io convert input.shp output.parquet --compression GZIP --compression-level 9
+    """
+    convert_to_geoparquet(
+        input_file,
+        output_file,
+        skip_hilbert=skip_hilbert,
+        verbose=verbose,
+        compression=compression,
+        compression_level=compression_level,
+        row_group_rows=100000,  # Best practice default
+        wkt_column=wkt_column,
+        lat_column=lat_column,
+        lon_column=lon_column,
+        delimiter=delimiter,
+        crs=crs,
+        skip_invalid=skip_invalid,
+    )
+
+
+# Inspect command
+@cli.command()
+@click.argument("parquet_file", type=click.Path(exists=True))
+@click.option("--head", type=int, default=None, help="Show first N rows")
+@click.option("--tail", type=int, default=None, help="Show last N rows")
+@click.option(
+    "--stats", is_flag=True, help="Show column statistics (nulls, min/max, unique counts)"
+)
+@click.option("--json", "json_output", is_flag=True, help="Output as JSON for scripting")
+def inspect(parquet_file, head, tail, stats, json_output):
+    """
+    Inspect a GeoParquet file and show metadata summary.
+
+    Provides quick examination of GeoParquet files without launching external tools.
+    Default behavior shows metadata only (instant). Use --head/--tail to preview data,
+    or --stats to calculate column statistics.
+
+    Examples:
+
+        \b
+        # Quick metadata inspection
+        gpio inspect data.parquet
+
+        \b
+        # Preview first 10 rows
+        gpio inspect data.parquet --head 10
+
+        \b
+        # Preview last 5 rows
+        gpio inspect data.parquet --tail 5
+
+        \b
+        # Show statistics
+        gpio inspect data.parquet --stats
+
+        \b
+        # JSON output for scripting
+        gpio inspect data.parquet --json
+    """
+    import fsspec
+    import pyarrow.parquet as pq
+
+    from geoparquet_io.core.common import safe_file_url
+
+    # Validate mutually exclusive options
+    if head and tail:
+        raise click.UsageError("--head and --tail are mutually exclusive")
+
+    try:
+        # Extract metadata
+        file_info = extract_file_info(parquet_file)
+        geo_info = extract_geo_info(parquet_file)
+
+        # Get schema for column info
+        safe_url = safe_file_url(parquet_file, verbose=False)
+        with fsspec.open(safe_url, "rb") as f:
+            pf = pq.ParquetFile(f)
+            schema = pf.schema_arrow
+
+        columns_info = extract_columns_info(schema, geo_info.get("primary_column"))
+
+        # Get preview data if requested
+        preview_table = None
+        preview_mode = None
+        if head or tail:
+            preview_table, preview_mode = get_preview_data(parquet_file, head=head, tail=tail)
+
+        # Get statistics if requested
+        statistics = None
+        if stats:
+            statistics = get_column_statistics(parquet_file, columns_info)
+
+        # Output
+        if json_output:
+            output = format_json_output(
+                file_info, geo_info, columns_info, preview_table, statistics
+            )
+            click.echo(output)
+        else:
+            format_terminal_output(
+                file_info, geo_info, columns_info, preview_table, preview_mode, statistics
+            )
+
+    except Exception as e:
+        raise click.ClickException(str(e)) from e
+
+
+# Meta command
+def _get_primary_geometry_column(parquet_file: str):
+    """Get primary geometry column for metadata highlighting."""
+    from geoparquet_io.core.common import get_parquet_metadata, parse_geo_metadata
+
+    metadata, _ = get_parquet_metadata(parquet_file, verbose=False)
+    geo_meta = parse_geo_metadata(metadata, verbose=False)
+    return geo_meta.get("primary_column") if geo_meta else None
+
+
+def _handle_meta_display(
+    parquet_file: str,
+    parquet: bool,
+    geoparquet: bool,
+    parquet_geo: bool,
+    row_groups: int,
+    json_output: bool,
+) -> None:
+    """Handle metadata display logic based on flags."""
+    from geoparquet_io.core.metadata_utils import (
+        format_all_metadata,
+        format_geoparquet_metadata,
+        format_parquet_geo_metadata,
+        format_parquet_metadata_enhanced,
+    )
+
+    # Count how many specific flags were set
+    specific_flags = sum([parquet, geoparquet, parquet_geo])
+
+    if specific_flags == 0:
+        # Show all sections
+        format_all_metadata(parquet_file, json_output, row_groups)
+    elif specific_flags > 1:
+        # Multiple specific flags - show each requested section
+        primary_col = _get_primary_geometry_column(parquet_file)
+
+        if parquet:
+            format_parquet_metadata_enhanced(parquet_file, json_output, row_groups, primary_col)
+        if parquet_geo:
+            format_parquet_geo_metadata(parquet_file, json_output, row_groups)
+        if geoparquet:
+            format_geoparquet_metadata(parquet_file, json_output)
+    else:
+        # Single specific flag
+        if parquet:
+            primary_col = _get_primary_geometry_column(parquet_file)
+            format_parquet_metadata_enhanced(parquet_file, json_output, row_groups, primary_col)
+        elif geoparquet:
+            format_geoparquet_metadata(parquet_file, json_output)
+        elif parquet_geo:
+            format_parquet_geo_metadata(parquet_file, json_output, row_groups)
+
+
+@cli.command()
+@click.argument("parquet_file", type=click.Path(exists=True))
+@click.option("--parquet", is_flag=True, help="Show only Parquet file metadata")
+@click.option("--geoparquet", is_flag=True, help="Show only GeoParquet metadata from 'geo' key")
+@click.option("--parquet-geo", is_flag=True, help="Show only Parquet geospatial metadata")
+@click.option(
+    "--row-groups", type=int, default=1, help="Number of row groups to display (default: 1)"
+)
+@click.option("--json", "json_output", is_flag=True, help="Output as JSON for scripting")
+def meta(parquet_file, parquet, geoparquet, parquet_geo, row_groups, json_output):
+    """
+    Show comprehensive metadata for a GeoParquet file.
+
+    Displays three types of metadata:
+    1. Parquet File Metadata - File structure, schema, row groups, and column statistics
+    2. Parquet Geo Metadata - Geospatial metadata from Parquet format specification
+    3. GeoParquet Metadata - GeoParquet-specific metadata from 'geo' key
+
+    By default, shows all three sections. Use flags to show specific sections only.
+
+    Examples:
+
+        \b
+        # Show all metadata sections
+        gpio meta data.parquet
+
+        \b
+        # Show only Parquet file metadata
+        gpio meta data.parquet --parquet
+
+        \b
+        # Show only GeoParquet metadata
+        gpio meta data.parquet --geoparquet
+
+        \b
+        # Show all row groups instead of just the first
+        gpio meta data.parquet --row-groups 10
+
+        \b
+        # JSON output for scripting
+        gpio meta data.parquet --json
+    """
+    try:
+        _handle_meta_display(
+            parquet_file, parquet, geoparquet, parquet_geo, row_groups, json_output
+        )
+    except Exception as e:
+        raise click.ClickException(str(e)) from e
+
+
+# Format commands group
+@cli.group()
+def format():
+    """Commands for formatting GeoParquet files."""
+    pass
+
+
+@format.command(name="bbox-metadata")
+@click.argument("parquet_file")
+@click.option("--verbose", is_flag=True, help="Print detailed information")
+def format_bbox_metadata(parquet_file, verbose):
+    """Add bbox covering metadata to a GeoParquet file."""
+    add_bbox_metadata_impl(parquet_file, verbose)
+
+
+# Sort commands group
+@cli.group()
+def sort():
+    """Commands for sorting GeoParquet files."""
+    pass
+
+
+@sort.command(name="hilbert")
+@click.argument("input_parquet", type=click.Path(exists=True))
+@click.argument("output_parquet", type=click.Path())
+@click.option(
+    "--geometry-column",
+    "-g",
+    default="geometry",
+    help="Name of the geometry column (default: geometry)",
+)
+@click.option(
+    "--add-bbox", is_flag=True, help="Automatically add bbox column and metadata if missing."
+)
+@output_format_options
+@verbose_option
+def hilbert_order(
+    input_parquet,
+    output_parquet,
+    geometry_column,
+    add_bbox,
+    compression,
+    compression_level,
+    row_group_size,
+    row_group_size_mb,
+    verbose,
+):
+    """
+    Reorder a GeoParquet file using Hilbert curve ordering.
+
+    Takes an input GeoParquet file and creates a new file with rows ordered
+    by their position along a Hilbert space-filling curve.
+
+    Applies optimal formatting (configurable compression, optimized row groups,
+    bbox metadata) while preserving the CRS. Output is written as GeoParquet 1.1.
+    """
+    # Validate mutually exclusive options
+    if row_group_size and row_group_size_mb:
+        raise click.UsageError("--row-group-size and --row-group-size-mb are mutually exclusive")
+
+    # Parse size string if provided
+    from geoparquet_io.core.common import parse_size_string
+
+    row_group_mb = None
+    if row_group_size_mb:
+        try:
+            size_bytes = parse_size_string(row_group_size_mb)
+            row_group_mb = size_bytes / (1024 * 1024)
+        except ValueError as e:
+            raise click.UsageError(f"Invalid row group size: {e}") from e
+
+    try:
+        hilbert_impl(
+            input_parquet,
+            output_parquet,
+            geometry_column,
+            add_bbox,
+            verbose,
+            compression.upper(),
+            compression_level,
+            row_group_mb,
+            row_group_size,
+        )
+    except Exception as e:
+        raise click.ClickException(str(e)) from e
+
+
+@cli.group()
+def add():
+    """Commands for enhancing GeoParquet files in various ways."""
+    pass
+
+
+@add.command(name="admin-divisions")
+@click.argument("input_parquet")
+@click.argument("output_parquet")
+@click.option(
+    "--dataset",
+    type=click.Choice(["gaul", "overture"], case_sensitive=False),
+    default="gaul",
+    help="Admin boundaries dataset: 'gaul' (GAUL L2) or 'overture' (Overture Maps)",
+)
+@click.option(
+    "--levels",
+    help="Comma-separated hierarchical levels to add as columns (e.g., 'continent,country'). "
+    "If not specified, adds all available levels for the dataset.",
+)
+@click.option(
+    "--add-bbox", is_flag=True, help="Automatically add bbox column and metadata if missing."
+)
+@output_format_options
+@dry_run_option
+@verbose_option
+def add_country_codes(
+    input_parquet,
+    output_parquet,
+    dataset,
+    levels,
+    add_bbox,
+    compression,
+    compression_level,
+    row_group_size,
+    row_group_size_mb,
+    dry_run,
+    verbose,
+):
+    """Add admin division columns via spatial join with remote boundaries datasets.
+
+    Performs spatial intersection to add administrative division columns to your data.
+
+    \b
+    **Datasets:**
+    - gaul: GAUL L2 (levels: continent, country, department)
+    - overture: Overture Maps (levels: country, region, locality)
+
+    \b
+    **Examples:**
+
+    \b
+    # Add all GAUL levels (continent, country, department)
+    gpio add admin-divisions input.parquet output.parquet --dataset gaul
+
+    \b
+    # Add specific GAUL levels only
+    gpio add admin-divisions input.parquet output.parquet --dataset gaul \\
+        --levels continent,country
+
+    \b
+    # Preview SQL before execution
+    gpio add admin-divisions input.parquet output.parquet --dataset gaul --dry-run
+
+    \b
+    **Note:** Requires internet connection to fetch remote boundaries datasets.
+    Input data must have valid geometries in WGS84 or compatible CRS.
+    """
+    # Validate mutually exclusive options
+    if row_group_size and row_group_size_mb:
+        raise click.UsageError("--row-group-size and --row-group-size-mb are mutually exclusive")
+
+    # Parse size string if provided
+    from geoparquet_io.core.common import parse_size_string
+
+    row_group_mb = None
+    if row_group_size_mb:
+        try:
+            size_bytes = parse_size_string(row_group_size_mb)
+            row_group_mb = size_bytes / (1024 * 1024)
+        except ValueError as e:
+            raise click.UsageError(f"Invalid row group size: {e}") from e
+
+    # Use new multi-dataset implementation
+    from geoparquet_io.core.add_admin_divisions_multi import add_admin_divisions_multi
+
+    # Parse levels
+    if levels:
+        level_list = [level.strip() for level in levels.split(",")]
+    else:
+        # Use all available levels for the dataset
+        from geoparquet_io.core.admin_datasets import AdminDatasetFactory
+
+        temp_dataset = AdminDatasetFactory.create(dataset, None, verbose=False)
+        level_list = temp_dataset.get_available_levels()
+
+    add_admin_divisions_multi(
+        input_parquet,
+        output_parquet,
+        dataset_name=dataset,
+        levels=level_list,
+        dataset_source=None,  # No custom sources for now
+        add_bbox_flag=add_bbox,
+        dry_run=dry_run,
+        verbose=verbose,
+        compression=compression.upper(),
+        compression_level=compression_level,
+        row_group_size_mb=row_group_mb,
+        row_group_rows=row_group_size,
+    )
+
+
+@add.command(name="bbox")
+@click.argument("input_parquet")
+@click.argument("output_parquet")
+@click.option("--bbox-name", default="bbox", help="Name for the bbox column (default: bbox)")
+@output_format_options
+@dry_run_option
+@verbose_option
+def add_bbox(
+    input_parquet,
+    output_parquet,
+    bbox_name,
+    compression,
+    compression_level,
+    row_group_size,
+    row_group_size_mb,
+    dry_run,
+    verbose,
+):
+    """Add a bbox struct column to a GeoParquet file.
+
+    Creates a new column with bounding box coordinates (xmin, ymin, xmax, ymax)
+    for each geometry feature. The bbox column improves spatial query performance
+    and adds proper bbox covering metadata to the GeoParquet file (GeoParquet 1.1).
+    """
+    # Validate mutually exclusive options
+    if row_group_size and row_group_size_mb:
+        raise click.UsageError("--row-group-size and --row-group-size-mb are mutually exclusive")
+
+    # Parse size string if provided
+    from geoparquet_io.core.common import parse_size_string
+
+    row_group_mb = None
+    if row_group_size_mb:
+        try:
+            size_bytes = parse_size_string(row_group_size_mb)
+            row_group_mb = size_bytes / (1024 * 1024)
+        except ValueError as e:
+            raise click.UsageError(f"Invalid row group size: {e}") from e
+
+    add_bbox_column_impl(
+        input_parquet,
+        output_parquet,
+        bbox_name,
+        dry_run,
+        verbose,
+        compression.upper(),
+        compression_level,
+        row_group_mb,
+        row_group_size,
+    )
+
+
+@add.command(name="h3")
+@click.argument("input_parquet")
+@click.argument("output_parquet")
+@click.option("--h3-name", default="h3_cell", help="Name for the H3 column (default: h3_cell)")
+@click.option(
+    "--resolution",
+    default=9,
+    type=click.IntRange(0, 15),
+    help="H3 resolution level (0-15). Res 7: ~5km², Res 9: ~105m², Res 11: ~2m², Res 13: ~0.04m². Default: 9",
+)
+@output_format_options
+@dry_run_option
+@verbose_option
+def add_h3(
+    input_parquet,
+    output_parquet,
+    h3_name,
+    resolution,
+    compression,
+    compression_level,
+    row_group_size,
+    row_group_size_mb,
+    dry_run,
+    verbose,
+):
+    """Add an H3 cell ID column to a GeoParquet file.
+
+    Computes H3 hexagonal cell IDs based on geometry centroids. H3 is a hierarchical
+    hexagonal geospatial indexing system that provides consistent cell sizes and shapes
+    across the globe.
+
+    The cell ID is stored as a VARCHAR (string) for maximum portability across tools.
+    Resolution determines cell size - higher values mean smaller cells with more precision.
+    """
+    # Validate mutually exclusive options
+    if row_group_size and row_group_size_mb:
+        raise click.UsageError("--row-group-size and --row-group-size-mb are mutually exclusive")
+
+    # Parse size string if provided
+    from geoparquet_io.core.common import parse_size_string
+
+    row_group_mb = None
+    if row_group_size_mb:
+        try:
+            size_bytes = parse_size_string(row_group_size_mb)
+            row_group_mb = size_bytes / (1024 * 1024)
+        except ValueError as e:
+            raise click.UsageError(f"Invalid row group size: {e}") from e
+
+    add_h3_column_impl(
+        input_parquet,
+        output_parquet,
+        h3_name,
+        resolution,
+        dry_run,
+        verbose,
+        compression.upper(),
+        compression_level,
+        row_group_mb,
+        row_group_size,
+    )
+
+
+@add.command(name="kdtree")
+@click.argument("input_parquet")
+@click.argument("output_parquet")
+@click.option(
+    "--kdtree-name",
+    default="kdtree_cell",
+    help="Name for the KD-tree column (default: kdtree_cell)",
+)
+@click.option(
+    "--partitions",
+    default=None,
+    type=int,
+    help="Explicit partition count (must be power of 2: 2, 4, 8, ...). Overrides default auto mode.",
+)
+@click.option(
+    "--auto",
+    default=None,
+    type=int,
+    help="Auto-select partitions targeting N rows/partition. Default when neither --partitions nor --auto specified: 120,000.",
+)
+@click.option(
+    "--approx",
+    default=100000,
+    type=int,
+    help="Use approximate computation by sampling N points (default: 100000). Mutually exclusive with --exact.",
+)
+@click.option(
+    "--exact",
+    is_flag=True,
+    help="Use exact median computation on full dataset (slower but deterministic). Mutually exclusive with --approx.",
+)
+@output_format_options
+@dry_run_option
+@click.option(
+    "--force",
+    is_flag=True,
+    help="Force operation on large datasets without confirmation",
+)
+@verbose_option
+def add_kdtree(
+    input_parquet,
+    output_parquet,
+    kdtree_name,
+    partitions,
+    auto,
+    approx,
+    exact,
+    compression,
+    compression_level,
+    row_group_size,
+    row_group_size_mb,
+    dry_run,
+    force,
+    verbose,
+):
+    """Add a KD-tree cell ID column to a GeoParquet file.
+
+    Creates balanced spatial partitions using recursive splits alternating between
+    X and Y dimensions at medians. Partition count must be a power of 2.
+
+    By default, auto-selects partitions targeting ~120k rows each using approximate mode
+    (O(n) with 100k sample). Use --partitions N for explicit control or --exact for
+    deterministic computation.
+
+    Performance Note: Approximate mode is O(n), exact mode is O(n × log2(partitions)).
+
+    Use --verbose to track progress with iteration-by-iteration updates.
+    """
+    import math
+
+    # Validate mutually exclusive options
+    if sum([partitions is not None, auto is not None]) > 1:
+        raise click.UsageError("--partitions and --auto are mutually exclusive")
+
+    # Set defaults
+    if partitions is None and auto is None:
+        auto = 120000  # Default: auto-select targeting 120k rows/partition
+        partitions = None
+    elif auto is not None:
+        # Auto mode: will compute partitions below
+        partitions = None
+
+    # Validate partitions if specified
+    if partitions is not None and (partitions < 2 or (partitions & (partitions - 1)) != 0):
+        raise click.UsageError(f"Partitions must be a power of 2 (2, 4, 8, ...), got {partitions}")
+
+    # Validate mutually exclusive options for approx/exact
+    if exact and approx != 100000:
+        raise click.UsageError("--approx and --exact are mutually exclusive")
+
+    # Determine sample size
+    sample_size = None if exact else approx
+
+    # If auto mode, compute optimal partitions
+    if auto is not None:
+        # Pass None for iterations, let implementation compute
+        iterations = None
+        target_rows = auto if auto > 0 else 120000
+        auto_target = ("rows", target_rows)
+    else:
+        # Convert partitions to iterations
+        iterations = int(math.log2(partitions))
+        auto_target = None
+
+    # Validate mutually exclusive options
+    if row_group_size and row_group_size_mb:
+        raise click.UsageError("--row-group-size and --row-group-size-mb are mutually exclusive")
+
+    # Parse size string if provided
+    from geoparquet_io.core.common import parse_size_string
+
+    row_group_mb = None
+    if row_group_size_mb:
+        try:
+            size_bytes = parse_size_string(row_group_size_mb)
+            row_group_mb = size_bytes / (1024 * 1024)
+        except ValueError as e:
+            raise click.UsageError(f"Invalid row group size: {e}") from e
+
+    add_kdtree_column_impl(
+        input_parquet,
+        output_parquet,
+        kdtree_name,
+        iterations,
+        dry_run,
+        verbose,
+        compression.upper(),
+        compression_level,
+        row_group_mb,
+        row_group_size,
+        force,
+        sample_size,
+        auto_target,
+    )
+
+
+# Partition commands group
+@cli.group()
+def partition():
+    """Commands for partitioning GeoParquet files."""
+    pass
+
+
+@partition.command(name="admin")
+@click.argument("input_parquet")
+@click.argument("output_folder", required=False)
+@click.option(
+    "--dataset",
+    type=click.Choice(["gaul", "overture"], case_sensitive=False),
+    default="gaul",
+    help="Admin boundaries dataset: 'gaul' (GAUL L2) or 'overture' (Overture Maps)",
+)
+@click.option(
+    "--levels",
+    required=True,
+    help="Comma-separated hierarchical levels to partition by. "
+    "GAUL levels: continent,country,department. "
+    "Overture levels: country,region.",
+)
+@partition_options
+@verbose_option
+def partition_admin(
+    input_parquet,
+    output_folder,
+    dataset,
+    levels,
+    hive,
+    overwrite,
+    preview,
+    preview_limit,
+    force,
+    skip_analysis,
+    prefix,
+    verbose,
+):
+    """Partition by administrative boundaries via spatial join with remote datasets.
+
+    This command performs a two-step operation:
+    1. Spatially joins input data with remote admin boundaries (GAUL or Overture)
+    2. Partitions the enriched data by specified admin levels
+
+    \b
+    **Datasets:**
+    - gaul: GAUL L2 Admin Boundaries (levels: continent, country, department)
+    - overture: Overture Maps Divisions (levels: country, region)
+
+    \b
+    **Examples:**
+
+    \b
+    # Preview GAUL partitions by continent
+    gpio partition admin input.parquet --dataset gaul --levels continent --preview
+
+    \b
+    # Partition by continent and country
+    gpio partition admin input.parquet output/ --dataset gaul --levels continent,country
+
+    \b
+    # All GAUL levels with Hive-style (continent=Africa/country=Kenya/...)
+    gpio partition admin input.parquet output/ --dataset gaul \\
+        --levels continent,country,department --hive
+
+    \b
+    # Overture Maps by country and region
+    gpio partition admin input.parquet output/ --dataset overture --levels country,region
+
+    \b
+    **Note:** This command fetches remote boundaries and performs spatial intersection.
+    Requires internet connection. Input data must have valid geometries in WGS84 or
+    compatible CRS.
+    """
+    # If preview mode, output_folder is not required
+    if not preview and not output_folder:
+        raise click.UsageError("OUTPUT_FOLDER is required unless using --preview")
+
+    # Parse levels
+    level_list = [level.strip() for level in levels.split(",")]
+
+    # Use hierarchical partitioning (spatial join + partition)
+    partition_admin_hierarchical_impl(
+        input_parquet,
+        output_folder,
+        dataset_name=dataset,
+        levels=level_list,
+        hive=hive,
+        overwrite=overwrite,
+        preview=preview,
+        preview_limit=preview_limit,
+        verbose=verbose,
+        force=force,
+        skip_analysis=skip_analysis,
+        filename_prefix=prefix,
+    )
+
+
+@partition.command(name="string")
+@click.argument("input_parquet")
+@click.argument("output_folder", required=False)
+@click.option("--column", required=True, help="Column name to partition by (required)")
+@click.option("--chars", type=int, help="Number of characters to use as prefix for partitioning")
+@partition_options
+@verbose_option
+def partition_string(
+    input_parquet,
+    output_folder,
+    column,
+    chars,
+    hive,
+    overwrite,
+    preview,
+    preview_limit,
+    force,
+    skip_analysis,
+    prefix,
+    verbose,
+):
+    """Partition a GeoParquet file by string column values.
+
+    Creates separate GeoParquet files based on distinct values in the specified column.
+    When --chars is provided, partitions by the first N characters of the column values.
+
+    Use --preview to see what partitions would be created without actually creating files.
+
+    Examples:
+
+        # Preview partitions by first character of MGRS codes
+        gpio partition string input.parquet --column MGRS --chars 1 --preview
+
+        # Partition by full column values
+        gpio partition string input.parquet output/ --column category
+
+        # Partition by first character of MGRS codes
+        gpio partition string input.parquet output/ --column mgrs --chars 1
+
+        # Use Hive-style partitioning
+        gpio partition string input.parquet output/ --column region --hive
+    """
+    # If preview mode, output_folder is not required
+    if not preview and not output_folder:
+        raise click.UsageError("OUTPUT_FOLDER is required unless using --preview")
+
+    partition_by_string_impl(
+        input_parquet,
+        output_folder,
+        column,
+        chars,
+        hive,
+        overwrite,
+        preview,
+        preview_limit,
+        verbose,
+        force,
+        skip_analysis,
+        prefix,
+    )
+
+
+@partition.command(name="h3")
+@click.argument("input_parquet")
+@click.argument("output_folder", required=False)
+@click.option(
+    "--h3-name",
+    default="h3_cell",
+    help="Name of H3 column to partition by (default: h3_cell)",
+)
+@click.option(
+    "--resolution",
+    type=click.IntRange(0, 15),
+    default=9,
+    help="H3 resolution for partitioning (0-15, default: 9)",
+)
+@click.option(
+    "--keep-h3-column",
+    is_flag=True,
+    help="Keep the H3 column in output files (default: excluded for non-Hive, included for Hive)",
+)
+@partition_options
+@verbose_option
+def partition_h3(
+    input_parquet,
+    output_folder,
+    h3_name,
+    resolution,
+    keep_h3_column,
+    hive,
+    overwrite,
+    preview,
+    preview_limit,
+    force,
+    skip_analysis,
+    prefix,
+    verbose,
+):
+    """Partition a GeoParquet file by H3 cells at specified resolution.
+
+    Creates separate GeoParquet files based on H3 cell prefixes at the specified resolution.
+    If the H3 column doesn't exist, it will be automatically added before partitioning.
+
+    By default, the H3 column is excluded from output files (since it's redundant with the
+    partition path) unless using Hive-style partitioning. Use --keep-h3-column to explicitly
+    keep the column in all cases.
+
+    Use --preview to see what partitions would be created without actually creating files.
+
+    Examples:
+
+        # Preview partitions at resolution 7 (~5km² cells)
+        gpio partition h3 input.parquet --resolution 7 --preview
+
+        # Partition by H3 cells at default resolution 9 (H3 column excluded from output)
+        gpio partition h3 input.parquet output/
+
+        # Partition with H3 column kept in output files
+        gpio partition h3 input.parquet output/ --keep-h3-column
+
+        # Partition with custom H3 column name
+        gpio partition h3 input.parquet output/ --h3-name my_h3
+
+        # Use Hive-style partitioning at resolution 8 (H3 column included by default)
+        gpio partition h3 input.parquet output/ --resolution 8 --hive
+    """
+    # If preview mode, output_folder is not required
+    if not preview and not output_folder:
+        raise click.UsageError("OUTPUT_FOLDER is required unless using --preview")
+
+    # Convert flag to None if not explicitly set, so implementation can determine default
+    keep_h3_col = True if keep_h3_column else None
+
+    partition_by_h3_impl(
+        input_parquet,
+        output_folder,
+        h3_name,
+        resolution,
+        hive,
+        overwrite,
+        preview,
+        preview_limit,
+        verbose,
+        keep_h3_col,
+        force,
+        skip_analysis,
+        prefix,
+    )
+
+
+@partition.command(name="kdtree")
+@click.argument("input_parquet")
+@click.argument("output_folder", required=False)
+@click.option(
+    "--kdtree-name",
+    default="kdtree_cell",
+    help="Name of KD-tree column to partition by (default: kdtree_cell)",
+)
+@click.option(
+    "--partitions",
+    default=None,
+    type=int,
+    help="Explicit partition count (must be power of 2: 2, 4, 8, ...). Overrides default auto mode.",
+)
+@click.option(
+    "--auto",
+    default=None,
+    type=int,
+    help="Auto-select partitions targeting N rows/partition. Default: 120,000.",
+)
+@click.option(
+    "--approx",
+    default=100000,
+    type=int,
+    help="Use approximate computation by sampling N points (default: 100000). Mutually exclusive with --exact.",
+)
+@click.option(
+    "--exact",
+    is_flag=True,
+    help="Use exact median computation on full dataset (slower but deterministic). Mutually exclusive with --approx.",
+)
+@click.option(
+    "--keep-kdtree-column",
+    is_flag=True,
+    help="Keep the KD-tree column in output files (default: excluded for non-Hive, included for Hive)",
+)
+@partition_options
+@verbose_option
+def partition_kdtree(
+    input_parquet,
+    output_folder,
+    kdtree_name,
+    partitions,
+    auto,
+    approx,
+    exact,
+    keep_kdtree_column,
+    hive,
+    overwrite,
+    preview,
+    preview_limit,
+    force,
+    skip_analysis,
+    prefix,
+    verbose,
+):
+    """Partition a GeoParquet file by KD-tree cells.
+
+    Creates separate files based on KD-tree partition IDs. If the KD-tree column doesn't
+    exist, it will be automatically added. Partition count must be a power of 2.
+
+    By default, auto-selects partitions targeting ~120k rows each using approximate mode
+    (O(n) with 100k sample). Use --partitions N for explicit control or --exact for
+    deterministic computation.
+
+    Performance Note: Approximate mode is O(n), exact mode is O(n × log2(partitions)).
+
+    Use --verbose to track progress with iteration-by-iteration updates.
+
+    Examples:
+
+        # Preview with auto-selected partitions
+        gpio partition kdtree input.parquet --preview
+
+        # Partition with explicit partition count
+        gpio partition kdtree input.parquet output/ --partitions 32
+
+        # Partition with exact computation
+        gpio partition kdtree input.parquet output/ --partitions 32 --exact
+
+        # Partition with custom sample size
+        gpio partition kdtree input.parquet output/ --approx 200000
+    """
+    # Validate mutually exclusive options
+    import math
+
+    if sum([partitions is not None, auto is not None]) > 1:
+        raise click.UsageError("--partitions and --auto are mutually exclusive")
+
+    # Set defaults
+    if partitions is None and auto is None:
+        auto = 120000  # Default: auto-select targeting 120k rows/partition
+
+    # Validate partitions if specified
+    if partitions is not None:
+        if partitions < 2 or (partitions & (partitions - 1)) != 0:
+            raise click.UsageError(
+                f"Partitions must be a power of 2 (2, 4, 8, ...), got {partitions}"
+            )
+        iterations = int(math.log2(partitions))
+    else:
+        iterations = None  # Will be computed in auto mode
+
+    # Validate mutually exclusive options for approx/exact
+    if exact and approx != 100000:
+        raise click.UsageError("--approx and --exact are mutually exclusive")
+
+    # Determine sample size
+    sample_size = None if exact else approx
+
+    # Prepare auto_target if in auto mode
+    if auto is not None:
+        target_rows = auto if auto > 0 else 120000
+        auto_target = ("rows", target_rows)
+    else:
+        auto_target = None
+
+    # If preview mode, output_folder is not required
+    if not preview and not output_folder:
+        raise click.UsageError("OUTPUT_FOLDER is required unless using --preview")
+
+    # Convert flag to None if not explicitly set, so implementation can determine default
+    keep_kdtree_col = True if keep_kdtree_column else None
+
+    partition_by_kdtree_impl(
+        input_parquet,
+        output_folder,
+        kdtree_name,
+        iterations,
+        hive,
+        overwrite,
+        preview,
+        preview_limit,
+        verbose,
+        keep_kdtree_col,
+        force,
+        skip_analysis,
+        sample_size,
+        auto_target,
+        prefix,
+    )
+
+
+# STAC commands
+def _check_output_stac_item(output_path, output: str, overwrite: bool) -> None:
+    """Check if output already exists and is a STAC Item, handle overwrite."""
+
+    from geoparquet_io.core.stac import detect_stac
+
+    if not output_path.exists():
+        return
+
+    existing_stac_type = detect_stac(str(output_path))
+    if existing_stac_type == "Item":
+        if not overwrite:
+            raise click.ClickException(
+                f"Output file already exists and is a STAC Item: {output}\n"
+                "Use --overwrite to overwrite the existing file."
+            )
+        click.echo(
+            click.style(
+                f"⚠️  Overwriting existing STAC Item: {output}",
+                fg="yellow",
+            )
+        )
+
+
+def _check_output_stac_collection(output_path, collection_file, overwrite: bool) -> None:
+    """Check if output directory already contains a STAC Collection, handle overwrite."""
+
+    from geoparquet_io.core.stac import detect_stac
+
+    if not collection_file.exists():
+        return
+
+    existing_stac_type = detect_stac(str(collection_file))
+    if existing_stac_type == "Collection":
+        if not overwrite:
+            raise click.ClickException(
+                f"Output directory already contains a STAC Collection: {collection_file}\n"
+                "Use --overwrite to overwrite the existing collection and items."
+            )
+        click.echo(
+            click.style(
+                f"⚠️  Overwriting existing STAC Collection: {collection_file}",
+                fg="yellow",
+            )
+        )
+
+
+def _handle_stac_item(
+    input_path,
+    output: str,
+    bucket: str,
+    public_url: str,
+    item_id: str,
+    overwrite: bool,
+    verbose: bool,
+) -> None:
+    """Handle STAC Item generation for single file."""
+    from pathlib import Path
+
+    from geoparquet_io.core.stac import generate_stac_item, write_stac_json
+
+    if verbose:
+        click.echo(f"Generating STAC Item for {input_path}")
+
+    output_path = Path(output)
+    _check_output_stac_item(output_path, output, overwrite)
+
+    item_dict = generate_stac_item(str(input_path), bucket, public_url, item_id, verbose)
+    write_stac_json(item_dict, output, verbose)
+    click.echo(f"✓ Created STAC Item: {output}")
+
+
+def _handle_stac_collection(
+    input_path,
+    output: str,
+    bucket: str,
+    public_url: str,
+    collection_id: str,
+    overwrite: bool,
+    verbose: bool,
+) -> None:
+    """Handle STAC Collection generation for partitioned directory."""
+    from pathlib import Path
+
+    from geoparquet_io.core.stac import generate_stac_collection, write_stac_json
+
+    if verbose:
+        click.echo(f"Generating STAC Collection for {input_path}")
+
+    # For collections, output can be:
+    # 1. A directory path (write collection.json there, items alongside parquet files)
+    # 2. None/same as input (write in-place alongside data)
+    input_path_obj = Path(input_path)
+
+    # Determine where to write collection.json
+    if output:
+        output_path = Path(output)
+        collection_file = output_path / "collection.json"
+    else:
+        # Write in-place
+        output_path = input_path_obj
+        collection_file = output_path / "collection.json"
+
+    _check_output_stac_collection(output_path, collection_file, overwrite)
+
+    collection_dict, item_dicts = generate_stac_collection(
+        str(input_path), bucket, public_url, collection_id, verbose
+    )
+
+    # Create output directory if needed
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    # Write collection
+    write_stac_json(collection_dict, str(collection_file), verbose)
+
+    # Write items alongside their parquet files in the input directory
+    # This follows STAC best practice of co-locating metadata with data
+    for item_dict in item_dicts:
+        item_id = item_dict["id"]
+        # Find the parquet file in input directory
+        parquet_file = input_path_obj / f"{item_id}.parquet"
+        if not parquet_file.exists():
+            # Check for hive-style partitions
+            hive_partitions = list(input_path_obj.glob(f"*/{item_id}.parquet"))
+            if hive_partitions:
+                parquet_file = hive_partitions[0]
+
+        # Write item JSON next to parquet file
+        item_file = parquet_file.parent / f"{item_id}.json"
+
+        # Check if we need to overwrite
+        if item_file.exists() and not overwrite:
+            from geoparquet_io.core.stac import detect_stac
+
+            if detect_stac(str(item_file)):
+                raise click.ClickException(
+                    f"STAC Item already exists: {item_file}\nUse --overwrite to replace it."
+                )
+
+        write_stac_json(item_dict, str(item_file), verbose)
+
+    click.echo(f"✓ Created STAC Collection: {collection_file}")
+    click.echo(f"✓ Created {len(item_dicts)} STAC Items alongside data files in {input_path}")
+
+
+@cli.command()
+@click.argument("input", type=click.Path(exists=True))
+@click.argument("output", type=click.Path())
+@click.option(
+    "--bucket",
+    required=True,
+    help="S3 bucket prefix for asset hrefs (e.g., s3://source.coop/org/dataset/)",
+)
+@click.option(
+    "--public-url",
+    help="Optional public HTTPS URL for assets (e.g., https://data.source.coop/org/dataset/)",
+)
+@click.option("--collection-id", help="Custom collection ID (for partitioned datasets)")
+@click.option("--item-id", help="Custom item ID (for single files)")
+@click.option(
+    "--overwrite",
+    is_flag=True,
+    help="Overwrite existing STAC files in output location",
+)
+@verbose_option
+def stac(input, output, bucket, public_url, collection_id, item_id, overwrite, verbose):
+    """
+    Generate STAC Item or Collection from GeoParquet file(s).
+
+    Single file → STAC Item JSON
+
+    Partitioned directory → STAC Collection + Items (co-located with data)
+
+    For partitioned datasets, Items are written alongside their parquet files
+    following STAC best practices. collection.json is written to OUTPUT.
+
+    Automatically detects PMTiles overview files and includes them as assets.
+
+    Examples:
+
+      \b
+      # Single file
+      gpio stac input.parquet output.json --bucket s3://my-bucket/roads/
+
+      \b
+      # Partitioned dataset - Items written next to parquet files
+      gpio stac partitions/ . --bucket s3://my-bucket/roads/
+
+      \b
+      # With public URL mapping
+      gpio stac data.parquet output.json \\
+        --bucket s3://my-bucket/roads/ \\
+        --public-url https://data.example.com/roads/
+    """
+    from pathlib import Path
+
+    from geoparquet_io.core.stac import (
+        detect_stac,
+    )
+
+    input_path = Path(input)
+
+    # Check if input is already a STAC file/collection
+    stac_type = detect_stac(str(input_path))
+    if stac_type:
+        raise click.ClickException(
+            f"Input is already a STAC {stac_type}: {input}\n"
+            f"Use 'gpio check stac {input}' to validate it, or provide a GeoParquet file/directory."
+        )
+
+    if input_path.is_file():
+        _handle_stac_item(input_path, output, bucket, public_url, item_id, overwrite, verbose)
+    elif input_path.is_dir():
+        _handle_stac_collection(
+            input_path, output, bucket, public_url, collection_id, overwrite, verbose
+        )
+    else:
+        raise click.BadParameter(f"Input must be file or directory: {input}")
+
+
+@check.command(name="stac")
+@click.argument("stac_file", type=click.Path(exists=True))
+@verbose_option
+def check_stac_cmd(stac_file, verbose):
+    """
+    Validate STAC Item or Collection JSON.
+
+    Checks:
+
+      • STAC spec compliance
+
+      • Required fields
+
+      • Asset href resolution (local files)
+
+      • Best practices
+
+    Example:
+
+      \b
+      gpio check stac output.json
+    """
+    from geoparquet_io.core.stac_check import check_stac
+
+    check_stac(stac_file, verbose)
+
+
+if __name__ == "__main__":
+    cli()
