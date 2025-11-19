@@ -1,0 +1,239 @@
+# Git Repo Manager (v0.5.0)
+
+**Git Repo Manager** - A TUI-based tool for managing multiple Git repositories in one place with an intuitive interface.
+
+> **Note**: The name "GORO" stands for "Git Repo Manager" - a powerful tool to help you manage all your Git repositories from one place.
+
+## Features (v0.4.1)
+
+- **Improved CLI Experience**
+  - Launch TUI by default when running `goro` without arguments
+  - Maintained backward compatibility with `goro ui`
+  - Maintained backward compatibility with `goro ui`
+  - More intuitive command structure
+
+## Features (v0.4.0)
+
+- **Project Rename**
+  - Renamed project from 'app' to 'goro' for better clarity
+  - Updated all internal imports and references
+  - Improved project structure and organization
+
+## Features (v0.3.8)
+
+- **New Edit Command**
+  - Added `goro edit <repo>` for interactive editing
+  - Support for renaming repositories with `--name`
+  - Update repository paths with `--path`
+  - Case-insensitive repository name matching
+  - Interactive confirmation prompts (can be skipped with `--force`)
+
+- **New Sync Commands**
+  - Added `goro sync <repo>` to sync a specific repository
+  - Added `goro sync-all` to sync all tracked repositories
+  - Async operations with progress indicators
+  - Case-insensitive repository name matching
+  - Improved output formatting and error handling
+
+## Features (v0.3.7)
+
+- **Sync Dialog Improvements**
+  - Simplified command output handling
+  - Removed redundant error checking for cleaner output
+  - Adjusted margins and spacing for better readability
+  - More consistent command output formatting
+
+## Features (v0.3.6)
+
+- **UI Improvements**
+  - Streamlined repository dialog with cleaner input fields
+  - Removed redundant labels in favor of placeholders
+  - Improved visual hierarchy in form elements
+
+## Features (v0.3.5)
+
+- Improved error handling in repository sync
+  - Removed redundant error checking that could cause false negatives
+  - Streamlined error reporting for better user experience
+  - More reliable sync operation completion detection
+
+## Features (v0.3.4)
+
+- Added 'Show Status' feature to view git status of selected repository
+  - Press 't' to show git status for the selected repository
+  - Displays detailed status information in a dialog
+  - Shows both staged and unstaged changes
+  - Includes branch information and working tree status
+
+## Features (v0.3.3)
+
+- Added commit step to sync all repositories flow
+- Consistent behavior between single and multiple repository sync
+
+## Features (v0.3.2)
+
+- Added automatic commit during sync operations
+- Fixed command syntax for better compatibility
+
+## Features (v0.3.1)
+
+- Enhanced single repository sync with detailed status bar logging
+- Real-time output of git commands (add, pull, push)
+- Added clear logs functionality with 'c' key binding
+- Improved error handling and user feedback
+
+## Features (v0.3.0)
+
+- Added sync all repositories feature with live command output
+- New modal dialog showing real-time git command execution
+- Automatic git add, pull, and push for all repositories
+- Progress tracking and error handling
+
+## Features (v0.2.9)
+
+- Fixed status dialog layout and close button visibility
+- Improved dialog styling to match application theme
+- Enhanced button positioning and interaction
+
+## Features (v0.2.8)
+
+- Added compact status dialog for repository status checks
+- Improved dialog styling and layout
+- Added keyboard shortcuts for better accessibility
+- Enhanced error handling for git operations
+
+## Features (v0.2.7)
+
+- Refactored project structure for better organization
+  - Renamed main module from `goro` to `app`
+- Updated all imports and configurations to reflect the new structure
+- Fixed version display in the CLI
+
+## Features (v0.2.6)
+
+- Adjusted dialog dimensions for better proportions
+- Fixed dialog content layout and spacing
+- Improved overall modal appearance and usability
+
+## Features (v0.2.5)
+
+## Features (v0.2.4)
+
+- Fixed dialog border and layout issues
+- Improved dialog centering and spacing
+- Enhanced visual consistency across the application
+
+## Features (v0.2.3)
+
+- Consolidated Add/Edit repository dialogs into a single unified dialog
+- Improved code maintainability by reducing duplication
+- Fixed dialog positioning and styling issues
+
+## Features (v0.2.2)
+
+- Enhanced repository name validation to allow more special characters
+- Improved error messages for invalid repository names
+- Added length validation for repository names (1-100 characters)
+
+## Features (v0.2.1)
+
+- Fixed dialog styling and layout issues
+- Improved error message visibility
+- Consistent dialog behavior across the application
+
+## Features (v0.2.0)
+
+- Track multiple Git repositories
+- Intuitive TUI interface with repository list and details view
+- View repository status and details at a glance
+- Add, edit, and remove repositories with ease
+- Interactive dialogs for repository management
+- Status bar with current operation feedback
+- Cross-platform support (Windows, Linux, macOS)
+- Plugin system for extending functionality (coming soon)
+
+## Installation
+
+1. Make sure you have Python 3.8+ installed
+2. Install `uv` (recommended) or use `pip`
+
+### Using uv (recommended)
+
+```bash
+# Create and activate a virtual environment
+uv venv
+.venv\Scripts\activate  # Windows
+source .venv/bin/activate  # Linux/macOS
+
+# Install in development mode
+uv pip install -e ".[dev]"
+```
+
+### Using pip
+
+```bash
+# Create and activate a virtual environment
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+source .venv/bin/activate  # Linux/macOS
+
+# Install in development mode
+pip install -e ".[dev]"
+```
+
+## Usage
+
+### Command Line Interface
+
+```bash
+# Initialize configuration
+goro init
+
+# Add a repository
+goro add my-repo ~/projects/my-repo
+
+# List repositories
+goro list
+
+# Show status of a specific repository
+goro status my-repo
+
+# Show status of all repositories
+goro status-all
+
+# Sync a specific repository
+goro sync my-repo
+
+# Sync all repositories
+goro sync-all
+
+# Edit a repository (interactive mode)
+goro edit my-repo
+
+# Rename a repository
+goro edit my-repo --name new-name
+
+# Update repository path
+goro edit my-repo --path /new/path
+
+# Remove a repository
+goro remove my-repo
+
+# Launch TUI
+goro  # or 'goro ui' for explicit TUI launch
+```
+
+### TUI Controls
+
+- `a`: Add repository
+- `r`: Remove repository
+- `s`: Sync current repository
+- `S` (Shift+s): Sync all repositories
+- `F2`: Edit repository
+- `t`: Show git status
+- `c`: Clear status logs
+- `q`: Quit
+
+## License
+
+MIT
