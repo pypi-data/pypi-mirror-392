@@ -1,0 +1,361 @@
+# Realtime ASR SDK
+
+A Python SDK designed for real-time speech transcription over WebSocket, offering a simple and reliable interface for integrating real-time ASR (Automatic Speech Recognition) capabilities into your applications.
+
+## Features
+
+- WebSocket-based real-time audio streaming
+- Microphone audio capture and processing
+- Support for multiple audio formats (8kHz - 44.1kHz)
+- Word-level timestamps
+- Multiple language support
+- Event-driven architecture with callbacks
+- Easy integration with existing Python applications
+
+## Installation
+
+### Basic Installation
+
+```bash
+pip install -r requirements.txt
+```
+
+### Development Installation
+
+```bash
+pip install -e .
+```
+
+### Installing with Audio Support
+
+For microphone capture functionality:
+
+```bash
+pip install -r requirements.txt
+# or
+pip install -e ".[audio]"
+```
+
+**Note:** PyAudio installation may require additional system dependencies:
+
+**macOS:**
+```bash
+brew install portaudio
+pip install pyaudio
+```
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get install portaudio19-dev python3-pyaudio
+pip install pyaudio
+```
+
+**Windows:**
+```bash
+pip install pipwin
+pipwin install pyaudio
+```
+
+## Quick Start
+
+### Simple Example
+
+```python
+from realtime_asr import RealtimeASRClient, AudioStream, AudioFormat
+
+# Create client
+client = RealtimeASRClient(
+    ws_url="ws://localhost:8081/asr/realtime",
+    api_key="your-api-key",
+    model_id="echo_v1_realtime",
+    audio_format=AudioFormat.PCM_16000,
+)
+
+# Set up callbacks
+client.on_partial_transcript = lambda msg: print(f"[Partial] {msg.text}")
+client.on_committed_transcript = lambda msg: print(f"[Final] {msg.text}")
+client.on_error = lambda msg: print(f"[Error] {msg.error}")
+
+# Connect
+client.connect()
+
+# Stream from microphone
+with AudioStream(audio_format=AudioFormat.PCM_16000) as stream:
+    stream.start(lambda audio_data: client.send_audio(audio_data))
+    input("Press Enter to stop...")
+
+# Disconnect
+client.disconnect()
+```
+
+### Streaming from Microphone
+
+```python
+import logging
+from realtime_asr import RealtimeASRClient, AudioStream, AudioFormat, CommitStrategy
+
+logging.basicConfig(level=logging.INFO)
+
+# Create and configure client
+client = RealtimeASRClient(
+    ws_url="ws://localhost:8081/asr/realtime",
+    api_key="your-api-key",
+    model_id="echo_v1_realtime",
+    language="en",  # or None for auto-detect
+    audio_format=AudioFormat.PCM_16000,
+    commit_mode=CommitStrategy.VAD,
+    word_timestamps=True,
+)
+
+# Define event handlers
+def on_session_started(msg):
+    print(f"Session ID: {msg.session_id}")
+
+def on_partial_transcript(msg):
+    if msg.text.strip():
+        print(f"[Partial] {msg.text}")
+
+def on_committed_transcript_with_timestamps(msg):
+    if msg.text.strip():
+        print(f"[Final] {msg.text}")
+        if msg.words:
+            duration = msg.words[-1].end - msg.words[0].start
+            print(f"  → {len(msg.words)} words, {duration:.2f}s")
+
+def on_error(msg):
+    print(f"Error: {msg.error}")
+
+# Register callbacks
+client.on_session_started = on_session_started
+client.on_partial_transcript = on_partial_transcript
+client.on_committed_transcript_with_timestamps = on_committed_transcript_with_timestamps
+client.on_error = on_error
+
+# Connect and stream
+client.connect()
+
+audio_stream = AudioStream(audio_format=AudioFormat.PCM_16000)
+audio_stream.start(lambda audio_data: client.send_audio(audio_data))
+
+try:
+    input("Press Enter to stop recording...\n")
+except KeyboardInterrupt:
+    pass
+
+# Cleanup
+audio_stream.stop()
+client.disconnect()
+```
+
+## API Reference
+
+### RealtimeASRClient
+
+Main client class for WebSocket communication.
+
+#### Constructor Parameters
+
+- `ws_url` (str): WebSocket server URL
+- `api_key` (str): API key for authentication
+- `model_id` (str): Model ID (e.g., "echo_v1_realtime", "lexis_v1")
+- `language` (Optional[str]): Language code (e.g., "en", "zh", "ja") or None for auto-detect
+- `audio_format` (AudioFormat): Audio format specification
+- `commit_mode` (CommitStrategy): Commit strategy (VAD or MANUAL)
+- `word_timestamps` (bool): Whether to request word-level timestamps
+
+#### Methods
+
+- `connect(timeout: float = 10.0)`: Connect to WebSocket server
+- `disconnect()`: Disconnect from server
+- `send_audio(audio_data: bytes, commit: bool = False)`: Send audio chunk
+- `is_connected`: Property to check connection status
+- `session_id`: Property to get current session ID
+
+#### Event Callbacks
+
+- `on_session_started(msg: SessionStartedMessage)`: Called when session starts
+- `on_partial_transcript(msg: PartialTranscriptMessage)`: Called for partial transcripts
+- `on_committed_transcript(msg: CommittedTranscriptMessage)`: Called for final transcripts
+- `on_committed_transcript_with_timestamps(msg: CommittedTranscriptWithTimestampsMessage)`: Called for final transcripts with timestamps
+- `on_error(msg: ErrorMessage)`: Called on errors
+- `on_message(msg: TranscriptionMessage)`: Called for any message
+- `on_connected()`: Called when connected
+- `on_disconnected(code: int, reason: str)`: Called when disconnected
+
+### AudioStream
+
+Audio stream handler for microphone capture.
+
+#### Constructor Parameters
+
+- `audio_format` (AudioFormat): Audio format specification
+- `chunk_size` (int): Number of frames per buffer (default: 4096)
+- `channels` (int): Number of audio channels (default: 1)
+
+#### Methods
+
+- `start(callback: Callable[[bytes], None])`: Start audio capture
+- `stop()`: Stop audio capture
+- `close()`: Close and cleanup resources
+
+### AudioFormat
+
+Enum for supported audio formats:
+
+- `PCM_8000`: 8kHz PCM
+- `PCM_16000`: 16kHz PCM (recommended)
+- `PCM_22050`: 22.05kHz PCM
+- `PCM_24000`: 24kHz PCM
+- `PCM_44100`: 44.1kHz PCM
+
+### CommitStrategy
+
+Enum for commit strategies:
+
+- `VAD`: Voice Activity Detection (automatic)
+- `MANUAL`: Manual commit
+
+## Message Types
+
+### SessionStartedMessage
+
+```python
+@dataclass
+class SessionStartedMessage:
+    message_type: str
+    session_id: Optional[str]
+    raw_data: Dict[str, Any]
+```
+
+### PartialTranscriptMessage
+
+```python
+@dataclass
+class PartialTranscriptMessage:
+    message_type: str
+    text: str
+    raw_data: Dict[str, Any]
+```
+
+### CommittedTranscriptMessage
+
+```python
+@dataclass
+class CommittedTranscriptMessage:
+    message_type: str
+    text: str
+    raw_data: Dict[str, Any]
+```
+
+### CommittedTranscriptWithTimestampsMessage
+
+```python
+@dataclass
+class CommittedTranscriptWithTimestampsMessage:
+    message_type: str
+    text: str
+    words: List[WordTimestamp]
+    raw_data: Dict[str, Any]
+
+@dataclass
+class WordTimestamp:
+    word: str
+    start: float
+    end: float
+```
+
+### ErrorMessage
+
+```python
+@dataclass
+class ErrorMessage:
+    message_type: str
+    error: str
+    raw_data: Dict[str, Any]
+```
+
+## Examples
+
+The `examples/` directory contains several example scripts:
+
+1. **simple_example.py**: Basic usage demonstration
+2. **stream_from_mic.py**: Full-featured microphone streaming with interactive options
+3. **send_audio_file.py**: Send pre-recorded WAV file for transcription
+
+Run examples:
+
+```bash
+python examples/simple_example.py
+python examples/stream_from_mic.py
+python examples/send_audio_file.py
+```
+
+## Supported Languages
+
+The SDK supports multiple languages including:
+
+- English (en)
+- Chinese (zh)
+- Japanese (ja)
+- Korean (ko)
+- Spanish (es)
+- French (fr)
+- German (de)
+- Russian (ru)
+- Arabic (ar)
+- Portuguese (pt)
+- And more...
+
+Set `language=None` for automatic language detection.
+
+## Error Handling
+
+The SDK provides comprehensive error handling through callbacks:
+
+```python
+def on_error(msg):
+    print(f"Error type: {msg.message_type}")
+    print(f"Error message: {msg.error}")
+
+client.on_error = on_error
+```
+
+Common error types:
+- `error`: General error
+- `auth_error`: Authentication failed
+- `quota_exceeded_error`: API quota exceeded
+- `unaccepted_terms`: Terms of service not accepted
+
+## Requirements
+
+- Python 3.8+
+- websocket-client >= 1.6.0
+- numpy >= 1.24.0
+- PyAudio >= 0.2.13 (for microphone capture)
+
+## License
+
+MIT License
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Support
+
+For issues and questions:
+- Create an issue on GitHub
+- Check the examples directory for usage patterns
+- Review the API documentation above
+
+## Changelog
+
+### Version 0.1.0
+
+- Initial release
+- WebSocket client implementation
+- Audio streaming support
+- Event-driven callbacks
+- Multiple audio format support
+- Word-level timestamps
+- Example scripts
