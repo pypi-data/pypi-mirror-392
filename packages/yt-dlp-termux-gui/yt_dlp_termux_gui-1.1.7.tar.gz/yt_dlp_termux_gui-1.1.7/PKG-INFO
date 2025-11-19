@@ -1,0 +1,136 @@
+Metadata-Version: 2.4
+Name: yt-dlp-termux-gui
+Version: 1.1.7
+Summary: Simple yet useful Termux GUI for yt-dlp.
+Author: tochi
+License: MIT
+Project-URL: Homepage, https://github.com/tochiResources/yt-dlp-termux-gui
+Project-URL: Source, https://github.com/tochiResources/yt-dlp-termux-gui
+Keywords: termux,android,gui,python
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: Android
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Intended Audience :: Developers
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: termuxgui==0.1.6
+Dynamic: license-file
+
+<p align="center">
+  <img src="https://img.shields.io/pypi/pyversions/yt-dlp-termux-gui" alt="required python version">
+  <a href="https://pypi.org/project/yt-dlp-termux-gui/"><img src="https://img.shields.io/pypi/v/yt-dlp-termux-gui" alt="required python version"></a>
+</p>
+
+<p align="center">
+  Simple yet useful Termux GUI for <a href="https://github.com/yt-dlp/yt-dlp">yt-dlp</a>.
+</p>
+
+<p align="center">
+  <img src="https://i.imgur.com/yuice0z.png" alt="preview 1" width="300px">
+</p>
+
+## Prerequisites
+
+These must be installed before using `yt-dlp-termux-gui`:
+
+- [Termux](https://termux.dev)
+- [Termux:Widget Plugin](https://github.com/termux/termux-widget)
+- [Termux:GUI Plugin](https://github.com/termux/termux-gui)
+
+## Installation
+
+```bash
+pip install yt-dlp-termux-gui --upgrade
+```
+
+## How to use (declarative)
+
+```python
+import yt_dlp_termux_gui
+
+
+# launch the GUI
+yt_dlp_termux_gui.launch()
+
+# get settings
+yt_dlp_termux_gui.settings = get_settings()
+
+# reset settings
+yt_dlp_termux_gui.reset_settings()
+
+# get settings file path
+yt_dlp_termux_gui.settings_path = SETTINGS_PATH
+
+# get widget name (yt-dlp-gui.sh)
+yt_dlp_termux_gui.widget_name = WIDGET_SCRIPT_NAME
+
+# get widget title (YT-DLP TERMUX GUI)
+yt_dlp_termux_gui.widget_title = WIDGET_TITLE
+
+# create Termux:Widget shortcut
+yt_dlp_termux_gui.ensure_termux_widget(force=True)
+
+# check if running inside Termux
+yt_dlp_termux_gui.is_termux = detect_termux()
+
+# ensure dependencies are installed
+#
+# IMPORTANT:
+# the plugins 'Termux:GUI' and 'Termux:Widget'
+# must be installed the same way as Termux was installed
+# Termux:GUI --> https://github.com/termux/termux-gui
+# Termux:Widget --> https://github.com/termux/termux-widget
+yt_dlp_termux_gui.ensure_packages(force=True)
+```
+
+## How to use (CLI)
+
+```bash
+Usage: yt-dlp-termux-gui [OPTIONS...] [COMMAND]
+
+Commands:
+deps --> Ensure dependencies (install missing packages)
+launch --> Launch the GUI
+widget --> Ensure Termux:Widget shortcut for the GUI
+
+Options:
+--verbose <silent|debug|info|warning|error|critical> --> Set logging level
+--silent --> Disable ALL GUI logs in Termux
+--widget-name --> Print widget name
+--widget-script-name --> Print widget script filename
+--settings --> Print current settings
+--settings-path --> Print settings path
+--settings-reset --> Reset settings
+-h, --help --> Show this help message
+-v, -V, --version --> Print version
+
+Options [deps]:
+--force --> Overwrite 'curl-impersonate' compiled binaries if they already exist
+
+Options [launch]:
+--no-activity-logs --> Disable GUI activity logs in Termux
+--init-logs --> Enable GUI initialization logs in Termux by the GUI
+
+Options [widget]:
+--force --> Overwrite existing widget if it already exist
+```
+
+## Tools
+
+### Terminal
+
+- [Termux](https://termux.dev)
+  - [Termux:Widget Plugin](https://github.com/termux/termux-widget)
+  - [Termux:GUI Plugin](https://github.com/termux/termux-gui)
+
+### CLI
+
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp)
+- [termux-api](https://github.com/termux/termux-api)
+- [termuxgui](https://github.com/tareksander/termux-gui-python-bindings)
+
+### Modules
+
+- [curl_cffi](https://github.com/lexiforest/curl_cffi)
+- [curl-impersonate-android](https://github.com/T0chi/curl-impersonate-android)
