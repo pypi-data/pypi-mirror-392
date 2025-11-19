@@ -1,0 +1,135 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "parallel-llm"
+version = "0.1.0"
+description = "Ultra-fast parallel training and inference for language models"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.9"
+authors = [
+    {name = "Parallel-LLM Team", email = "contact@parallel-llm.ai"},
+]
+maintainers = [
+    {name = "Furqan Khan", email = "furqan@lastappstanding.com"},
+]
+keywords = [
+    "machine-learning",
+    "deep-learning",
+    "transformers",
+    "language-models",
+    "parallel-computing",
+    "distributed-training",
+    "diffusion-models",
+    "pytorch",
+    "cuda",
+    "gpu",
+    "llm",
+    "ai",
+    "nlp",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    # Core dependencies
+    "torch>=2.2.0",
+    "triton>=2.2.0",
+    "transformers>=4.36.0",
+    "accelerate>=0.25.0",
+    "deepspeed>=0.12.0",
+
+    # Distributed training
+
+    # Optimization
+    "flash-attn>=2.5.0",
+    "xformers>=0.0.23",
+
+    # Multimodal
+    "torchvision>=0.17.0",
+    "timm>=0.9.0",
+    "open-clip-torch>=2.24.0",
+
+    # Utilities
+    "numpy>=1.24.0",
+    "einops>=0.7.0",
+    "wandb>=0.16.0",
+    "tensorboard>=2.15.0",
+    "tqdm>=4.66.0",
+    "safetensors>=0.4.0",
+    "huggingface-hub>=0.20.0",
+
+    # Inference optimization
+    "vllm>=0.3.0",
+]
+dynamic = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "black>=23.0",
+    "flake8>=6.0",
+    "mypy>=1.0",
+    "isort>=5.12.0",
+]
+docs = [
+    "sphinx>=5.0",
+    "sphinx-rtd-theme>=1.0",
+    "myst-parser>=0.18.0",
+]
+all = [
+    # All optional dependencies
+    "pytest>=7.0",
+    "black>=23.0",
+    "flake8>=6.0",
+    "mypy>=1.0",
+    "isort>=5.12.0",
+    "sphinx>=5.0",
+    "sphinx-rtd-theme>=1.0",
+    "myst-parser>=0.18.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/furqan-y-khan/parallel-llm"
+Documentation = "https://parallel-llm.readthedocs.io/"
+Repository = "https://github.com/furqan-y-khan/parallel-llm"
+Issues = "https://github.com/furqan-y-khan/parallel-llm/issues"
+Changelog = "https://github.com/furqan-y-khan/parallel-llm/blob/main/CHANGELOG.md"
+
+[project.scripts]
+parallel-llm-train = "parallel_llm.cli:train_cli"
+parallel-llm-infer = "parallel_llm.cli:infer_cli"
+
+[tool.setuptools]
+packages = ["parallel_llm"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+parallel_llm = ["*.txt", "*.md"]
+
+[tool.black]
+line-length = 120
+target-version = ['py39', 'py310', 'py311', 'py312']
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
