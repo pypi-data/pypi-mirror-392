@@ -1,0 +1,88 @@
+# loguru-discord-sink
+
+A Loguru sink that outputs log messages to a Discord webhook.
+
+## Installation
+```shell
+pip install loguru-discord-sink
+```
+
+## Quick setup
+
+```python
+from loguru import logger
+from loguru_discord_sink import DiscordWebhookSink
+
+discord_webhook = "https://discord.com/api/webhooks/XXXX/XXXXX"
+project_name = "my-service"
+
+discord_sink = DiscordWebhookSink(discord_webhook, project_name)
+logger.add(discord_sink, level="ERROR")
+
+logger.info("This will not be sent.")
+logger.error("Something failed!")  # -> sent to Discord
+```
+
+> [!WARNING]
+>
+> This sink has **no default filtering**.
+> If you don't specify a level or set up a filter when calling `logger.add()`, **Loguru will send all log messages to Discord.**
+> This includes `DEBUG`, `INFO`, etc, which *will* saturate your webhook.
+
+
+## Sink parameters
+
+```python
+DiscordWebhookSink(
+    webhook_url: str,
+    project_name: str,
+    embed_colors: EmbedColors | None = None,
+    embed_titles: EmbedTitles | None = None,
+    discord_field_names: DiscordFieldNames | None = None
+)
+```
+
+- `webhook_url: str`
+
+Discord webhook URL where messages will  be forwarded to.
+- `project_name: str`
+Project name that will be used in the Discord default notification header.
+
+- `embed_colors: EmbedColors | None`
+Dictionary mapping to add custom colors to each Loguru log level.
+
+```python
+colors = {
+    "ERROR": "16711680",    # red
+    "SUCCESS": "65280",     # green
+}
+```
+> [!NOTE]
+>
+> Colors must be in [decimal notation](https://www.spycolor.com/), as required by the Discord API.
+
+- `embed_titles: EmbedTitles | None`
+
+Custom embed titles for each log level. `project_name` can be interpolated into these strings.
+
+```python
+titles = {
+    "ERROR": "❌ {project_name} encountered an error",
+    "SUCCESS": "✅ {project_name} finished successfully",
+}
+```
+
+
+- `discord_field_names: DiscordFieldNames | None`
+
+Titles for the fields shown inside the Discord embed
+
+```python
+field_names = {
+    "level": "Severity",
+    "function": "Func",
+    "line": "Ln",
+    "file": "Path",
+}
+
+```
