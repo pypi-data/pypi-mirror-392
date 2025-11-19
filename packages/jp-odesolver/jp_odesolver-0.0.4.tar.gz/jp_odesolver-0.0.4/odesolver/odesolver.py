@@ -1,0 +1,43 @@
+from .ode import ODE 
+from .solver import Solver
+
+import numpy as np
+
+class ODESolver:
+    """
+        Class for solving ODEs.
+    """
+
+    EULER = "euler"
+    AUTO_DIFF = "auto"
+    RUNGE_KUTTA_4 = "rk4"
+
+    def solveODE(ode:ODE, method:str, initial_conditions:list, t0:float, t_final:float, h:float) -> np.ndarray:
+        """
+            Solve an ODE.
+
+            Parameters
+            -----------------
+                ode : ODE
+                method : str
+                initial_conditions : list
+                t0 : float
+                t_final : float
+                h : float
+
+            Returns
+            -----------------
+                np.ndarray
+        """
+        if ode.get_order() != len(initial_conditions):
+            raise Exception("Amount of given initial conditions does not match order of ODE.")
+
+        match method:
+            case ODESolver.EULER:
+                return Solver.EulerSolver(ode=ode, y0=initial_conditions, t0=t0, t_final=t_final, h=h)
+            case ODESolver.AUTO_DIFF:
+                return Solver.AutoSolver(ode=ode, y0=initial_conditions, t0=t0, t_final=t_final)
+            case ODESolver.RUNGE_KUTTA_4:
+                return Solver.RungeKutta4Solver(ode=ode, y0=initial_conditions, t0=t0, t_final=t_final, h=h)
+            case _:
+                raise Exception(f"Unknown solve method: {method}")
