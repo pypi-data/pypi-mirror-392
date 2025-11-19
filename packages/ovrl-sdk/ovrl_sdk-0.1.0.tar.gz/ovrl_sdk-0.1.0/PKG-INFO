@@ -1,0 +1,170 @@
+Metadata-Version: 2.4
+Name: ovrl-sdk
+Version: 0.1.0
+Summary: Async SDK for OVRL on Stellar/Soroban with bootstrap, quoting, monitoring, and contract helpers
+Project-URL: Homepage, https://github.com/overlumens/ovrl-sdk
+Project-URL: Repository, https://github.com/overlumens/ovrl-sdk
+Project-URL: Documentation, https://overlumens.github.io/ovrl-sdk/
+Author-email: "Overlumens (github.com/overlumens)" <support@overlumens.com>, "Md Mahedi Zaman Zaber (github.com/zaber-dev)" <zaber@overlumens.com>
+License: Apache-2.0
+License-File: LICENSE
+Requires-Python: >=3.10
+Requires-Dist: aiohttp>=3.9.0
+Requires-Dist: stellar-sdk[aiohttp]>=11.0.0
+Provides-Extra: dev
+Requires-Dist: pytest-asyncio>=0.23; extra == 'dev'
+Requires-Dist: pytest-mock>=3.12; extra == 'dev'
+Requires-Dist: pytest>=8.2; extra == 'dev'
+Requires-Dist: sphinxawesome-theme>=5.1; extra == 'dev'
+Description-Content-Type: text/markdown
+
+# OVRL SDK
+
+[![PyPI](https://img.shields.io/pypi/v/ovrl-sdk.svg)](https://pypi.org/project/ovrl-sdk/)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+
+Production-ready, async-first helpers for working with the OVRL token (`OVRL`, issuer `GBZH36ATUXJZKFRMQTAAW42MWNM34SOA4N6E7DQ62V3G5NVITC3QOVRL`). This SDK layers ergonomic account management, payment flows, quoting, and Soroban integrations on top of `stellar-sdk[aiohttp]` so application developers can focus on product logic instead of Horizon plumbing.
+
+> **Audience**: Stellar/OVRL integrators who need a well-documented Python client with predictable behavior, Sphinx-ready docstrings, and runnable examples.
+
+## Table of contents
+
+1. [Highlights](#highlights)
+2. [Installation](#installation)
+3. [Quickstart](#quickstart)
+4. [Configuration & environment](#configuration--environment)
+5. [Usage recipes](#usage-recipes)
+6. [Examples](#examples)
+7. [Documentation (Sphinx)](#documentation-sphinx)
+8. [Testing & quality](#testing--quality)
+9. [Support & contributions](#support--contributions)
+10. [License](#license)
+
+## Highlights
+
+- 🪙 **Token-aware primitives** – constants, trustline helpers, and payment builders hard-code the correct OVRL asset + issuer metadata.
+- ⚙️ **Async Horizon client** – powered by `stellar-sdk[aiohttp]` with sensible defaults for rate-friendly batching.
+- ✨ **Soroban coverage** – invoke contracts, approve allowances, mint/burn, and inspect return values with `SorobanToolkit`/`SorobanTokenClient`.
+- 🚀 **Network presets** – ready-made configs for Public, Testnet, and Futurenet, complete with Friendbot URLs where available.
+-  **Operational insight** – inspect fee percentiles, circulating supply, top holders, and stream live payment events.
+- 💱 **Quoting & swaps** – convert between USD and OVRL, fetch strict send/receive paths, and submit swap transactions—all via typed helpers.
+- 🧰 **Developer ergonomics** – Sphinx-friendly docstrings, runnable example scripts, and a small helper module for common env setup.
+
+## Installation
+
+```powershell
+pip install ovrl-sdk
+```
+
+For contributors or CI environments that need the test stack:
+
+```powershell
+pip install -e .[dev]
+```
+
+> Requires Python 3.10+. The package automatically installs `stellar-sdk[aiohttp]`.
+
+## Quickstart
+
+```python
+import asyncio
+from ovrl_sdk import NetworkPresets, OVRLClient
+
+
+async def main() -> None:
+    client = OVRLClient(network=NetworkPresets.TESTNET)
+
+    await client.bootstrap_account(account_secret="SC...YOUR_SECRET...")
+    await client.pay(
+        source_secret="SC...YOUR_SECRET...",
+        destination="GD...RECIPIENT...",
+        amount="5",
+        memo="First OVRL transfer",
+    )
+
+    summary = await client.summarize_payments("GD...RECIPIENT...", max_pages=2)
+    print("Recent count:", summary.record_count, "total amount:", summary.total_amount)
+
+    price = await client.quote_ovrl_price()
+    print("Spot price per OVRL:", price)
+
+    await client.close()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+## Configuration & environment
+
+Many workflows key off the following environment variables. These are optional unless otherwise noted, but setting them keeps example scripts and CI jobs consistent.
+
+| Variable | Required | Description |
+| --- | --- | --- |
+| `OVRL_SECRET` | ✅ | Primary secret key used for signing transactions and Soroban invocations. |
+| `OVRL_DESTINATION` | ✅ for payment demos | Recipient address for payment/swap/allowance examples. |
+| `OVRL_FUNDING_SECRET` | Optional | Alternate sponsor when Friendbot is unavailable. |
+| `OVRL_CONTRACT_ID` | Soroban-only | Token contract ID consumed by `SorobanTokenClient`. |
+| `OVRL_SPENDER` | Optional | Account to approve when testing allowances (defaults to destination). |
+| `OVRL_WATCH_ACCOUNT` | Optional | Account watched by monitoring scripts; falls back to `OVRL_SECRET`'s public key. |
+| `OVRL_NETWORK` | Optional | `PUBLIC`, `TESTNET`, or `FUTURENET` (defaults to `TESTNET`). |
+| `OVRL_EXECUTE_SWAPS` | Optional | Set to `1` to actually submit swap transactions in the quotes example. |
+
+Use `examples/shared.py` for a ready-made resolver that enforces these expectations.
+
+## Usage recipes
+
+- **Account bootstrap**: `OVRLClient.bootstrap_account` funds an account (Friendbot or sponsor), creates the trustline, and returns an `AccountStatus` struct summarizing what changed.
+- **Payments & batching**: `pay` emits single transfers; `batch_pay` chunks up to 100 ops/tx and normalizes heterogeneous payloads into typed `PaymentIntent`s.
+- **Payment history**: Use `list_payments_page` + cursors for pagination or `payment_watcher` to poll and stream new records.
+- **Quoting & conversions**: `quote_ovrl_price`, `ovrl_to_usd`, `usd_to_ovrl`, and `quote_paths_*` wrap strict send/receive path endpoints and return normalized `PathQuote`s.
+- **Swaps**: `swap_from_ovrl` and `swap_to_ovrl` automatically discover intermediary assets and build strict send/receive operations.
+- **Soroban token flows**: `SorobanTokenClient` wires balances, transfers, approvals, mint/burn, and allowance inspection into single-call helpers using the shared `SorobanToolkit`.
+
+Every public API features Sphinx field-list docstrings (`:param`, `:returns:`, `:raises:`) so IDEs and doc tooling surface the same guidance.
+
+## Examples
+
+Richer, end-to-end scenarios live in [`examples/`](examples/). Each script is runnable on its own:
+
+| Script | Scenario |
+| --- | --- |
+| `bootstrap_trustline.py` | Ensure an account exists, is funded, and holds the OVRL trustline. |
+| `payments_and_batches.py` | Send individual payments, chunk batch payouts, and summarize history. |
+| `quotes_and_swaps.py` | Quote conversions and optionally execute swap transactions (opt-in via `OVRL_EXECUTE_SWAPS`). |
+| `monitoring_and_reporting.py` | Report circulating supply, fee percentiles, and watch live payments for a target account. |
+| `soroban_token_flow.py` | Exercise the Soroban token contract for balances, approvals, and transfers. |
+
+Example invocation (PowerShell):
+
+```powershell
+$env:OVRL_SECRET="SC..."; $env:OVRL_DESTINATION="GD..."; python examples\payments_and_batches.py
+```
+
+## Documentation (Sphinx)
+
+Autogenerated API docs live under `docs/` and are built with Sphinx. We ship a ready-to-use configuration (`docs/conf.py`) that enables `autodoc`, `autosummary`, and `napoleon`, mocks heavy dependencies (`stellar_sdk`, `aiohttp`), and pulls the code directly from the working tree.
+
+Build HTML docs locally:
+
+```powershell
+sphinx-build -b html docs docs\_build\html
+```
+
+The resulting site (in `docs/_build/html/index.html`) can be published to GitHub Pages or uploaded to any static host.
+
+## Testing & quality
+
+- Run automated tests: `pytest`
+- Keep docstrings Sphinx-compatible (`:param`/`:returns:`/`:raises:`) and update relevant example scripts when you change an API surface.
+- The repository follows standard `black`/`isort` formatting conventions—configure your editor to respect 4-space indents and trailing commas.
+
+## Support & contributions
+
+- File bugs or feature requests via GitHub Issues (include reproduction steps + network info).
+- Pull Requests should include: tests (when applicable), updated docstrings, and—if the change touches user flows—an example refresh.
+- For high-severity security disclosures, contact the maintainers privately before opening a public issue.
+
+## License
+
+Licensed under the [Apache License 2.0](LICENSE). You are free to use the SDK in commercial or open-source projects, but derivative works must retain the original copyright and license notices.
