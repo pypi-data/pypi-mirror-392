@@ -1,0 +1,89 @@
+Metadata-Version: 2.4
+Name: damaged-reads-simulator
+Version: 0.1.0
+Summary: A simulator for damaged DNA reads with base quality recalibration
+Home-page: https://github.com/nebiolabs/damaged_reads_simulator
+Author: Ariel Erijman (NEB Labs) 
+Author-email: Ariel Erijman <aerijman@neb.com>, Brad Langhorst <langhorst@neb.com>
+Project-URL: Homepage, https://github.com/nebiolabs/damaged_reads_simulator
+Project-URL: Repository, https://github.com/nebiolabs/damaged_reads_simulator
+Project-URL: Issues, https://github.com/nebiolabs/damaged_reads_simulator/issues
+Keywords: bioinformatics,dna,sequencing,simulation,base-quality
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: numpy
+Requires-Dist: scipy
+Requires-Dist: pandas
+Requires-Dist: matplotlib
+Requires-Dist: seaborn
+Requires-Dist: biopython
+Requires-Dist: fast_string_replace
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: pytest-cov; extra == "dev"
+Requires-Dist: black; extra == "dev"
+Requires-Dist: flake8; extra == "dev"
+Requires-Dist: mypy; extra == "dev"
+Dynamic: author
+Dynamic: home-page
+Dynamic: requires-python
+
+# reads_simulator
+Simulates NGS sequenced reads
+
+## Installation
+```
+python3 -m venv readsim_env
+source readsim_env/bin/activate
+
+pip install fast_string_replace numpy
+```
+for prototyping with marimo:
+```
+pip install marimo matplotlib seaborn
+```
+
+## Usage
+```
+python ../generate_reference_and_reads.py <parameters.info>
+```
+
+where parameters.info file should be as follows.
+```
+# SYNTAX IS IMPORTANT
+# LInes starting with # are comments
+# name of the parameter: value
+# : not = | where True/False first letter is uppercase.
+random seed: 402
+
+# GENOME SIMULATION PARAMETERS
+reference file path: None
+generate reference: True
+GC percentage: 40
+length of contigs: 1000000,10000,50000,200000 
+
+# READS SIMULATION PARAMETERS
+number of reads: 100000
+read_length: 76
+insert length: 100
+insert length variations: 35
+type of library: FFPE
+
+# METHYLATION PARAMETERS
+methylation library: False
+percent methylation: 96
+
+# PREFIX TO BE USED IN LOG AND OUTPUT FILES
+prefix: ffpe_nometh
+```
+The above should be modified to your needs.

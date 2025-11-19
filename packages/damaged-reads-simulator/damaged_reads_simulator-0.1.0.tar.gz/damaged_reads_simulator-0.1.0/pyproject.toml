@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "damaged-reads-simulator"
+version = "0.1.0"
+authors = [
+    {name = "Ariel Erijman", email = "aerijman@neb.com"},
+    {name = "Brad Langhorst", email = "langhorst@neb.com"},
+]
+description = "A simulator for damaged DNA reads with base quality recalibration"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+keywords = ["bioinformatics", "dna", "sequencing", "simulation", "base-quality"]
+dependencies = [
+    "numpy",
+    "scipy",
+    "pandas",
+    "matplotlib",
+    "seaborn",
+    "biopython",
+    "fast_string_replace",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "black",
+    "flake8",
+    "mypy",
+]
+
+[project.scripts]
+simulate-reads = "generate_reference_and_reads:main"
+
+[project.urls]
+Homepage = "https://github.com/nebiolabs/damaged_reads_simulator"
+Repository = "https://github.com/nebiolabs/damaged_reads_simulator"
+Issues = "https://github.com/nebiolabs/damaged_reads_simulator/issues"
+
+[tool.setuptools]
+py-modules = ["generate_reference_and_reads"]
+packages = ["libs"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"*" = ["*.info", "*.tsv", "*.sh"]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
