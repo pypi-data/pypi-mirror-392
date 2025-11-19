@@ -1,0 +1,380 @@
+Metadata-Version: 2.4
+Name: slimschema
+Version: 0.0.0.dev3
+Summary: Token-efficient schema language for LLMs with validation and conversion
+Author: BotAssembly
+License: MIT
+Project-URL: Homepage, https://github.com/botassembly/slimschema
+Project-URL: Repository, https://github.com/botassembly/slimschema
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: ruamel.yaml>=0.18.0
+Requires-Dist: msgspec>=0.18.0
+Requires-Dist: pydantic>=2.0.0
+Provides-Extra: all
+Requires-Dist: pydantic>=2.0.0; extra == "all"
+Requires-Dist: xmltodict>=0.13.0; extra == "all"
+Provides-Extra: xml
+Requires-Dist: xmltodict>=0.13.0; extra == "xml"
+Provides-Extra: dev
+Requires-Dist: pytest>=7.4.0; extra == "dev"
+Requires-Dist: pytest-xdist>=3.6.1; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.21.0; extra == "dev"
+Requires-Dist: pytest-mock>=3.11.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.1.0; extra == "dev"
+Requires-Dist: pytest-html>=4.1.1; extra == "dev"
+Requires-Dist: mypy>=1.5.0; extra == "dev"
+Requires-Dist: black>=23.7.0; extra == "dev"
+Requires-Dist: ruff>=0.0.285; extra == "dev"
+Requires-Dist: import-linter>=2.0; extra == "dev"
+
+# SlimSchema
+
+Compact schemas for LLM-generated JSON.
+
+SlimSchema provides 6 core functions:
+
+- **`to_data(json, schema)`** - Validate JSON against a schema
+- **`from_data(examples)`** - Infer schema from JSON examples
+- **`to_schema(input)`** - Normalize any format to Schema IR
+- **`to_pydantic(schema)`** - Convert to Pydantic BaseModel
+- **`to_msgspec(schema)`** - Convert to msgspec Struct
+- **`apply_patch(data, patches)`** - Apply JSON Patch mutations (RFC 6902)
+
+## Quick Start
+
+```bash
+pip install slimschema
+```
+
+## Define Your Schema
+
+Choose your preferred format - all three work identically:
+
+<details>
+<summary><b>Option 1: YAML</b></summary>
+
+```yaml
+name: str{1..100}
+email: email
+age: 18..120
+country: str{2..2}
+status: active | inactive | pending
+```
+
+</details>
+
+<details>
+<summary><b>Option 2: Pydantic</b></summary>
+
+```python
+from pydantic import BaseModel, Field
+from typing import Literal
+
+class User(BaseModel):
+    name: str = Field(min_length=1, max_length=100)
+    email: str
+    age: int = Field(ge=18, le=120)
+    country: str = Field(min_length=2, max_length=2)
+    status: Literal["active", "inactive", "pending"]
+```
+
+</details>
+
+<details>
+<summary><b>Option 3: msgspec</b></summary>
+
+```python
+import msgspec
+from typing import Literal
+
+class User(msgspec.Struct):
+    name: str
+    email: str
+    age: int
+    country: str
+    status: Literal["active", "inactive", "pending"]
+```
+
+</details>
+
+## Core API
+
+### 1. Validate JSON with `to_data()`
+
+```python
+from slimschema import to_data
+
+schema = """
+name: str{1..100}
+email: email
+age: 18..120
+country: str{2..2}
+status: active | inactive | pending
+"""
+
+# Valid JSON
+json_response = """
+<json>
+{
+    "name": "Alice",
+    "email": "alice@example.com",
+    "age": 30,
+    "country": "US",
+    "status": "active"
+}
+</json>
+"""
+
+user, error = to_data(json_response, schema)
+print(user["name"])  # "Alice"
+print(error)  # None
+```
+
+**Invalid JSON produces clear errors:**
+
+```python
+bad_json = """
+{
+    "name": "Bob",
+    "email": "not-an-email",
+    "age": 150,
+    "country": "USA",
+    "status": "unknown"
+}
+"""
+
+user, error = to_data(bad_json, schema)
+print(error)
+# "Expected `str` matching regex '^[^@]+@[^@]+\.[^@]+$' - at `$.email`"
+```
+
+### 2. Infer Schema with `from_data()`
+
+Enums are detected by repetition - if the same value appears multiple times, it becomes an enum:
+
+```python
+from slimschema import from_data, to_yaml
+
+examples = [
+    {"name": "Alice", "status": "active"},
+    {"name": "Bob", "status": "inactive"},
+    {"name": "Charlie", "status": "active"},
+    {"name": "Diana", "status": "inactive"},
+]
+
+schema = from_data(examples, name="User")
+print(to_yaml(schema))
+```
+
+**Output:**
+```yaml
+# User
+name: str
+status: active | inactive
+```
+
+### 3. Convert Formats with `to_schema()`, `to_pydantic()`, `to_msgspec()`
+
+All schema formats are interchangeable:
+
+```python
+from slimschema import to_schema, to_pydantic, to_msgspec, to_yaml
+
+# Start with YAML
+yaml_schema = """
+name: str
+age: 18..120
+status: active | inactive
+"""
+
+# Convert to Pydantic (class-based API)
+pydantic_model = to_pydantic(yaml_schema)
+user = pydantic_model(name="Alice", age=30, status="active")
+
+# Convert to msgspec (functional API with msgspec.convert)
+import msgspec
+msgspec_struct = to_msgspec(yaml_schema)
+user = msgspec.convert({"name": "Bob", "age": 25, "status": "active"}, type=msgspec_struct)
+
+# Convert between formats
+from pydantic import BaseModel, Field
+from typing import Literal
+
+class Product(BaseModel):
+    name: str
+    status: Literal["draft", "active"]
+
+schema = to_schema(Product)
+yaml_output = to_yaml(schema)
+print(yaml_output)
+# # Product
+# name: str
+# status: draft | active
+```
+
+### 4. Apply Patches with `apply_patch()`
+
+Mutate data using JSON Patch (RFC 6902). Paths use JSON Pointer syntax (`/field`, `/nested/field`, `/array/0`).
+
+```python
+from slimschema import apply_patch
+
+data = {"name": "Bob", "age": 30, "tags": ["user"]}
+
+patches = [
+    {"op": "replace", "path": "/name", "value": "Alice"},
+    {"op": "add", "path": "/email", "value": "alice@example.com"},
+    {"op": "add", "path": "/tags/-", "value": "admin"},  # append with -
+    {"op": "remove", "path": "/age"}
+]
+
+result = apply_patch(data, patches)
+# {"name": "Alice", "email": "alice@example.com", "tags": ["user", "admin"]}
+```
+
+**Operations:** `add`, `remove`, `replace`, `move` (rename/relocate), `copy`, `test` (conditional).
+
+## YAML Syntax Reference
+
+```yaml
+# Basic types
+name: str
+age: int
+price: float
+active: bool
+
+# String constraints
+username: str{3..20}          # length constraint
+email: email                  # format validator
+url: url
+uuid: uuid
+date: date                    # YYYY-MM-DD
+datetime: datetime            # ISO 8601
+sku: /^[A-Z]{3}-\d{4}$/      # regex pattern
+
+# Numeric constraints
+age: 18..120                  # int range
+price: 0.01..99999.99         # float range
+quantity: 1..                 # min only (no max)
+
+# Literals (enums)
+status: draft | active | archived
+role: admin | user
+
+# Arrays
+tags: [str]
+scores: [int]
+items: [str{1..50}]
+
+# Optional fields
+bio?: str
+updated?: datetime
+
+# Comments
+name: str  # User's full name
+```
+
+## Configure Inference
+
+`from_data()` can be configured to control enum detection, range detection, and more:
+
+```python
+from slimschema import InferenceConfig, from_data, to_yaml
+
+# Disable enum detection
+config = InferenceConfig(detect_enums=False)
+schema = from_data(data, config=config)
+
+# Allow up to 10 unique values for enums (default is 5)
+config = InferenceConfig(enum_max_cardinality=10)
+schema = from_data(data, config=config)
+```
+
+Other options: `detect_ranges`, `detect_formats`, `max_samples`, `max_nesting_depth`, `int_range_max_delta`, `float_range_max_delta`.
+
+## Generate LLM Prompts
+
+Create prompts with embedded schemas for structured output:
+
+```python
+from slimschema import to_prompt
+
+# Default: <output>```json...```</output> (most robust)
+prompt = to_prompt(schema)
+
+# Customize tagging and fencing
+prompt = to_prompt(
+    schema,
+    instruction="Extract user data from the text.",
+    tag="xml",           # "xml" or "none"
+    tag_name="output",   # Tag name
+    fence="fenced",      # "fenced" or "none"
+    format_label="json"  # "json", "xml", "csv", "yaml"
+)
+
+# Compact version (no instruction text)
+prompt = to_prompt_compact(schema)
+```
+
+**Tagging strategies:**
+- `tag="xml"` + `fence="fenced"`: `<output>```json...```</output>` (recommended)
+- `tag="none"` + `fence="fenced"`: ` ```json...``` `
+- `tag="xml"` + `fence="none"`: `<output>...</output>`
+
+## Robust Extraction
+
+`to_data()` extracts structured data from LLM responses with multiple fallback strategies:
+
+**Supports 4 formats:** JSON, CSV, XML, YAML
+
+**Multiple tagging strategies (priority order):**
+1. XML wrapped fence: `<output>```json...```</output>`
+2. Fence alone: ` ```json...``` `
+3. XML tag alone: `<json>...</json>`
+4. Raw format detection
+
+**Special handling:**
+- **JSONL/JSON-ND**: Newline-delimited JSON objects (with or without commas)
+- **CSV**: Auto-delimiter detection (`,`, `;`, `\t`, `|`)
+- **Case-insensitive**: All tags and fence labels
+- **Flexible fencing**: 3-10 backticks supported
+
+```python
+from slimschema import to_data
+
+# Works with any tagging strategy
+response = '<output>```json\n{"name": "Alice"}\n```</output>'
+data, error = to_data(response, schema)
+
+# JSONL support
+response = """<json>
+{"name": "Alice"}
+{"name": "Bob"}
+</json>"""
+data, error = to_data(response, schema)  # Returns list
+```
+
+See [docs/extraction.md](docs/extraction.md) for complete documentation.
+
+## Installation
+
+```bash
+# Basic installation
+pip install slimschema
+
+# With XML extraction support
+pip install slimschema[xml]
+```
+
+All core dependencies (msgspec, pydantic, ruamel.yaml) are included.
+
+## License
+
+MIT
