@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling>=1.24.2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "observify"
+version = "1.0.2"
+description = "SDK de métricas HTTP para FastAPI e Django com batch e retries"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "Guilherme Gradaschi", email = "guilhermegradas@gmail.com" }]
+keywords = ["observability", "metrics", "fastapi", "django", "asgi", "middleware"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Framework :: FastAPI",
+  "Framework :: Django",
+  "Topic :: System :: Monitoring",
+  "Typing :: Typed"
+]
+dependencies = ["requests>=2.28"]
+
+[tool.hatch.build.targets.sdist]
+include = ["observify", "README.md", "LICENSE", "observify/py.typed"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["observify"]
+force-include = { "observify/py.typed" = "observify/py.typed" }
