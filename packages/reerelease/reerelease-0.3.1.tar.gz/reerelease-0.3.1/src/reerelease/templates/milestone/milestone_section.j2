@@ -1,0 +1,44 @@
+{# Milestone template with DSL annotations for parsing and validation #}
+
+{# INPUT section #}
+{# @field:name type=inline required=true #}
+{# @field:description type=paragraph #}
+{# @field:target_date type=line format=date required=true #}
+{# @field:status type=line required=true #}
+{# Note: Valid status values are defined in core/Milestone/MilestoneStatus #}
+{# Note: Validation happens in validate_milestone_status() #}
+{# @section:tasks title_like='[Tt]asks$' level=3 checkbox='^\[([ xX/\^])\]\s*(?P<text>.*?)(?:\s*\(@(?P<assigned>\w+)\))?\s*$' #}
+{# @section:problems title_like='([Kk]nown )?[Pp]roblems$' level=3 #}
+
+{# OUTPUT section #}
+## {{ milestone_name }}
+{% if milestone_description %}
+
+{{ milestone_description }}
+{% endif %}
+
+**Target date:** {{ milestone_target_date }}
+**Status:** {{ milestone_status }}
+
+### ✅ {{ milestone_name }} tasks
+
+{% if milestone_tasks and milestone_tasks|length > 0 %}
+{% for task in milestone_tasks %}
+- [{{ 'x' if task.completed else ' ' }}] {{ task.name }}{% if task.assigned_to %} (@{{ task.assigned_to }}){% endif %}
+
+{% endfor -%}
+{% else -%}
+- [ ] No tasks defined yet
+{% endif %}
+
+### 🪲 {{ milestone_name }} known problems
+
+{% if milestone_problems and milestone_problems|length > 0 %}
+{% for problem in milestone_problems %}
+- {{ problem }}
+
+{% endfor -%}
+{% else -%}
+- No known problems
+{% endif %}
+
