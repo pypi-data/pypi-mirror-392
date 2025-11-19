@@ -1,0 +1,4467 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Argus API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.mnemonic.no"
+    }
+  ],
+  "security": [
+    {
+      "ApiKeyScheme": []
+    }
+  ],
+  "paths": {
+    "/datacollector/v1/category": {
+      "get": {
+        "tags": [
+          "datacollector/v1"
+        ],
+        "summary": "Retrieve a list of valid categories (PUBLIC)",
+        "description": "",
+        "operationId": "listCategories",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Skip a number of categories",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of returned categories",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Retrieve a list of valid categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.services.datacollector.spi.response.DataCollectorCategory"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "submitDataIngest"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/datacollector/v1/ingest/{category}/bulk": {
+      "post": {
+        "tags": [
+          "datacollector/v1"
+        ],
+        "summary": "Submit JSON data in bulk that will be forwarded to a Kafka topic based on its category (PUBLIC)",
+        "description": "",
+        "operationId": "ingestBulkData",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "path",
+            "description": "What category the records belong to",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.datacollector.spi.request.DataCollectorIngestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Submit JSON data in bulk that will be forwarded to a Kafka topic based on its category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.datacollector.spi.response.DataCollectorIngestResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "submitDataIngest"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/datacollector/v1/ingest/{category}": {
+      "post": {
+        "tags": [
+          "datacollector/v1"
+        ],
+        "summary": "Submit JSON data that will be forwarded to a Kafka topic based on its category (PUBLIC)",
+        "description": "",
+        "operationId": "ingestData",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "path",
+            "description": "What category the records belong to",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "customer",
+            "in": "query",
+            "description": "The customer ID or shortname that this data belongs to. Defaults to the current users customer",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ignoreOnFailed",
+            "in": "query",
+            "description": "Whether or not to ignore any errors in the record",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/com.fasterxml.jackson.databind.JsonNode"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Submit JSON data that will be forwarded to a Kafka topic based on its category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.datacollector.spi.response.DataCollectorIngestResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "submitDataIngest"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/jsonobject/v1/type/{type}/schema": {
+      "get": {
+        "tags": [
+          "jsonobject/v1/object"
+        ],
+        "summary": "Returns a json schema identified by type. (PUBLIC)",
+        "description": "",
+        "operationId": "getJsonSchema",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "description": "The shortName of the JsonObject type.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Returns a json schema identified by type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.jsonobject.spi.response.JsonSchemaResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewJsonObjects"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/jsonobject/v1/object/{type}/{idOrShortname}/favorite": {
+      "post": {
+        "tags": [
+          "jsonobject/v1/object"
+        ],
+        "summary": "Creates a new JsonObjectFavorite to current user's JsonObject (PUBLIC)",
+        "description": "",
+        "operationId": "addJsonObjectFavorite",
+        "parameters": [
+          {
+            "name": "idOrShortname",
+            "in": "path",
+            "description": "Id or shortName of the JsonObject to favorite.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "path",
+            "description": "The shortName of the JsonObject type.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "201": {
+            "description": "Creates a new JsonObjectFavorite to current user's JsonObject",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.jsonobject.spi.response.JsonObjectResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Object not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewJsonObjects"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      },
+      "delete": {
+        "tags": [
+          "jsonobject/v1/object"
+        ],
+        "summary": "Deletes JsonObjectFavorite to current user's JsonObject (PUBLIC)",
+        "description": "",
+        "operationId": "removeJsonObjectFavorite",
+        "parameters": [
+          {
+            "name": "idOrShortname",
+            "in": "path",
+            "description": "Id or shortName of the JsonObject the favorite should be removed from.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "path",
+            "description": "The shortName of the JsonObject type.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Deletes JsonObjectFavorite to current user's JsonObject",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.jsonobject.spi.response.JsonObjectResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Object not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewJsonObjects"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/jsonobject/v1/object/{type}/{idOrShortname}/access/bulk": {
+      "post": {
+        "tags": [
+          "jsonobject/v1/object"
+        ],
+        "summary": "Bulk adds access entries to the identified JsonObject. (PUBLIC)",
+        "description": "",
+        "operationId": "bulkGrantJsonObjectAccess",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "description": "The shortName of the JsonObject type.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "idOrShortname",
+            "in": "path",
+            "description": "Id or shortName of the JsonObject to add the access entries to.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.jsonobject.spi.request.GrantJsonObjectAccessBulkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "201": {
+            "description": "Bulk adds access entries to the identified JsonObject.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.services.jsonobject.spi.response.JsonObjectAccess"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Object not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewJsonObjects"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/jsonobject/v1/object/{type}": {
+      "get": {
+        "tags": [
+          "jsonobject/v1/object"
+        ],
+        "summary": "Search json objects with specified query parameters (PUBLIC)",
+        "description": "",
+        "operationId": "getJsonObjects",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "description": "The shortName of the JsonObject type.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keywords",
+            "in": "query",
+            "description": "Filter search by JsonObject keyword fields (name and short name)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            }
+          },
+          {
+            "name": "favorite",
+            "in": "query",
+            "description": "Limit search to favorites",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "includeData",
+            "in": "query",
+            "description": "Whether or not to include the actual JsonObject data in the response.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "includeDeleted",
+            "in": "query",
+            "description": "Whether or not to include deleted JsonObjects in the response.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Limit result",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Offset result",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Search json objects with specified query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.services.jsonobject.spi.response.JsonObjectResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewJsonObjects"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      },
+      "post": {
+        "tags": [
+          "jsonobject/v1/object"
+        ],
+        "summary": "Creates a new JsonObject of a specified type. (PUBLIC)",
+        "description": "",
+        "operationId": "createJsonObject",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "description": "The shortName of the JsonObject type.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.jsonobject.spi.request.CreateJsonObjectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "201": {
+            "description": "Creates a new JsonObject of a specified type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.jsonobject.spi.response.JsonObjectResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "addJsonObject"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/jsonobject/v1/object/{type}/{idOrShortname}": {
+      "get": {
+        "tags": [
+          "jsonobject/v1/object"
+        ],
+        "summary": "Returns a JsonObject identified by either id or type+shortname. (PUBLIC)",
+        "description": "",
+        "operationId": "getJsonObject",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "description": "The shortName of the JsonObject type.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "idOrShortname",
+            "in": "path",
+            "description": "Id or shortName of the JsonObject to retrieve.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeData",
+            "in": "query",
+            "description": "Whether or not to include the actual JsonObject data in the response.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Returns a JsonObject identified by either id or type+shortname.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.jsonobject.spi.response.JsonObjectResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Object not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewJsonObjects"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      },
+      "put": {
+        "tags": [
+          "jsonobject/v1/object"
+        ],
+        "summary": "Updates a JsonObject identified by either id or type+shortname (PUBLIC)",
+        "description": "",
+        "operationId": "updateJsonObject",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "description": "The shortName of the JsonObject type.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "idOrShortname",
+            "in": "path",
+            "description": "Id or shortName of the JsonObject to update.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.jsonobject.spi.request.UpdateJsonObjectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Updates a JsonObject identified by either id or type+shortname",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.jsonobject.spi.response.JsonObjectResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Object not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewJsonObjects"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      },
+      "delete": {
+        "tags": [
+          "jsonobject/v1/object"
+        ],
+        "summary": "Deletes a JsonObject identified by either id or type+shortname (PUBLIC)",
+        "description": "",
+        "operationId": "deleteJsonObject",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "description": "The shortName of the JsonObject type.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "idOrShortname",
+            "in": "path",
+            "description": "Id or shortName of the JsonObject to delete.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Deletes a JsonObject identified by either id or type+shortname",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.jsonobject.spi.response.JsonObjectResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Object not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewJsonObjects"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/jsonobject/v1/object/{type}/{idOrShortname}/access": {
+      "get": {
+        "tags": [
+          "jsonobject/v1/object"
+        ],
+        "summary": "Returns a list of access entries for a JsonObject identified by either id or type+shortname (PUBLIC)",
+        "description": "",
+        "operationId": "listJsonObjectAccess",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "description": "The shortName of the JsonObject type.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "idOrShortname",
+            "in": "path",
+            "description": "Id or shortName of the JsonObject to list access entries for.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeDeleted",
+            "in": "query",
+            "description": "Whether or not to include deleted access entries in the response.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of returned results",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "By how many records to offset results",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Returns a list of access entries for a JsonObject identified by either id or type+shortname",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.services.jsonobject.spi.response.JsonObjectAccess"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Object not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewJsonObjects"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      },
+      "post": {
+        "tags": [
+          "jsonobject/v1/object"
+        ],
+        "summary": "Adds an access entry to the identified JsonObject. (PUBLIC)",
+        "description": "",
+        "operationId": "grantJsonObjectAccess",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "description": "The shortName of the JsonObject type.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "idOrShortname",
+            "in": "path",
+            "description": "Id or shortName of the JsonObject to add the access entry to.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.jsonobject.spi.request.GrantJsonObjectAccessRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "default response",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "201": {
+            "description": "Adds an access entry to the identified JsonObject.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.jsonobject.spi.response.JsonObjectAccess"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Object not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewJsonObjects"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/jsonobject/v1/object/{type}/{idOrShortname}/revisions": {
+      "get": {
+        "tags": [
+          "jsonobject/v1/object"
+        ],
+        "summary": "Returns the revisions of a JsonObject identified by either id or type+shortname (PUBLIC)",
+        "description": "",
+        "operationId": "listJsonObjectRevisions",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "description": "The shortName of the JsonObject type.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "idOrShortname",
+            "in": "path",
+            "description": "Id or shortName of the JsonObject to retrieve revisions for.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeData",
+            "in": "query",
+            "description": "Whether or not to include the actual JsonObject data in the revision responses.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of returned results",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "By how many records to offset results",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Returns the revisions of a JsonObject identified by either id or type+shortname",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.services.jsonobject.spi.response.JsonObjectResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Object not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewJsonObjects"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/jsonobject/v1/object/{type}/{idOrShortname}/revisions/{revision}/revert": {
+      "put": {
+        "tags": [
+          "jsonobject/v1/object"
+        ],
+        "summary": "Reverts a JsonObject identified by either id or type+shortname to a previous revision (PUBLIC)",
+        "description": "",
+        "operationId": "revertJsonObject",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "description": "The shortName of the JsonObject type.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "idOrShortname",
+            "in": "path",
+            "description": "Id or shortName of the current JsonObject.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "path",
+            "description": "The revision to revert to.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Reverts a JsonObject identified by either id or type+shortname to a previous revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.jsonobject.spi.response.JsonObjectResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Object not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewJsonObjects"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/jsonobject/v1/object/{type}/{idOrShortname}/access/{id}": {
+      "delete": {
+        "tags": [
+          "jsonobject/v1/object"
+        ],
+        "summary": "Revokes access entity to the identified JsonObject (PUBLIC)",
+        "description": "",
+        "operationId": "revokeJsonObjectAccess",
+        "parameters": [
+          {
+            "name": "idOrShortname",
+            "in": "path",
+            "description": "Id or shortName of the JsonObject the access entity should be removed from.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "path",
+            "description": "The shortName of the JsonObject type.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the access entity to revoke",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Revokes access entity to the identified JsonObject",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.jsonobject.spi.response.JsonObjectAccess"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Object not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewJsonObjects"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/jsonobject/v1/object/{type}/search": {
+      "post": {
+        "tags": [
+          "jsonobject/v1/object"
+        ],
+        "summary": "Search json objects with specified criteria (PUBLIC)",
+        "description": "",
+        "operationId": "searchJsonObjects",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "description": "The shortName of the JsonObject type.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.jsonobject.spi.request.JsonObjectSearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Search json objects with specified criteria",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.services.jsonobject.spi.response.JsonObjectResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewJsonObjects"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/jsonobject/v1/type": {
+      "get": {
+        "tags": [
+          "jsonobject/v1/type"
+        ],
+        "summary": "Returns a list of available JsonObject types (PUBLIC)",
+        "description": "",
+        "operationId": "listJsonObjectTypeDescriptors",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of returned results",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "By how many records to offset results",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Returns a list of available JsonObject types",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.services.jsonobject.spi.response.JsonObjectTypeDescriptor"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "viewJsonObjects"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/world/v1/timezone": {
+      "get": {
+        "tags": [
+          "world/v1"
+        ],
+        "summary": "Get all time zones (PUBLIC)",
+        "description": "",
+        "operationId": "getTimeZones",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Skip a number of time zones",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of returned time zones",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 25,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "keywords",
+            "in": "query",
+            "description": "Filter time zones by keywords",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search by keywords (legacy)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Get all time zones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-list-no.mnemonic.jargus.model.TimeZone"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/logging/v1/csp-report-uri": {
+      "post": {
+        "tags": [
+          "logging/v1"
+        ],
+        "summary": "Submit CSP log event (INTERNAL)",
+        "description": "",
+        "operationId": "submitCSPLogEvent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.world.spi.request.CSPLogEntry"
+              }
+            },
+            "application/csp-report": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.world.spi.request.CSPLogEntry"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Submit CSP log event",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.world.spi.response.CSPResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "submitClientLog"
+        ],
+        "x-Argus-ApiStatus": "INTERNAL"
+      }
+    },
+    "/logging/v1/client": {
+      "post": {
+        "tags": [
+          "logging/v1"
+        ],
+        "summary": "Submit client log events in a bulk operation (INTERNAL)",
+        "description": "",
+        "operationId": "submitClientLogEventsBulk",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.world.spi.request.ClientLoggingBulkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Submit client log events in a bulk operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.world.spi.response.LoggingBulkResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "submitClientLog"
+        ],
+        "x-Argus-ApiStatus": "INTERNAL"
+      }
+    },
+    "/logging/v1/distributed": {
+      "post": {
+        "tags": [
+          "logging/v1"
+        ],
+        "summary": "Submit distributed log events in a bulk operation (INTERNAL)",
+        "description": "",
+        "operationId": "submitDistributedLogEventsBulk",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.world.spi.request.DistributedLoggingBulkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Submit distributed log events in a bulk operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.world.spi.response.LoggingBulkResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "submitDistributedLog"
+        ],
+        "x-Argus-ApiStatus": "INTERNAL"
+      }
+    },
+    "/logging/v1/tool": {
+      "post": {
+        "tags": [
+          "logging/v1"
+        ],
+        "summary": "Submit tool log events in a bulk operation (INTERNAL)",
+        "description": "",
+        "operationId": "submitToolingLogEventsBulk",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.world.spi.request.ToolLoggingBulkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Submit tool log events in a bulk operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.world.spi.response.LoggingBulkResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "submitToolLog"
+        ],
+        "x-Argus-ApiStatus": "INTERNAL"
+      }
+    },
+    "/world/v1/ioc": {
+      "post": {
+        "tags": [
+          "world/v1"
+        ],
+        "summary": "Extract indicators of compromise (IOC) from a text blob (PUBLIC)",
+        "description": "",
+        "operationId": "extractIOC",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/no.mnemonic.services.world.spi.request.IOCParserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Extract indicators of compromise (IOC) from a text blob",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.world.spi.response.IOCParserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-Required-Permissions": [
+          "extractIOC"
+        ],
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/world/v1/dns/ip/{ip}": {
+      "get": {
+        "tags": [
+          "world/v1"
+        ],
+        "summary": "Get DNS reverse hostname by IP (PUBLIC)",
+        "description": "",
+        "operationId": "lookupDNS",
+        "parameters": [
+          {
+            "name": "ip",
+            "in": "path",
+            "description": "Lookup reverse DNS hostname information for specified value",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Get DNS reverse hostname by IP",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.world.spi.response.WhoIsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/world/v1/time": {
+      "get": {
+        "tags": [
+          "world/v1"
+        ],
+        "summary": "Resolves an Argus timestring. This can be used by UI components to resolve an Argus relative or absolute timestring into an absolute timestamp. (PUBLIC)",
+        "description": "",
+        "operationId": "getTime",
+        "parameters": [
+          {
+            "name": "timestring",
+            "in": "query",
+            "description": "Timestring to resolve",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Resolves an Argus timestring. This can be used by UI components to resolve an Argus relative or absolute timestring into an absolute timestamp.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.world.spi.response.GetTimeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    },
+    "/world/v1/whois": {
+      "get": {
+        "tags": [
+          "world/v1"
+        ],
+        "summary": "Get WHOIS information by IP or host name (PUBLIC)",
+        "description": "",
+        "operationId": "lookupWhoIs",
+        "parameters": [
+          {
+            "name": "lookup",
+            "in": "query",
+            "description": "Lookup WhoIs information for specified value",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Get WHOIS information by IP or host name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultStash-no.mnemonic.services.world.spi.response.WhoIsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "412": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        },
+        "x-Argus-ApiStatus": "PUBLIC"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "no.mnemonic.services.datacollector.spi.response.DataCollectorCategory": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the category"
+          }
+        }
+      },
+      "no.mnemonic.services.datacollector.spi.response.DataCollectorIngestResponse": {
+        "type": "object",
+        "properties": {
+          "accepted": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The number of accepted data submissions"
+          },
+          "errorInformationList": {
+            "type": "array",
+            "description": "A list of information on errors in the data submissions",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.datacollector.spi.response.FailedDataRecord"
+            }
+          },
+          "rejected": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The number of rejected data submissions"
+          }
+        }
+      },
+      "no.mnemonic.services.datacollector.spi.response.FailedDataRecord": {
+        "type": "object",
+        "description": "A list of information on errors in the data submissions",
+        "properties": {
+          "errorMessages": {
+            "type": "array",
+            "description": "The list of errors detected about the data",
+            "items": {
+              "type": "string",
+              "description": "The list of errors detected about the data"
+            }
+          },
+          "submissionIndex": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The index into the data submission list this error is about"
+          }
+        }
+      },
+      "no.mnemonic.services.datacollector.spi.request.DataCollectorIngestRecord": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "type": "string",
+            "description": "The customer ID or shortname that this data belongs to. Defaults to the current users customer"
+          },
+          "data": {
+            "type": "string"
+          }
+        }
+      },
+      "no.mnemonic.services.datacollector.spi.request.DataCollectorIngestRequest": {
+        "type": "object",
+        "properties": {
+          "ignoreOnFailed": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether or not to ignore any errors in the records"
+          },
+          "records": {
+            "type": "array",
+            "description": "The records containing the JSON data",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.datacollector.spi.request.DataCollectorIngestRecord"
+            },
+            "maxItems": 1000,
+            "minItems": 1
+          }
+        },
+        "required": [
+          "records"
+        ]
+      },
+      "com.fasterxml.jackson.databind.JsonNode": {
+        "type": "object"
+      },
+      "no.mnemonic.services.jsonobject.spi.response.JsonSchemaResponse": {
+        "type": "object",
+        "properties": {
+          "schema": {
+            "description": "The json schema of a given type"
+          }
+        }
+      },
+      "no.mnemonic.services.argus.common.spi.response.CustomerInfo": {
+        "type": "object",
+        "description": "SPI CustomerInfo",
+        "properties": {
+          "domain": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.DomainInfo",
+            "description": "Domain that this customer belongs to."
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the response object."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the customer."
+          },
+          "shortName": {
+            "type": "string",
+            "description": "Shortname of the customer."
+          }
+        }
+      },
+      "no.mnemonic.services.argus.common.spi.response.DomainInfo": {
+        "type": "object",
+        "description": "SPI DomainInfo",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "description": "ID of the response object."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the domain."
+          }
+        }
+      },
+      "no.mnemonic.services.argus.common.spi.response.UserInfo": {
+        "type": "object",
+        "description": "SPI UserInfo",
+        "properties": {
+          "customer": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.CustomerInfo",
+            "description": "The customer the subject belongs to"
+          },
+          "domain": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.DomainInfo",
+            "description": "The subject's domain"
+          },
+          "flags": {
+            "type": "array",
+            "description": "The subject's flags",
+            "items": {
+              "type": "string",
+              "description": "The subject's flags",
+              "enum": [
+                "deleted"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the response object."
+          },
+          "name": {
+            "type": "string",
+            "description": "The subject's name"
+          },
+          "shortName": {
+            "type": "string",
+            "description": "The subject's short name"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of the subject",
+            "enum": [
+              "user",
+              "group"
+            ],
+            "readOnly": true
+          }
+        }
+      },
+      "no.mnemonic.services.jsonobject.spi.response.JsonObjectResponse": {
+        "type": "object",
+        "description": "JsonObject response. Provides the JsonObject itself along with meta information",
+        "properties": {
+          "createdByUser": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.UserInfo",
+            "description": "The user that created the JsonObject."
+          },
+          "createdTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "When this JsonObject was created."
+          },
+          "currentUserAccess": {
+            "type": "string",
+            "description": "Which access the current user has for the current JsonObject",
+            "enum": [
+              "read",
+              "write",
+              "owner"
+            ]
+          },
+          "customer": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.CustomerInfo",
+            "description": "Info about the customer owning the JsonObject."
+          },
+          "data": {
+            "description": "The actual JsonObject."
+          },
+          "deletedByUser": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.UserInfo",
+            "description": "The user that deleted this JsonObject (if deleted)."
+          },
+          "deletedTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "When this JsonObject was deleted (if deleted)."
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the JsonObject."
+          },
+          "flags": {
+            "type": "array",
+            "description": "Flags that are set on this JsonObject.",
+            "items": {
+              "type": "string",
+              "description": "Flags that are set on this JsonObject.",
+              "enum": [
+                "deleted",
+                "controlledVersion",
+                "favorite",
+                "sharedWithRole",
+                "sharedWithUserOrGroup",
+                "sharedGlobal"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "An automatically created UUID to identify the object."
+          },
+          "lastUpdatedByUser": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.UserInfo",
+            "description": "The user that last updated the JsonObject."
+          },
+          "lastUpdatedTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "When this JsonObject was last updated."
+          },
+          "localizedDescription": {
+            "type": "string",
+            "description": "The localized description for the current users language."
+          },
+          "localizedDescriptions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "All available localized descriptions."
+            },
+            "description": "All available localized descriptions."
+          },
+          "localizedName": {
+            "type": "string",
+            "description": "The localized name for the current users language."
+          },
+          "localizedNames": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "All available localized names."
+            },
+            "description": "All available localized names."
+          },
+          "masterID": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The UUID of the master JsonObject if this is a revision. Null if not."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the JsonObject."
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The change revision of the JsonObject."
+          },
+          "shortName": {
+            "type": "string",
+            "description": "The shortName of the JsonObject."
+          },
+          "tags": {
+            "type": "array",
+            "description": "Tags set on this object",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.jsonobject.spi.response.JsonObjectTag"
+            },
+            "uniqueItems": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/no.mnemonic.services.jsonobject.spi.response.JsonObjectTypeInfo",
+            "description": "The type that is implemented by this JsonObject."
+          }
+        }
+      },
+      "no.mnemonic.services.jsonobject.spi.response.JsonObjectTag": {
+        "type": "object",
+        "description": "A tag on a JSON object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "An automatically created UUID to identify the tag."
+          },
+          "key": {
+            "type": "string",
+            "description": "The tag key."
+          },
+          "value": {
+            "type": "string",
+            "description": "The tag value."
+          }
+        }
+      },
+      "no.mnemonic.services.jsonobject.spi.response.JsonObjectTypeInfo": {
+        "type": "object",
+        "description": "Describing a JsonObject type.",
+        "properties": {
+          "shortName": {
+            "type": "string",
+            "description": "A shortname representing one out of several defined JsonObject types."
+          }
+        }
+      },
+      "no.mnemonic.services.argus.common.spi.response.FunctionInfo": {
+        "type": "object",
+        "description": "SPI FunctionInfo",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the response object."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the function."
+          }
+        }
+      },
+      "no.mnemonic.services.argus.common.spi.response.GroupInfo": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.SubjectInfo"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "customer": {
+                "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.CustomerInfo"
+              },
+              "domain": {
+                "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.DomainInfo"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "group"
+                ]
+              }
+            }
+          }
+        ],
+        "description": "SPI GroupInfo",
+        "required": [
+          "type"
+        ]
+      },
+      "no.mnemonic.services.argus.common.spi.response.SubjectInfo": {
+        "type": "object",
+        "description": "SPI SubjectInfo",
+        "discriminator": {
+          "propertyName": "type"
+        },
+        "properties": {
+          "customer": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.CustomerInfo",
+            "description": "The customer the subject belongs to"
+          },
+          "domain": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.DomainInfo",
+            "description": "The subject's domain"
+          },
+          "flags": {
+            "type": "array",
+            "description": "The subject's flags",
+            "items": {
+              "type": "string",
+              "description": "The subject's flags",
+              "enum": [
+                "deleted"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the response object."
+          },
+          "name": {
+            "type": "string",
+            "description": "The subject's name"
+          },
+          "shortName": {
+            "type": "string",
+            "description": "The subject's short name"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of the subject",
+            "enum": [
+              "user",
+              "group"
+            ],
+            "readOnly": true
+          }
+        }
+      },
+      "no.mnemonic.services.jsonobject.spi.response.JsonObjectAccess": {
+        "type": "object",
+        "description": "An access entry giving access to a JsonObject for a specific user, groups or functions",
+        "properties": {
+          "customer": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.CustomerInfo",
+            "description": "Customer which is granted role based access. Null if global permission."
+          },
+          "flags": {
+            "type": "array",
+            "description": "Flags that are set on this access entry.",
+            "items": {
+              "type": "string",
+              "description": "Flags that are set on this access entry.",
+              "enum": [
+                "deleted",
+                "searchable"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "function": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.FunctionInfo",
+            "description": "Function which is granted role based access."
+          },
+          "grantedByUser": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.UserInfo",
+            "description": "The user that has granted this permission."
+          },
+          "grantedTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "When this permission was granted."
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "An automatically created UUID to identify the access entry."
+          },
+          "level": {
+            "type": "string",
+            "description": "The access level this entry grants.",
+            "enum": [
+              "read",
+              "write",
+              "owner"
+            ]
+          },
+          "revokedByUser": {
+            "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.UserInfo",
+            "description": "The user that revoked this permission."
+          },
+          "revokedTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "When this permission was revoked."
+          },
+          "subject": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.UserInfo"
+              },
+              {
+                "$ref": "#/components/schemas/no.mnemonic.services.argus.common.spi.response.GroupInfo"
+              }
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "The access type this entry grants.",
+            "enum": [
+              "explicit",
+              "roleBased"
+            ]
+          }
+        }
+      },
+      "no.mnemonic.services.jsonobject.spi.request.GrantJsonObjectAccessBaseRequest": {
+        "type": "object",
+        "description": "Base request to add access entries to a JsonObject",
+        "properties": {
+          "customer": {
+            "type": "string",
+            "description": "ID or shortname of customer for granting role-based access. Null if global permission."
+          },
+          "function": {
+            "type": "string",
+            "description": "ID or name of function for granting role-based access."
+          },
+          "level": {
+            "type": "string",
+            "description": "The access level this entry grants.",
+            "enum": [
+              "read",
+              "write",
+              "owner"
+            ]
+          },
+          "searchable": {
+            "type": "boolean",
+            "default": true,
+            "description": "If true, the object will be searchable."
+          },
+          "subject": {
+            "type": "string",
+            "description": "ID or shortname for user or group to grant explicit access to."
+          }
+        },
+        "required": [
+          "level"
+        ]
+      },
+      "no.mnemonic.services.jsonobject.spi.request.GrantJsonObjectAccessBulkRequest": {
+        "type": "object",
+        "description": "Request for adding a bulk of access entries to a JsonObject",
+        "properties": {
+          "accessEntries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.jsonobject.spi.request.GrantJsonObjectAccessBaseRequest"
+            },
+            "maxItems": 2147483647,
+            "minItems": 1
+          }
+        },
+        "required": [
+          "accessEntries"
+        ]
+      },
+      "no.mnemonic.services.jsonobject.spi.request.CreateJsonObjectRequest": {
+        "type": "object",
+        "description": "Request to create a JsonObject",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/com.fasterxml.jackson.databind.JsonNode",
+            "description": "The actual JSON. Max 1MB string encoded JSON."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of this object"
+          },
+          "localizedDescriptions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Description in specified languages. Required for global objects."
+            },
+            "description": "Description in specified languages. Required for global objects."
+          },
+          "localizedNames": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Display name in specified languages. Required for global objects."
+            },
+            "description": "Display name in specified languages. Required for global objects."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of this object"
+          },
+          "shortName": {
+            "type": "string",
+            "description": "If set, this needs to be unique per type. If not, this will default to the generated UUID of the object.",
+            "pattern": "[a-zA-Z0-9_:\\-\\.]*"
+          },
+          "tags": {
+            "type": "array",
+            "description": "Tags to set on this object.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.jsonobject.spi.request.CreateJsonObjectRequest_Tag"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "no.mnemonic.services.jsonobject.spi.request.CreateJsonObjectRequest_Tag": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Key for this tag. Must be alphanumeric (no spaces), and at most 256 characters",
+            "pattern": "[a-zA-Z0-9_:\\-\\.]*"
+          },
+          "value": {
+            "type": "string",
+            "description": "Value for this tag. Must be a string below 1024 characters",
+            "pattern": "[\\s\\w\\{\\}\\$\\-\\(\\)\\.\\[\\]\"\\'_/\\\\,\\*\\+\\#:@!?;=]*"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ]
+      },
+      "no.mnemonic.services.jsonobject.spi.request.GrantJsonObjectAccessRequest": {
+        "type": "object",
+        "description": "Request to add an access entry to a JsonObject",
+        "properties": {
+          "customer": {
+            "type": "string",
+            "description": "ID or shortname of customer for granting role-based access. Null if global permission."
+          },
+          "function": {
+            "type": "string",
+            "description": "ID or name of function for granting role-based access."
+          },
+          "level": {
+            "type": "string",
+            "description": "The access level this entry grants.",
+            "enum": [
+              "read",
+              "write",
+              "owner"
+            ]
+          },
+          "searchable": {
+            "type": "boolean",
+            "default": true,
+            "description": "If true, the object will be searchable."
+          },
+          "subject": {
+            "type": "string",
+            "description": "ID or shortname for user or group to grant explicit access to."
+          }
+        },
+        "required": [
+          "level"
+        ]
+      },
+      "no.mnemonic.services.jsonobject.spi.request.JsonObjectSearchBaseRequest_TagCriteria": {
+        "type": "object",
+        "properties": {
+          "exclude": {
+            "type": "boolean",
+            "description": "If true, exclude any objects matching this tag criteria"
+          },
+          "key": {
+            "type": "string",
+            "description": "Key for tag to search for."
+          },
+          "values": {
+            "type": "array",
+            "description": "Values for tag to search for. Will match objects where tag matches key and any of these values. If no values are specified, will match all objects with a tag with this key.",
+            "items": {
+              "type": "string",
+              "description": "Values for tag to search for. Will match objects where tag matches key and any of these values. If no values are specified, will match all objects with a tag with this key."
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "key"
+        ]
+      },
+      "no.mnemonic.services.jsonobject.spi.request.JsonObjectSearchRequest": {
+        "type": "object",
+        "description": "Request to search for json objects",
+        "properties": {
+          "customer": {
+            "type": "array",
+            "description": "Limit search to json objects with the given customers, identified by id or shortname",
+            "items": {
+              "type": "string",
+              "description": "Limit search to json objects with the given customers, identified by id or shortname"
+            },
+            "uniqueItems": true
+          },
+          "endTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "default": 0,
+            "description": "Restrict to a time frame based on the set timeFieldStrategy (end timestamp)",
+            "minimum": 0
+          },
+          "excludeFlags": {
+            "type": "array",
+            "description": "Filter out objects with any of these flags set",
+            "items": {
+              "type": "string",
+              "description": "Filter out objects with any of these flags set",
+              "enum": [
+                "deleted",
+                "controlledVersion",
+                "sharedWithRole",
+                "sharedWithUserOrGroup",
+                "sharedGlobal"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "favorite": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to only search for favorites, exclude favorites or neither"
+          },
+          "includeData": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to include data in the response."
+          },
+          "includeDeleted": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to include deleted json objects in the search. Only allowed for users with \u00b4jsonObjectAdministration` permission"
+          },
+          "includeFlags": {
+            "type": "array",
+            "description": "Filter by objects with all these flags set",
+            "items": {
+              "type": "string",
+              "description": "Filter by objects with all these flags set",
+              "enum": [
+                "deleted",
+                "controlledVersion",
+                "sharedWithRole",
+                "sharedWithUserOrGroup",
+                "sharedGlobal"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "includeTags": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to include tags in the response."
+          },
+          "keywordFieldStrategy": {
+            "type": "array",
+            "default": "all",
+            "description": "Defines which fields will be searched by keywords",
+            "items": {
+              "type": "string",
+              "default": "all",
+              "description": "Defines which fields will be searched by keywords",
+              "enum": [
+                "name",
+                "shortName",
+                "all"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "keywordMatchStrategy": {
+            "type": "string",
+            "default": "all",
+            "description": "Defines how strict different keywords should be matched",
+            "enum": [
+              "any",
+              "all"
+            ]
+          },
+          "keywords": {
+            "type": "array",
+            "description": "Search for keywords against fields defined by KeywordFieldStrategy",
+            "items": {
+              "type": "string",
+              "description": "Search for keywords against fields defined by KeywordFieldStrategy"
+            },
+            "uniqueItems": true
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "default": 25,
+            "description": "Limit maximum amount of results",
+            "minimum": 0
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0,
+            "description": "Skip specified amount of results",
+            "minimum": 0
+          },
+          "sortBy": {
+            "type": "array",
+            "description": "Specify the order of results. Prefix with '-' to order descending.",
+            "items": {
+              "type": "string",
+              "description": "Specify the order of results. Prefix with '-' to order descending.",
+              "enum": [
+                "createdTimestamp",
+                "name",
+                "shortName",
+                "lastUpdatedTimestamp",
+                "-createdTimestamp",
+                "-name",
+                "-shortName",
+                "-lastUpdatedTimestamp"
+              ]
+            }
+          },
+          "startTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "default": 0,
+            "description": "Restrict to a time frame based on the set timeFieldStrategy (start timestamp)",
+            "minimum": 0
+          },
+          "subCriteria": {
+            "type": "array",
+            "description": "Set additional criteria",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.jsonobject.spi.request.JsonObjectSearchSubCriteriaRequest"
+            },
+            "uniqueItems": true
+          },
+          "tags": {
+            "type": "array",
+            "description": "Search for objects matching these tags",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.jsonobject.spi.request.JsonObjectSearchBaseRequest_TagCriteria"
+            },
+            "uniqueItems": true
+          },
+          "timeFieldStrategy": {
+            "type": "array",
+            "default": "all",
+            "description": "Defines which timestamp fields will be filtered with start/endTimestamp",
+            "items": {
+              "type": "string",
+              "default": "all",
+              "description": "Defines which timestamp fields will be filtered with start/endTimestamp",
+              "enum": [
+                "createdTimestamp",
+                "lastUpdatedTimestamp",
+                "all"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "timeMatchStrategy": {
+            "type": "string",
+            "default": "any",
+            "description": "Defines how strict to match against different timestamps (all/any) using start and end timestamp",
+            "enum": [
+              "any",
+              "all"
+            ]
+          },
+          "user": {
+            "type": "array",
+            "description": "Search using users identified by id or shortname. If given a group, we will resolve all members of the group recursively",
+            "items": {
+              "type": "string",
+              "description": "Search using users identified by id or shortname. If given a group, we will resolve all members of the group recursively"
+            },
+            "uniqueItems": true
+          },
+          "userFieldStrategy": {
+            "type": "array",
+            "default": "all",
+            "description": "Defines which fields will be searched by user",
+            "items": {
+              "type": "string",
+              "default": "all",
+              "description": "Defines which fields will be searched by user",
+              "enum": [
+                "owner",
+                "read",
+                "write",
+                "createdByUser",
+                "lastUpdatedByUser",
+                "all"
+              ]
+            },
+            "uniqueItems": true
+          }
+        }
+      },
+      "no.mnemonic.services.jsonobject.spi.request.JsonObjectSearchSubCriteriaRequest": {
+        "type": "object",
+        "description": "Request defining if sub-criteria should be included or excluded",
+        "properties": {
+          "customer": {
+            "type": "array",
+            "description": "Limit search to json objects with the given customers, identified by id or shortname",
+            "items": {
+              "type": "string",
+              "description": "Limit search to json objects with the given customers, identified by id or shortname"
+            },
+            "uniqueItems": true
+          },
+          "endTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "default": 0,
+            "description": "Restrict to a time frame based on the set timeFieldStrategy (end timestamp)",
+            "minimum": 0
+          },
+          "exclude": {
+            "type": "boolean",
+            "default": false,
+            "description": "Exclude objects matching subcriteria? If true the search is NOT-ed"
+          },
+          "excludeFlags": {
+            "type": "array",
+            "description": "Filter out objects with any of these flags set",
+            "items": {
+              "type": "string",
+              "description": "Filter out objects with any of these flags set",
+              "enum": [
+                "deleted",
+                "controlledVersion",
+                "sharedWithRole",
+                "sharedWithUserOrGroup",
+                "sharedGlobal"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "favorite": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to only search for favorites, exclude favorites or neither"
+          },
+          "includeFlags": {
+            "type": "array",
+            "description": "Filter by objects with all these flags set",
+            "items": {
+              "type": "string",
+              "description": "Filter by objects with all these flags set",
+              "enum": [
+                "deleted",
+                "controlledVersion",
+                "sharedWithRole",
+                "sharedWithUserOrGroup",
+                "sharedGlobal"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "keywordFieldStrategy": {
+            "type": "array",
+            "default": "all",
+            "description": "Defines which fields will be searched by keywords",
+            "items": {
+              "type": "string",
+              "default": "all",
+              "description": "Defines which fields will be searched by keywords",
+              "enum": [
+                "name",
+                "shortName",
+                "all"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "keywordMatchStrategy": {
+            "type": "string",
+            "default": "all",
+            "description": "Defines how strict different keywords should be matched",
+            "enum": [
+              "any",
+              "all"
+            ]
+          },
+          "keywords": {
+            "type": "array",
+            "description": "Search for keywords against fields defined by KeywordFieldStrategy",
+            "items": {
+              "type": "string",
+              "description": "Search for keywords against fields defined by KeywordFieldStrategy"
+            },
+            "uniqueItems": true
+          },
+          "required": {
+            "type": "boolean",
+            "default": false,
+            "description": "Is this subcriteria required? If true the search is AND-ed"
+          },
+          "startTimestamp": {
+            "type": "integer",
+            "format": "int64",
+            "default": 0,
+            "description": "Restrict to a time frame based on the set timeFieldStrategy (start timestamp)",
+            "minimum": 0
+          },
+          "tags": {
+            "type": "array",
+            "description": "Search for objects matching these tags",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.jsonobject.spi.request.JsonObjectSearchBaseRequest_TagCriteria"
+            },
+            "uniqueItems": true
+          },
+          "timeFieldStrategy": {
+            "type": "array",
+            "default": "all",
+            "description": "Defines which timestamp fields will be filtered with start/endTimestamp",
+            "items": {
+              "type": "string",
+              "default": "all",
+              "description": "Defines which timestamp fields will be filtered with start/endTimestamp",
+              "enum": [
+                "createdTimestamp",
+                "lastUpdatedTimestamp",
+                "all"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "timeMatchStrategy": {
+            "type": "string",
+            "default": "any",
+            "description": "Defines how strict to match against different timestamps (all/any) using start and end timestamp",
+            "enum": [
+              "any",
+              "all"
+            ]
+          },
+          "user": {
+            "type": "array",
+            "description": "Search using users identified by id or shortname. If given a group, we will resolve all members of the group recursively",
+            "items": {
+              "type": "string",
+              "description": "Search using users identified by id or shortname. If given a group, we will resolve all members of the group recursively"
+            },
+            "uniqueItems": true
+          },
+          "userFieldStrategy": {
+            "type": "array",
+            "default": "all",
+            "description": "Defines which fields will be searched by user",
+            "items": {
+              "type": "string",
+              "default": "all",
+              "description": "Defines which fields will be searched by user",
+              "enum": [
+                "owner",
+                "read",
+                "write",
+                "createdByUser",
+                "lastUpdatedByUser",
+                "all"
+              ]
+            },
+            "uniqueItems": true
+          }
+        }
+      },
+      "no.mnemonic.services.jsonobject.spi.request.UpdateJsonObjectRequest": {
+        "type": "object",
+        "description": "Request to update a JsonObject",
+        "properties": {
+          "addTags": {
+            "type": "array",
+            "description": "If set, add these tags to the object.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.jsonobject.spi.request.UpdateJsonObjectRequest_TagToCreate"
+            },
+            "uniqueItems": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/com.fasterxml.jackson.databind.JsonNode",
+            "description": "The actual JSON. Max 1MB string encoded JSON."
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of this object"
+          },
+          "localizedDescriptions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Description in specified languages. Required for global objects."
+            },
+            "description": "Description in specified languages. Required for global objects."
+          },
+          "localizedNames": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Display name in specified languages. Required for global objects."
+            },
+            "description": "Display name in specified languages. Required for global objects."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of this object"
+          },
+          "removeTags": {
+            "type": "array",
+            "description": "If set, remove these tags from the object, by tag ID or key. If key is specified, this will match all tags with this key.",
+            "items": {
+              "type": "string",
+              "description": "If set, remove these tags from the object, by tag ID or key. If key is specified, this will match all tags with this key."
+            },
+            "uniqueItems": true
+          },
+          "shortName": {
+            "type": "string",
+            "description": "If set, this needs to be unique per type.",
+            "pattern": "[a-zA-Z0-9_:\\-\\.]*"
+          },
+          "skipRevision": {
+            "type": "boolean",
+            "description": "If true, do not create a new revision for this update."
+          }
+        }
+      },
+      "no.mnemonic.services.jsonobject.spi.request.UpdateJsonObjectRequest_TagToCreate": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Key for this tag. Must be alphanumeric (no spaces), and at most 256 characters",
+            "pattern": "[a-zA-Z0-9_:\\-\\.]*"
+          },
+          "value": {
+            "type": "string",
+            "description": "Value for this tag. Must be a string below 1024 characters",
+            "pattern": "[\\s\\w\\{\\}\\$\\-\\(\\)\\.\\[\\]\"\\'_/\\\\,\\*\\+\\#:@!?;=]*"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ]
+      },
+      "no.mnemonic.services.jsonobject.spi.response.JsonObjectTypeDescriptor": {
+        "type": "object",
+        "description": "Describing the type and fields of a JsonObject.",
+        "properties": {
+          "shortName": {
+            "type": "string",
+            "description": "A shortname representing one out of several defined JsonObject types."
+          }
+        }
+      },
+      "no.mnemonic.jargus.model.TimeZone": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "no.mnemonic.services.world.spi.response.CSPResponse": {
+        "type": "object"
+      },
+      "no.mnemonic.services.world.spi.request.CSPLogEntry": {
+        "type": "object",
+        "properties": {
+          "blockedUri": {
+            "type": "string",
+            "description": "The URI of the resource that was blocked from loading by the Content Security Policy."
+          },
+          "csp-report": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "writeOnly": true
+          },
+          "disposition": {
+            "type": "string",
+            "description": "Either 'enforce' or 'report'."
+          },
+          "documentUri": {
+            "type": "string",
+            "description": "The URI of the document in which the violation occurred."
+          },
+          "effectiveDirective": {
+            "type": "string",
+            "description": "The directive whose enforcement caused the violation."
+          },
+          "originalPolicy": {
+            "type": "string",
+            "description": "The original policy as specified by the Content-Security-Policy-Report-Only HTTP header."
+          },
+          "referrer": {
+            "type": "string",
+            "description": "The referrer of the document in which the violation occurred."
+          },
+          "scriptSample": {
+            "type": "string",
+            "description": "The first 40 characters of the inline script, event handler, or style that caused the violation."
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The HTTP status code of the resource on which the global object was instantiated."
+          },
+          "violatedDirective": {
+            "type": "string",
+            "description": "The name of the policy section that was violated."
+          }
+        },
+        "required": [
+          "blockedUri",
+          "disposition",
+          "documentUri",
+          "originalPolicy",
+          "violatedDirective"
+        ]
+      },
+      "no.mnemonic.services.world.spi.response.LogErrorInformation": {
+        "type": "object",
+        "description": "Contains a description of which log failed to be added and why",
+        "properties": {
+          "errorMessages": {
+            "type": "array",
+            "description": "String message of error cause.",
+            "items": {
+              "type": "string",
+              "description": "String message of error cause."
+            }
+          },
+          "logIndex": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Index of the log as it appears in the submission request."
+          }
+        }
+      },
+      "no.mnemonic.services.world.spi.response.LoggingBulkResponse": {
+        "type": "object",
+        "properties": {
+          "accepted": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of successfully submitted logs."
+          },
+          "errorInformationList": {
+            "type": "array",
+            "description": "Information regarding any logs that are rejected during validation.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.world.spi.response.LogErrorInformation"
+            }
+          },
+          "rejected": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of logs that failed validation."
+          }
+        }
+      },
+      "no.mnemonic.services.world.spi.request.ClientLogEntry": {
+        "type": "object",
+        "description": "A description of a log entry",
+        "properties": {
+          "clientBrowser": {
+            "type": "string",
+            "description": "Browser running client."
+          },
+          "context": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Additional information that could be relevant in the context. Max length of context values is 4000 characters."
+            },
+            "description": "Additional information that could be relevant in the context. Max length of context values is 4000 characters."
+          },
+          "level": {
+            "type": "string",
+            "description": "Event level: debug, info, warning or error. Defaults to info",
+            "enum": [
+              "none",
+              "error",
+              "warning",
+              "info",
+              "debug"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Event message. Max string length is 4000 characters."
+          },
+          "originatingPage": {
+            "type": "string",
+            "description": "Client page on which the event occurred."
+          },
+          "owningCustomerID": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Allow identifying which customer owns this log entry, default is current user customer. This is used for traceName=ainception"
+          },
+          "requestID": {
+            "type": "string",
+            "description": "RequestID used during event."
+          },
+          "stacktrace": {
+            "type": "string",
+            "description": "Complete stacktrace for event. Max string length is 10000 characters."
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Timestamp for event. Accepts ISO-8601 timestamp string.",
+            "minimum": 1
+          },
+          "traceName": {
+            "type": "string",
+            "default": "debug",
+            "description": "Type of log",
+            "enum": [
+              "debug",
+              "ainception"
+            ]
+          }
+        },
+        "required": [
+          "clientBrowser",
+          "originatingPage",
+          "traceName"
+        ]
+      },
+      "no.mnemonic.services.world.spi.request.ClientLoggingBulkRequest": {
+        "type": "object",
+        "properties": {
+          "ignoreOnFailed": {
+            "type": "boolean",
+            "default": false,
+            "description": "Set this value for successful response even with failures occur while submitting."
+          },
+          "logEntries": {
+            "type": "array",
+            "description": "Log entries for submission.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.world.spi.request.ClientLogEntry"
+            },
+            "maxItems": 2147483647,
+            "minItems": 1
+          }
+        },
+        "required": [
+          "logEntries"
+        ]
+      },
+      "no.mnemonic.services.world.spi.request.DistributedLogEntry": {
+        "type": "object",
+        "description": "A log entry from distributed",
+        "properties": {
+          "component": {
+            "type": "string",
+            "description": "Name og the component that provides log"
+          },
+          "componentInstanceID": {
+            "type": "integer",
+            "format": "int32",
+            "description": "ID of the component instance that provides log"
+          },
+          "container": {
+            "type": "string",
+            "description": "Name of the container that provides log"
+          },
+          "context": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Additional information that could be relevant in the context. Max length of context values is 4000 characters."
+            },
+            "description": "Additional information that could be relevant in the context. Max length of context values is 4000 characters."
+          },
+          "hostname": {
+            "type": "string",
+            "description": "Host running script."
+          },
+          "level": {
+            "type": "string",
+            "description": "Event level: debug, info, warning or error. Defaults to info",
+            "enum": [
+              "none",
+              "error",
+              "warning",
+              "info",
+              "debug"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Event message. Max string length is 4000 characters."
+          },
+          "stacktrace": {
+            "type": "string",
+            "description": "Complete stacktrace for event. Max string length is 10000 characters."
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Timestamp for event. Accepts ISO-8601 timestamp string.",
+            "minimum": 1
+          }
+        }
+      },
+      "no.mnemonic.services.world.spi.request.DistributedLoggingBulkRequest": {
+        "type": "object",
+        "description": "Request for logs from distributed",
+        "properties": {
+          "ignoreOnFailed": {
+            "type": "boolean",
+            "default": false,
+            "description": "Set this value for successful response even with failures occur while submitting."
+          },
+          "logEntries": {
+            "type": "array",
+            "description": "Log entries for submission.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.world.spi.request.DistributedLogEntry"
+            },
+            "maxItems": 2147483647,
+            "minItems": 1
+          }
+        },
+        "required": [
+          "logEntries"
+        ]
+      },
+      "no.mnemonic.services.world.spi.request.ToolLogEntry": {
+        "type": "object",
+        "description": "A log entry from tooling",
+        "properties": {
+          "arguments": {
+            "type": "string",
+            "description": "Arguments used, do not include API keys."
+          },
+          "context": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Additional information that could be relevant in the context. Max length of context values is 4000 characters."
+            },
+            "description": "Additional information that could be relevant in the context. Max length of context values is 4000 characters."
+          },
+          "currentUser": {
+            "type": "string",
+            "description": "User ID or shortname, used by the script."
+          },
+          "executableName": {
+            "type": "string",
+            "description": "Executable that initiated the script."
+          },
+          "hostname": {
+            "type": "string",
+            "description": "Host running script."
+          },
+          "level": {
+            "type": "string",
+            "description": "Event level: debug, info, warning or error. Defaults to info",
+            "enum": [
+              "none",
+              "error",
+              "warning",
+              "info",
+              "debug"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Event message. Max string length is 4000 characters."
+          },
+          "operatingSystem": {
+            "type": "string",
+            "description": "Operating system running the script."
+          },
+          "platformVersion": {
+            "type": "string",
+            "description": "Platform/Python version."
+          },
+          "reference": {
+            "type": "string",
+            "description": "Reference, such as cronmeta-tag."
+          },
+          "stacktrace": {
+            "type": "string",
+            "description": "Complete stacktrace for event. Max string length is 10000 characters."
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Timestamp for event. Accepts ISO-8601 timestamp string.",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "currentUser",
+          "executableName",
+          "hostname",
+          "operatingSystem",
+          "platformVersion"
+        ]
+      },
+      "no.mnemonic.services.world.spi.request.ToolLoggingBulkRequest": {
+        "type": "object",
+        "properties": {
+          "ignoreOnFailed": {
+            "type": "boolean",
+            "default": false,
+            "description": "Set this value for successful response even with failures occur while submitting."
+          },
+          "logEntries": {
+            "type": "array",
+            "description": "Log entries for submission.",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.world.spi.request.ToolLogEntry"
+            },
+            "maxItems": 2147483647,
+            "minItems": 1
+          }
+        },
+        "required": [
+          "logEntries"
+        ]
+      },
+      "no.mnemonic.services.world.spi.response.IOCParserResponse": {
+        "type": "object",
+        "description": "Contains extracted indicators of comprise (IOC)",
+        "properties": {
+          "fqdn": {
+            "type": "array",
+            "description": "Extracted FQDNs",
+            "items": {
+              "type": "string",
+              "description": "Extracted FQDNs"
+            },
+            "uniqueItems": true
+          },
+          "ipv4": {
+            "type": "array",
+            "description": "Extracted IPv4 addresses",
+            "items": {
+              "type": "string",
+              "description": "Extracted IPv4 addresses"
+            },
+            "uniqueItems": true
+          },
+          "ipv6": {
+            "type": "array",
+            "description": "Extracted IPv6 addresses",
+            "items": {
+              "type": "string",
+              "description": "Extracted IPv6 addresses"
+            },
+            "uniqueItems": true
+          },
+          "md5": {
+            "type": "array",
+            "description": "Extracted MD5 hashes",
+            "items": {
+              "type": "string",
+              "description": "Extracted MD5 hashes"
+            },
+            "uniqueItems": true
+          },
+          "sha1": {
+            "type": "array",
+            "description": "Extracted SHA1 hashes",
+            "items": {
+              "type": "string",
+              "description": "Extracted SHA1 hashes"
+            },
+            "uniqueItems": true
+          },
+          "sha256": {
+            "type": "array",
+            "description": "Extracted SHA256 hashes",
+            "items": {
+              "type": "string",
+              "description": "Extracted SHA256 hashes"
+            },
+            "uniqueItems": true
+          },
+          "sha512": {
+            "type": "array",
+            "description": "Extracted SHA512 hashes",
+            "items": {
+              "type": "string",
+              "description": "Extracted SHA512 hashes"
+            },
+            "uniqueItems": true
+          },
+          "url": {
+            "type": "array",
+            "description": "Extracted URLs",
+            "items": {
+              "type": "string",
+              "description": "Extracted URLs"
+            },
+            "uniqueItems": true
+          }
+        }
+      },
+      "no.mnemonic.services.world.spi.request.IOCParserRequest": {
+        "type": "object",
+        "description": "Extract indicators of compromise (IOC) from a text blob",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Text from which IOC should be extracted"
+          }
+        },
+        "required": [
+          "text"
+        ]
+      },
+      "no.mnemonic.services.world.spi.response.WhoIsResponse": {
+        "type": "object",
+        "description": "Response containing the WHOIS information",
+        "properties": {
+          "info": {
+            "type": "string",
+            "description": "Resolved WHOIS information"
+          }
+        }
+      },
+      "no.mnemonic.services.world.spi.response.GetTimeResponse": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "no.mnemonic.services.argus.common.rest.model.ResultMessage": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Message text"
+          },
+          "messageTemplate": {
+            "type": "string",
+            "description": "Message template"
+          },
+          "type": {
+            "type": "string",
+            "description": "Message type",
+            "enum": [
+              "FIELD_ERROR",
+              "ACTION_ERROR",
+              "WARNING",
+              "NOTIFICATION",
+              "INFO"
+            ]
+          },
+          "field": {
+            "type": "string",
+            "description": "Field which this message applies to"
+          },
+          "parameter": {
+            "type": "string",
+            "description": "The affected parameter"
+          }
+        }
+      },
+      "no.mnemonic.services.argus.common.rest.model.ResultStash": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "type": "object",
+            "description": "Returned results (might be an array or a single object)"
+          }
+        }
+      },
+      "ResultStash-list-no.mnemonic.services.datacollector.spi.response.DataCollectorCategory": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.datacollector.spi.response.DataCollectorCategory"
+            }
+          }
+        }
+      },
+      "ResultStash-no.mnemonic.services.datacollector.spi.response.DataCollectorIngestResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "$ref": "#/components/schemas/no.mnemonic.services.datacollector.spi.response.DataCollectorIngestResponse"
+          }
+        }
+      },
+      "ResultStash-no.mnemonic.services.jsonobject.spi.response.JsonSchemaResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "$ref": "#/components/schemas/no.mnemonic.services.jsonobject.spi.response.JsonSchemaResponse"
+          }
+        }
+      },
+      "ResultStash-no.mnemonic.services.jsonobject.spi.response.JsonObjectResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "$ref": "#/components/schemas/no.mnemonic.services.jsonobject.spi.response.JsonObjectResponse",
+            "description": "JsonObject response. Provides the JsonObject itself along with meta information"
+          }
+        }
+      },
+      "ResultStash-list-no.mnemonic.services.jsonobject.spi.response.JsonObjectAccess": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.jsonobject.spi.response.JsonObjectAccess",
+              "description": "An access entry giving access to a JsonObject for a specific user, groups or functions"
+            }
+          }
+        }
+      },
+      "ResultStash-list-no.mnemonic.services.jsonobject.spi.response.JsonObjectResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.jsonobject.spi.response.JsonObjectResponse",
+              "description": "JsonObject response. Provides the JsonObject itself along with meta information"
+            }
+          }
+        }
+      },
+      "ResultStash-no.mnemonic.services.jsonobject.spi.response.JsonObjectAccess": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "$ref": "#/components/schemas/no.mnemonic.services.jsonobject.spi.response.JsonObjectAccess",
+            "description": "An access entry giving access to a JsonObject for a specific user, groups or functions"
+          }
+        }
+      },
+      "ResultStash-list-no.mnemonic.services.jsonobject.spi.response.JsonObjectTypeDescriptor": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.services.jsonobject.spi.response.JsonObjectTypeDescriptor",
+              "description": "Describing the type and fields of a JsonObject."
+            }
+          }
+        }
+      },
+      "ResultStash-list-no.mnemonic.jargus.model.TimeZone": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/no.mnemonic.jargus.model.TimeZone"
+            }
+          }
+        }
+      },
+      "ResultStash-no.mnemonic.services.world.spi.response.CSPResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "$ref": "#/components/schemas/no.mnemonic.services.world.spi.response.CSPResponse"
+          }
+        }
+      },
+      "ResultStash-no.mnemonic.services.world.spi.response.LoggingBulkResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "$ref": "#/components/schemas/no.mnemonic.services.world.spi.response.LoggingBulkResponse"
+          }
+        }
+      },
+      "ResultStash-no.mnemonic.services.world.spi.response.IOCParserResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "$ref": "#/components/schemas/no.mnemonic.services.world.spi.response.IOCParserResponse",
+            "description": "Contains extracted indicators of comprise (IOC)"
+          }
+        }
+      },
+      "ResultStash-no.mnemonic.services.world.spi.response.WhoIsResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "$ref": "#/components/schemas/no.mnemonic.services.world.spi.response.WhoIsResponse",
+            "description": "Response containing the WHOIS information"
+          }
+        }
+      },
+      "ResultStash-no.mnemonic.services.world.spi.response.GetTimeResponse": {
+        "type": "object",
+        "properties": {
+          "responseCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Status code returned from API"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum number of returned results"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of skipped results"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of available results on server"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Actual number of returned results"
+          },
+          "metaData": {
+            "type": "object",
+            "description": "Additional unstructured meta data associated with response"
+          },
+          "messages": {
+            "type": "array",
+            "description": "Contains messages returned from the API, usually error messages",
+            "items": {
+              "type": "object",
+              "$ref": "#/components/schemas/no.mnemonic.services.argus.common.rest.model.ResultMessage"
+            }
+          },
+          "data": {
+            "$ref": "#/components/schemas/no.mnemonic.services.world.spi.response.GetTimeResponse"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyScheme": {
+        "type": "apiKey",
+        "name": "Argus-API-Key",
+        "in": "header"
+      }
+    }
+  },
+  "x-ResultStash-converted": true
+}
