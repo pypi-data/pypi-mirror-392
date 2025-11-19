@@ -1,0 +1,71 @@
+[project]
+name = "cli-dumper"
+version = "1.1"
+description = "A CLI tool that merges multiple files into a single text file"
+readme = "README.md"
+authors = [
+    { name = "DasKaroWow", email = "daskarowow@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "rich>=14.1.0",
+    "typer>=0.16.1",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Utilities",
+]
+
+[project.urls]
+Homepage = "https://github.com/DasKaroWow/cli-dumper"
+Source = "https://github.com/DasKaroWow/cli-dumper"
+Issues = "https://github.com/DasKaroWow/cli-dumper/issues"
+
+
+[build-system]
+requires = ["uv_build>=0.8.9,<0.9.0"]
+build-backend = "uv_build"
+
+[project.scripts]
+dumper = "cli_dumper.__main__:app"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-mock>=3.14.1",
+    "taskipy>=1.14.1",
+]
+
+# [tool.ruff]
+# line-length = 120
+# src = ["."]
+# exclude = ["migrations", ".venv", "__pycache__"]
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "ANN", "ASYNC", "I"]
+ignore = ["E501", "E701"]
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "native"
+docstring-code-format = true
+skip-magic-trailing-comma = false
+
+[tool.taskipy.tasks]
+lint = "ruff check --no-cache --fix ."
+format = "ruff format --no-cache ."
+test = "pytest -v"
+precommit = "task format && task lint && task test"
+clean = "cleaner -u python --delete"
