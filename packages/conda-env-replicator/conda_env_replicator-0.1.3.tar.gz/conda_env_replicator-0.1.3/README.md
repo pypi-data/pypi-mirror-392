@@ -1,0 +1,220 @@
+<div align="center">
+  <img src="https://raw.githubusercontent.com/mpinb/conda-env-replicator/main/conda-env-replicator-logo.png" alt="conda-env-replicator logo" width="600">
+
+# conda-env-replicator
+
+Create portable conda environment files that work across OS and glibc upgrades by removing overly-specific build strings while preserving critical CUDA/GPU requirements.
+</div>
+
+[![PyPI version](https://badge.fury.io/py/conda-env-replicator.svg)](https://badge.fury.io/py/conda-env-replicator)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
+
+## The Problem
+
+When migrating conda environments across systems (especially during HPC OS/glibc upgrades), environment recreation often fails due to:
+
+- **Overly-specific build strings** that are no longer available in conda channels
+- **Platform-specific dependencies** that don't exist on new systems
+- **Missing channel information** in exported environment files
+
+This tool solves these issues by creating portable environment files that:
+- Remove unnecessary build strings
+- Preserve critical CUDA/GPU version constraints with wildcards
+- Explicitly specify package channels
+- Work across different Linux versions and glibc updates
+
+## Installation
+
+### From PyPI (recommended)
+
+```bash
+pip install conda-env-replicator
+```
+
+### From source
+
+```bash
+git clone https://github.com/mpinb/conda-env-replicator.git
+cd conda-env-replicator
+pip install -e .
+```
+
+## Quick Start
+
+### Export and process an existing environment
+
+```bash
+conda-env-replicator -n myenv -o portable_env.yml
+```
+
+### Process existing export files
+
+```bash
+# First, export your environment manually
+conda env export -n myenv > env.yml
+conda list -n myenv --explicit > explicit.txt
+
+# Then process them
+conda-env-replicator -y env.yml -e explicit.txt -o portable_env.yml
+```
+
+### Recreate environment on new system
+
+```bash
+conda env create -n myenv_new -f portable_env.yml
+```
+
+## How It Works
+
+The tool processes conda environment files using this logic:
+
+1. **Removes build strings**: `ptxcompiler=0.2.0=py39h107f55c_0` → `ptxcompiler=0.2.0`
+2. **Preserves CUDA versions**: `ucx=1.12.0=cuda11.2_0` → `ucx=1.12.0=*cuda11*`
+3. **Preserves GPU builds**: `package=1.0=gpu_0` → `package=1.0=*gpu*`
+4. **Adds explicit channels**: `ptxcompiler=0.2.0` → `rapidsai::ptxcompiler=0.2.0`
+
+### Example Transformation
+
+**Before** (fails on new system):
+```yaml
+dependencies:
+  - ptxcompiler=0.2.0=py39h107f55c_0
+  - ucx=1.12.0=cuda11.2_0
+  - numpy=1.21.2=py39h20f2e39_0
+```
+
+**After** (portable):
+```yaml
+dependencies:
+  - rapidsai::ptxcompiler=0.2.0
+  - rapidsai::ucx=1.12.0=*cuda11*
+  - conda-forge::numpy=1.21.2
+```
+
+## Usage
+
+### Command Line Options
+
+```
+conda-env-replicator [-h] [-y YAML] [-e EXPLICIT] [-n NAME] -o OUTPUT [--keep-intermediates]
+
+Options:
+  -y, --yaml YAML          Input conda environment YAML file
+  -e, --explicit EXPLICIT  Input conda list --explicit output file
+  -n, --name NAME          Name of existing conda environment to export
+  -o, --output OUTPUT      Output portable YAML file (required)
+  --keep-intermediates     Keep intermediate export files (when using -n)
+  -h, --help              Show this help message and exit
+```
+
+### Examples
+
+#### Process an existing environment directly
+
+```bash
+conda-env-replicator -n pytorch-cuda11 -o portable_pytorch.yml
+```
+
+#### Process existing export files
+
+```bash
+conda-env-replicator -y my_env.yml -e my_env_explicit.txt -o portable.yml
+```
+
+#### Keep intermediate files for inspection
+
+```bash
+conda-env-replicator -n myenv -o portable.yml --keep-intermediates
+```
+
+## Use Cases
+
+### HPC System Migrations
+
+Perfect for HPC centers upgrading OS or glibc versions:
+
+```bash
+# On old system
+conda-env-replicator -n research_env -o research_portable.yml
+
+# Transfer file to new system
+scp research_portable.yml newcluster:~/
+
+# On new system
+conda env create -n research_env -f research_portable.yml
+```
+
+### Cross-Platform Development
+
+Create environments that work across different Linux distributions:
+
+```bash
+# On Ubuntu 20.04
+conda-env-replicator -n dev_env -o portable_dev.yml
+
+# Works on Rocky Linux 8, Ubuntu 22.04, etc.
+```
+
+### CUDA Version Flexibility
+
+Maintain CUDA major version requirements while allowing flexibility:
+
+```bash
+# Original: cuda11.2_0 → Portable: *cuda11*
+# Allows conda to find any cuda 11.x compatible build
+```
+
+## Requirements
+
+- Python 3.7+
+- PyYAML
+- conda (for environment export functionality)
+
+## Comparison with Other Tools
+
+| Tool | Purpose | Use Case |
+|------|---------|----------|
+| `conda-env-replicator` | OS/glibc migration | HPC upgrades, cross-distro |
+| `conda clone` | Exact environment copy | Same system only |
+| `conda-lock` | Lockfile generation | Reproducibility with exact versions |
+| `conda env export` | YAML export | Starting point (not portable) |
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+### Development Setup
+
+```bash
+git clone https://github.com/mpinb/conda-env-replicator.git
+cd conda-env-replicator
+pip install -e ".[dev]"
+pytest tests/
+```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Citation
+
+If you use this tool in your research, please cite:
+
+```bibtex
+@software{conda_env_replicator,
+  title = {conda-env-replicator: Portable Conda Environment Migration Tool},
+  author = {{Max Planck Institute for Neurobiology of Behavior - caesar}},
+  year = {2025},
+  url = {https://github.com/mpinb/conda-env-replicator}
+}
+```
+
+## Support
+
+- **Issues**: [GitHub Issues](https://github.com/mpinb/conda-env-replicator/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/mpinb/conda-env-replicator/discussions)
+
+## Acknowledgments
+
+Developed at the Max Planck Institute for Neurobiology of Behavior - caesar to facilitate HPC environment migrations and improve reproducibility in computational neuroscience research.
