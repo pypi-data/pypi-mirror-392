@@ -1,0 +1,144 @@
+{% extends 'generic/object.html' %}
+{% load helpers %}
+{% load plugins %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    <li class="breadcrumb-item"><a href="{% url 'plugins:netbox_freeipa:freeipahost_list' %}">FreeIPA Hosts</a></li>
+    <li class="breadcrumb-item active">{{ object }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <h5 class="card-header">Host Information</h5>
+            <div class="card-body">
+                <table class="table table-hover attr-table">
+                    <tr>
+                        <th scope="row">FQDN</th>
+                        <td>{{ object.fqdn }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Description</th>
+                        <td>{{ object.description|placeholder }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">IPA UUID</th>
+                        <td>{{ object.ipa_uuid|placeholder }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Status</th>
+                        <td>
+                            {% if object.enrolled %}
+                                <span class="badge bg-success">{{ object.status_label }}</span>
+                            {% else %}
+                                <span class="badge bg-warning">{{ object.status_label }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Enrolled</th>
+                        <td>{% checkmark object.enrolled %}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Enrollment Date</th>
+                        <td>{{ object.enrollment_date|placeholder }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Last Synced</th>
+                        <td>{{ object.last_synced }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <h5 class="card-header">Network Information</h5>
+            <div class="card-body">
+                <table class="table table-hover attr-table">
+                    <tr>
+                        <th scope="row">IP Address</th>
+                        <td>{{ object.ip_address|placeholder }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">MAC Address</th>
+                        <td>{{ object.mac_address|placeholder }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <h5 class="card-header">Authentication</h5>
+            <div class="card-body">
+                <table class="table table-hover attr-table">
+                    <tr>
+                        <th scope="row">Has Keytab</th>
+                        <td>{% checkmark object.has_keytab %}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">SSH Public Key</th>
+                        <td>
+                            {% if object.ssh_public_key %}
+                                <details>
+                                    <summary>View Key</summary>
+                                    <pre class="mt-2">{{ object.ssh_public_key }}</pre>
+                                </details>
+                            {% else %}
+                                {{ ''|placeholder }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Managed By</th>
+                        <td>{{ object.managed_by|placeholder }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <div class="card">
+            <h5 class="card-header">Certificate Information</h5>
+            <div class="card-body">
+                <table class="table table-hover attr-table">
+                    <tr>
+                        <th scope="row">Certificate Subject</th>
+                        <td>{{ object.certificate_subject|placeholder }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Certificate Issuer</th>
+                        <td>{{ object.certificate_issuer|placeholder }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Valid From</th>
+                        <td>{{ object.certificate_valid_not_before|placeholder }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Valid Until</th>
+                        <td>{{ object.certificate_valid_not_after|placeholder }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Certificate Status</th>
+                        <td>
+                            {% if object.is_certificate_valid is None %}
+                                {{ ''|placeholder }}
+                            {% elif object.is_certificate_valid %}
+                                <span class="badge bg-success">Valid</span>
+                            {% else %}
+                                <span class="badge bg-danger">Expired</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
