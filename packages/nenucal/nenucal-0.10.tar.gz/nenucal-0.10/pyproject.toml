@@ -1,0 +1,45 @@
+[build-system]
+requires = ["poetry-core>=1.9.0"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
+name = "nenucal"
+version = "0.10"
+description = "Calibration pipeline for the NenuFAR Cosmic Dawn project"
+readme = "README.md"
+license = { text = "GPL-3.0-or-later" }
+authors = [
+    { name = "Florent Mertens", email = "florent.mertens@gmail.com" }
+]
+repository = "https://gitlab.com/flomertens/nenucal-cd"
+requires-python = ">=3.10,<4.0"
+
+dependencies = [
+    "python-casacore>=3.0",
+    "lsmtool>=1.4.2",
+    "losoto>=2.3",
+    "nenupy>=2.0",
+    "toml>=0.10",
+    "astropy>=6.0",
+    "matplotlib>=3.0",
+    "tables>=3.2",
+    "click>=8.0",
+    "scipy>=1.8",
+    "astroquery>=0.4",
+    "requests>=2.0",
+    "libpipe>=0.2",
+    "tabulate>=0.8",
+]
+
+[project.scripts]
+calpipe = "nenucal.tools.calpipe:main"
+imgpipe = "nenucal.tools.imgpipe:main"
+flagtool = "nenucal.tools.flagtool:main"
+soltool = "nenucal.tools.soltool:main"
+modeltool = "nenucal.tools.modeltool:main"
+mstool = "nenucal.tools.mstool:main"
+nenudata = "nenucal.tools.nenudata:main"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0"
+pytest-cov = "^5.0"

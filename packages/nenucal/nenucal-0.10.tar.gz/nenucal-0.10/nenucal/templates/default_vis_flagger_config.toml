@@ -1,0 +1,33 @@
+umin = 50
+umax = 500
+data_col = 'DATA'
+n_time_avg = 50
+
+filters = ['flag_time_threshold', 'flag_baseline_threshold', 'flag_freqs_band', 'flag_delay_time_outliers', 'flag_delay_baseline_outliers']
+
+flag_time_threshold = 0.35
+flag_baseline_threshold = 0.8
+
+flag_freqs_band = {}
+
+[flag_delay_time_outliers]
+n_sigma = 5
+window_fct = 'hann'
+wedge_factor = 1.2
+delay_max = 4
+hpass_filter = true
+
+[flag_delay_baseline_outliers]
+n_sigma = 5
+window_fct = 'hann'
+wedge_factor = 1.2
+delay_max = 4
+max_threshold = 3
+min_threshold = 1.8
+hpass_filter = true
+
+[flag_time_freq_outliers]
+n_sigma = 5
+hpass_filter = true
+hpass_n_chan = 4
+stokes = 'I'
