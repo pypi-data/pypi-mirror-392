@@ -1,0 +1,247 @@
+name: git-commit
+version: "6.0.0"
+author: "workflows-mcp"
+tags: [git, commit, semantic, conventional-commits, interactive, composed, breaking-changes]
+description: |
+  Create a semantic commit with an LLM-generated message based on staged changes.
+
+  Uses LLM to analyze diffs, detect breaking changes, and generate Conventional Commits v1.0.0
+  compliant messages with proper type, scope, body, and footers.
+
+  Breaking change detection analyzes diffs for:
+  - API signature changes (parameters, return types)
+  - Public function/class/endpoint removals
+  - Behavior changes (defaults, validation, error handling)
+  - Configuration changes (required fields, schema changes)
+  - Dependency version requirements
+
+  Generates commit messages with:
+  - Proper type (feat, fix, refactor, docs, test, chore, perf, ci, build, revert)
+  - Optional scope (component/module affected)
+  - Concise summary (imperative mood, ≤70 chars)
+  - Detailed body for complex changes (multi-paragraph support)
+  - Breaking change notation (!) and BREAKING CHANGE footer
+  - Additional footers (issue refs, co-authors)
+
+  Workflow steps:
+  1. Optional staging of all modified files
+  2. Analyze staged changes (via git-analyze-changes)
+  3. Generate semantic commit message with breaking change detection (or use manual override)
+  4. Optional interactive confirmation
+  5. Create the commit
+
+inputs:
+  stage_all:
+    type: bool
+    default: false
+    description: "(Optional) Stage all modified files before analyzing (default: use already staged files)"
+    required: false
+
+  working_dir:
+    type: str
+    default: "."
+    description: "(Optional) Path to the git repository"
+    required: false
+
+  auto_commit:
+    type: bool
+    default: true
+    description: "(Optional) Skip interactive confirmation and commit immediately with generated message"
+    required: false
+
+  commit_message:
+    type: str
+    default: ""
+    description: "(Optional) Manually provide commit message (bypasses LLM generation)"
+    required: false
+
+blocks:
+  - id: stage_files
+    type: Shell
+    description: "Stage all modified files in git repository"
+    inputs:
+      working_dir: "{{inputs.working_dir}}"
+      command: git add -A
+    condition: "{{inputs.stage_all}}"
+
+  - id: analyze_changes
+    type: Workflow
+    description: "Analyze staged changes in git repository"
+    inputs:
+      workflow: "git-analyze-changes"
+      inputs:
+        working_dir: "{{inputs.working_dir}}"
+
+  - id: no_changes_message
+    type: Shell
+    description: "No changes to commit"
+    inputs:
+      command: printf "No changes to commit"
+    condition: "{{not blocks.analyze_changes.outputs.has_changes}}"
+    depends_on:
+      - analyze_changes
+
+  - id: llm_generate_message
+    type: LLMCall
+    description: "Generate semantic commit message using LLM"
+    inputs:
+      profile: default
+      timeout: 600
+      response_schema:
+        type: object
+        required: [type, scope, summary, body, is_breaking, breaking_description]
+        properties:
+          type:
+            type: string
+            enum: [feat, fix, docs, style, refactor, perf, test, chore, ci, build, revert]
+            description: "(Required) Commit type following Conventional Commits"
+          scope:
+            type: string
+            default: ""
+            description: "(Optional) Component/module affected (optional, e.g., 'api', 'auth', 'config')"
+          summary:
+            type: string
+            maxLength: 70
+            description: "(Required) Brief summary in imperative mood, lowercase, no period"
+          body:
+            type: string
+            default: ""
+            description: "(Optional) Concise explanation of what changed and why"
+          is_breaking:
+            type: boolean
+            default: false
+            description: "(Optional) Does this commit introduce breaking changes?(true/false)"
+          breaking_description:
+            type: string
+            default: ""
+            description: "(Optional) In case of breaking changes write the details here"
+      prompt: |
+        Analyze the following git changes:
+
+        ## Summary
+        {{blocks.analyze_changes.outputs.summary}}
+
+        ## Detailed Changes
+        {{blocks.analyze_changes.outputs.diff}}
+        ---
+
+        Generate a semantic commit message following Conventional Commits specification.
+
+        **COMMIT MESSAGE COMPONENTS:**
+
+        type: Choose most appropriate type:
+        - feat: new feature or capability
+        - fix: bug fix
+        - refactor: code restructuring without behavior change
+        - perf: performance improvement
+        - docs: documentation only
+        - test: test additions or modifications
+        - chore: tooling, dependencies, config (no production code change)
+        - ci: CI/CD pipeline changes
+        - build: build system or external dependency changes
+        - revert: revert a previous commit
+
+        scope: Component/module/area affected (e.g., 'api', 'auth', 'parser', 'cli'). Leave empty if change spans multiple areas.
+
+        summary: Imperative mood, lowercase, no period, max 70 chars. Focus on WHAT changed.
+
+        **BREAKING CHANGE DETECTION - CRITICAL:**
+        Carefully analyze the diff for breaking changes:
+        - Public API changes: function/method signature changes, parameter additions/removals/reorderings
+        - Removals: deleted public functions, classes, endpoints, config options
+        - Behavior changes: modified defaults, changed error handling, altered validation rules
+        - Dependencies: major version bumps, increased minimum version requirements
+        - Configuration: new required fields, renamed/removed fields, schema changes
+        - Database/migrations: schema changes requiring data migration
+
+        If ANY breaking change detected, set is_breaking: true and include breaking_description with:
+        1. What breaks and why
+        2. Migration steps for users
+        3. Alternative approaches if available
+
+        body: Explain concisely WHAT changed and WHY (not HOW - code shows that).
+        Use body when:
+        - Multiple files/components changed
+        - Non-obvious design decisions made
+        - Performance/security implications exist
+        - Complex refactoring requiring context
+        IMPORTANT: Do NOT include "BREAKING CHANGE" text in body - use is_breaking and breaking_description fields instead.
+    condition: "{{blocks.analyze_changes.outputs.has_changes and inputs.commit_message == ''}}"
+    depends_on:
+      - analyze_changes
+
+  - id: select_message
+    type: CreateFile
+    description: "Format conventional commit message with breaking change support"
+    inputs:
+      path: "{{tmp}}/message.txt"
+      overwrite: true
+      content: |
+        {%- if inputs.commit_message -%}
+        {{ inputs.commit_message }}
+        {%- else -%}
+        {%- set type = blocks.llm_generate_message.response.type -%}
+        {%- set scope = blocks.llm_generate_message.response.scope -%}
+        {%- set summary = blocks.llm_generate_message.response.summary -%}
+        {%- set is_breaking = blocks.llm_generate_message.response.is_breaking -%}
+        {%- set body = blocks.llm_generate_message.response.body -%}
+        {%- set breaking_desc = blocks.llm_generate_message.response.breaking_description -%}
+        {%- if scope -%}
+        {{ type }}({{ scope }}){% if is_breaking %}!{% endif %}: {{ summary }}
+        {%- else -%}
+        {{ type }}{% if is_breaking %}!{% endif %}: {{ summary }}
+        {%- endif %}
+        {%- if is_breaking and breaking_desc %}
+
+        BREAKING CHANGE: {{ breaking_desc }}
+        {%- endif %}
+        {%- if body %}
+
+        {{ body }}
+        {%- endif %}
+        {%- endif %}
+    condition: "{{blocks.analyze_changes.outputs.has_changes}}"
+    depends_on:
+      - block: llm_generate_message
+        required: false
+
+  - id: confirm_commit
+    type: Prompt
+    description: "Prompt user for commit confirmation"
+    inputs:
+      prompt: |
+        About to create commit with message:
+
+        {{blocks.select_message.outputs.content}}
+
+        Proceed with commit? Respond with 'yes' or 'no'
+    condition: "{{blocks.analyze_changes.outputs.has_changes and not inputs.auto_commit}}"
+    depends_on:
+      - select_message
+
+  - id: create_commit
+    type: Shell
+    description: "Create git commit with semantic message"
+    inputs:
+      working_dir: "{{inputs.working_dir}}"
+      command: |
+        set -e  # Exit immediately if any command fails
+        # Create commit from message file and get hash
+        git commit -F "{{tmp}}/message.txt"
+        git rev-parse HEAD
+    condition: "{{blocks.analyze_changes.outputs.has_changes and (inputs.auto_commit or blocks.confirm_commit.outputs.response == 'yes')}}"
+    depends_on:
+      - block: select_message
+        required: true
+      - block: confirm_commit
+        required: false
+outputs:
+  has_changes:
+    value: "{{blocks.analyze_changes.outputs.has_changes}}"
+    type: bool
+  commit_succeeded:
+    value: "{{blocks.create_commit.succeeded}}"
+    type: bool
+  commit_hash:
+    value: "{{blocks.create_commit.outputs.stdout}}"
+    type: str
