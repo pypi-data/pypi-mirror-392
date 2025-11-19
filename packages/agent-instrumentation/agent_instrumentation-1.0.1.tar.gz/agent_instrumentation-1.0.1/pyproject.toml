@@ -1,0 +1,26 @@
+[project]
+name = "agent-instrumentation"
+version = "1.0.1"
+description = "Automatic instrumentation for Python applications using Traceloop SDK"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Hansi Karunarathna", email = "hansijayanika@gmail.com" }
+]
+maintainers = [
+    { name = "Hansi Karunarathna", email = "hansijayanika@gmail.com" }
+]
+dependencies = [
+    "traceloop-sdk>=0.47.0",
+]
+
+[project.scripts]
+agent-trace = "agent_instrumentation.cli.main:cli"
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatchling.build.targets.wheel]
+packages = ["src/agent_instrumentation"]
