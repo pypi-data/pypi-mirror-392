@@ -1,0 +1,211 @@
+# Smooth Transcriber
+
+`smooth-transcriber` 提供一个异步流式语音转文本的 Python 库，基于 Google Cloud Speech-to-Text 官方示例进行了抽象。该库专注于以下目标：
+
+- 从音频流实时提取文本，支持边上传边获取识别结果；
+- 提供一致的数据模型与配置对象，方便在应用中集成；
+- 使用 PyAV 将各种音频格式转换为 Google Speech API 所需的 PCM 流，支持异步迭代器接口；
+- 通过标准日志接口输出关键事件，便于监控流式识别的状态。
+
+## 快速开始
+
+```bash
+pip install smooth-transcriber
+```
+
+如果需要从 WebSocket 或其他源读取音频流，只需提供异步迭代器：
+
+```python
+import asyncio
+from smooth_transcriber import StreamingTranscriber, TranscriptionConfig
+
+async def websocket_audio_stream():
+    """从 WebSocket 或其他源接收音频数据（任意格式：webm、wav 等）"""
+    async for chunk_bytes in receive_audio_chunks():
+        yield chunk_bytes
+
+async def main() -> None:
+    # 方式1：指定语言
+    config = TranscriptionConfig(language_code="zh-CN", chunk_delay=0.1)
+    
+    # 方式2：自动语言检测（不指定 language_code 或设置为 None）
+    config_auto = TranscriptionConfig(language_code=None, chunk_delay=0.1)
+    # 或者直接使用默认值（默认即为 None，启用自动检测）
+    config_auto = TranscriptionConfig(chunk_delay=0.1)
+    
+    transcriber = StreamingTranscriber(credentials_path="google.json")
+
+    # 直接传入音频流，自动处理格式转换
+    async for event in transcriber.stream_from_audio(websocket_audio_stream(), config):
+        if event.type == "final":
+            print("[FINAL]", event.transcript)
+        else:
+            print("[INTERIM]", event.transcript)
+
+asyncio.run(main())
+```
+
+## 语言配置
+
+### 指定语言
+
+如果需要指定特定语言，在创建 `TranscriptionConfig` 时设置 `language_code`：
+
+```python
+config = TranscriptionConfig(language_code="zh-CN")  # 中文（简体）
+config = TranscriptionConfig(language_code="en-US")  # 英语（美国）
+config = TranscriptionConfig(language_code="ja-JP")  # 日语
+```
+
+### 自动语言检测
+
+如果不指定 `language_code`（默认为 `None`），库会自动检测音频语言。自动检测支持以下常见语言：
+
+- 中文（简体、繁体）
+- 英语（美国、英国）
+- 日语、韩语
+- 西班牙语、法语、德语、俄语
+
+```python
+# 启用自动语言检测
+config = TranscriptionConfig()  # language_code 默认为 None
+# 或者显式设置为 None
+config = TranscriptionConfig(language_code=None)
+```
+
+**注意**：自动语言检测可能会略微增加识别延迟，如果已知音频语言，建议明确指定以获得更好的性能。
+
+## 事件模型
+
+`stream_from_audio` 和 `stream` 方法返回的 `TranscriptionEvent` 对象包含以下属性：
+
+### 属性说明
+
+- **`type`** (`Literal["interim", "final"]`): 事件类型
+  - `"interim"`: 临时识别结果，可能会被后续结果更新
+  - `"final"`: 最终确认的识别结果，不会再改变
+
+- **`transcript`** (`str`): 转录的文本内容
+
+- **`is_final`** (`bool`): 是否为最终结果（与 `type == "final"` 等价）
+
+- **`confidence`** (`Optional[float]`): 置信度分数，范围通常在 0.0 到 1.0 之间
+  - 仅在 `final` 类型事件中提供
+  - `interim` 类型事件中为 `None`
+
+- **`stability`** (`Optional[float]`): 稳定性指标，表示识别结果的稳定程度
+  - 仅在 `interim` 类型事件中提供
+  - `final` 类型事件中为 `None`
+
+- **`result_index`** (`Optional[int]`): 结果索引，表示该结果在结果序列中的位置
+
+### 使用示例
+
+```python
+async for event in transcriber.stream_from_audio(audio_stream, config):
+    if event.type == "final":
+        print(f"[最终结果] {event.transcript}")
+        if event.confidence:
+            print(f"置信度: {event.confidence:.2%}")
+    else:
+        print(f"[临时结果] {event.transcript}")
+        if event.stability:
+            print(f"稳定性: {event.stability:.2%}")
+    
+    # 检查是否为空
+    if event.is_empty():
+        continue
+```
+
+## 设计亮点
+
+- **完全异步**：利用 `asyncio` 与 Google Speech Async Client，可在事件循环中无缝集成。
+- **模块化**：配置、事件模型、音频解码与 API 客户端解耦，可根据需要扩展或替换。
+- **多格式支持**：自动检测音频格式并转码，支持多种格式，无需手动转换。
+- **可测试性**：提供清晰的接口和模块化设计，便于编写单元测试。
+
+## 依赖
+
+- Python 3.9+
+- `google-cloud-speech`
+- `google-auth`
+- `av` (PyAV) - 用于音频编解码
+
+### 系统依赖
+
+- **所有格式**：需要安装 `ffmpeg`（PyAV 依赖 ffmpeg）
+  - macOS: `brew install ffmpeg`
+  - Ubuntu/Debian: `sudo apt-get install ffmpeg`
+  - Windows: 从 [ffmpeg.org](https://ffmpeg.org/download.html) 下载
+
+## 发布到 PyPI
+
+### 安装构建工具
+
+```bash
+pip install build twine
+```
+
+### 构建分发包
+
+```bash
+# 构建源码分发包和 wheel 包
+python -m build
+```
+
+构建完成后，会在 `dist/` 目录下生成：
+- `smooth-transcriber-X.X.X.tar.gz` (源码分发包)
+- `smooth_transcriber-X.X.X-py3-none-any.whl` (wheel 包)
+
+### 上传到 PyPI
+
+#### 测试环境 (TestPyPI)
+
+```bash
+# 上传到 TestPyPI 进行测试
+python -m twine upload --repository testpypi dist/*
+```
+
+#### 生产环境 (PyPI)
+
+```bash
+# 上传到 PyPI
+python -m twine upload dist/*
+```
+
+### 发布前检查
+
+在发布前，建议执行以下检查：
+
+```bash
+# 检查分发包
+python -m twine check dist/*
+
+# 运行测试
+pytest
+
+# 验证安装
+pip install --upgrade --force-reinstall dist/smooth_transcriber-*.whl
+```
+
+### 版本管理
+
+在 `pyproject.toml` 中更新版本号：
+
+```toml
+[project]
+version = "0.1.0"  # 更新为新版本号
+```
+
+### 注意事项
+
+- 确保已更新 `pyproject.toml` 中的版本号
+- 确保所有测试通过
+- 确保 `README.md` 和文档是最新的
+- 首次发布前，建议先在 TestPyPI 上测试
+- 需要 PyPI 账户和 API token（可通过 `~/.pypirc` 配置或使用环境变量）
+
+## 许可协议
+
+MIT License
+
