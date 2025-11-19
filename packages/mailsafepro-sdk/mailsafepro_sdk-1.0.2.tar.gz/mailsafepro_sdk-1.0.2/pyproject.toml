@@ -1,0 +1,85 @@
+[project]
+name = "mailsafepro-sdk"
+version = "1.0.2"
+description = "Official Python SDK for Email Validation API with comprehensive security features"
+authors = [
+    {name = "MailSafePro Team", email = "support@mailsafepro.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+keywords = ["email", "validation", "verification", "smtp", "dns", "api", "sdk", "security"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Communications :: Email",
+    "Topic :: Internet",
+    "Topic :: Security",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "requests>=2.32.4",
+    "urllib3>=2.0.0",
+]
+
+[project.urls]
+Homepage = "https://mailsafepro.com"
+Documentation = "https://docs.mailsafepro.com/sdk/python"
+Repository = "https://github.com/mailsafepro/mailsafepro-python-sdk"
+Issues = "https://github.com/mailsafepro/mailsafepro-python-sdk/issues"
+Changelog = "https://github.com/mailsafepro/mailsafepro-python-sdk/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.11.1",
+    "black>=24.3.0",
+    "flake8>=6.1.0",
+    "mypy>=1.5.0",
+    "bandit>=1.7.5",
+    "safety>=3.0.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 120
+target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  \.eggs
+  | \.git
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-v --cov=mailsafepro --cov-report=term-missing"
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.bandit]
+exclude_dirs = ["tests", "examples"]
+skips = ["B101"]  # Skip assert_used in tests
