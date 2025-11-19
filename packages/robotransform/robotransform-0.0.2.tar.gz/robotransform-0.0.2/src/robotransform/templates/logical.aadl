@@ -1,0 +1,61 @@
+{%- macro render_port(name, direction, typename) -%}
+  {{ name }}: {{ direction }} {{ typename | typename_to_port }} port messages::{{ typename }};
+{%- endmacro -%}
+
+{%- macro render_state_threads(machine) -%}
+  {%- for state in machine.states %}
+thread {{ state.name }}
+  features
+    {# TODO: Replace these with real resolved fields #}
+    input:  in  event data port messages::input_type;
+    output: out event data port messages::output_type;
+end {{ state.name }};
+
+thread implementation {{ state.name }}.impl
+end {{ state.name }}.impl;
+  {%- endfor %}
+{%- endmacro -%}
+
+
+package LogicalArchitecture
+public
+  with messages, Base_Types, MBED;
+{%- for package in packages %}
+  process {{package.name}}
+    {%- set interface_vars = package.interfaces | map(attribute="variables") | sum(start=[]) -%}
+    {%- set machine_vars = package.machines | map(attribute="variables") | sum(start=[]) -%}
+    {%- if interface_vars or machine_vars %}
+    features
+      {%- for interface in package.interfaces -%}
+        {%- for variable in interface.variables %}
+      {{ render_port(variable.name, 'in',  variable.type) }}
+        {%- endfor %}
+      {%- endfor %}
+      {%- for machine in package.machines -%}
+        {%- for variable in machine.variables %}
+      {{ render_port(variable.name, 'in',  variable.type) }}
+        {%- endfor %}
+      {%- endfor -%}
+      {%- endif %}
+  end {{package.name}};
+  process implementation {{package.name}}.impl
+  {%- set machines_with_states = package.machines | selectattr("states") | select("truthy") | list %}
+  {%- if machines_with_states %}
+    subcomponents
+      {%- for machine in machines_with_states -%}
+        {% for state in machine.states %}
+      {{state.name}}: thread {{state.name}}; -- TODO: FILTER SO THAT NOT ALL STATES ARE TRANSFORMED INTO THREADS
+        {%- endfor %}
+      {%- endfor %}
+  {%- endif %}
+    connections
+      I1: port input_name -> thread_name.input_name; -- TODO: CANNOT RESOLVE CONNECTIONS!!
+      O1: port thread_name.output_name -> output_name; -- TODO: CANNOT RESOLVE CONNECTIONS!!
+  end {{package.name}}.impl;
+  {%- if machines_with_states %}
+    {%- for machine in machines_with_states %}
+      {{ render_state_threads(machine) }}
+    {%- endfor %}
+  {%- endif %}
+{%- endfor %}
+end LogicalArchitecture;
