@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lol-lmao-even"
+dynamic = ["version"]
+description = "lol, lmao even"
+authors = [{name = "Slackow"}]
+license = { file = "LICENSE.txt" }
+requires-python = ">=3.0"
+readme = {file = "README.md", content-type = "text/markdown"}
+keywords = ["lol", "lmao", "even"]
+
+[project.urls]
+Repository = "https://github.com/Slackow/lol-lmao-even.git"
+Issues = "https://github.com/Slackow/lol-lmao-even/issues"
+Download = "https://github.com/Slackow/lol-lmao-even/releases"
+Changelog = "https://github.com/Slackow/lol-lmao-even/releases"
+
+[project.scripts]
+lol = "lol:main"
+
+[tool.setuptools]
+py-modules = ["lol"]
+
+[tool.setuptools.dynamic]
+version = {attr = "lol.__version__"}
