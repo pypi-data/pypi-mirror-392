@@ -1,0 +1,94 @@
+
+[build-system]
+requires = ["uv_build>=0.9.4,<0.10.0"]
+build-backend = "uv_build"
+
+[project]
+name = "raggify"
+version = "0.1.1"
+description = "llama index based library for building multimodal RAG systems"
+authors = [
+    { name = "jun76", email = "jun76.git@gmail.com" }
+]
+license = { file = "LICENSE" }
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Utilities",
+]
+keywords = ["rag", "multimodal", "embedding", "cli", "fastapi", "streamlit", "typer"]
+dependencies = [
+    "aiofiles",
+    "chromadb",
+    "docx2txt",
+    "fastapi",
+    "fastapi-mcp",
+    "ffmpeg-python",
+    "FlagEmbedding",
+    "laion-clap==1.1.7",
+    "llama-index",
+    "llama-index-core",
+    "llama-index-embeddings-bedrock",
+    "llama-index-embeddings-clip",
+    "llama-index-embeddings-cohere",
+    "llama-index-embeddings-huggingface",
+    "llama-index-embeddings-openai",
+    "llama-index-embeddings-voyageai",
+    "llama-index-postprocessor-cohere-rerank",
+    "llama-index-postprocessor-flag-embedding-reranker",
+    "llama-index-readers-file",
+    "llama-index-readers-web",
+    "llama-index-retrievers-bm25",
+    "llama-index-storage-docstore-postgres",
+    "llama-index-storage-docstore-redis",
+    "llama-index-storage-kvstore-postgres",
+    "llama-index-vector-stores-chroma",
+    "llama-index-vector-stores-redis",
+    "llama-index-vector-stores-postgres",
+    "mashumaro",
+    "nbconvert",
+    "pillow",
+    "psycopg2-binary",
+    "pydantic",
+    "pydantic-settings",
+    "pymupdf",
+    "python-dotenv",
+    "python-multipart",
+    "requests",
+    "sentence-transformers==2.7.0",
+    "starlette",
+    "torch==2.9.0",
+    "torchaudio==2.9.0",
+    "torchvision==0.24.0",
+    "unstructured",
+    "uvicorn[standard]",
+]
+
+[project.optional-dependencies]
+exam = [
+    "openai-agents",
+    "streamlit",
+]
+
+[project.urls]
+Homepage = "https://github.com/jun76/raggify"
+Issues = "https://github.com/jun76/raggify/issues"
+
+[project.scripts]
+raggify = "raggify.cli.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: marks tests as integration tests",
+]
