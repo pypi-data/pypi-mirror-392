@@ -1,0 +1,36 @@
+name: alchemiscale-client
+channels:
+  - conda-forge
+
+dependencies:
+  - pip
+  - python=3.12
+  - cuda-version >=12
+
+  # alchemiscale dependencies
+  - gufe=1.6.1
+  - openfe=1.6.1
+  - requests
+  - click
+  - httpx
+  - pydantic >2
+  - pydantic-settings
+  - async-lru
+  - zstandard
+  - diskcache
+  - libsqlite<3.49  # newer versions cause diskcache to fail
+  - stratocaster
+
+  ## user client
+  - rich
+  - nest-asyncio
+
+  # openmm protocols
+  - feflow=0.1.4
+
+  # additional pins
+  - openmm=8.2.0
+  - openmmforcefields>=0.14.2
+
+  - pip:
+    - git+https://github.com/OpenFreeEnergy/alchemiscale.git@v0.7.1
