@@ -1,0 +1,79 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agentic-learning"
+version = "0.4.2"
+description = "Drop-in SDK to add an AI memory layer to any application. Works with OpenAI, Anthropic, Gemini, Claude."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+keywords = [
+    "ai-memory",
+    "llm-memory",
+    "agent-memory",
+    "persistent-memory",
+    "continual-learning",
+    "ai-agents",
+    "llm",
+    "openai",
+    "anthropic",
+    "claude",
+    "gemini",
+    "letta",
+    "memory-layer",
+    "stateful-agents",
+    "conversational-ai",
+    "rag",
+    "context-management",
+    "semantic-memory"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+authors = [
+    {name = "Caren Thomas", email = "caren@letta.com"}
+]
+dependencies = [
+    "httpx>=0.21.2",
+    "httpx-sse>=0.4.0",
+    "pydantic>=1.9.2",
+    "pydantic-core>=2.18.2",
+    "typing_extensions>=4.0.0",
+    "letta_client==1.0.0a20",
+]
+
+# Optional dependencies for different providers
+[project.optional-dependencies]
+anthropic = ["anthropic>=0.64.0"]
+openai = ["openai>=1.102.0"]
+gemini = ["google-generativeai>=0.8.0"]
+claude = ["claude-agent-sdk>=0.1.0"]
+all = [
+    "anthropic>=0.64.0",
+    "openai>=1.102.0",
+    "google-generativeai>=0.8.0",
+]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/letta-ai/agentic-learning-sdk"
+Repository = "https://github.com/letta-ai/agentic-learning-sdk"
+Issues = "https://github.com/letta-ai/agentic-learning-sdk/issues"
+Documentation = "https://github.com/letta-ai/agentic-learning-sdk#readme"
+"Source Code" = "https://github.com/letta-ai/agentic-learning-sdk"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentic_learning"]
