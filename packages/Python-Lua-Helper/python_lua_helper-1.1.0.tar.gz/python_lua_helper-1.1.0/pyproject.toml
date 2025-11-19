@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling","hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "Python-Lua-Helper"
+dynamic = ["version"]
+description = "Lua configuration system for your Python projects."
+authors = [{name = "DarkCaster", email = "dark.caster@outlook.com"}]
+dependencies = []
+requires-python = ">=3.10"
+maintainers = [{name = "DarkCaster", email = "dark.caster@outlook.com"}]
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = ["lua", "configuration"]
+
+[project.urls]
+Repository = "https://github.com/DarkCaster/Python-Lua-Helper.git"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.targets.sdist]
+include = ["python_lua_helper", "lua/"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["python_lua_helper"]
+
+[tool.hatch.build.targets.wheel.hooks.custom]
