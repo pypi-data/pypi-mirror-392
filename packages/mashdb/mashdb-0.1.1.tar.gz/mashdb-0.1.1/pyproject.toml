@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mashdb"
+version = "0.1.1"
+description = "A Python interface for MashDB database"
+readme = "README.md"
+requires-python = ">=3.7"
+license = { text = "MIT" }
+authors = [
+    { name = "Misbah Sarfaraz", email = "misbahsarfaraz@example.com" }
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "black>=21.12b0",
+    "isort>=5.10.1",
+    "mypy>=0.910",
+]
+
+[project.scripts]
+mashdb = "mashdb.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["mashdb*"]
+
+[tool.setuptools.package-data]
+mashdb = ["bin/*"]
+
+[tool.black]
+line-length = 88
+target-version = ['py37']
+include = '\.pyi?$'
