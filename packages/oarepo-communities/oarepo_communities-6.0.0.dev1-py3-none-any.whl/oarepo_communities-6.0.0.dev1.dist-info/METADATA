@@ -1,0 +1,50 @@
+Metadata-Version: 2.4
+Name: oarepo-communities
+Version: 6.0.0.dev1
+Project-URL: Homepage, https://github.com/oarepo/oarepo-communities
+License-Expression: MIT
+License-File: LICENSE
+Requires-Python: <3.14,>=3.13
+Requires-Dist: oarepo-requests>=3.0.0dev1
+Requires-Dist: oarepo-runtime<3.0.0,>=2.0.0dev23
+Requires-Dist: oarepo-workflows<3.0.0,>=2.0.0dev3
+Requires-Dist: oarepo[rdm,tests]<15.0.0,>=14.0.0dev0
+Provides-Extra: dev
+Requires-Dist: oarepo-invenio-typing-stubs; extra == 'dev'
+Requires-Dist: ruff>=0.11.13; extra == 'dev'
+Requires-Dist: types-pyyaml; extra == 'dev'
+Provides-Extra: oarepo14
+Requires-Dist: oarepo[rdm,tests]<15.0.0,>=14.0.0dev0; extra == 'oarepo14'
+Provides-Extra: tests
+Requires-Dist: oarepo-rdm>=1.0.0.dev4; extra == 'tests'
+Requires-Dist: oarepo-ui>=6.0.0dev1; extra == 'tests'
+Requires-Dist: pytest-invenio; extra == 'tests'
+Requires-Dist: pytest-oarepo; extra == 'tests'
+Description-Content-Type: text/markdown
+
+# OARepo communities
+
+## Installation
+
+To init custom fields, add them under COMMUNITIES_CUSTOM_FIELDS key to invenio.cfg,
+for example
+
+```python
+from oarepo_communities.cf.permissions import PermissionsCF
+from oarepo_communities.cf.aai import AAIMappingCF
+
+COMMUNITIES_CUSTOM_FIELDS = [PermissionsCF("permissions"), AAIMappingCF("aai")]
+COMMUNITIES_CUSTOM_FIELDS_UI = [{
+     "section": "settings",
+     "fields": [{
+                 "field": "permissions",
+                 "ui_widget": "Input",
+                 "props": {
+                             "label":"permissions dict",
+                          }
+                }]
+ }]
+```
+
+and the init cli command:
+invenio communities custom-fields init
