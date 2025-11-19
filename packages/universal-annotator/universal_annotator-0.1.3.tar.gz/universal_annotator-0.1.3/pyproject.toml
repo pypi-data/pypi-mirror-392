@@ -1,0 +1,35 @@
+[project]
+name = "universal-annotator"
+version = "0.1.3"
+description = "Universal Annotation Tool for images"
+readme = { file = "README.md", content-type = "text/markdown" }
+license = { file = "LICENSE" }
+authors = [
+    { name = "Madan Mohan", email = "madanmmj3@gmail.com" }
+]
+
+requires-python = ">=3.12"
+dependencies = [
+    "PyQt5>=5.15",
+    "PyQt5-sip>=12.11",
+    "Pillow>=9.0",
+    "opencv-python>=4.5",
+    "numpy>=1.20",
+    "tqdm>=4.60",
+    "pyyaml>=6.0",
+    "jsonschema>=4.0",
+]
+
+
+[project.scripts]
+universal-annotator = "universal_annotator.app.main:main"
+
+[tool.uv]
+package = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[build-system]
+requires = ["uv_build>=0.9.10,<0.10.0"]
+build-backend = "uv_build"
