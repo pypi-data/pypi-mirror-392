@@ -1,0 +1,83 @@
+Metadata-Version: 2.4
+Name: nextcloud-pywebdav
+Version: 1.0.1
+Summary: A simple Python library for Nextcloud WebDAV operations (List, Upload, Download). Designed to be used within the ESA MAAP Project.
+Author-email: Joseph Melizza <joseph.melizza@serco.com>
+License: MIT
+Project-URL: Homepage, https://gitlab.maap.eo.esa.int/joseph.melizza/nextcloud-pywebdav
+Project-URL: Bug Tracker, https://gitlab.maap.eo.esa.int/joseph.melizza/nextcloud-pywebdav/issues
+Keywords: nextcloud,webdav,client
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: requests
+Requires-Dist: tqdm
+
+# Using Python to List, Upload and Download files on Nextcloud
+
+With <em>nextcloud_pywebdav</em> you can:
+
+- List all the files and folder within your Nextcloud storage and navigate through them
+- Upload files or folders from your local Jupyter environment to your Nextcloud storage
+- Download files or folders from Nextcloud to your Jupyter environment
+
+**Disclaimer: this module has been developed to be used within the [ESA MAAP Project](https://portal.maap.eo.esa.int/). Please, check the related [documentation](https://portal.maap.eo.esa.int/ini/kb/books/collaborative-environment-pal/page/using-the-coding-environment-to-interact-with-nextcloud) to assess the needed criteria.
+We are not responsible for any damages.**
+
+
+## Installation
+
+> pip install nextcloud_pywebdav
+
+
+## Functions description
+
+> def list_remote_path(base_url: str, username: str, app_password: str, remote_path: str, max_depth: int = 3)
+
+Lists files and folders from a Nextcloud WebDAV endpoint recursively (tree view)
+
+- base_url: Nextcloud server URL
+- username: Nextcloud username
+- app_password: Nextcloud app password
+- remote_path: The starting folder relative to the user's files
+- max_depth: Limits recursion depth for large directories
+
+> def upload_folder_recursive(base_url: str, username: str, app_password: str, remote_parent_folder: str, local_dir: str, max_workers: int = 4)
+
+Upload a local folder (and its contents recursively) to Nextcloud
+
+- base_url: Nextcloud server URL 
+- username: Nextcloud username
+- app_password: Nextcloud app password
+- remote_parent_folder: Path of the Nextcloud target folder 
+- local_dir: Path of the folder to upload
+
+> def upload_file(base_url: str, username: str, app_password: str, remote_folder: str, local_file_path: str, retries: int = 3)
+
+Uploads a single local file to a specified remote folder.
+
+- base_url: Nextcloud server URL
+- username: Nextcloud username
+- app_password: Nextcloud app password
+- remote_folder: Path of the Nextcloud target folder 
+- local_file_path: Path of the single file to upload
+
+> def download_resource(base_url: str, username: str, app_password: str, remote_path: str, local_download_base_path: str)
+
+Downloads a single file or an entire folder recursively
+
+- base_url: Nextcloud server URL 
+- username: Nextcloud username
+- app_password: Nextcloud app password
+- remote_folder: The path of the resource on Nextcloud (relative to the user's root files)
+- local_download_base_path: The local directory where the file/folder will be placed
+
+
+## Examples
+
+You can find some usage examples referring to the official [ESA PAL documentation](https://portal.maap.eo.esa.int/ini/kb/books/collaborative-environment-pal/page/using-the-coding-environment-to-interact-with-nextcloud).
+
+
+## Additional Resources
+
+- **ESA MAAP Main Portal**: https://portal.maap.eo.esa.int/
+- **ESA PAL Documentation**: https://portal.maap.eo.esa.int/ini/kb/books
