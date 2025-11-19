@@ -1,0 +1,48 @@
+from abc import ABC, abstractmethod
+from typing import Dict, Any, Callable, List
+import logging
+
+from langgraph.errors import GraphInterrupt
+
+logger = logging.getLogger(__name__)
+
+
+class ActionStrategy(ABC):
+    def __init__(self, step_config: Dict[str, Any], engine_context: Any):
+        self.step_config = step_config
+        self.engine_context = engine_context
+        self.step_id = step_config.get('id')
+        self.action = step_config.get('action')
+
+    @abstractmethod
+    def execute(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        pass
+
+    def get_node_function(self) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
+        def node_fn(state: Dict[str, Any]) -> Dict[str, Any]:
+            logger.info(f"Executing node: {self.step_id} (action: {self.action})")
+            try:
+                result = self.execute(state)
+                logger.debug(f"Node {self.step_id} completed successfully")
+                return result
+            except GraphInterrupt:
+                raise
+            except Exception as e:
+                logger.error(f"Node {self.step_id} failed: {e}", exc_info=True)
+                raise
+
+        return node_fn
+
+    def _get_transitions(self) -> List[Dict[str, Any]]:
+        return self.step_config.get('transitions', [])
+
+    def _get_next_step(self) -> str:
+        return self.step_config.get('next')
+
+    def _set_status(self, state: Dict[str, Any], status_suffix: str):
+        from ..core.constants import WorkflowKeys
+        state[WorkflowKeys.STATUS] = f'{self.step_id}_{status_suffix}'
+
+    def _set_outcome(self, state: Dict[str, Any], outcome_id: str):
+        from ..core.constants import WorkflowKeys
+        state[WorkflowKeys.OUTCOME_ID] = outcome_id
