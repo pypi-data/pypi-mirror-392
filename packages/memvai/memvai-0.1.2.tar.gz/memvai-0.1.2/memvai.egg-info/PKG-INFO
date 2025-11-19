@@ -1,0 +1,144 @@
+Metadata-Version: 2.4
+Name: memvai
+Version: 0.1.2
+Summary: MemV AI client library for video processing and knowledge management.
+Author-email: MemV <hello@memv.ai>
+Project-URL: Homepage, https://github.com/memv/memvai
+Keywords: ai,video,knowledge-graph,api-client,memv
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+Requires-Dist: requests>=2.25.0
+Requires-Dist: typing-extensions>=4.0.0; python_version < "3.8"
+
+# memvai
+
+MemV AI client library for video processing and knowledge management.
+
+## Installation
+
+```bash
+pip install memvai
+```
+
+## Usage
+
+```python
+from memvai import MemVClient
+
+# Initialize the client with your API key
+client = MemVClient("your-api-key-here")
+
+# Check server health
+health = client.health_check()
+print(f"Server status: {health['status']}")
+
+# Get your user information
+user_info = client.get_user_info()
+print(f"User ID: {user_info['id']}")
+
+# Get your complete data summary
+data = client.get_user_data()
+print(f"Total videos: {data['total_videos']}")
+print(f"Storage used: {data['total_storage_used']} bytes")
+
+# Get your video indexes
+indexes = client.get_video_indexes()
+for index in indexes:
+    print(f"Index: {index['name']} - {index['description']}")
+
+# Get videos from a specific index
+if indexes:
+    videos = client.get_videos(indexes[0]['id'])
+    for video in videos:
+        print(f"Video: {video['original_name']} - {video['status']}")
+
+# Search the knowledge graph
+search_results = client.search_knowledge_graph("machine learning algorithms")
+print(f"Found {search_results['total_count']} relevant facts")
+
+# Simple search (returns just the content)
+facts = client.simple_search("neural networks", max_results=3)
+for fact in facts:
+    print(f"Fact: {fact}")
+
+# Chat with AI using knowledge graph context
+chat_response = client.chat_with_ai([
+    {"role": "user", "content": "What can you tell me about deep learning?"}
+])
+print(f"AI: {chat_response['content']}")
+
+# Simple question method
+answer = client.ask("How do transformers work?")
+print(f"Answer: {answer}")
+
+# Check your chat capabilities
+capabilities = client.get_chat_capability()
+print(f"Chat enabled: {capabilities['chat_enabled']}")
+print(f"Search enabled: {capabilities['search_enabled']}")
+```
+
+## API Reference
+
+### MemVClient
+
+#### Constructor
+- `MemVClient(api_key, base_url="https://base.memv.ai")`
+
+#### Methods
+
+**Health & User Info**
+- `health_check()` - Check server health
+- `get_user_info()` - Get current user information
+- `get_user_data(user_id=None)` - Get complete user data summary
+
+**Video Management**
+- `get_video_indexes(user_id=None)` - Get all video indexes
+- `get_videos(index_id, user_id=None)` - Get videos from specific index
+
+**Knowledge Graph & AI**
+- `search_knowledge_graph(query, group_id=None, max_facts=10)` - Search knowledge graph
+- `chat_with_ai(messages, group_id=None)` - Chat with AI
+- `get_chat_capability(user_id=None)` - Check chat capabilities
+
+**Convenience Methods**
+- `simple_search(query, max_results=5)` - Simple search returning content strings
+- `ask(question, group_id=None)` - Ask a question and get text response
+
+## Configuration
+
+The client connects to the MemV production API server at `https://base.memv.ai` by default. You can specify a different `base_url` when initializing the client if needed (e.g., for local development).
+
+## Error Handling
+
+The client includes built-in error handling:
+
+```python
+from memvai import MemVClient, MemVAuthenticationError, MemVAPIError, MemVClientError
+
+try:
+    client = MemVClient("invalid-key")
+    user_info = client.get_user_info()
+except MemVAuthenticationError:
+    print("Invalid API key")
+except MemVAPIError as e:
+    print(f"API error: {e}")
+except MemVClientError as e:
+    print(f"Client error: {e}")
+```
+
+## Requirements
+
+- Python 3.7-3.13
+- requests >= 2.25.0
+
+For inquiries, please contact: hello@memv.ai
