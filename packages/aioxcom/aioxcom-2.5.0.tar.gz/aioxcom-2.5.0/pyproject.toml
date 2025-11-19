@@ -1,0 +1,44 @@
+[project]
+name = "aioxcom"
+version = "2.5.0"
+authors = [
+  { name="Anko Hanse", email="anko_hanse@hotmail.com" },
+]
+description = "Depricated. Please use pystuderxcom library instead."
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.8"
+dependencies = [
+  'getmac<1.0.0',
+  'pyserial-asyncio<1.0',
+  'asyncudp<1.0.0'
+]
+
+[project.optional-dependencies]
+tests = [
+  'pytest',
+  'pytest-asyncio',
+]
+ 
+[project.urls]
+Homepage = "https://github.com/ankohanse/aioxcom"
+Issues = "https://github.com/ankohanse/aioxcom/issues"
+
+[build-system]
+requires = [
+    "setuptools>=61.0",
+    "wheel",
+    "cython"
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+aioxcom = ["*.json"]
+
