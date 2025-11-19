@@ -1,0 +1,50 @@
+[project]
+name = "loon-utils"
+version = "0.0.7"
+description = "A python library for updating / converting data for use in Loon visualization"
+readme = "README.md"
+authors = [
+    { name = "Luke Schreiber", email = "lucasjschreiber@gmail.com" },
+    { name = "Devin Lange", email = "devinscottlange@gmail.com" }
+]
+requires-python = ">=3.12"
+license = { text = "MIT" }
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3 :: Only",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+]
+
+dependencies = [
+    "pandas>=2.0",
+    "geojson>=3.0",
+    "roifile>=0.6",
+    "matlab-to-all",
+    "util-common",
+]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/loon_utils"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/loon_utils"]
+
+[project.scripts]
+hello = "loon_utils.main:hello"
+convert_trackmate = "loon_utils.convert_trackmate:main"
+
+[project.urls]
+Homepage = "https://github.com/visdesignlab/loon-utils"
