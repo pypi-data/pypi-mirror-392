@@ -1,0 +1,110 @@
+Metadata-Version: 2.4
+Name: dr-agent
+Version: 0.1.0
+Summary: dr-agent-lib is an agent library for building deep research agents
+Author-email: Shannon Shen <zejiang@gmail.com>, Rulin Shao <rulins@cs.washington.edu>
+License: MIT
+Keywords: agents,ai,research,tools,rag,deep-research
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: fastmcp==2.11.3
+Requires-Dist: python-dotenv
+Requires-Dist: requests
+Requires-Dist: pydantic
+Requires-Dist: tinydb
+Requires-Dist: tinydb-serialization
+Requires-Dist: tenacity
+Requires-Dist: beautifulsoup4
+Requires-Dist: pdfplumber
+Requires-Dist: lxml
+Requires-Dist: aiohttp
+Requires-Dist: chardet
+Requires-Dist: nltk
+Requires-Dist: crawl4ai
+Requires-Dist: pyyaml
+Requires-Dist: transformers
+Requires-Dist: blobfile
+Requires-Dist: cohere
+Requires-Dist: litellm
+Requires-Dist: diskcache
+Requires-Dist: typer
+Requires-Dist: omegaconf
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: pytest-asyncio; extra == "dev"
+Requires-Dist: build; extra == "dev"
+Requires-Dist: twine; extra == "dev"
+Provides-Extra: vllm
+Requires-Dist: vllm; extra == "vllm"
+Provides-Extra: all
+Requires-Dist: vllm; extra == "all"
+
+# `dr-agent-lib`
+
+## Overview
+
+`dr-agent-lib` is an agent library for training and developing deep research agents. It supports:
+- **MCP-Based Tool Backend**: Unified interface for web search and browsing tools
+- **High Concurrency**: Global caching and async request management for RL training at scale
+- **Flexible Prompting Interface**: Easy composition of search workflows with fine-grained control
+
+## Setup 
+
+```bash
+conda create -n dr_agent python=3.10 -y && conda activate dr_agent
+
+uv pip install -e .     # Install dev version
+uv pip install dr_agent # Install from pypi 
+```
+
+## Getting started 
+
+1. Launch MCP Server 
+
+    ```bash
+    MCP_CACHE_DIR=".cache-$(hostname)" python -m mcp_agents.mcp_backend.main --port 8000
+    ```
+
+2. Start the VLLM Server 
+
+    ```bash 
+    CUDA_VISIBLE_DEVICES=0 vllm serve rl-research/DR-Tulu-8B --dtype auto --port 30002 --max-model-len 40960
+    
+    CUDA_VISIBLE_DEVICES=1 vllm serve Qwen/Qwen3-8B --dtype auto --port 30002 --max-model-len 40960
+    ```
+
+3. Run generation script 
+
+    ```bash
+    bash scripts/auto_search.sh
+    ```
+
+## Publishing to PyPI
+
+To publish the package to PyPI, first install the dev dependencies:
+
+```bash
+pip install -e ".[dev]"
+```
+
+Then run the publish script:
+
+```bash
+# Test on TestPyPI first (recommended)
+bash scripts/publish_to_pypi.sh test
+
+# Publish to PyPI
+bash scripts/publish_to_pypi.sh
+```
+
+You'll need to have PyPI credentials configured. Set up your `~/.pypirc` file or use environment variables for authentication.
