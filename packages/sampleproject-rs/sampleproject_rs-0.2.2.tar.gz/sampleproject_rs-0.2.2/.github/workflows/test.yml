@@ -1,0 +1,99 @@
+name: Run tests
+
+on: [push]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  rust:
+    name: cargo test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - run: python -V
+      - run: cargo test --all-features
+
+  python:
+    needs: rust
+    name: pytest on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Install (Linux / macOS)
+        if: ${{ ! startsWith(matrix.os, 'windows') }}
+        run: |
+          python -m venv .venv --upgrade-deps
+          source .venv/bin/activate
+          pipx run maturin develop -E test
+      - name: Install (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          python -m venv .venv --upgrade-deps
+          .venv\Scripts\activate
+          pipx run maturin develop -E test
+      - name: Run tests (Linux / macOS)
+        if: ${{ ! startsWith(matrix.os, 'windows') }}
+        run: |
+          source .venv/bin/activate
+          pytest
+      - name: Run tests (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          .venv\Scripts\activate
+          pytest
+
+  linux-build:
+    needs: [rust, python]
+    name: Test build (Ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: PyO3/maturin-action@v1
+        with:
+          target: x86_64
+          args: --release --out dist
+          manylinux: auto
+
+  macos-build:
+    needs: [rust, python]
+    name: Test build (macOS)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: PyO3/maturin-action@v1
+        with:
+          target: aarch64
+          args: --release --out dist
+
+  windows-build:
+    needs: [rust, python]
+    name: Test build (Windows) target=${{ matrix.arch }}
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        arch: [x86, x64]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          architecture: ${{ matrix.arch }}
+      - uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.arch }}
+          args: --release --out dist
