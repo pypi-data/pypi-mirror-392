@@ -1,0 +1,667 @@
+Metadata-Version: 2.4
+Name: agentrun-inner-test
+Version: 0.0.1
+Summary: Add your description here
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: crcmod>=1.7
+Requires-Dist: pydantic>=2.12.4
+Requires-Dist: httpx>=0.23.0
+Requires-Dist: playwright>=1.40.0
+Requires-Dist: python-dotenv>=1.2.1
+Requires-Dist: typing-extensions>=4.15.0
+Requires-Dist: litellm>=1.79.3
+Requires-Dist: alibabacloud-devs20230714>=2.4.1
+Requires-Dist: openapi3-parser>=1.1.22
+Requires-Dist: pydash>=8.0.5
+Requires-Dist: fastapi>=0.104.0 ; extra == "fastapi"
+Requires-Dist: uvicorn>=0.24.0 ; extra == "fastapi"
+Requires-Dist: langchain-core>=0.3.10 ; extra == "langchain"
+Provides-Extra: fastapi
+Provides-Extra: langchain
+
+# AgentRun Python SDK
+
+AgentRun Python SDK 是阿里云 AgentRun 服务的 Python 客户端库，提供简洁易用的 API 来管理 AI Agent 运行时环境。
+
+## 📋 目录
+
+- [特性](#特性)
+- [安装](#安装)
+- [快速开始](#快速开始)
+- [核心 API](#核心-api)
+- [配置说明](#配置说明)
+- [示例代码](#示例代码)
+- [开发指南](#开发指南)
+- [常见问题](#常见问题)
+
+## ✨ 特性
+
+- 🎯 **简洁 API** - 面向对象的设计，直观易用
+- ⚡ **异步支持** - 同时提供同步和异步接口
+- 🔧 **类型提示** - 完整的类型注解，IDE 友好
+- 🔐 **多种认证** - 支持 Access Key、STS Token 等
+- 🌐 **多区域** - 支持阿里云所有可用区域
+- 📝 **详细文档** - 完善的代码注释和示例
+
+## 📦 安装
+
+### 使用 pip 安装
+
+```bash
+pip install agentrun
+```
+
+### 依赖要求
+
+- Python 3.9 或更高版本
+
+## 🚀 快速开始
+
+### 1. 配置认证信息
+
+设置环境变量（推荐）：
+
+```bash
+export AGENTRUN_ACCESS_KEY_ID="your-access-key-id"
+export AGENTRUN_ACCESS_KEY_SECRET="your-access-key-secret"
+export AGENTRUN_ACCOUNT_ID="your-account-id"
+export AGENTRUN_REGION="cn-hangzhou"
+```
+
+### 2. 创建第一个 Agent
+
+```python
+from agentrun import agent_runtime
+
+# 创建客户端
+client = agent_runtime.AgentRuntimeClient()
+
+# 创建 Agent Runtime
+agent = client.create(
+    agent_runtime.AgentRuntimeInput(
+        agent_runtime_name="my-first-agent",
+        code_configuration=agent_runtime.AgentRuntimeCode().from_file(
+            language=agent_runtime.AgentRuntimeLanguage.NODEJS18,
+            command=["node", "index.js"],
+            file_path="./my-agent-code",
+        ),
+    )
+)
+
+print(f"Agent 创建成功，ID: {agent.agent_runtime_id}")
+
+# 等待 Agent 就绪
+agent.wait_until_ready()
+print(f"Agent 状态: {agent.status}")
+
+# 创建访问端点
+endpoint = agent.create_endpoint(
+    agent_runtime.AgentRuntimeEndpointInput(
+        agent_runtime_endpoint_name="my-endpoint",
+        description="My first endpoint",
+    )
+)
+
+# 等待端点就绪
+endpoint.wait_until_ready()
+print(f"端点公网访问地址: {endpoint.endpoint_public_url}")
+```
+
+### 3. 清理资源
+
+```python
+# 删除 Agent（会自动删除所有关联的 Endpoint）
+agent.delete()
+print("Agent 已删除")
+```
+
+## 🔑 核心 API
+
+### AgentRuntimeClient
+
+客户端类，用于管理 Agent Runtime。
+
+#### 创建 Agent Runtime
+
+```python
+agent = client.create(
+    agent_runtime.AgentRuntimeInput(
+        agent_runtime_name="my-agent",
+        description="My AI Agent",
+        # 使用代码包部署
+        code_configuration=agent_runtime.AgentRuntimeCode().from_file(
+            language=agent_runtime.AgentRuntimeLanguage.PYTHON39,
+            command=["python", "app.py"],
+            file_path="./code",
+        ),
+        # 或使用容器镜像部署
+        # container_configuration=agent_runtime.AgentRuntimeContainer(
+        #     image="registry.cn-hangzhou.aliyuncs.com/namespace/image:tag",
+        #     command=["python", "app.py"],
+        #     port=8080,
+        # ),
+    )
+)
+```
+
+#### 获取 Agent Runtime
+
+```python
+# 通过 ID 获取
+agent = client.get("agent-runtime-id")
+
+# 列出所有 Agent Runtime
+agents = client.list()
+```
+
+#### 更新 Agent Runtime
+
+```python
+agent = client.update(
+    "agent-runtime-id",
+    agent_runtime.AgentRuntimeInput(
+        description="Updated description",
+        # 其他配置...
+    )
+)
+```
+
+#### 删除 Agent Runtime
+
+```python
+agent = client.delete("agent-runtime-id")
+```
+
+### AgentRuntime
+
+Agent Runtime 实例类，封装了实例级别的操作。
+
+#### 实例方法
+
+```python
+# 刷新状态
+agent.refresh()
+
+# 等待就绪
+agent.wait_until_ready(
+    interval_seconds=5,
+    timeout_seconds=300,
+    before_check_callback=lambda a: print(f"状态: {a.status}")
+)
+
+# 更新配置
+agent.update(new_input)
+
+# 删除（会自动删除所有 Endpoint）
+agent.delete()
+
+# Endpoint 管理
+endpoint = agent.create_endpoint(endpoint_input)
+endpoints = agent.list_endpoints()
+endpoint = agent.get_endpoint("endpoint-id")
+agent.delete_endpoint("endpoint-id")
+
+# 版本管理
+versions = agent.list_versions()
+```
+
+### AgentRuntimeEndpoint
+
+访问端点类，管理 Agent 的外部访问。
+
+#### 创建 Endpoint
+
+```python
+endpoint = agent.create_endpoint(
+    agent_runtime.AgentRuntimeEndpointInput(
+        agent_runtime_endpoint_name="my-endpoint",
+        description="Public endpoint",
+        # 配置路由权重（用于灰度发布）
+        routing_config=agent_runtime.AgentRuntimeEndpointRoutingConfig(
+            weights=[
+                agent_runtime.AgentRuntimeEndpointRoutingWeight(
+                    agent_runtime_id="agent-v1-id",
+                    weight=80  # 80% 流量
+                ),
+                agent_runtime.AgentRuntimeEndpointRoutingWeight(
+                    agent_runtime_id="agent-v2-id",
+                    weight=20  # 20% 流量
+                )
+            ]
+        )
+    )
+)
+```
+
+#### Endpoint 操作
+
+```python
+# 刷新状态
+endpoint.refresh()
+
+# 等待就绪
+endpoint.wait_until_ready()
+
+# 更新配置
+endpoint.update(new_endpoint_input)
+
+# 删除
+endpoint.delete()
+```
+
+## ⚙️ 配置说明
+
+### Config 类
+
+用于配置认证信息和客户端参数。
+
+```python
+from agentrun.utils.config import Config
+
+config = Config(
+    access_key_id="your-key-id",          # Access Key ID
+    access_key_secret="your-secret",       # Access Key Secret
+    security_token="your-token",           # 可选：STS Token
+    account_id="your-account-id",          # 账号 ID
+    region_id="cn-hangzhou",               # 区域
+    timeout=30,                            # 可选：请求超时（秒）
+    control_endpoint="custom-endpoint",    # 可选：自定义控制端点
+    data_endpoint="custom-endpoint",       # 可选：自定义数据端点
+)
+
+# 使用配置创建客户端
+client = agent_runtime.AgentRuntimeClient()
+agent = client.create(input_config, config=config)
+```
+
+### 环境变量
+
+SDK 会自动读取以下环境变量：
+
+| 环境变量 | 说明 | 备用变量 |
+|---------|------|---------|
+| `AGENTRUN_ACCESS_KEY_ID` | Access Key ID | `ALIBABA_CLOUD_ACCESS_KEY_ID` |
+| `AGENTRUN_ACCESS_KEY_SECRET` | Access Key Secret | `ALIBABA_CLOUD_ACCESS_KEY_SECRET` |
+| `AGENTRUN_SECURITY_TOKEN` | STS Token | `ALIBABA_CLOUD_SECURITY_TOKEN` |
+| `AGENTRUN_ACCOUNT_ID` | 账号 ID | `FC_ACCOUNT_ID` |
+| `AGENTRUN_REGION` | 区域 | `FC_REGION` |
+| `AGENTRUN_CONTROL_ENDPOINT` | 控制端点 | - |
+| `AGENTRUN_DATA_ENDPOINT` | 数据端点 | - |
+
+## 📚 示例代码
+
+### 完整部署流程
+
+```python
+from agentrun import agent_runtime
+from agentrun.utils.exception import ResourceNotExistError
+
+def deploy_agent():
+    """完整的 Agent 部署流程"""
+    client = agent_runtime.AgentRuntimeClient()
+
+    # 1. 创建 Agent Runtime
+    print("创建 Agent Runtime...")
+    agent = client.create(
+        agent_runtime.AgentRuntimeInput(
+            agent_runtime_name="production-agent",
+            description="Production AI Agent",
+            code_configuration=agent_runtime.AgentRuntimeCode().from_file(
+                language=agent_runtime.AgentRuntimeLanguage.PYTHON39,
+                command=["python", "main.py"],
+                file_path="./agent-code",
+            ),
+            network_configuration=agent_runtime.AgentRuntimeNetworkConfig(
+                network_mode=agent_runtime.AgentRuntimeNetworkMode.INTERNET,
+            ),
+            protocol_configuration=agent_runtime.AgentRuntimeProtocolConfig(
+                protocol_type=agent_runtime.AgentRuntimeProtocolType.HTTP,
+                port=8080,
+            ),
+            health_check_configuration=agent_runtime.AgentRuntimeHealthCheckConfig(
+                enabled=True,
+                path="/health",
+                initial_delay_seconds=10,
+                period_seconds=30,
+                timeout_seconds=5,
+                failure_threshold=3,
+            ),
+        )
+    )
+    print(f"Agent 创建成功，ID: {agent.agent_runtime_id}")
+
+    # 2. 等待 Agent 就绪
+    print("等待 Agent 就绪...")
+    agent.wait_until_ready(
+        before_check_callback=lambda a: print(f"  状态: {a.status}")
+    )
+    print("Agent 已就绪")
+
+    # 3. 创建访问端点
+    print("创建访问端点...")
+    endpoint = agent.create_endpoint(
+        agent_runtime.AgentRuntimeEndpointInput(
+            agent_runtime_endpoint_name="public-endpoint",
+            description="Public access endpoint",
+        )
+    )
+    print(f"Endpoint 创建成功，ID: {endpoint.agent_runtime_endpoint_id}")
+
+    # 4. 等待端点就绪
+    print("等待端点就绪...")
+    endpoint.wait_until_ready(
+        before_check_callback=lambda e: print(f"  状态: {e.status}")
+    )
+    print(f"端点已就绪，访问地址: {endpoint.endpoint_public_url}")
+
+    return agent, endpoint
+
+if __name__ == "__main__":
+    agent, endpoint = deploy_agent()
+```
+
+### 异步操作
+
+```python
+import asyncio
+from agentrun import agent_runtime
+
+async def deploy_agent_async():
+    """异步部署 Agent"""
+    client = agent_runtime.AgentRuntimeClient()
+
+    # 异步创建
+    agent = await client.create_async(
+        agent_runtime.AgentRuntimeInput(
+            agent_runtime_name="async-agent",
+            code_configuration=agent_runtime.AgentRuntimeCode().from_file(
+                language=agent_runtime.AgentRuntimeLanguage.NODEJS18,
+                command=["node", "server.js"],
+                file_path="./code",
+            ),
+        )
+    )
+
+    # 异步等待就绪
+    await agent.wait_until_ready_async()
+
+    # 异步创建端点
+    endpoint = await agent.create_endpoint_async(
+        agent_runtime.AgentRuntimeEndpointInput(
+            agent_runtime_endpoint_name="async-endpoint",
+        )
+    )
+
+    await endpoint.wait_until_ready_async()
+
+    return agent, endpoint
+
+# 运行
+agent, endpoint = asyncio.run(deploy_agent_async())
+```
+
+### 错误处理
+
+```python
+from agentrun import agent_runtime
+from agentrun.utils.exception import ResourceNotExistError, ClientError
+
+def safe_get_agent(agent_id: str):
+    """安全获取 Agent"""
+    client = agent_runtime.AgentRuntimeClient()
+
+    try:
+        agent = client.get(agent_id)
+        return agent
+    except ResourceNotExistError:
+        print(f"Agent {agent_id} 不存在")
+        return None
+    except ClientError as e:
+        print(f"API 调用失败: {e.message}")
+        print(f"错误码: {e.error_code}")
+        print(f"HTTP 状态码: {e.status_code}")
+        return None
+```
+
+### 灰度发布
+
+```python
+from agentrun import agent_runtime
+
+def canary_deployment(old_agent_id: str, new_config):
+    """金丝雀部署（灰度发布）"""
+    client = agent_runtime.AgentRuntimeClient()
+
+    # 1. 创建新版本 Agent
+    print("创建新版本 Agent...")
+    new_agent = client.create(new_config)
+    new_agent.wait_until_ready()
+
+    # 2. 获取旧版本 Agent
+    old_agent = client.get(old_agent_id)
+
+    # 3. 获取或创建 Endpoint
+    endpoints = old_agent.list_endpoints()
+    if not endpoints:
+        print("未找到 Endpoint，创建新的...")
+        endpoint = old_agent.create_endpoint(
+            agent_runtime.AgentRuntimeEndpointInput(
+                agent_runtime_endpoint_name="canary-endpoint",
+            )
+        )
+    else:
+        endpoint = endpoints[0]
+
+    # 4. 配置流量分配：90% 旧版本，10% 新版本
+    print("配置流量分配（90% 旧版本，10% 新版本）...")
+    endpoint.update(
+        agent_runtime.AgentRuntimeEndpointInput(
+            routing_config=agent_runtime.AgentRuntimeEndpointRoutingConfig(
+                weights=[
+                    agent_runtime.AgentRuntimeEndpointRoutingWeight(
+                        agent_runtime_id=old_agent_id,
+                        weight=90
+                    ),
+                    agent_runtime.AgentRuntimeEndpointRoutingWeight(
+                        agent_runtime_id=new_agent.agent_runtime_id,
+                        weight=10
+                    )
+                ]
+            )
+        )
+    )
+
+    print("灰度发布配置完成")
+    print(f"新版本 Agent ID: {new_agent.agent_runtime_id}")
+
+    # 5. 监控一段时间后，如果新版本稳定，逐步增加流量
+    # 最终切换到 100% 新版本
+    # endpoint.update(...)
+
+    return old_agent, new_agent, endpoint
+```
+
+### 批量管理
+
+```python
+from agentrun import agent_runtime
+
+def cleanup_unused_agents():
+    """清理未使用的 Agent"""
+    client = agent_runtime.AgentRuntimeClient()
+
+    # 列出所有 Agent
+    agents = client.list()
+
+    for agent in agents:
+        # 检查状态
+        if agent.status == agent_runtime.AgentRuntimeStatus.FAILED:
+            print(f"删除失败的 Agent: {agent.agent_runtime_id}")
+            try:
+                agent.delete()
+            except Exception as e:
+                print(f"删除失败: {e}")
+
+        # 检查是否有 Endpoint
+        elif not agent.list_endpoints():
+            print(f"删除没有 Endpoint 的 Agent: {agent.agent_runtime_id}")
+            try:
+                agent.delete()
+            except Exception as e:
+                print(f"删除失败: {e}")
+```
+
+## 🛠️ 开发指南
+
+### 环境设置
+
+```bash
+# 克隆仓库
+git clone https://github.com/aliyun/agentrun-sdk.git
+cd agentrun-sdk/python
+
+# 安装依赖
+make setup
+
+# 代码格式化
+make fmt
+
+# 运行测试
+make test
+
+# 代码生成（如果修改了模板）
+make codegen
+```
+
+### 项目结构
+
+```
+python/
+├── agentrun/                      # SDK 源代码
+│   ├── agent_runtime/             # Agent Runtime 核心模块
+│   │   ├── __init__.py            # 模块导出
+│   │   ├── client.py              # 客户端类
+│   │   ├── runtime.py             # Runtime 类
+│   │   ├── endpoint.py            # Endpoint 类
+│   │   ├── model.py               # 数据模型
+│   │   └── api/                   # 底层 API 封装
+│   ├── integration/               # 第三方集成
+│   │   ├── agentscope/            # AgentScope 集成
+│   │   ├── langchain/             # LangChain 集成
+│   │   └── google_adk/            # Google ADK 集成
+│   └── utils/                     # 工具模块
+│       ├── config.py              # 配置管理
+│       ├── exception.py           # 异常定义
+│       └── ...
+├── examples/                      # 示例代码
+│   └── agent_runtime_client.py    # 基础示例
+├── tests/                         # 测试代码
+├── codegen/                       # 代码生成脚本
+├── pyproject.toml                 # 项目配置
+├── Makefile                       # 构建配置
+└── README.md                      # 本文件
+```
+
+### 运行测试
+
+```bash
+# 运行所有测试
+uv run pytest
+
+# 运行指定测试
+uv run pytest tests/test_runtime.py
+
+# 查看测试覆盖率
+uv run pytest --cov=agentrun --cov-report=html
+```
+
+### 代码规范
+
+项目使用以下工具保证代码质量：
+
+- **pyink** - 代码格式化（Google 风格）
+- **isort** - import 排序
+- **mypy** - 类型检查
+- **pylint** - 代码静态分析
+- **pytest** - 单元测试
+
+运行格式化：
+
+```bash
+make fmt
+```
+
+## ❓ 常见问题
+
+### Q: 如何查看 Agent 运行日志？
+
+A: 在创建 Agent 时配置日志：
+
+```python
+agent = client.create(
+    agent_runtime.AgentRuntimeInput(
+        # ... 其他配置
+        log_configuration=agent_runtime.AgentRuntimeLogConfig(
+            enabled=True,
+            log_store="your-log-store",
+            project="your-sls-project",
+        ),
+    )
+)
+```
+
+然后在阿里云日志服务（SLS）控制台查看日志。
+
+### Q: 支持哪些 Python 版本？
+
+A: AgentRun Python SDK 要求 Python 3.9 或更高版本。
+
+### Q: 如何处理网络超时？
+
+A: 配置超时时间：
+
+```python
+config = Config(timeout=60)  # 60 秒超时
+client.create(input_config, config=config)
+```
+
+### Q: 代码包部署有大小限制吗？
+
+A: 是的，代码包（压缩后）建议不超过 50MB。如需部署大型应用，建议使用容器镜像方式。
+
+### Q: 如何使用自定义域名？
+
+A: 目前需要通过阿里云控制台配置自定义域名，SDK 暂不直接支持。
+
+### Q: 异步 API 和同步 API 有什么区别？
+
+A:
+- 同步 API：阻塞调用，适合简单脚本
+- 异步 API：非阻塞调用，适合高并发场景
+
+性能上异步 API 在并发操作时有优势。
+
+## 🔗 相关资源
+
+- [AgentRun 概念文档](../AGENTS.md)
+- [示例代码](./examples/)
+- [API 参考文档](https://agentrun-sdk-python.readthedocs.io/)
+- [阿里云 AgentRun 产品文档](https://help.aliyun.com/zh/agentrun/)
+- [GitHub 仓库](https://github.com/aliyun/agentrun-sdk)
+
+## 📄 许可证
+
+Apache License 2.0
+
+## 🤝 贡献
+
+欢迎贡献代码！请先阅读 [CONTRIBUTING.md](../CONTRIBUTING.md)。
+
+## 💬 支持
+
+如有问题或建议，欢迎：
+- 提交 [GitHub Issue](https://github.com/aliyun/agentrun-sdk/issues)
+- 加入钉钉群（群号待补充）
+- 联系阿里云技术支持
+
