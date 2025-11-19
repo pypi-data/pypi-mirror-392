@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyCallisto"
+version = "1.2.3"
+description = "Python library for processing Callisto solar radio spectrometer data"
+readme = "README.md"
+requires-python = ">=3.7"
+license = "MIT"
+authors = [
+    {name = "Ravindra Pawase", email = "ravi.pawase@gmail.com"},
+    {name = "K. Sasikumar Raja", email = "sasikumarraja@gmail.com"},
+    {name = "Mrutyunjaya Muduli", email = "mudulimrutyunjaya42@gmail.com"}
+]
+dependencies = [
+    "numpy",
+    "matplotlib",
+    "astropy",
+    "beautifulsoup4",
+    "scipy"
+]
+
+[project.optional-dependencies]
+goes = [
+    "sunpy>=4.0.0",
+    "drms",
+    "zeep",
+    "lxml",
+    "h5netcdf",
+    "h5py",
+    "cdflib",
+    "reproject",
+    "mpl-animators"
+]
+all = [
+    "sunpy>=4.0.0",
+    "drms",
+    "zeep",
+    "lxml",
+    "h5netcdf",
+    "h5py",
+    "cdflib",
+    "reproject",
+    "mpl-animators"
+]
+
+[project.urls]
+Homepage = "https://github.com/ravipawase/pyCallisto"
+"Bug Tracker" = "https://github.com/ravipawase/pyCallisto/issues"
+
+[tool.setuptools]
+py-modules = ["pyCallisto", "pyCallistoUtils"]
+
+[tool.setuptools.package-dir]
+"" = "src"
