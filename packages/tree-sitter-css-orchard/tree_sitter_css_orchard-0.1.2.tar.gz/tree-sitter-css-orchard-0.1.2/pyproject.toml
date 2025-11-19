@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=62.4.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tree-sitter-css-orchard"
+description = "Parser for CSS files"
+version = "0.1.2"
+keywords = ["incremental", "parsing", "tree-sitter", "css-orchard"]
+classifiers = [
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Compilers",
+  "Topic :: Text Processing :: Linguistic",
+  "Typing :: Typed",
+]
+authors = [{ name = "Max Brunsfeld", email = "maxbrunsfeld@gmail.com" }]
+requires-python = ">=3.10"
+license.text = "MIT"
+readme = "README.md"
+
+[project.urls]
+Homepage = "https://codeberg.org/grammar-orchard/tree-sitter-css-orchard"
+
+[project.optional-dependencies]
+core = ["tree-sitter~=0.24"]
+
+[tool.cibuildwheel]
+build = "cp310-*"
+build-frontend = "build"
