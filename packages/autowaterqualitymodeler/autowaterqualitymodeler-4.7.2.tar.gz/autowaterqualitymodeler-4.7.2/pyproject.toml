@@ -1,0 +1,128 @@
+[project]
+name = "autowaterqualitymodeler"
+dynamic = ["version"]
+description = "Automatic water quality spectral modeling tool"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "周元琦", email = "zyq1034378361@gmail.com" }
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: GIS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+]
+dependencies = [
+    "pandas>=1.3.0",
+    "numpy>=1.21.0",
+    "scipy>=1.7.0",
+    "scikit-learn>=1.0.0",
+    "openpyxl>=3.0.0",
+    "cryptography>=41.0.0",
+    "matplotlib>=3.10.3",
+    "seaborn>=0.13.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.0.0",
+    "black>=22.0.0",
+    "flake8>=4.0.0",
+    "mypy>=0.950",
+    "isort>=5.0.0",
+    "pre-commit>=2.0.0",
+    "basedpyright>=1.10.0",
+    "pandas-stubs>=1.5.0",
+    "setuptools_scm>=6.2",
+]
+
+
+[build-system]
+requires = ["setuptools>=61.0", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+write_to = "autowaterqualitymodeler/_version.py"
+version_scheme = "python-simplified-semver"
+local_scheme = "no-local-version"
+
+
+[tool.setuptools]
+package-dir = {"" = "."}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["autowaterqualitymodeler", "autowaterqualitymodeler.*"]
+
+[tool.setuptools.package-data]
+"autowaterqualitymodeler" = ["resources/*.xlsx"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short --strict-markers --color=yes"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+known_first_party = ["autowaterqualitymodeler"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "B", "C90"]
+# 忽略以下规则：
+# N806: 变量名应该小写（A_vector、Range_vector 是约定俗成的变量名）
+# E501: 行长度限制（已由 Black 处理）
+# B904: except子句中使用 raise ... from（需要大量重构，暂时忽略）
+# C901: 函数复杂度限制（需要重构，暂时忽略）
+ignore = ["N806", "E501", "B904", "C901"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["autowaterqualitymodeler"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = false
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+check_untyped_defs = true
+
+[tool.basedpyright]
+pythonVersion = "3.10"
+typeCheckingMode = "standard"
+reportMissingImports = "warning"
+reportMissingTypeStubs = false
+reportUnusedImport = true
+reportUnusedClass = true
+reportUnusedFunction = true
+reportUnusedVariable = true
+reportDuplicateImport = true
+
+[tool.coverage.run]
+source = ["autowaterqualitymodeler"]
+omit = ["*/tests/*", "*/cli/*"]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
