@@ -1,0 +1,26 @@
+# Single agent configuration with minimal MCP tools (command-line only for file operations)
+# This demonstrates using exclude_file_operation_mcps to reduce MCP tool overhead
+
+agents:
+  - id: "gemini_minimal"
+    backend:
+      type: "gemini"
+      model: "gemini-2.5-flash"
+      cwd: "gemini_minimal_workspace"  # Working directory for file operations
+
+      # Minimal MCP configuration - exclude redundant file operation tools
+      exclude_file_operation_mcps: true  # Agents use command-line tools (cat, ls, cp, etc.)
+      enable_mcp_command_line: true      # Enable command execution (execute_command, background shells)
+
+      # Optional: Enable media generation tools (kept even when file ops are excluded)
+      enable_image_generation: false
+      enable_audio_generation: false
+
+orchestrator:
+    snapshot_storage: "gemini_minimal_snapshots"  # Directory to store workspace snapshots
+    agent_temporary_workspace: "gemini_minimal_temp_workspaces"  # Directory for temporary agent workspaces
+
+# UI Configuration
+ui:
+  type: "rich_terminal"
+  logging_enabled: true
