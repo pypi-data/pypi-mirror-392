@@ -1,0 +1,22 @@
+[project]
+name = "pyclipper2"
+dynamic = ['version']
+
+[build-system]
+requires = ['meson-python']
+
+build-backend = 'mesonpy'
+
+[dependency-groups]
+dev = [
+    "nanobind>=2.9.2", ### we add nanobind here for stub generation
+    "pytest>=9.0.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
+
+[tool.pyright]
+exclude = ["subprojects", ".venv"]
