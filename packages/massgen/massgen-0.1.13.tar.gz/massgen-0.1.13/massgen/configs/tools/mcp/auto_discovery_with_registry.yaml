@@ -1,0 +1,63 @@
+# MCP Auto-Discovery with Registry Example
+# Demonstrates automatic inclusion of recommended MCP servers from the registry
+#
+# When auto_discover_custom_tools is enabled, MassGen automatically includes
+# these MCP servers if their API keys are available (or not required):
+# - Context7: Documentation search (no API key required)
+# - Brave Search: Web search (requires BRAVE_API_KEY in .env)
+#
+# Setup:
+# 1. Optional: Add BRAVE_API_KEY to .env for web search
+#    Get key at: https://brave.com/search/api/
+# 2. Optional: Add CONTEXT7_API_KEY to .env for higher rate limits
+#    Get key at: https://context7.com/dashboard
+#
+# Run with:
+# uv run massgen --automation \
+#   --config massgen/configs/tools/mcp/auto_discovery_with_registry.yaml \
+#   "What are the latest features in Next.js 15 App Router? Search for recent updates."
+
+agents:
+  - id: "auto_discovery_agent"
+    backend:
+      type: "gemini"
+      model: "gemini-2.5-flash"
+
+      # Enable auto-discovery - automatically adds registry MCP servers
+      auto_discover_custom_tools: true
+
+      # Optional: You can still manually configure additional MCP servers
+      # They won't conflict with auto-discovered ones
+      # mcp_servers:
+      #   - name: "my_custom_server"
+      #     type: "stdio"
+      #     command: "npx"
+      #     args: ["-y", "my-custom-mcp-server"]
+
+    system_message: |
+      You are a research assistant with access to multiple tools:
+
+      **Available MCP Tools (auto-discovered from registry):**
+
+      1. **Context7** (mcp__context7__*)
+         - Get up-to-date documentation for libraries and frameworks
+         - Usage: resolve_context7_library_id("next.js") then get_library_docs(...)
+         - Note: Outputs are large - consider writing to file first
+
+      2. **Brave Search** (mcp__brave_search__*) - Only if BRAVE_API_KEY is set
+         - Web search for current information
+         - Usage: brave_web_search("query")
+         - Note: Free tier has 2000 queries/month limit
+
+      **Workflow:**
+      1. For documentation questions: Use Context7
+      2. For current web info: Use Brave Search (if available)
+
+      **Best Practices:**
+      - When Context7 returns large docs, write to file first then parse
+      - Use Brave Search for recent updates and current information
+      - Combine tools: e.g., Brave Search for overview, Context7 for detailed docs
+
+ui:
+  display_type: "rich_terminal"
+  logging_enabled: true
