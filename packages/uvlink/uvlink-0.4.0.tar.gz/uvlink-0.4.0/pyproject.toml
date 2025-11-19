@@ -1,0 +1,43 @@
+[build-system]
+build-backend = "uv_build"
+requires = [ "uv-build>=0.9.9,<0.10" ]
+
+[project]
+name = "uvlink"
+version = "0.4.0"
+description = "CLI helper for keeping Python venvs outside synced project folders"
+readme = "README.md"
+authors = [
+  { name = "Cory Chu", email = "cory@gwlab.page" },
+]
+requires-python = ">=3.12"
+classifiers = [
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+  "rich>=14.2",
+  "typer>=0.20",
+]
+
+scripts.uvlink = "uvlink.cli:app"
+
+[dependency-groups]
+dev = [
+  "black>=25.11",
+  "pre-commit>=4.4",
+  "pyproject-fmt>=2.11.1",
+  "pyright>=1.1.407",
+  "pytest>=9.0.1",
+  "pytest-cov>=7",
+  "ruff>=0.14.5",
+]
+
+[tool.ruff]
+lint.select = [ "B", "E", "F", "I", "UP" ]
+
+[tool.pyright]
+typeCheckingMode = "strict"
+include = [ "src" ]
