@@ -1,0 +1,114 @@
+[build-system]
+requires = ["setuptools >= 70.1.0", "setuptools-scm[simple]>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "potodo"
+description = "List .po files to be translated."
+authors = [
+    { name = "Jules Lasne", email = "jules.lasne@gmail.com" },
+    { name = "Maciej Olko", email = "maciej.olko@gmail.com" },
+    { name = "Julien Palard", email = "julien@palard.fr" },
+]
+keywords = ["potodo", "gettext", "i18n"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+]
+requires-python = ">= 3.10"
+dependencies = [
+    "colorama >= 0.4.6",
+    "gitignore-parser",
+    "polib",
+    "requests",
+    "simple-term-menu",
+]
+dynamic = ["version"]
+license = "MIT"
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.urls]
+Homepage = "https://git.afpy.org/AFPy/potodo"
+
+[project.scripts]
+potodo = "potodo.potodo:main"
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "coverage",
+    "mypy",
+    "pytest",
+    "tox",
+    "types-requests",
+    "types-polib",
+    "pylint",
+]
+
+[tool.isort]
+profile = "black"
+
+[tool.pylint]
+disable = [
+    "missing-function-docstring",
+    "missing-module-docstring",
+    "too-many-instance-attributes",
+    "too-many-positional-arguments",
+    "too-many-return-statements",
+    "too-many-arguments",
+    "import-outside-toplevel",
+    "too-few-public-methods",
+]
+
+[tool.setuptools]
+packages = [
+    "potodo",
+]
+include-package-data = true
+
+[tool.black]
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.tox]
+envlist = ["py311", "py312", "py313", "py314", "mypy", "black", "pylint", "isort", "coverage"]
+skip_missing_interpreters = true
+
+[tool.tox.env_run_base]
+deps = ["pytest", "coverage"]
+description = "Run test under {base_python}"
+commands = [["python", "-m", "coverage", "run", "-m", "pytest"]]
+setenv = { COVERAGE_FILE = "{toxworkdir}/.coverage.{envname}" }
+
+[tool.tox.env.coverage]
+deps = ["coverage"]
+depends = ["py311", "py312", "py313", "py314"]
+parallel_show_output = true
+skip_install = true
+setenv = { COVERAGE_FILE = "{toxworkdir}/.coverage" }
+commands = [
+  ["coverage", "combine"],
+  ["coverage", "report", "--fail-under", "60"]
+]
+
+[tool.tox.env.mypy]
+deps = [".[dev]"]
+commands = [["mypy", "potodo/"]]
+
+[tool.tox.env.black]
+deps = ["black"]
+commands = [["black", "--check", "--diff", "potodo/", "tests/"]]
+
+[tool.tox.env.pylint]
+deps = [".[dev]"]
+commands = [["pylint", "potodo/", "tests/"]]
+
+[tool.tox.env.isort]
+deps = ["isort"]
+commands = [["isort", "--check", "potodo/", "tests/"]]
