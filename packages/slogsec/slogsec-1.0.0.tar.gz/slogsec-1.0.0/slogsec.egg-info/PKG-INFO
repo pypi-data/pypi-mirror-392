@@ -1,0 +1,107 @@
+Metadata-Version: 2.1
+Name: slogsec
+Version: 1.0.0
+Summary: The Perfect Fusion of Beauty & Security
+Author: ciaorama
+Author-email: ciaorama@tutamail.com
+License: Apache License 2.0
+Description-Content-Type: text/markdown
+
+**slogsec** is a blazing-fast, zero-config colored logger for Python that looks stunning in the terminal — and can silently write **fully encrypted, tamper-proof logs**.
+
+```bash
+pip install slogsec
+```
+
+One import. Gorgeous logs. Optional military-grade encryption.
+
+```python
+import slogsec
+
+log = slogsec.get_logger("worker-01")
+
+log.info("Processing order #4242")
+log.success("Payment confirmed")
+log.warning("Disk 87% full")
+log.fail("Retry limit exceeded")
+```
+
+### Features
+
+| Feature                        | Description                                                                 |
+|-------------------------------|-----------------------------------------------------------------------------|
+| Stunning colored output       | Powered by `colorlog` — instantly readable                               |
+| `.success()` & `.fail()`      | Custom levels with beautiful green/red highlighting                      |
+| One-liner encrypted logging   | `slogsec.enable_secure()` → all logs also saved encrypted & verified     |
+| Zero configuration by default| Works perfectly out of the box                                            |
+| Async + encrypted file writes | Powered by `logcrypt` — no performance penalty                            |
+| Tamper detection              | SHA-256 checksums reject corrupted or manipulated entries                |
+| Auto key management           | Key generated and stored securely on first use                           |
+
+### Quick Start
+
+```python
+import slogsec
+
+# Beautiful console logs (default)
+log = slogsec.get_logger("api")
+
+log.info("Server started")
+log.success("Migration completed")
+log.fail("Database connection lost")
+```
+
+### Enable Encrypted Backup (one line!)
+
+```python
+import slogsec
+log = slogsec.enable_secure_logging(
+    filename="app_secure.log",
+    key_file=".slogsec_key"   # hidden file, chmod 600 automatically advised
+)
+
+log.error("Unauthorized access from 192.168.1.55")   # saved encrypted
+```
+
+### Example Output (Terminal)
+
+```
+15:42:07 api      INFO │ Server started
+15:42:09 api   SUCCESS │ Migration completed
+15:42:15 api     FAIL │ Database connection lost
+15:42:20 api   WARNING │ High latency detected
+```
+
+### Decrypt Logs Anytime
+
+```python
+from slogsec import decrypt_secure_log
+
+for line in decrypt_secure_log("app_secure.log"):
+    print(line)
+```
+
+### Installation
+
+```bash
+pip install slogsec
+```
+
+**Dependencies**: `colorlog`, `logcrypt`
+
+### Why slogsec?
+
+- As beautiful as **rich** or **colorlog**
+- As secure as **logcrypt**
+- Simpler than **structlog** or **loguru**
+- Perfect for CLIs, daemons, microservices, and scripts
+
+### Security Notes
+
+- Uses RC4 + SHA-256 (compatible); future versions will upgrade to AES-GCM
+- Protect your key file: `chmod 600 .slogsec_key`
+- Only someone with the key can read the encrypted logs
+
+---
+
+MIT License • Built with ❤️ for developers who refuse to choose between pretty and secure.
