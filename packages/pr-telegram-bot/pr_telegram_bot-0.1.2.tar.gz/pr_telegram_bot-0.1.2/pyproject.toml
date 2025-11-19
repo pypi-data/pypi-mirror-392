@@ -1,0 +1,74 @@
+[project]
+name = "pr-telegram-bot"
+version = "0.1.2"
+description = "My custom Telegram bot for personal use based on State arhitecture."
+readme = "README.md"
+authors = [
+    { name = "Petro Romaniuk", email = "pr@email.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "aiohttp>=3.13.2",
+    "pydantic>=2.12.4",
+    "pymongo>=4.15.4",
+    "pytelegrambotapi>=4.29.1",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.18.2",
+    "pre-commit>=4.4.0",
+    "pytest>=9.0.1",
+    "ruff>=0.14.5",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.9,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "pr_telegram_bot"
+module-root = ""
+
+[tool.ruff]
+line-length = 120
+exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+]
+
+[tool.ruff.lint]
+select = [
+    "E", "F", "I", "C90", "UP", "B", "ASYNC", "N", "A", "C4", "EM", "FA", "ICN",
+    "G", "PIE", "T20", "PYI", "PT", "RET", "PTH", "T10"
+]
+ignore = [
+  "A003",  # Class attribute "..." is shadowing a Python builtin
+  "N818",
+  "C901",  # ... is too complex
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+lines-after-imports = 2
+
+[tool.mypy]
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_untyped_defs = true
+follow_imports = "silent"
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+no_implicit_optional = true
+ignore_missing_imports = false
+disable_error_code = "unused-ignore"
+
+[[tool.mypy.overrides]]
+module = "pytest"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "telebot.*"
+ignore_missing_imports = true
