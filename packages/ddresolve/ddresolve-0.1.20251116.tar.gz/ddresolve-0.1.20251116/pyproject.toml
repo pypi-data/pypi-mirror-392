@@ -1,0 +1,50 @@
+[project]
+name = "ddresolve"
+description = "Distributed Directory name resolver"
+
+version = "0.1.20251116"
+# Please consult https://pypi.org/classifiers/ for a full list.
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Communications",
+]
+
+authors = [{ name = "Kevin Steen", email = "code@kevinsteen.net" }]
+license = "AGPL-3.0-or-later"
+license-files = ["LICENCE", "COPYING"]
+readme = "README.md"
+keywords = ["dns", "petnames", "dig", "ddig"]
+
+requires-python = ">=3.12"
+dependencies = []
+
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+
+#[project.scripts]
+#ddig = "ddresolve.ddresolve:main"
+#[project.scripts]
+#ddig = "ddresolve.ddresolve:main"
+
+
+[project.urls]
+source = "https://codeberg.org/skyguy/ddresolve"
+
+
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
+
+
+[tool.hatch.version]
+path = "src/ddresolve/ddresolve.py"
+
+
+[tool.pytest.ini_options]
+log_cli_level = "DEBUG"
