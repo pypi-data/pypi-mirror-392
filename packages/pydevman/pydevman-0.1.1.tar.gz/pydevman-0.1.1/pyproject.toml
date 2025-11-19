@@ -1,0 +1,27 @@
+[project]
+name = "pydevman"
+version = "0.1.1"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "inquirer>=3.4.0",
+    "pyperclip>=1.11.0",
+    "requests>=2.32.5",
+    "send2trash>=1.8.3",
+    "tinydb>=4.8.2",
+    "typer>=0.20.0",
+]
+
+[project.scripts]
+dev = "devman.__main__:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+]
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+# pytest -v 表示详细模式
+addopts = "-v"
