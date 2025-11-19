@@ -1,0 +1,54 @@
+[project]
+name = "fondsweb-scraper"
+version = "0.1.2"
+description = "Web scraper for ETF data from fondsweb website."
+authors = [
+    { name = "asmaier", email = "asmaier@web.de" }
+]
+readme = "README.md"
+license = "MIT"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Natural Language :: German",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial :: Investment",
+]
+
+requires-python = ">=3.12"
+dependencies = [
+    "cloudscraper>=1.2.71",
+    "lxml>=5.4.0",
+    "pandas>=2.2.3",
+]
+
+[dependency-groups]
+dev = [
+    "jupyter>=1.1.1",
+    "matplotlib>=3.10.7",
+    "plotly-express>=0.4.1",
+    "pytest>=8.3.4",
+    "ruff>=0.8.4",
+]
+
+[project.urls]
+Homepage = "https://github.com/asmaier/fondsweb"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+
+[tool.ruff.lint]
+extend-select = ["E", "F"]
+
+[tool.hatch.build.targets.sdist]
+include = ["fondsweb"]
+
+[tool.hatch.build.targets.wheel]
+include = ["fondsweb"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
