@@ -1,0 +1,141 @@
+Metadata-Version: 2.4
+Name: pyautomatic
+Version: 1.0.2
+Summary: A comprehensive Python automation toolkit for Windows
+Author: xiaotbl
+Author-email: monios114514@outlook.com
+Project-URL: Bug Reports, https://github.com/xiaotbl/pyautomatic/issues
+Project-URL: Source, https://github.com/xiaotbl/pyautomatic
+Keywords: automation,windows,system-administration,win32,process-management,audio-control,encryption
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: Microsoft :: Windows :: Windows 10
+Classifier: Operating System :: Microsoft :: Windows :: Windows 11
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: System :: Systems Administration
+Classifier: Topic :: Utilities
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pywin32>=300
+Requires-Dist: psutil>=5.9.0
+Requires-Dist: comtypes>=1.1.14
+Requires-Dist: pycaw>=20181226
+Requires-Dist: pycryptodome>=3.17.0
+Requires-Dist: requests>=2.28.0
+Requires-Dist: tqdm>=4.64.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: black>=22.0.0; extra == "dev"
+Requires-Dist: flake8>=5.0.0; extra == "dev"
+Provides-Extra: gui
+Requires-Dist: PyQt5>=5.15.0; extra == "gui"
+Requires-Dist: wxPython>=4.2.0; extra == "gui"
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: keywords
+Dynamic: license-file
+Dynamic: project-url
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+# pyautomatic
+python模块
+
+## 模块列表
+- [x] windows
+- [x] rs1
+- [x] pt (print的彩色输出)
+- [x] math
+- [x] download
+- [] mail
+- [] image
+
+## 安装
+```shell
+pip install pyautomatic
+```
+
+## 使用
+```python
+from pyautomatic import windows
+
+# 获取系统信息
+print(windows.get_system_info())
+
+# 获取进程列表
+print(windows.get_process_list())
+
+# 显示通知
+windows.show_notification("标题", "内容")
+
+# 显示toast通知
+windows.show_toast_notification("标题", "内容")
+
+# 判断是否为管理员权限
+print(windows.is_admin())
+
+# 以管理员权限运行
+windows.run_as_admin()
+
+# 获取文件属性
+print(windows.get_file_properties("C:\\Windows\\System32\\notepad.exe"))
+
+# 格式化文件大小
+print(windows._format_file_size(1024))
+
+# 创建快捷方式
+windows.create_shortcut("C:\\Windows\\System32\\notepad.exe", "C:\\Users\\Public\\Desktop\\Notepad.lnk", "Notepad快捷方式", "", "C:\\Windows\\System32", "C:\\Windows\\System32\\notepad.exe")
+
+# 获取注册表值
+print(windows.get_registry_value("HKEY_LOCAL_MACHINE", "SOFTWARE\\Microsoft\\Windows\\CurrentVersion", "ProgramFilesDir"))
+
+# 设置注册表值
+windows.set_registry_value("HKEY_LOCAL_MACHINE", "SOFTWARE\\Microsoft\\Windows\\CurrentVersion", "ProgramFilesDir", "REG_SZ", "C:\\Program Files")
+
+# 获取系统启动时间
+print(windows.get_system_uptime())
+
+# 获取磁盘使用情况
+print(windows.get_disk_usage())
+
+# 终止进程
+windows.terminate_process(1234)
+
+# 运行命令
+print(windows.run_command("ipconfig"))
+
+# 锁定工作站
+windows.lock_workstation()
+
+# 设置壁纸
+windows.set_wallpaper("C:\\Users\\Public\\Pictures\\Sample Pictures\\Koala.jpg")
+
+# 获取活动窗口
+print(windows.get_active_window())
+
+# 关机
+windows.system_shutdown()
+
+# 重启
+windows.system_shutdown(reboot=True)
+
+# 定时关机
+windows.system_shutdown(timer=60) # 60秒后关机
+```
+还有许多功能，请查看源代码。
+
