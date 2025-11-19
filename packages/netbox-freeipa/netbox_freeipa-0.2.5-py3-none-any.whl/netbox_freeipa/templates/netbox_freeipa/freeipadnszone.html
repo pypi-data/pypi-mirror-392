@@ -1,0 +1,138 @@
+{% extends 'generic/object.html' %}
+{% load helpers %}
+{% load plugins %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    <li class="breadcrumb-item"><a href="{% url 'plugins:netbox_freeipa:freeipadnszone_list' %}">DNS Zones</a></li>
+    <li class="breadcrumb-item active">{{ object }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <h5 class="card-header">Zone Information</h5>
+            <div class="card-body">
+                <table class="table table-hover attr-table">
+                    <tr>
+                        <th scope="row">Zone Name</th>
+                        <td>{{ object.zone_name }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Zone Type</th>
+                        <td>{{ object.zone_type|placeholder }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Authoritative Nameserver</th>
+                        <td>{{ object.authoritative_nameserver|placeholder }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Administrator Email</th>
+                        <td>{{ object.administrator_email|placeholder }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Last Synced</th>
+                        <td>{{ object.last_synced }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <h5 class="card-header">SOA Record</h5>
+            <div class="card-body">
+                <table class="table table-hover attr-table">
+                    <tr>
+                        <th scope="row">Serial Number</th>
+                        <td>{{ object.serial_number|placeholder }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Refresh</th>
+                        <td>{{ object.refresh|placeholder }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Retry</th>
+                        <td>{{ object.retry|placeholder }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Expire</th>
+                        <td>{{ object.expire|placeholder }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Minimum TTL</th>
+                        <td>{{ object.minimum|placeholder }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <h5 class="card-header">Settings</h5>
+            <div class="card-body">
+                <table class="table table-hover attr-table">
+                    <tr>
+                        <th scope="row">Default TTL</th>
+                        <td>{{ object.ttl|placeholder }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Dynamic Update</th>
+                        <td>{% checkmark object.dynamic_update %}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Allow Sync PTR</th>
+                        <td>{% checkmark object.allow_sync_ptr %}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <div class="card">
+            <h5 class="card-header">
+                DNS Records
+                <span class="badge bg-secondary">{{ object.dns_records.count }}</span>
+            </h5>
+            <div class="card-body">
+                {% if object.dns_records.all %}
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Value</th>
+                                <th>TTL</th>
+                                <th>Host</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in object.dns_records.all %}
+                            <tr>
+                                <td><a href="{% url 'plugins:netbox_freeipa:freeipadnsrecord' pk=record.pk %}">{{ record.record_name }}</a></td>
+                                <td><span class="badge bg-info">{{ record.record_type }}</span></td>
+                                <td>{{ record.record_value }}</td>
+                                <td>{{ record.ttl|placeholder }}</td>
+                                <td>
+                                    {% if record.host %}
+                                        <a href="{% url 'plugins:netbox_freeipa:freeipahost' pk=record.host.pk %}">{{ record.host.fqdn }}</a>
+                                    {% else %}
+                                        {{ ''|placeholder }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="text-muted">No DNS records found for this zone.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'generic/object_list.html' %}
+{% load helpers %}
+
+{% block title %}FreeIPA DNS Records{% endblock %}
+
+{% block controls %}
+    <form method="post" action="{% url 'plugins:netbox_freeipa:freeipahost_sync' %}" class="d-inline">
+        {% csrf_token %}
+        <input type="hidden" name="sync_type" value="dns_records">
+        <button type="submit" class="btn btn-primary">
+            <i class="mdi mdi-sync"></i> Sync DNS Records
+        </button>
+    </form>
+{% endblock %}
