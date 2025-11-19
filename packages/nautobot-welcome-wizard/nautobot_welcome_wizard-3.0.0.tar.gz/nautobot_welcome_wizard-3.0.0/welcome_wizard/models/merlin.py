@@ -1,0 +1,39 @@
+"""Models definition for Welcome Wizard."""
+
+from django.db import models
+from nautobot.core.models import BaseModel
+
+
+class Merlin(BaseModel):
+    """Base model for Merlin Start.
+
+    Keeping the Merlin name as a nod to the original plugin name.
+
+    Args:
+        models (model): Django model
+
+    DEPRECATION NOTICE:
+    - The *_link fields (nautobot_add_link, merlin_link, nautobot_list_link) are deprecated.
+      Do not use them in new code; derive URLs from `nautobot_model` instead.
+
+    Todo:
+    - Change `nautobot_model` to ForeignKey(ContentType).
+    - Make `name` a computed property based on `Merlin.nautobot_model._meta.verbose_name_plural.title()`.
+    """
+
+    name = models.CharField(max_length=100, default="")
+    completed = models.BooleanField(default=False)
+    ignored = models.BooleanField(default=False)
+    nautobot_model = models.CharField(verbose_name="Related Nautobot Model", default="", max_length=255)
+    nautobot_add_link = models.CharField(verbose_name="Nautobot Model Add One Link", default="", max_length=255)
+    merlin_link = models.CharField(max_length=200, default="", blank=True)
+    nautobot_list_link = models.CharField(verbose_name="Nautobot Model List Link", default="", max_length=255)
+
+    class Meta:
+        """Meta definition."""
+
+        verbose_name_plural = "Welcome Wizard"
+
+    def __str__(self):
+        """Return name."""
+        return self.name
