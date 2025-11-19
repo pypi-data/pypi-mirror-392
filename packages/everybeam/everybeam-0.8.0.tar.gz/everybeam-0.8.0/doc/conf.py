@@ -1,0 +1,81 @@
+# Configuration file for the Sphinx documentation builder.
+#
+# This file only contains a selection of the most common options. For a full
+# list see the documentation:
+# https://www.sphinx-doc.org/en/master/usage/configuration.html
+
+# -- Path setup --------------------------------------------------------------
+
+# If extensions (or modules to document with autodoc) are in another directory,
+# add these directories to sys.path here. If the directory is relative to the
+# documentation root, use os.path.abspath to make it absolute, like shown here.
+
+import os
+import sys
+
+# Pre-load symbols from libeverybeam*. This should not be necessary, but on
+# Readthedocs the linking is going wrong, maybe related to use of asdf there.
+if "READTHEDOCS" in os.environ:
+    import ctypes
+    import importlib.util
+    from glob import glob
+
+    spec = importlib.util.find_spec("everybeam")
+
+    everybeam_so_path = importlib.util.find_spec("everybeam").origin
+
+    site_packages_dir = os.path.dirname(everybeam_so_path)
+    everybeam_libdir = libdir = os.path.join(
+        site_packages_dir, "everybeam.libs"
+    )
+
+    for so_file in glob(os.path.join(everybeam_libdir, "*.so")):
+        ctypes.CDLL(so_file, mode=ctypes.RTLD_GLOBAL)
+
+
+# -- Project information -----------------------------------------------------
+
+project = "EveryBeam"
+copyright = "2022, ASTRON (Netherlands Institute for Radio Astronomy)"
+author = "ASTRON"
+
+
+# -- General configuration ---------------------------------------------------
+
+# Add any Sphinx extension module names here, as strings. They can be
+# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
+# ones.
+extensions = [
+    "sphinx_rtd_theme",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "breathe",
+    "myst_parser",
+]
+
+# Disable typehints in signatures - doens't seem to take any effect
+autodoc_typehints = "none"
+
+# Add any paths that contain templates here, relative to this directory.
+templates_path = ["_templates"]
+
+# List of patterns, relative to source directory, that match files and
+# directories to ignore when looking for source files.
+# This pattern also affects html_static_path and html_extra_path.
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
+# -- Options for HTML output -------------------------------------------------
+
+# The theme to use for HTML and HTML Help pages.  See the documentation for
+# a list of builtin themes.
+#
+html_theme = "sphinx_rtd_theme"
+
+html_static_path = ["_static"]
+
+# Breathe Configuration
+# When using CMake, the 'doc' target already sets breathe_projects.
+if "READTHEDOCS" in os.environ:
+    breathe_projects = {"EveryBeam": "../build/doc/doxygen/xml"}
+
+breathe_default_project = "EveryBeam"

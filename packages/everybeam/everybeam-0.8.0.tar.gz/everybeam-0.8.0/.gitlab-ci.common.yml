@@ -1,0 +1,354 @@
+# Copyright (C) 2021 ASTRON (Netherlands Institute for Radio Astronomy)
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# This file contains the common part of the CI pipelines that run on both the
+# Astron and the SKAO repository (mirror) of EveryBeam. The yml files for those
+# pipelines include this file.
+
+workflow:
+  rules:
+    # don't create a pipeline if it is a commit pipeline, on a branch and that branch has open merge requests (bc we will get a MR build instead)
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - when: always
+
+stages:
+  - prepare
+  - build
+  - package
+  - test # Do not remove! SKAO CI templates use this stage, too.
+  - scan # Do not remove! SKAO CI templates use this stage, too.
+  - deploy
+
+# Creating a docker image name which includes the commit hash of the dockerfile,
+# and storing that image name in a 'dotenv' artifact, allows reusing docker
+# images between different pipelines.
+# See https://confluence.skatelescope.org/display/SE/Caching+Docker+images+using+GitLab+CI+registry
+.prepare:
+  extends: .dind-requester
+  stage: prepare
+  image: docker:20.10
+  before_script:
+    - apk add git
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    # Unshallowing ensures that 'git log' works
+    - git fetch --unshallow
+    - DOCKER_FILE=docker/ubuntu_${UBUNTU_VERSION}_04_base
+    - DOCKER_FILE_COMMIT=$(git log -n 1 --pretty=format:%H -- ${DOCKER_FILE})
+    - DOCKER_IMAGE=${CI_REGISTRY_IMAGE}/base_${UBUNTU_VERSION}04:${DOCKER_FILE_COMMIT}
+    - echo BASE_IMAGE_${UBUNTU_VERSION}04=${DOCKER_IMAGE} > base_image.env
+    - |
+      if ! docker manifest inspect $DOCKER_IMAGE > /dev/null || [ "$BUILD_DOCKER_IMAGE" = "1" ]; then
+        if [ "$BUILD_DOCKER_IMAGE" = "1" ]; then
+          DOCKER_CACHE_PARAMETERS="--no-cache"
+        else
+          DOCKER_CACHE_PARAMETERS=""
+        fi
+        docker build $DOCKER_BUILD_ARG ${DOCKER_CACHE_PARAMETERS} --tag $DOCKER_IMAGE -f $DOCKER_FILE .
+        docker push $DOCKER_IMAGE
+      fi
+  artifacts:
+    reports:
+      dotenv: base_image.env
+
+# Create and push the base image to the gitlab registry, if it does not exist.
+prepare-base-2004:
+  extends: .prepare
+  variables:
+    UBUNTU_VERSION: 20
+
+prepare-base-2204:
+  extends: .prepare
+  variables:
+    UBUNTU_VERSION: 22
+
+prepare-base-2404:
+  extends: .prepare
+  variables:
+    UBUNTU_VERSION: 24
+
+# Template for jobs that depend on a prepare-base job.
+.needs-base-2004:
+  needs: ["prepare-base-2004"]
+  image: $BASE_IMAGE_2004
+
+.needs-base-2204:
+  needs: ["prepare-base-2204"]
+  image: $BASE_IMAGE_2204
+
+.needs-base-2404:
+  needs: ["prepare-base-2404"]
+  image: $BASE_IMAGE_2404
+
+format-2204:
+  extends: .needs-base-2204
+  stage: build
+  script:
+    #Update external/aocommon, which contains format.sh.
+    - git submodule update --init external/aocommon
+    - ./scripts/run-format.sh
+
+.download-wsrt-measures:
+  before_script:
+    - wget -q https://www.astron.nl/iers/WSRT_Measures.ztar
+    - tar -xf WSRT_Measures.ztar -C /var/lib/casacore/data/
+    - rm -f WSRT_Measures.ztar
+
+# Build a debug version of EveryBeam from the base image
+test-and-coverage-2204:
+  extends: [ .needs-base-2204, .download-wsrt-measures ]
+  stage: test
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
+  script:
+    - WORKDIR=$PWD
+    # Build in Debug mode
+    - mkdir -p build/coeffs/lobes && cd build
+    - mv /coeffs/lobes/* ./coeffs/lobes/
+    - cmake -DCMAKE_INSTALL_PREFIX=.. -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON -DBUILD_WITH_PYTHON=ON -DCMAKE_CXX_FLAGS="-coverage -fprofile-update=atomic" -DCMAKE_EXE_LINKER_FLAGS="-coverage" -G Ninja ..
+    - ninja install
+    - ctest -j`nproc` --output-on-failure -T test
+    # Capture coverage.
+    - gcovr -j`nproc` -r .. -e '../external/.*' -e '_deps/.*' -e '.*/CompilerIdCXX/.*' -e '.*/test/.*' -e '.*/demo/.*' --txt --xml coverage.xml --json coverage.json .
+    # Check whether pyeverybeam modules can be found from home directory after setting the PYTHONPATH
+    - PYVERSION=`python3 --version | grep -P -o ".*\s\K\d+\.\d+(?=\.\d+)"`
+    - export PYTHONPATH=${WORKDIR}/lib/python${PYVERSION}/dist-packages
+    - cd && python3 -c "import everybeam"
+  after_script:
+    # Copy xml files to build/reports for the SKA .post step that generates badges.
+    - mkdir -p build/reports
+    - cp build/cpp/test/unittests.xml build/reports/unit-tests.xml
+    # Coping python test results into integration-tests.xml is not
+    # needed, since SKA has no badges for integration tests yet.
+    - cp build/coverage.xml build/reports/code-coverage.xml
+  coverage: /^TOTAL.*\s+(\d+\%)$/
+  artifacts:
+    paths:
+      - build/reports
+      - build/coverage.json # The pages job uses this file. See .gitlab-ci.ska.yml
+    reports:
+      # NOTE: artifacts only work with relative paths...
+      coverage_report:
+        coverage_format: cobertura
+        path: build/coverage.xml
+      junit:
+        - build/cpp/test/unittests.xml
+        - build/python/test/*.xml
+
+# Run unittests only using the address sanitizer.
+# Python tests do not work with the sanitizer, since the main executable
+# (python) was not built with the sanitizer.
+sanitize-2204:
+  extends: [ .needs-base-2204, .dind-requester, .download-wsrt-measures ]
+  stage: test
+  image: $BASE_IMAGE_2204
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
+  script:
+    # Build and run unit tests.
+    - mkdir -p build/coeffs/lobes && cd build
+    - mv /coeffs/lobes/* ./coeffs/lobes/
+    - cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON -DCMAKE_CXX_FLAGS="-fsanitize=address" -G Ninja ..
+    - ninja install
+    - ctest --output-on-failure -L unit
+
+.build-everybeam:
+  stage: build
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
+  script:
+    - mkdir -p build/coeffs/lobes && cd build
+    - mv /coeffs/lobes/* ./coeffs/lobes/
+    - cmake -DBUILD_TESTING=ON -DBUILD_WITH_PYTHON=ON -DCMAKE_CXX_FLAGS="$CXX_FLAGS" ..
+    - make -j`nproc` install
+    - if [ -n "$RUN_TESTS" ]; then ctest -j`nproc` --output-on-failure; fi
+
+build-test-2004:
+  extends: [ .needs-base-2004, .build-everybeam, .download-wsrt-measures ]
+  variables:
+    # Non-portable build, optimize for native cpu
+    CMAKE_FLAGS: -DPORTABLE=OFF -UTARGET_CPU
+    CXX_FLAGS: -coverage
+    RUN_TESTS: yes please run all tests with binaries optimized for native cpu
+
+build-everybeam-2204:
+  extends: [ .needs-base-2204, .build-everybeam ]
+  variables:
+    # Non-portable build, optimize for Haswell cpu
+    CMAKE_FLAGS: -DPORTABLE=OFF -DTARGET_CPU=haswell
+
+build-everybeam-2404:
+  extends: [ .needs-base-2404, .build-everybeam ]
+  variables:
+    # Portable build, do not optimize for specific cpu
+    CMAKE_FLAGS: -DPORTABLE=ON -UTARGET_CPU
+
+build-doc-2204:
+  extends: .needs-base-2204
+  stage: build
+  script:
+    - EVERYBEAM_PATH=$PWD
+    - mkdir build && cd build
+    - cmake -DBUILD_WITH_PYTHON=ON $EVERYBEAM_PATH -G Ninja
+    - ninja
+    - ninja doc
+  artifacts:
+    paths:
+    - build/doc/html
+
+build-package-2204:
+  extends: .needs-base-2204
+  stage: package
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
+  script:
+    - git fetch --unshallow # Unshallowing ensures that 'git describe' works.
+    - mkdir everybeam_package
+    - mkdir build && cd build
+    - cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_WITH_PYTHON=ON -DBUILD_APT_PACKAGES=ON ..
+    - make -j `nproc` package
+    - mv $(ls -1 *.deb) ../everybeam_package/
+  artifacts:
+    paths:
+    - everybeam_package/
+  rules:
+    # The package is built only during a merge_request_event, a merge to master,
+    # or when the pipeline is triggered by a tag event.
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_TAG'
+    - if: '$UPLOAD_PACKAGE'
+
+compare-oskar-2204:
+  stage: test
+  extends: .needs-base-2204
+  image: $BASE_IMAGE_2204
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
+  before_script:
+    # Build and install everybeam
+    - mkdir -p /opt/everybeam/build/coeffs/lobes
+    - mv /coeffs/lobes/* /opt/everybeam/build/coeffs/lobes
+    - cmake -DBUILD_TESTING=ON -DBUILD_WITH_PYTHON=ON -DCMAKE_INSTALL_PREFIX=/opt/everybeam -S. -B/opt/everybeam/build
+    - cd /opt/everybeam/build
+    - make -j`nproc` install
+    # Update newer python-casacore with numpy 2.0 compatibility
+    - apt remove -y python3-casacore
+    - python3 -m pip install python-casacore
+    # Get OSKAR sources
+    - mkdir -p /opt/oskar/build
+    - cd /opt/oskar && git clone https://github.com/OxfordSKA/OSKAR.git
+    - cd OSKAR
+    - PYVERSION=`python3 --version | grep -P -o ".*\s\K\d+\.\d+(?=\.\d+)"`
+    - export PYTHONPATH=/opt/everybeam/lib/python${PYVERSION}/dist-packages
+  script:
+    # OSKAR cpp install
+    - cd /opt/oskar/build
+    - cmake -DCMAKE_INSTALL_PREFIX=.. -DCMAKE_BUILD_TYPE=Debug ../OSKAR/
+    - make -j`nproc`
+    - make install
+    # Python install
+    - export OSKAR_INC_DIR=/opt/oskar/include
+    - export OSKAR_LIB_DIR=/opt/oskar/lib
+    - cd ../OSKAR/python && python3 setup.py install
+    # Run cmake for EveryBeam again, to update the cache with the updated $PATH
+    - export PATH=/opt/oskar/bin:$PATH
+    - cd /opt/everybeam/build
+    - cmake .
+    # Run OSKAR base comparison, set some env variables for this session
+    - export NPIXELS=8 APPLY_TRANSPOSE=OFF MAX_ORDER=3 TOLERANCE=1e-12
+    - make VERBOSE=1 comparison-oskar-basefunctions
+    # Run OSKAR stationresponse comparison
+    - export NPIXELS=32 TOLERANCE=1e-5
+    - make VERBOSE=1 comparison-oskar-station-response
+  rules:
+    # Only add job for schedules, on merge_request_event, and on master
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "master"'
+
+deploy-image-2204:
+  extends: .dind-requester
+  needs: ["prepare-base-2204","build-everybeam-2204"]
+  stage: deploy
+  image: docker:20.10
+  variables:
+    DOCKER_IMAGE: $CI_REGISTRY_IMAGE/everybeam_2204:latest
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build --build-arg BASE_IMAGE=${BASE_IMAGE_2204} --tag $DOCKER_IMAGE -f docker/everybeam .
+    - docker push $DOCKER_IMAGE
+  rules:
+    # Only add job when ran on master and not a scheduled job, i.e. when merging
+    - if: '$CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE != "schedule"'
+    # For testing this job on a branch, set the DEPLOY_IMAGE variable to true.
+    - if: '$DEPLOY_IMAGE'
+  artifacts:
+    paths:
+      - dist/everybeam*.whl
+
+build-python-source-tarball:
+  stage: deploy
+  image: python:3.12
+  variables:
+    # Start with a clean working copy to avoid including unwanted files in the tarball
+    GIT_STRATEGY: clone
+  before_script:
+    - pip install build
+  script:
+    - python -m build --sdist --outdir dist
+  artifacts:
+    paths:
+      - dist/*.tar.gz
+  rules:
+    # Only run job when building a release tag, the default branch,
+    # or when triggered manually.
+    - if: $CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: always
+    - when: manual
+      allow_failure: true # Make the manual job optional instead of mandatory
+
+cibuild-python-wheels:
+  extends: .cibuildwheels-custom
+  stage: deploy
+  image: python:3.12
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
+  before_script:
+    - wget -qO - https://get.docker.com/ | sh
+    - pip install cibuildwheel
+  script:
+    - cibuildwheel --output-dir wheelhouse
+  rules:
+    # Since cibuildwheel takes 10 to 15 minutes, only run it when building
+    # a release tag, the default branch, or when triggered manually.
+    - if: $CI_COMMIT_TAG || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: always
+    - when: manual
+      allow_failure: true # Make the manual job optional instead of mandatory.
+  artifacts:
+    paths:
+      - wheelhouse/*.whl
+
+.deploy-python-package:
+  stage: deploy
+  needs:
+    - build-python-source-tarball
+    - cibuild-python-wheels
+  image: python:3.12
+  before_script:
+    - pip install twine
+  script:
+    - python -m twine upload --verbose dist/*.tar.gz wheelhouse/*.whl
+  rules:
+    # Only deploy when building a release tag, or when requested explicitly.
+    - if: '$CI_COMMIT_TAG && $CI_COMMIT_REF_PROTECTED == "true"'
+
+deploy_on_gitlab:
+  extends: .deploy-python-package
+  environment: gitlab
+  variables:
+    TWINE_USERNAME: gitlab-ci-token
+    TWINE_PASSWORD: ${CI_JOB_TOKEN}
+    TWINE_REPOSITORY_URL: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi

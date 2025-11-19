@@ -1,0 +1,82 @@
+// Copyright (C) 2022 ASTRON (Netherlands Institute for Radio Astronomy)
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#ifndef OSKAR_ELEMENTRESPONSE_H
+#define OSKAR_ELEMENTRESPONSE_H
+
+#include "../elementresponse.h"
+
+#include <aocommon/matrix2x2.h>
+
+#include <memory>
+
+namespace everybeam {
+
+// Use a forward declaration instead of including internal libeverybeam-oskar
+// headers. The internal headers use OSKAR headers, which are not available
+// outside the library.
+class Datafile;
+
+/**
+ * Implementation of the OSKAR dipole response model. Uses the frequency to
+ * set the dipole length to half the wavelength (to align with OSKAR
+ * simulations) and calls sdp_element_beam_dipole from ska-sdp-func.
+ */
+class [[gnu::visibility("default")]] OSKARElementResponseDipole
+    : public ElementResponse {
+ public:
+  ElementResponseModel GetModel() const override {
+    return ElementResponseModel::kOSKARDipole;
+  }
+
+  aocommon::MC2x2 Response(double freq, double theta, double phi)
+      const override;
+};
+
+/**
+ * Implementation of the OSKAR dipole response model with cos taper.
+ * This model is a quick phenomenological model, that will likely be
+ * deprecated when 'official' beam models for SKA-LOW are implemented.
+ */
+class [[gnu::visibility("default")]] OSKARElementResponseDipoleCos
+    : public OSKARElementResponseDipole {
+ public:
+  ElementResponseModel GetModel() const final override {
+    return ElementResponseModel::kOSKARDipoleCos;
+  }
+
+  aocommon::MC2x2 Response(double freq, double theta, double phi)
+      const final override;
+};
+
+//! Implementation of the OSKAR spherical wave response model
+class [[gnu::visibility("default")]] OSKARElementResponseSphericalWave
+    : public ElementResponse {
+ public:
+  /** Constructor loading the default coefficients file */
+  OSKARElementResponseSphericalWave();
+
+  /**
+   * Constructor loading a custom coefficients file
+   * @param filename Filename of HDF5 file with coefficients.
+   */
+  OSKARElementResponseSphericalWave(const std::string& filename);
+
+  ElementResponseModel GetModel() const final override {
+    return ElementResponseModel::kOSKARSphericalWave;
+  }
+
+  aocommon::MC2x2 Response(double freq, double theta, double phi)
+      const final override;
+
+  aocommon::MC2x2 Response(int element_id, double freq, double theta,
+                           double phi) const final override;
+
+ private:
+  // This weak pointer allows reusing the default coefficients.
+  static std::weak_ptr<Datafile> cached_datafile_;
+  std::shared_ptr<Datafile> datafile_;
+};
+
+}  // namespace everybeam
+#endif
