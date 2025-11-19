@@ -1,0 +1,314 @@
+Metadata-Version: 2.4
+Name: syncline-mcp-server
+Version: 1.0.20
+Summary: Model Context Protocol server for Syncline - AI-powered meeting scheduling
+Author-email: Kekwanu Labs <hello@kekwanulabs.com>
+License: MIT
+Project-URL: Homepage, https://syncline.run
+Project-URL: Documentation, https://kekwanulabslllc.mintlify.app
+Project-URL: Repository, https://github.com/KekwanuLabs/syncline
+Project-URL: Bug Tracker, https://github.com/KekwanuLabs/syncline/issues
+Keywords: mcp,model-context-protocol,syncline,scheduling,ai,calendar
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: mcp>=1.0.0
+Requires-Dist: httpx>=0.27.0
+
+# Syncline MCP Server (Python)
+
+<!--
+mcp-name: com.kekwanu/syncline-mcp-server-python
+-->
+
+Official Model Context Protocol (MCP) server for Syncline - AI-powered meeting scheduling. Pure Python implementation with async support.
+
+**📦 Other Implementations:**
+[TypeScript (Node.js)](https://www.npmjs.com/package/@kekwanulabs/syncline-mcp-server) • [Go (High Performance)](https://www.npmjs.com/package/@kekwanulabs/syncline-mcp-server-go)
+
+All implementations are functionally identical and maintained in sync. Choose the one that fits your environment best.
+
+## What is MCP?
+
+The Model Context Protocol (MCP) is an open protocol by Anthropic that enables AI models like Claude to securely interact with external tools and data sources. With Syncline's MCP server, Claude can autonomously schedule meetings, check availability, and manage calendars through natural conversation.
+
+## Features
+
+- **AI Auto-Scheduling**: Let Claude pick the optimal meeting time using Syncline's learning AI
+- **Availability Checking**: Find all available slots across attendees
+- **Calendar Status**: Verify user calendar connections
+- **Manual Scheduling**: Book meetings at specific times
+- **Context-Aware**: Support for 13 meeting contexts (investor_call, team_standup, etc.)
+- **Smart Learning**: Every booking improves Syncline's AI accuracy
+- **Async/Await**: Modern Python async architecture for optimal performance
+- **Type-Safe**: Full type hints for better IDE support
+
+## Installation
+
+### Prerequisites
+
+- Python 3.10 or higher
+- A Syncline account with API key ([Get one here](https://syncline.run))
+- Claude Desktop app
+
+### 1. Install the MCP Server
+
+```bash
+pip install syncline-mcp-server
+```
+
+Or with pipx for isolated installation:
+
+```bash
+pipx install syncline-mcp-server
+```
+
+### 2. Configure Claude Desktop
+
+Add the Syncline MCP server to your Claude Desktop configuration:
+
+**macOS/Linux**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "syncline": {
+      "command": "syncline-mcp-server",
+      "env": {
+        "SYNCLINE_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+Alternatively, if using uvx (recommended for Python MCP servers):
+
+```json
+{
+  "mcpServers": {
+    "syncline": {
+      "command": "uvx",
+      "args": ["syncline-mcp-server"],
+      "env": {
+        "SYNCLINE_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+### 3. Restart Claude Desktop
+
+Restart Claude Desktop to load the MCP server. You should see "Syncline" appear in the MCP tools list.
+
+## Usage
+
+Once configured, Claude can use Syncline tools through natural conversation:
+
+### Example 1: AI Auto-Scheduling
+
+```
+You: Schedule a 30-minute investor call with alice@example.com and bob@example.com
+     sometime next week. Let the AI pick the best time.
+
+Claude: I'll use Syncline's AI to find the optimal time for your investor call.
+        [Uses schedule_auto tool]
+
+        Perfect! I've scheduled your investor call for Tuesday, January 16th at 2:00 PM PST.
+
+        Why this time was chosen:
+        - Both attendees have high energy levels in early afternoon
+        - No meetings immediately before/after (buffer time)
+        - Fair timezone for all participants
+        - Aligns with typical investor call patterns
+
+        Calendar invites have been sent to all attendees.
+```
+
+### Example 2: Check Availability First
+
+```
+You: What times are available for a 1-hour meeting with alice@example.com
+     next Monday?
+
+Claude: Let me check availability for next Monday.
+        [Uses find_availability tool]
+
+        Here are the available slots for a 1-hour meeting on Monday, January 15th:
+
+        - 9:00 AM - 10:00 AM
+        - 11:30 AM - 12:30 PM
+        - 2:00 PM - 3:00 PM
+        - 4:00 PM - 5:00 PM
+
+        Which time works best for you?
+
+You: Book the 2 PM slot
+
+Claude: Done! I've scheduled the meeting for Monday, January 15th at 2:00 PM.
+        [Uses schedule_meeting tool]
+```
+
+### Example 3: Verify Calendar Connections
+
+```
+You: Can you check if alice@example.com has connected their calendar?
+
+Claude: [Uses get_user_calendar_status tool]
+
+        Yes, Alice has connected their Google Calendar.
+        Last synced: 2 minutes ago
+        Status: Active
+```
+
+## Available Tools
+
+### 1. `schedule_auto` (Recommended)
+
+AI-powered scheduling that picks the optimal time automatically.
+
+**When to use**: When you want the best possible time without manual selection.
+
+**Parameters**:
+- `attendees`: Array of email addresses
+- `duration_minutes`: Meeting length (e.g., 30, 60)
+- `title`: Meeting title
+- `context`: Meeting type (warm_intro, investor_call, team_standup, etc.)
+- `description`: Optional agenda
+- `earliest_date`: Optional start of search window
+- `latest_date`: Optional end of search window
+- `location`: Optional location (Zoom, Office, etc.)
+
+### 2. `find_availability`
+
+Find all available time slots.
+
+**When to use**: When you want to see options or give the user choice.
+
+**Parameters**:
+- `attendees`: Array of email addresses
+- `duration_minutes`: Meeting length
+- `earliest_date`: Start of search window
+- `latest_date`: End of search window
+
+### 3. `schedule_meeting`
+
+Schedule a meeting at a specific time.
+
+**When to use**: When you already know the desired time.
+
+**Parameters**:
+- `attendees`: Array of email addresses
+- `start_time`: ISO 8601 timestamp
+- `duration_minutes`: Meeting length
+- `title`: Meeting title
+- `description`: Optional agenda
+- `location`: Optional location
+
+### 4. `get_user_calendar_status`
+
+Check if a user has connected their calendar.
+
+**When to use**: Before attempting to schedule with new attendees.
+
+**Parameters**:
+- `email`: User's email address
+
+## Meeting Contexts
+
+Syncline's AI uses context to understand meeting priority and energy requirements:
+
+- `warm_intro` - Introduction to someone you know
+- `cold_outreach` - First contact with new person
+- `investor_call` - Meeting with investors
+- `client_demo` - Product demonstration
+- `team_standup` - Daily team sync
+- `one_on_one` - 1:1 meeting
+- `interview` - Job interview
+- `sales_call` - Sales conversation
+- `strategy_session` - Strategic planning
+- `brainstorm` - Creative ideation
+- `review` - Performance or project review
+- `casual_chat` - Informal catch-up
+- `urgent` - Time-sensitive meeting
+
+## Environment Variables
+
+- `SYNCLINE_API_KEY` (required): Your Syncline API key
+- `SYNCLINE_API_URL` (optional): Custom API endpoint (defaults to production)
+
+## REST API vs MCP
+
+**Use MCP when**:
+- Building AI assistants or agents
+- Want conversational scheduling interface
+- Need autonomous decision-making
+- Integrating with Claude or other AI models
+
+**Use REST API when**:
+- Building traditional web/mobile apps
+- Need direct control over API calls
+- Implementing custom UI workflows
+- Prefer explicit programming
+
+Both approaches use the same underlying Syncline infrastructure and share the same learning system.
+
+## Troubleshooting
+
+### "SYNCLINE_API_KEY environment variable is required"
+
+Make sure you've added your API key to the Claude Desktop config file:
+
+```json
+"env": {
+  "SYNCLINE_API_KEY": "sk_live_..."
+}
+```
+
+### MCP Server Not Appearing in Claude Desktop
+
+1. Check that the config file path is correct
+2. Verify JSON syntax is valid (use a JSON validator)
+3. Restart Claude Desktop completely
+4. Check Claude's MCP logs for errors
+
+### "User calendar not connected" errors
+
+Users must connect their calendar before scheduling:
+1. Send them to: https://syncline.run/developer
+2. They'll authenticate with Google/Microsoft
+3. Use `get_user_calendar_status` to verify connection
+
+## Why Python?
+
+The Python implementation offers:
+- **Modern Async**: Built on asyncio for efficient I/O operations
+- **Type Safety**: Full type hints for better development experience
+- **Pythonic**: Idiomatic Python code that feels natural
+- **Easy Integration**: Works seamlessly with Python AI/ML workflows
+
+## Support
+
+- Website: https://syncline.run
+- Get API Key: https://syncline.run/developer
+- Issues: https://github.com/KekwanuLabs/syncline/issues
+- Email: support@syncline.run
+
+## License
+
+MIT
+
+## About Syncline
+
+Syncline is AI-powered meeting scheduling that learns from every booking to get smarter over time. Instead of dumb slot-picking, Syncline considers 100+ factors including user preferences, energy patterns, timezone fairness, and meeting context to find the truly optimal time.
+
+Built by developers, for developers. Schedule smarter, not harder.
