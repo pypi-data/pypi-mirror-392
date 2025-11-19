@@ -1,0 +1,73 @@
+name: Unit tests
+on:
+  push:
+  workflow_call:
+
+jobs:
+  container_job:
+    name: Unit tests (Python ${{ matrix.python-version }}, Pydantic ${{ matrix.pydantic-version }}, FastAPI ${{ matrix.fastapi-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+        pydantic-version: ['lockfile']
+        fastapi-version: ['lockfile']
+        # Test specific older releases to avoid an extremely large test matrix
+        include:
+          # Older pydantic releases with the oldest + second-latest supported python version.
+          # (using python 3.14 requires pydantic 2.12 which is currently the latest)
+          - python-version: '3.13'
+            pydantic-version: '2.11.10'
+            fastapi-version: 'lockfile'
+          - python-version: '3.13'
+            pydantic-version: '2.10.6'
+            fastapi-version: 'lockfile'
+          - python-version: '3.10'
+            pydantic-version: '2.10.6'
+            fastapi-version: 'lockfile'
+          - python-version: '3.13'
+            pydantic-version: '2.9.2'
+            fastapi-version: 'lockfile'
+          - python-version: '3.10'
+            pydantic-version: '2.9.2'
+            fastapi-version: 'lockfile'
+          # Older fastapi releases with the oldest + latest supported python version
+          - python-version: '3.14'
+            pydantic-version: 'lockfile'
+            fastapi-version: '0.103.2'
+          - python-version: '3.10'
+            pydantic-version: 'lockfile'
+            fastapi-version: '0.103.2'
+      fail-fast: false
+    container: python:${{ matrix.python-version }}-slim
+    steps:
+      # Downloads a copy of the code in your repository before running CI tests
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          apt update
+          apt install curl git build-essential libpq-dev libffi-dev -y
+          python -m pip install --upgrade pip
+          pip install flit
+          flit install --deps develop
+          if [ "${{ matrix.pydantic-version }}" != "lockfile" ]; then
+            pip install pydantic[email]~=${{ matrix.pydantic-version }}
+          fi
+          if [ "${{ matrix.fastapi-version }}" != "lockfile" ]; then
+            pip install fastapi~=${{ matrix.fastapi-version }}
+          else
+            flit install --extras fastapi
+          fi
+        env:
+          FLIT_ROOT_INSTALL: 1
+      - name: Run Unit tests
+        run: pytest tests/unit_tests --cov-branch --cov=pydantic_forms --ignore=tests --cov-report=xml
+        env:
+          COVERAGE_FILE: reports/.coverage.${{ matrix.python-version }}
+      - name: "Upload coverage to Codecov"
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+          files: ./coverage.xml
