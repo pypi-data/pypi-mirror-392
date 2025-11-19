@@ -1,0 +1,77 @@
+[package]
+name = "yake-rust"
+version = "1.0.3"
+edition = "2021"
+
+# https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["Kyle Fahey <kyle.c.r.fahey@gmail.com>", "Anton Vikström", "Igor Strebz"]
+categories = ["text-processing"]
+description = "Yake (Yet Another Keyword Extractor) in Rust"
+keywords = ["keyword", "nlp", "keywords", "extractor"]
+license = "MIT"
+repository = "https://github.com/quesurifn/yake-rust"
+readme = "README.md"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+default = [
+    "ar", "bg", "br", "cz", "da", "de", "el", "en", "es", "et", "fa", "fi", "fr", "hi", "hr", "hu", "hy", "id", "it", "ja",
+    "lt", "lv", "nl", "no", "pl", "pt", "ro", "ru", "sk", "sl", "sv", "tr", "uk", "zh"
+]
+ar = []
+bg = []
+br = []
+cz = []
+da = []
+de = []
+el = []
+en = []
+es = []
+et = []
+fa = []
+fi = []
+fr = []
+hi = []
+hr = []
+hu = []
+hy = []
+id = []
+it = []
+ja = []
+lt = []
+lv = []
+nl = []
+no = []
+pl = []
+pt = []
+ro = []
+ru = []
+sk = []
+sl = []
+sv = []
+tr = []
+uk = []
+zh = []
+
+[dependencies]
+regex = "1"
+streaming-stats = "0.2.3"
+hashbrown = "0.15.2"
+segtok = "0.1.5"
+levenshtein = "1.0.5"
+indexmap = "2.7.0"
+itertools = "0.14.0"
+
+[dev-dependencies]
+divan = "0.1.17"
+rusty-hook = { workspace = true }
+pretty_assertions = "1.4.1"
+zip = { version = "2.2.2" }
+
+[lib]
+path = "src/lib.rs"
+
+[[bench]]
+name = "bench"
+harness = false
