@@ -1,0 +1,533 @@
+# Yirifi Data Quality - CLI/TUI Tool
+
+> **MongoDB data quality operations made fast, safe, and repeatable**
+
+A comprehensive CLI/TUI tool for managing data quality across MongoDB databases. Think of it as TypeScript for your database operations - with safety rails, state tracking, and automation for common tasks.
+
+---
+
+## 🎯 What Is This?
+
+Yirifi Data Quality (yirifi-dq) is a command-line tool that automates MongoDB data quality operations:
+
+- **Remove duplicates** - Find and clean duplicate records
+- **Detect orphans** - Identify and fix broken relationships
+- **Normalize data** - Standardize field values
+- **Track everything** - Complete audit trail of all operations
+- **Safety first** - Automatic backups, test mode, verification
+
+**From 60 minutes to 2 minutes per operation.**
+
+---
+
+## 🚀 Quick Start (5 Minutes)
+
+### 1. Install
+
+```bash
+# Clone the repository (or navigate to it)
+cd /path/to/yirifi-data-fixes
+
+# Install the CLI tool
+pip install -e .
+
+# Verify installation
+yirifi-dq --help
+```
+
+### 2. Configure MongoDB Connection
+
+Create a `.env` file:
+
+```bash
+cp .env.example .env
+```
+
+Add your connection strings:
+
+```
+DEV_MONGODB_URI=mongodb://localhost:27017/regdb_dev
+UAT_MONGODB_URI=mongodb://your-uat-server/regdb
+PRD_MONGODB_URI=mongodb://your-prod-server/regdb
+```
+
+### 3. Run Your First Operation
+
+**Option A: Interactive Wizard** (Recommended for first-time users)
+
+```bash
+yirifi-dq new
+```
+
+Follow the 8-screen guided workflow to create and execute an operation.
+
+**Option B: Command Mode** (For power users)
+
+```bash
+# Remove duplicate URLs from links collection (test mode - only 10 records)
+yirifi-dq new duplicate-cleanup \
+  --database regdb \
+  --collection links \
+  --field url \
+  --keep-strategy oldest \
+  --env DEV \
+  --test-mode \
+  --execute-now
+
+# Output:
+# ✓ Operation OP-2025-001 created
+# ✓ Backup created: output/backup_20250116_100000.json
+# ✓ Found 5 duplicates, removed 5
+# ✓ Verification passed
+```
+
+---
+
+## 🎓 Who Is This For?
+
+### Data Analysts
+Use the **interactive wizard** (`yirifi-dq new`) for guided workflows. No coding required!
+
+### Junior Developers
+Use **CLI commands** for faster execution. Learn from examples in [docs/tutorials/](docs/tutorials/).
+
+### Senior Developers
+Use **CLI commands** for automation, **extend with custom operations**, or write **manual Python scripts** for complex cases. See [docs/developer-guide/](docs/developer-guide/).
+
+---
+
+## ✨ Key Features
+
+### 1. Dual Interface
+
+**Interactive Wizard (TUI)**
+- 8-screen guided workflow
+- Perfect for exploratory work
+- No MongoDB knowledge needed
+
+**Command Line (CLI)**
+- 9 powerful commands
+- Scriptable and automatable
+- Tab completion support
+
+### 2. Automatic Safety
+
+- **Mandatory backups** before deletion (no exceptions)
+- **Test mode default** (limits to 10 records for safety)
+- **Collection locking** (prevents concurrent operations)
+- **Auto-verification** (confirms expected results)
+- **Rollback support** (restore from backup with one command)
+
+### 3. State Management
+
+- **SQLite database** (state.db) - Fast queries, filtering, concurrent operation management
+- **INDEX.yaml export** - Git-friendly operation history
+- **Complete audit trail** - Every action logged with INFO/WARNING/ERROR levels
+
+### 4. Pre-defined Operations
+
+- `duplicate-cleanup` - Remove duplicate records intelligently
+- `orphan-cleanup` - Clean orphaned records
+- `framework-stats` - Generate framework statistics
+- `verify-all-operations` - Verify all completed operations
+- Custom operations via YAML definitions
+
+---
+
+## 📋 CLI Commands Overview
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `yirifi-dq new` | Create operation (wizard or command mode) | `yirifi-dq new duplicate-cleanup --database regdb --collection links --field url` |
+| `yirifi-dq list` | List/filter operations | `yirifi-dq list --status completed --database regdb` |
+| `yirifi-dq show <id>` | Show operation details | `yirifi-dq show OP-2025-001` |
+| `yirifi-dq execute <id>` | Execute saved operation | `yirifi-dq execute OP-2025-001` |
+| `yirifi-dq verify <id>` | Verify operation results | `yirifi-dq verify OP-2025-001` |
+| `yirifi-dq rollback <id>` | Rollback with backup restore | `yirifi-dq rollback OP-2025-001` |
+| `yirifi-dq stats` | Framework statistics | `yirifi-dq stats --database regdb` |
+| `yirifi-dq logs <id>` | View operation logs | `yirifi-dq logs OP-2025-001 --level ERROR` |
+| `yirifi-dq export-index` | Export to INDEX.yaml for git | `yirifi-dq export-index` |
+
+**Complete reference:** [docs/reference/cli-commands.md](docs/reference/cli-commands.md)
+
+---
+
+## 🗂️ Project Structure
+
+```
+yirifi-data-fixes/
+├── yirifi_dq/               # Main package
+│   ├── commands/            # CLI commands (new, list, execute, etc.)
+│   ├── tui/                 # Interactive wizard screens
+│   ├── engine/              # Orchestrator, safety, templates
+│   ├── db/                  # State management (state.db, SQLite)
+│   ├── models/              # Pydantic models (validation)
+│   ├── config/              # Operation & category YAML definitions
+│   ├── validators/          # Duplicate/orphan detection
+│   ├── fixers/              # Remove duplicates, clean orphans
+│   ├── analyzers/           # Field analysis, statistics
+│   └── generators/          # Slug generation, etc.
+│
+├── docs/                    # Complete documentation
+│   ├── user-guide/          # For data analysts & junior devs
+│   ├── developer-guide/     # For senior devs & contributors
+│   ├── tutorials/           # Step-by-step learning
+│   ├── workflows/           # CLI-first operation guides
+│   ├── reference/           # CLI commands, YAML specs, schemas
+│   ├── troubleshooting/     # Common issues & solutions
+│   └── architecture/        # Design decisions & patterns
+│
+├── databases/               # Operation folders (auto-created by CLI)
+│   └── {db}/{collection}/{field}/{type}/{operation_name}/
+│       ├── OPERATION.md     # Auto-generated documentation
+│       ├── input/           # Input data (if needed)
+│       ├── scripts/         # Generated scripts (if needed)
+│       ├── output/          # Backups, reports, results
+│       └── analysis/        # Analysis results
+│
+├── framework/               # Framework metadata
+│   ├── INDEX.yaml           # Git-friendly operation history (auto-exported)
+│   └── INDEX.json.legacy    # Legacy format (archived)
+│
+├── templates/               # Templates for manual operations
+├── .env                     # MongoDB connection strings
+└── README.md                # This file
+```
+
+---
+
+## 🎯 Common Use Cases
+
+### Remove Duplicate URLs
+
+```bash
+# Interactive wizard (guided)
+yirifi-dq new
+
+# Or command mode (direct)
+yirifi-dq new duplicate-cleanup \
+  --database regdb \
+  --collection links \
+  --field url \
+  --keep-strategy oldest \
+  --env DEV \
+  --test-mode \
+  --execute-now
+```
+
+### Clean Orphaned Articles
+
+```bash
+yirifi-dq new orphan-cleanup \
+  --database regdb \
+  --primary-collection links \
+  --foreign-collection articlesdocuments \
+  --primary-field link_yid \
+  --foreign-field articleYid \
+  --action delete \
+  --env DEV \
+  --test-mode
+```
+
+### View Framework Statistics
+
+```bash
+yirifi-dq stats
+
+# Or for specific database/collection
+yirifi-dq stats --database regdb --collection links
+```
+
+### Rollback an Operation
+
+```bash
+# Dry-run preview first
+yirifi-dq rollback OP-2025-001 --dry-run
+
+# Then rollback for real
+yirifi-dq rollback OP-2025-001
+```
+
+---
+
+## 📚 Documentation
+
+### For AI Assistants (Claude Code)
+- **[CLAUDE.md](CLAUDE.md)** - Quick reference guide (450 lines, optimized for LLM parsing)
+- **[CLAUDE_GUIDE.md](CLAUDE_GUIDE.md)** - Comprehensive guide (650+ lines, all commands, workflows, architecture)
+
+### For Human Users
+
+**New to the CLI?**
+- [Installation Guide](docs/user-guide/installation.md)
+- [CLI Quick Start](docs/user-guide/quick-start.md)
+- [TUI Wizard Guide](docs/user-guide/tui-wizard-guide.md)
+
+**Running Operations?**
+- [Duplicate Cleanup Workflow](docs/workflows/duplicate-cleanup.md)
+- [Orphan Detection Workflow](docs/workflows/orphan-detection.md)
+- [Large Dataset Processing](docs/workflows/large-datasets.md)
+
+**Extending the Framework?**
+- [Architecture Overview](docs/developer-guide/architecture-overview.md)
+- [Adding New Commands](docs/developer-guide/adding-commands.md)
+- [Defining New Operations](docs/developer-guide/adding-operations.md)
+
+**Having Problems?**
+- [CLI Issues](docs/troubleshooting/cli-issues.md)
+- [Rollback Procedures](docs/troubleshooting/rollback-procedures.md)
+- [Common Errors](docs/troubleshooting/common-errors.md)
+
+**Complete documentation hub:** [docs/README.md](docs/README.md)
+
+---
+
+## 🏗️ Architecture (Simplified)
+
+```
+CLI/TUI Layer (yirifi-dq commands, interactive wizard)
+    ↓
+Orchestration Layer (workflow engine, safety enforcement)
+    ↓
+State Management Layer (SQLite state.db, INDEX.yaml export)
+    ↓
+Data Operations Layer (validators, fixers, analyzers, MongoDB utilities)
+```
+
+**4-layer architecture:**
+1. **CLI/TUI** - User interface (commands + interactive wizard)
+2. **Orchestration** - Workflow coordination (folder creation, backup, execute, verify)
+3. **State Management** - Operation tracking (SQLite + INDEX.yaml)
+4. **Data Operations** - MongoDB utilities (validators, fixers, analyzers)
+
+**Complete architecture:** [docs/architecture/architecture-overview.md](docs/architecture/architecture-overview.md)
+
+---
+
+## 🛡️ Safety & Best Practices
+
+### Automatic Safety Features
+
+✅ **Mandatory backups** before any deletion operation
+✅ **Test mode default** (limits to 10 records unless explicitly disabled)
+✅ **Collection locks** (prevents concurrent operations on same collection)
+✅ **Auto-verification** after execution (count checks, orphan detection)
+✅ **Complete audit trail** (all operations logged to SQLite)
+
+### Golden Rules
+
+1. ⚠️ **Always backup before deletion** (CLI does this automatically)
+2. ⚠️ **Always test on DEV first** or use `--test-mode` (CLI defaults to test mode)
+3. ⚠️ **Always verify after execution** (`yirifi-dq verify <id>`)
+4. ⚠️ **Check cross-collection relationships** (links ↔ articlesdocuments)
+5. ⚠️ **If verification fails → Rollback immediately** (`yirifi-dq rollback <id>`)
+
+---
+
+## 🔄 Framework Evolution
+
+### Phase 1: Bespoke Scripts (2024 Q4)
+- Manual folder creation
+- One-off Python scripts
+- Manual backup/restore
+- 30-60 minutes per operation
+
+### Phase 2: Utility Library (2025 Q1)
+- Reusable validators, fixers
+- Consistent error handling
+- Still required manual orchestration
+
+### Phase 3: CLI/TUI Tool (2025 Q2 - **Current**)
+- **`yirifi-dq` CLI** (9 commands)
+- **Interactive wizard** (8 screens)
+- **State management** (SQLite + INDEX.yaml)
+- **Automatic safety** (backups, locks, verification)
+- **2 minutes per operation** ✨
+
+---
+
+## 🤝 Contributing
+
+### Adding a New CLI Command
+
+```python
+# 1. Create yirifi_dq/commands/my_command.py
+import click
+
+@click.command()
+@click.option('--param', required=True)
+def my_command(param: str):
+    """Command description"""
+    click.echo(f"Executing: {param}")
+
+# 2. Register in yirifi_dq/main.py
+from yirifi_dq.commands.my_command import my_command
+cli.add_command(my_command)
+
+# 3. Test
+yirifi-dq my-command --param test
+```
+
+**Complete guide:** [docs/developer-guide/adding-commands.md](docs/developer-guide/adding-commands.md)
+
+### Defining a New Operation Type
+
+**Create operation YAML:**
+
+```yaml
+# yirifi_dq/config/operations/my_operation.yaml
+operation:
+  id: my-operation
+  name: My Operation
+  description: What this operation does
+  categories:
+    - data_quality
+  parameters:
+    - name: my_param
+      type: string
+      required: true
+  safety:
+    requires_backup: true
+  verification:
+    - check: custom_check
+```
+
+**Complete guide:** [docs/developer-guide/adding-operations.md](docs/developer-guide/adding-operations.md)
+
+---
+
+## 📊 State Management
+
+### SQLite Database (state.db)
+
+Tracks all operations with:
+- **operations** table - Operation configs and status
+- **operation_logs** table - Complete audit trail (INFO/WARNING/ERROR/DEBUG)
+- **operation_locks** table - Collection-level locks (prevents concurrent operations)
+- **framework_stats** table - Cumulative statistics
+
+### INDEX.yaml Export
+
+Git-friendly YAML export of operation history:
+- Human-readable
+- Git-trackable (diffs, blame, history)
+- Backward compatible with old INDEX.json workflow
+- Auto-exported on operation completion
+
+---
+
+## 🆘 Troubleshooting
+
+### Command not found: yirifi-dq
+
+```bash
+pip install -e .
+yirifi-dq --help
+```
+
+### ModuleNotFoundError: No module named 'yirifi_dq'
+
+```bash
+# Ensure you're in project root
+cd /path/to/yirifi-data-fixes
+pip install -e .
+```
+
+### Collection is locked
+
+Another operation is running on this collection. Wait for it to complete or check locks:
+
+```bash
+yirifi-dq list --status executing
+```
+
+**All troubleshooting:** [docs/troubleshooting/](docs/troubleshooting/)
+
+---
+
+## 📝 License
+
+Internal use only - Yirifi Data Quality Team
+
+---
+
+## 📞 Support
+
+- **Quick questions?** Check [CLAUDE.md](CLAUDE.md)
+- **Comprehensive guide?** See [CLAUDE_GUIDE.md](CLAUDE_GUIDE.md)
+- **User docs?** Browse [docs/user-guide/](docs/user-guide/)
+- **Developer docs?** See [docs/developer-guide/](docs/developer-guide/)
+- **Issues?** Check [docs/troubleshooting/](docs/troubleshooting/)
+
+---
+
+**Framework Version:** 2.0.0 (CLI/TUI)
+**Last Updated:** 2025-11-16
+**Operations Tracked:** See `yirifi-dq stats`
+
+---
+
+## 🎉 Success Stories
+
+> "From 60 minutes of manual scripting to 2 minutes with `yirifi-dq new`. Game changer!" - *Data Team*
+
+> "The interactive wizard is perfect for training new team members. No MongoDB knowledge required." - *Team Lead*
+
+> "I can finally automate data quality checks in our CI/CD pipeline with the CLI commands." - *DevOps Engineer*
+
+---
+
+Basic Commands
+
+  # Check for linting issues
+  ruff check .
+
+  # Auto-fix issues
+  ruff check . --fix
+
+  # Format code
+  ruff format .
+
+  # Check with statistics
+  ruff check . --statistics
+
+  Pre-commit Integration
+
+  # Install pre-commit hooks (if not already done)
+  pre-commit install
+
+  # Run all hooks manually
+  pre-commit run --all-files
+
+  # Run only ruff
+  pre-commit run ruff --all-files
+
+  CI/CD Integration
+
+  Add to your CI pipeline:
+  ruff check .  # Fails if issues found
+  ruff format --check .  # Fails if formatting needed
+
+# Usage Examples
+
+  CLI Usage:
+  # List all available scripts
+  yirifi-dq scripts list
+
+  # Get detailed script information
+  yirifi-dq scripts info articles/duplicate-cleanup
+
+  # Run a script
+  yirifi-dq run articles/duplicate-cleanup \
+    --database regdb \
+    --collection articlesdocuments \
+    --field slug \
+    --keep-strategy newest \
+    --test-mode
+
+  TUI Usage:
+  # Launch TUI
+  yirifi-dq tui
+
+
+**Ready to get started?** Run `yirifi-dq new` and follow the wizard! 🚀
