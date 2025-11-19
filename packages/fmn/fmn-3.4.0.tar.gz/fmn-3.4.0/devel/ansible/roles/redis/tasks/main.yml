@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Contributors to the Fedora Project
+#
+# SPDX-License-Identifier: MIT
+
+---
+- name: Install RPM packages
+  dnf:
+      name:
+        - redis
+      state: present
+
+- name: Start the service using systemd
+  systemd:
+    state: started
+    name: redis
+    daemon_reload: yes
+    enabled: yes

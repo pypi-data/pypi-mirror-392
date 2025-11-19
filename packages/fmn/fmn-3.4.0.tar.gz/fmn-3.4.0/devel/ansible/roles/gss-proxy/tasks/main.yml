@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: Contributors to the Fedora Project
+#
+# SPDX-License-Identifier: MIT
+
+---
+- name: Install RPM packages
+  dnf:
+      name:
+        - gssproxy
+      state: present
+
+- name: kinit
+  shell: echo "password" | kinit admin@TINYSTAGE.TEST
+
+- name: Create the service in IPA
+  command: ipa service-add FMN/fmn.tinystage.test
+  register: service_add_result
+  changed_when: "'Added service' in service_add_result.stdout"
+  failed_when: "not ('Added service' in service_add_result.stdout or 'already exists' in service_add_result.stderr)"
+
+- name: Get service keytab for FMN
+  shell: ipa-getkeytab -p FMN/fmn.tinystage.test@TINYSTAGE.TEST -k /var/lib/gssproxy/fmn.keytab
+  args:
+    creates: /var/lib/gssproxy/fmn.keytab
+
+- name: Set the correct permissions on keytab
+  file:
+    path: /var/lib/gssproxy/fmn.keytab
+    owner: root
+    group: root
+    mode: 0640
+
+- name: Copy gssproxy conf
+  copy:
+    src: gssproxy-fmn.conf
+    dest: /etc/gssproxy/98-fmn.conf
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Enable and restart GSSProxy
+  systemd:
+    state: restarted
+    name: gssproxy
+    enabled: yes
+    daemon_reload: yes

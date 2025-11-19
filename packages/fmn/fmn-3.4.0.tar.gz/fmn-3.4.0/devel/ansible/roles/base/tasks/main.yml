@@ -1,0 +1,61 @@
+# SPDX-FileCopyrightText: Contributors to the Fedora Project
+#
+# SPDX-License-Identifier: MIT
+
+---
+- name: Install RPM packages
+  dnf:
+      name:
+        - acl
+        - git
+        - vim
+        - python3-pip
+        - python3-devel
+        - fedora-messaging
+        - npm
+        - gcc
+        - krb5-devel
+      state: present
+
+- name: Determine Python version
+  command:
+    argv:
+      - python3
+      - -c
+      - "from sys import version_info as vi; print(f'{vi[0]}.{vi[1]}')"
+  register: _python3_version_result
+  changed_when: False
+
+
+- name: Prepare the facts dir
+  file:
+    path: /etc/ansible/facts.d
+    state: directory
+
+- name: Set Python version fact
+  ini_file:
+    path: /etc/ansible/facts.d/python.fact
+    section: py3
+    option: version
+    value: "{{ _python3_version_result.stdout | trim }}"
+  register: fact_ini
+
+- name: Re-read facts after adding custom fact
+  ansible.builtin.setup:
+    filter: ansible_local
+  when: fact_ini.changed
+
+
+- name: Install the .bashrc
+  copy:
+      src: bashrc
+      dest: /home/vagrant/.bashrc
+      mode: 0644
+      owner: vagrant
+      group: vagrant
+
+# running npm from systemd causes some selinux issues -- turn it off for now
+- name: Put SELinux in permissive mode, logging actions that would be blocked.
+  selinux:
+    policy: targeted
+    state: permissive

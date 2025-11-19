@@ -1,0 +1,125 @@
+# SPDX-FileCopyrightText: Contributors to the Fedora Project
+#
+# SPDX-License-Identifier: MIT
+
+---
+- name: Install RPM dependencies
+  dnf:
+    state: present
+    name:
+      - python3-psycopg2
+
+- become: yes
+  become_user: vagrant
+  tags:
+    - fmn-base
+  block:
+    - name: Install poetry using pip to ensure new enough version
+      pip:
+        name: poetry>=1.2.0
+      become_user: root
+      tags:
+        - packages
+
+    - name: Install the `fmn` Python package with poetry
+      command:
+        cmd: poetry install --all-extras
+        chdir: /home/vagrant/fmn/
+      tags:
+        - packages
+
+    # Add Tinystage's root CA to certifi's bundle
+    - name: Find where certifi's CA bundle is located
+      command:
+        cmd: poetry run python -c "import certifi; print(certifi.where())"
+        chdir: /home/vagrant/fmn/
+      register: _ca_bundle_path
+      changed_when: False
+    - name: Get the content of the CA cert
+      slurp:
+        src: /etc/ipa/ca.crt
+      register: ca_crt
+    - name: Put tinystage root CA in the list of CA's for certifi
+      blockinfile:
+        block: "{{ ca_crt.content | b64decode }}"
+        path: "{{ _ca_bundle_path.stdout }}"
+
+    # This needs to be here because the fmn.cfg.j2 template uses it.
+    - name: Register the API as an OIDC client with Ipsilon
+      command:
+        cmd: >
+          oidc-register --debug --output-file /home/vagrant/api-oidc-secrets.json
+          https://{{ ipsilon_hostname }}/idp/openidc/ https://fmn.tinystage.test/
+        creates: /home/vagrant/api-oidc-secrets.json
+
+    - name: Read the OIDC credentials file
+      slurp:
+        src: /home/vagrant/api-oidc-secrets.json
+      register: api_oidc_secrets_out
+
+    - name: Set OIDC client credentials
+      set_fact:
+        oidc_client_id: "{{ (api_oidc_secrets_out.content | b64decode | from_json).web.client_id }}"
+        oidc_client_secret: >-
+          {{ (api_oidc_secrets_out.content | b64decode | from_json).web.client_secret }}
+
+    - become_user: root
+      block:
+        - name: Prepare the configuration directory
+          file:
+            path: /etc/fmn
+            state: directory
+            owner: root
+            group: vagrant
+            mode: 0750
+
+        - name: Install the API backend configuration file
+          template:
+            src: fmn.cfg.j2
+            dest: /etc/fmn/fmn.cfg
+            owner: root
+            group: vagrant
+            mode: 0640
+
+        - name: Install the configuration file for Fedora Messaging
+          copy:
+            src: config.toml
+            dest: /etc/fmn/api.toml
+            owner: root
+            group: vagrant
+            mode: 0640
+
+    - become_user: postgres
+      become: yes
+      tags:
+        - database
+      block:
+        - name: Create the `vagrant` PostgreSQL user
+          command: createuser vagrant
+          register: createuser_out
+          changed_when: not createuser_out.failed
+          failed_when: createuser_out.failed and "already exists" not in createuser_out.stderr
+
+        - name: Create the `fmn` database
+          command: createdb fmn -O vagrant
+          register: createdb_out
+          changed_when: not createdb_out.failed
+          failed_when: createdb_out.failed and "already exists" not in createdb_out.stderr
+
+        # Used by collectd for stats gathering (collectd runs as root)
+        - name: Create the `root` PostgreSQL user
+          command: createuser root
+          register: createuser_out
+          changed_when: not createuser_out.failed
+          failed_when: createuser_out.failed and "already exists" not in createuser_out.stderr
+        - name: Grant root access to the fmn db
+          community.postgresql.postgresql_privs:
+            db: fmn
+            privs: SELECT
+            objs: ALL_IN_SCHEMA
+            roles: root
+
+    - name: Set up FMN database schema
+      command: poetry run fmn database sync
+      register: database_setup_out
+      changed_when: '"Database already up-to-date." not in database_setup_out.stdout'

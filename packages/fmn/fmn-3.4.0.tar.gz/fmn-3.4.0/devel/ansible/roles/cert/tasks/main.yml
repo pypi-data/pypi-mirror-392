@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Contributors to the Fedora Project
+#
+# SPDX-License-Identifier: MIT
+
+- name: Generate and get SSL cert
+  shell: ipa-getcert request -f /etc/pki/tls/certs/server.pem -k /etc/pki/tls/private/server.key -K {{ service }}/{{ ansible_fqdn }} -m 0644 -M 0644
+  args:
+    creates: /etc/pki/tls/certs/server.pem
+
+- name: Check the cert is there
+  wait_for:
+    path: /etc/pki/tls/certs/server.pem
+    state: present
+
+- name: Check the key is there
+  wait_for:
+    path: /etc/pki/tls/private/server.key
+    state: present

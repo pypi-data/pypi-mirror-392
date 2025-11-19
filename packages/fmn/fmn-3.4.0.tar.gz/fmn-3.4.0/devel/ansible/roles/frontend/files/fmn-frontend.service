@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Contributors to the Fedora Project
+#
+# SPDX-License-Identifier: MIT
+
+[Unit]
+Description=fmn-frontend
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=vagrant
+
+WorkingDirectory=/home/vagrant/fmn/frontend
+ExecStart=/usr/bin/npm run dev -- -c vite.vagrant.config.ts
+
+[Install]
+WantedBy=multi-user.target

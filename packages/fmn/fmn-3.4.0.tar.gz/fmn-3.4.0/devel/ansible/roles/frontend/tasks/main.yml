@@ -1,0 +1,59 @@
+# SPDX-FileCopyrightText: Contributors to the Fedora Project
+#
+# SPDX-License-Identifier: MIT
+
+---
+- name: Install RPM packages
+  dnf:
+      name:
+        - npm
+      state: present
+
+- name: Copy helper scripts for fmn-frontend
+  copy:
+    src: '{{item}}'
+    dest: '/home/vagrant/.local/bin/'
+    owner: vagrant
+    group: vagrant
+    mode: 0744
+  loop:
+    - fmn-frontend-logs
+    - fmn-frontend-restart
+    - fmn-frontend-start
+    - fmn-frontend-status
+    - fmn-frontend-stop
+
+- name: Install the systemd unit files for the fmn-frontend service
+  copy:
+      src: fmn-frontend.service
+      dest: /etc/systemd/system/fmn-frontend.service
+      mode: 0644
+
+- name: install the frontend with npm
+  command: npm install
+  become: yes
+  become_user: vagrant
+  args:
+    chdir: /home/vagrant/fmn/frontend
+
+- name: get the OIDC config
+  ansible.builtin.slurp:
+    src: /home/vagrant/frontend_oidc.json
+  register: oidc_config
+
+- name: extract the OIDC client_id
+  set_fact:
+    oidc_client_id: "{{ oidc_config['content'] | b64decode | from_json | json_query('web.client_id') }}"
+
+- name: set the env.development.local file
+  template:
+    src: env.development.local
+    dest: /home/vagrant/fmn/frontend/.env.development.local
+
+
+- name: Start the service using systemd
+  systemd:
+    state: started
+    name: fmn-frontend
+    daemon_reload: yes
+    enabled: yes
