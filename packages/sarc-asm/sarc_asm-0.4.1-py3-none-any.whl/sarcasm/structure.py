@@ -1,0 +1,1422 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2025 University Medical Center Göttingen, Germany.
+# All rights reserved.
+#
+# Patent Pending: DE 10 2024 112 939.5
+# SPDX-License-Identifier: LicenseRef-Proprietary-See-LICENSE
+#
+# This software is licensed under a custom license. See the LICENSE file
+# in the root directory for full details.
+#
+# **Commercial use is prohibited without a separate license.**
+# Contact MBM ScienceBridge GmbH (https://sciencebridge.de/en/) for licensing.
+
+
+import glob
+import os
+import shutil
+from typing import Optional, Tuple, Union, List, Literal, Any
+
+import numpy as np
+import tifffile
+import torch
+from bio_image_unet.progress import ProgressNotifier
+from scipy import stats, sparse
+
+from sarcasm.core import SarcAsM
+from sarcasm.ioutils import IOUtils
+from sarcasm.utils import Utils
+
+# Import structure modules
+from sarcasm.structure_modules import (
+    z_band_analysis,
+    sarcomere_vectors,
+    myofibril_analysis,
+    domain_clustering,
+    kymograph,
+    detection,
+    loi_detection
+)
+
+
+class Structure(SarcAsM):
+    """
+    Class for analyzing sarcomere morphology.
+
+    Parameters
+    ----------
+    file_path : str | os.PathLike
+        Path to the image tif file.
+    restart : bool, optional
+        If ``True`` the previous analysis folder is deleted and a fresh run is
+        started (default: ``False``).
+    pixelsize : float or None, optional
+        Physical pixel size in µm.  If ``None`` the value is taken from file
+        metadata; otherwise the supplied number overrides all metadata.
+    frametime : float or None, optional
+        Time between frames in s.  If ``None`` it is taken from metadata; an
+        explicit number overrides it.
+    channel : int | None, optional
+        Index of the fluorescence channel that shows the sarcomeres.  If the
+        image has only one channel this argument is ignored.
+    axes : str | None, optional
+        Explicit dimension order (e.g. ``'TXYC'``).  ``None`` lets the base
+        class auto-detect the order.
+    auto_save : bool, optional
+        Write analysis results to disk automatically (default ``True``).
+    use_gui : bool, optional
+        Activate GUI mode (default ``False``).
+    device : torch.device | Literal['auto'], optional
+        Device on which PyTorch kernels are executed.  ``'auto'`` selects CUDA
+        or MPS when available (default ``'auto'``).
+    **info : Any
+        Additional key-value pairs that are stored in the metadata file.
+
+    Attributes
+    ----------
+    data : dict
+        Dictionary that contains numeric results of the morphology analysis
+        (populated after running the respective detection routines).
+    """
+
+    def __init__(self,
+                 file_path: Union[str, os.PathLike],
+                 restart: bool = False,
+                 pixelsize: Union[float, None] = None,
+                 frametime: Union[float, None] = None,
+                 channel: Union[int, None] = None,
+                 axes: Union[str, None] = None,
+                 auto_save: bool = True,
+                 use_gui: bool = False,
+                 device: Union[torch.device, Literal['auto']] = 'auto',
+                 **info: Any) -> None:
+        """
+        Instantiate a Structure object and initialize the common SarcAsM base.
+        """
+        super().__init__(
+            file_path=file_path,
+            restart=restart,
+            pixelsize=pixelsize,
+            frametime=frametime,
+            channel=channel,
+            axes=axes,
+            auto_save=auto_save,
+            use_gui=use_gui,
+            device=device,
+            **info
+        )
+
+        # Initialize structure data dictionary
+        if os.path.exists(self.__get_structure_data_file()):
+            self._load_structure_data()
+        else:
+            self.data = {}
+
+    def __get_structure_data_file(self, is_temp_file: bool = False) -> str:
+        """
+        Returns the path to the structure data file.
+
+        Parameters
+        ----------
+        is_temp_file : bool, optional
+            If True, returns the path to a temporary file. This temporary file is used to prevent
+            creating corrupted data files due to aborted operations (e.g., exceptions or user intervention).
+            The temporary file can be committed to a final file by renaming it. Default is False.
+
+        Returns
+        -------
+        str
+            The path to the structure data file, either temporary or final.
+        """
+        file_name = "structure.temp.json" if is_temp_file else "structure.json"
+        return os.path.join(self.data_dir, file_name)
+
+    def commit(self) -> None:
+        """
+        Commit data by renaming the temporary file to the final data file.
+        """
+        temp_file_path = self.__get_structure_data_file(is_temp_file=True)
+        final_file_path = self.__get_structure_data_file()
+
+        if os.path.exists(temp_file_path):
+            if os.path.exists(final_file_path):
+                os.remove(final_file_path)
+            os.rename(temp_file_path, final_file_path)
+
+    def store_structure_data(self, override: bool = True) -> None:
+        """
+        Store structure data in a JSON file.
+
+        Parameters
+        ----------
+        override : bool, optional
+            If True, override the file.
+        """
+        if override or not os.path.exists(self.__get_structure_data_file(is_temp_file=False)):
+            IOUtils.json_serialize(self.data, self.__get_structure_data_file(is_temp_file=True))
+            self.commit()
+
+    def _load_structure_data(self) -> None:
+        """
+        Load structure data from the final data file; fall back to the temporary file if needed.
+        Raises
+        ------
+        Exception
+            If no valid structure data could be loaded.
+        """
+        try:
+            if os.path.exists(self.__get_structure_data_file(is_temp_file=False)):
+                self.data = IOUtils.json_deserialize(self.__get_structure_data_file(is_temp_file=False))
+            elif os.path.exists(self.__get_structure_data_file(is_temp_file=True)):
+                self.data = IOUtils.json_deserialize(self.__get_structure_data_file(is_temp_file=True))
+        except:
+            if os.path.exists(self.__get_structure_data_file(is_temp_file=True)):
+                self.data = IOUtils.json_deserialize(self.__get_structure_data_file(is_temp_file=True))
+
+        # ensure compatibility with data from early version
+        keys_old = {'points': 'pos_vectors', 'sarcomere_length_points': 'sarcomere_length_vectors',
+                    'midline_length_points': 'midline_length_vectors', 'midline_id_points': 'midline_id_vectors',
+                    'sarcomere_orientation_points': 'sarcomere_orientation_vectors',
+                    'max_score_points': 'max_score_vectors'}
+        for key, val in keys_old.items():
+            if key in self.data:
+                self.data[val] = self.data[key]
+        keys = [key for key in self.data.keys() if 'timepoints' in key]
+        for key in keys:
+            new_key = key.replace('timepoints', 'frames')
+            self.data[new_key] = self.data[key]
+            if isinstance(self.data[new_key], str) and self.data[new_key] == 'all':
+                n_stack = self.metadata.n_stack if self.metadata.n_stack is not None else 0
+                self.data[new_key] = list(range(n_stack))
+
+        if self.data is None:
+            raise Exception('Loading of structure failed')
+
+    def get_list_lois(self):
+        """Returns list of LOIs"""
+        return Utils.get_lois_of_file(self.file_path)
+
+    def detect_sarcomeres(self, frames: Union[str, int, List[int], np.ndarray] = 'all',
+                          model_path: str = None, max_patch_size: Tuple[int, int] = (1024, 1024),
+                          normalization_mode: str = 'all', clip_thres: Tuple[float, float] = (0., 99.98),
+                          rescale_factor: float = 1.0,
+                          progress_notifier: ProgressNotifier = ProgressNotifier.progress_notifier_tqdm()):
+        """
+        Predict sarcomeres (Z-bands, mbands, distance, orientation) with U-Net.
+
+        Parameters
+        ----------
+        frames : Union[str, int, List[int], np.ndarray]
+            Frames for sarcomere detection ('all' for all frames, int for a single frame, list or ndarray for
+            selected frames). Defaults to 'all'.
+        model_path : str, optional
+            Path of trained network weights for U-Net. Default is None.
+        max_patch_size : tuple of int, optional
+            Maximal patch dimensions for convolutional neural network (n_x, n_y).
+            Default is (1024, 1024).
+        normalization_mode : str, optional
+            Mode for intensity normalization for 3D stacks prior to prediction ('single': each image individually,
+            'all': based on histogram of full stack, 'first': based on histogram of first image in stack).
+            Default is 'all'.
+        clip_thres : tuple of float, optional
+            Clip threshold (lower / upper) for intensity normalization. Default is (0., 99.8).
+        rescale_factor : float, optional
+            Factor by which to rescale the input images in the XY dimensions before prediction.
+            For example, 0.5 reduces the XY resolution by half.
+            The images and all subsequent outputs will be rescaled back to their original resolution after prediction.
+            Default is 1.0 (no rescaling).
+        progress_notifier : ProgressNotifier, optional
+            Progress notifier for inclusion in GUI. Default is ProgressNotifier.progress_notifier_tqdm().
+
+        Returns
+        -------
+        None
+        """
+        max_patch_size = Utils.check_and_round_max_patch_size(max_patch_size)
+        if isinstance(frames, str) and frames == 'all':
+            images = self.read_imgs()
+            list_frames = list(range(len(images)))
+        elif np.issubdtype(type(frames), np.integer) or isinstance(frames, list) or type(frames) is np.ndarray:
+            images = self.read_imgs(frames=frames)
+            if np.issubdtype(type(frames), np.integer):
+                list_frames = [frames]
+            else:
+                list_frames = list(frames)
+        else:
+            raise ValueError('frames argument not valid')
+
+        if images.ndim < 2:
+            raise ValueError("Images must be at least 2D (Y,X) to have XY dimensions for rescaling.")
+        original_xy_shape = images.shape[-2:]
+
+        if rescale_factor != 1.0:
+            from skimage.transform import rescale
+
+            current_ndim = images.ndim
+            if current_ndim == 2:  # Input is (Y, X)
+                # Scale factors for Y, X
+                scale_vector = (rescale_factor, rescale_factor)
+            elif current_ndim == 3:  # Input is (Z, Y, X) or (T, Y, X)
+                # Scale factors for Z, Y, X (or T, Y, X) - only scale last two
+                scale_vector = (1.0, rescale_factor, rescale_factor)
+            else:
+                raise ValueError(f"Unsupported image dimensionality for rescaling: {current_ndim}D. Expected 2D or 3D.")
+
+            print(f"Rescaling image from {images.shape} by factor {round(rescale_factor, 4)} on XY axes...")
+            images = rescale(
+                images,
+                scale_vector,
+                order=0,
+                mode='reflect',
+                preserve_range=True,
+                channel_axis=None
+            ).astype(images.dtype)
+            print(f"Rescaled image shape: {images.shape}")
+
+        # Check pixelsize is not None
+        if self.metadata.pixelsize is None:
+            raise ValueError("Pixel size is not available. Please provide pixelsize during initialization.")
+        
+        # Delegate to detection module
+        detection.detect_sarcomeres_unet(
+            images=images,
+            model_path=model_path,
+            base_dir=self.base_dir,
+            model_dir=str(self.model_dir),
+            pixelsize=self.metadata.pixelsize,
+            max_patch_size=max_patch_size,
+            normalization_mode=normalization_mode,
+            clip_thres=clip_thres,
+            rescale_factor=rescale_factor,
+            device=self.device,
+            progress_notifier=progress_notifier
+        )
+
+        _dict = {
+            'params.detect_sarcomeres.frames': list_frames,
+            'params.detect_sarcomeres.model': model_path,
+            'params.detect_sarcomeres.normalization_mode': normalization_mode,
+            'params.detect_sarcomeres.clip_threshold': clip_thres,
+            'params.detect_sarcomeres.rescale_factor': rescale_factor,
+        }
+        self.data.update(_dict)
+        if self.auto_save:
+            self.store_structure_data()
+
+    def detect_z_bands_fast_movie(self, model_path: Optional[str] = None,
+                                  max_patch_size: Tuple[int, int, int] = (32, 256, 256),
+                                  normalization_mode: str = 'all',
+                                  clip_thres: Tuple[float, float] = (0., 99.8),
+                                  progress_notifier: ProgressNotifier = ProgressNotifier.progress_notifier_tqdm()) -> None:
+        """
+        Predict sarcomere z-bands with 3D U-Net for high-speed movies for improved temporal consistency.
+
+        Parameters
+        ----------
+        model_path : str, optional
+            Path of trained network weights for 3D U-Net. Default is None.
+        max_patch_size : tuple of int, optional
+            Maximal patch dimensions for convolutional neural network (n_frames, n_x, n_y).
+            Dimensions need to be divisible by 16. Default is (32, 256, 256).
+        normalization_mode : str, optional
+            Mode for intensity normalization for 3D stacks prior to prediction ('single': each image individually,
+            'all': based on histogram of full stack, 'first': based on histogram of first image in stack).
+            Default is 'all'.
+        clip_thres : tuple of float, optional
+            Clip threshold (lower / upper) for intensity normalization. Default is (0., 99.8).
+        progress_notifier : ProgressNotifier, optional
+            Progress notifier for inclusion in GUI. Default is ProgressNotifier.progress_notifier_tqdm().
+
+        Returns
+        -------
+        None
+        """
+        if model_path is None:
+            model_path = os.path.join(self.model_dir, 'model_z_bands_unet3d.pt')
+        
+        # Delegate to detection module
+        detection.detect_z_bands_fast_movie_unet(
+            images=self.read_imgs(),
+            model_path=model_path,
+            base_dir=self.base_dir,
+            model_dir=str(self.model_dir),
+            max_patch_size=max_patch_size,
+            normalization_mode=normalization_mode,
+            clip_thres=clip_thres,
+            device=self.device,
+            progress_notifier=progress_notifier
+        )
+        _dict = {'params.detect_z_bands_fast_movie.model': model_path,
+                 'params.detect_z_bands_fast_movie.max_patch_size': max_patch_size,
+                 'params.detect_z_bands_fast_movie.normalization_mode': normalization_mode,
+                 'params.predict_z_bands_fast_movie.clip_threshold': clip_thres}
+        self.data.update(_dict)
+        if self.auto_save:
+            self.store_structure_data()
+
+    def analyze_cell_mask(self, frames: Union[str, int, List[int], np.ndarray] = 'all', threshold: float = 0.1) -> None:
+        """
+        Analyzes the area occupied by cells in the given image(s) and calculates the average cell intensity and
+        cell area ratio.
+
+        Parameters
+        ----------
+        threshold : float, optional
+            Threshold value for binarizing the cell mask image. Pixels with intensity
+            above threshold are considered cell. Defaults to 0.1.
+        frames: {'all', int, list, np.ndarray}, optional
+            Frames for z-band analysis ('all' for all frames, int for a single frame, list or ndarray for
+            selected frames). Defaults to 'all'.
+        """
+        if not os.path.exists(self.file_cell_mask):
+            raise FileNotFoundError("Cell mask not found. Please run detect_sarcomeres first.")
+        if (isinstance(frames, str) and frames == 'all') or (self.metadata.n_stack == 1 and frames == 0):
+            cell_mask = tifffile.imread(self.file_cell_mask)
+            images = self.read_imgs()
+            list_frames = list(range(len(images)))
+        elif np.issubdtype(type(frames), np.integer) or isinstance(frames, list) or type(frames) is np.ndarray:
+            cell_mask = tifffile.imread(self.file_cell_mask, key=frames)
+            images = self.read_imgs(frames=frames)
+            if np.issubdtype(type(frames), np.integer):
+                list_frames = [frames]
+            else:
+                list_frames = list(frames)
+        else:
+            raise ValueError('frames argument not valid')
+
+        if len(cell_mask.shape) == 2:
+            cell_mask = np.expand_dims(cell_mask, 0)
+        if len(images.shape) == 2:
+            images = np.expand_dims(images, 0)
+
+        n_imgs = len(images)
+
+        # create empty arrays
+        cell_area, cell_area_ratio = np.full(n_imgs, fill_value=np.nan), np.full(n_imgs, fill_value=np.nan)
+        cell_mask_intensity = np.full(n_imgs, fill_value=np.nan)
+
+        for i, (img_i, cell_mask_i) in enumerate(zip(images, cell_mask)):
+            # binarize mask
+            mask_i = cell_mask_i > threshold
+
+            # average cell intensity
+            cell_mask_intensity[i] = np.mean(img_i[mask_i])
+
+            # total cell area and ratio to total image area
+            if self.metadata.pixelsize is not None:
+                cell_area[i] = np.sum(mask_i) * self.metadata.pixelsize ** 2
+                cell_area_ratio[i] = cell_area[i] / (img_i.shape[0] * img_i.shape[1] * self.metadata.pixelsize ** 2)
+
+        _dict = {'cell_mask_area': cell_area, 'cell_mask_area_ratio': cell_area_ratio,
+                 'cell_mask_intensity': cell_mask_intensity,
+                 'params.analyze_cell_mask.frames': list_frames,
+                 'params.analyze_cell_mask.threshold': threshold}
+        self.data.update(_dict)
+        if self.auto_save:
+            self.store_structure_data()
+
+    def analyze_z_bands(self, frames: Union[str, int, List[int], np.ndarray] = 'all', threshold: float = 0.5,
+                        min_length: float = 0.2, median_filter_radius: float = 0.2, theta_phi_min: float = 0.4, 
+                        a_min: float = 0.3, d_max: float = 3.0, d_min: float = 0.0,
+                        progress_notifier: ProgressNotifier = ProgressNotifier.progress_notifier_tqdm()) -> None:
+        """
+        Segment and analyze sarcomere z-bands.
+
+        Parameters
+        ----------
+        frames: {'all', int, list, np.ndarray}, optional
+            Frames for z-band analysis ('all' for all frames, int for a single frame, list or ndarray for
+            selected frames). Defaults to 'all'.
+        threshold : float, optional
+            Threshold for binarizing z-bands prior to labeling (0 - 1). Defaults to 0.1.
+        min_length : float, optional
+            Minimal length of z-bands; smaller z-bands are removed (in µm). Defaults to 0.5.
+        median_filter_radius : float, optional
+            Radius of kernel to smooth sarcomere orientation field. Default is 0.2 µm.
+        theta_phi_min : float, optional
+            Minimal cosine of the angle between the pointed z-band vector and the connecting vector between ends of z-bands.
+            Smaller values are not recognized as connections (for lateral alignment and distance analysis). Defaults to 0.4.
+        a_min: float, optional
+            Minimal lateral alignment between z-band ends to create a lateral connection. Defaults to 0.3.
+        d_max : float, optional
+            Maximal distance between z-band ends (in µm). Z-band end pairs with larger distances are not connected
+            (for lateral alignment and distance analysis). Defaults to 3.0.
+        d_min : float, optional
+            Minimal distance between z-band ends (in µm). Z-band end pairs with smaller distances are not connected.
+            Defaults to 0.0.
+        progress_notifier: ProgressNotifier
+            Wraps progress notification, default is progress notification done with tqdm
+        """
+        if not os.path.exists(self.file_zbands):
+            raise FileNotFoundError("Z-band mask not found. Please run detect_sarcomeres first.")
+        if (isinstance(frames, str) and frames == 'all') or (self.metadata.n_stack == 1 and frames == 0) or (len(self.data['params.detect_sarcomeres.frames']) == 1 and len(frames) == 1):
+            zbands = tifffile.imread(self.file_zbands)
+            orientation_field = tifffile.imread(self.file_orientation)
+            images = self.read_imgs()
+            list_frames = list(range(len(images)))
+        elif np.issubdtype(type(frames), np.integer) or isinstance(frames, list) or type(frames) is np.ndarray:
+            zbands = tifffile.imread(self.file_zbands, key=frames)
+            orientation_field = tifffile.imread(self.file_orientation)[frames]
+            images = self.read_imgs(frames=frames)
+            if np.issubdtype(type(frames), np.integer):
+                list_frames = [frames]
+            else:
+                list_frames = list(frames)
+        else:
+            raise ValueError('frames argument not valid')
+
+        if len(zbands.shape) == 2:
+            zbands = np.expand_dims(zbands, 0)
+        if len(images.shape) == 2:
+            images = np.expand_dims(images, 0)
+        if len(orientation_field.shape) == 3:
+            orientation_field = np.expand_dims(orientation_field, 0)
+        n_imgs = len(zbands)
+
+        # create empty lists
+        def none_lists():
+            return [None] * self.metadata.n_stack
+        z_length, z_intensity, z_straightness, z_orientation = (none_lists() for _ in range(4))
+        z_lat_neighbors, z_lat_alignment, z_lat_dist = (none_lists() for _ in range(3))
+        z_lat_size_groups, z_lat_length_groups, z_lat_alignment_groups = (none_lists() for _ in range(3))
+        z_labels, z_ends, z_lat_links, z_lat_groups = (none_lists() for _ in range(4))
+
+        # create empty arrays
+        def nan_arrays():
+            return np.full(self.metadata.n_stack, np.nan)
+        z_length_mean, z_length_std, z_length_max, z_length_sum, z_oop = (nan_arrays() for _ in range(5))
+        n_zbands, z_intensity_mean, z_intensity_std = (nan_arrays() for _ in range(3))
+        z_mask_area, z_mask_intensity, z_mask_area_ratio = (nan_arrays() for _ in range(3))
+        z_straightness_mean, z_straightness_std = (nan_arrays() for _ in range(2))
+        z_lat_neighbors_mean, z_lat_neighbors_std = (nan_arrays() for _ in range(2))
+        z_lat_alignment_mean, z_lat_alignment_std = (nan_arrays() for _ in range(2))
+        z_lat_dist_mean, z_lat_dist_std = (nan_arrays() for _ in range(2))
+        z_lat_size_groups_mean, z_lat_size_groups_std = (nan_arrays() for _ in range(2))
+        z_lat_length_groups_mean, z_lat_length_groups_std = (nan_arrays(), nan_arrays())
+        z_lat_alignment_groups_mean, z_lat_alignment_groups_std = (nan_arrays() for _ in range(2))
+
+        # iterate images
+        print('\nStarting Z-band analysis...')
+        for i, (frame_i, zbands_i, image_i, orientation_field_i) in enumerate(
+                progress_notifier.iterator(zip(list_frames, zbands, images, orientation_field), total=n_imgs)):
+
+            # Delegate to z_band_analysis module
+            labels_i, labels_skel_i = z_band_analysis.segment_z_bands(zbands_i, threshold=threshold)
+
+            # analyze z-band features
+            z_band_features = z_band_analysis.analyze_z_bands(
+                zbands_i, labels_i, labels_skel_i, image_i, orientation_field_i,
+                pixelsize=self.metadata.pixelsize, threshold=threshold,
+                min_length=min_length, median_filter_radius=median_filter_radius,
+                a_min=a_min, theta_phi_min=theta_phi_min,
+                d_max=d_max, d_min=d_min
+            )
+
+            (
+                z_length_i, z_intensity_i, z_straightness_i, z_mask_intensity_i, z_mask_area_i, orientation_i,
+                z_oop_i,
+                labels_list_i, labels_i, z_lat_neighbors_i, z_lat_dist_i, z_lat_alignment_i, z_lat_links_i, z_ends_i,
+                z_lat_groups_i, z_lat_size_groups_i, z_lat_length_groups_i, z_lat_alignment_groups_i,
+            ) = z_band_features
+
+            # fill lists and arrays
+            z_length[frame_i] = z_length_i
+            z_intensity[frame_i] = z_intensity_i
+            z_straightness[frame_i] = z_straightness_i
+            z_lat_alignment[frame_i] = z_lat_alignment_i
+            z_lat_neighbors[frame_i] = z_lat_neighbors_i
+            z_orientation[frame_i] = orientation_i
+            z_lat_dist[frame_i] = z_lat_dist_i
+            z_lat_size_groups[frame_i] = z_lat_size_groups_i
+            z_lat_length_groups[frame_i] = z_lat_length_groups_i
+            z_lat_alignment_groups[frame_i] = z_lat_alignment_groups_i
+            z_mask_area[frame_i], z_mask_intensity[frame_i], z_oop[
+                frame_i] = z_mask_area_i, z_mask_intensity_i, z_oop_i
+            if 'cell_mask_area' in self.data:
+                z_mask_area_ratio[frame_i] = z_mask_area_i / self.data['cell_mask_area'][frame_i]
+            else:
+                z_mask_area_ratio[frame_i] = z_mask_area_i / (self.metadata.size[0] * self.metadata.size[1])
+
+            z_labels[frame_i] = sparse.coo_matrix(labels_i)
+            z_lat_links[frame_i] = z_lat_links_i
+            z_ends[frame_i] = z_ends_i
+            z_lat_groups[frame_i] = z_lat_groups_i
+
+            # calculate mean and std of z-band features
+            if len(z_length_i) > 0:
+                z_length_mean[frame_i], z_length_std[frame_i], z_length_max[frame_i], z_length_sum[frame_i] = np.mean(
+                    z_length_i), np.std(
+                    z_length_i), np.max(z_length_i), np.sum(z_length_i)
+            n_zbands[frame_i] = len(z_length_i)
+            z_intensity_mean[frame_i], z_intensity_std[frame_i] = np.mean(z_intensity_i), np.std(z_intensity_i)
+            z_straightness_mean[frame_i], z_straightness_std[frame_i] = np.mean(z_straightness_i), np.std(
+                z_straightness_i)
+            z_lat_neighbors_mean[frame_i], z_lat_neighbors_std[frame_i] = np.mean(z_lat_neighbors_i), np.std(
+                z_lat_neighbors_i)
+            z_lat_alignment_mean[frame_i], z_lat_alignment_std[frame_i] = np.nanmean(z_lat_alignment_i), np.nanstd(
+                z_lat_alignment_i)
+            z_lat_dist_mean[frame_i], z_lat_dist_std[frame_i] = np.nanmean(z_lat_dist_i), np.nanstd(z_lat_dist_i)
+            z_lat_size_groups_mean[frame_i], z_lat_size_groups_std[frame_i] = np.nanmean(
+                z_lat_size_groups_i), np.nanstd(
+                z_lat_size_groups_i)
+            z_lat_length_groups_mean[frame_i], z_lat_length_groups_std[frame_i] = np.nanmean(
+                z_lat_length_groups_i), np.nanstd(
+                z_lat_length_groups_i)
+            z_lat_alignment_groups_mean[frame_i], z_lat_alignment_groups_std[frame_i] = np.nanmean(
+                z_lat_alignment_groups_i), np.nanstd(z_lat_alignment_groups_i)
+
+        # create and save dictionary for cell structure
+        z_band_data = {'n_zbands': n_zbands, 'z_length': z_length, 'z_length_mean': z_length_mean, 'z_length_std': z_length_std,
+                       'z_length_max': z_length_max, 'z_intensity': z_intensity, 'z_intensity_mean': z_intensity_mean,
+                       'z_intensity_std': z_intensity_std, 'z_orientation': z_orientation, 'z_oop': z_oop,
+                       'z_straightness': z_straightness, 'z_mask_intensity': z_mask_intensity, 'z_labels': z_labels,
+                       'z_straightness_mean': z_straightness_mean, 'z_straightness_std': z_straightness_std,
+                       'z_mask_area': z_mask_area, 'z_mask_area_ratio': z_mask_area_ratio, 'z_lat_neighbors': z_lat_neighbors,
+                       'z_lat_neighbors_mean': z_lat_neighbors_mean, 'z_lat_neighbors_std': z_lat_neighbors_std,
+                       'z_lat_alignment': z_lat_alignment, 'z_lat_alignment_mean': z_lat_alignment_mean,
+                       'z_lat_alignment_std': z_lat_neighbors_std, 'z_lat_dist': z_lat_dist, 'z_ends': z_ends,
+                       'z_lat_dist_mean': z_lat_dist_mean, 'z_lat_dist_std': z_lat_dist_std, 'z_lat_links': z_lat_links,
+                       'z_lat_groups': z_lat_groups, 'z_lat_size_groups': z_lat_size_groups,
+                       'z_lat_size_groups_mean': z_lat_size_groups_mean, 'z_lat_size_groups_std': z_lat_size_groups_std,
+                       'z_lat_length_groups': z_lat_length_groups, 'z_lat_alignment_groups': z_lat_alignment_groups,
+                       'z_lat_length_groups_mean': z_lat_length_groups_mean,
+                       'z_lat_length_groups_std': z_lat_length_groups_std,
+                       'z_lat_alignment_groups_mean': z_lat_alignment_groups_mean,
+                       'z_lat_alignment_groups_std': z_lat_alignment_groups_std,
+                       'params.analyze_z_bands.frames': list_frames, 'params.analyze_z_bands.threshold': threshold,
+                       'params.analyze_z_bands.min_length': min_length, 'params.analyze_z_bands.median_filter_radius': median_filter_radius,
+                       'params.analyze_z_bands.theta_phi_min': theta_phi_min, 'params.analyze_z_bands.d_max': d_max,
+                       'params.analyze_z_bands.d_min': d_min}
+        self.data.update(z_band_data)
+        if self.auto_save:
+            self.store_structure_data()
+
+    def analyze_sarcomere_vectors(self, frames: Union[str, int, List[int], np.ndarray] = 'all', threshold_mbands: float = 0.25,
+                                  median_filter_radius: float = 0.25, linewidth: float = 0.2, interp_factor: int = 0,
+                                  slen_lims: Tuple[float, float] = (1, 3), threshold_sarcomere_mask=0.1, backend='loky',
+                                  progress_notifier: ProgressNotifier = ProgressNotifier.progress_notifier_tqdm()) -> None:
+        """
+        Extract sarcomere orientation and length vectors.
+
+        Parameters
+        ----------
+        frames : {'all', int, list, np.ndarray}, optional
+            frames for sarcomere vector analysis ('all' for all frames, int for a single frame, list or ndarray for
+            selected frames). Defaults to 'all'.
+        threshold_mbands : float, optional
+            Threshold to binarize sarcomere M-bands. Lower values might result in more false-positive sarcomere vectors. Defaults to 0.2.
+        median_filter_radius : float, optional
+            Radius of kernel to smooth orientation field before assessing orientation at M-points, in µm (default 0.25 µm).
+        linewidth : float, optional
+            Line width of profile lines to analyze sarcomere lengths, in µm (default is 0.3 µm).
+        interp_factor: int, optional
+            Interpolation factor for profiles to calculate sarcomere length. Default to 4.
+        slen_lims : tuple of float, optional
+            Sarcomere size limits in µm (default is (1, 3) µm).
+        threshold_sarcomere_mask : float
+            Threshold to binarize sarcomere masks. Defaults to 0.1.
+        backend : str, optional
+            Backend for parallelization of profile processing. Defaults to 'loky'.
+        progress_notifier: ProgressNotifier
+            Wraps progress notification, default is progress notification done with tqdm
+
+        Returns
+        -------
+        sarcomere_orientation_points : np.ndarray
+            Sarcomere orientation values at midline points.
+        sarcomere_length_points : np.ndarray
+            Sarcomere length values at midline points.
+        """
+        if not os.path.exists(self.file_zbands):
+            raise FileNotFoundError("Z-band mask not found. Please run detect_sarcomeres first.")
+
+        _detected_frames = self.data['params.detect_sarcomeres.frames']
+        if ((isinstance(frames, str) and frames == 'all') or (self.metadata.n_stack == 1 and frames == 0)
+                or (_detected_frames != 'all' and len(_detected_frames) == 1)):
+            list_frames = list(range(self.metadata.n_stack))
+            z_bands = tifffile.imread(self.file_zbands)
+            mbands = tifffile.imread(self.file_mbands)
+            orientation_field = tifffile.imread(self.file_orientation)
+            sarcomere_mask = tifffile.imread(self.file_sarcomere_mask)
+        elif np.issubdtype(type(frames), np.integer) or isinstance(frames, list) or isinstance(frames, np.ndarray):
+            z_bands = tifffile.imread(self.file_zbands, key=frames)
+            mbands = tifffile.imread(self.file_mbands, key=frames)
+            orientation_field = tifffile.imread(self.file_orientation)[frames]
+            sarcomere_mask = tifffile.imread(self.file_sarcomere_mask, key=frames)
+            if np.issubdtype(type(frames), np.integer):
+                list_frames = [frames]
+            else:
+                list_frames = [int(f) for f in frames]
+        else:
+            raise ValueError('frames argument not valid')
+        if len(z_bands.shape) == 2:
+            z_bands = np.expand_dims(z_bands, axis=0)
+        if len(mbands.shape) == 2:
+            mbands = np.expand_dims(mbands, axis=0)
+        if len(sarcomere_mask.shape) == 2:
+            sarcomere_mask = np.expand_dims(sarcomere_mask, axis=0)
+        if len(orientation_field.shape) == 3:
+            orientation_field = np.expand_dims(orientation_field, axis=0)
+
+        # binarize M-bands
+        mbands = mbands > threshold_mbands
+
+        n_frames = len(z_bands)
+        pixelsize = self.metadata.pixelsize
+
+        # create empty arrays
+        def none_lists():
+            return [None] * self.metadata.n_stack
+        def nan_arrays():
+            return np.full(self.metadata.n_stack, np.nan)
+        (pos_vectors, pos_vectors_px, sarcomere_length_vectors,
+         sarcomere_orientation_vectors) = (none_lists() for _ in range(4))
+        midline_id_vectors, midline_length_vectors = (none_lists() for _ in range(2))
+        sarcomere_masks = np.zeros((self.metadata.n_stack, *self.metadata.size), dtype=bool)
+        (sarcomere_length_mean, sarcomere_length_std) = (nan_arrays() for _ in range(2))
+        sarcomere_orientation_mean, sarcomere_orientation_std = nan_arrays(), nan_arrays()
+        n_vectors, n_mbands, oop, sarcomere_area, sarcomere_area_ratio, score_thresholds = (nan_arrays() for _ in range(6))
+
+        # Check pixelsize is not None
+        if pixelsize is None:
+            raise ValueError("Pixel size is not available. Please provide pixelsize during initialization.")
+
+        # iterate images
+        print('\nStarting sarcomere length and orientation analysis...')
+        for i, (frame_i, zbands_i, mbands_i, orientation_field_i, sarcomere_mask_i) in enumerate(
+                progress_notifier.iterator(zip(list_frames, z_bands, mbands, orientation_field, sarcomere_mask),
+                                           total=n_frames)):
+
+            # Delegate to sarcomere_vectors module
+            (
+                pos_vectors_px_i, pos_vectors_i, midline_id_vectors_i, midline_length_vectors_i,
+                sarcomere_length_vectors_i, sarcomere_orientation_vectors_i,
+                n_mbands_i) = sarcomere_vectors.get_sarcomere_vectors(zbands_i, mbands_i,
+                                                         orientation_field_i,
+                                                         pixelsize=pixelsize,
+                                                         median_filter_radius=median_filter_radius,
+                                                         slen_lims=slen_lims,
+                                                         interp_factor=interp_factor,
+                                                         linewidth=linewidth,
+                                                         backend=backend)
+
+            # write in list
+            n_vectors[frame_i] = len(sarcomere_length_vectors_i)
+            n_mbands[frame_i] = n_mbands_i
+            pos_vectors_px[frame_i] = pos_vectors_px_i
+            pos_vectors[frame_i] = pos_vectors_i
+            sarcomere_length_vectors[frame_i] = sarcomere_length_vectors_i
+            sarcomere_orientation_vectors[frame_i] = sarcomere_orientation_vectors_i
+            midline_id_vectors[frame_i] = midline_id_vectors_i
+            midline_length_vectors[frame_i] = midline_length_vectors_i
+
+            # calculate mean and std of sarcomere length and orientation
+            sarcomere_length_mean[frame_i], sarcomere_length_std[frame_i], = np.nanmean(
+                sarcomere_length_vectors_i), np.nanstd(sarcomere_length_vectors_i)
+            if np.count_nonzero(~np.isnan(sarcomere_orientation_vectors_i)) > 1:
+                sarcomere_orientation_mean[frame_i], sarcomere_orientation_std[frame_i] = stats.circmean(
+                    sarcomere_orientation_vectors_i[~np.isnan(sarcomere_orientation_vectors_i)]), stats.circstd(
+                    sarcomere_orientation_vectors_i[~np.isnan(sarcomere_orientation_vectors_i)])
+
+            # orientation order parameter
+            if len(sarcomere_orientation_vectors_i) > 0:
+                oop[frame_i], _ = Utils.analyze_orientations(
+                    sarcomere_orientation_vectors_i[~np.isnan(sarcomere_orientation_vectors_i)])
+
+            # calculate sarcomere mask area
+            sarcomere_masks[frame_i] = sarcomere_mask_i > threshold_sarcomere_mask
+            sarcomere_area[frame_i] = np.sum(sarcomere_mask_i) * self.metadata.pixelsize ** 2
+            if 'cell_mask_area' in self.data:
+                sarcomere_area_ratio[frame_i] = sarcomere_area[frame_i] / self.data['cell_mask_area'][i]
+
+        vectors_dict = {'params.analyze_sarcomere_vectors.frames': list_frames,
+                        'params.analyze_sarcomere_vectors.threshold_sarcomere_mask': threshold_sarcomere_mask,
+                        'params.analyze_sarcomere_vectors.median_filter_radius': median_filter_radius,
+                        'params.analyze_sarcomere_vectors.slen_lims': slen_lims,
+                        'params.analyze_sarcomere_vectors.interp_factor': interp_factor,
+                        'params.analyze_sarcomere_vectors.linewidth': linewidth,
+                        'n_vectors': n_vectors, 'n_mbands': n_mbands, 'pos_vectors_px': pos_vectors_px,
+                        'pos_vectors': pos_vectors, 'sarcomere_length_vectors': sarcomere_length_vectors,
+                        'sarcomere_orientation_vectors': sarcomere_orientation_vectors,
+                        'sarcomere_area': sarcomere_area, 'sarcomere_area_ratio': sarcomere_area_ratio,
+                        'midline_length_vectors': midline_length_vectors, 'midline_id_vectors': midline_id_vectors,
+                        'sarcomere_length_mean': sarcomere_length_mean,
+                        'sarcomere_length_std': sarcomere_length_std,
+                        'sarcomere_orientation_mean': sarcomere_orientation_mean,
+                        'sarcomere_orientation_std': sarcomere_orientation_std,
+                        'sarcomere_oop': oop}
+        self.data.update(vectors_dict)
+        if self.auto_save:
+            self.store_structure_data()
+
+    def analyze_myofibrils(self, frames: Optional[Union[str, int, List[int], np.ndarray]] = None,
+                           ratio_seeds: float = 0.1, persistence: int = 3, threshold_distance: float = 0.5,
+                           n_min: int = 4, median_filter_radius: float = 0.5,
+                           progress_notifier: ProgressNotifier = ProgressNotifier.progress_notifier_tqdm()) -> None:
+        """
+        Estimate myofibril lines by line growth algorithm and analyze length and curvature.
+
+        Parameters
+        ----------
+        frames : {'all', int, list, np.ndarray}, optional
+            frames for myofibril analysis ('all' for all frames, int for a single frame, list or ndarray for
+            selected frames). If None, frames from sarcomere vector analysis are used. Defaults to None.
+        ratio_seeds : float, optional
+            Ratio of sarcomere vector used as seeds for line growth. Defaults to 0.1.
+        persistence : int, optional
+            Persistence of line (average vector length and orientation for prior estimation), needs to be > 0.
+            Defaults to 3.
+        threshold_distance : float, optional
+            Maximal distance for nearest neighbor estimation (in micrometers). Defaults to 0.3.
+        n_min : int, optional
+            Minimal number of sarcomere line segments per line. Shorter lines are removed. Defaults to 5.
+        median_filter_radius : float, optional
+            Filter radius for smoothing myofibril length map (in micrometers). Defaults to 0.5.
+        progress_notifier: ProgressNotifier
+            Wraps progress notification, default is progress notification done with tqdm
+        """
+        if 'pos_vectors_px' not in self.data:
+            raise ValueError('Sarcomere length and orientation not yet analyzed. Run analyze_sarcomere_vectors first.')
+        if frames is not None:
+            if (isinstance(frames, str) and frames == 'all') or (self.metadata.n_stack == 1 and frames == 0):
+                frames = list(range(self.metadata.n_stack))
+            if np.issubdtype(type(frames), np.integer):
+                frames = [frames]
+            if not set(frames).issubset(self.data['params.analyze_sarcomere_vectors.frames']):
+                raise ValueError(f'Run analyze_sarcomere_vectors first for frames {frames}.')
+        elif frames is None:
+            if 'params.analyze_sarcomere_vectors.frames' in self.data.keys():
+                frames = self.data['params.analyze_sarcomere_vectors.frames']
+            else:
+                raise ValueError("To use frames from sarcomere vector analysis, run 'analyze_sarcomere vectors' first!")
+
+        if frames == 'all':
+            n_imgs = self.metadata.n_stack
+            list_frames = list(range(n_imgs))
+        elif isinstance(frames, int):
+            list_frames = [frames]
+        elif isinstance(frames, list) or type(frames) is np.ndarray:
+            list_frames = list(frames)
+        else:
+            raise ValueError('Selection of frames not valid!')
+
+        pos_vectors_px = [self.data['pos_vectors_px'][frame] for frame in list_frames]
+        pos_vectors = [self.data['pos_vectors'][frame] for frame in list_frames]
+        sarcomere_length_vectors = [self.data['sarcomere_length_vectors'][frame] for frame in list_frames]
+        sarcomere_orientation_vectors = [self.data['sarcomere_orientation_vectors'][frame] for frame in list_frames]
+        midline_length_vectors = [self.data['midline_length_vectors'][frame] for frame in list_frames]
+
+        # create empty arrays
+        def none_lists():
+            return [None] * self.metadata.n_stack
+        def nan_arrays():
+            return np.full(self.metadata.n_stack, np.nan)
+        length_mean, length_std, length_max = (nan_arrays() for _ in range(3))
+        straightness_mean, straightness_std = (nan_arrays() for _ in range(2))
+        bending_mean, bending_std = (nan_arrays() for _ in range(2))
+        myof_lines, lengths, straightness, frechet_straightness, bending = (none_lists() for _ in range(5))
+
+        # iterate frames
+        print('\nStarting myofibril line analysis...')
+        for i, (
+                frame_i, pos_vectors_px_i, pos_vectors_i, sarcomere_length_vectors_i, sarcomere_orientation_vectors_i,
+                midline_length_vectors_i) in enumerate(
+            progress_notifier.iterator(
+                zip(list_frames, pos_vectors_px, pos_vectors, sarcomere_length_vectors, sarcomere_orientation_vectors,
+                    midline_length_vectors),
+                total=len(pos_vectors_px))):
+            if len(np.asarray(pos_vectors_px_i).T) > 0:
+                # Delegate to myofibril_analysis module
+                line_data_i = myofibril_analysis.line_growth(pos_vectors_px_i, sarcomere_length_vectors_i,
+                                               sarcomere_orientation_vectors_i,
+                                               midline_length_vectors_t=midline_length_vectors_i,
+                                               pixelsize=self.metadata.pixelsize, ratio_seeds=ratio_seeds,
+                                               persistence=persistence, threshold_distance=threshold_distance,
+                                               n_min=n_min)
+                lines_i = line_data_i['lines']
+
+                if len(lines_i) > 0:
+                    # line lengths and mean squared curvature (msc)
+                    lengths_i = line_data_i['line_features']['length_lines']
+                    straightness_i = line_data_i['line_features']['straightness_lines']
+                    bending_i = line_data_i['line_features']['bending_lines']
+
+                    if len(lengths_i) > 0:
+                        # Delegate to myofibril_analysis module for map creation
+                        myof_map_i = myofibril_analysis.create_myofibril_length_map(myof_lines=lines_i, myof_length=lengths_i,
+                                                                      pos_vectors=pos_vectors_i,
+                                                                      sarcomere_orientation_vectors=sarcomere_orientation_vectors_i,
+                                                                      sarcomere_length_vectors=sarcomere_length_vectors_i,
+                                                                      size=self.metadata.size,
+                                                                      pixelsize=self.metadata.pixelsize,
+                                                                      median_filter_radius=median_filter_radius)
+
+                        myof_map_flat_i = myof_map_i.flatten()
+                        myof_map_flat_i = myof_map_flat_i[~np.isnan(myof_map_flat_i)]
+                        weights_i = 1.0 / myof_map_flat_i
+                        weighted_mean_length_i = np.average(myof_map_flat_i, weights=weights_i)
+                        weighted_std_length_i = np.sqrt(np.average((myof_map_flat_i - weighted_mean_length_i) ** 2,
+                                                                   weights=weights_i))
+                        length_mean[frame_i], length_std[frame_i], length_max[frame_i] = (weighted_mean_length_i,
+                                                                                          weighted_std_length_i,
+                                                                                          np.nanmax(myof_map_flat_i))
+                        straightness_mean[frame_i], straightness_std[frame_i] = (np.mean(straightness_i),
+                                                                                 np.std(straightness_i))
+                        bending_mean[frame_i], bending_std[frame_i] = (np.mean(bending_i),
+                                                                                     np.std(bending_i))
+                    myof_lines[frame_i] = lines_i
+                    lengths[frame_i] = lengths_i
+                    straightness[frame_i] = straightness_i
+                    bending[frame_i] = bending_i
+
+        # update structure dictionary
+        myofibril_data = {'myof_length_mean': length_mean,
+                          'myof_length_std': length_std, 'myof_lines': myof_lines,
+                          'myof_length_max': length_max, 'myof_length': lengths,
+                          'myof_straightness': straightness, 'myof_straightness_mean': straightness_mean,
+                          'myof_straightness_std': straightness_std,
+                          'myof_bending': bending,
+                          'myof_bending_mean': bending_mean,
+                          'myof_bending_std': bending_std,
+                          'params.analyze_myofibrils.persistence': persistence,
+                          'params.analyze_myofibrils.threshold_distance': threshold_distance,
+                          'params.analyze_myofibrils.frames': list_frames,
+                          'params.analyze_myofibrils.n_min': n_min,
+                          'params.analyze_myofibrils.ratio_seeds': ratio_seeds,
+                          'params.analyze_myofibrils.median_filter_radius': median_filter_radius
+                          }
+
+        self.data.update(myofibril_data)
+        if self.auto_save:
+            self.store_structure_data()
+
+    def analyze_sarcomere_domains(self, frames: Optional[Union[str, int, List[int], np.ndarray]] = None,
+                                  d_max: float = 3, cosine_min: float = 0.65, leiden_resolution: float = 0.06,
+                                  random_seed: int = 42, area_min: float = 20.0, dilation_radius: float = 0.3,
+                                  progress_notifier: ProgressNotifier = ProgressNotifier.progress_notifier_tqdm()) -> None:
+        """
+        Cluster sarcomeres into domains based on their spatial and orientational properties using the Leiden algorithm
+        for community detection.
+
+        Parameters
+        ----------
+        frames : {'all', int, list, np.ndarray}, optional
+            frames for domain analysis ('all' for all frames, int for a single frame, list or ndarray for
+            selected frames). If None, frames from sarcomere vector analysis are used. Defaults to None.
+        d_max : float
+            Max. distance threshold for creating a network edge between vector ends
+        cosine_min : float
+            Minimal absolute cosine between vector angles for creating a network edge between vector ends
+        leiden_resolution : float, optional
+            Control parameter for domain size. If resolution is small, the algorithm favors larger domains.
+            Greater resolution favors smaller domains. Defaults to 0.05.
+        random_seed : int, optional
+            Random seed for Leiden algorithm, to ensure reproducibility. Defaults to 2.
+        area_min : float, optional
+            Minimal area of domains/clusters (in µm^2). Defaults to 50.0.
+        dilation_radius : float, optional
+            Dilation radius for refining domain area masks, in µm. Defaults to 0.3.
+        progress_notifier: ProgressNotifier
+            Wraps progress notification, default is progress notification done with tqdm
+        """
+        if 'pos_vectors' not in self.data:
+            raise ValueError('Sarcomere length and orientation not yet analyzed. Run analyze_sarcomere_vectors first.')
+        if frames is not None:
+            if (isinstance(frames, str) and frames == 'all') or (self.metadata.n_stack == 1 and frames == 0):
+                frames = list(range(self.metadata.n_stack))
+            if np.issubdtype(type(frames), np.integer):
+                frames = [frames]
+            if not set(frames).issubset(self.data['params.analyze_sarcomere_vectors.frames']):
+                raise ValueError(f'Run analyze_sarcomere_vectors first for frames {frames}.')
+        elif frames is None:
+            if 'params.analyze_sarcomere_vectors.frames' in self.data.keys():
+                frames = self.data['params.analyze_sarcomere_vectors.frames']
+            else:
+                raise ValueError("To use frames from sarcomere vector analysis, run 'analyze_sarcomere_vectors' first!")
+
+        if frames == 'all':
+            n_imgs = self.metadata.n_stack
+            list_frames = list(range(n_imgs))
+        elif isinstance(frames, int):
+            n_imgs = 1
+            list_frames = [frames]
+        elif isinstance(frames, list) or type(frames) is np.ndarray:
+            n_imgs = len(frames)
+            list_frames = list(frames)
+        else:
+            raise ValueError('Selection of frames not valid!')
+
+        pos_vectors = [np.asarray(self.data['pos_vectors'][t]) for t in list_frames]
+        sarcomere_length_vectors = [np.asarray(self.data['sarcomere_length_vectors'][t]) for t in list_frames]
+        sarcomere_orientation_vectors = [np.asarray(self.data['sarcomere_orientation_vectors'][t]) for t in list_frames]
+        midline_id_vectors = [np.asarray(self.data['midline_id_vectors'][t]) for t in list_frames]
+
+        # create empty arrays
+        def none_lists():
+            return [None] * self.metadata.n_stack
+        def nan_arrays():
+            return np.full(self.metadata.n_stack, np.nan)
+        n_domains, domain_area_mean, domain_area_std = (nan_arrays() for _ in range(3))
+        domain_slen_mean, domain_slen_std = (nan_arrays() for _ in range(2))
+        domain_oop_mean, domain_oop_std = (nan_arrays() for _ in range(2))
+
+        (domains, domain_area, domain_slen, domain_slen_std,
+         domain_oop, domain_orientation) = (none_lists() for _ in range(6))
+
+        # iterate frames
+        print('\nStarting sarcomere domain analysis...')
+        for i, (frame_i, pos_vectors_i, sarcomere_length_vectors_i, sarcomere_orientation_vectors_i,
+                midline_id_vectors_i) in enumerate(
+            progress_notifier.iterator(
+                zip(list_frames, pos_vectors, sarcomere_length_vectors, sarcomere_orientation_vectors,
+                    midline_id_vectors),
+                total=len(pos_vectors))):
+            # Delegate to domain_clustering module
+            cluster_data_t = domain_clustering.cluster_sarcomeres(pos_vectors_i, sarcomere_length_vectors_i,
+                                                     sarcomere_orientation_vectors_i,
+                                                     pixelsize=self.metadata.pixelsize,
+                                                     size=self.metadata.size,
+                                                     d_max=d_max, cosine_min=cosine_min,
+                                                     leiden_resolution=leiden_resolution, random_seed=random_seed,
+                                                     area_min=area_min, dilation_radius=dilation_radius)
+            (n_domains[frame_i], domains[frame_i], domain_area[frame_i], domain_slen[frame_i], domain_slen_std[frame_i],
+             domain_oop[frame_i], domain_orientation[frame_i], domain_mask_i) = cluster_data_t
+
+            # calculate mean and std of domains
+            domain_area_mean[frame_i], domain_area_std[frame_i] = np.mean(domain_area[frame_i]), np.std(
+                domain_area[frame_i])
+            domain_slen_mean[frame_i], domain_slen_std[frame_i] = (
+                np.mean(domain_slen[frame_i]), np.std(domain_slen[frame_i]))
+            domain_oop_mean[frame_i], domain_oop_std[frame_i] = (
+                np.mean(domain_oop[frame_i]), np.std(domain_oop[frame_i]))
+
+        # update structure dictionary
+        domain_data = {'n_domains': n_domains, 'domains': domains,
+                       'domain_area': domain_area, 'domain_area_mean': domain_area_mean,
+                       'domain_area_std': domain_area_std,
+                       'domain_slen': domain_slen, 'domain_slen_mean': domain_slen_mean,
+                       'domain_slen_std': domain_slen_std,
+                       'domain_oop': domain_oop, 'domain_oop_mean': domain_oop_mean,
+                       'domain_oop_std': domain_oop_std,
+                       'domain_orientation': domain_orientation,
+                       'params.analyze_sarcomere_domains.frames': list_frames,
+                       'params.analyze_sarcomere_domains.d_max': d_max,
+                       'params.analyze_sarcomere_domains.cosine_min': cosine_min,
+                       'params.analyze_sarcomere_domains.leiden_resolution': leiden_resolution,
+                       'params.analyze_sarcomere_domains.area_min': area_min,
+                       'params.analyze_sarcomere_domains.dilation_radius': dilation_radius}
+
+        self.data.update(domain_data)
+        if self.auto_save:
+            self.store_structure_data()
+
+    def _grow_lois(self, frame: int = 0, ratio_seeds: float = 0.1, persistence: int = 2,
+                   threshold_distance: float = 0.3, random_seed: Union[None, int] = None) -> None:
+        """
+        Find LOIs (lines of interest) using a line growth algorithm. The parameters **lims can be used to filter LOIs.
+
+        Parameters
+        ----------
+        frame : int, optional
+            Frame to select frame. Selects i-th frame of frames specified in sarcomere vector analysis. Defaults to 0.
+        ratio_seeds : float, optional
+            Ratio of sarcomere vectors to take as seeds for line growth. Default 0.1.
+        persistence : int, optional
+            Persistence of line (average vector length and orientation for prior estimation). Defaults to 2.
+        threshold_distance : float, optional
+            Maximal distance for nearest neighbor estimation. Defaults to 0.5.
+        random_seed : int, optional
+            Random seed for reproducibility. Defaults to None.
+        """
+        # select midline point data at frame
+        (pos_vectors, sarcomere_length_vectors,
+         sarcomere_orientation_vectors, midline_length_vectors) = self.data['pos_vectors_px'][frame], \
+            self.data['sarcomere_length_vectors'][frame], \
+            self.data['sarcomere_orientation_vectors'][frame], \
+            self.data['midline_length_vectors'][frame]
+        # Delegate to myofibril_analysis module
+        loi_data = myofibril_analysis.line_growth(points_t=pos_vectors, sarcomere_length_vectors_t=sarcomere_length_vectors,
+                                    sarcomere_orientation_vectors_t=sarcomere_orientation_vectors,
+                                    midline_length_vectors_t=midline_length_vectors,
+                                    pixelsize=self.metadata.pixelsize,
+                                    ratio_seeds=ratio_seeds, persistence=persistence,
+                                    threshold_distance=threshold_distance, random_seed=random_seed)
+        self.data['loi_data'] = loi_data
+        lois_vectors = [self.data['pos_vectors_px'][frame][loi_i] for loi_i in self.data['loi_data']['lines']]
+        self.data['loi_data']['lines_vectors'] = lois_vectors
+        if self.auto_save:
+            self.store_structure_data()
+
+    def _filter_lois(self, number_lims: Tuple[int, int] = (10, 100), length_lims: Tuple[float, float] = (0, 200),
+                     sarcomere_mean_length_lims: Tuple[float, float] = (1, 3),
+                     sarcomere_std_length_lims: Tuple[float, float] = (0, 1),
+                     midline_mean_length_lims: Tuple[float, float] = (0, 50),
+                     midline_std_length_lims: Tuple[float, float] = (0, 50),
+                     midline_min_length_lims: Tuple[float, float] = (0, 50),
+                     ) -> None:
+        """
+        Filters Lines of Interest (LOIs) based on various geometric and morphological criteria.
+
+        Parameters
+        ----------
+        number_lims : tuple of int, optional
+            Limits of sarcomere numbers in LOI (min, max). Defaults to (10, 100).
+        length_lims : tuple of float, optional
+            Limits for LOI lengths (in µm) (min, max). Defaults to (0, 200).
+        sarcomere_mean_length_lims : tuple of float, optional
+            Limits for mean length of sarcomeres in LOI (min, max). Defaults to (1, 3).
+        sarcomere_std_length_lims : tuple of float, optional
+            Limits for standard deviation of sarcomere lengths in LOI (min, max). Defaults to (0, 1).
+        midline_mean_length_lims : tuple of float, optional
+            Limits for mean length of the midline in LOI (min, max). Defaults to (0, 50).
+        midline_std_length_lims : tuple of float, optional
+            Limits for standard deviation of the midline length in LOI (min, max). Defaults to (0, 50).
+        midline_min_length_lims : tuple of float, optional
+            Limits for minimum length of the midline in LOI (min, max). Defaults to (0, 50).
+        """
+        # Delegate to loi_detection module
+        (filtered_lois, filtered_lois_vectors,
+         filtered_features) = loi_detection.filter_lois(
+            lois=self.data['loi_data']['lines'],
+            loi_features=self.data['loi_data']['line_features'],
+            lois_vectors=self.data['loi_data']['lines_vectors'],
+            number_lims=number_lims,
+            length_lims=length_lims,
+            sarcomere_mean_length_lims=sarcomere_mean_length_lims,
+            sarcomere_std_length_lims=sarcomere_std_length_lims,
+            midline_mean_length_lims=midline_mean_length_lims,
+            midline_std_length_lims=midline_std_length_lims,
+            midline_min_length_lims=midline_min_length_lims
+        )
+
+        self.data['loi_data']['lines'] = filtered_lois
+        self.data['loi_data']['lines_vectors'] = filtered_lois_vectors
+        self.data['loi_data']['line_features'] = filtered_features
+
+    def _hausdorff_distance_lois(self, symmetry_mode: str = 'max') -> None:
+        """
+        Compute Hausdorff distances between all good LOIs.
+
+        Parameters
+        ----------
+        symmetry_mode : str, optional
+            Choose 'min' or 'max', whether min/max(H(loi_i, loi_j), H(loi_j, loi_i)). Defaults to 'max'.
+        """
+        # Delegate to loi_detection module
+        hausdorff_dist_matrix = loi_detection.hausdorff_distance_lois(
+            lines_vectors=self.data['loi_data']['lines_vectors'],
+            symmetry_mode=symmetry_mode
+        )
+
+        self.data['loi_data']['hausdorff_dist_matrix'] = hausdorff_dist_matrix
+        if self.auto_save:
+            self.store_structure_data()
+
+    def _cluster_lois(self, distance_threshold_lois: float = 40, linkage: str = 'single') -> None:
+        """
+        Agglomerative clustering of good LOIs using predefined Hausdorff distance matrix using scikit-learn.
+
+        Parameters
+        ----------
+        distance_threshold_lois : float, optional
+            The linkage distance threshold above which clusters will not be merged. Defaults to 40.
+        linkage : {'complete', 'average', 'single'}, optional
+            Which linkage criterion to use. The linkage criterion determines which distance to use between sets of
+            observations. The algorithm will merge the pairs of clusters that minimize this criterion.
+            - 'average' uses the average of the distances of each observation of the two sets.
+            - 'complete' or 'maximum' linkage uses the maximum distances between all observations of the two sets.
+            - 'single' uses the minimum of the distances between all observations of the two sets.
+            Defaults to 'single'.
+        """
+        # Delegate to loi_detection module
+        cluster_labels, n_clusters = loi_detection.cluster_lois(
+            hausdorff_dist_matrix=self.data['loi_data']['hausdorff_dist_matrix'],
+            distance_threshold=distance_threshold_lois,
+            linkage=linkage
+        )
+
+        self.data['loi_data']['line_cluster'] = cluster_labels
+        self.data['loi_data']['n_lines_clusters'] = n_clusters
+        if self.auto_save:
+            self.store_structure_data()
+
+    def _fit_straight_line(self, add_length=1, n_lois=None):
+        """Fit linear lines to cluster points
+
+        Parameters
+        ----------
+        add_length : float
+            Elongate line at end with add_length (in length unit)
+        n_lois : int
+            If int, only n longest LOIs are saved. If None, all are saved.
+        """
+        # Delegate to loi_detection module
+        loi_lines, len_loi_lines = loi_detection.fit_straight_line_to_clusters(
+            lines_vectors=self.data['loi_data']['lines_vectors'],
+            cluster_labels=self.data['loi_data']['line_cluster'],
+            n_clusters=self.data['loi_data']['n_lines_clusters'],
+            pixelsize=self.metadata.pixelsize,
+            add_length=add_length,
+            n_lois=n_lois
+        )
+
+        self.data['loi_data']['loi_lines'] = np.asarray(loi_lines, dtype=object)
+        self.data['loi_data']['len_loi_lines'] = np.asarray(len_loi_lines)
+        if self.auto_save:
+            self.store_structure_data()
+
+    def _longest_in_cluster(self, n_lois, frame):
+        # Delegate to loi_detection module
+        loi_lines, len_loi_lines = loi_detection.select_longest_in_cluster(
+            lines=self.data['loi_data']['lines'],
+            pos_vectors=self.data['pos_vectors_px'][frame],
+            cluster_labels=self.data['loi_data']['line_cluster'],
+            n_clusters=self.data['loi_data']['n_lines_clusters'],
+            n_lois=n_lois
+        )
+
+        self.data['loi_data']['loi_lines'] = loi_lines
+        self.data['loi_data']['len_loi_lines'] = len_loi_lines
+        if self.auto_save:
+            self.store_structure_data()
+
+    def _random_from_cluster(self, n_lois, frame):
+        # Delegate to loi_detection module
+        loi_lines, len_loi_lines = loi_detection.select_random_from_cluster(
+            lines=self.data['loi_data']['lines'],
+            pos_vectors=self.data['pos_vectors_px'][frame],
+            cluster_labels=self.data['loi_data']['line_cluster'],
+            n_clusters=self.data['loi_data']['n_lines_clusters'],
+            n_lois=n_lois
+        )
+
+        self.data['loi_data']['loi_lines'] = loi_lines
+        self.data['loi_data']['len_loi_lines'] = len_loi_lines
+        if self.auto_save:
+            self.store_structure_data()
+
+    def _random_lois(self, n_lois, frame):
+        # Delegate to loi_detection module
+        loi_lines, len_loi_lines = loi_detection.select_random_lois(
+            lines=self.data['loi_data']['lines'],
+            pos_vectors=self.data['pos_vectors_px'][frame],
+            n_lois=n_lois
+        )
+
+        self.data['loi_data']['loi_lines'] = loi_lines
+        self.data['loi_data']['len_loi_lines'] = len_loi_lines
+        if self.auto_save:
+            self.store_structure_data()
+
+    def create_loi_data(self, line: np.ndarray, linewidth: float = 0.65, order: int = 0,
+                        export_raw: bool = False) -> None:
+        """
+        Extract intensity kymograph along LOI and create LOI file from line.
+
+        Parameters
+        ----------
+        line : np.ndarray
+            Line start and end coordinates ((start_x, start_y), (end_x, end_y))
+            or list of segments [(x0, y0), (x1, y1), (x2, y2), ...]
+        linewidth : float, optional
+            Width of the scan in µm, perpendicular to the line. Defaults to 0.65.
+        order : int, optional
+            The order of the spline interpolation, default is 0 if image.dtype is bool and 1 otherwise.
+            The order has to be in the range 0-5. See `skimage.transform.warp` for details. Defaults to 0.
+        export_raw : bool, optional
+            If True, intensity kymograph along LOI from raw microscopy image is additionally stored. Defaults to False.
+        """
+        if self.metadata.pixelsize is None:
+            raise ValueError("Pixel size is not available. Please provide pixelsize during initialization.")
+        if os.path.exists(self.file_zbands_fast_movie):
+            file_z_bands = self.file_zbands_fast_movie
+        else:
+            file_z_bands = self.file_zbands
+        imgs_sarcomeres = tifffile.imread(file_z_bands)
+        profiles = kymograph.kymograph_movie(imgs_sarcomeres, line, order=order,
+                                        linewidth=int(linewidth / self.metadata.pixelsize))
+        profiles = np.asarray(profiles)
+        if export_raw:
+            imgs_raw = self.image
+            profiles_raw = kymograph.kymograph_movie(imgs_raw, line, order=order,
+                                                linewidth=int(linewidth / self.metadata.pixelsize))
+        else:
+            profiles_raw = None
+
+        # length of line
+        def __calculate_segmented_line_length(line):
+            # Ensure line is a proper numeric numpy array
+            line = np.asarray(line, dtype=np.float64)
+            diffs = np.diff(line, axis=0)
+            lengths = np.sqrt(np.sum(diffs ** 2, axis=1))
+            return np.sum(lengths)
+
+        length = __calculate_segmented_line_length(line) * self.metadata.pixelsize
+
+        loi_data = {'profiles': profiles, 'profiles_raw': profiles_raw,
+                    'line': line, 'linewidth': linewidth, 'length': length}
+        for key, value in loi_data.items():
+            loi_data[key] = np.asarray(value)
+        save_name = os.path.join(self.base_dir,
+                                 f'{line[0][0]}_{line[0][1]}_{line[-1][0]}_{line[-1][1]}_{linewidth}_loi.json')
+        IOUtils.json_serialize(loi_data, save_name)
+
+    def detect_lois(self, frame: int = 0, 
+                    n_lois: int = 4, 
+                    ratio_seeds: float = 0.1, 
+                    persistence: int = 4,
+                    threshold_distance: float = 0.5,
+                    mode: str = 'longest_in_cluster', 
+                    random_seed: Optional[int] = None,
+                    number_lims: Tuple[int, int] = (10, 50), 
+                    length_lims: Tuple[float, float] = (0, 200),
+                    sarcomere_mean_length_lims: Tuple[float, float] = (1, 3),
+                    sarcomere_std_length_lims: Tuple[float, float] = (0, 1),
+                    midline_mean_length_lims: Tuple[float, float] = (0, 50),
+                    midline_std_length_lims: Tuple[float, float] = (0, 50),
+                    midline_min_length_lims: Tuple[float, float] = (0, 50), 
+                    distance_threshold_lois: float = 40,
+                    linkage: str = 'single', 
+                    linewidth: float = 0.65, 
+                    order: int = 0, 
+                    export_raw: bool = False
+                    ) -> None:
+        """
+        Detects Regions of Interest (LOIs) for tracking sarcomere Z-band motion and creates kymographs.
+
+        This method integrates several steps: growing LOIs based on seed vectors, filtering LOIs based on
+        specified criteria, clustering LOIs, fitting lines to LOI clusters, and extracting intensity profiles
+        to generate kymographs.
+
+        Parameters
+        ----------
+        frame : int
+            The index of the frame to select for analysis.
+        n_lois : int
+            Number of LOIs.
+        ratio_seeds : float
+            Ratio of sarcomere vectors to take as seed vectors for initiating LOI growth.
+        persistence : int
+            Persistence parameter influencing line growth direction and termination.
+        threshold_distance : float
+            Maximum distance for nearest neighbor estimation during line growth.
+        mode : str
+            Mode for selecting LOIs from identified clusters.
+            - 'fit_straight_line' fits a straight line to all midline points in the cluster.
+            - 'longest_in_cluster' selects the longest line of each cluster, also allowing curved LOIs.
+            - 'random_from_cluster' selects a random line from each cluster, also allowing curved LOIs.
+            - 'random_line' selects a set of random lines that fulfil the filtering criteria.
+        random_seed : int, optional
+            Random seed for selection of random starting vectors for line growth algorithm, for reproducible outcomes.
+            If None, no random seed is set, and outcomes in every run will differ.
+        number_lims : tuple of int
+            Limits for the number of sarcomeres within an LOI (min, max).
+        length_lims : tuple of float
+            Length limits for LOIs (in µm) (min, max).
+        sarcomere_mean_length_lims : tuple of float
+            Limits for the mean length of sarcomeres within an LOI (min, max).
+        sarcomere_std_length_lims : tuple of float
+            Limits for the standard deviation of sarcomere lengths within an LOI (min, max).
+        midline_mean_length_lims : tuple of float
+            Limits for the mean length of the midline of vectors in LOI (min, max).
+        midline_std_length_lims : tuple of float
+            Limits for the standard deviation of the midline length of vectors in LOI (min, max).
+        midline_min_length_lims : tuple of float
+            Limits for the minimum length of the midline of vectors in LOI (min, max).
+        distance_threshold_lois : float
+            Distance threshold for clustering LOIs. Clusters will not be merged above this threshold.
+        linkage : str
+            Linkage criterion for clustering ('complete', 'average', 'single').
+        linewidth : float
+            Width of the scan line (in µm), perpendicular to the LOIs.
+        order : int
+            Order of spline interpolation for transforming LOIs (range 0-5).
+        export_raw : bool
+            If True, exports raw intensity kymographs along LOIs.
+
+        Returns
+        -------
+        None
+        """
+        if 'pos_vectors' not in self.data:
+            raise ValueError('Sarcomere length and orientation not yet analyzed. Run analyze_sarcomere_vectors first.')
+
+        if self.metadata.n_stack == 1:
+            raise ValueError('LOI detection not possible in single images. '
+                             'Sarcomere motion tracking is only possible in high-speed movies; (t, x, y) stacks.')
+
+        # Grow LOIs based on seed vectors and specified parameters
+        self._grow_lois(frame=frame, ratio_seeds=ratio_seeds, random_seed=random_seed, persistence=persistence,
+                        threshold_distance=threshold_distance)
+        # Filter LOIs based on geometric and morphological criteria
+        self._filter_lois(number_lims=number_lims, length_lims=length_lims,
+                          sarcomere_mean_length_lims=sarcomere_mean_length_lims,
+                          sarcomere_std_length_lims=sarcomere_std_length_lims,
+                          midline_mean_length_lims=midline_mean_length_lims,
+                          midline_std_length_lims=midline_std_length_lims,
+                          midline_min_length_lims=midline_min_length_lims)
+        if mode == 'fit_straight_line' or mode == 'longest_in_cluster' or mode == 'random_from_cluster':
+            # Calculate Hausdorff distance between LOIs and perform clustering
+            self._hausdorff_distance_lois()
+            self._cluster_lois(distance_threshold_lois=distance_threshold_lois, linkage=linkage)
+            # Fit lines to LOIs clusters and select LOIs for analysis
+            if mode == 'fit_straight_line':
+                self._fit_straight_line(add_length=2, n_lois=n_lois)
+            elif mode == 'longest_in_cluster':
+                self._longest_in_cluster(n_lois=n_lois, frame=frame)
+            elif mode == 'random_from_cluster':
+                self._random_from_cluster(n_lois=n_lois, frame=frame)
+        elif mode == 'random_line':
+            self._random_lois(n_lois=n_lois, frame=frame)
+        else:
+            raise ValueError(f'mode {mode} not valid.')
+
+        # extract intensity kymographs profiles and save LOI files
+        for line_i in self.data['loi_data']['loi_lines']:
+            self.create_loi_data(line_i, linewidth=linewidth, order=order, export_raw=export_raw)
+
+    def delete_lois(self):
+        """
+        Delete all LOIs, their associated data files, and their directories.
+        """
+        self.data.pop('loi_data', None)
+
+        loi_files = glob.glob(os.path.join(self.base_dir, '*loi.json'))
+        for loi_file in loi_files:
+            try:
+                # Remove the LOI file
+                os.remove(loi_file)
+
+                # Remove the associated data file
+                data_file = os.path.join(self.data_dir,
+                                         f"{os.path.splitext(os.path.basename(loi_file))[0]}_data.json")
+                if os.path.exists(data_file):
+                    os.remove(data_file)
+
+                # Remove the directory and its contents
+                directory = loi_file[:-len('_loi.json')] + '/'
+                if os.path.exists(directory):
+                    shutil.rmtree(directory)
+
+            except Exception:
+                pass  # Silently continue if an error occurs
+
+    def full_analysis_structure(self, frames='all'):
+        """
+        Analyze sarcomere structure with default parameters at specified frames
+
+        Parameters
+        ----------
+        frames : {'all', int, list, np.ndarray}
+            frames for analysis ('all' for all frames, int for a single frame, list or ndarray for
+            selected frames).
+        """
+        self.auto_save = False
+        self.analyze_cell_mask()
+        self.analyze_z_bands(frames=frames)
+        self.analyze_sarcomere_vectors(frames=frames)
+        self.analyze_myofibrils(frames=frames)
+        self.analyze_sarcomere_domains(frames=frames)
+        if not self.auto_save:
+            self.store_structure_data()
+            self.auto_save = True
