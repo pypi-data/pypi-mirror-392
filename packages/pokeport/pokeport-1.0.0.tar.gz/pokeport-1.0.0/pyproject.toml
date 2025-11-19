@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pokeport"
+version = "1.0.0"
+authors = [
+  { name="Deeshura", email="dukeashura@gmail.com" },
+]
+description = "A Python script that queries SpriteCollab and returns prints a portrait of a Pokémon to the terminal."
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+dependencies = [
+    "aiohttp>=3.11.16",
+    "climage>=0.2.2",
+    "gql~=3.5.2",
+    "Pillow>=11.2.1",
+    "Requests>=2.32.3"
+]
+
+[project.scripts]
+pokeport = "pokeport.__main__:cli"
+
+[project.urls]
+Homepage = "https://github.com/Deeshura/pokeport"
+Issues = "https://github.com/Deeshura/pokeport/issues"
