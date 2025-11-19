@@ -1,0 +1,125 @@
+[tool.poetry]
+name = "metrics-python"
+version = "0.3.1"
+description = "Generic set of metrics for Python applications."
+authors = ["Eirik Martiniussen Sylliaas <eirik@sylliaas.no>"]
+readme = "README.md"
+packages = [{include = "metrics_python", from = "src"}]
+
+[tool.poetry.dependencies]
+python = ">= 3.11, < 3.14"
+
+[tool.poetry.group.dev.dependencies]
+celery = "^5.5.3"
+django = "^5.2.8"
+django-ninja = "^1.5.0"
+fastapi = "^0.121.2"
+gunicorn = "^23.0.0"
+httpx = "^0.28.1"
+mypy = "^1.18.2"
+prometheus-client = "^0.23.1"
+pytest = "^9.0.1"
+pytest-asyncio = "^1.3.0"
+pytest-cov = "^7.0.0"
+pytest-django = "^4.11.1"
+pytest-env = "^1.2.0"
+pytest-mock = "^3.15.1"
+pytest-socket = "^0.7.0"
+pytest-xdist = "^3.8.0"
+ruff = "^0.14.5"
+starlette = "^0.49.3"
+strawberry-graphql = "^0.285.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "migrations",
+]
+
+[tool.ruff.lint]
+select = [
+    # Regular flake8 rules
+    "C", "E", "F", "W",
+    # flake8-bugbear rules
+    "B",
+    # Import sorting rules
+    "I",
+    # Django rules
+    "DJ",
+    # flake8-comprehensions
+    "C4",
+    # Pylint rules
+    "PLC", "PLE", "PLR", "PLW",
+    # Ruff
+    "RUF",
+]
+ignore = [
+    # Import should be at the top-level of a file
+    "PLC0415",
+    # Disable magic value comparison. They're perfectly valid in tests and quite a few
+    # other places in the codebase. It would just be annoying to refactor.
+    "PLR2004",
+    # Too many return statements.
+    "PLR0911",
+    # Too many arguments to function call.
+    "PLR0913",
+    # DJ001 Avoid using null=True on string-based fields
+    "DJ001",
+    # DJ008 Model does not define __str__ method
+    "DJ008",
+]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "parents"
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
+[tool.mypy]
+python_version = "3.13"
+plugins = ["strawberry.ext.mypy_plugin"]
+strict = true
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "*.tests.*",
+]
+ignore_errors = true
+
+[tool.pytest.ini_options]
+testpaths = ["src/metrics_python"]
+# Include captured log messages in system-out in CI report file
+junit_logging = "system-out"
+markers = [ ]
+# --- pytest-django settings
+DJANGO_SETTINGS_MODULE = "metrics_python.django.tests.settings"
+# --- pytest-env settings
+env = ["ENV_PATH=.env.test"]
+# --- pytest-asyncio settings
+asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.coverage.run]
+branch = true
+source = [ "metrics_python" ]
+omit = [
+    "*/tests/*",
+    "*/migrations/*",
+]
+
+[tool.coverage.report]
+fail_under = 1
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+]
+
+[tool.coverage.html]
+directory = "coverage"
