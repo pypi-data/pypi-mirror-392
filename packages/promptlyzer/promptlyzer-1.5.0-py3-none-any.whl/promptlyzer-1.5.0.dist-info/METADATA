@@ -1,0 +1,447 @@
+Metadata-Version: 2.1
+Name: promptlyzer
+Version: 1.5.0
+Summary: Official Python SDK for Promptlyzer - Simple LLM inference with smart deployment routing
+Home-page: https://promptlyzer.com
+Author: Promptlyzer
+Author-email: contact@promptlyzer.com
+License: UNKNOWN
+Project-URL: Homepage, https://promptlyzer.com
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENCE
+Requires-Dist: requests (>=2.31.0)
+Requires-Dist: aiohttp (>=3.9.0)
+Requires-Dist: openai (>=1.0.0)
+Requires-Dist: anthropic (>=0.15.0)
+Requires-Dist: nest-asyncio (>=1.5.6)
+
+# Promptlyzer Python SDK
+
+Official Python client for Promptlyzer - Smart LLM routing and cost optimization.
+
+[![PyPI version](https://img.shields.io/badge/pypi-v1.5.0-blue)](https://pypi.org/project/promptlyzer/)
+[![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+---
+
+## What is Promptlyzer?
+
+Promptlyzer is a production-ready LLM infrastructure layer that provides:
+- Smart model routing with complexity-based deployment strategies
+- Multi-provider support (OpenAI, Anthropic, Together AI, SiliconFlow)
+- Automatic cost optimization and credit management
+- Prompt management with versioning and caching
+- Real-time analytics and monitoring
+
+---
+
+## Installation
+
+```bash
+pip install promptlyzer
+
+# Upgrade to latest
+pip install --upgrade promptlyzer
+```
+
+**Requirements:**
+- Python 3.7+
+- Promptlyzer API key
+
+---
+
+## Quick Start
+
+### Step 1: Setup Your Account
+
+1. **Sign up** at [promptlyzer.com](https://promptlyzer.com)
+2. **Create a team** (or use the default team created for you)
+3. **Create a project** to organize your deployments
+4. **Get your API key** from Settings → API Keys
+
+### Step 2: Install and Initialize
+
+```bash
+pip install promptlyzer
+
+# Set environment variable
+export PROMPTLYZER_API_KEY="pk_live_YOUR_API_KEY"
+```
+
+### Step 3: Create a Deployment
+
+**Why use deployments?**
+- AI-powered smart routing across multiple model tiers
+- Automatic cost optimization based on request complexity
+- Real-time monitoring and analytics
+- No code changes needed when switching models
+
+**Create a deployment from your dashboard:**
+1. Go to Deployments page in your project
+2. Click "Create Deployment"
+3. Configure your 3-tier routing:
+   - **Tier 1** (Fast & Cheap): e.g., gpt-4o-mini - Simple queries
+   - **Tier 2** (Balanced): e.g., gpt-4o - Standard requests
+   - **Tier 3** (Premium): e.g., claude-sonnet-4-5 - Complex tasks
+4. Copy your deployment ID
+
+**Smart Routing Engine:**
+- Uses AI to analyze prompt complexity (0-100 score)
+- Considers task type and context length
+- Routes to optimal tier automatically
+
+### Step 4: Use Deployment for Inference
+
+```python
+from promptlyzer import PromptlyzerClient
+
+# Initialize client
+client = PromptlyzerClient(api_key="pk_live_YOUR_API_KEY")
+
+# Make inference request through deployment
+response = client.deployments.infer(
+    deployment_id="dep_abc123",
+    prompt="Explain quantum computing in simple terms",
+    task_type="customer_agent",  # Optional: helps routing decision
+    context="Previous conversation..."  # Optional: chat history or documents
+)
+
+# Response contains
+print(f"Response: {response['content']}")
+print(f"Routing: {response['routing']}")
+# {
+#   'selected_tier': 'tier_2',
+#   'model_id': 'gpt-4o',
+#   'complexity_score': 65,
+#   'confidence': 0.88,
+#   'reasoning': 'Moderate complexity...',
+#   'llm_analysis_used': True
+# }
+print(f"Cost: ${response['cost_usd']:.6f}")
+print(f"Latency: {response['latency_ms']}ms")
+print(f"Tokens: {response['tokens_used']}")
+```
+
+**Smart Routing Logic (AI-Powered):**
+- Analyzes prompt + context + task type
+- Calculates complexity score (0-100)
+- Routes to appropriate tier:
+  - **Tier 1** (0-40): Simple FAQ, quick responses
+  - **Tier 2** (40-70): Standard queries, moderate context
+  - **Tier 3** (70-100): Complex reasoning, large context
+
+**Using Your Own API Keys (No Credits):**
+```python
+response = client.deployments.infer(
+    deployment_id="dep_abc123",
+    prompt="Your prompt here",
+    provider_api_key="sk-..."  # Your OpenAI/Anthropic key
+)
+```
+
+### View Deployment Logs
+
+```python
+# Get all logs for a deployment
+logs = client.deployments.get_logs(
+    deployment_id="dep_abc123",
+    status="success",  # or "error"
+    limit=50
+)
+
+for log in logs:
+    print(f"{log['timestamp']}: {log['model_id']} - ${log['cost_usd']:.6f}")
+```
+
+### Alternative: Direct Inference (Without Deployment)
+
+Use the same client for direct inference:
+
+```python
+# Simple inference using credits (no deployment)
+response = client.inference.infer(
+    prompt="What is machine learning?",
+    model="gpt-4o-mini"
+)
+
+print(response.content)
+print(f"Cost: ${response.usage.cost_usd:.6f}")
+```
+
+**One client, multiple features:**
+- `client.deployments.infer()` → Smart routing with deployments
+- `client.inference.infer()` → Direct model inference
+- `client.get_prompt()` → Prompt management
+- `client.billing.get_balance()` → Credit management
+
+---
+
+## Supported Models
+
+### OpenAI
+- `gpt-5`
+- `gpt-4o` (vision supported)
+- `gpt-4o-mini`
+- `gpt-3.5-turbo`
+
+### Anthropic
+- `claude-3-5-sonnet-20241022` (vision supported)
+- `claude-3-haiku-20240307`
+- `claude-3-opus-20240229`
+
+### Together AI
+
+**Llama Models:**
+- `llama-3.3-70b-turbo`
+- `llama-3.3-70b-instruct-turbo`
+- `llama-3.1-8b-turbo`
+- `llama-3.2-3b`
+- `llama-4-scout` (vision supported)
+- `llama-4-maverick` (vision supported)
+
+**Qwen Models:**
+- `qwen-2.5-72b`
+- `qwen-2.5-7b`
+- `qwen-qwq-32b`
+- `qwen3-235b`
+
+**DeepSeek Models:**
+- `deepseek-v3`
+- `deepseek-v3.1`
+- `deepseek-r1-0528` (reasoning model)
+- `deepseek-r1-distill-llama-70b`
+- `deepseek-r1-distill-qwen-14b`
+- `deepseek-r1-distill-qwen-1.5b`
+
+**Other Models:**
+- `mixtral-8x7b`
+- `kimi-k2-instruct`
+- `openai-gpt-oss-120b`
+- `openai-gpt-oss-20b`
+
+### SiliconFlow
+
+**Vision Models:**
+- `zai-org/GLM-4.5V`
+- `stepfun-ai/step3`
+- `THUDM/GLM-4.1V-9B-Thinking` (thinking model)
+- `Qwen/Qwen2.5-VL-72B-Instruct`
+- `Qwen/Qwen2.5-VL-32B-Instruct`
+- `Qwen/Qwen2.5-VL-7B-Instruct`
+- `deepseek-ai/deepseek-vl2`
+
+**Text Models:**
+- `deepseek-ai/DeepSeek-V3.1`
+- `deepseek-ai/DeepSeek-R1` (reasoning model)
+- `deepseek-ai/DeepSeek-R1-Distill-Qwen-32B`
+- `zai-org/GLM-4.5`
+- `zai-org/GLM-4.5-Air`
+- `Qwen/Qwen3-235B-A22B-Instruct-2507`
+- `Qwen/Qwen3-235B-A22B-Thinking-2507` (thinking model)
+- `moonshotai/Kimi-K2-Instruct`
+- `tencent/Hunyuan-A13B-Instruct`
+- `Qwen/QwQ-32B`
+- `Qwen/Qwen2.5-72B-Instruct`
+- `Qwen/Qwen2.5-32B-Instruct`
+- `Qwen/Qwen2.5-7B-Instruct`
+- `meta-llama/Meta-Llama-3.1-8B-Instruct`
+
+**View pricing and details:** [Model Explorer](https://promptlyzer.com/app/model-explorer)
+
+---
+
+## Authentication
+
+### Method 1: Environment Variable (Recommended)
+
+```bash
+export PROMPTLYZER_API_KEY="pk_live_your_api_key"
+```
+
+```python
+from promptlyzer import PromptlyzerClient
+client = PromptlyzerClient()  # Auto-loads from environment
+```
+
+### Method 2: Direct Initialization
+
+```python
+client = PromptlyzerClient(api_key="pk_live_your_api_key")
+```
+
+### Method 3: Use Your Own Provider Keys
+
+```python
+# Use your own OpenAI/Anthropic keys instead of credits
+client.inference.add_external_api_key("openai", "sk-...")
+client.inference.add_external_api_key("anthropic", "sk-ant-...")
+client.inference.configure_mode(use_credits=False)
+```
+
+---
+
+## Billing & Credits
+
+### Check Balance
+
+```python
+balance = client.billing.get_balance()
+print(f"Available: ${balance['available']:.2f}")
+print(f"Used: ${balance['used']:.2f}")
+```
+
+### Get Usage Analytics
+
+```python
+analytics = client.billing.get_analytics(days=30)
+print(f"Total cost: ${analytics['total_cost']:.2f}")
+print(f"Total requests: {analytics['request_count']}")
+```
+
+---
+
+## Prompt Management
+
+### Get Prompt
+
+```python
+prompt = client.get_prompt(
+    project_id="proj_123",
+    prompt_name="customer_support",
+    environment="dev"  # or "staging", "prod"
+)
+
+print(prompt['content'])
+```
+
+### Use Prompt in Inference
+
+```python
+response = client.inference.infer(
+    prompt=prompt['content'],
+    model="claude-3-5-sonnet"
+)
+```
+
+Prompts are cached for 5 minutes to reduce API calls.
+
+---
+
+## Advanced Features
+
+### Async Inference
+
+```python
+import asyncio
+
+async def main():
+    response = await client.inference.infer_async(
+        prompt="Hello world",
+        model="gpt-4o-mini"
+    )
+    print(response.content)
+
+asyncio.run(main())
+```
+
+### Streaming Responses
+
+```python
+for chunk in client.inference.infer_stream(
+    prompt="Write a story",
+    model="gpt-4o"
+):
+    print(chunk.content, end="", flush=True)
+```
+
+### Error Handling
+
+```python
+from promptlyzer.exceptions import (
+    AuthenticationError,
+    InsufficientCreditsError,
+    RateLimitError,
+    InferenceError
+)
+
+try:
+    response = client.inference.infer(prompt, model)
+except AuthenticationError:
+    print("Invalid API key")
+except InsufficientCreditsError as e:
+    print(f"Out of credits: {e.available_credits}")
+except RateLimitError as e:
+    print(f"Rate limited. Retry after: {e.retry_after}s")
+except InferenceError as e:
+    print(f"Inference failed: {e.message}")
+```
+
+---
+
+## Configuration
+
+### Unified Client
+
+```python
+from promptlyzer import PromptlyzerClient
+
+client = PromptlyzerClient(
+    api_key="pk_live_YOUR_API_KEY",
+    environment="dev"  # Options: "dev", "staging", "prod" (default: "dev")
+)
+```
+
+**One client for everything:**
+- `client.deployments.*` → Deployment inference with smart routing
+- `client.inference.*` → Direct model inference
+- `client.get_prompt()` → Prompt management across environments
+- `client.billing.*` → Credit and usage management
+
+**Internal Settings** (auto-configured):
+- Prompt cache TTL: 5 minutes
+- Connection pool size: 10
+- Request timeout: 10s (quick), 60s (inference)
+- Retry strategy: 3 attempts with exponential backoff
+
+---
+
+## Documentation
+
+Full documentation: [DOCUMENTATION.md](DOCUMENTATION.md)
+
+Topics covered:
+- Deployment configuration and usage
+- Advanced inference options
+- Prompt management and versioning
+- Cost analytics and monitoring
+- Production best practices
+
+---
+
+## Support
+
+- Documentation: [docs.promptlyzer.com](https://docs.promptlyzer.com)
+- Dashboard: [promptlyzer.com](https://promptlyzer.com)
+- Email: contact@promptlyzer.com
+
+---
+
+## License
+
+MIT License - See [LICENSE](LICENSE) for details.
+
+---
+
