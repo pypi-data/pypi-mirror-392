@@ -1,0 +1,149 @@
+## array_repr_shape
+
+A tiny utility that patches `torch.Tensor.__repr__` and `numpy.ndarray.__repr__` so that every printed tensor/ndarray shows its shape.
+
+一个很小的工具，用来给 `torch.Tensor.__repr__` 和 `numpy.ndarray.__repr__` 打补丁，让你在 `print(tensor)` / `print(array)` 时一眼看到张量 / 数组的形状，在 VS Code 的 Debugger、REPL、Jupyter 中都更方便调试。
+
+示例输出（PyTorch）：
+
+```text
+{Tensor:(2, 3)} tensor([[...]])
+```
+
+示例输出（NumPy）：
+
+```text
+{ndarray:(2, 3)} array([[...]])
+```
+
+也就是说，原本的输出前面会多一段 `{Tensor:(shape)}` 或 `{ndarray:(shape)}`。
+
+---
+
+## Features / 特性
+
+- ✅ **Torch + NumPy 支持**：同时支持 `torch.Tensor` 和 `numpy.ndarray` 的 `__repr__` 形状前缀。
+- ✅ **Lazy loading / 惰性加载**：可以在导入 `torch` / `numpy` 之前或之后调用，首次导入对应模块时自动打补丁。
+- ✅ **Idempotent / 幂等**：多次调用 `enable_torch_shape()` / `enable_numpy_shape()` 不会重复打补丁。
+- ✅ **Per-module disable / 独立关闭**：通过环境变量分别控制 Torch 和 NumPy 的补丁。
+- ✅ **Fail-safe / 安全兜底**：如果补丁失败，会自动忽略错误，不影响你的正常代码。
+
+---
+
+## Installation / 安装
+
+```bash
+pip install array_repr_shape
+```
+
+请确保你已经在环境中安装了 PyTorch 与 / 或 NumPy（如 `torch`, `torchvision`, `numpy` 等），本包只对已有的库做输出增强。
+
+---
+
+## Quick Start / 快速上手
+
+### PyTorch
+
+在任何需要的地方调用一次 `enable_torch_shape()` 即可：
+
+```python
+from array_repr_shape import enable_torch_shape
+
+enable_torch_shape()
+
+import torch
+
+x = torch.randn(2, 3)
+print(x)
+```
+
+典型输出类似：
+
+```text
+{Tensor:(2, 3)} tensor([[ 0.1234, -0.5678, ...],
+                        [...,      ...,      ...]])
+```
+
+你也可以在已经导入 `torch` 之后调用，效果相同。
+
+### NumPy
+
+开启 NumPy 的 shape 前缀：
+
+```python
+from array_repr_shape import enable_numpy_shape
+
+enable_numpy_shape()
+
+import numpy as np
+
+a = np.zeros((2, 3))
+print(a)
+```
+
+典型输出类似：
+
+```text
+{ndarray:(2, 3)} array([[0., 0., 0.],
+                        [0., 0., 0.]])
+```
+
+### Torch + NumPy 一起用
+
+```python
+from array_repr_shape import enable_torch_shape, enable_numpy_shape
+
+enable_torch_shape()
+enable_numpy_shape()
+
+import torch
+import numpy as np
+
+print(torch.ones(2, 2))
+print(np.ones((2, 2)))
+```
+
+---
+
+## Disable via env / 环境变量关闭
+
+如果某些场景下你不想改写 `__repr__`，可以通过环境变量分别一键关闭：
+
+- 关闭 Torch 补丁：
+
+  ```bash
+  DISABLE_TORCH_REPR_SHAPE=1 python your_script.py
+  ```
+- 关闭 NumPy 补丁：
+
+  ```bash
+  DISABLE_NUMPY_REPR_SHAPE=1 python your_script.py
+  ```
+
+当环境变量为 `1` 时，对应的 `enable_torch_shape()` / `enable_numpy_shape()` 会直接返回，不做任何修改。
+
+---
+
+## How it works / 实现原理
+
+- 通过一个轻量的 import hook 统一管理多个模块的懒加载补丁：
+  - 如果模块（如 `torch`、`numpy`）已经在 `sys.modules` 中，立即打补丁。
+  - 如果还未导入，则登记到 pending 列表中，首次导入时自动执行补丁。
+  - 当所有待处理模块都已补丁完成后，恢复原始的 `builtins.__import__`，不长期影响 import 行为。
+- 对 `torch.Tensor.__repr__` 的新实现：在原有输出前加上 `{Tensor:(shape)}`，形如 `{Tensor:(2, 3, 4)}`。
+- 对 `numpy.ndarray.__repr__` 的新实现：在原有输出前加上 `{ndarray:(shape)}`，形如 `{ndarray:(2, 3, 4)}`。
+- 通过内部标记属性 `__repr__adds_shape__` 确保不会重复打补丁。
+
+---
+
+## Use cases / 适用场景
+
+- 调试深度学习模型时，快速区分多个 tensor / ndarray 的尺寸。
+- 在 VS Code Debugger、REPL、Jupyter Notebook 中自动显示 shape，减少 `print(x.shape)`。
+- 在复杂数据管道中追踪中间结果的维度变化。
+
+---
+
+## Development / 开发信息
+
+欢迎在 PyPI 上使用 `array_repr_shape` 并在实际项目中反馈问题或改进建议。
