@@ -1,0 +1,53 @@
+# src/auto_pytest_generator/templates/pytest_template.jinja2
+
+# Auto-generated pytest case. Edit generated_tests/config.py to change base URLs or tokens.
+
+import requests
+import json
+from generated_tests.config import BASE_URLS, AUTH_TOKENS
+
+def {{ test_func_name }}():
+    """
+    自动生成的冒烟测试用例
+    """
+    BASE = BASE_URLS["{{ base_key }}"]
+    url = BASE + "{{ path_query }}"
+    
+    # 模板使用传入的 base_netloc（例如 "1.2.3.4:9003"）作为 Host header，优先于录制时的 Host
+    host_from_base = "{{ base_netloc }}"
+    
+    # 优先使用 config 中的 token（AUTH_TOKENS），没有则使用录制时捕获的 header
+    auth_from_capture = "{{ headers.get('Authorization', '') }}"
+    auth = AUTH_TOKENS.get("{{ base_key }}", auth_from_capture)
+
+    headers = {
+        "Host": host_from_base,
+        "Proxy-Connection": "{{ headers.get('Proxy-Connection', '') }}",
+        "Authorization": auth,
+        "User-Agent": "{{ headers.get('User-Agent', '') }}",
+        "Accept": "{{ headers.get('Accept', '') }}",
+        "Content-Language": "{{ headers.get('Content-Language', '') }}",
+        "Referer": "{{ headers.get('Referer', '') }}",
+        "Accept-Encoding": "{{ headers.get('Accept-Encoding', '') }}",
+        "Accept-Language": "{{ headers.get('Accept-Language', '') }}",
+        "Cookie": "{{ headers.get('Cookie', '') }}",
+    }
+    
+    # 移除空值 header
+    headers = {k: v for k, v in headers.items() if v}
+
+    response = requests.request("get", url, headers=headers)
+    
+    # 断言状态码
+    assert response.status_code == {{ response_status }}
+    
+    # 断言响应体
+    {% if is_json_response %}
+    # json 模式：直接以 Python 字面量写出期望结果
+    expected_response = {{ response_data_py }}
+    assert response.json() == expected_response
+    {% else %}
+    # text 模式或解析失败：按原始文本断言
+    expected_text = {{ response_data_text | tojson }}
+    assert response.text == expected_text
+    {% endif %}

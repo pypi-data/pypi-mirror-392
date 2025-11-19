@@ -1,0 +1,28 @@
+[project]
+name = "auto-pytest-generator"
+version = "0.1.0"
+authors = [
+    {name = "Chen Jianpeng", email = "chenjianpeng97@outlook.com"}
+]
+license = {text = "MIT"}
+description = "Generate pytest tests from captured fetch/XHR traffic via mitmproxy"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "mitmproxy",
+    "Jinja2",
+    "click",
+]
+
+[project.scripts]
+apg = "auto_pytest_generator.main:cli"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"auto_pytest_generator" = ["templates/*.jinja2"]
