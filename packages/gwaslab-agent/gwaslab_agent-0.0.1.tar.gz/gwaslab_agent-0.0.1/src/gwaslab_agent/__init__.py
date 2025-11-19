@@ -1,0 +1,1 @@
+from gwaslab_agent.sumstat_agent import SmartSumstats
