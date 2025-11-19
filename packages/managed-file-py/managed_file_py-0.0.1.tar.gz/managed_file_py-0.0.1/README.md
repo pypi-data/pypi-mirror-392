@@ -1,0 +1,122 @@
+# 📦 managed-file-py
+A lightweight Python utility library for loading, exporting, duplicating, and managing dataset files.  
+Supports CSV & Excel loading, safe filename generation, exporting with clean directory structure, and CLI tools.
+
+---
+
+## 🚀 Features
+
+- Load datasets from **CSV** and **Excel (.xlsx, .xls)**
+- Export pandas DataFrames to **CSV**
+- Auto-generate safe filenames (`safe_filename`)
+- Duplicate files with customizable count
+- Auto-create output directories
+- Clean **CLI tools**:
+  - `duplicate-file`
+  - `export-file`
+- Full **pytest** test suite
+- Minimal & clean dependencies
+
+---
+
+## 🧰 Requirements
+
+| Component | Version |
+|----------|---------|
+| **Python** | 3.9 – 3.12 |
+| **pandas** | Latest stable |
+
+Tested on:
+
+- Python 3.9  
+- Python 3.10  
+- Python 3.11  
+- Python 3.12
+
+---
+
+## 📥 Installation
+
+### Install from PyPI
+
+```bash
+pip install tools-managed-file-py
+```
+
+### Install from GitHub
+```bash
+pip install git+https://github.com/madamroger007/python-tools.git
+```
+
+### Local Development
+```bash
+pip install -e .
+```
+
+
+## 📘 Usage
+### 🔹Load a Dataset
+```bash
+from tools_managed_file.exporter import load_dataset
+
+df = load_dataset("data.csv")
+print(df)
+
+```
+
+
+### 🔹Export a Dataset to CSV
+```bash
+from tools_managed_file.exporter import export_dataset
+import pandas as pd
+
+df = pd.DataFrame([
+    {"name": "Adam", "age": 20},
+    {"name": "Sarah", "age": 22}
+])
+
+output = export_dataset(df, "outputs", "student-data")
+print("Exported to:", output)
+
+```
+
+Generates:
+```bash
+outputs/student-data.csv
+```
+
+### 🔹Duplicate a File
+```bash
+duplicate-file input.csv --count 5
+```
+
+Creates:
+```bash
+input_copy_1.csv
+input_copy_2.csv
+input_copy_3.csv
+input_copy_4.csv
+input_copy_5.csv
+```
+
+## 🔧 CLI Commands
+### ✔ Exporting
+```bash
+export-file input.xlsx --output out --name cleaned
+```
+
+### ✔ Exporting
+```bash
+duplicate-file report.pdf --count 3
+```
+
+## 🔧 CLI Commands
+This project follows Semantic Versioning (SemVer).
+
+0.1.0 — Initial Release
+- Dataset loader (CSV & Excel)
+- CSV exporter
+- Filename sanitization
+- File duplicator
+- CLI utilities
+- Full pytest suite

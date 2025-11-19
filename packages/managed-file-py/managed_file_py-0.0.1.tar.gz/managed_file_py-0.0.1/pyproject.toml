@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "managed-file-py"
+version = "0.0.1"
+description = "A utility library for managing and processing files."
+authors = [
+    { name="Madamroger", email="adamsetiadijr07@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">=3.9"
+
+dependencies = [
+    "pandas",
+]
+
+[tool.setuptools]
+packages = [
+    "tools_managed_file",
+]
+
+[project.scripts]
+duplicate-file = "cli.duplicate_cli:main"
+export-file = "cli.exporter_cli:main"
+
+[tool.pytest.ini_options]
+pythonpath = [
+    ".",                # Root project
+    "tools_managed_file"
+]
+testpaths = [
+    "tests",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+]
