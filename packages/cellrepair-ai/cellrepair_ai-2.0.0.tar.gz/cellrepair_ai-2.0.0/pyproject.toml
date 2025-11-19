@@ -1,0 +1,101 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel>=0.41.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cellrepair-ai"
+version = "2.0.0"
+description = "CellRepair.AI - Evolutionäres KI-Framework mit 12 Genie-Level-Features"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "PROPRIETARY"}
+authors = [
+    {name = "Oliver Winkel", email = "ai@cellrepair.ai"}
+]
+keywords = [
+    "ai",
+    "artificial-intelligence",
+    "genie-level",
+    "evolutionary-framework",
+    "self-healing",
+    "predictive-load-indexing",
+    "empathy-matrix",
+    "meta-proxy-bus",
+    "neural-autodiagnosis",
+    "situation-synthesis",
+    "meta-reflection",
+    "agent-resonance",
+    "antiproblem-generator",
+    "dynamic-subagents",
+    "cellrepair",
+    "aurora-genesis",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Healthcare Industry",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: Other/Proprietary License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "flask>=3.0.0",
+    "psutil>=5.9.0",
+    "requests>=2.31.0",
+    "stripe>=7.0.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.5.0",
+]
+all = [
+    "openai>=1.0.0",
+    "anthropic>=0.7.0",
+    "google-generativeai>=0.3.0",
+    "perplexity>=0.1.0",
+]
+
+[project.urls]
+Homepage = "https://cellrepair.ai"
+Documentation = "https://cellrepair.ai/docs"
+API = "https://cellrepair.ai/api/docs"
+GitHub = "https://github.com/cellrepair/cellrepair-ai"
+Issues = "https://github.com/cellrepair/cellrepair-ai/issues"
+Pricing = "https://cellrepair.ai/pricing"
+
+# Entry-Point entfernt wegen Emoji im Dateinamen (nicht kompatibel mit Entry-Point-Spec)
+# Stattdessen kann das Modul direkt mit python3 -m importiert werden
+# [project.scripts]
+# cellrepair-ai = "💎_ULTIMATE_DOWNLOAD_TRACKER:main"
+
+[tool.setuptools]
+packages = ["cellrepair_ai"]
+
+[tool.black]
+line-length = 100
+target-version = ['py39', 'py310', 'py311', 'py312']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
