@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dialektos"
+version = "0.0.0"
+description = "Conversational AI"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "litellm~=1.55",
+]
+authors = [{name = "Charalampos Mitsakis", email = "c@mitsakis.org"}]
+
+[project.scripts]
+dialektos = "dialektos:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/dialektos"]
+
+[tool.hatch.build]
+only-packages = true
