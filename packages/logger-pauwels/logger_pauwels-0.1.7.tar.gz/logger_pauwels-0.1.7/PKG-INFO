@@ -1,0 +1,139 @@
+Metadata-Version: 2.4
+Name: logger-pauwels
+Version: 0.1.7
+Summary: Simple logger to have fancy logs :D
+Author-email: Tom Pauwels <tom.j.pauwels@gmail.com>
+License: MIT License
+        
+        Copyright (c) 2025 Ton Nom
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Project-URL: Homepage, https://github.com/PauwelsTom/Python-Logger
+Project-URL: Repository, https://github.com/PauwelsTom/Python-Logger
+Project-URL: Issues, https://github.com/PauwelsTom/Python-Logger/issues
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: license-file
+
+# Python-Logger
+Logger for python that can write into stdout, create a log file at the end.
+
+## Usage
+
+### Colors
+
+There are multiple colors available, you can use them using Colors.<COLOR>
+
+
+### Types of log
+
+- log, normal logs
+- warn
+- error
+- debug, can be disabled with parameter self.debug (`debug=False` in constructor)
+
+- success
+- failed
+
+
+### Layout functions
+
+- `section`, create a separation to arrange your logs
+
+```
+................................. SECTION .................................
+```
+
+- `cadre`, create a rectangle with text inside
+
+```
+################################################################################
+#                                                                              #
+#                                                                              #
+#                                    CADRE                                     #
+#                                                                              #
+#                                                                              #
+################################################################################
+```
+
+
+### Macros
+
+- `init`, Create a cadre and start timer
+- `end`, stop timer, create a last log with total duration and save into file
+
+
+### Waiters
+
+There are some waiters to track your process progress:
+
+- `waiting_time`: print the running time of a process
+
+```
+My message 4h 2min 42sec
+```
+
+- `waiting_animation`: print an animated wheel next to a custom message for a duration
+
+```
+[/] My message
+```
+
+- `progress_bar`: display a loading bar with a given advencement (ex: 0.42 stands for 42%)
+
+```
+[11%] [■■■■■.............................................]
+```
+
+
+### Example
+
+Here is a code exampleto show posibilities
+
+```
+l = Logger(debug=False)
+l.init(msg="Logger Pauwels demonstration")
+l.log("Testing log system")
+l.section("Progress bar", char=".", color=Colors.YELLOW)
+
+steps = 200
+duration = 5    # In seconds
+for i in range(steps):
+    l.progress_bar(i/steps, color=Colors.CYAN)
+    time.sleep(duration / steps)
+
+l.success("Loading bar: OK")
+
+l.cadre("Waiting time", color=Colors.PINK)
+
+for i in range(steps):
+    elapsed_time = duration*i/steps + 60
+    l.waiting_time(elapsed_time)
+    time.sleep(duration / steps)
+
+l.success("Waiting ended")
+
+l.cadre("Thanks for using me :D", color=Colors.RED)
+
+l.print_rainbow("For any problem, contact me: tom.j.pauwels@gmail.com")
+
+l.end()
+```
