@@ -1,0 +1,31 @@
+# Tinybeans Downloader Configuration
+# Copy this file to config.yaml and fill in your details
+
+# login credentials
+auth:
+  email: "your-email@example.com"
+  password: "your-password"
+
+# https://tinybeans.com/entries/1234567/2025/8/2
+# tinybeans account ID          ^^^^^^^
+tinybeans_id: "1234567"
+
+# download settings
+download:
+  output_dir: "downloads"           # relative to this repo root
+  original_only: true               # original quality images
+  skip_existing: true               # pass over existing files
+  ignore_thumbnails: true           # ignore video thumbnail images
+  filename_pattern: "tinybeans-{date}_{time}.jpg"  # {date} = YYYY-MM-DD, {time} = HH-MM-SS
+  fix_timestamps: true              # correct image filenames with exif timestamps
+  # videos: false                   # TODO
+
+dates:
+  from_last_date: true              # download from last date (for periodic grabs or systemd timer)
+  single_date: null                 # YYYY-MM-DD format
+  after: null                       # e.g., "2025-06-01"
+  before: null                      # e.g., "2025-08-31"
+
+logging:
+  level: "info"
+  file: "/var/lib/tinybeans-sync/logs/tinybeans-sync.log"

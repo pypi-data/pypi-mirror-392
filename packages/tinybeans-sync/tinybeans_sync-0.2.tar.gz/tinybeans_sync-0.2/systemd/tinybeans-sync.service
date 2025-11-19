@@ -1,0 +1,15 @@
+[Unit]
+Description=Sync Tinybeans photos
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=__user__
+Group=__group__
+Environment="PATH=/home/__user__/.local/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/usr/bin/env tinybeans-sync --data /var/lib/tinybeans-sync --config /var/lib/tinybeans-sync/config.yaml --from-last-date --daemon
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
