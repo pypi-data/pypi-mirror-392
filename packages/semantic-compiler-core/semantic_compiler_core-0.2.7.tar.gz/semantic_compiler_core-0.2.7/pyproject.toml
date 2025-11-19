@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "semantic-compiler-core"
+version = "0.2.7"
+description = "Deterministic semantic compiler core: SIR → RLang → ProofBundle with stable hashes."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+  { name = "Kushagra Bhatnagar", email = "kushagra.bhatnagar@example.com" }
+]
+license = { text = "MIT" }
+keywords = ["compiler", "deterministic", "proofs", "hashes", "rlang", "bor"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+]
+
+dependencies = [
+  "rlang-compiler>=0.2.4",
+]
+
+[project.urls]
+Homepage = "https://github.com/kushagrab21/Compiler_new"
+Source = "https://github.com/kushagrab21/Compiler_new"
+Issues = "https://github.com/kushagrab21/Compiler_new/issues"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["semantic_compiler_core*"]
+
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+# LLM-related entry points removed - they are now in nl_frontend package
