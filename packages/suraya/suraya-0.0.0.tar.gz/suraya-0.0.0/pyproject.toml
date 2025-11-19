@@ -1,0 +1,127 @@
+# Python project definition.
+# Derived from https://peps.python.org/pep-0621/
+
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [
+  "setuptools>=42", # At least v42 of setuptools required.
+  "versioningit",
+]
+
+[project]
+name = "suraya"
+description = "Suraya - a blend of Grafana and Marimo, with flavours of AMG and PMM."
+readme = "README.md"
+keywords = [
+  "amg",
+  "cratedb",
+  "dash",
+  "dashboard",
+  "general purpose",
+  "grafana",
+  "kotori",
+  "library",
+  "marimo",
+  "mixed",
+  "plotly",
+  "pmm",
+  "pyviz",
+  "react",
+]
+license = { text = "AGPL 3, EUPL 1.2" }
+authors = [
+  { name = "Andreas Motl", email = "andreas.motl@panodata.org" },
+]
+requires-python = ">=3.11"
+classifiers = [
+  "Development Status :: 1 - Planning",
+  "Environment :: Console",
+  "Intended Audience :: Customer Service",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Education",
+  "Intended Audience :: Information Technology",
+  "Intended Audience :: Telecommunications Industry",
+  "License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)",
+  "License :: OSI Approved :: GNU Affero General Public License v3",
+  "Operating System :: MacOS :: MacOS X",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: Unix",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Communications",
+  "Topic :: Education",
+  "Topic :: Scientific/Engineering :: GIS",
+  "Topic :: Scientific/Engineering :: Human Machine Interfaces",
+  "Topic :: Scientific/Engineering :: Information Analysis",
+  "Topic :: Scientific/Engineering :: Interface Engine/Protocol Translator",
+  "Topic :: Scientific/Engineering :: Visualization",
+  "Topic :: Software Development :: Libraries",
+  "Topic :: Text Processing",
+  "Topic :: Utilities",
+]
+
+dynamic = [
+  "version",
+]
+
+dependencies = [
+  "attrs",
+  "click",
+  "hishel<0.2",
+  "munch",
+  "pueblo",
+  "pypdl",
+  "python-on-whales",
+]
+optional-dependencies.develop = [
+  "pueblo[develop]",
+]
+optional-dependencies.web = [
+   "duckdb",
+   "fastapi",
+   "jinja2",
+   "marimo",
+   "pandas==2.2.3",
+   "starlette",
+   "requests",
+   "pydantic",
+   "sqlalchemy-cratedb",
+   "vega-datasets==0.9.0",
+]
+optional-dependencies.test = [
+  "pueblo[testing]",
+]
+
+[tool.ruff]
+line-length = 90
+
+lint.select = [
+  # Builtins
+  "A",
+  # Bugbear
+  "B",
+  # comprehensions
+  "C4",
+  # Pycodestyle
+  "E",
+  # eradicate
+  "ERA",
+  # Pyflakes
+  "F",
+  # isort
+  "I",
+  # pandas-vet
+  "PD",
+  # return
+  "RET",
+  # Bandit
+  "S",
+  # print
+  "T20",
+  "W",
+  # flake8-2020
+  "YTT",
+]
