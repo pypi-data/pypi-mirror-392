@@ -1,0 +1,24 @@
+[THIS-865] 📊Allow updating index and constraints (#1445)
+
+# Description
+
+To achieve modifying indexes and constraints I do 2 steps.
+
+1. I update the plan step in the SchemaDeployer to change modified
+index/constrains as a removal + addition,
+[ref](https://github.com/cognitedata/neat/pull/1445/files#diff-7405e66a129630712b1d0dbaa902b40d7dd3b3619da87bb3a3eb3f8f7066637bR235).
+2. I update the consolidate plan to not consolidate removals if they are
+additions for index/constraints,
+[ref](https://github.com/cognitedata/neat/pull/1445/files#diff-6bef3b9717d4220abd54d9be42a0d18df521591fc8eb0ea87a5e9449ae0917f1R336).
+
+## Bump
+
+- [x] Patch
+- [ ] Minor
+- [ ] Skip
+
+## Changelog
+### Improved
+
+- [alpha v1] Neat now allows you to modify a constraint or index on a
+container. Neat does this by removing and readding it.
