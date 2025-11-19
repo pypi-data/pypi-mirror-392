@@ -1,0 +1,26 @@
+image: archlinux
+triggers:
+  - action: email
+    condition: failure
+    to: Dmitriy Morozov <dmitriy@mrzv.org>
+packages:
+  - cmake
+  - python
+  - boost
+  - cgal
+  - python-numpy
+  - python-pytest
+sources:
+  - https://github.com/mrzv/diode
+tasks:
+  - configure: |
+      mkdir diode/build
+      cd diode/build
+      cmake ..
+  - build: |
+      cd diode/build
+      make
+  - test: |
+      export PYTHONPATH=~/diode/build/bindings/python
+      cd diode/tests
+      pytest
