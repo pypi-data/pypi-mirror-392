@@ -1,0 +1,290 @@
+Metadata-Version: 2.4
+Name: aws-cli-assistant-lite
+Version: 1.0.1
+Summary: Natural language to AWS CLI converter with real-time validation
+Home-page: https://github.com/maliniagrawal/aws-cli-assistant-lite
+Author: Malini Agrawal
+Author-email: Malini Agrawal <aws2minutes@gmail.com>
+License: Commercial
+Project-URL: Homepage, https://github.com/maliniagrawal/aws-cli-assistant-lite
+Project-URL: Documentation, https://docs.yourdomain.com
+Project-URL: Repository, https://github.com/maliniagrawal/aws-cli-assistant-lite
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: Other/Proprietary License
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: fastmcp>=0.2.0
+Requires-Dist: pydantic>=2.12.0
+Requires-Dist: loguru>=0.7.0
+Requires-Dist: boto3>=1.40.0
+Requires-Dist: botocore>=1.40.0
+Requires-Dist: fastapi>=0.115.0
+Requires-Dist: uvicorn>=0.32.0
+Requires-Dist: transformers>=4.57.0
+Requires-Dist: torch>=2.5.0
+Requires-Dist: anthropic>=0.70.0
+Requires-Dist: python-dotenv>=1.2.0
+Dynamic: author
+Dynamic: home-page
+Dynamic: license-file
+Dynamic: requires-python
+
+# AWS CLI Assistant - Lite Edition
+
+## Overview
+AWS CLI Assistant converts your natural language requests into proper AWS CLI commands with real-time validation against your AWS environment.
+
+## Features
+✅ **Natural Language Processing** - Just describe what you want to do  
+✅ **5 AWS Services** - S3, DynamoDB, EC2, Lambda, IAM  
+✅ **Real-time Validation** - Commands tested against your actual AWS account  
+✅ **Instant Results** - Get command syntax and execution results immediately  
+
+## Supported Operations
+
+### S3 Operations
+- List buckets
+- Create buckets
+- Delete buckets
+- List objects in bucket
+
+### DynamoDB Operations
+- List tables
+- Describe table
+- Query table
+- Scan table
+
+### EC2 Operations
+- List instances
+- Describe instances
+- Start/stop instances
+
+### Lambda Operations
+- List functions
+- Invoke function
+- Get function configuration
+
+### IAM Operations
+- List users
+- List roles
+- Get user details
+
+## Installation
+
+### Prerequisites
+- Python 3.10 or higher
+- AWS CLI configured with credentials
+- Valid AWS account
+
+### Quick Start
+
+1. **Clone or download the package**
+```bash
+git clone <https://github.com/MaliniAgrawal/aws-cli-assistant-lite.git>
+cd aws-cli-assistant-lite
+```
+
+2. **Install dependencies**
+```bash
+pip install -r requirements.txt
+```
+
+3. **Configure AWS credentials**
+```bash
+aws configure
+```
+
+4. **Start the MCP server**
+```bash
+python mcp_server.py
+```
+
+5. **Connect to Claude Desktop** (if using MCP)
+Add to your `claude_desktop_config.json`(given exaple below is my path in python evn):
+```json
+
+{
+  "mcpServers": {
+    "aws-cli-assistant-lite": {
+      "command": "C:/myworkspace/mcp/MCP-phase-1/venv-phase-1/Scripts/python.exe",
+      "args": [
+        "C:/myworkspace/mcp/MCP-phase-1/src/mcp_server.py"
+      ],
+      "env": {
+        "AWS_REGION": "us-west-1",
+        "PYTHONPATH": "C:/myworkspace/mcp/MCP-phase-1/src",
+        "PYTHONUNBUFFERED": "1"
+      }
+      }
+  }
+}
+                                                    
+```
+
+## Usage Examples
+
+### Example 1: List S3 Buckets
+**Input:** "list all my s3 buckets"  
+**Output:** 
+```bash
+aws s3 ls
+```
+**Validation:** ✅ Valid - Found 19 buckets
+
+### Example 2: List Lambda Functions
+**Input:** "show me lambda functions"  
+**Output:** 
+```bash
+aws lambda list-functions --region us-west-1
+```
+**Validation:** ✅ Valid - Found 11 functions
+
+### Example 3: List DynamoDB Tables
+**Input:** "list dynamodb tables"  
+**Output:** 
+```bash
+aws dynamodb list-tables
+```
+**Validation:** ✅ Valid - Found 4 tables
+
+## Architecture
+
+```
+User Input (Natural Language)
+    ↓
+NLP Transformer Model
+    ↓
+AWS CLI Command Generation
+    ↓
+Boto3 Validation (Real AWS)
+    ↓
+Result + Validation Status
+```
+
+## API Reference
+
+### `generate_aws_cli(query: str)`
+Converts natural language to AWS CLI command
+
+**Parameters:**
+- `query` (string): Natural language request
+
+**Returns:**
+```json
+{
+  "command": "aws s3 ls",
+  "explanation": "Lists S3 buckets in your account",
+  "validation": {
+    "intent": "list_s3_buckets",
+    "region": "us-west-1",
+    "status": "valid",
+    "reason": "Listed buckets",
+    "detail": { "buckets": [...] }
+  }
+}
+```
+
+### `health_check()`
+Verifies service status
+
+**Returns:**
+```json
+{
+  "status": "ok",
+  "model": "local-transformer"
+}
+```
+
+### `list_supported_services()`
+Returns supported AWS services
+
+**Returns:**
+```json
+["s3", "dynamodb", "ec2", "lambda", "iam"]
+```
+
+## Configuration
+
+### Environment Variables
+```bash
+AWS_REGION=us-west-1          # Your preferred AWS region
+AWS_PROFILE=default           # AWS profile to use
+MCP_PORT=3000                 # Server port (optional)
+```
+
+### Custom Settings
+Edit `config.yaml`:
+```yaml
+services:
+  - s3
+  - dynamodb
+  - ec2
+  - lambda
+  - iam
+
+validation:
+  enabled: true
+  timeout: 30
+
+model:
+  type: local-transformer
+  cache_size: 1000
+```
+
+## Pricing
+
+**Lite Edition:** $49/month or $500 one-time purchase
+
+**Includes:**
+- 5 AWS services
+- 100 queries per day
+- Email support
+- Monthly updates
+
+**Need more?** Contact us about Pro Edition (15+ services, unlimited queries)
+
+## Support
+
+- **Email:** aws2minutes@gmail.com
+- **Documentation:** https://docs.yourdomain.com
+- **Issues:** https://github.com/yourrepo/issues
+
+## FAQ
+
+**Q: Does this work with all AWS regions?**  
+A: Yes, specify your region in AWS configuration.
+
+**Q: Can I use this with multiple AWS accounts?**  
+A: Lite edition supports one account. Pro edition supports multiple.
+
+**Q: Is my AWS data secure?**  
+A: Yes, all processing is local. We never store your AWS credentials or data.
+
+**Q: What happens if I exceed 100 queries/day?**  
+A: Service pauses until next day. Upgrade to Pro for unlimited queries.
+
+## Roadmap
+
+**Coming in Q1 2026:**
+- RDS support
+- CloudFormation support
+- Cost estimation
+- Batch operations
+
+## License
+
+Commercial License - See LICENSE.txt
+
+## About
+
+Created by [Malini Agrawal] - AWS Certified Solutions Architect & Developer  
+Transitioned from Banking & Finance to AWS Cloud Engineering in 2021
+
+---
+
+**Ready to simplify your AWS CLI experience?**  
+Download and get started today!# pip install aws-cli-assistant-lite
