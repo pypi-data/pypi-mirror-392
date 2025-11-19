@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "links-notation"
+version = "0.12.0"
+description = "Python implementation of the Links Notation parser"
+readme = "README.md"
+license = {text = "Unlicense"}
+authors = [
+    {name = "Link.Foundation", email = "drakonard@gmail.com"}
+]
+keywords = ["lino", "parser", "links", "notation", "protocol"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: Public Domain",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing",
+]
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=7.0", "pytest-timeout>=2.1"]
+
+[project.urls]
+Homepage = "https://github.com/link-foundation/links-notation"
+Repository = "https://github.com/link-foundation/links-notation"
+Issues = "https://github.com/link-foundation/links-notation/issues"
+
+[tool.setuptools]
+packages = ["links_notation"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+timeout = 60
+timeout_func_only = true
