@@ -1,0 +1,25 @@
+[project]
+name = "iflow-mcp_mcp-server-shioaji"
+version = "0.1.0"
+description = "MCP server for interacting with Shioaji trading API"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp[cli]>=1.5.0",
+    "shioaji[speed]>=1.2.5",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
+    "polars>=1.26.0",
+    "loguru>=0.6.0",
+    "fire>=0.7.0",
+]
+
+[project.scripts]
+mcp-server-shioaji = "mcp_server_shioaji:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcp_server_shioaji"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
