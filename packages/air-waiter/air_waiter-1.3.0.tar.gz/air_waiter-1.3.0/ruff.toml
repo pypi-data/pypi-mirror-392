@@ -1,0 +1,44 @@
+target-version = "py313"
+line-length = 120
+
+[lint]
+select = ["ALL"]
+
+ignore = [
+    "COM",     # flake8-commas
+    "T20",     # flake8-print
+    "FIX",     # flake8-fixme
+    "ERA",     # eradicate
+
+    "ANN401",  # Checks that function arguments are annotated with a more specific type than `Any`
+    "D10",     # Undocumented
+    "PT007",   # Wrong values type in `@pytest.mark.parametrize` expected `list` of `tuple`
+    "PT019",   # Fixture without value is injected as parameter, use `@pytest.mark.usefixtures` instead
+    "RUF021",  # Checks for chained operators where adding parentheses could improve the clarity of the code
+    "S101",    # Use of `assert` detected
+    "TD002",   # Missing author in TODO
+]
+
+[lint.per-file-ignores]
+"tests/*" = [
+    "ARG001",  # Unused function argument
+    "ARG002",  # Unused method argument
+    "ARG004",  # Unused static method argument
+    "FBT001",  # Boolean-typed positional argument in function definition
+    "SLF001",  # Checks for accesses on "private" class members
+]
+"tests/unit/*" = [
+    "PLC0415",  # `import` should be at the top-level of a file
+    "PLR0917",  # Too many positional arguments
+    "PLC2701",  # Private name import from external module
+]
+
+[lint.isort]
+force-single-line = false
+order-by-type = false
+required-imports = ["from __future__ import annotations"]
+
+[lint.pydocstyle]
+# https://github.com/astral-sh/ruff/issues/6606
+# convention = "sphinx"
+convention = "google"
