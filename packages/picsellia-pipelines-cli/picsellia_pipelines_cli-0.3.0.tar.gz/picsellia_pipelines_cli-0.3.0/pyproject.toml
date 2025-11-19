@@ -1,0 +1,61 @@
+[project]
+name = "picsellia-pipelines-cli"
+version = "0.3.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.10,<3.14"
+license = { text = "MIT" }
+authors = [{ name = "Sonia Garrouch", email = "sonia.garrouch@picsellia.com" }, { name = "Pierre-Nicolas Tiffreau", email = "pierre-nicolas@picsellia.com" }]
+maintainers = [{ name = "Sonia Garrouch", email = "sonia.garrouch@picsellia.com" }, { name = "Pierre-Nicolas Tiffreau", email = "pierre-nicolas@picsellia.com" }]
+keywords = ["picsellia", "computer-vision", "vision", "cv-engine", "cli", "pipeline"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+    "Typing :: Typed",
+]
+
+dependencies = [
+    "picsellia>=6.20.0,<7.0.0",
+    "typer>=0.15.2,<0.16.0",
+    "toml>=0.10.2,<1.0",
+    "dotenv>=0.9.9,<1.0",
+    "semver>=3.0.0,<4.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.2.0"
+]
+
+[project.scripts]
+pxl-pipeline = "picsellia_pipelines_cli.main:app"
+
+[build-system]
+requires = ["hatchling>=1.18.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.ruff.lint]
+select = [
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "F", # pyflakes
+    "I", # isort
+    "C", # flake8-comprehensions
+    "B", # flake8-bugbear
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501", # line too long, handled by black
+]
