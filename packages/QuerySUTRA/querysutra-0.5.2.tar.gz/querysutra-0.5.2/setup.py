@@ -1,0 +1,3 @@
+from setuptools import setup,find_packages
+with open("README.md","r",encoding="utf-8") as f:d=f.read()
+setup(name="QuerySUTRA",version="0.5.2",author="Aditya Batta",description="SUTRA",long_description=d,long_description_content_type="text/markdown",packages=find_packages(),python_requires=">=3.8",install_requires=["pandas>=1.3.0","numpy>=1.21.0","openai>=1.0.0","plotly>=5.0.0","matplotlib>=3.3.0","PyPDF2>=3.0.0","python-docx>=0.8.11","openpyxl>=3.0.0"],extras_require={"mysql":["sqlalchemy>=1.4.0","mysql-connector-python>=8.0.0"],"postgres":["sqlalchemy>=1.4.0","psycopg2-binary>=2.9.0"],"embeddings":["sentence-transformers>=2.0.0"],"all":["sqlalchemy>=1.4.0","mysql-connector-python>=8.0.0","psycopg2-binary>=2.9.0","sentence-transformers>=2.0.0"]})
