@@ -1,0 +1,172 @@
+[project]
+name = "simlx"
+version = "v0.1.0"
+description = "self supervised representation learning"
+authors = [{ name = "Petrus Zwart", email = "phzwart@lbl.gov" }]
+readme = "README.md"
+keywords = ['python']
+requires-python = ">=3.9,<4.0"
+dependencies = [
+    "torch>=2.0.0",
+]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.urls]
+Homepage = "https://phzwart.github.io/simlx/"
+Repository = "https://github.com/phzwart/simlx"
+Documentation = "https://phzwart.github.io/simlx/"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.2.0",
+    "pytest-cov>=4.0.0",
+    "pre-commit>=2.20.0",
+    "tox-uv>=1.11.3",
+    "deptry>=0.23.0",
+    "ty>=0.0.1a16",
+    "ruff>=0.11.5",
+    "mypy>=1.11.0",
+    "bandit>=1.7.9",
+    "mkdocs>=1.4.2",
+    "mkdocs-material>=8.5.10",
+    "mkdocstrings[python]>=0.26.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=7.2.0",
+    "pytest-cov>=4.0.0",
+    "pre-commit>=2.20.0",
+    "tox-uv>=1.11.3",
+    "deptry>=0.23.0",
+    "ty>=0.0.1a16",
+    "ruff>=0.11.5",
+    "mypy>=1.11.0",
+    "bandit>=1.7.9",
+    "mkdocs>=1.4.2",
+    "mkdocs-material>=8.5.10",
+    "mkdocstrings[python]>=0.26.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/simlx"]
+
+[tool.ty.environment]
+python = "./.venv"
+python-version = "3.9"
+
+[tool.ty.rules]
+# Ignore rules that have false positives with PyTorch
+# PyTorch's nn.Module uses custom __setattr__ which causes false positives
+unresolved-attribute = "ignore"  # PyTorch modules assign attributes dynamically
+call-non-callable = "ignore"  # Registered buffers are typed as Tensor | Module
+non-subscriptable = "ignore"  # Same issue with registered buffers
+no-matching-overload = "ignore"  # PyTorch tensor methods have complex overloads
+unsupported-operator = "ignore"  # Tensor operations are dynamically typed
+possibly-missing-implicit-call = "ignore"  # PyTorch's dynamic nature
+unresolved-import = "ignore"  # Optional dependencies (clearml, mlflow)
+possibly-missing-attribute = "ignore"  # Optional dependencies may be None
+invalid-argument-type = "warn"  # Downgrade to warning for test file
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 120
+fix = true
+extend-exclude = ["notebooks", "notebooks/*"]
+
+[tool.ruff.lint]
+select = [
+    # flake8-2020
+    "YTT",
+    # flake8-bandit
+    "S",
+    # flake8-bugbear
+    "B",
+    # flake8-builtins
+    "A",
+    # flake8-comprehensions
+    "C4",
+    # flake8-debugger
+    "T10",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+    # mccabe
+    "C90",
+    # pycodestyle
+    "E", "W",
+    # pyflakes
+    "F",
+    # pygrep-hooks
+    "PGH",
+    # pyupgrade
+    "UP",
+    # ruff
+    "RUF",
+    # tryceratops
+    "TRY",
+]
+ignore = [
+    # LineTooLong
+    "E501",
+    # DoNotAssignLambda
+    "E731",
+    # Tryceratops long exception messages
+    "TRY003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+
+[tool.ruff.format]
+preview = true
+
+[tool.coverage.report]
+skip_empty = true
+fail_under = 33  # TODO: Increase to 80% as more tests are added
+precision = 2
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+    "*/migrations/*",
+    # Files under development, not yet tested
+    "src/simlx/models/decoder_head.py",
+    "src/simlx/models/mamba_vit_encoder.py",
+    "src/simlx/models/vit_encoder.py",
+    "src/simlx/models/projection_utils.py",
+    "src/simlx/data/loaders/base.py",
+    "src/simlx/data/loaders/__init__.py",
+]
