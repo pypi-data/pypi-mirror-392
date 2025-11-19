@@ -1,0 +1,69 @@
+Metadata-Version: 2.4
+Name: stickersbot
+Version: 4.2.0
+Summary: Sticker packs for all your Delta Chat needs
+Author-email: adbenitez <adb@merlinux.eu>
+Project-URL: Homepage, https://github.com/deltachat-bot/stickersbot
+Keywords: deltachat,bot
+Classifier: Development Status :: 4 - Beta
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: deltabot-cli<9.0,>=8.0.0
+Requires-Dist: signalstickers-client>=3.3.0
+Requires-Dist: emoji>=2.15.0
+Requires-Dist: cachelib>=0.13.0
+Requires-Dist: requests<3.0,>=2.32.5
+Requires-Dist: pillow>=12.0.0
+Requires-Dist: rembg[cpu]>=2.0.68
+Provides-Extra: dev
+Requires-Dist: black; extra == "dev"
+Requires-Dist: mypy; extra == "dev"
+Requires-Dist: isort; extra == "dev"
+Requires-Dist: pylint; extra == "dev"
+Requires-Dist: pylama; extra == "dev"
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: types-emoji; extra == "dev"
+Requires-Dist: types-requests; extra == "dev"
+Requires-Dist: setuptools; extra == "dev"
+Dynamic: license-file
+
+# StickersBot
+
+[![Latest Release](https://img.shields.io/pypi/v/stickersbot.svg)](https://pypi.org/project/stickersbot)
+[![CI](https://github.com/deltachat-bot/stickersbot/actions/workflows/python-ci.yml/badge.svg)](https://github.com/deltachat-bot/stickersbot/actions/workflows/python-ci.yml)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+Delta Chat bot that allows users to get stickers packs and convert normal images to stickers.
+
+## Installation and configuration
+
+```sh
+pip install stickersbot
+```
+
+**IMPORTANT:** You might need first to install `libwebp` library in your system
+(For Debian/Ubuntu it's libwebp-dev package)
+
+Configure the bot:
+
+```sh
+stickersbot init bot@example.com PASSWORD
+```
+
+Start the bot:
+
+```sh
+stickersbot serve
+```
+
+Run `stickersbot --help` to see all available options.
+
+## Usage
+
+* To get sticker packs, browse https://signalstickers.com/ and copy the URL of the pack you want (the link in the "+ Add to Signal" button, an URL starting with ``https://signal.art/addstickers``) and send the pack URL to the bot in private, the bot will send you a zip with the sticker pack.
+* To create an sticker from a normal image send the image to the bot and it will remove the background and send you back the image as sticker.
+* Send any text to the bot to search packs matching the given text.
+* Send an emoji to the bot to get a random sticker associated with that emoji.
