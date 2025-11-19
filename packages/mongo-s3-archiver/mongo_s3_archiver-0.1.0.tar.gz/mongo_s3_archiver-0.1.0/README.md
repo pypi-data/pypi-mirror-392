@@ -1,0 +1,115 @@
+# mongo-s3-archiver
+ 
+Backup utility for MongoDB. Compatible with Azure, Amazon Web Services and Google Cloud Platform.
+
+> **About this fork**  
+> This repository is a maintained fork of [exesse/mongodump-s3](https://github.com/exesse/mongodump-s3) by Vladislav I. Kulbatski.  
+> Additional features and ongoing maintenance are provided by **Hadi Koubeissy** (123.hadikoubeissy@gmail.com).
+
+## Installation
+Make sure that original MongoDB Database Tools are installed. Please follow instruction on [the official page](https://www.mongodb.com/try/download/database-tools) for platform specific installation.
+Also make sure that `mongodump` command is in your PATH.
+````bash
+pip install mongo-s3-archiver
+````
+
+## Usage
+`mongo-s3-archiver` could be used as command line tool or as Docker service. There are also three possible ways to pass parameters to the utility:
+-   Through setting environment variables
+-   By passing env file to the tool
+-   Or by passing individual flags
+
+Please refer to `sample.env` [example](https://github.com/hadikoub/mongo-s3-archiver/blob/main/sample.env) for all possible env options.
+
+### Command line
+```bash
+$ mongo-s3-archiver --help
+usage: mongo-s3-archiver <options>
+
+Export the content of a running server into .bson files and uploads to provided S3 compatible storage. By default loads required settings from environment variables.
+
+general options:
+  -h, --help            print usage
+  -v, --version         print the tool version and exit
+
+output options:
+  -b <S3 Bucket>, --bucket <S3 Bucket>
+                        S3 bucket name for upload, defaults to 'mongodump'
+  -o <folder>, --out <folder>
+                        output directory, defaults to 'dump'
+
+uri options:
+  -u <uri>, --uri <uri>
+                        mongodb uri connection string. See official description here https://docs.mongodb.com/manual/reference/connection-string
+
+environmental options:
+  -e <env-file>, --env <env-file>
+                        path to file containing environmental variables
+
+cloud storage options:
+  --azure "<azure_storage_connection_string>"
+                        connection string for storage account provided by Azure
+  --aws "<aws_access_key_id=value> <aws_secret_access_key=value> <aws_region=value>"
+                        AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION properties provided by Amazon Web Services IAM. AWS_REGION defaults to 'us-west-2' if not specified
+  --gcp "<google_application_credentials=value> <google_region=value>"
+                        path to service account file and optional Google Cloud Region. GOOGLE_REGION defaults to 'us-multiregion' if not specified
+
+S3 permissions tip:
+- Set `MONGO_S3_SKIP_BUCKET_DISCOVERY=true` when your IAM user lacks `s3:ListAllMyBuckets`/bucket creation rights; uploads will proceed without listing or auto-creating the bucket (make sure the bucket already exists).
+
+notification options:
+  --email <user@example.com>
+                        email address which to notify upon the result
+  --smtp <mail-server.example.com>
+                        SMTP relay server to use, defaults to 'localhost'
+  --telegram "<telegram_token=value> <telegram_chat_id=value>"
+                        Telegram API token and chat id to be used for notification. See more: https://core.telegram.org/bots/api
+```
+
+> The legacy CLI entry point `mongodump-s3` is still shipped for backward compatibility and maps to the same functionality.
+
+#### Filtering and archiving dumps
+- Use `--db`, `--collection` and `--query` (JSON) to limit the scope of `mongodump`.
+- Pass `--archive <file.gz>` to stream the output into a compressed archive instead of a folder.
+- Use `-j/--jobs` to control how many collections `mongodump` processes in parallel. `--no-gzip` disables compression.
+
+Example exporting a subset of documents into a gzipped archive:
+
+```
+python run_mongo_s3_archiver.py \
+  --uri 'mongodb+srv://<username>:<password>@cluster.example.net/app_db?authSource=admin&tls=true' \
+  --db app_db \
+  --collection events \
+  --query '{"timestamp": {"$lt": "2025-09-31"}}' \
+  --archive data/pre_2025_09_31.gz \
+  -j 10 \
+  --delete-after-dump \
+  --delete-batch-size 1000
+```
+
+#### Post dump cleanup
+Set `--delete-after-dump` (or `MONGO_PURGE_AFTER_DUMP=true`) to remove the documents that matched the dump query once the upload finishes. Documents are deleted in batches (configurable through `--delete-batch-size` or `MONGO_PURGE_BATCH_SIZE`, defaults to 1000) to keep memory usage low even when purging millions of records. This feature requires that `--db/--collection` and a valid JSON query are provided.
+
+#### Running without installing the package
+To execute the CLI straight from the repository (helpful inside CI/CD pipelines), use the provided launcher script:
+
+```
+python run_mongo_s3_archiver.py --help
+```
+
+### Docker
+````bash
+sudo docker run --name mongo-s3-archiver [Optional: --env-file sample.env] hadikoub/mongo-s3-archiver:latest [Optional: startup flags]
+````
+
+In case you need to pass GCP service account key please mount the key inside container and simply specify `GOOGLE_APPLICATION_CREDENTIALS=/mongo-dump/key.json`.
+```bash
+sudo docker run --name mongo-s3-archiver-gcp \
+    --env-file sample.env \
+    -v ~/dev.json:/mongodump/key.json:ro \
+    hadikoub/mongo-s3-archiver:latest 
+```
+
+## Feedback
+- Original author: [hi@exesse.org](mailto:hi@exesse.org)
+- Maintainer of this fork: [123.hadikoubeissy@gmail.com](mailto:123.hadikoubeissy@gmail.com)
