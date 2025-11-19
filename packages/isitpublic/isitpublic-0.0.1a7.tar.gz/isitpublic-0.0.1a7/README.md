@@ -1,0 +1,516 @@
+# isitpublic
+
+[![PyPI version](https://badge.fury.io/py/isitpublic.svg)](https://pypi.org/project/isitpublic/)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![Dead Code: 0](https://img.shields.io/badge/Dead_Code-0_detected-brightgreen?logo=codacy&logoColor=white)](https://pypi.org/project/skylos/)
+
+A lightweight, standalone Python library for determining if works are likely in the public domain using multiple heuristics and validation methods.
+
+Find the package on PyPI at: https://pypi.org/project/isitpublic/
+
+## Overview
+
+The `isitpublic` library provides focused tools to assess whether a work is likely in the public domain based on:
+- Title and content analysis for public domain indicators
+- Heuristic checks for historical authors and time periods
+- Copyright calculations based on author death years or publication dates
+- Jurisdiction-specific copyright law analysis
+- Advanced analysis for databases, audio/video, and software
+- JSON-based data storage for configuration and results
+
+## Installation
+
+```bash
+pip install isitpublic
+```
+
+## Quick Start
+
+```python
+import asyncio
+from isitpublic import PublicDomainValidator, ContentItem
+
+# Create a validator instance
+validator = PublicDomainValidator()
+
+# Create a content item to validate
+item = ContentItem(
+    title="Shakespeare's Hamlet",
+    content="A classic play by William Shakespeare",
+    snippet="To be or not to be..."
+)
+
+# Check if the item is likely in the public domain (async function)
+async def main():
+    is_pd = await validator.is_likely_public_domain(item)
+    print(f"Is likely public domain: {is_pd}")  # True
+
+# Run the async function
+asyncio.run(main())
+```
+
+## Core Features
+
+### 1. Content-based Validation
+
+The library checks titles and content for public domain indicators:
+
+```python
+import asyncio
+from isitpublic import validate_public_domain_status, ContentItem
+
+item = ContentItem(
+    title="A Public Domain Work",
+    content="This work is in the public domain"
+)
+
+# Async function for validation
+async def main():
+    is_pd = await validate_public_domain_status(item)
+    print(is_pd)  # True
+
+# Run the async function
+asyncio.run(main())
+```
+
+### 2. Heuristic Analysis
+
+The library applies heuristics based on:
+- Historical authors (Shakespeare, Darwin, etc.)
+- Time periods (19th century, ancient, etc.)
+- Content types (biblical, folk tales, etc.)
+
+### 3. Copyright Calculation
+
+Calculate public domain status based on copyright information:
+
+```python
+from isitpublic import calculate_pd_from_metadata
+
+metadata = {
+    "author_death_year": 1601,  # Over 400 years ago!
+    "publication_year": 1600,
+    "country": "worldwide"
+}
+
+result = calculate_pd_from_metadata(metadata)
+print(result)  # {'is_public_domain': True, 'pd_year': 1672, ...}
+```
+
+### 4. Jurisdiction-Specific Analysis
+
+Comprehensive analysis across multiple jurisdictions:
+
+```python
+from isitpublic import PublicDomainValidator
+
+validator = PublicDomainValidator()
+
+# Generate a comprehensive jurisdiction report
+report = validator.generate_jurisdiction_report(
+    author_death_year=1601,  # Shakespeare died in 1601
+    work_title="Shakespeare's Works",
+    work_type="individual"
+)
+
+print(f"PD in {report['risk_assessment']['public_domain_percentage']}% of jurisdictions")
+print(f"Legal recommendation: {report['legal_recommendations'][0]}")
+```
+
+### 5. Database and Compilation Rights Recognition
+
+Advanced analysis of database and compilation rights beyond standard copyright:
+
+```python
+# Analyze database rights that exist in addition to copyright
+db_analysis = validator.analyze_database_compilation_rights(
+    title="Historical Database",
+    creation_year=2000,
+    compilation_type="database",
+    jurisdiction="DE",  # EU jurisdiction with database rights
+    substantial_investment_claim=True,
+    is_licensed_dataset=False
+)
+
+print(f"Has database rights: {db_analysis['database_rights_analysis']['has_rights']}")
+print(f"In public domain: {db_analysis['database_rights_analysis']['is_public_domain']}")
+print(f"Risk level: {db_analysis['risk_level']}")
+```
+
+### 6. Audio/Video Copyright Analysis (Sampling & Fair Use)
+
+Analyze copyright status for audio, video, and sampled content:
+
+```python
+# Analyze audio/video content with sampling considerations
+av_analysis = validator.analyze_audio_video_copyright(
+    title="Musical Composition",
+    creator="Artist Name",
+    creation_year=1990,
+    sampling_info={
+        "sampled_from_year": 1950,  # Original sample source
+        "sample_length_seconds": 5,  # Length of sample
+        "sampled_from_work": "Old Song"
+    },
+    intended_use="commercial"  # "personal", "educational", "commercial"
+)
+
+print(f"Original work PD: {av_analysis['is_original_pd']}")
+print(f"Sampling analysis: {av_analysis['sampling_analysis']}")
+print(f"Risk level: {av_analysis['risk_level']}")
+print(f"Recommendations: {av_analysis['recommendations']}")
+```
+
+### 7. Software and Source Code Analysis
+
+Analyze software licenses and public domain status for code:
+
+```python
+# Analyze if software is in public domain based on license
+software_analysis = validator.analyze_software_source_pd(
+    project_name="Open Source Project",
+    license_type="MIT",  # or "GPL-3.0", "CC0", "Unlicense", etc.
+    creation_year=2015,
+    author_death_year=2000,  # For individual-authored software
+    repository_info={
+        "has_license_file": True,
+        "license_spdx_id": "MIT-0",
+        "copyright_holders": ["Author Name"]
+    }
+)
+
+print(f"Is in public domain: {software_analysis['is_pd']}")
+print(f"License analysis: {software_analysis['license_analysis']}")
+print(f"Risk level: {software_analysis['risk_level']}")
+```
+
+### 8. Database Rights and Compilation Analysis
+
+Handle special rights for databases beyond standard copyright:
+
+```python
+# Analyze database rights which vary significantly by jurisdiction
+db_rights = validator.analyze_database_compilation_rights(
+    title="Statistical Database",
+    creation_year=2010,
+    compilation_type="database",
+    jurisdiction="EU",  # EU has special database rights (sui generis)
+    database_contents=["tables", "records", "statistics"],
+    substantial_investment_claim=True
+)
+
+print(f"Database rights status: {db_rights['database_rights_analysis']['has_rights']}")
+print(f"Years until PD: {db_rights['database_rights_analysis']['years_until_pd']}")
+print(f"Protection type: {db_rights['database_rights_analysis']['protection_type']}")
+```
+
+### 9. Performance and Neighboring Rights
+
+Analyze rights in performances beyond the underlying work:
+
+```python
+# Analyze performance and neighboring rights (different from the underlying composition)
+perf_analysis = validator.analyze_performance_neighboring_rights(
+    title="Live Performance Recording",
+    performer="Performer Name",
+    performance_year=2000,
+    recording_year=2001,
+    jurisdiction="US"
+)
+
+print(f"Performance rights PD: {perf_analysis['performance_rights_analysis']['is_public_domain']}")
+print(f"Recording rights PD: {perf_analysis['recording_rights_analysis']['is_public_domain']}")
+print(f"Overall risk: {perf_analysis['risk_level']}")
+```
+
+### 10. Historical Copyright Law Timeline
+
+Track and analyze changes in copyright law over time:
+
+```python
+# Add historical law changes to track legal evolution
+law_changes = [
+    {
+        "effective_date": "1995-01-01",
+        "terms": 70,  # Extended from life+50 to life+70
+        "description": "Extension of copyright term",
+        "law_type": "standard",
+        "change_reason": "International treaty obligation"
+    }
+]
+
+# Track timeline of copyright law changes
+timeline_result = validator.track_copyright_law_timeline(
+    country="DE",
+    law_changes=law_changes,
+    source="official_government_record",
+    is_historical_data=True
+)
+
+# Get historical law at a specific date
+law_at_date = validator.get_copyright_law_at_date(
+    country="DE",
+    target_date="1998-06-01",
+    law_type="standard"
+)
+
+print(f"Laws in effect in 1998: {law_at_date['current_terms']} years")
+```
+
+### 11. Historical Analysis Reports
+
+Generate comprehensive reports showing law evolution over time:
+
+```python
+# Generate historical analysis report for a time period
+historical_report = validator.create_historical_analysis_report(
+    country="FR",
+    start_year=1980,
+    end_year=2020,
+    include_database_rights=True
+)
+
+print(f"Report for {historical_report['country']} ({start_year}-{end_year})")
+print(f"Standard changes: {historical_report['standard_changes_count']}")
+print(f"Database changes: {historical_report['database_changes_count']}")
+
+# Access year-by-year analysis
+for year in ["1985", "1995", "2005"]:
+    if year in historical_report['analysis_by_year']:
+        year_analysis = historical_report['analysis_by_year'][year]
+        print(f"  {year}: Standard={year_analysis['standard_copyright']} years, "
+              f"DB Rights={year_analysis['database_rights']} years")
+```
+
+### 12. Law Change Impact Analysis
+
+Analyze how specific law changes affect work public domain status:
+
+```python
+# Analyze the impact of a specific law change on a work
+impact_analysis = validator.analyze_impact_of_law_change(
+    country="UK",
+    change_date="2013-01-01",  # When UK extended some terms
+    work_creation_year=1940,
+    author_death_year=1970
+)
+
+print(f"Impact of law change on {impact_analysis['change_date']}")
+print(f"Work created in {impact_analysis['work_creation_year']}")
+print(f"Author died in {impact_analysis['author_death_year']}")
+print(f"Potential impact: {impact_analysis['potential_impact']}")
+```
+
+### 13. JSON Data Management
+
+Save and load configuration and results in structured format:
+
+```python
+# Save country copyright data to JSON
+validator.save_country_copyright_data('data/copyright_terms.json')
+
+# Validate multiple items and store results in an async function
+async def validate_multiple():
+    items = [
+        ContentItem(title="Work 1", content="Content of work 1"),
+        ContentItem(title="Work 2", content="Content of work 2")
+    ]
+    await validator.validate_and_store_results(items, 'data/validation_results.json')
+
+# Run the async function
+asyncio.run(validate_multiple())
+
+# Load educational resources about public domain
+pd_basics = validator.get_educational_resource('what_is_pd')
+print(f"PD basics: {pd_basics['content'][0]['section']}")
+```
+```
+
+### 14. Decision Tree Workflow
+
+The library now includes a structured decision tree workflow that follows the systematic approach you specified for determining public domain status. This provides a more detailed, step-by-step analysis based on various factors.
+
+```python
+from isitpublic import assess_public_domain_status_with_decision_tree
+
+# Assess using the structured decision tree approach
+result = assess_public_domain_status_with_decision_tree(
+    title="A Novel",
+    author_death_year=1990,
+    publication_year=1985,
+    work_type="individual",  # "individual", "corporate", "anonymous", "government"
+    country="US",
+    nationality="US",
+    copyright_renewed=True  # For US works published 1928-1963
+)
+
+print(f"Is in Public Domain: {result['is_public_domain']}")
+print(f"Explanation: {result['explanation']}")
+print(f"Decision Path: {result['decision_path']}")
+print(f"Confidence: {result['confidence']}%")
+```
+
+You can also use the method directly on a validator instance for more control:
+
+```python
+from isitpublic import PublicDomainValidator
+
+validator = PublicDomainValidator()
+
+# Using the decision tree method on a validator instance
+result = validator.assess_public_domain_status_with_decision_tree(
+    title="Historical Document",
+    publication_year=1920,  # Published before 1928, so in US PD
+    country="US"
+)
+
+print(f"Result: {result}")
+```
+
+The decision tree workflow follows these steps:
+1. Determines work type (literary, cinematographic, musical, artistic, anonymous/pseudonymous, corporate, etc.)
+2. Applies appropriate copyright term rules based on:
+   - Publication date
+   - Author death date (if individual work)
+   - Work type (individual vs corporate vs anonymous)
+   - Country of origin/publishing
+   - Author nationality
+   - Copyright renewal status (for US works 1928-1963)
+3. Provides detailed explanations of each decision point
+4. Returns confidence level in the determination
+
+### 15. Alternative Usage Without Async
+
+For simpler use cases, the library also provides a synchronous function that doesn't require async/await:
+
+```python
+from isitpublic import calculate_pd_from_metadata
+
+metadata = {
+    "author_death_year": 1601,  # Over 400 years ago!
+    "publication_year": 1600,
+    "country": "worldwide"
+}
+
+result = calculate_pd_from_metadata(metadata)
+print(result)  # {'is_public_domain': True, 'pd_year': 1672, ...}
+```
+
+Note that the more advanced validation methods like `is_likely_public_domain()` are async, while methods like `calculate_pd_from_metadata()` and `assess_public_domain_status_with_decision_tree()` are synchronous and can be used directly without async/await.
+
+## API Reference
+
+### PublicDomainValidator
+
+Main validator class with comprehensive validation methods.
+
+#### Methods:
+- `is_likely_public_domain(item, use_wikidata=False)` - **[ASYNC]** Check if content is likely in public domain
+- `is_likely_public_domain_with_details(item)` - **[ASYNC]** Detailed analysis with confidence and explanations
+- `assess_public_domain_status_with_decision_tree(title="", author_death_year=None, publication_year=None, work_type="individual", country="worldwide", nationality="worldwide", published_with_copyright_notice=True, copyright_renewed=True)` - **[SYNC]** Structured decision tree analysis following systematic workflow
+- `calculate_pd_status_from_copyright_info(author_death_year=None, publication_year=None, country="worldwide", work_type="individual", is_government_work=False)` - **[SYNC]** Calculate status from copyright data
+- `generate_jurisdiction_report(author_death_year, publication_year, work_title, work_type, is_government_work)` - **[SYNC]** Comprehensive jurisdiction analysis
+- `assess_use_risk(author_death_year, publication_year, intended_jurisdictions, commercial_use)` - **[SYNC]** Risk assessment for usage
+- `save_country_copyright_data(filepath)` - **[SYNC]** Save country copyright data to JSON
+- `load_country_copyright_data(filepath)` - **[SYNC]** Load country copyright data from JSON
+- `validate_and_store_results(items, output_file, country, work_type, is_government_work)` - **[ASYNC]** Validate multiple items and store results
+- `store_pd_calculation_results(metadata_list, output_file)` - **[SYNC]** Perform multiple calculations and store results
+- `get_educational_resources(category)` - **[SYNC]** Retrieve educational materials about public domain
+- `get_educational_resource(resource_name)` - **[SYNC]** Retrieve specific educational resource
+
+### ContentItem
+
+Simple data class for content to be validated.
+
+#### Attributes:
+- `title`: Title of the work
+- `content`: Full content (optional)
+- `url`: URL of the content (optional)
+- `snippet`: Snippet or excerpt (optional)
+
+### Standalone Functions
+
+- `validate_public_domain_status(item, use_wikidata=False)` - **[ASYNC]** Basic PD validation
+- `validate_public_domain_with_explanation(item, country, work_type, is_government_work, use_wikidata)` - **[ASYNC]** PD validation with detailed explanations
+- `assess_public_domain_status_with_decision_tree(title="", author_death_year=None, publication_year=None, work_type="individual", country="worldwide", nationality="worldwide", published_with_copyright_notice=True, copyright_renewed=True)` - **[SYNC]** Structured decision tree analysis following systematic workflow
+- `calculate_pd_from_metadata(metadata)` - **[SYNC]** Calculate status from metadata dict
+
+### Async vs Sync Usage
+
+When using async methods, wrap your code in an async function and use `asyncio.run()`:
+
+```python
+import asyncio
+from isitpublic import PublicDomainValidator, ContentItem
+
+async def main():
+    validator = PublicDomainValidator()
+    item = ContentItem(title="Shakespeare's Hamlet", content="To be or not to be...")
+    is_pd = await validator.is_likely_public_domain(item)
+    print(f"Is likely public domain: {is_pd}")
+
+asyncio.run(main())
+```
+
+For sync methods, use them directly:
+
+```python
+from isitpublic import calculate_pd_from_metadata
+
+result = calculate_pd_from_metadata({
+    "author_death_year": 1601,
+    "country": "worldwide"
+})
+print(result)
+```
+
+## About Directory
+
+The library includes educational materials about public domain concepts stored in JSON format in the `data/about/` directory:
+- `what_is_pd.json` - Basic definitions and concepts
+- `copyright_terms.json` - Information about copyright terms
+- `jurisdiction_rules.json` - Country-specific public domain rules
+- `historical_works.json` - Examples of famous public domain works
+- `misconceptions.json` - Common myths and misunderstandings
+- `index.json` - Master index of all educational resources
+
+## License
+
+AGPLv3 License for code. See the [LICENSE](LICENSE) file for details.
+
+Data files are licensed under Creative Commons Attribution Share Alike 4.0 International (CC BY-SA 4.0).
+
+## Development & Code Quality
+
+This project uses [Skylos](https://pypi.org/project/skylos/) for automated code quality and security analysis:
+
+### 🔍 Code Quality Features
+- **Dead Code Detection**: Automatically identifies and removes unused imports, variables, and unreachable code
+- **Security Scanning**: Checks for potential vulnerabilities, path traversal issues, and hardcoded secrets
+- **Pre-commit Integration**: Automated quality checks before each commit
+- **CI/CD Pipeline**: GitHub Actions workflow for continuous quality monitoring
+
+### 🛠️ Development Setup
+
+```bash
+# Install pre-commit hooks
+pre-commit install
+
+# Run skylos manually
+uv run skylos src/ --secrets --danger
+
+# Run with verbose output
+uv run skylos src/ --verbose
+```
+
+### 📊 Quality Metrics
+- **Dead Code**: 0 detected ✅
+- **Security Issues**: Continuously monitored
+- **Code Coverage**: Maintained through automated testing
+- **Type Safety**: Pydantic models ensure data validation
+
+## Architecture Note
+
+This is the core `isitpublic` library focused solely on public domain determination logic.
+Web API, GraphQL, and advanced application features have been separated into a dedicated application layer
+that builds upon this library, ensuring the core library remains lightweight and focused on its primary function.

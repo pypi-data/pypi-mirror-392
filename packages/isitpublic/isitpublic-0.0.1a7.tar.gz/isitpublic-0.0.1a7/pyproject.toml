@@ -1,0 +1,69 @@
+[project]
+name = "isitpublic"
+version = "0.0.1a7"
+description = "A standalone library for determining if works are likely in the public domain using multiple heuristics and validation methods"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "pydantic>=2.10.6",
+    "pydantic-settings>=2.0.0",
+    "requests>=2.32.4",
+    "requests-cache>=1.0.0",
+    "structlog>=25.5.0",
+    "python-dateutil>=2.8.0",
+    "pycountry>=22.1.10",
+    "cachetools>=5.0.0",
+    "orjson>=3.9.0",
+]
+authors = [
+    {name = "WikiReads", email = "info@wikireads.org"}
+]
+maintainers = [
+    {name = "WikiReads", email = "info@wikireads.org"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Legal Industry",
+    "Intended Audience :: Education",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+keywords = ["public domain", "copyright", "intellectual property", "legal", "validation", "heuristics"]
+license = {text = "AGPL-3.0-or-later"}
+
+[dependency-groups]
+test = [
+    "pytest>=6.0",
+    "pytest-asyncio>=0.15",
+]
+dev = [
+    "build>=0.10.0",
+    "pytest>=8.3.5",
+    "ruff>=0.14.5",
+    "skylos>=0.0.7",
+    "twine>=4.0.0",
+]
+
+[build-system]
+requires = ["uv-build"]
+build-backend = "uv_build"
+
+[project.urls]
+Homepage = "https://gitlab.com/ranjithraj/isitpublic"
+Repository = "https://gitlab.com/ranjithraj/isitpublic.git"
+Documentation = "https://gitlab.com/ranjithraj/isitpublic#readme"
+"Bug Tracker" = "https://gitlab.com/ranjithraj/isitpublic/issues"
+
+[tool.dist]
+[tool.dist.sdist]
+exclude = [".env"]
+
+[tool.uv]
