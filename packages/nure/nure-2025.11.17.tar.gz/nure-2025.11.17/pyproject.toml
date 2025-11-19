@@ -1,0 +1,50 @@
+[project]
+name = "nure"
+version = "2025.11.17"
+description = "Data Science Utilities"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "GPL-3.0-or-later"
+license-files = ["LICEN[CS]E*"]
+authors = [
+    { name = "Trung Tran", email = "tranduytrung@outlook.com" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "more-itertools",
+    "numpy",
+    "pandas",
+    "pyarrow"
+]
+
+[project.urls]
+Homepage = "https://github.com/tranduytrung/nure"
+Issues = "https://github.com/tranduytrung/nure/issues"
+
+[project.optional-dependencies]
+image = [
+    "pillow",
+    "opencv-python-headless"
+]
+sql = [
+    "mysql-connector-python",
+    "sqlalchemy-bigquery",
+    "psycopg2-binary"
+]
+aws = [
+    "boto3"
+]
+
+[tool.setuptools]
+include-package-data = true
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+exclude = ["tests"]
+
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
