@@ -1,0 +1,1310 @@
+{
+  "read_me": {
+    "description": "This is the description of how to add new messages. See more info here https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-messages/",
+    "keyword": "(optional) The keyword sent via whatsapp that will trigger the message",
+    "button_trigger": "(optional) Should contain the ID of the buttons that should trigger the message for example 'avance_semanal-button'",
+    "type": "The type of message, for now it can only be either 'text' or 'interactive'",
+    "interactive_type": "If type is interactive, should specify the interactive_type. Can be either 'button' or 'cta_url'",
+    "button_keys": "Required for interactive_type = 'button' should be a list of the buttons to be displayed in the message with this format, where the text is the id of the button ['comenzar-button']. Can add a min of 1 button and max of 3 buttons",
+    "parameters": {
+      "display_text": "Required for interactive type 'cta_url', this text will show up where you click on the link. For example ''Ver Reporte'",
+      "url": "Should be the url where you have your report stored for example: 'https://www.baltra.ai/demo-dashboard'"
+    },
+    "text": "Text message body should be a string",
+    "footer_text": "(optional) Text displayed at the bottom of the message, should be a string",
+    "header_type": "(optional) Type of header of the message can be either 'image' or 'text'",
+    "header_content": "Required if there is a header type. Should be a string if header type is 'text', should be a directory with this format {'link': 'https://i.imgur.com/PfKRzAP.png'} if header type = 'image' where the url stores the image"
+  },
+  "generic": {
+    "pulse_template_ut":{
+      "keyword": "pulse_template_ut",
+      "text": "Hola {name}! ¿Quieres comenzar la encuesta Baltra? Es breve y ayuda a mejorar tu calidad de trabajo. Recuerda que la encuesta es 100% anónima!",
+      "type": "template",
+      "template": "pulse_template_ut",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["comenzar-button"]
+    },
+    "gracias": {
+      "type": "text",
+      "button_trigger": "gracias-button",
+      "text": "Seguimos en contacto {name}!​"
+    },
+    "encuestas": {
+      "type": "text",
+      "button_trigger": "encuestas-button",
+      "text": "❓ Las encuestas Baltra son preguntas rápidas que recibirás cada semana por este WhatsApp. Tus respuestas son completamente anónimas, y al contestar, acumularás puntos Baltra. \n\n🎯 El objetivo es que los directores de {company_name} conozcan cómo te sientes y descubran oportunidades de mejora semana a semana. Los directores implementaran mejoras a tu trabajo y a la compañía acorde a tus comentarios!​"
+    },
+    "owner_template":{
+      "keyword": "business_owner",
+      "text": "Hola {name}, da click abajo para ver tu reporte Baltra de esta semana!",
+      "type": "template",
+      "template": "business_owner",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "url_keys": ["company_id"],
+      "header_type": "image",
+      "header_base": "https://baltrabucket.s3.us-east-2.amazonaws.com/dashboards/company_id_{}.png",
+      "header_content": "company_id"
+    },
+    "owner_template_1":{
+      "keyword": "business_owner_1",
+      "text": "Hola {name}, Da click abajo para ver tu dashboard actualizado.",
+      "type": "template",
+      "template": "business_owner_1",
+      "variables": {
+        "{name}": "first_name"
+      }
+    },
+    "onboarding_1":{
+      "keyword": "onboarding_1",
+      "text": "Hola {name}! Muchas felicidades por unirte al equipo de {company_name}!!🎉🎉 Este es el chat de Baltra. Somos una empresa independiente apoyando a {company_name} a mejorar sus condiciones laborales. Recurda que todo lo que se comparta en este chat será 100% anónimo para la empresa. Nos interesa mucho escuchar tu opinión: Cómo fue tu experiencia en el primer día en {company_name}?",
+      "type": "template",
+      "template": "onboarding_1",
+      "variables": {
+        "{name}": "first_name",
+        "{company_name}": "company_name"
+      }
+    },
+    "onboarding_2":{
+      "keyword": "onboarding_2",
+      "text": "Hola {name}! Quisieramos escuchar tu opinión sobre tu proceso de integración a {company_name}. Cómo fue el trato que recibiste por parte de tu supervisor, compañeros y personal en general de {company_name} en tus primeros días?",
+      "type": "template",
+      "template": "onboarding_2",
+      "variables": {
+        "{name}": "first_name",
+        "{company_name}": "company_name"
+      }
+    },
+    "onboarding_3":{
+      "keyword": "onboarding_3",
+      "text": "Hola {name}! Tu opinión es muy importante para mejorar las condiciones de trabajo en {company_name}! 📈📈 Nos podrías compartir: cómo ha sido tu capacitación durante tu primera semana en {company_name} y quién fue el responsable de impartir la capacitación? Recuerda que tus respuestas son 100% anónimas siempre!",
+      "type": "template",
+      "template": "onboarding_3",
+      "variables": {
+        "{name}": "first_name",
+        "{company_name}": "company_name"
+      }
+    },
+    "exit_survey":{
+      "keyword": "exit_survey",
+      "text": "👋 ¡Hola, {name}! Nos da tristeza que hayas decidido dejar {company_name} y nos gustaría conocer tu opinión para mejorar.❓ ¿Cuál fue el principal motivo por el que decidiste dejar la empresa? Te deseamos mucho éxito en tus siguientes pasos!",
+      "type": "template",
+      "template": "exit_survey",
+      "variables": {
+        "{name}": "first_name",
+        "{company_name}": "company_name"
+      }
+    },
+    "feliz_cumpleanos": {
+      "keyword": "feliz_cumpleanos",
+      "text": "Hola {name}! Te queremos desear un felíz cumpleaños de parte de Baltra y {company_name}.🎉🎉 Que disfrutes mucho tu día!",
+      "type": "template",
+      "template": "feliz_cumpleanos",
+      "template_type": "button",
+      "button_keys": ["gracias-button"],
+      "variables": {
+        "{name}": "first_name",
+        "{company_name}": "company_name"
+      }
+    },
+    "feliz_aniversario": {
+      "keyword": "feliz_aniversario",
+      "text": "  🎉 Hola {name}! 🎉 Hoy celebramos un año más de tu increíble trayectoria en la familia {company_name}. Tu dedicación y esfuerzo han dejado una huella en nuestro equipo. 🥳✨ Gracias por ser parte de este viaje y por contribuir con tu talento y buena energía a {company_name}. ¡Esperamos seguir creando grandes recuerdos juntos! 🎊",
+      "type": "template",
+      "template": "feliz_aniversario",
+      "template_type": "button",
+      "button_keys": ["gracias-button"],
+      "variables": {
+        "{name}": "first_name",
+        "{company_name}": "company_name"
+      }
+    },
+    "happy_holidays":{
+      "keyword": "happy_holidays",
+      "text": "Hola {name} 🎄✨ De parte de Baltra y {company_name}, queremos desearte felices fiestas 🎉 y un próspero Año Nuevo 🎆. Gracias a tu participación en este chat, {company_name} ahora cuenta con las herramientas para hacer de nuestra empresa un mejor lugar de trabajo. Contigo en todo momento, Baltra",
+      "type": "template",
+      "template": "happy_holidays",
+      "header_type": "image",
+      "header_base": "https://baltrabucket.s3.us-east-2.amazonaws.com/comunicados/happy_holidays.png",
+      "variables": {
+        "{name}": "first_name",
+        "{company_name}": "company_name"
+      },
+      "button_keys": ["gracias-button"]
+    },
+    "confirmar_asistencia_push":{
+      "keyword": "confirmar_asistencia_push",
+      "text": "Hola {name}, Tu turno en {company_name} comienza en 2 horas. Por favor confirma tu asistencia abajo",
+      "type": "template",
+      "template": "confirmar_asistencia_push_2",
+      "variables": {
+        "{name}": "first_name",
+        "{company_name}" : "company_name"
+      },
+      "button_keys": ["si-asistiré-button", "no-asistiré-button"]
+    },
+    "confirmar_asistencia_pull": {
+      "keyword": "confirmar_asistencia_pull",
+      "type": "interactive",
+      "interactive_type": "button",
+      "text": "Por favor confirma tu falta abajo",
+      "button_keys": ["si-asistiré-button", "no-asistiré-button"]
+    },
+    "si-asistire": {
+      "type": "text",
+      "button_trigger": "si-asistiré-button",
+      "text": "Gracias por confirmar {name}!"
+    },
+    "no-asistire": {
+      "type": "text",
+      "button_trigger": "no-asistiré-button",
+      "text": "Muchas gracias por reportar tu ausencia {name}."
+    },
+    "attendance": {
+      "keyword": "attendance",
+      "type": "interactive",
+      "interactive_type": "location_request_message",
+      "text": "Por favor confirma tu asistencia aquí!"
+    },
+    "reporte_faltas":{
+      "keyword": "reporte_faltas",
+      "text": "Hola, {name}: El reporte de faltas ya está disponible. Haz clic a continuación para verlo.",
+      "type": "template",
+      "template": "statement_available_1",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["attendance_data"]
+    },
+    "fetch_attendance_data": {
+      "type": "text",
+      "button_trigger": "attendance_data",
+      "text": "Hola {name}. Este es el reporte de asistencias de hoy:\n {attendance_data}"
+    },
+    "cambiar_numero": {
+      "type": "text",
+      "keyword": "cambiar_numero",
+      "text": "Si quieres actualizar tu número registrado en Baltra da click en el siguiente enlace: https://forms.gle/HEmKnNvwVgm9ARHU9 \n\nPara más información contactanos en info@baltra.ai"
+    },
+    "gift_card_confirmation_dynamic":{
+      "keyword": "gift_card_confirmation_2",
+      "text": "Hola {name}! ¡Da click abajo para obtener la Tarjeta de Regalo Amazon que ordenaste por Baltra!",
+      "type": "template",
+      "template": "gift_card_confirmation_2",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "url_keys": ["monthly_path"]
+    },
+    "boletos_cine_generic":{
+      "keyword": "boletos_cine_generic",
+      "text": "¡Ya tienes tus boletos de cine ! Puedes usarlos en la app, sitio web de Cinépolis, o directamente en taquilla. 🎫 Válidos solo para funciones 2D tradicionales. No aplican en salas especiales ni funciones de estreno. ¡Prepara las palomitas 🍿 y disfruta la función! 😎 Tienes hasta el 6 de Octubre de 2025 para usar tus boletos",
+      "type": "template",
+      "template": "boletos_cine",
+      "button_keys": ["boletos_cine-button", "detalles_cine-button","TyC_cine-button"]
+    },
+    "ver_boletos_cine": {
+      "type": "text",
+      "button_trigger": "boletos_cine-button",
+      "text": "Aquí tienes los folios de tus boletos:\n\n{cinepolis}\n\nGuárdalos y no los compartas con nadie."
+    },
+    "detalles_cine": {
+      "type": "text",
+      "button_trigger": "detalles_cine-button",
+      "text": "🎟 En taquilla del cine:\n\n- Muestra los folios\n- Ellos te ayudarán a canjearlos por tus entradas\n\n📱 En la app o sitio web de Cinépolis:\n\n- Ingresa a cinepolis.com o abre la app\n- Elige película, horario y butaca\n- Da clic en “Usar promoción” o “Folio”\n- Ingresa el código alfanumérico de los boletos que te mandamos\n- Sigue las instrucciones para finalizar. El sistema te dará un QR con tus entradas. Preséntate directo en la sala, ya no es necesario ir a taquilla."
+    },
+    "TyC_cine": {
+      "type": "text",
+      "button_trigger": "TyC_cine-button",
+      "text": "La entrada es válida solo en funciones 2D tradicionales\n- No aplica en: Cinépolis VIP, ONYX LED, ScreenX, 4DX, IMAX, Sala Junior, Zona PLUUS, Sala PLUUS y 4DScreenX en todo México\n- No válida en: estrenos, preventas, anime, funciones especiales, contenido alternativo, Cineticket y otras promociones\n- No acumulable con promociones, convenios o programas vigentes\n- Sujeto a disponibilidad y clasificación\n- Vigente solo dentro del territorio de la República Mexicana\n- Tienes hasta el 14 de septiembre de 2025 para usar tus boletos"
+    },
+    "flow_pulse":{
+      "keyword": "flow_pulse",
+      "template": "encuesta_1_ut",
+      "text": "Hola, aquí tienes la encuesta de la semana. Recuerda que es 100% anónima",
+      "type": "template",
+      "variables": {
+        "{company_name}": "company_name"      
+      },
+      "flow_keys": ["pulse"],
+      "flow_action_data": [{
+        "question_1_text": "¿Qué tanto recomendarías a un amigo o familiar trabajar en esta empresa?",
+        "question_2_text": "¿Qué tan frecuente recibes reconocimiento positivo por tu trabajo?",
+        "question_3_text": "¿Qué tan feliz estás en tu trabajo?"
+      }]
+    }
+  },
+  "company_1":{
+  "scheduled_messages_due": {
+    "type": "text",
+    "button_trigger": "scheduled_messages_due",
+    "text": "Hola {name}. Estos son los mensajes programados para hoy:\n {scheduled_messages_due}"
+  },
+  "campaign_summary": {
+    "type": "text",
+    "button_trigger": "campaign_summary",
+    "text": "Hola {name}. Este es el resumen de las campañas de hoy:\n {campaign_summary}"
+  },
+  "utility_messages_due":{
+    "keyword": "utility_messages_due",
+    "text": "Ver mensajes agendados",
+    "type": "template",
+    "template": "order_pick_up_1",
+    "variables": {
+      "{name}": "first_name",
+      "{employee_id}": "employee_id",
+      "{company_name}" : "company_name",
+      "{last_name}": "last_name"
+    },
+    "button_keys": ["scheduled_messages_due"]
+  },
+  "utility_campaign_summary":{
+    "keyword": "utility_campaign_summary",
+    "text": "Ver mensajes agendados",
+    "type": "template",
+    "template": "order_pick_up_1",
+    "variables": {
+      "{name}": "first_name",
+      "{employee_id}": "employee_id",
+      "{company_name}" : "company_name",
+      "{last_name}": "last_name"
+    },
+    "button_keys": ["campaign_summary"]
+  },
+  "testing_flow_message":{
+    "keyword": "testing_flow_message",
+    "text": "testing flow",
+    "type": "template",
+    "template": "testing_flow_message",
+    "flow_keys": ["unused"]
+  },
+    "testing_flow_message_dynamic_number":{
+    "keyword": "prize_flow",
+    "text": "Da click abajo para canjear tu premio!",
+    "type": "flow",
+    "header_type": "text",
+    "footer_text": "Impulsado por Baltra",
+    "header_content": "Canje de Premio",
+    "flow_name": "prize_flow_V1",
+    "flow_CTA": "Canjear"
+  }
+  },
+  "company_3":{
+    "welcome_pollos_generic": {
+      "keyword": "welcome_pollos_generic",
+      "type": "template",
+      "template": "welcome_message_generic_2",
+      "template_type": "button",
+      "button_keys": ["gracias-button","puntos_pollos-button", "encuestas-button"],
+      "variables": {
+        "{name}": "first_name",
+        "{company_name}": "company_name"
+      }, 
+      "text": "Hola {name}! Soy Baltra y esta semana comenzamos a trabajar con {company_name}❓ Comenzaremos con encuestas semanales y el nuevo sistema de recompensas Baltra, todo por whatsapp!🔊 Las encuestas se enviarán todas las semanas y contestarlas genera puntos Baltra. Tus respuestas serán 100% anónimas🏆 Además, te compartiré tus avances en puntualidad, asistencia y productividad. En base a tu buen desempeño generarás puntos Baltra que podrás cambiar por increíbles premios!!🛍🎁🎊Al seguir esta conversación, aceptas nuestro aviso de privacidad. Consúltalo aquí: https://www.baltra.ai/privacidad"
+    },
+    "puntos_pollos": {
+      "type": "text",
+      "button_trigger": "puntos_pollos-button",
+      "text": "Los puntos Baltra funcionan de la siguiente forma: \n\n*Asistencia semanal*:\n0 faltas: 7 puntos\n1 falta o más: 0 puntos\n\n*Puntualidad semanal* :\n0 llegadas tarde: 6 puntos\n1 llegada tarde: 4 puntos\n2 llegadas tarde: 2 puntos\n3 llegadas tarde o más: 0 puntos\n\n*Encuesta Baltra semanal* :\nContestarla: 7 puntos\nNo contestarla: 0 puntos\n\nEjemplo: Si tienes 0 faltas en la semana consigues 7 puntos. Si tienes 0 llegadas tarde consigues 6 puntos. Y si respondes tu encuesta Baltra obtienes 7 puntos extra. En total esa semana consigues 20 puntos! 🥇🥇"
+    },
+    "rewards_pollos_template":{
+      "keyword": "rewards_pollos_template",
+      "text": "Hola {name}, aquí tienes tu avance de puntos Baltra de la semana! 🏆🏆Recuerda que si tienes más de 140 puntos puedes canjear tus premios haciendo una solicitud en este chat🎁🎁 Los premios que solicites serán entregados el primer viernes del mes siguiente🎖",
+      "type": "template",
+      "template": "rewards_template_pollos",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["puntos_pollos-button", "premios_pollos-button"],
+      "header_type": "image",
+      "header_content": "weekly_path"
+    },
+    "rewards_pollos": {
+      "button_trigger": "avance_semanal_pollos-button",
+      "type": "interactive",
+      "interactive_type": "button",
+      "text": "Hola {name}! Te comparto tu *avance de la semana* de puntualidad y asistencia!",
+      "button_keys": ["puntos_pollos-button", "premios_pollos-button", "gracias-button"],
+      "header_type": "image",
+      "header_content": "weekly_path"
+    },
+    "premios_pollos": {
+      "button_trigger": "premios_pollos-button",
+      "type": "interactive",
+      "interactive_type": "button",
+      "text": "Puedes canjear tus puntos por los siguientes *premios!*\n\nRecuerda que se entregan el primer viernes del mes siguiente al que hiciste tu solicitud.",
+      "button_keys": ["avance_semanal_pollos-button", "puntos_pollos-button", "gracias-button"],
+      "header_type": "image",
+      "header_content": "rewards_path"
+    },
+    "onboarding_pollos":{
+      "keyword": "onboarding_pollos",
+      "text": "Hola {name}, muchas felicidades por unirte a la gran familia de Pollo & Co. 🥳🥳Da click abajo para ver un vídeo de bienvenida a la empresa!",
+      "type": "template",
+      "template": "onboarding_pollos",
+      "variables": {
+        "{name}": "first_name"
+      }
+    },
+    "onboarding_pollos_2":{
+      "keyword": "onboarding_pollos_2",
+      "text": "Hola {name}, Da click abajo para ver el video de la misión y visión de {company_name} 🙌🙌🙌 Cualquier duda que tengas no dudes en preguntar",
+      "type": "template",
+      "template": "onboarding_pollos_2",
+      "variables": {
+        "{name}": "first_name",
+        "{company_name}": "company_name"
+      }
+    },
+    "onboarding_pollos_3":{
+      "keyword": "onboarding_pollos_3",
+      "text": "Hola {name}, Da click abajo para ver el video de PALA, la forma de operar en {company_name} 🙌🙌🙌 Cualquier duda que tengas no dudes en preguntar",
+      "type": "template",
+      "template": "onboarding_pollos_3",
+      "variables": {
+        "{name}": "first_name",
+        "{company_name}": "company_name"
+      }
+    }
+  },
+  "company_4": {
+    "welcome_fibras_generic": {
+      "keyword": "welcome_fibras_generic",
+      "type": "template",
+      "template": "welcome_message_generic_2",
+      "template_type": "button",
+      "button_keys": ["gracias-button","puntos_fibras-button", "encuestas-button"],
+      "variables": {
+        "{name}": "first_name",
+        "{company_name}": "company_name"
+      }, 
+      "text": "Hola {name}! Soy Baltra y esta semana comenzamos a trabajar con {company_name}❓ Comenzaremos con encuestas semanales y el nuevo sistema de recompensas Baltra, todo por whatsapp!🔊 Las encuestas se enviarán todas las semanas y contestarlas genera puntos Baltra. Tus respuestas serán 100% anónimas🏆 Además, te compartiré tus avances en puntualidad, asistencia y productividad. En base a tu buen desempeño generarás puntos Baltra que podrás cambiar por increíbles premios!!🛍🎁🎊Al seguir esta conversación, aceptas nuestro aviso de privacidad. Consúltalo aquí: https://www.baltra.ai/privacidad"
+    },
+    "puntos_fibras": {
+      "type": "text",
+      "button_trigger": "puntos_fibras-button",
+      "text":"🎯 *Puntos Baltra para ganar el bono mensual de $500* 🎯\n\nAcumula *al menos 238 puntos* al mes para obtener el bono de $500 en vales de despensa. Esto significa tener *asistencia perfecta* y un *máximo de 2 retardos*.\n\n📅 *Turno diurno (24 días al mes):*\n- ✅ Asistencia: 10 puntos por día\n- 🕒 Retardo: 9 puntos por día\n- ❌ Falta: 0 puntos\n\n🌙 *Turno nocturno (16 días al mes):*\n- ✅ Asistencia: 15 puntos por día\n- 🕒 Retardo: 14 puntos por día\n- ❌ Falta: 0 puntos\n\nEjemplo: En turno diurno, con 23 asistencias y 1 retardo, acumulas *239 puntos* y te ganas el bono.\n\n⚠️ *Recuerda que necesitas tener más de 3 meses en la empresa para ganar este bono de puntualidad y asistencia.* 🏆\n\n📋 *Encuesta Baltra semanal:*\nCada jueves recibirás una encuesta que ayuda a mejorar las condiciones laborales.\nSi respondes las 4 encuestas del mes, ¡ganas un *bono adicional de $100* en una tarjeta de regalo digital\n\n⚠️ *Este bono de encuesta aplica para quienes tienen más de 1 mes en la empresa.* 🙌"
+    },
+    "rewards_fibras_template":{
+      "keyword": "rewards_fibras_template",
+      "text": "Hola {name}! Te comparto tu *resultados de esta semana* de puntualidad, asistencia y la encuesta!",
+      "type": "template",
+      "template": "rewards_template",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["puntos_fibras-button", "gracias-button"],
+      "header_type": "image",
+      "header_content": "weekly_path"
+    },
+    "rewards_fibras_template_fin_mes":{
+      "keyword": "rewards_fibras_template_fin_mes",
+      "text": "Hola {name}! Te comparto tus resultados de esta semana de puntualidad, asistencia y la encuesta! Felicitaciones a los ganadores del bono!",
+      "type": "template",
+      "template": "rewards_fibras_template_fin_mes",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["felicidades_bono-button", "puntos_fibras-button","gracias-button"],
+      "header_type": "image",
+      "header_content": "weekly_path"
+    },
+    "pulse_template_fibras":{
+      "keyword": "pulse_template_fibras",
+      "text": "Hola {name}! ¿Quieres comenzar la encuesta Baltra? Es breve y ayuda a mejorar tu calidad de trabajo. Recuerda que la encuesta es 100% anónima!",
+      "type": "template",
+      "template": "pulse_template_3",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["comenzar-button", "cambios_fibras-button"]
+    },
+    "cambios_fibras": {
+      "type": "text",
+      "button_trigger": "cambios_fibras-button",
+      "text": "Gracias a tus comentarios en este chat hemos realizado los siguientes cambios! Te impulsamos a que sigas participando en las encuestas, tu opinión es muy importante para {company_name}: \n\n Se esta trabajando en una matriz de capacitción y habilidades para desarrollar a los colaboradores"
+    },
+    "felicidades_bono":{
+      "keyword": "felicidades_bono",
+      "button_trigger": "felicidades_bono-button",
+      "text": "🎉 ¡Aquí están los ganadores del bono de puntualidad y asistencia de $500 pesos en vales de despensa para el mes de octubre! 🎉🎊 ¡Muchas felicidades a los ganadores! 🎊 Para quienes estuvieron cerca, los invitamos a seguir esforzándose para obtener el bono este mes.", 
+      "type": "template",
+      "template": "felicidades_bono",
+      "header_type": "image",
+      "header_base": "https://baltrabucket.s3.us-east-2.amazonaws.com/comunicados/ganadores_{}.png",
+      "header_content": "company_id",
+      "button_keys": ["puntos_fibras-button", "gracias-button"]
+    },
+    "unlock_encuestas": {
+      "keyword": "unlock_encuestas",
+      "text": "Hola first_name! 🎉 ¡Muchas felicidades por haber alcanzado 30 días en company_name! 👏✨ A partir del próximo mes has desbloqueado un nuevo beneficio: Encuestas Baltra 📊.¡Respóndelas cada semana para obtener una tarjeta de regalo de $100 pesos a final de mes! 🎁💸",
+      "type": "template",
+      "template": "unlock_encuestas",
+      "template_type": "button",
+      "button_keys": ["encuestas-button", "gracias-button"],
+      "variables": {
+        "{name}": "first_name",
+        "{company_name}": "company_name"
+      }
+    },
+    "unlock_puntos": {
+      "keyword": "unlock_puntos",
+      "text": "Hola {name}! 🎉 ¡Muchas felicidades por haber alcanzado 3 meses en {company_name}! 👏✨ A partir del próximo mes has desbloqueado un nuevo beneficio: Bono de Puntualidad y Asistencia📊.Obten asistencia perfecta y un máximo de 2 retardos para ganar $500 en vales de despensa a final de mes 🎁💸",
+      "type": "template",
+      "template": "unlock_puntos",
+      "template_type": "button",
+      "button_keys": ["puntos_fibras-button","gracias-button"],
+      "variables": {
+        "{name}": "first_name",
+        "{company_name}": "company_name"
+      }
+    },
+    "gift_card_soriana": {
+      "keyword": "gift_card_soriana",
+      "text": "Hola {name}! muchas felicidades por completar tus encuestas de Baltra 🙌 Ya puedes acceder a tu tarjeta de regalo de Soriana 🛒, con el monto correspondiente al bono por tu participación en las encuestas de marzo y abril. Haz clic en el siguiente enlace para obtenerla",
+      "type": "template",
+      "template": "gift_card_delivery",
+      "template_type": "button",
+      "button_keys": ["canje_soriana-button"],
+      "variables": {
+        "{name}": "first_name"
+      },
+      "url_keys": ["soriana"]
+    },
+    "instrucciones_canje": {
+      "type": "text",
+      "button_trigger": "canje_soriana-button",
+      "text": "Presenta esta e-gift card o tarjeta de regalo digital en las tiendas físicas de Soriana en sus formatos Hiper, Súper, Mercado y Express dentro de los horarios de operación de cada tienda, en formato digital desde tu celular, o impresa en papel con el código de barras de la tarjeta y código verificador visible.\n\n*Recuerda no compartir tu tarjeta con nadie!*"
+    }
+  },
+  "company_5": {
+    "welcome_brinco_generic": {
+    "keyword": "welcome_brinco_generic",
+    "type": "template",
+    "template": "welcome_message_generic_2",
+    "template_type": "button",
+    "button_keys": ["gracias-button","puntos_brinco-button", "encuestas-button"],
+    "variables": {
+      "{name}": "first_name",
+      "{company_name}": "company_name"
+    }, 
+    "text": "Hola {name}! Soy Baltra y esta semana comenzamos a trabajar con {company_name}❓ Comenzaremos con encuestas semanales y el nuevo sistema de recompensas Baltra, todo por whatsapp!🔊 Las encuestas se enviarán todas las semanas y contestarlas genera puntos Baltra. Tus respuestas serán 100% anónimas🏆 Además, te compartiré tus avances en puntualidad, asistencia y productividad. En base a tu buen desempeño generarás puntos Baltra que podrás cambiar por increíbles premios!!🛍🎁🎊Al seguir esta conversación, aceptas nuestro aviso de privacidad. Consúltalo aquí: https://www.baltra.ai/privacidad"
+    },
+    "puntos_brinco": {
+      "type": "text",
+      "button_trigger": "puntos_brinco-button",
+      "text": "Puedes ganar hasta 1200 puntos al mes según tu desempeño:\n✅ *Productividad:* Hasta *600 puntos* al mes según métricas de tu área.\n✅ *Puntualidad y asistencia: 500 puntos* al mes si no tienes faltas ni retardos en el mes.\n✅ *Encuesta Baltra: 25 puntos* por semana al completarla.\n\n⚠️ Deducciones:\n❌ Reporte de seguridad: -50 puntos (falta de uniforme, EPP o uso de celular).\n❌ Progreso incorrecto: -50 puntos\n❌ A partir de la segunda falta del mes: -600 puntos por falta\n❌ Acta administrativa: -1200 puntos\n\n¡Acumula puntos y cámbialos por premios increíbles! 🎁"
+    },
+    "rewards_brinco_template":{
+      "keyword": "rewards_template_brinco",
+      "button_trigger": "rewards_brinco-button",
+      "text": "Hola {name},  te comparto tu avance de *puntos Baltra* de esta semana 🏆🏆 Recuerda que llegando *puntual*, respondiendo la *encuesta* y *trabajando en equipo* ganamos todos!🥇",
+      "type": "template",
+      "template": "rewards_template_brinco_3",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["puntos_brinco-button", "detalles_puntos_brinco-button", "premios_brinco-button"],
+      "header_type": "image",
+      "header_content": "weekly_path"
+    },
+    "rewards_brinco_template_inicio_mes":{
+      "keyword": "rewards_template_brinco_inicio_mes",
+      "text": "Hola {name} 👋 Te comparto tu avance de puntos Baltra, en donde ya tienes tus puntos de puntualidad y asistencia del mes de Julio 🏆🏆 📅 Las fechas para canjear tus puntos por premios son el 8, 9 y 10 de Septiembre 🛍️🎁🥇",
+      "type": "template",
+      "template": "rewards_template_brinco_6",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["cuantos_puntos_brinco-button", "detalles_semana_brinco-button", "premios_new_brinco-button"],
+      "header_type": "image",
+      "header_content": "weekly_path"
+    },
+    "inicio_canjes_brinco":{
+      "keyword": "inicio_canjes_brinco",
+      "text": "🚨🚨 *¡Canjea tus puntos {name}!* 🚨🚨De hoy al miércoles a las 11:59 p.m. ⏰ puedes canjear tus puntos por premios 🎁",
+      "type": "template",
+      "template": "inicio_canjes",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["prize_flow"]
+    },
+    "fin_canjes_brinco":{
+      "keyword": "fin_canjes_brinco",
+      "text": "🚨🚨 *¡Canjea tus puntos {name}!* 🚨🚨Recuerda que hoy es el último día para canjear tus puntos este mes⏰ No olvides seleccionar tu premio favorito antes de las a las 11:59 p.m. 🎁",
+      "type": "template",
+      "template": "fin_canjes",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["prize_flow"]
+    },
+    "rewards_brinco_template_temporal":{
+      "keyword": "rewards_template_brinco_temporal",
+      "text": "Hola {name}, A partir de esta semana entrán en vigor las nuevas políticas del sistema de puntos Baltra. Da click abajo para ver el comunicado",
+      "type": "template",
+      "template": "brinco_rewards_v3",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["politica_puntos_brinco-button", "rewards_brinco-button", "premios_brinco-button"]
+    },
+    "premios_brinco": {
+      "button_trigger": "premios_brinco-button",
+      "type": "interactive",
+      "interactive_type": "button",
+      "text": "Puedes canjear tus puntos por los siguientes *premios!*\n\nRecuerda que se entregan el segundo viernes del mes siguiente al que hiciste tu solicitud.",
+      "button_keys": ["puntos_brinco-button", "detalles_puntos_brinco-button", "rewards_brinco-button"],
+      "header_type": "image",
+      "header_content": "rewards_path"
+    },
+    "intro_puntos_brinco": {
+      "keyword": "intro_puntos_brinco",
+      "text": "¡Hola {name}! 🎉Te presentamos el nuevo programa de puntos Baltra para {company_name}, donde puedes ganar hasta 1200 puntos al mes según tu desempeño:✅ Productividad: Hasta 600 puntos al mes según métricas de tu área.✅ Puntualidad y asistencia: 500 puntos al mes si no tienes faltas y máximo 1 retardo al mes.✅ Encuesta Baltra: 25 puntos por semana al completarla.⚠️ Deducciones:❌ Reporte de seguridad: -50 puntos (falta de uniforme, EPP o uso de celular).❌ Progreso incorrecto: -50 puntos❌ Acta administrativa: -1200 puntos ¡Acumula puntos y cámbialos por premios increíbles! 🎁",
+      "type": "template",
+      "template": "intro_puntos_brinco_2",
+      "template_type": "button",
+      "button_keys": ["explicar_cambios_brinco-button","detalles_puntos_brinco-button", "rewards_template_brinco"],
+      "variables": {
+        "{name}": "first_name", 
+        "{company_name}": "company_name"
+      }
+    },
+    "detalles_puntos_brinco": {
+      "type": "text",
+      "button_trigger": "detalles_puntos_brinco-button",
+      "text": "Hola {name}!\nAcumularás puntos de la siguiente manera:\n{rewards_description}."
+    },
+    "explicar_cambios_brinco": {
+      "type": "text",
+      "button_trigger": "explicar_cambios_brinco-button",
+      "text": "📢 ¡En conjunto con {company_name} hemos mejorado el sistema de *puntos Baltra*! 🎉\n\nAhora puedes ganar hasta 1200 puntos al mes en lugar de 440. Además, los puntos valen más, por lo que aunque tu saldo bajó, sigues pudiendo canjear los mismos premios con menos puntos. Por ejemplo, una licuadora antes costaba 670 puntos y ahora solo 500.\n\nTambién hemos renovado el catálogo de premios, agregando nuevas opciones. 🎁\n\nTus puntos anteriores se mantienen y todos los premios que ya canjeaste se entregarán en los próximos días. No hay nada de qué preocuparse. ✅\n\n¡Sigue acumulando puntos y canjéalos por increíbles recompensas! 🚀"
+    },
+    "pulse_template_brinco":{
+      "keyword": "pulse_template_brinco",
+      "text": "Hola {name}! ¿Quieres comenzar la encuesta Baltra? Es breve y ayuda a mejorar tu calidad de trabajo. Recuerda que la encuesta es 100% anónima!",
+      "type": "template",
+      "template": "pulse_template_3",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["comenzar-button", "cambios_brinco-button"]
+    },
+    "cambios_brinco": {
+      "type": "text",
+      "button_trigger": "cambios_brinco-button",
+      "text": "Gracias a tus comentarios en este chat hemos realizado los siguientes cambios! Te impulsamos a que sigas participando en las encuestas, tu opinión es muy importante para {company_name}\n\nSe ha trabajado en distintos aspectos de la seguridad e higiene de la planta"
+    },
+    "politica_puntos_brinco": {
+      "type": "document",
+      "button_trigger": "politica_puntos_brinco-button",
+      "text": "Hola {name},\nAquí puedes ver la nueva política de los puntos Baltra.",
+      "link": "https://baltrabucket.s3.us-east-2.amazonaws.com/comunicados/F-RH-019-15+BALTRA.pdf",
+      "filename":"F-RH-019"
+    },
+    "comunicado_brinco_1": {
+      "type": "document",
+      "keyword": "comunicado_brinco_1",
+      "button_trigger": "comunicado_brinco_1-button",
+      "text": "Comunicado: Liquidación de Mobiliario y Equipo",
+      "link": "https://baltrabucket.s3.us-east-2.amazonaws.com/comunicados/IMG_20241104_0002.pdf",
+      "filename":"CONT-0020-24"
+    },
+    "comunicado_brinco_2": {
+      "type": "document",
+      "keyword": "comunicado_brinco_2",
+      "button_trigger": "comunicado_brinco_2-button",
+      "text": "Comunicado: Únete al equipo oficial de fútbol de Entretelas Brinco",
+      "link": "https://baltrabucket.s3.us-east-2.amazonaws.com/comunicados/F-RH-019-16+Convocatoria+f%C3%BAtbol+BALTRA.pdf",
+      "filename":"Convocatoria fútbol"
+    },
+    "comunicado_brinco_3":{
+      "type": "document",
+      "keyword": "comunicado_brinco_3",
+      "button_trigger": "comunicado_brinco_3-button",
+      "text": "Únete: ¡Gana un bono de *$500 por referir talento* a nuestra empresa!",
+      "link": "https://baltrabucket.s3.us-east-2.amazonaws.com/comunicados/F-RH-019-17+Candidatos+referidos.pdf",
+      "filename":"Bono de Referidos"
+      
+    },
+    "comunicado":{
+      "keyword": "comunicado",
+      "text": "Hola {name}! Da click abajo para ver tu nuevo comunicado!",
+      "type": "template",
+      "template": "comunicado",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["comunicado_brinco_3-button"]
+    },
+    "flow_ECPI":{
+      "keyword": "flow_ecpi",
+      "template": "ecpi_flow_1",
+      "text": "Califica a tus colegas Hola {name}. Tus comentarios son importantes para nosotros. Realiza una breve encuesta sobre tu experiencia trabajando con el area de {context}.",
+      "type": "template",
+      "variables": {
+        "{name}": "first_name",
+        "{context}": "context"
+      },
+      "flow_keys": ["ECPI"],
+      "flow_action_data": [{
+        "area": "context"
+      }]
+    },
+    "flow_ECPI_mtto":{
+      "keyword": "flow_ecpi_mtto",
+      "template": "ecpi_flow_mtto",
+      "text": "Califica a tus colegas Hola {name}. Tus comentarios son importantes para nosotros. Realiza una breve encuesta sobre tu experiencia trabajando con el resto de las areas.",
+      "type": "template",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "flow_keys": ["ECPI-mtto"]
+    },
+    "flow_calidad":{
+      "keyword": "flow_calidad",
+      "template": "calidad",
+      "text": "Hola {name}. Tus comentarios son importantes para nosotros. Realiza una breve encuesta sobre tu experiencia con calidad",
+      "type": "template",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "flow_keys": ["calidad"]
+    },
+    "prize_flow_closed": {
+      "keyword": "prize_flow_closed",
+      "type": "text",
+      "text": "En este momento no es posible canjear tus puntos por premios. Los canjes estarán abiertos del 4 al 6 de Agosto, por ahora sigue acumulando puntos!!"
+    },
+    "new_rewards_brinco":{
+      "keyword": "new_rewards_brinco",
+      "button_trigger": "new_rewards_brinco-button",
+      "text": "Hola {name}!Te comparto tu avance de puntos Baltra de esta semana 🏆🏆 Recuerda que llegando puntual, respondiendo la encuesta y trabajando en equipo ganamos todos!🥇",
+      "type": "template",
+      "template": "new_rewards_brinco",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["cuantos_puntos_brinco-button", "detalles_semana_brinco-button", "premios_new_brinco-button"],
+      "header_type": "image",
+      "header_content": "weekly_path"
+    },
+    "puntos_totales_brinco":{
+      "keyword": "puntos_totales_brinco",
+      "button_trigger": "cuantos_puntos_brinco-button",
+      "text": "Hola {name}! Te comparto tu total de puntos acumulados hasta el día de hoy",
+      "type": "interactive",
+      "interactive_type": "button",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["puntos_brinco-button", "detalles_puntos_brinco-button", "new_rewards_brinco-button"],
+      "header_type": "image",
+      "header_content": "daily_path"
+    },
+    "detalles_semana_brinco":{
+      "keyword": "detalles_semana_brinco",
+      "button_trigger": "detalles_semana_brinco-button",
+      "text": "Hola {name}! Te comparto el detalle de tus puntos acumulados esta semana",
+      "type": "interactive",
+      "interactive_type": "button",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["new_rewards_brinco-button"],
+      "header_type": "image",
+      "header_content": "monthly_path"
+    },
+    "premios_brinco_new":{
+      "keyword": "premios_brinco_new",
+      "button_trigger": "premios_new_brinco-button",
+      "text": "Hola {name}! Te comparto el detalle de tu progreso para ganar premios",
+      "type": "interactive",
+      "interactive_type": "button",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["cuantos_puntos_brinco-button", "new_rewards_brinco-button"],
+      "header_type": "image",
+      "header_content": "rewards_path"
+    },
+    "gracias_brinco":{
+      "keyword": "gracias_brinco",
+      "text": "👋 Hola {name}, Queremos agradecerte por haber participado en el chat de Baltra. 🙌A partir de septiembre dejaremos de trabajar con Entretelas Brinco, por lo que ya no recibirás mensajes en este chat.✨ Tus puntos están seguros y será la empresa quien se encargue de liquidarlos.📲 Para que la empresa pueda seguir escuchándote, se habilitó el siguiente link como canal anónimo e interno.Finalmente, agradecemos a Brinco por haber elegido a Baltra en su búsqueda de ofrecer los mejores beneficios a sus colaboradores. 💙",
+      "type": "template",
+      "template": "gracias_brinco",
+      "variables": {
+        "{name}": "first_name"
+      }
+    }
+  },
+  "company_6": {
+    "welcome_saks_generic": {
+      "keyword": "welcome_saks_generic",
+      "type": "template",
+      "template": "welcome_message_generic_2",
+      "template_type": "button",
+      "button_keys": ["gracias-button","puntos_saks-button", "encuestas-button"],
+      "variables": {
+        "{name}": "first_name",
+        "{company_name}": "company_name"
+      }, 
+      "text": "Hola {name}! Soy Baltra y esta semana comenzamos a trabajar con {company_name}❓ Comenzaremos con encuestas semanales y el nuevo sistema de recompensas Baltra, todo por whatsapp!🔊 Las encuestas se enviarán todas las semanas y contestarlas genera puntos Baltra. Tus respuestas serán 100% anónimas🏆 Además, te compartiré tus avances en puntualidad, asistencia y productividad. En base a tu buen desempeño generarás puntos Baltra que podrás cambiar por increíbles premios!!🛍🎁🎊Al seguir esta conversación, aceptas nuestro aviso de privacidad. Consúltalo aquí: https://www.baltra.ai/privacidad"
+    },
+    "puntos_saks": {
+      "button_trigger": "puntos_saks-button",
+      "type": "interactive",
+      "interactive_type": "button",
+      "text": "*Encuesta semanal:* \n- *2 puntos* \n*Puntualidad:* \n- *15 puntos:* Sin retardos. \n- *5 puntos:* Con 1 retardo. \n- *0 puntos:* Más de 1 retardo. \n*Metas de Venta y Merma:* \n- *20 puntos:* Alcanzar la meta mensual. \n- *40 puntos:* Superar la meta mensual por 5%. \n  - *Salón:* Se mide por venta. \n  - *Cocina:* Se mide por merma. \n\n*Importante:* \n- Para ganar puntos de metas y puntualidad, *no debes tener faltas* o *máximo 1 falta con aviso.* \n- Los puntos que obtengas se multiplican por el nivel que tienes en la empresa.",
+      "button_keys": ["niveles_saks-button", "premios_saks-button", "rewards_saks-button"]
+    },
+    "rewards_saks_template":{
+      "keyword": "rewards_saks_template",
+      "button_trigger": "rewards_saks-button",
+      "text": "Hola {name}, Te comparto tu avance de puntos de esta semana. Recuerda que llegando puntual, respondiendo la encuesta y trabajando en equipo ganamos todos!🥇",
+      "type": "template",
+      "template": "rewards_saks_template_1",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["premios_saks-button", "niveles_saks-button", "puntos_saks-button"],
+      "header_type": "image",
+      "header_content": "weekly_path"
+    },
+    "rewards_saks_template_temporal":{
+      "keyword": "rewards_saks_template_temporal",
+      "text": "Hola {name}, Te comparto tu avance de puntos de esta semana. Felicidades a los colaboradores con más de 80 puntos que ya pueden canjear un premio! Recuerda que llegando puntual, respondiendo la encuesta y trabajando en equipo ganamos todos!🥇",
+      "type": "template",
+      "template": "rewards_saks_template_2",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["premios_saks-button", "niveles_saks-button", "puntos_saks-button"],
+      "header_type": "image",
+      "header_content": "weekly_path"
+    },
+    "premios_saks": {
+      "button_trigger": "premios_saks-button",
+      "type": "interactive",
+      "interactive_type": "button",
+      "text": "Puedes canjear tus puntos por los siguientes *premios!*\n\nRecuerda que se entregan el segundo viernes del mes siguiente al que hiciste tu solicitud.",
+      "button_keys": ["puntos_saks-button", "niveles_saks-button", "rewards_saks-button"],
+      "header_type": "image",
+      "header_content": "rewards_path"
+    },
+    "intro_points_saks":{
+      "keyword": "intro_points_saks",
+      "text": "¡Hola {name}! 🌟 Te presentamos Puntos Baltra, el nuevo programa de recompensas por desempeño de {company_name} 🎁\nCómo funciona?\n• Puedes ganar hasta 240 puntos al mes según tu desempeño y antiguedad. 💼\n• Canjea tus puntos por premios como electrodomésticos y vales de despensa.🛍️\n• Cada semana te enviaremos una actualización de tu progreso 📈\nSi tienes preguntas, ¡escríbenos por este chat! Estamos aquí para ayudarte. 😊",
+      "type": "template",
+      "template": "intro_points",
+      "variables": {
+        "{name}": "first_name",
+        "{company_name}": "company_name"
+      },
+      "button_keys": ["puntos_saks-button", "niveles_saks-button", "premios_saks-button"]
+    },
+    "niveles_saks": {
+      "button_trigger": "niveles_saks-button",
+      "type": "interactive",
+      "interactive_type": "button",
+      "text": "🏅 En {company_name} valoramos la antigüedad de nuestros colaboradores: \n- Si tienes menos de 3 meses en la empresa, eres *nivel 1*. \n- Si tienes de 3 a 10 meses, eres *nivel 2* y ganarás el doble de puntos. \n- Si tienes más de 10 meses, eres *nivel 3* y ganarás el triple de puntos. \n\n✨ *¿Cómo funciona el multiplicador?* \nLos puntos que acumules se multiplican por tu nivel. \nPor ejemplo: \nSi eres *nivel 3* y acumulas 80 puntos, ganas *240 puntos!!*",
+      "button_keys": ["puntos_saks-button", "premios_saks-button", "rewards_saks-button"]
+    },
+    "rewards_saks_template_canje":{
+      "keyword": "rewards_saks_template_canje",
+      "text": "¡Hola {name}! 🎉 Aquí tienes tu avance de puntos Baltra ⭐¡No olvides canjear tus premios 🎁 por tu excelente desempeño! 💪😄",
+      "type": "template",
+      "template": "rewards_template_canje",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["prize_flow", "rewards_saks-button"],
+      "header_type": "image",
+      "header_content": "rewards_path"
+    },
+      "rewards_saks_template_canje_temporal":{
+      "keyword": "rewards_template_canje_temporal_saks",
+      "text": "¡Hola {name}! 🎉 Da click abajo para ver tu avance de puntos Baltra ⭐Muchas felicidades a quienes recibieron sus premios hoy!😄 Recuerda que para acumular puntos debes llegar puntual y alcanzar tus objetivos de venta y merma",
+      "type": "template",
+      "template": "rewards_template_canje_temporal",
+      "header_type": "image",
+      "header_base": "https://baltrabucket.s3.us-east-2.amazonaws.com/comunicados/rewards_saks.png",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["prize_flow", "rewards_saks-button"]
+    },
+    "gift_card_soriana_saks": {
+      "keyword": "gift_card_soriana_saks",
+      "text": "Hola {name}! 🎉Ya puedes acceder a tu tarjeta de regalo de Soriana que canjeaste a través de Baltra. Da click en el siguiente enlace para obtenerla",
+      "type": "template",
+      "template": "tarjeta_soriana_2",
+      "template_type": "button",
+      "button_keys": ["canje_soriana-button"],
+      "variables": {
+        "{name}": "first_name"
+      },
+      "url_keys": ["soriana"]
+    }
+  },
+  "company_7": {
+    "welcome_carnes_generic": {
+      "keyword": "welcome_carnes_generic",
+      "type": "template",
+      "template": "welcome_message_generic_2",
+      "template_type": "button",
+      "button_keys": ["gracias-button","puntos_carnes-button", "encuestas-button"],
+      "variables": {
+        "{name}": "first_name",
+        "{company_name}": "company_name"
+      }, 
+      "text": "Hola {name}! Soy Baltra y esta semana comenzamos a trabajar con {company_name}❓ Comenzaremos con encuestas semanales y el nuevo sistema de recompensas Baltra, todo por whatsapp!🔊 Las encuestas se enviarán todas las semanas y contestarlas genera puntos Baltra. Tus respuestas serán 100% anónimas🏆 Además, te compartiré tus avances en puntualidad, asistencia y productividad. En base a tu buen desempeño generarás puntos Baltra que podrás cambiar por increíbles premios!!🛍🎁🎊Al seguir esta conversación, aceptas nuestro aviso de privacidad. Consúltalo aquí: https://www.baltra.ai/privacidad"
+    },
+    "puntos_carnes": {
+      "button_trigger": "puntos_carnes-button",
+      "type": "interactive",
+      "interactive_type": "button",
+      "text": "Puedes ganar hasta *37.5 puntos a la semana* 🎯\n\n✨ *Productividad*: Hasta 25 puntos según el cumplimiento de las métricas de desempeño de tu área.\n✨ *Puntualidad:* \n - 10 puntos si no tienes retardos.\n - 5 puntos si tienes 1 o 2 retardos.\n - 0 puntos si tienes más de 2 retardos.\n✨ *Encuesta Baltra*: 2.5 puntos por completarla. \n\n⚠️ Importante: Para obtener los puntos de productividad y puntualidad, no debes tener faltas o reportes. Si los tienes, solo acumularás puntos por la encuesta.\n\n- Los puntos que obtengas se *multiplican por el nivel* que tienes en la empresa.",
+      "button_keys": ["niveles_carnes-button", "premios_carnes-button", "detalles_puntos_carnes-button"]
+    },
+    "niveles_carnes": {
+      "button_trigger": "niveles_carnes-button",
+      "type": "interactive",
+      "interactive_type": "button",
+      "text": "🏅 En {company_name} valoramos la antigüedad de nuestros colaboradores: \n- Si tienes menos de 3 meses en la empresa, eres *nivel 1*. \n- Si tienes de 3 a 10 meses, eres *nivel 2* y ganarás el doble de puntos. \n- Si tienes más de 10 meses, eres *nivel 3* y ganarás el triple de puntos. \n\n✨ *¿Cómo funciona el multiplicador?* \nLos puntos que acumules se multiplican por tu nivel. \nPor ejemplo: \nSi eres *nivel 3* y acumulas 25 puntos, ganas *75 puntos!!*",
+      "button_keys": ["puntos_carnes-button", "premios_carnes-button", "detalles_puntos_carnes-button"]
+    },
+    "rewards_carnes_template":{
+      "keyword": "rewards_template_carnes",
+      "button_trigger": "rewards_carnes-button",
+      "text": "Hola {name}, Aquí tienes tu avance de puntos Baltra de la semana!🏆🏆",
+      "type": "template",
+      "template": "rewards_saks_template_1",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["premios_carnes-button", "niveles_carnes-button", "puntos_carnes-button"],
+      "header_type": "image",
+      "header_content": "weekly_path"
+    },
+    "premios_carnes": {
+      "button_trigger": "premios_carnes-button",
+      "type": "interactive",
+      "interactive_type": "button",
+      "text": "Puedes canjear tus puntos por los siguientes *premios!*\n\nRecuerda que se entregan el segundo viernes del mes siguiente al que hiciste tu solicitud.",
+      "button_keys": ["puntos_carnes-button", "detalles_puntos_carnes-button", "rewards_carnes-button"],
+      "header_type": "image",
+      "header_content": "rewards_path"
+    },
+    "detalles_puntos_carnes": {
+      "type": "text",
+      "button_trigger": "detalles_puntos_carnes-button",
+      "text": "Hola {name}!\n Acumularás puntos de la siguiente manera:\n {rewards_description}."
+    },
+    "pulse_template_carnes":{
+      "keyword": "pulse_template_carnes",
+      "text": "Hola {name}! ¿Quieres comenzar la encuesta Baltra? Es breve y ayuda a mejorar tu calidad de trabajo. Recuerda que la encuesta es 100% anónima!",
+      "type": "template",
+      "template": "pulse_template_3",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["comenzar-button", "cambios_carnes-button"]
+    },
+    "cambios_carnes": {
+      "type": "text",
+      "button_trigger": "cambios_carnes-button",
+      "text": "Gracias a tus comentarios en este chat hemos realizado los siguientes cambios! Te impulsamos a que sigas participando en las encuestas, tu opinión es muy importante para {company_name}\n\nSe esta evaluando aumentar el personal para optimizar la eficiencia operativa."
+    },
+    "rewards_carnes_template_canje":{
+      "keyword": "rewards_carnes_template_canje",
+      "text": "¡Hola {name}! 🎉 Aquí tienes tu avance de puntos Baltra ⭐¡No olvides canjear tus premios 🎁 por tu excelente desempeño! 💪😄",
+      "type": "template",
+      "template": "rewards_template_canje",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["prize_flow", "rewards_carnes-button"],
+      "header_type": "image",
+      "header_content": "rewards_path"
+    },
+    "recarga_celular_carnes": {
+      "keyword": "recarga_celular_carnes",
+      "text": "Hola {name}! muchas felicidades por haber ganado tu recarga celular Puedes dar click en el link de abajo para acceder a tu recarga y abonarla a tu número de teléfono.",
+      "type": "template",
+      "template": "recarga_celular",
+      "template_type": "button",
+      "button_keys": ["recarga_celular-button"],
+      "variables": {
+        "{name}": "first_name"
+      },
+      "url_keys": ["recargas"]
+    },
+    "instrucciones_canje_recarga": {
+      "type": "text",
+      "button_trigger": "recarga_celular-button",
+      "text": "Selecciona tu compañía telefónica. Después escribir correctamente el número telefónico a diez dígitos y escribirlo nuevamente en el campo confirmar número. Después de llenar los campos correctamente presiona el botón Obtener mi recompensa y espera unos segundos para recibir el mensaje de confirmación de tu recarga."
+    },
+    "new_rewards_carnes":{
+      "keyword": "new_rewards_carnes",
+      "button_trigger": "new_rewards_carnes-button",
+      "text": "Hola {name}!Te comparto tu avance de puntos Baltra de esta semana 🏆🏆 Recuerda que llegando puntual, respondiendo la encuesta y trabajando en equipo ganamos todos!🥇",
+      "type": "template",
+      "template": "new_rewards_brinco",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["cuantos_puntos_carnes-button", "detalles_semana_carnes-button", "premios_new_carnes-button"],
+      "header_type": "image",
+      "header_content": "weekly_path"
+    },
+    "puntos_totales_carnes":{
+      "keyword": "puntos_totales_carnes",
+      "button_trigger": "cuantos_puntos_carnes-button",
+      "text": "Hola {name}! Te comparto tu total de puntos acumulados hasta el día de hoy",
+      "type": "interactive",
+      "interactive_type": "button",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["puntos_carnes-button", "detalles_puntos_carnes-button", "new_rewards_carnes-button"],
+      "header_type": "image",
+      "header_content": "daily_path"
+    },
+    "detalles_semana_carnes":{
+      "keyword": "detalles_semana_carnes",
+      "button_trigger": "detalles_semana_carnes-button",
+      "text": "Hola {name}! Te comparto el detalle de tus puntos acumulados esta semana",
+      "type": "interactive",
+      "interactive_type": "button",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["new_rewards_carnes-button"],
+      "header_type": "image",
+      "header_content": "monthly_path"
+    },
+    "premios_carnes_new":{
+      "keyword": "premios_carnes_new",
+      "button_trigger": "premios_new_carnes-button",
+      "text": "Hola {name}! Te comparto el detalle de tu progreso para ganar premios",
+      "type": "interactive",
+      "interactive_type": "button",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["prize_flow", "cuantos_puntos_carnes-button", "new_rewards_carnes-button"],
+      "header_type": "image",
+      "header_content": "rewards_path"
+    }
+  },
+  "company_8": {
+    "welcome_etal_generic": {
+    "keyword": "welcome_etal_generic",
+    "type": "template",
+    "template": "welcome_message_generic_2",
+    "template_type": "button",
+    "button_keys": ["gracias-button","puntos_etal-button", "encuestas-button"],
+    "variables": {
+      "{name}": "first_name",
+      "{company_name}": "company_name"
+    }, 
+    "text": "Hola {name}! Soy Baltra y esta semana comenzamos a trabajar con {company_name}❓ Comenzaremos con encuestas semanales y el nuevo sistema de recompensas Baltra, todo por whatsapp!🔊 Las encuestas se enviarán todas las semanas y contestarlas genera puntos Baltra. Tus respuestas serán 100% anónimas🏆 Además, te compartiré tus avances en puntualidad, asistencia y productividad. En base a tu buen desempeño generarás puntos Baltra que podrás cambiar por increíbles premios!!🛍🎁🎊Al seguir esta conversación, aceptas nuestro aviso de privacidad. Consúltalo aquí: https://www.baltra.ai/privacidad"
+    },
+    "welcome_etal": {
+      "keyword": "welcome_etal",
+      "type": "template",
+      "template": "welcome_etal_1",
+      "template_type": "button",
+      "button_keys": ["puntos_etal-button", "encuestas-button"],
+      "variables": {
+        "{name}": "first_name",
+        "{company_name}": "company_name"
+      }, 
+      "text": "Hola {name}! Soy Baltra y esta semana comenzamos a trabajar con {company_name} ❓ Comenzaremos con el nuevo sistema de recompensas Baltra y encuestas semanales todo por whatsapp!🏆En base a tu buen desempeño generarás puntos Baltra que podrás cambiar por increíbles premios!!🛍🎁🎊🔊 Las encuestas se enviarán todas las semanas y contestarlas genera puntos Baltra. Tus respuestas serán 100% anónimas Al seguir esta conversación, aceptas nuestro aviso de privacidad. Consúltalo aquí: https://www.baltra.ai/privacidad"
+      },
+    "puntos_etal": {
+      "type": "text",
+      "button_trigger": "puntos_etal-button",
+      "text": "Puedes ganar hasta *25 puntos por semana* según tu desempeño:\n\n✅ *Encuesta:* *25 puntos* por responderla.\n\n¡Acumula puntos y canjéalos por premios increíbles! 🎁"
+    },
+    "rewards_etal_template":{
+      "keyword": "rewards_template_etal",
+      "button_trigger": "rewards_etal-button",
+      "text": "Hola {name}, te comparto tu avance de *puntos Baltra* de esta semana 🏆🏆 Recuerda que llegando *puntual*, respondiendo la *encuesta* y *trabajando en equipo* ganamos todos!🥇",
+      "type": "template",
+      "template": "rewards_template_brinco_3",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["puntos_etal-button", "detalles_puntos_etal-button", "premios_etal-button"],
+      "header_type": "image",
+      "header_content": "weekly_path"
+    },
+    "premios_etal": {
+      "button_trigger": "premios_etal-button",
+      "type": "interactive",
+      "interactive_type": "button",
+      "text": "Puedes canjear tus puntos por los siguientes *premios!*\n\nRecuerda que se entregan el segundo viernes del mes siguiente al que hiciste tu solicitud.",
+      "button_keys": ["puntos_etal-button", "detalles_puntos_etal-button", "rewards_etal-button"],
+      "header_type": "image",
+      "header_content": "rewards_path"
+    },
+    "intro_puntos_etal": {
+      "keyword": "intro_puntos_brinco",
+      "text": "¡Hola {name}! 🎉Te presentamos el nuevo programa de puntos Baltra para {company_name}, donde puedes ganar hasta 1200 puntos al mes según tu desempeño:✅ Productividad: Hasta 600 puntos al mes según métricas de tu área.✅ Puntualidad y asistencia: 500 puntos al mes si no tienes faltas y máximo 1 retardo al mes.✅ Encuesta Baltra: 25 puntos por semana al completarla.⚠️ Deducciones:❌ Reporte de seguridad: -50 puntos (falta de uniforme, EPP o uso de celular).❌ Progreso incorrecto: -50 puntos❌ Acta administrativa: -1200 puntos ¡Acumula puntos y cámbialos por premios increíbles! 🎁",
+      "type": "template",
+      "template": "intro_puntos_brinco_2",
+      "template_type": "button",
+      "button_keys": ["explicar_cambios_brinco-button","detalles_puntos_brinco-button", "rewards_template_brinco"],
+      "variables": {
+        "{name}": "first_name", 
+        "{company_name}": "company_name"
+      }
+    },
+    "detalles_puntos_etal": {
+      "type": "text",
+      "button_trigger": "detalles_puntos_etal-button",
+      "text": "Hola {name}!\n En las próximas semanas comunicaremos como puedes ganar puntos Baltra adicionales en tu área!"
+    },
+    "pulse_template_etal":{
+      "keyword": "pulse_template_etal",
+      "text": "Hola {name}! ¿Quieres comenzar la encuesta Baltra? Es breve y ayuda a mejorar tu calidad de trabajo. Recuerda que la encuesta es 100% anónima!",
+      "type": "template",
+      "template": "pulse_template_3",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["comenzar-button", "cambios_etal-button"]
+    },
+    "cambios_etal": {
+      "type": "text",
+      "button_trigger": "cambios_etal-button",
+      "text": "Gracias a tus comentarios en este chat hemos realizado los siguientes cambios! Te impulsamos a que sigas participando en las encuestas, tu opinión es muy importante para {company_name}\n\n Se esta trabajando en brindar asesoría técina a las distintas áreas para mejorar la productividad"
+    },
+    "rewards_etal_template_canje":{
+      "keyword": "rewards_etal_template_canje",
+      "text": "¡Hola {name}! 🎉 Aquí tienes tu avance de puntos Baltra ⭐¡No olvides canjear tus premios 🎁 por tu excelente desempeño! 💪😄",
+      "type": "template",
+      "template": "rewards_template_canje",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["prize_flow", "rewards_etal-button"],
+      "header_type": "image",
+      "header_content": "rewards_path"
+    },
+    "loteria_baltra": {
+      "keyword": "loteria_baltra",
+      "text": "🎉 ¡Hola {name}!¡Tenemos excelentes noticias! 🎊🥳 ¡Eres el ganador de la Lotería Baltra del mes anterior!Te has ganado una tarjeta de regalo de Soriana de $250 🎁Haz clic en el siguiente enlace para reclamar tu premio y disfrutarlo:",
+      "type": "template",
+      "template": "loteria_baltra",
+      "template_type": "button",
+      "button_keys": ["canje_soriana-button"],
+      "variables": {
+        "{name}": "first_name"
+      },
+      "url_keys": ["soriana"]
+    }
+  },
+  "company_9": {
+    "welcome_fantasias": {
+    "keyword": "welcome_fantasias",
+    "type": "template",
+    "template": "welcome_fantasias",
+    "template_type": "button",
+    "button_keys": ["gracias-button","puntos_fantasias-button", "encuestas-fantasias-button"],
+    "variables": {
+      "{name}": "first_name",
+      "{company_name}": "company_name"
+    }, 
+    "text": "Hola {{name}} 👋! Soy Baltra Esta semana *empezamos a trabajar con {{company_name}}* y te voy a contar cómo va a estar la cosa:❓ Vamos a usar un sistema de *puntos* y hacer *encuestas*, todo por WhatsApp.🏆 Por este chat te voy a mandar tus *ventas y cómo vas con los objetivos que pone la empresa*.En base a tu desempeño, vas a ganar puntos Baltra que te pueden llevar a ser el *campeón de las ventas*🎊🔊 Adicionalmente las *encuestas* se enviarán cada 2 jueves, y su objetivo es que ayudes a la empresa a entender *como puede mejorar las condiciones de tu trabajo*. Tus respuestas serán 100% anónimas siempre."
+    },
+    "encuestas_fantasias": {
+      "type": "text",
+      "button_trigger": "encuestas-fantasias-button",
+      "text": "❓ Las encuestas Baltra son preguntas rápidas que recibirás cada 2 jueves por este WhatsApp. Tus respuestas son completamente anónimas. \n\n🎯 El objetivo es que los directores y gerentes de {company_name} conozcan cómo te sientes y descubran oportunidades de mejora semana a semana. Los gerentes y directores buscarán implementar mejoras a tu trabajo y a la compañía acorde a tus comentarios!​"
+    },
+    "puntos_fantasias": {
+      "type": "text",
+      "button_trigger": "puntos_fantasias-button",
+      "text": "Puedes obtener hasta 30 puntos a la semana por alcanzar tus metas:\n-*10 puntos* por alcanzar la meta de *Ticket Promedio*\n-*10 puntos* por alcanzar la meta de *SKUs por Ticket*\n-*10 puntos* por alcanzar la meta de *Total de Tickets*"
+      },
+    "rewards_fantasias_template":{
+      "keyword": "rewards_fantasias_template",
+      "button_trigger": "rewards_fantasias-button",
+      "text": "Hola {name}, Te comparto tus resultados de ventas de esta semana!",
+      "type": "template",
+      "template": "rewards_fantasias_template",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["ver_ranking-button", "ver_desempeño-button"],
+      "header_type": "image",
+      "header_content": "monthly_path"
+    },
+    "ranking_fantasias": {
+      "button_trigger": "ver_ranking-button",
+      "type": "interactive",
+      "interactive_type": "button",
+      "text": "Aquí puedes ver a los *campeones* de las ventas este mes 🏆🔥🎉",
+      "button_keys": ["puntos_fantasias-button", "detalles_puntos_fantasias-button"],
+      "header_type": "image",
+      "header_content": "rewards_path"
+    },
+    "desempeño_fantasias": {
+      "button_trigger": "ver_desempeño-button",
+      "type": "interactive",
+      "interactive_type": "button",
+      "text": "Aquí puedes ver tu desempeño de esta semana 🏆🔥🎉",
+      "button_keys": ["puntos_fantasias-button", "detalles_puntos_fantasias-button"],
+      "header_type": "image",
+      "header_content": "weekly_path"
+    },
+    "fantasias_rewards_update":{
+      "keyword": "fantasias_rewards_update",
+      "text": "Hola {name}, Te comparto tu progreso a tus metas de venta en esta semana!",
+      "type": "template",
+      "template": "fantasias_rewards_update",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["gracias-button"],
+      "header_type": "image",
+      "header_content": "weekly_path"
+    },    
+    "detalles_puntos_fantasias": {
+      "type": "text",
+      "button_trigger": "detalles_puntos_fantasias-button",
+      "text": "Hola {name}!\nAcumularás puntos de la siguiente manera:\n{rewards_description}."
+    },
+    "pulse_template_fantasias":{
+      "keyword": "pulse_template_fantasias",
+      "text": "Hola {name}! ¿Quieres comenzar la encuesta Baltra? Es breve y ayuda a mejorar tu calidad de trabajo. Recuerda que la encuesta es 100% anónima!",
+      "type": "template",
+      "template": "pulse_template_3",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["comenzar-button", "cambios_fantasias-button"]
+    },
+    "cambios_fantasias": {
+      "type": "text",
+      "button_trigger": "cambios_fantasias-button",
+      "text": "Gracias a tus comentarios en este chat hemos realizado los siguientes cambios! Te impulsamos a que sigas participando en las encuestas, tu opinión es muy importante para {company_name}\n\n"
+    }
+  },
+   "company_10": {
+    "welcome_MTWA_generic": {
+      "keyword": "welcome_MTWA_generic",
+      "type": "template",
+      "template": "welcome_message_generic_2",
+      "template_type": "button",
+      "button_keys": ["gracias-button","puntos_MTWA-button", "encuestas-button"],
+      "variables": {
+        "{name}": "first_name",
+        "{company_name}": "company_name"
+      }, 
+      "text": "Hola {name}! Soy Baltra y esta semana comenzamos a trabajar con {company_name}❓ Comenzaremos con encuestas semanales y el nuevo sistema de recompensas Baltra, todo por whatsapp!🔊 Las encuestas se enviarán todas las semanas y contestarlas genera puntos Baltra. Tus respuestas serán 100% anónimas🏆 Además, te compartiré tus avances en puntualidad, asistencia y productividad. En base a tu buen desempeño generarás puntos Baltra que podrás cambiar por increíbles premios!!🛍🎁🎊Al seguir esta conversación, aceptas nuestro aviso de privacidad. Consúltalo aquí: https://www.baltra.ai/privacidad"
+    },
+    "puntos_MTWA": {
+      "button_trigger": "puntos_MTWA-button",
+      "type": "interactive",
+      "interactive_type": "button",
+      "text": "🎯 ¡Puedes ganar hasta 300 puntos al mes según tu desempeño!\n\n✨ Desempeño:\nPuntos semanales por asistencia y puntualidad (solo ayudantes)\nBonificación mensual por siniestros y rendimiento de combustible (solo operadores)\n\n✨ Encuesta Baltra:\n12.5 puntos a la semana por completarla\n\n✨ Capacitación:\n50 puntos al mes por cumplir con el plan establecido\n\n🚀 Súmale a tu esfuerzo y alcanza más recompensas cada semana. ¡Tú controlas cuántos puntos ganas!",
+      "button_keys": ["detalles_puntos_MTWA-button"]
+    },
+    "detalles_puntos_MTWA": {
+      "type": "text",
+      "button_trigger": "detalles_puntos_MTWA-button",
+      "text": "Hola {name}!\n Acumularás puntos de la siguiente manera:\n {rewards_description}."
+    },
+    "pulse_template_MTWA":{
+      "keyword": "pulse_template_MTWA",
+      "text": "Hola {name}! ¿Quieres comenzar la encuesta Baltra? Es breve y ayuda a mejorar tu calidad de trabajo. Recuerda que la encuesta es 100% anónima!",
+      "type": "template",
+      "template": "pulse_template_3",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["comenzar-button", "cambios_MTWA-button"]
+    },
+    "cambios_MTWA": {
+      "type": "text",
+      "button_trigger": "cambios_MTWA-button",
+      "text": "Gracias a tus comentarios en este chat hemos realizado los siguientes cambios! Te impulsamos a que sigas participando en las encuestas, tu opinión es muy importante para {company_name}\n\nSe esta evaluando aumentar el personal para optimizar la eficiencia operativa."
+    },
+    "new_rewards_MTWA":{
+      "keyword": "new_rewards_MTWA",
+      "button_trigger": "new_rewards_MTWA-button",
+      "text": "Hola {name}!Te comparto tu avance de puntos Baltra de esta semana 🏆🏆 Recuerda que llegando puntual, respondiendo la encuesta y trabajando en equipo ganamos todos!🥇",
+      "type": "template",
+      "template": "new_rewards_brinco",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["cuantos_puntos_MTWA-button", "detalles_semana_MTWA-button", "premios_new_MTWA-button"],
+      "header_type": "image",
+      "header_content": "weekly_path"
+    },
+    "puntos_totales_MTWA":{
+      "keyword": "puntos_totales_MTWA",
+      "button_trigger": "cuantos_puntos_MTWA-button",
+      "text": "Hola {name}! Te comparto tu total de puntos acumulados hasta el día de hoy",
+      "type": "interactive",
+      "interactive_type": "button",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["puntos_MTWA-button", "detalles_puntos_MTWA-button", "new_rewards_MTWA-button"],
+      "header_type": "image",
+      "header_content": "daily_path"
+    },
+    "detalles_semana_MTWA":{
+      "keyword": "detalles_semana_MTWA",
+      "button_trigger": "detalles_semana_MTWA-button",
+      "text": "Hola {name}! Te comparto el detalle de tus puntos acumulados esta semana",
+      "type": "interactive",
+      "interactive_type": "button",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["new_rewards_MTWA-button"],
+      "header_type": "image",
+      "header_content": "monthly_path"
+    },
+    "premios_MTWA_new":{
+      "keyword": "premios_MTWA_new",
+      "button_trigger": "premios_new_MTWA-button",
+      "text": "Hola {name}! Te comparto el detalle de tu progreso para ganar premios",
+      "type": "interactive",
+      "interactive_type": "button",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["prize_flow", "cuantos_puntos_MTWA-button", "new_rewards_MTWA-button"],
+      "header_type": "image",
+      "header_content": "rewards_path"
+    },
+      "comunicado_capacitación":{
+      "keyword": "comunicado-MTWA",
+      "text": "Hola {name}! Da click abajo para ver tu nuevo comunicado!",
+      "type": "template",
+      "template": "comunicado",
+      "variables": {
+        "{name}": "first_name"
+      },
+      "button_keys": ["capacitacion_agosto-button"]
+    },
+    "capacitación_agosto": {
+      "type": "text",
+      "button_trigger": "capacitacion_agosto-button",
+      "text": "🚛 *Solo te quedan 2 días para completar tus cursos* 📘✨\n\nRecuerda que tienes hasta el 31 de agosto para completar tus cursos de capacitación en la Universidad de MTWA para poder ganar 50 puntos Baltra!!\nSi tu ya los completaste haz caso omiso de este mensaje "
+    }
+  }
+}
+
