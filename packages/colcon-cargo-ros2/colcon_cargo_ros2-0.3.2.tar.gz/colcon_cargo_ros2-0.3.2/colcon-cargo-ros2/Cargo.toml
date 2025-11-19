@@ -1,0 +1,17 @@
+[package]
+name = "colcon-cargo-ros2"
+version = "0.3.2"
+edition = "2021"
+license = "Apache-2.0"
+authors = ["Lin Hsiang-Jui <jerry73204@gmail.com>"]
+description = "Extension for colcon to support Rust ROS 2 packages using cargo-ros2"
+readme = "README.md"
+
+[lib]
+name = "cargo_ros2_py"
+crate-type = ["cdylib"]
+
+[dependencies]
+# PyO3 bindings to expose cargo-ros2 functionality to Python
+pyo3 = { version = "0.22", features = ["extension-module"] }
+cargo-ros2 = { path = "../cargo-ros2" }
