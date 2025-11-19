@@ -1,0 +1,274 @@
+[build-system]
+requires = [
+  "setuptools >= 80",
+  "setuptools_scm[toml] >= 8",
+]
+build-backend = 'setuptools.build_meta'
+
+
+[project]
+name = "reVReports"
+dynamic = ["version"]
+description = "For creating standardized graphics to summarize/report outputs from reV supply curves."
+readme = "README.rst"
+authors = [
+  {name = "Michael Gleason", email = "mike.gleason@nrel.gov"},
+]
+maintainers = [
+  {name = "Pavlo Pinchuk", email = "ppinchuk@nrel.gov"},
+]
+license = "BSD-3-Clause"
+keywords = ["reVReports", "NREL", "Supply Curve", "Visualization", "Graphics"]
+requires-python = ">= 3.10"
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+dependencies = [
+    "cartopy>=0.24,<0.25",
+    "click>=8.1.7,<9",
+    "geopandas>=1.0.1,<1.1",
+    "geoplot>=0.5.1,<1",
+    "imagehash>=4.3.2,<5",
+    "matplotlib>=3.8.1,<4.0",
+    "numpy>=2.0.2,<3",
+    "pandas>=2.1.2,<3.0",
+    "pydantic>=2.4.2,<3.0",
+    "pyproj>=3.3.0,<4",
+    "seaborn>=0.13.0,<1.0",
+    "shapely>=2.0.7,<3",
+    "tabulate>=0.9.0,<1.0",
+    "tqdm>=4.66.1,<5.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "jupyter>=1.0.0,<1.1",
+  "pipreqs>=0.4.13,<0.5",
+  "ruff>=0.13.3,<0.14",
+  "ruff-lsp>=0.0.62,<0.0.63",
+]
+test = [
+  "flaky>=3.8.1,<4",
+  "pytest>=8.3.3,<9",
+  "pytest-cases>=3.8.6,<4",
+  "pytest-cov>=6.0.0,<7",
+  "pytest-mock>=3.14.0,<4",
+  "pytest-profiling>=1.7.0,<2",
+  "pytest-xdist>=3.6.1,<4",
+  "snakeviz>=2.2.2,<3",
+  "tox>=4.23.2,<5",
+]
+doc = [
+  "ghp-import>=2.1.0,<3",
+  "pydata-sphinx-theme>=0.16.1,<0.17",
+  "sphinx-click>=6.0.0,<7",
+  "sphinx-copybutton>=0.5.2,<0.6",
+  "sphinx-tabs>=3.4.1,<4",
+  "sphinxcontrib-mermaid>=1.0.0,<2",
+]
+build = [
+  "build>=1.2.2,<2",
+  "pkginfo>=1.12.1.2,<2",
+  "twine>=6.1.0,<7",
+]
+
+[project.scripts]
+reVReports = "reVReports.cli:main"
+
+[project.urls]
+homepage = "https://github.com/NREL/reVReports"
+documentation = "https://nrel.github.io/reVReports/"
+repository = "https://github.com/NREL/reVReports"
+
+
+[tool.setuptools.packages]
+find = { include = ["reV*"] }
+
+[tool.setuptools_scm]
+fallback_version = "9999"
+version_file = "reVReports/_version.py"
+
+
+[tool.pixi.workspace]
+name = "reVReports"
+channels = ["conda-forge", "nrel"]
+platforms = ["win-64", "osx-arm64", "osx-64", "linux-64", "linux-aarch64"]
+
+[tool.pixi.environments]
+default = { features = ["default"], solve-group = "default" }
+dev = { features = ["default", "dev", "build", "test", "doc"], solve-group = "dev" }
+test = { features = ["default", "test"], solve-group = "dev" }
+doc = { features = ["default", "doc"], solve-group = "dev" }
+build = { features = ["default", "build"], solve-group = "dev" }
+
+[tool.pixi.tasks]
+geo-demo = { cmd = "reVReports maps -c config_geo.json -o ../../", cwd = "tests/data"}
+
+[tool.pixi.feature.build.tasks]
+build-wheels = { cmd = "uv build --sdist --wheel --out-dir dist/ ." }
+check-wheels = { cmd = ["twine", "check", "dist/*"], depends-on = ["build-wheels"] }
+upload-wheels = { cmd = ["twine", "upload", "dist/*"], depends-on = ["check-wheels"] }
+
+[tool.pixi.dependencies]
+cartopy = ">=0.24,<0.25"
+click = ">=8.1.7,<9"
+geopandas = ">=1.0.1,<1.1"
+geoplot = ">=0.5.1,<1"
+imagehash = ">=4.3.2,<5"
+matplotlib = ">=3.8.1,<4.0"
+numpy = ">=2.0.2,<3"
+pandas = ">=2.1.2,<3.0"
+pydantic = ">=2.4.2,<3.0"
+pyproj = ">=3.3.0,<4"
+seaborn = ">=0.13.0,<1.0"
+shapely = ">=2.0.7,<3"
+tabulate = ">=0.9.0,<1.0"
+tqdm = ">=4.66.1,<5.0"
+
+[tool.pixi.pypi-dependencies]
+reVReports = { path = ".", editable = true }
+
+[tool.pixi.feature.dev.dependencies]
+ipykernel = ">=7.1.0,<8"
+jupyter = ">=1.0.0,<1.1"
+pipreqs = ">=0.4.13,<0.5"
+ruff = ">=0.13.3,<0.14"
+ruff-lsp = ">=0.0.62,<0.0.63"
+
+[tool.pixi.feature.test.dependencies]
+flaky = ">=3.8.1,<4"
+pytest = ">=8.3.3,<9"
+pytest-cases = ">=3.8.6,<4"
+pytest-cov = ">=6.0.0,<7"
+pytest-mock = ">=3.14.0,<4"
+pytest-profiling = ">=1.7.0,<2"
+pytest-xdist = ">=3.6.1,<4"
+snakeviz = ">=2.2.2,<3"
+tox = ">=4.23.2,<5"
+
+[tool.pixi.feature.doc.dependencies]
+ghp-import = ">=2.1.0,<3"
+make = ">=4.4.1,<5"
+pydata-sphinx-theme = ">=0.16.1,<0.17"
+sphinx-click = ">=6.0.0,<7"
+sphinx-copybutton = ">=0.5.2,<0.6"
+sphinx-tabs = ">=3.4.1,<4"
+sphinxcontrib-mermaid = ">=1.0.0,<2"
+
+[tool.pixi.feature.build.dependencies]
+python-build = ">=1.2.2,<2"
+pkginfo = ">=1.12.1.2,<2"
+twine = ">=6.1.0,<7"
+uv = ">=0.8.4,<0.9"
+
+
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.ruff.lint]
+preview = true
+select = [
+  "A", # flake8-builtins
+  "B", # flake8-bugbear
+  "ARG", # flake8-unused-arguments
+  "BLE", # flake8-blind-except
+  "C4", # flake8-comprehensions
+  "C90", # mccabe
+  "COM", # flake8-commas
+  "D", # pydocstyle
+  "E", # pycodestyle
+  "EM", # flake8-errmsg
+  "F", # Pyflakes
+  "FURB", # refurb
+  "FLY", #  flynt
+  "G", # flake8-logging-format
+  "I", # isort
+  "INP", # flake8-no-pep420
+  "ISC", # flake8-implicit-str-concat
+  "LOG", # flake8-logging
+  "N", # pep8-naming
+  "NPY", # numpy-specific
+  "PD", # pandas-vet
+  "PERF", # Perflint
+  "PIE", # flake8-pie
+  "PL", # Pylint
+  "PTH", # flake8-use-pathlib
+  "PYI", # flake8-pyi
+  "Q", # flake8-quotes
+  "RET", # flake8-return
+  "RSE", # flake8-raise
+  "RUF", # Ruff-specific rules
+  "S", # flake8-bandit
+  "SLF", # flake8-self
+  "SIM", # flake8-simplify
+  "TID", # flake8-tidy-imports (absolute imports)
+  "TRY", # tryceratops
+  "UP", # pyupgrade
+  "W", # Warning
+]
+ignore = [
+  "B028", # no-explicit-stacklevel
+  "COM812", # missing-trailing-comma (incompatible with formatter)
+  "D105", # undocumented-magic-method
+  "D205", # blank-line-after-summary
+  "D202", # no-blank-lines-after-function
+  "D210", # surrounded-whitespace
+  "D400", # first-line-should-end-with-a-period
+  "D401", # non-imperative-mood
+  "D403", # first-line-capitalized
+  "FURB140", # reimplemented-starmap
+  "I001", # unsorted-imports
+  "PYI024", # collections-named-tuple
+  "RUF012", # mutable-class-default
+  "RUF031", # incorrectly-parenthesized-tuple-in-subscript
+  "S101", # assert
+  "S324", # hashlib-insecure-hash-function
+  "S403", # suspicious-pickle-import
+  "TRY003", # raise-vanilla-args
+]
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 72
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = [
+  "F401", # unused-import
+]
+"tests/**.py" = [
+  "ARG001", # unused-function-argument
+  "ARG002", # unused-method-argument
+  "D101", # undocumented-public-class
+  "D102", # undocumented-public-method
+  "EM101", # raw-string-in-exception
+  "G004", # logging-f-string
+  "INP001", # implicit-namespace-package
+  "N806", # non-lowercase-variable-in-function
+  "PLC2701", # import-private-name
+  "PLR0914", # too-many-locals
+  "PLR0915", # too-many-statements
+  "PLR2004", # magic-value-comparison
+  "PLR6301", # no-self-use
+  "SLF001", # private-member-access
+  "TRY301", # raise-within-try
+  "W505", # doc-line-too-long
+]
+
+[tool.ruff.lint.pylint]
+max-args = 10
+max-positional-args = 10
