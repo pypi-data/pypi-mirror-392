@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="generator" content="epijats" />
+</head>
+<body>
+  <p>
+    There are
+    {% if not issues %}
+    no document format issues.
+    {% else %}
+    {{ issues | length }} document format issues:
+    {% endif %}
+  </p>
+  {% if issues %}
+  <dl>
+    {% for issue in issues %}
+    <div>
+      <dt><code>{{ issue.condition | tojson }}</code></dt>
+      <dd>
+      "{{issue.str}}"
+      </dd>
+    </div>
+    {% endfor %}
+  </dl>
+  {% endif %}
+</body>
+</html>
