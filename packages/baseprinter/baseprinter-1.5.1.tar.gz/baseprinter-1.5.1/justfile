@@ -1,0 +1,23 @@
+#!/usr/bin/env -S just --justfile
+
+default:
+    just --list
+
+test-runtime:
+    python3 -m pytest -vv tests
+
+check-code:
+    ruff check baseprinter || true
+    mypy --strict baseprinter
+    cd tests && mypy --ignore-missing-imports .  # cd for separate mypy cache+config
+
+test: check-code test-runtime
+
+test-fast: check-code 
+    python3 -m pytest -vv tests -m "not slow"
+
+clean:
+    rm -rf dist
+    rm -rf build
+    rm -rf baseprinter.egg-info
+    rm -f baseprinter/_version.py

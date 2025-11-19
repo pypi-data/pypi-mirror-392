@@ -1,0 +1,3 @@
+---
+title: Metadata in separate YAML file
+...
