@@ -1,0 +1,65 @@
+[project]
+name = "pipecat-ai-typecast"
+version = "0.0.1"
+description = "Typecast is an AI text-to-speech API that converts text into lifelike, expressive speech in many languages."
+license = "BSD-2-Clause"
+license-files = ["LICENSE"]
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = ["pipecat", "text-to-speech", "ai"]
+authors = [
+    {name = "Neosapience", email = "help@typecast.ai"}
+]
+maintainers = [
+    {name = "Neosapience", email = "help@typecast.ai"}
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence"
+]
+dependencies = [
+    "pipecat-ai>=0.0.94",
+    "aiohttp>=3.9.0",
+    "loguru>=0.7.0",
+    "pydantic>=2.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "pipecat-ai[daily,openai,deepgram,runner,webrtc,local-smart-turn-v3]>=0.0.94",
+    "python-dotenv>=1.0.1",
+    "onnxruntime>=1.23.2",
+    "ruff>=0.12.11",
+    "build>=1.0.0",
+    "twine>=5.0.0",
+]
+
+[project.urls]
+Homepage = "https://typecast.ai"
+Documentation = "https://typecast.ai/docs/overview"
+Source = "https://github.com/neosapience/pipecat-typecast"
+
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "D", # Docstring rules
+    "I", # Import rules
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Skip docstring checks for non-source code
+"example.py" = ["D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
