@@ -1,0 +1,109 @@
+from typing import Any, Callable, Optional
+
+from agentrun.agent_runtime.model import (
+    AgentRuntimeEndpointImmutableProps,
+    AgentRuntimeEndpointMutableProps,
+    AgentRuntimeEndpointSystemProps,
+)
+from agentrun.utils.config import Config
+from agentrun.utils.model import Status
+from agentrun.utils.resource import ResourceBase
+
+
+class AgentRuntimeEndpoint(
+    AgentRuntimeEndpointMutableProps,
+    AgentRuntimeEndpointImmutableProps,
+    AgentRuntimeEndpointSystemProps,
+    ResourceBase,
+):
+    """智能体运行时端点信息"""
+
+    @classmethod
+    def __get_client(cls):
+        from agentrun.agent_runtime.client import AgentRuntimeClient
+
+        return AgentRuntimeClient()
+
+    def __update_self(self, other: Any):
+        self.__dict__.update(other.__dict__)
+
+    async def refresh_async(self, config: Optional[Config] = None):
+        if self.agent_runtime_id is None:
+            raise ValueError(
+                "agent_runtime_id is required to get an Agent Runtime"
+            )
+
+        cli = self.__get_client()
+
+        result = await cli.get_async(
+            self.agent_runtime_id,
+            config=config,
+        )
+        self.__update_self(result)
+
+        return self
+
+    async def delete_async(
+        self, config: Optional[Config] = None
+    ) -> "AgentRuntimeEndpoint":
+        if self.agent_runtime_id is None:
+            raise ValueError(
+                "agent_runtime_id is required to delete an Agent Runtime"
+                " Endpoint"
+            )
+        if self.agent_runtime_endpoint_id is None:
+            raise ValueError(
+                "agent_runtime_endpoint_id is required to delete an Agent"
+                " Runtime Endpoint"
+            )
+
+        if self.status == Status.CREATING:
+            await self.wait_until_ready_async(
+                interval_seconds=1, timeout_seconds=300
+            )
+
+        cli = self.__get_client()
+        result = await cli.delete_endpoint_async(
+            self.agent_runtime_id,
+            self.agent_runtime_endpoint_id,
+            config=config,
+        )
+        self.__update_self(result)
+
+        return self
+
+    async def wait_until_ready_async(
+        self,
+        interval_seconds: int = 5,
+        timeout_seconds: int = 300,
+        before_check_callback: Optional[
+            Callable[["AgentRuntimeEndpoint"], None]
+        ] = None,
+        ready_status_checker: Optional[
+            Callable[["AgentRuntimeEndpoint"], None]
+        ] = None,
+    ):
+        """等待智能体运行时进入就绪状态"""
+        import asyncio
+        import time
+
+        start_time = time.time()
+        while True:
+            await self.refresh_async()
+
+            if before_check_callback:
+                before_check_callback(self)
+
+            if ready_status_checker:
+                if ready_status_checker(self):
+                    return self
+            else:
+                if self.status == Status.READY:
+                    return self
+
+            if time.time() - start_time > timeout_seconds:
+                raise TimeoutError(
+                    f"等待智能体运行时 {self.agent_runtime_id} 就绪超时"
+                )
+
+            await asyncio.sleep(interval_seconds)
