@@ -1,0 +1,95 @@
+Metadata-Version: 2.4
+Name: pylib-summarize
+Version: 0.1.0
+Summary: Summarize long text using frequency-based or AI-based summarizers. Perfect for AI agents. Perfect for AI agents and LLM applications.
+Author: pylib-summarize
+License: MIT
+Project-URL: Homepage, https://github.com/upendra-manike/PyLib
+Project-URL: Repository, https://github.com/upendra-manike/PyLib
+Project-URL: Documentation, https://github.com/upendra-manike/PyLib
+Project-URL: Issues, https://github.com/upendra-manike/PyLib/issues
+Keywords: agent,ai,data-processing,data-science,llm,machine-learning,ml,nlp,summarization,text-processing,utilities
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+
+# pysummarize
+
+Summarize long text using frequency-based or AI-based summarizers.
+
+## Installation
+
+```bash
+pip install pysummarize
+```
+
+## 💡 Usage Examples
+
+### Basic Operations
+
+```python
+from pylib_summarize import summarize_frequency, extract_keywords, summarize_by_ratio
+
+text = "Python is great. Machine learning is fun. Python and ML are powerful."
+
+# Summarize by word frequency
+summary = summarize_frequency(text, num_sentences=2)
+# 'Python is great. Machine learning is fun.'
+
+# Extract keywords
+keywords = extract_keywords(text, num_keywords=3)
+# ['python', 'learning', 'machine']
+
+# Summarize by ratio
+short_summary = summarize_by_ratio(text, ratio=0.5)
+```
+
+### AI/ML Use Cases
+
+```python
+from pylib_summarize import summarize_frequency, extract_keywords
+
+# Summarize AI-generated content
+ai_response = "Long AI-generated text..."
+summary = summarize_frequency(ai_response, num_sentences=3)
+
+# Extract key topics from text
+topics = extract_keywords(ai_response, num_keywords=10)
+```
+
+## 📚 API Reference
+
+### `summarize_frequency(text: str, num_sentences: int = 3) -> str`
+Summarizes text based on word frequency. Returns top N sentences.
+
+### `extract_keywords(text: str, num_keywords: int = 5) -> List[str]`
+Extracts top keywords by frequency, excluding stop words.
+
+### `summarize_by_ratio(text: str, ratio: float = 0.3) -> str`
+Summarizes text to a ratio of original length.
+
+
+## 🤖 AI Agent Friendly
+
+This package is optimized for AI agents and code generation tools:
+- **Clear function names** and signatures
+- **Comprehensive docstrings** with examples
+- **Type hints** for better IDE support
+- **Common use cases** documented
+- **Zero dependencies** for reliability
+
+## License
+
+MIT
+
