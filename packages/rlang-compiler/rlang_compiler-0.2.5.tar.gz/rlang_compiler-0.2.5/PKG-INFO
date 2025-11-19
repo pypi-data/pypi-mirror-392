@@ -1,0 +1,573 @@
+Metadata-Version: 2.4
+Name: rlang-compiler
+Version: 0.2.5
+Summary: Deterministic RLang compiler with cryptographic proof generation for BoR (Blockchain of Reasoning)
+Author: Kushagra Bhatnagar
+License: MIT
+Project-URL: Homepage, https://github.com/kushagrab21/Compiler_application
+Project-URL: Documentation, https://github.com/kushagrab21/Compiler_application
+Keywords: deterministic-compiler,bor,blockchain-of-reasoning,rlang,cryptographic-verification,proof-generation,verifiable-computation,dsl
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Operating System :: OS Independent
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Software Development :: Compilers
+Classifier: Topic :: Scientific/Engineering
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Provides-Extra: dev
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: ruff>=0.1.0; extra == "dev"
+Provides-Extra: test
+Requires-Dist: pytest>=7.0.0; extra == "test"
+Requires-Dist: pytest-cov>=4.0.0; extra == "test"
+Provides-Extra: bor-sdk
+Requires-Dist: bor-sdk>=1.0.0; extra == "bor-sdk"
+Dynamic: license-file
+
+# RLang Compiler — Deterministic Reasoning Pipelines with Cryptographic Verification
+
+A new computational paradigm: deterministic, cryptographically-verifiable reasoning pipelines for trustworthy automation.
+
+![Version](https://img.shields.io/badge/version-0.2.4-blue)
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![Determinism](https://img.shields.io/badge/determinism-verified-blue)
+![BoR Verification](https://img.shields.io/badge/BoR%20verification-ok-success)
+![Tests](https://img.shields.io/badge/tests-190%2B-green)
+
+---
+
+## TL;DR (60 seconds)
+
+**What RLang is**: A deterministic domain-specific language that enforces identical outputs for identical inputs, regardless of execution environment or time. Unlike LLMs that cannot guarantee the same answer twice, RLang guarantees bit-for-bit reproducibility.
+
+**Why determinism matters**: Banks, hospitals, and regulators require verifiable reasoning—not probabilistic outputs. Determinism is the architecture of trust. When compliance automation needs proof, RLang generates cryptographic proof bundles (HMASTER + HRICH) for every execution.
+
+**What RLang + Compiler + BoR achieve**: Together, they create provable automation pipelines with trustless reproducibility. Every computation produces a cryptographic proof bundle that can be verified without re-execution. Correctness equals equality of hashes.
+
+**How to run the simplest example**: Write RLang source, compile to canonical IR, execute with proof generation, and verify the proof bundle. Same program and input always produce identical HMASTER and HRICH hashes.
+
+**How to verify a proof bundle**: Use `borp verify-bundle` to cryptographically validate execution traces. The bundle contains complete TRP (Trace of Reasoning Process) records with cryptographic integrity.
+
+---
+
+## Quick Start
+
+### Installation
+
+```bash
+pip install rlang-compiler
+```
+
+### Write Your First Pipeline
+
+Create `example.rlang`:
+
+```rlang
+fn inc(x: Int) -> Int;
+pipeline main(Int) -> Int { inc }
+```
+
+### Compile to Canonical IR
+
+```bash
+rlangc example.rlang --out example.json
+```
+
+### Run with Proof Generation
+
+```python
+from rlang.bor import run_program_with_proof, RLangBoRCrypto
+
+source = """
+fn inc(x: Int) -> Int;
+pipeline main(Int) -> Int { inc }
+"""
+
+bundle = run_program_with_proof(
+    source=source,
+    input_value=10,
+    fn_registry={"inc": lambda x: x + 1}
+)
+
+# Generate cryptographic hashes
+crypto = RLangBoRCrypto(bundle)
+rich = crypto.to_rich_bundle()
+
+print("Output:", bundle.output_value)  # 11
+print("HMASTER:", rich.rich["primary"]["master"])
+print("HRICH:", rich.rich["H_RICH"])
+```
+
+### Verify Proof Bundle
+
+```bash
+borp verify-bundle --bundle bundle.json
+```
+
+---
+
+## Deterministic Execution Pipeline
+
+Every RLang program flows through a deterministic pipeline that preserves hash stability and enables cryptographic verification:
+
+```mermaid
+flowchart LR
+    A[RLang Source] --> B[Parser]
+    B --> C[Resolver]
+    C --> D[Type Checker]
+    D --> E[IR Lowering]
+    E --> F[Canonicalization]
+    F --> G[Deterministic Executor]
+    G --> H[TRP Recorder]
+    H --> I[Proof Bundle: HMASTER + HRICH]
+    I --> J[BoR Verification]
+```
+
+**Parser & Resolver**: Extension-safe frontend components that parse source code and resolve symbols. New syntax can be added without breaking determinism.
+
+**Type Checker**: Maintains type safety while preserving deterministic semantics. Type inference is deterministic and canonical.
+
+**IR Lowering**: Produces canonical intermediate representation. Same program always produces identical IR structure.
+
+**Canonicalization**: Ensures hash stability through alphabetically sorted keys and normalized floats. Same IR always produces same JSON string.
+
+**Deterministic Executor**: Enforces pure functional semantics with no side effects, randomness, or time-dependence. Sequential pipeline execution with fixed evaluation order.
+
+**TRP Recorder**: Captures complete execution traces with step-level and branch-level records. Trace structure is deterministic and canonical.
+
+**Proof Bundle Generation**: Computes cryptographic hashes (HMASTER for program IR, HRICH for execution trace). Enables trustless verification without re-execution.
+
+**BoR Verification**: Validates proof bundles cryptographically. Third parties can verify computation results independently.
+
+---
+
+## Why Deterministic Reasoning Matters
+
+AI has evolved from stochastic creativity to needing verifiable logic. We are solving deterministic problems using nondeterministic tools—LLMs that cannot guarantee the same answer twice, autonomous agents that drift silently, and compliance systems that lack cryptographic proof.
+
+Determinism is the architecture of trust. When banks validate transactions, hospitals make diagnostic decisions, or regulators audit automated systems, they require provable correctness—not probabilistic outputs. The next era of AI is not about generating creative text; it is about building reasoning pipelines that produce identical, verifiable results across environments, time, and platforms.
+
+This system represents a new computational paradigm: deterministic, cryptographically-verifiable reasoning pipelines. RLang + Compiler + BoR form the execution substrate for trustworthy automation, where every computation produces a cryptographic proof bundle that can be verified without re-execution.
+
+---
+
+## Deterministic Trust Stack Lineage
+
+The Deterministic Trust Stack emerged from a decade-long evolution, each layer building deterministic execution foundations:
+
+```mermaid
+flowchart TD
+    A[AML Framework] --> B[RAM Cognitive Architecture]
+    B --> C[Compliance Copilot]
+    C --> D[BoR - Blockchain of Reasoning]
+    D --> E[BoR Proof SDK]
+    E --> F[RLang Compiler]
+```
+
+**AML Framework**: Established deterministic execution semantics for abstract machines. Provided the foundation for reproducible computation.
+
+**RAM Cognitive Architecture**: Formalized reasoning pipelines as sequential, verifiable computational steps. Defined the cognitive model for deterministic reasoning.
+
+**Compliance Copilot**: Demonstrated deterministic automation in regulated environments. Showed that compliance systems require cryptographic proof, not probabilistic outputs.
+
+**BoR (Blockchain of Reasoning)**: Became the "blockchain for logic"—a cryptographic layer that notarizes computation through hashing. Unlike blockchains for transactions, BoR validates reasoning processes.
+
+**BoR-Proof SDK**: Made cryptographic proof generation accessible programmatically. Enabled any deterministic system to generate proof bundles compatible with BoR.
+
+**RLang Compiler**: Completes the stack by providing a deterministic DSL that compiles to canonical IR with guaranteed hash stability. Enforces three non-negotiable invariants at the language level.
+
+---
+
+## What This System Is
+
+**RLANG** is a deterministic domain-specific language (DSL) designed for provable computation. Unlike general-purpose languages, RLang enforces determinism at the language level—same program and input always produce identical output, regardless of execution environment or time.
+
+**The RLang Compiler** translates RLang source code into canonical intermediate representation (IR), ensuring deterministic semantics and generating cryptographic proof bundles for every execution. The compiler guarantees that identical programs produce identical IR representations, enabling hash stability and verifiable computation.
+
+**BoR (Blockchain of Reasoning)** is the cryptographic verification layer that validates proof bundles through hashing. Every execution produces a proof bundle containing HMASTER (program IR hash) and HRICH (execution trace hash), enabling trustless verification without re-execution.
+
+**The Combined Effect**: Together, RLANG + Compiler + BoR create provable automation pipelines with trustless reproducibility. Every computation is deterministic, auditable, and cryptographically verifiable—ideal for compliance, finance, reconciliation, LLM guardrails, and deterministic AI agents.
+
+---
+
+## Core Guarantees
+
+RLang enforces three non-negotiable invariants that define the physics layer of deterministic computation:
+
+### Deterministic Semantics Invariant
+
+For any RLang program `P` and input `x`, there exists a unique output `y` such that `Eval(P, x) = y`. This holds regardless of execution environment, time, or platform. No randomness, I/O, timestamps, or mutable global state is permitted.
+
+**Mathematical Properties**:
+- **Functionality**: `∀P, x. ∃!y. Eval(P, x) = y`
+- **Idempotency**: `Eval(P, x) = Eval(P, x)` (always)
+- **Compositionality**: `Eval(P₁; P₂, x) = Eval(P₂, Eval(P₁, x))`
+
+### Deterministic Proof Shape Invariant
+
+Same execution → same execution trace (TRP). Every step and branch decision is recorded deterministically, ensuring identical traces for identical executions. The trace structure is complete, ordered, deterministic, and canonical.
+
+**Trace Structure**: Each execution produces a TRP record containing step-level traces (index, step_name, template_id, input_snapshot, output_snapshot) and branch-level traces (index, path, condition_value).
+
+### Single-Source Canonical Representation Invariant
+
+Same program → same canonical IR → same hash (HMASTER). Canonical JSON ensures stable serialization with alphabetically sorted keys and normalized floats. This hash is stable across compiler versions, platforms, Python versions, and serialization libraries.
+
+**Hash Stability**: The canonical IR hash (HMASTER) serves as program identity. Any modification to program semantics breaks hash verification, enabling tamper detection.
+
+---
+
+## Architecture Overview
+
+The compiler architecture follows a strict separation between extension-safe frontend components and frozen physics-layer components:
+
+```mermaid
+flowchart TB
+    subgraph Frontend["Frontend (Extension-Safe)"]
+        L[Lexer] --> P[Parser] --> R[Resolver] --> T[Type Checker]
+    end
+    subgraph Middle["Middle-End (Deterministic)"]
+        I[IR Builder] --> C[Canonical IR]
+    end
+    subgraph Backend["Backend (Frozen Physics)"]
+        X[Executor] --> Y[TRP Engine] --> Z[Hashing + Proof System]
+    end
+    
+    Frontend --> Middle
+    Middle --> Backend
+```
+
+**Frontend (Extension-Safe)**: Lexer, Parser, Resolver, Type Checker. These components can be extended with new syntax, AST nodes, symbols, and types while maintaining determinism. New language features can be added safely.
+
+**Middle-End (Safe But Strict)**: IR Lowering, Canonical IR Generation. Must remain deterministic. IR structure defines execution model and cannot change without breaking proofs. IR extensions are possible but must preserve canonical representation.
+
+**Backend (Very Sensitive)**: Canonicalizer, Executor, Proof System, Hashing. These components are frozen or must remain deterministic. Canonical JSON rules, hash algorithms, and TRP structure cannot change without breaking verification.
+
+For detailed architecture documentation, see [`docs/compiler_physics.md`](docs/compiler_physics.md).
+
+---
+
+## Detailed Example
+
+Multi-branch control flow with deterministic trace recording:
+
+```rlang
+fn classify_high(x: Int) -> Int;
+fn classify_medium(x: Int) -> Int;
+fn classify_low(x: Int) -> Int;
+
+pipeline classify(Int) -> Int {
+  if (__value > 50) {
+    classify_high
+  } else {
+    if (__value > 20) {
+      classify_medium
+    } else {
+      classify_low
+    }
+  }
+}
+```
+
+Execution with input `35` produces deterministic output and TRP trace:
+
+```python
+bundle = run_program_with_proof(
+    source=source,
+    input_value=35,
+    fn_registry={
+        "classify_high": lambda x: 1,
+        "classify_medium": lambda x: 2,
+        "classify_low": lambda x: 3
+    }
+)
+
+print("Output:", bundle.output_value)  # 2
+print("Steps:", len(bundle.steps))     # 1
+print("Branches:", len(bundle.branches))  # 2
+```
+
+The TRP trace records every branch decision deterministically:
+
+```
+steps: [
+  { "index": 0, "step_name": "classify_medium", "input": 35, "output": 2 }
+]
+
+branch_trace: [
+  { "index": 0, "path": "else", "condition_value": false },
+  { "index": 1, "path": "then", "condition_value": true }
+]
+```
+
+Same input always produces identical trace structure, enabling cryptographic verification via HRICH.
+
+---
+
+## Proof System Overview
+
+RLang generates cryptographic proof bundles for every execution, enabling trustless verification without re-execution:
+
+```mermaid
+flowchart LR
+    A[Canonical IR] --> B[Execute]
+    B --> C[Trace TRP]
+    C --> D[Hashing Engine]
+    D --> E[HMASTER]
+    D --> F[HRICH]
+```
+
+### HMASTER: Program IR Hash
+
+**Definition**: `HMASTER = Hash(canonical_json(program_ir))`
+
+HMASTER identifies program identity cryptographically. Same program always produces identical HMASTER, regardless of compiler version, platform, or serialization library. Any modification to program semantics breaks HMASTER verification.
+
+**Key Properties**:
+- **Input-independent**: HMASTER depends only on program logic, not on input values
+- **Logic-sensitive**: Any change to program logic produces a different HMASTER
+- **Deterministic**: Same program always produces identical HMASTER across all runs
+
+**Computation**: Canonical IR is serialized to JSON with alphabetically sorted keys and normalized floats. SHA-256 hash of the canonical JSON string produces HMASTER.
+
+### HRICH: Execution Trace Hash
+
+**Definition**: `HRICH = Hash(canonical_json(proof_bundle))`
+
+HRICH validates execution integrity cryptographically. Same execution always produces identical HRICH, enabling trustless verification of computation results. Any modification to execution trace breaks HRICH verification.
+
+**Key Properties**:
+- **Execution-sensitive**: HRICH changes when input, output, or execution path changes
+- **Branch-aware**: Different branch paths produce different HRICH values
+- **Deterministic**: Same execution always produces identical HRICH across all runs
+
+**Computation**: Proof bundle containing TRP traces, input/output values, IR, and metadata is serialized to canonical JSON. SHA-256 hash of the canonical JSON string produces HRICH.
+
+### Proof Bundle Structure
+
+Each proof bundle contains:
+- **Program IR**: Canonical intermediate representation
+- **Input/Output Values**: Execution inputs and final outputs
+- **TRP Traces**: Complete step-level and branch-level execution records
+- **HMASTER**: Program IR hash
+- **HRICH**: Execution trace hash
+- **Subproofs**: BoR-compatible subproof structures (DIP, DP, PEP, PoPI, CCP, CMIP, PP, TRP)
+
+For detailed proof system documentation, see [`docs/proof-system.md`](docs/proof-system.md).
+
+---
+
+## TRP Overview
+
+TRP (Trace of Reasoning Process) is the execution trace format that records every step and branch decision deterministically:
+
+### Step Execution Records
+
+Each step execution produces a record containing:
+- **index**: 0-based step index in pipeline
+- **step_name**: Function name being executed
+- **template_id**: Template reference for step definition
+- **input_snapshot**: Input value passed to this step
+- **output_snapshot**: Output value produced by this step
+
+### Branch Execution Records
+
+Each conditional execution produces a record containing:
+- **index**: Index of the IRIf in the top-level pipeline steps list
+- **path**: "then" or "else" branch taken
+- **condition_value**: Evaluated condition value (bool)
+
+### Trace Stability
+
+TRP traces are deterministic and canonical:
+- **Complete**: Every step execution is recorded
+- **Ordered**: Steps appear in execution order
+- **Deterministic**: Same execution → same trace
+- **Canonical**: Trace structure is stable across serializations
+
+Same program and input always produce identical TRP structure, enabling cryptographic verification via HRICH. Trace stability ensures that proof bundles can be verified independently without re-execution.
+
+---
+
+## Comparison to Existing Approaches
+
+| Feature / System          | RLang + BoR | SQL | WASM | Solidity | zkVMs | Deterministic ML |
+|---------------------------|-------------|-----|------|----------|-------|-------------------|
+| Deterministic by design   | Yes         | Partial | Yes | Depends | Yes | No |
+| Canonical IR              | Yes         | No  | No   | No       | Yes   | No |
+| Cryptographic proofs      | HMASTER + HRICH | No | No | Keccak-based | Proof-of-execution | No |
+| Full execution trace      | TRP | No | No | Event logs only | Yes | No |
+| Trustless verification    | Yes | No | No | Limited | Yes | No |
+| Primary domain            | Compliance, deterministic reasoning | Data | Execution VM | Smart contracts | ZK proofs | ML models |
+| Identity guarantee        | Canonical IR hash | No | No | Contract hash | Proof statements | No |
+
+RLang + BoR uniquely combines deterministic language design, canonical IR representation, cryptographic proof generation, complete execution traces, and trustless verification—making it ideal for compliance automation, reproducible reasoning, and high-integrity systems.
+
+**Differences**:
+- **WASM**: Execution VM without determinism guarantees or canonical IR
+- **Solidity**: Smart contracts without canonical IR or full execution traces
+- **zkVMs**: Zero-knowledge proofs without deterministic language or TRP traces
+- **Deterministic ML**: Model determinism without execution trace verification or cryptographic proof layers
+
+---
+
+## Use Cases
+
+### Compliance Automation
+
+Regulated industries require complete audit trails with cryptographic integrity. RLang produces TRP records with tamper-evident proof bundles, enabling compliance automation with verifiable proof. Auditors can verify compliance decisions without re-execution.
+
+### Reproducible Reasoning
+
+Scientific computing and research require bit-for-bit reproducible execution across platforms and time periods. RLang guarantees identical outputs for identical inputs, eliminating "works on my machine" problems and enabling reproducible science.
+
+### Autonomous Agents
+
+Autonomous agents require deterministic decision-making pipelines. RLang provides the execution layer where agent reasoning steps are verifiable and reproducible. Every agent decision produces a cryptographic proof bundle.
+
+### LLM Guardrails
+
+LLM outputs can be validated through RLang pipelines. When LLMs generate structured decisions, RLang pipelines verify correctness deterministically. LLM reasoning steps become cryptographically verifiable.
+
+### Financial Transaction Validation
+
+Financial institutions require verifiable transaction validation logic. RLang enables deterministic transaction processing with cryptographic proof bundles. Regulators can audit transaction logic independently.
+
+### Healthcare Diagnostic Pipelines
+
+Healthcare systems require deterministic diagnostic pipelines. RLang guarantees bit-for-bit reproducible execution across environments, enabling verifiable diagnostic reasoning with cryptographic proof.
+
+---
+
+## Who Is This For?
+
+### Developers
+
+Building deterministic reasoning pipelines that require cryptographic verification. Implementing compliance automation systems with audit-ready execution traces. Creating reproducible AI agents with verifiable decision-making logic. Developing systems where correctness equals equality of hashes.
+
+### Enterprise Engineers / Compliance Teams
+
+Financial institutions requiring verifiable transaction validation logic. Healthcare systems needing deterministic diagnostic pipelines. Regulated industries demanding compliance-grade auditability. Organizations building trustless automation with cryptographic proof.
+
+### Researchers in PL / Verification / AI Safety
+
+Programming language researchers studying deterministic execution semantics. Formal verification researchers exploring cryptographic proof systems. AI safety researchers building verifiable reasoning substrates. Systems researchers investigating trustless computation architectures.
+
+---
+
+## Roadmap
+
+### Frontend Extensions (Extension-Safe)
+
+- **Records**: Structured data types with field access
+- **Lists**: Ordered collections with deterministic iteration
+- **Pattern Matching**: Exhaustive case analysis with deterministic selection
+- **Loops**: Deterministic iteration constructs (for, while)
+- **Modules**: Code organization and namespace management
+
+### Backend Stability (Frozen Physics)
+
+- **Canonical IR structure**: Remains stable across versions
+- **TRP trace format**: Versioned but backward-compatible
+- **Hash algorithms**: HMASTER and HRICH are frozen
+- **Canonical JSON rules**: Cannot change without breaking verification
+
+### Evolution Philosophy
+
+Frontend is extensible—new syntax, types, and constructs can be added safely while maintaining determinism. Backend physics is frozen—IR structure, proof formats, and hashing algorithms maintain stability to preserve cryptographic verification guarantees.
+
+---
+
+## Installation & Development Setup
+
+### Installation
+
+```bash
+pip install rlang-compiler
+```
+
+### Local Development
+
+```bash
+git clone https://github.com/kushagrab21/Compiler_application.git
+cd Compiler_application
+pip install -e .[dev,test]
+```
+
+### Running Tests
+
+```bash
+pytest -q --disable-warnings
+```
+
+---
+
+## Verification Commands
+
+### Generate Proof Bundle
+
+```python
+from rlang.bor import run_program_with_proof, RLangBoRCrypto
+import json
+
+source = """
+fn inc(x: Int) -> Int;
+pipeline main(Int) -> Int { inc }
+"""
+
+bundle = run_program_with_proof(
+    source=source,
+    input_value=10,
+    fn_registry={"inc": lambda x: x + 1}
+)
+
+# Convert to rich bundle format
+crypto = RLangBoRCrypto(bundle)
+rich = crypto.to_rich_bundle()
+
+# Save bundle
+with open("bundle.json", "w") as f:
+    json.dump(rich.rich, f, indent=2)
+```
+
+### Verify with BoR CLI
+
+```bash
+borp verify-bundle --bundle bundle.json
+```
+
+Successful verification confirms cryptographic integrity of the execution trace. The bundle contains HMASTER (program IR hash), HRICH (execution trace hash), complete TRP traces, and BoR-compatible subproofs.
+
+---
+
+## Documentation
+
+- **Formal Specification**: [`docs/compiler_physics.md`](docs/compiler_physics.md) — Complete deterministic execution & proof architecture specification
+- **Proof System**: [`docs/proof-system.md`](docs/proof-system.md) — BoR integration, proof bundles, and verification details
+- **Language Reference**: [`docs/language.md`](docs/language.md) — RLang syntax, semantics, and type system
+- **Expansion Playbook**: [`docs/compiler_expansion_playbook.md`](docs/compiler_expansion_playbook.md) — Implementation checklists, test matrices, and extension guidelines
+- **Examples**: See [`examples/`](examples/) for sample RLang programs
+
+---
+
+## Status
+
+**Compiler**: Fully functional (190+ tests passing)  
+**Control Flow**: Deterministic `if/else` in pipelines with type-checked branches  
+**Proof Generation**: Complete and deterministic, including branch-aware TRP subproofs  
+**BoR Integration**: Verified with `borp verify-bundle`  
+**Determinism**: Bit-for-bit reproducible including branch traces  
+**Security**: Tamper detection working for both steps and branches  
+**Version**: 0.2.4 (published to PyPI)
+
+---
+
+**License**: MIT License  
+**Author**: Kushagra Bhatnagar

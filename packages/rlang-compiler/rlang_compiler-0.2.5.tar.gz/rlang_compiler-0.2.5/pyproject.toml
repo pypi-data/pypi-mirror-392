@@ -1,0 +1,62 @@
+[project]
+name = "rlang-compiler"
+version = "0.2.5"
+requires-python = ">=3.9"
+authors = [{name = "Kushagra Bhatnagar"}]
+description = "Deterministic RLang compiler with cryptographic proof generation for BoR (Blockchain of Reasoning)"
+readme = "README.md"
+license = {text = "MIT"}
+keywords = [
+    "deterministic-compiler",
+    "bor",
+    "blockchain-of-reasoning",
+    "rlang",
+    "cryptographic-verification",
+    "proof-generation",
+    "verifiable-computation",
+    "dsl"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Topic :: Software Development :: Compilers",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+]
+test = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+]
+bor-sdk = [
+    "bor-sdk>=1.0.0",
+]
+
+[project.scripts]
+rlangc = "rlang.cli.rlangc:main"
+
+[project.urls]
+Homepage = "https://github.com/kushagrab21/Compiler_application"
+Documentation = "https://github.com/kushagrab21/Compiler_application"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["rlang"]
+
+[tool.setuptools.package-data]
+rlang = ["**/*.py"]
