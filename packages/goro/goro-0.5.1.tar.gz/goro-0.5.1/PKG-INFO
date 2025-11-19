@@ -1,0 +1,88 @@
+Metadata-Version: 2.4
+Name: goro
+Version: 0.5.1
+Summary: A TUI-based tool for managing multiple Git repositories in one place with an intuitive interface
+Author-email: Angelo E DZ <user4302@users.noreply.gitlab.com>
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.8
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: rich>=13.0.0
+Requires-Dist: textual>=0.40.0
+Requires-Dist: typer>=0.9.0
+Requires-Dist: typing-extensions>=4.0.0
+Provides-Extra: dev
+Requires-Dist: black>=23.0.0; extra == 'dev'
+Requires-Dist: hatch-vcs; extra == 'dev'
+Requires-Dist: isort>=5.0.0; extra == 'dev'
+Requires-Dist: mypy>=1.0.0; extra == 'dev'
+Requires-Dist: pytest-cov>=4.0.0; extra == 'dev'
+Requires-Dist: pytest>=7.0.0; extra == 'dev'
+Description-Content-Type: text/markdown
+
+# Goro — Git Ops Repo Orchestrator (v0.5.0)
+
+**Goro** (Git Ops Repo Orchestrator) is a blazing-fast **Textual TUI** for managing and syncing **dozens of Git repositories at once** — think *lazygit, but for your entire workspace*.
+
+![Goro screenshot/demo](https://i.ibb.co/CKQYvzCp/goro.png)  
+<!-- *TODO: (replace the link above with your own screenshot or short GIF)* -->
+
+### Install
+
+```bash
+pip install goro          # or
+uv tool install goro
+```
+
+### Run
+
+```bash
+goro                      # launches the interactive TUI instantly
+```
+
+### Core Features
+
+- Manually add any repository path (even weird ones like %APPDATA%, client folders, external drives…)- Bulk sync (`add → commit → pull → push`) for selected or all repos
+- Live status grid with branch, ahead/behind, and dirty indicators
+- Add, edit, rename, and remove repositories interactively
+- Real-time command output with progress bars
+- Full CLI fallback (`goro sync-all`, `goro status my-repo`, etc.)
+- Cross-platform (Windows • macOS • Linux)
+
+### TUI Quick Keys
+
+| Key       | Action                     |
+|-----------|----------------------------|
+| `a`       | Add repository             |
+| `s` / `S` | Sync selected • all repos  |
+| `t`       | Show detailed git status   |
+| `F2`      | Edit / rename repository   |
+| `c`       | Clear logs                 |
+| `q`       | Quit                       |
+
+### Full CLI Reference & Changelog
+→ https://gitlab.com/user4302_Projects/coding/python/textual/goro/-/blob/main/CHANGELOG.md
+
+### Project Homes
+
+| Platform   | Purpose                                  | Link                                                                      |
+|------------|-------------------------------------------|---------------------------------------------------------------------------|
+| **GitLab** | Source of truth • Issues • MRs • CI/CD    | https://gitlab.com/user4302_Projects/coding/python/textual/goro           |
+| **GitHub** | Mirror for discoverability & extra stars  | https://github.com/user4302/goro                              |
+
+> **Please file issues and feature requests on GitLab** — that’s where I actively track and fix everything.  
+> GitHub mirror is kept in sync automatically.
+
+**License** — MIT  
+**Built with** — Textual • Typer • uv • Hatch • Python 3.8+
+
+⭐ **Star on whichever platform you prefer** — every star helps!  
+(If you star both, I won’t complain 😉)
