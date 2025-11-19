@@ -1,0 +1,58 @@
+[package]
+name = "enderecobr_rs"
+version = "0.0.4"
+edition = "2021"
+license = "MIT"
+rust-version = '1.81'
+authors = ["Daniel Herszenhut Meirelles Santos <daniel.santos@ipea.gov.br>", "Gabriel Garcia de Almeida <gabriel.almeida@ipea.gov.br", "Rafael Henrique Moraes Pereira <rafael.pereira@ipea.gov.br>"]
+repository = "https://github.com/ipeaGIT/enderecobr_rs"
+homepage = "https://github.com/ipeaGIT/enderecobr_rs"
+categories = ["text-processing", "value-formatting", "science::geo"]
+keywords = ["address", "brazil", "brasil", "regex", "geocoding"]
+description = "Esta biblioteca tem por objetivo prover de funções utilizadas para padronizar endereços brasileiros, afim de facilitar processamentos posteriores."
+exclude = [ "scripts/"]
+readme = "README.md"
+
+[[bin]]
+name = "separacao-lote"
+path = "src/bin/separacao-lote.rs"
+required-features = ["experimental", "cli"]
+
+[[bin]]
+name = "bench-separacao"
+path = "src/bin/bench-separacao.rs"
+required-features = ["experimental", "cli"]
+
+[[bin]]
+name = "padronizar"
+path = "src/bin/padronizar.rs"
+required-features = ["cli"]
+
+[[bin]]
+name = "teste-comparativo"
+path = "src/bin/teste-comparativo.rs"
+required-features = ["cli"]
+
+
+[[bin]]
+name = "padronizacao-lote"
+path = "src/bin/padronizacao-lote.rs"
+required-features = ["cli"]
+
+[features] 
+default = []
+experimental = ["crfsuite"]
+cli = ["polars", "clap"]
+
+[dependencies]
+clap = { version = "4.5.50", features = ["derive"], optional = true }
+crfsuite = { version = "0.3.1", optional = true}
+diacritics = "0.2.2"
+itertools = "0.14.0"
+polars = { version = "0.51.0", features = ["lazy", "parquet", "strings", "new_streaming", "polars-lazy", "polars-io", "polars-parquet", "object"], optional = true }
+regex = "1.11.1"
+unicode-normalization = "0.1.25"
+
+[profile.release]
+strip = true
+# lto = true
