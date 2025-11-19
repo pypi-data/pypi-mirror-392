@@ -1,0 +1,84 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "zarr-particle-tools"
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+]
+dynamic = ["version"]
+dependencies = [
+    "click",
+    "copick",
+    "cryoet_alignment>=0.1.1",
+    "cryoet_data_portal",
+    "dask",
+    "mrcfile",
+    "numpy",
+    "pandas",
+    "rich",
+    "s3fs",
+    "scipy",
+    "starfile",
+]
+authors = [{ name = "Daniel Ji" }, { name = "Utz Heinrich Ermel" }]
+description = "Subtomogram extraction from local files and the CryoET Data Portal."
+readme = "README.md"
+license = { file = "LICENSE" }
+keywords = [
+    "cryoet",
+    "cryo-et",
+    "tomography",
+    "subtomogram",
+    "particle",
+    "zarr",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=25.1.0",
+    "hatchling>=1.25.0",
+    "hatch-vcs>=0.4.0",
+    "pre-commit>=4.2.0",
+    "ruff>=0.12.0",
+    "matplotlib",
+    "seaborn",
+    "pytest",
+    "pytest-xdist",
+]
+# pipeliner = ["pipeliner @ git+https://gitlab.com/ccpem/ccpem-pipeliner.git"]
+
+[project.scripts]
+zarr-particle-extract = "zarr_particle_tools.subtomo_extract:cli"
+zarr-particle-reconstruct = "zarr_particle_tools.subtomo_reconstruct:cli"
+
+[project.entry-points."ccpem_pipeliner.jobs"]
+"zarrparticletools.pseudosubtomo" = "zarr_particle_tools.pipeliner.subtomo_extract_pipeliner_job:PythonRelionPseudoSubtomoJob"
+"zarrparticletools.reconstruct" = "zarr_particle_tools.pipeliner.subtomo_reconstruct_pipeliner_job:PythonRelionSubtomoReconstructJob"
+
+[tool.hatch.version]
+path = "src/zarr_particle_tools/__init__.py"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.black]
+line-length = 120
+target-version = ["py39"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]
