@@ -1,0 +1,45 @@
+from __future__ import annotations
+
+import os
+from typing import Any, Iterable
+
+from llama_index.core.readers.base import BaseReader
+from llama_index.core.schema import Document
+
+from ....core.exts import Exts
+from ....logger import logger
+
+__all__ = ["DummyMediaReader"]
+
+
+class DummyMediaReader(BaseReader):
+    """Dummy reader to prevent downstream default readers from splitting media as text."""
+
+    def lazy_load_data(self, path: str, extra_info: Any = None) -> Iterable[Document]:
+        """Load media files as dummy documents containing file paths.
+
+        Args:
+            path (str): File path.
+
+        Returns:
+            Iterable[Document]: Documents containing the file path.
+        """
+        from ....core.metadata import MetaKeys as MK
+
+        path = os.path.abspath(path)
+        if not os.path.exists(path):
+            logger.warning(f"file not found: {path}")
+            return []
+
+        if not Exts.endswith_exts(path, Exts.PASS_THROUGH_MEDIA):
+            logger.warning(
+                f"unsupported ext for {path}. {' '.join(Exts.PASS_THROUGH_MEDIA)} is allowed."
+            )
+            return []
+
+        # For MultiModalVectorStoreIndex
+        doc = Document(text=path, metadata={MK.FILE_PATH: path})
+
+        logger.debug(f"loaded 1 doc from {path}")
+
+        return [doc]
