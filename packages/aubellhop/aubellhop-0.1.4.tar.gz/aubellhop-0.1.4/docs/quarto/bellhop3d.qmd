@@ -1,0 +1,115 @@
+---
+title: "Bellhop.py 3D models"
+format:
+  html:
+    code-fold: true
+jupyter: python3
+---
+
+The Python Bellhop wrapper supports multiple models, which can be automatically detected depending on the environment parameters and task being computed.
+The main feature this enables is to provide seamless access to Bellhop3D.
+
+## Bellhop3D environment definition
+
+Bellhop3D differs from Bellhop (2D) in roughly four ways:
+* Sources and receivers are now defined in 3D:
+    * The source location can be shifted to any $(x,y,z)$ coordinate
+    * The receiver locations can vary in their bearing angle $\theta$, with positions defined in cylindical coordinates $(r,\theta,z)$
+* Altimetry, bathymetry, speed of sound profiles, etc., are defined in 3D.
+* The beam fan is defined in both spherical directions (elevation, bearing).
+* The simulation can be set to either 2.5D or full 3D:
+    * 3D allows refraction horizontally due to lateral changes in sound speed;
+    * 2.5D traces beams along 3D directions but every beam is restricted to travel along a vertically-oriented plane (i.e., a straight line when viewed from above).
+
+## Bellhop3D rays
+
+Load Bellhop and check the standard models available out of the box:
+```{python}
+import bellhop as bh
+import bellhop.plot as bhp
+print(bh.Models.list())
+```
+
+Now define a standard 2D and 3D case and do some computations on them:
+```{python}
+env2d = bh.Environment(name="Example Bellhop2D",dimension="2D").check()
+env3d = bh.Environment(name="Example Bellhop3D",dimension="3D").check()
+output, ind = bh.compute(env=[env2d, env3d],task=["rays"])
+print(ind)
+```
+
+Now look at the results:
+
+```{python}
+print("Size of output:")
+print(f"2D rays: N={len(output[0]['results'])}")
+print(f"3D rays: N={len(output[1]['results'])}")
+
+print("Each ray data structure:")
+print(output[0]['results'].iloc[1,:])
+print(output[1]['results'].iloc[1,:])
+
+print("Ray details 2D:")
+print(output[0]['results'].iloc[1,:]['ray'])
+
+print("Ray details 3D:")
+print(output[1]['results'].iloc[1,:]['ray'])
+```
+
+### Minimal example 2D
+
+```{python}
+import bellhop as bh
+import bellhop.plot as bhp
+
+env2d = bh.Environment(name="Example Bellhop2D",dimension="2D",beam_angle_min=-45,beam_angle_max=45).check()
+rays2d = bh.compute_eigenrays(env2d)
+print(env2d)
+bhp.plot_rays(rays2d,env=env2d)
+```
+
+### Minimal example 3D (bokeh)
+
+Only a 2D projection can be plotted (essentially, y-axis ignored):
+
+```{python}
+import bellhop as bh
+import bellhop.plot as bhp
+
+env3d = bh.Environment(name="Example Bellhop3D",dimension="3D",beam_angle_min=-45,beam_angle_max=45).check()
+rays3d = bh.compute_eigenrays(env3d) 
+bhp.plot_rays(rays3d,env=env3d)
+```
+
+
+
+### Minimal example 2D (matplotlib)
+
+```{python}
+import bellhop as bh
+import bellhop.pyplot as bhp
+
+env2d = bh.Environment(name="Example Bellhop2D",dimension="2D",beam_angle_min=-45,beam_angle_max=45,beam_num=10_000).check()
+rays2d = bh.compute_eigenrays(env2d)
+
+bhp.pyplot_rays(rays2d,env=env2d)
+```
+
+### Minimal example 3D (matplotlib)
+
+```{python}
+import matplotlib.pyplot as plt
+import bellhop as bh
+import bellhop.pyplot as bhp
+
+env3d = bh.Environment(name="Example Bellhop3D",dimension="3D",beam_angle_min=-45,beam_angle_max=45,beam_num=10_000).check()
+rays3d = bh.compute_eigenrays(env3d) 
+
+fig = plt.figure()
+ax = fig.add_subplot(projection='3d')
+bhp.pyplot_rays(rays3d,env=env3d,ax=ax)
+plt.show(fig)
+plt.close(fig)
+```
+
+

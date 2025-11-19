@@ -1,0 +1,23 @@
+
+name: Code Lint
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install dependencies
+      run: pip install hatch fortitude-lint ruff uv
+    - name: Ruff
+      run: hatch run make lintp
+    - name: Type checking
+      run: hatch run make typep
+    - name: Fortitude
+      run: hatch run make lintf
+
