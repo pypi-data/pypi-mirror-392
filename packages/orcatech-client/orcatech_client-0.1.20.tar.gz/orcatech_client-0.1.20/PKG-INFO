@@ -1,0 +1,162 @@
+Metadata-Version: 2.4
+Name: orcatech_client
+Version: 0.1.20
+Summary: A Python API client for ORCATECH
+Author: Kezman Saboi
+Author-email: saboi@ohsu.edu
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: requests
+Requires-Dist: python-dotenv
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+# ORCATECH Python API Client
+
+A Python-based API client for interacting with the ORCATECH server API.
+
+## Overview
+
+This library provides a programmatic interface to make HTTP requests to the ORCATECH API using specific endpoints and request methods. It includes support for authentication, data retrieval, and AWS integration capabilities.
+
+## Installation
+
+```bash
+pip install orcatech_client
+```
+
+Or install from source:
+
+```bash
+git clone <repository-url>
+cd python
+pip install -e .
+```
+
+## Features
+
+- **API Client**: Full-featured HTTP client for ORCATECH API endpoints
+- **Authentication**: Bearer token authentication support
+- **Type Safety**: Comprehensive schema types for observations, records, and data structures
+- **AWS Integration**: Certificate management for AWS services
+- **Configuration**: Environment-based configuration using `.env` files
+
+## Examples
+
+### Example 1: Basic API Client Usage
+
+```python
+from orcatech_client.client import APIClient
+from orcatech_client.config import Config, Scope
+
+# Initialize configuration
+Config.validate()
+host = Config.HOST_URL
+token = Config.AUTH_TOKEN
+
+# Create client
+client = APIClient(host)
+client.headers["Authorization"] = f"Bearer {token}"
+
+# Make API requests
+scope = Scope["STUDY"]
+scope_id = 2
+data_schema = "com.orcatech.measure.access.period"
+observation_uuid = "your-observation-uuid"
+
+result = client.get_observation(
+    host,
+    scope,
+    scope_id,
+    data_schema,
+    observation_uuid
+)
+```
+
+### Example 2: AWS Certificate Management
+
+```python
+from orcatech_client.aws.aws_cert_manager import AWSCredentialManager
+
+# Configuration
+HOST = "https://test.c4.orcatech.org:8080/api/public"
+SCOPE = "study"
+SCOPE_ID = "1"
+ITEM_ID = 1
+SCHEMA = "com.orcatech.inventory.item"
+AUTH_TOKEN = "your-auth-token"
+
+# Read certificate and key files
+with open("aws_cert.pem", "r") as cert_file:
+    cert_pem = cert_file.read()
+
+with open("aws_key.pem", "r") as key_file:
+    key_pem = key_file.read()
+
+# Combine certificate and key
+combined_pem = cert_pem.strip() + "\n" + key_pem.strip()
+
+# Initialize manager
+manager = AWSCredentialManager(
+    host=HOST,
+    scope=SCOPE,
+    scope_id=SCOPE_ID,
+    auth_token=AUTH_TOKEN,
+    schema=SCHEMA,
+    demo_mode=False,
+    insecure_ssl=True  # Set to False in production
+)
+
+# Create new AWS credentials
+manager.create_aws_credentials(item_id=ITEM_ID, combined_pem=combined_pem)
+
+# Or update existing credentials
+manager.update_aws_credentials(item_id=ITEM_ID, combined_pem=combined_pem)
+```
+
+## Configuration
+
+Create a `.env` file in your project root:
+
+```
+HOST_URL=https://your-api-host.com
+AUTH_TOKEN=your-bearer-token
+```
+
+### Certificate File Format
+
+AWS certificates should be in PEM format:
+- `aws_cert.pem` - The device certificate
+- `aws_key.pem` - The private key
+
+**Important**: Never commit `.pem` files to version control. They are automatically ignored by `.gitignore`.
+
+## Available Methods
+
+- `get_observation()` - Retrieve specific observations
+- `get()` - Generic GET requests
+- `post()` - Generic POST requests
+- `authenticate()` - Handle authentication
+
+## Requirements
+
+- Python >= 3.6
+- requests
+- python-dotenv
+
+## Author
+
+Kezman Saboi
+
+## License
+
+MIT License
