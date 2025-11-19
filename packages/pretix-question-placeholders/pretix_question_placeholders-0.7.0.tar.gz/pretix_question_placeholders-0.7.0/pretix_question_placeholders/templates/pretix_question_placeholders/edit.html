@@ -1,0 +1,141 @@
+{% extends "pretixcontrol/event/base.html" %}
+{% load i18n %}
+{% load static %}
+{% load bootstrap3 %}
+{% load formset_tags %}
+{% load escapejson %}
+
+{% block title %}{% trans "Placeholders" %}{% endblock %}
+
+{% block custom_header %}
+    <link rel="stylesheet" type="text/css" href="{% static "pretix_question_placeholders/placeholder.css" %}"/>
+{% endblock %}
+
+{% block content %}
+<h1>{% trans "Email placeholder" %} {question_{{ form.instance.placeholder_name }}}</h1>
+    <div class="alert alert-info">
+        You can use this placeholder to add content to emails sent to users, depending on the answer they gave to the question "{{ form.instance.question }}".
+    </div>
+    <form action="" method="post" class="form-horizontal">
+        {% csrf_token %}
+        {% bootstrap_form_errors form %}
+        {% bootstrap_field form.use_fallback_when_unanswered layout="control" %}
+        {% bootstrap_field form.fallback_content layout="control" %}
+            <fieldset>
+                <h2>{% trans "Rules" %}</h2>
+                <div class="alert alert-info">
+                    <p>The rules can be counterintuitive – please test them carefully and note the following:</p>
+                    <ul>
+                        <li>Emails are sent for specific <i>orders</i>.</li>
+                        <li>For each <i>order position</i> in the given order, the rules are tested from <b>top to bottom</b>.</li>
+                        <li><b>Only the first matching rule is used</b> for each order position!</li>
+                        <li>If one rule matches multiple times, it will only be put into the email once.</li>
+                    </ul>
+                </div>
+                <div class="formset" data-formset data-formset-prefix="{{ formset.prefix }}">
+                    {{ formset.management_form }}
+                    {% bootstrap_formset_errors formset %}
+                    <div data-formset-body>
+                        {% for form in formset %}
+                        <div data-formset-form>
+                            <div class="sr-only">
+                                {{ form.id }}
+                                {% bootstrap_field form.DELETE form_group_class="" layout="inline" %}
+                                {% bootstrap_field form.ORDER form_group_class="" layout="inline" %}
+                            </div>
+                            <div class="row question-option-row">
+                                <div class="col-xs-10">
+                                    <h3>
+                                        {% blocktrans trimmed with id=forloop.counter %}
+                                            Rule {{ id }}
+                                        {% endblocktrans %}
+                                    </h3>
+                                    <div>&nbsp;</div>
+                                    {% bootstrap_form_errors form %}
+                                    {% bootstrap_label form.condition_operation.label %}
+                                    <div class="col-md-12 rule-input">
+                                        {% bootstrap_field form.condition_operation layout="inline" form_group_class="col-md-6" %}
+                                        {% bootstrap_field form.condition_content layout="inline" form_group_class="col-md-6 rule-content" %}
+                                    </div>
+                                    <div>
+                                        <div>
+                                            {% bootstrap_label form.content.label %}
+                                        </div>
+                                        <div class="col-md-12">
+                                            {% bootstrap_field form.content layout="inline" form_group_class="" %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-2 text-right flip">
+                                    <span>&nbsp;</span><br>
+                                    <button type="button" class="btn btn-default" data-formset-move-up-button>
+                                        <i class="fa fa-arrow-up"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-default" data-formset-move-down-button>
+                                        <i class="fa fa-arrow-down"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger" data-formset-delete-button>
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        {% endfor %}
+                    </div>
+                    <script type="form-template" data-formset-empty-form>
+                        {% escapescript %}
+                            <div data-formset-form>
+                                <div class="sr-only">
+                                    {{ formset.empty_form.id }}
+                                    {% bootstrap_field formset.empty_form.DELETE form_group_class="" layout="inline" %}
+                                    {% bootstrap_field formset.empty_form.ORDER form_group_class="" layout="inline" %}
+                                </div>
+                                <div class="row question-option-row">
+                                    <div class="col-xs-10">
+                                        <h3>
+                                            {% trans "New rule" %}
+                                        </h3>
+                                        <div>
+                                        {% bootstrap_label formset.empty_form.condition_operation.label %}
+                                        </div>
+                                        <div class="col-md-12 rule-input">
+                                            {% bootstrap_field formset.empty_form.condition_operation layout="inline" form_group_class="col-md-6" %}
+                                            {% bootstrap_field formset.empty_form.condition_content layout="inline" form_group_class="col-md-6 rule-content" %}
+                                        </div>
+                                        <div>
+                                            <div>
+                                                {% bootstrap_label formset.empty_form.content.label %}
+                                            </div>
+                                            <div class="col-md-12">
+                                                {% bootstrap_field formset.empty_form.content layout="inline" form_group_class="" %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-2 text-right flip">
+                                        <span>&nbsp;</span><br>
+                                        <button type="button" class="btn btn-default" data-formset-move-up-button>
+                                            <i class="fa fa-arrow-up"></i></button>
+                                        <button type="button" class="btn btn-default" data-formset-move-down-button>
+                                            <i class="fa fa-arrow-down"></i></button>
+                                        <button type="button" class="btn btn-danger" data-formset-delete-button>
+                                            <i class="fa fa-trash"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endescapescript %}
+                    </script>
+                    <p>
+                        <button type="button" class="btn btn-default" data-formset-add id="add-formset">
+                            <i class="fa fa-plus"></i> {% trans "Add a new rule" %}</button>
+                    </p>
+                </div>
+            </fieldset>
+        <div class="form-group submit-group">
+            <button type="submit" class="btn btn-primary btn-save">
+                {% trans "Save" %}
+            </button>
+        </div>
+    </form>
+    <script src="{% static "pretix_question_placeholders/placeholder.js" %}"></script>
+{% endblock %}
