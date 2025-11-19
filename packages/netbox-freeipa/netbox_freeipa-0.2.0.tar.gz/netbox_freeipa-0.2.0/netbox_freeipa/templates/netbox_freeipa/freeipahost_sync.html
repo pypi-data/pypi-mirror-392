@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load helpers %}
+
+{% block title %}Sync with FreeIPA{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <h5 class="card-header">
+                <i class="mdi mdi-sync"></i> Synchronize with FreeIPA
+            </h5>
+            <div class="card-body">
+                <p class="card-text">
+                    This action will synchronize all enrolled hosts from your FreeIPA server with NetBox.
+                </p>
+                <p class="card-text">
+                    <strong>The synchronization will:</strong>
+                </p>
+                <ul>
+                    <li>Create new host entries for hosts found in FreeIPA</li>
+                    <li>Update existing host entries with current information</li>
+                    <li>Remove host entries that no longer exist in FreeIPA</li>
+                </ul>
+                
+                <div class="alert alert-info" role="alert">
+                    <i class="mdi mdi-information"></i>
+                    <strong>Note:</strong> This operation may take some time depending on the number of hosts in your FreeIPA environment.
+                </div>
+                
+                <form method="post" class="mt-4">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'plugins:netbox_freeipa:freeipahost_list' %}" class="btn btn-secondary">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="mdi mdi-sync"></i> Start Synchronization
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
