@@ -1,0 +1,265 @@
+Metadata-Version: 2.3
+Name: universal-annotator
+Version: 0.1.3
+Summary: Universal Annotation Tool for images
+Author: Madan Mohan
+Author-email: Madan Mohan <madanmmj3@gmail.com>
+License:                                   LICENSE
+                                      Version  18 Nov 2025
+         
+         THIS SOFTWARE LICENSE IS PROVIDED "ALL CAPS" SO THAT YOU KNOW IT IS SUPER
+         SERIOUS AND YOU DON'T MESS AROUND WITH COPYRIGHT LAW BECAUSE YOU WILL GET IN
+         TROUBLE HERE ARE SOME OTHER BUZZWORDS COMMONLY IN THESE THINGS WARRANTIES
+         LIABILITY CONTRACT TORT LIABLE CLAIMS RESTRICTION MERCHANTABILITY. NOW HERE'S
+         THE REAL LICENSE:
+         
+         0. It's a public domain.
+         1. Do whatever you want with it.
+Requires-Dist: pyqt5>=5.15
+Requires-Dist: pyqt5-sip>=12.11
+Requires-Dist: pillow>=9.0
+Requires-Dist: opencv-python>=4.5
+Requires-Dist: numpy>=1.20
+Requires-Dist: tqdm>=4.60
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: jsonschema>=4.0
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+
+📦 Universal Annotator
+A modern, high-performance image annotation tool for computer vision datasets
+
+Universal Annotator is a powerful and user-friendly annotation tool designed for creating high-quality bounding box annotations.
+It supports TXT, JSON, and COCO formats, offers an advanced dark UI, and includes dozens of quality-of-life features for fast annotation workflows.
+
+🔥 Key Features
+🧰 Core Annotation Features
+
+Create, edit, move, and resize bounding boxes
+
+Nested annotations (draw boxes inside existing boxes)
+
+Edit Mode + View Mode
+
+Auto-save when navigating images
+
+Selection memory (restores previously selected boxes per image)
+
+Intelligent natural sorting (image_2.jpg before image_10.jpg)
+
+Format auto-detection (TXT / JSON / COCO)
+
+Smart JSON class discovery
+
+Supports JPG, PNG, BMP, TIFF, WebP
+
+🎨 UI Features
+
+Professional dark theme
+
+Mouse-wheel image zoom
+
+Full menu bar + rich status bar
+
+Help dialog (F1) with shortcuts
+
+Descriptive tooltips on all controls
+
+Optimized keyboard shortcuts for speed
+
+🚀 Installation
+Install directly from PyPI
+pip install universal-annotator
+
+
+Run the application:
+
+universal-annotator
+
+Optional: use a virtual environment
+python3 -m venv venv
+source venv/bin/activate   # Windows: venv\Scripts\activate
+pip install universal-annotator
+universal-annotator
+
+🧭 Basic Usage Guide
+1. Load Dataset
+
+Select an image folder & label folder
+
+Annotation format is auto-detected
+
+If empty, choose TXT, JSON, or COCO manually
+
+2. Draw Bounding Boxes
+
+Press E → Edit Mode
+
+Press M → Draw Mode
+
+Click & drag to draw
+
+Select a class from the popup dialog
+
+Navigate images with A / D or Previous/Next buttons
+
+3. Edit Annotations
+
+Select a box to move or resize
+
+Drag handles to resize
+
+Press Delete to remove
+
+Create nested boxes inside existing ones
+
+4. Save
+
+Press S to save manually
+
+Or enable Auto Save in the UI
+
+Status bar confirms save actions
+
+📁 Supported Annotation Formats
+TXT (YOLO format)
+<class_id> <x_center> <y_center> <width> <height>
+
+JSON
+{
+  "annotations": [
+    {"bbox": [x, y, w, h], "category_id": 0}
+  ]
+}
+
+COCO format
+
+Fully supported
+
+Reads & writes _annotations.coco.json
+
+🗂 Exporters & Converters
+
+All conversion tools avoid overwriting your root labels.
+Outputs go into folders such as:
+
+converted_txt/
+
+converted_json/
+
+converted_coco_json/
+
+Supported conversions include:
+
+TXT → JSON
+
+JSON → TXT
+
+TXT → COCO JSON
+
+COCO → JSON
+
+COCO → TXT
+
+JSON Folder → COCO merge
+
+🎮 Keyboard Shortcuts
+Key	Action
+A	Previous Image
+D	Next Image
+S	Save
+E	Edit Mode
+V	View Mode
+M	Draw Bounding Box
+X	Exit Draw Mode
+Delete	Remove selected box
+F1	Help dialog
+⚙ Configuration
+
+Edit sample_classes/classes.txt to change class names:
+
+person
+car
+bicycle
+dog
+cat
+
+
+Edit utils/config.py for:
+
+Default colors
+
+Line widths
+
+App name & version
+
+🛠 Troubleshooting
+Images not loading
+
+Make sure file formats are supported
+
+Check folder permissions
+
+Labels not found
+
+Ensure filenames match
+
+Ensure correct label folder is selected
+
+Shortcuts not working
+
+Make sure the app window is focused
+
+🖼 Supported Image Formats
+
+JPG / JPEG
+
+PNG
+
+BMP
+
+TIFF
+
+WebP
+
+🚧 Known Limitations
+
+No in-place label editing (must delete & recreate)
+
+Only rectangular bounding boxes
+
+No polygon/segmentation tools (coming soon)
+
+🛠️ Future Enhancements
+
+Change class label of existing box
+
+Polygon and segmentation support
+
+Custom keyboard shortcuts
+
+Analytics dashboard
+
+Undo/Redo
+
+Plugin system
+
+🤝 Contributing
+
+Pull requests are welcome!
+See the contribution guide in:
+
+CONTRIBUTING_UI.md
+
+📄 License
+
+(Add your license here)
+
+👨‍💻 Author
+
+Madan Mohan Jha
+
+📌 Version
+
+Current Version: 1.0.0
+Updated: November 2025
