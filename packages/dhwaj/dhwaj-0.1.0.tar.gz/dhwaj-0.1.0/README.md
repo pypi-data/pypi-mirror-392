@@ -1,0 +1,156 @@
+<div align="center">
+
+![thumbnail](https://github.com/R0X4R/dhwaj/blob/main/image/logo.png?raw=true)
+
+**Dhwaj** is a fast, modular, and extensible **API key verification framework** inspired by *KeyHacks* — built to help security researchers, bug bounty hunters, developers, and DevSecOps teams validate leaked or discovered API keys *safely and quickly*.
+
+It supports **dozens of providers**, automatic detection, structured testing, color-coded output, and a fully plugin-based architecture.
+</div>
+
+---
+
+## 🚀 Features
+
+- Validate API keys from 70+ popular services
+- Modular provider system (`providers/<name>.py`)
+- Central HTTP wrapper with warnings disabled
+- Typed & MyPy-friendly codebase
+- Extensible: add new providers with just ~10 lines
+
+
+## 📦 Installation
+
+```bash
+pipx install dhwaj
+```
+
+## 🧩 Usage
+
+List all available providers:
+
+```bash
+dhwaj
+```
+
+View help for a specific provider:
+
+```bash
+dhwaj github-token -h
+```
+
+Run a validation:
+
+```bash
+dhwaj github-token -t ghp_fake123
+```
+
+---
+
+## 🏗 Provider System
+
+Each provider lives in:
+
+```
+providers/<provider>.py
+```
+
+and follows the structure:
+
+```python
+class ExampleChecker(Provider):
+    name = "example"
+    description = "Check Example API token"
+    args = [
+        ("-k", "--key", "API Key for Example service"),
+    ]
+
+    def run(self, args):
+        ...
+        return True, "Valid Example key"
+```
+
+Providers automatically load through `utils/loader.py`.
+
+
+## 🛠 Development
+
+Install development deps:
+
+```bash
+pip install mypy ruff black
+```
+
+Type-check:
+
+```bash
+mypy .
+```
+
+Format:
+
+```bash
+black .
+```
+
+Lint:
+
+```bash
+ruff check .
+```
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome!
+
+1. Fork the repository
+2. Create a new branch
+3. Add or improve provider modules
+4. Run `mypy`, `ruff`, and `testall.py`
+5. Submit a pull request
+
+When submitting a new provider:
+
+* Follow the `Provider` class structure
+* Provide a clear description
+* Add meaningful arg names & help text
+* Ensure type hints are complete
+* Test with dummy inputs
+
+---
+
+## 🙏 Credits
+
+This project stands on the shoulders of giants.
+
+### 🔹 **KeyHacks**
+
+Huge thanks to the original *KeyHacks* repository for inspiring many of the provider checks used here.
+
+### 🔹 **OpenAI**
+
+Special thanks to OpenAI’s ChatGPT for assisting in generating clean provider modules, documentation, and improving the tool’s architecture.
+
+---
+
+## 📜 License
+
+MIT License — free to use, modify, and distribute.
+
+---
+
+## ⚡️ Why the name **Dhwaj**?
+
+**Dhwaj (ध्वज)** means *flag, banner, symbol of support or protection*.
+This tool acts exactly like a protective flag — detecting weak/leaked API keys before attackers can exploit them.
+
+---
+
+## ⭐️ Show Your Support
+
+If you find Dhwaj helpful:
+
+* Star the repo ⭐
+* Share with your security friends
+* Contribute to make it bigger & better
