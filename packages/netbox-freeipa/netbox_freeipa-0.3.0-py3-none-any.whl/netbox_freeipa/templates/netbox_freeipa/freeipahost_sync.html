@@ -1,0 +1,116 @@
+{% extends 'base/layout.html' %}
+{% load helpers %}
+
+{% block title %}Sync with FreeIPA{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <h5 class="card-header">
+                <i class="mdi mdi-sync"></i> Synchronize with FreeIPA
+            </h5>
+            <div class="card-body">
+                <p class="card-text">
+                    This action will synchronize data from your FreeIPA server with NetBox.
+                    Choose what you want to synchronize:
+                </p>
+                
+                <div class="alert alert-info" role="alert">
+                    <i class="mdi mdi-information"></i>
+                    <strong>Note:</strong> This operation may take some time depending on the amount of data in your FreeIPA environment.
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="mdi mdi-server"></i> Sync Hosts</h5>
+                                <p class="card-text">Synchronize FreeIPA hosts with NetBox.</p>
+                                <ul class="small">
+                                    <li>Create/update/delete host entries</li>
+                                    <li>Update host metadata and SSH keys</li>
+                                </ul>
+                                <form method="post" class="mt-3">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="sync_type" value="hosts">
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="mdi mdi-sync"></i> Sync Hosts
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="mdi mdi-dns"></i> Sync DNS Zones</h5>
+                                <p class="card-text">Synchronize DNS zones from FreeIPA.</p>
+                                <ul class="small">
+                                    <li>Create/update/delete DNS zones</li>
+                                    <li>Update SOA records and zone settings</li>
+                                </ul>
+                                <form method="post" class="mt-3">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="sync_type" value="dns_zones">
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="mdi mdi-sync"></i> Sync DNS Zones
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="mdi mdi-file-document"></i> Sync DNS Records</h5>
+                                <p class="card-text">Synchronize DNS records from all zones.</p>
+                                <ul class="small">
+                                    <li>Create/update/delete DNS records</li>
+                                    <li>Link records to hosts automatically</li>
+                                </ul>
+                                <form method="post" class="mt-3">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="sync_type" value="dns_records">
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="mdi mdi-sync"></i> Sync DNS Records
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card mb-3 border-success">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="mdi mdi-sync-circle"></i> Sync Everything</h5>
+                                <p class="card-text">Full synchronization of all data.</p>
+                                <ul class="small">
+                                    <li>Hosts</li>
+                                    <li>DNS Zones</li>
+                                    <li>DNS Records</li>
+                                </ul>
+                                <form method="post" class="mt-3">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="sync_type" value="all">
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="mdi mdi-sync"></i> Sync All
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <a href="{% url 'plugins:netbox_freeipa:freeipahost_list' %}" class="btn btn-secondary">
+                        <i class="mdi mdi-arrow-left"></i> Back to Hosts
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
