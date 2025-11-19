@@ -1,0 +1,188 @@
+import os
+import pysam
+from pathlib import Path
+from .outlier import outlier_analysis
+
+
+def postprocess(df, data_dir, perform_outlier_analysis, pon):
+    path_to_cosmic = "{}/cosmic/CosmicCodingMuts.indel.vcf.gz".format(data_dir)
+    path_to_non_somatic = "{}/non_somatic/non_somatic.vcf.gz".format(data_dir)
+
+    if Path(path_to_non_somatic).is_file():
+        non_somatic = pysam.VariantFile(path_to_non_somatic)
+    else:
+        non_somatic = None
+    if Path(path_to_cosmic).is_file():
+        cosmic = pysam.VariantFile(path_to_cosmic)
+    else:
+        cosmic = None
+
+    df["filter"], df["reclassified"], df["predicted_class"] = zip(
+        *df.apply(_wrapper, non_somatic_db=non_somatic, cosmic=cosmic, pon=pon, axis=1)
+    )
+
+    df["is_rescurable_homopolymer"] = df.apply(is_rescurable_homopolymer, axis=1)
+
+    if perform_outlier_analysis:
+        df = outlier_analysis(df, os.path.join(data_dir, "outliers"))
+
+    # df["cpos"], df["cref"], df["calt"] = zip(*df.apply(expand_complex, axis=1))
+
+    dfg = df.groupby(["chrom", "cpos", "cref", "calt"])
+    df = dfg.apply(recheck_caller_origin_by_complex_representation)
+
+    df = df[df["keep_this"]]
+
+    df.reset_index(drop=True, inplace=True)
+
+    return sort_positionally(df)
+
+
+def _wrapper(row, non_somatic_db, cosmic, pon, mapping_thresh=0.5):
+    fltr_str = filter_str(row, non_somatic_db, pon, mapping_thresh)
+    is_rescued = reclassify_by_knowledge(row, cosmic)
+    if is_rescued:
+        return fltr_str, "reclassified_by_knowledge", "somatic"
+    else:
+        return fltr_str, row["reclassified"], row["predicted_class"]
+
+
+def is_rescurable_homopolymer(row):
+    if row["is_common"]:
+        return False
+
+    if row["filter"] != "PASS":
+        return False
+
+    if row["reclassified"] != "-":
+        return False
+
+    if row["predicted_class"] == "somatic":
+        return False
+
+    if row["indel_size"] == 1 and row["repeat"] >= 5 and row["prob_s"] >= 0.2:
+        vaf = row["alt_count"] / (row["ref_count"] + row["alt_count"])
+
+        if (vaf > 0.3 and row["alt_count"] > 7) or vaf > 0.6:
+            return True
+
+    return False
+
+
+def filter_str(row, non_somatic_db, pon, mapping_thresh):
+    pred = row["predicted_class"]
+
+    if pred == "somatic":
+        msg = [
+            filter_by_db(row, non_somatic_db, pon),
+            filter_by_mappability(row, mapping_thresh),
+            filter_by_bidirectionality(row),
+            filter_by_junction(row),
+        ]
+        if any(msg):
+            msg = [_f for _f in msg if _f]
+            return ";".join(msg).strip(";")
+        else:
+            return "PASS"
+    else:
+        # TODO from other caller
+        return "PASS"
+
+
+def filter_by_db(row, non_somatic_db, pon):
+    if not non_somatic_db:
+        return ""
+
+    non_somatic_hits = row["indel"].query_vcf(non_somatic_db)
+
+    if non_somatic_hits:
+        if row["prob_a"] >= row["prob_g"]:
+            return "ProbableArtifact"
+        else:
+            return "ProbableGermline"
+
+    if row["is_common"] and not row["is_pathogenic"]:
+        return "ProbableGermline"
+
+    if pon:
+        pon = pysam.VariantFile(pon)
+        pon_hits = row["indel"].query_vcf(pon)
+        if pon_hits:
+            if row["prob_a"] >= row["prob_g"]:
+                return "ProbableArtifactByPON"
+            else:
+                return "ProbableGermlineByPON"
+
+    return ""
+
+
+def filter_by_mappability(row, mapping_thresh):
+    if row["uniq_mapping_rate"] < mapping_thresh:
+        return "LowMappabilityRegion"
+    else:
+        return ""
+
+
+def filter_by_bidirectionality(row):
+    if row["is_bidirectional"]:
+        return ""
+    else:
+        return "UnidirectionalSupport"
+
+
+def filter_by_junction(row):
+    if row["is_near_boundary"]:
+        return "ImmediateProximityToJunction"
+    else:
+        return ""
+
+
+def reclassify_by_knowledge(row, cosmic):
+    if not cosmic or row["is_common"]:
+        return False
+
+    # known pathogenic event with high cosmic count
+    cosmic_cnts = row["cosmic_cnt"]
+    if row["prob_s"] > 0.1:
+        if cosmic_cnts >= 10 and row["is_pathogenic"]:
+            return True
+        elif cosmic_cnts >= 30:
+            return True
+
+    return False
+
+
+def sort_positionally(df):
+    df["_chrom"] = df.apply(lambda x: str(x["chrom"]).replace("chr", ""), axis=1)
+    df["_chrom"] = df.apply(
+        lambda x: 23 if str(x["_chrom"]) == "X" else x["_chrom"], axis=1
+    )
+    df["_chrom"] = df.apply(
+        lambda x: 24 if str(x["_chrom"]) == "Y" else x["_chrom"], axis=1
+    )
+
+    df["_chrom"] = df.apply(lambda x: int(x["_chrom"]), axis=1)
+
+    df.sort_values(["_chrom", "cpos"], inplace=True)
+
+    return df
+
+
+def expand_complex(row):
+    cplx = row["cplx_variant"]
+    return cplx.pos, cplx.ref, cplx.alt
+
+
+def recheck_caller_origin_by_complex_representation(df_groupedby_indel):
+    origins = set(df_groupedby_indel["origin"].to_list())
+
+    if len(origins) > 1:
+        df_groupedby_indel["origin"] = "both"
+
+    max_somatic_prob = df_groupedby_indel["prob_s"].max()
+
+    df_groupedby_indel["keep_this"] = df_groupedby_indel.apply(
+        lambda x: x["prob_s"] == max_somatic_prob, axis=1
+    )
+
+    return df_groupedby_indel
