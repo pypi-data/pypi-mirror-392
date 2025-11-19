@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "django-maintenance-panel"
+version = "0.1.0"
+description = "Django maintenance panel: show maintenance page only to staff (non-superuser) while allowing superusers and public users."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+    { name = "Your Name", email = "you@example.com" }
+]
+keywords = ["django", "maintenance", "admin", "panel"]
+classifiers = [
+    "Framework :: Django",
+    "Framework :: Django :: 4",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 3 - Alpha",
+    "Environment :: Web Environment",
+]
+
+dependencies = [
+    "Django>=4.2",
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["maintenance_panel*"]
+
+[tool.setuptools.package-data]
+"maintenance_panel" = ["templates/maintenance_panel/*.html"]
