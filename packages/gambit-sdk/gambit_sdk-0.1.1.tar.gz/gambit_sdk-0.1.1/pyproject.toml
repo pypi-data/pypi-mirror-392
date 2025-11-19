@@ -1,0 +1,53 @@
+[tool.poetry]
+name = "gambit-sdk"
+version = "0.1.1"
+description = "The official SDK for building Gambit Platform Adapters"
+authors = ["Mikhail Shevernev <shevernev007@gmail.com>"]
+license = "Proprietary"
+readme = "README.md"
+homepage = "https://github.com/brilliant-gambit/gambit-sdk"
+repository = "https://github.com/твой_ник/gambit-sdk"
+keywords = ["sdk", "api", "gambit", "edtech"]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+
+[tool.poetry.dependencies]
+python = "^3.13"
+httpx = "^0.28.1"
+pydantic = "^2.12.4"
+pydantic-settings = "^2.12.0"
+
+[tool.poetry.group.dev.dependencies]
+ruff = ">=0.14.5,<0.15.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+fix = false
+exclude = [".venv", "__pycache__", "*test*", "alembic/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "UP", "I", "SIM", "C4", "RUF", "ANN", "N", "S", "T", "Q", "A", "R", "B9", "W", "PL", "ISC",
+    "PIE", "PGH", "TID", "COM", "RET", "PTH", "G", "FA", "ERA", "TRY", "RSE", "SLF", "EXE", "NPY", "PD", "PERF", "PYI",
+    "EM", "INP", "PT", "DTZ", "LOG", "BLE", "TCH", "FBT", "ASYNC", "TD"]
+ignore = [
+    "RUF001",
+    "TRY301",
+    "BLE001",
+    "TD002",
+    "TD003",
+]
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.File"]
