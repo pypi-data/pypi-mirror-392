@@ -1,0 +1,253 @@
+Metadata-Version: 2.4
+Name: llm-bedrock-converse
+Version: 0.1.0
+Summary: LLM plugin for AWS Bedrock Converse API with tool calling and embeddings support
+Author-email: geehexx <andrewcrozier86@gmail.com>
+License: Apache-2.0
+Project-URL: Homepage, https://github.com/geehexx/llm-bedrock-converse
+Project-URL: Repository, https://github.com/geehexx/llm-bedrock-converse
+Project-URL: Issues, https://github.com/geehexx/llm-bedrock-converse/issues
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: llm>=0.19
+Requires-Dist: boto3>=1.35.0
+Provides-Extra: test
+Requires-Dist: pytest>=7.0; extra == "test"
+Requires-Dist: pytest-mock>=3.10; extra == "test"
+Requires-Dist: pytest-cov>=4.0; extra == "test"
+Dynamic: license-file
+
+# llm-bedrock-converse
+
+[![PyPI](https://img.shields.io/pypi/v/llm-bedrock-converse.svg)](https://pypi.org/project/llm-bedrock-converse/)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/geehexx/llm-bedrock-converse/blob/main/LICENSE)
+[![Python](https://img.shields.io/pypi/pyversions/llm-bedrock-converse.svg)](https://pypi.org/project/llm-bedrock-converse/)
+[![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](https://github.com/geehexx/llm-bedrock-converse)
+
+A powerful [LLM](https://llm.datasette.io/) plugin that provides AWS Bedrock integration using the Converse API, enabling advanced tool calling, streaming responses, and embeddings for Claude models.
+
+## ✨ Features
+
+- 🔧 **Full Tool Calling Support** - Native function calling with the Converse API
+- 🌊 **Streaming Responses** - Real-time token streaming for interactive experiences
+- 🎯 **MCP Server Integration** - Works seamlessly with llm-tools-mcp
+- 📎 **Multi-Modal Support** - Handle images, PDFs, and videos
+- 🔄 **Conversation History** - Maintain context across multiple turns
+- 🚀 **All Claude Models** - Support for Claude 3, 3.5, 4, and cross-region profiles
+- 📊 **Titan Embeddings** - Generate embeddings with Amazon Titan models
+- ⚡ **Automatic Retry Logic** - Built-in throttling and error handling
+
+## 📦 Installation
+
+```bash
+llm install llm-bedrock-converse
+```
+
+## 🔑 Configuration
+
+The plugin uses standard AWS credentials via boto3. Configure your credentials using any of these methods:
+
+```bash
+# Environment variables
+export AWS_ACCESS_KEY_ID=your_access_key
+export AWS_SECRET_ACCESS_KEY=your_secret_key
+export AWS_REGION=us-east-1
+
+# Or use AWS CLI
+aws configure
+
+# Or use IAM roles (recommended for EC2/Lambda)
+```
+
+## 🚀 Usage
+
+### Basic Prompting
+
+```bash
+# Simple prompt
+llm -m bedrock-converse/claude-3-haiku "Explain quantum computing"
+
+# Using short alias
+llm -m bc-haiku "What is the capital of France?"
+
+# With system prompt
+llm -m bc-sonnet-3.5 -s "You are a Python expert" "Write a decorator"
+```
+
+### Tool Calling
+
+```bash
+# Built-in tools
+llm -m bc-haiku -T llm_time "What time is it?"
+
+# MCP servers (requires llm-tools-mcp)
+llm -m bc-sonnet-3.5 -T MCP "What's the weather in Tokyo?"
+
+# Custom functions
+llm -m bc-haiku --functions 'def multiply(a: int, b: int) -> int: return a * b' \
+    "What is 23 times 47?"
+```
+
+### Chat Mode
+
+```bash
+# Interactive chat with conversation history
+llm chat -m bc-sonnet-3.5
+
+# Chat with system prompt
+llm chat -m bc-haiku -s "You are a helpful coding assistant"
+```
+
+### Multi-Modal Inputs
+
+```bash
+# Analyze an image
+llm -m bc-sonnet-3.5 "Describe this image" -a image.jpg
+
+# Process a PDF document
+llm -m bc-opus "Summarize this document" -a report.pdf
+
+# Multiple attachments
+llm -m bc-sonnet-3.5 "Compare these images" -a img1.jpg -a img2.jpg
+```
+
+### Embeddings
+
+```bash
+# Generate embeddings with Titan v2
+llm embed -m titan-v2 -c "Hello world"
+
+# Embed multiple texts
+llm embed -m titan-v2 -c "Text 1" -c "Text 2" -c "Text 3"
+
+# Use Titan v1
+llm embed -m titan-v1 -c "Your text here"
+```
+
+## 🤖 Available Models
+
+### Claude Models
+
+| Model ID | Alias | Description |
+|----------|-------|-------------|
+| `anthropic.claude-3-haiku-20240307-v1:0` | `bc-haiku` | Fast, cost-effective |
+| `anthropic.claude-3-5-haiku-20241022-v1:0` | `bc-haiku-3.5` | Enhanced Haiku |
+| `anthropic.claude-haiku-4-5-20251001-v1:0` | `bc-haiku-4.5` | Latest Haiku |
+| `anthropic.claude-3-sonnet-20240229-v1:0` | `bc-sonnet` | Balanced performance |
+| `anthropic.claude-3-5-sonnet-20240620-v1:0` | `bc-sonnet-3.5` | Most popular |
+| `anthropic.claude-3-7-sonnet-20250219-v1:0` | `bc-sonnet-3.7` | Advanced Sonnet |
+| `anthropic.claude-sonnet-4-20250514-v1:0` | `bc-sonnet-4` | Claude 4 Sonnet |
+| `anthropic.claude-sonnet-4-5-20250929-v1:0` | `bc-sonnet-4.5` | Latest Sonnet |
+| `anthropic.claude-3-opus-20240229-v1:0` | `bc-opus` | Most capable |
+| `anthropic.claude-opus-4-20250514-v1:0` | `bc-opus-4` | Claude 4 Opus |
+| `anthropic.claude-opus-4-1-20250805-v1:0` | `bc-opus-4.1` | Latest Opus |
+
+### Cross-Region Models
+
+| Model ID | Alias | Description |
+|----------|-------|-------------|
+| `us.anthropic.claude-3-5-sonnet-20241022-v2:0` | `bc-sonnet-3.5-v2` | US inference profile |
+| `us.anthropic.claude-sonnet-4-5-20250929-v1:0` | `bc-sonnet-4.5-us` | US Sonnet 4.5 |
+| `us.anthropic.claude-opus-4-1-20250805-v1:0` | `bc-opus-4.1-us` | US Opus 4.1 |
+
+### Global Models
+
+| Model ID | Alias | Description |
+|----------|-------|-------------|
+| `global.anthropic.claude-sonnet-4-20250514-v1:0` | `bc-sonnet-4-global` | Global Sonnet 4 |
+| `global.anthropic.claude-sonnet-4-5-20250929-v1:0` | `bc-sonnet-4.5-global` | Global Sonnet 4.5 |
+
+### Embedding Models
+
+| Model ID | Alias | Dimensions |
+|----------|-------|------------|
+| `amazon.titan-embed-text-v2:0` | `titan-v2` | 1024 |
+| `amazon.titan-embed-text-v1` | `titan-v1` | 1536 |
+
+## 🛠️ Advanced Features
+
+### Retry Logic
+
+The plugin automatically handles throttling with exponential backoff:
+
+```python
+# Automatically retries on ThrottlingException
+# Respects retry-after headers
+# Up to 5 retry attempts with exponential backoff
+```
+
+### Rate Limiting
+
+Embeddings include built-in rate limiting (100 RPM for Titan models):
+
+```python
+# Automatically enforces 0.6s minimum interval between requests
+# Prevents throttling errors
+```
+
+### Conversation Context
+
+```bash
+# Maintains full conversation history
+llm chat -m bc-sonnet-3.5
+> What is Python?
+> Can you show me an example? # Context maintained
+```
+
+## 📚 Documentation
+
+- [LLM Documentation](https://llm.datasette.io/)
+- [AWS Bedrock Converse API](https://docs.aws.amazon.com/bedrock/latest/userguide/conversation-inference.html)
+- [Tool Use Guide](https://docs.aws.amazon.com/bedrock/latest/userguide/tool-use.html)
+
+## 🐛 Troubleshooting
+
+### No AWS credentials found
+
+```bash
+# Set credentials explicitly
+export AWS_ACCESS_KEY_ID=your_key
+export AWS_SECRET_ACCESS_KEY=your_secret
+export AWS_REGION=us-east-1
+```
+
+### Model not available in region
+
+```bash
+# Check model availability in your region
+aws bedrock list-foundation-models --region us-east-1
+
+# Use cross-region inference profiles (us. or global. prefix)
+llm -m bc-sonnet-4.5-us "Your prompt"
+```
+
+### Throttling errors
+
+The plugin automatically retries with exponential backoff. If issues persist:
+- Use cross-region profiles for better availability
+- Implement request batching
+- Request quota increases via AWS Support
+
+## 📄 License
+
+Apache License 2.0 - see [LICENSE](LICENSE) for details.
+
+## 🤝 Contributing
+
+Contributions welcome! Please feel free to submit issues or pull requests.
+
+## 🔗 Links
+
+- [GitHub Repository](https://github.com/geehexx/llm-bedrock-converse)
+- [PyPI Package](https://pypi.org/project/llm-bedrock-converse/)
+- [LLM Plugin Ecosystem](https://llm.datasette.io/en/stable/plugins/directory.html)
