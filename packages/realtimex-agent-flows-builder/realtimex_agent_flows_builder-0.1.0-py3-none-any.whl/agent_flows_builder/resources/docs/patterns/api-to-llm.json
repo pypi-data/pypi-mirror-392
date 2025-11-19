@@ -1,0 +1,126 @@
+{
+  "name": "API Data Processing",
+  "description": "Fetch data from API endpoint and process with LLM analysis",
+  "category": "data-processing",
+  "complexity": "basic",
+  "use_cases": [
+    "User profile analysis",
+    "Content enrichment",
+    "Data transformation",
+    "API response processing"
+  ],
+  "required_variables": [
+    {
+      "name": "endpoint",
+      "type": "string", 
+      "description": "API endpoint to fetch data from",
+      "example": "users/123"
+    },
+    {
+      "name": "base_url",
+      "type": "string",
+      "description": "Base API URL",
+      "example": "https://api.example.com"
+    }
+  ],
+  "optional_variables": [
+    {
+      "name": "processing_instruction",
+      "type": "string",
+      "description": "Custom LLM processing instruction",
+      "default": "Analyze this data and provide key insights"
+    }
+  ],
+  "steps": [
+    {
+      "type": "start",
+      "config": {
+        "variables": [
+          {
+            "name": "endpoint",
+            "value": "{{ $endpoint }}",
+            "type": "string",
+            "description": "API endpoint to call"
+          },
+          {
+            "name": "base_url", 
+            "value": "{{ $base_url }}",
+            "type": "string",
+            "description": "Base URL for the API"
+          },
+          {
+            "name": "processing_instruction",
+            "value": "{{ $processing_instruction || 'Analyze this data and extract key insights, trends, and actionable information.' }}",
+            "type": "string",
+            "description": "Instruction for data processing"
+          }
+        ]
+      }
+    },
+    {
+      "type": "apiCall",
+      "config": {
+        "url": "{{ $base_url }}/{{ $endpoint }}",
+        "method": "GET",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "responseVariable": "api_data",
+        "maxRetries": 2,
+        "timeout": 30
+      }
+    },
+    {
+      "type": "conditional",
+      "config": {
+        "condition": {
+          "variable": "api_data.status_code",
+          "operator": "equals",
+          "value": 200
+        },
+        "truePath": [
+          {
+            "type": "llmInstruction",
+            "config": {
+              "provider": "openai",
+              "model": "gpt-4o-mini",
+              "instruction": "{{ $processing_instruction }}\n\nData to analyze: {{ $api_data.data }}",
+              "temperature": 0.3,
+              "resultVariable": "analysis_result"
+            }
+          }
+        ],
+        "falsePath": [
+          {
+            "type": "llmInstruction",
+            "config": {
+              "provider": "openai", 
+              "model": "gpt-4o-mini",
+              "instruction": "Generate an error message for API failure. Status: {{ $api_data.status_code }}, Error: {{ $api_data.error }}",
+              "temperature": 0.2,
+              "resultVariable": "error_message"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "output_variables": [
+    "api_data",
+    "analysis_result",
+    "error_message"
+  ],
+  "testing": {
+    "sample_inputs": {
+      "endpoint": "users/1",
+      "base_url": "https://jsonplaceholder.typicode.com"
+    },
+    "expected_outputs": [
+      "api_data.data",
+      "analysis_result.content"
+    ]
+  }
+}
