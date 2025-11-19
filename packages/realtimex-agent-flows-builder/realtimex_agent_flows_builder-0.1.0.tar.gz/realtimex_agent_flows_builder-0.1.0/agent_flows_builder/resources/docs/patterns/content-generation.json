@@ -1,0 +1,214 @@
+{
+  "name": "Content Generation",
+  "description": "Generate personalized content using LLM with configurable parameters",
+  "category": "content-creation",
+  "complexity": "basic", 
+  "use_cases": [
+    "Marketing copy generation",
+    "Email templates",
+    "Product descriptions",
+    "Social media posts",
+    "Documentation creation"
+  ],
+  "required_variables": [
+    {
+      "name": "content_type",
+      "type": "string",
+      "description": "Type of content to generate",
+      "example": "email"
+    },
+    {
+      "name": "topic",
+      "type": "string", 
+      "description": "Main topic or subject",
+      "example": "artificial intelligence"
+    }
+  ],
+  "optional_variables": [
+    {
+      "name": "tone",
+      "type": "string",
+      "description": "Content tone and style",
+      "default": "professional"
+    },
+    {
+      "name": "audience",
+      "type": "string",
+      "description": "Target audience",
+      "default": "general audience"
+    },
+    {
+      "name": "length",
+      "type": "string", 
+      "description": "Content length requirement",
+      "default": "medium"
+    },
+    {
+      "name": "provider",
+      "type": "string",
+      "description": "LLM provider",
+      "default": "openai"
+    },
+    {
+      "name": "model",
+      "type": "string", 
+      "description": "LLM model to use",
+      "default": "gpt-4o-mini"
+    }
+  ],
+  "steps": [
+    {
+      "type": "start",
+      "config": {
+        "variables": [
+          {
+            "name": "content_type",
+            "value": "{{ $content_type }}",
+            "type": "string",
+            "description": "Type of content to generate"
+          },
+          {
+            "name": "topic",
+            "value": "{{ $topic }}",
+            "type": "string",
+            "description": "Content topic or subject"
+          },
+          {
+            "name": "tone",
+            "value": "{{ $tone || 'professional' }}",
+            "type": "string", 
+            "description": "Content tone"
+          },
+          {
+            "name": "audience", 
+            "value": "{{ $audience || 'general audience' }}",
+            "type": "string",
+            "description": "Target audience"
+          },
+          {
+            "name": "length",
+            "value": "{{ $length || 'medium' }}",
+            "type": "string",
+            "description": "Content length"
+          }
+        ]
+      }
+    },
+    {
+      "type": "conditional",
+      "config": {
+        "condition": {
+          "variable": "content_type",
+          "operator": "equals",
+          "value": "technical"
+        },
+        "truePath": [
+          {
+            "type": "llmInstruction",
+            "config": {
+              "provider": "{{ $provider || 'openai' }}",
+              "model": "{{ $model || 'gpt-4' }}",
+              "systemPrompt": "You are a technical writing expert. Create detailed, accurate, and well-structured technical content.",
+              "instruction": "Create {{ $length }} {{ $content_type }} content about {{ $topic }}. Target audience: {{ $audience }}. Tone: {{ $tone }}. Include technical details, examples, and actionable insights.",
+              "temperature": 0.2,
+              "maxTokens": 1000,
+              "resultVariable": "generated_content"
+            }
+          }
+        ],
+        "falsePath": [
+          {
+            "type": "conditional",
+            "config": {
+              "condition": {
+                "variable": "content_type", 
+                "operator": "equals",
+                "value": "creative"
+              },
+              "truePath": [
+                {
+                  "type": "llmInstruction",
+                  "config": {
+                    "provider": "{{ $provider || 'openai' }}",
+                    "model": "{{ $model || 'gpt-4o-mini' }}",
+                    "systemPrompt": "You are a creative writing expert. Generate engaging, imaginative, and compelling content.",
+                    "instruction": "Create {{ $length }} {{ $content_type }} content about {{ $topic }}. Target audience: {{ $audience }}. Tone: {{ $tone }}. Be creative, engaging, and memorable.",
+                    "temperature": 0.8,
+                    "maxTokens": 800,
+                    "resultVariable": "generated_content"
+                  }
+                }
+              ],
+              "falsePath": [
+                {
+                  "type": "llmInstruction",
+                  "config": {
+                    "provider": "{{ $provider || 'openai' }}",
+                    "model": "{{ $model || 'gpt-4o-mini' }}",
+                    "systemPrompt": "You are a professional content writer. Create clear, informative, and well-structured content.",
+                    "instruction": "Create {{ $length }} {{ $content_type }} content about {{ $topic }}. Target audience: {{ $audience }}. Tone: {{ $tone }}. Ensure clarity, accuracy, and engagement.",
+                    "temperature": 0.5,
+                    "maxTokens": 600,
+                    "resultVariable": "generated_content"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "llmInstruction",
+      "config": {
+        "provider": "{{ $provider || 'openai' }}",
+        "model": "{{ $model || 'gpt-3.5-turbo' }}",
+        "instruction": "Review and refine this content for grammar, clarity, and engagement. Original content: {{ $generated_content.content }}",
+        "temperature": 0.3,
+        "resultVariable": "refined_content"
+      }
+    }
+  ],
+  "output_variables": [
+    "generated_content",
+    "refined_content"
+  ],
+  "testing": {
+    "sample_inputs": {
+      "content_type": "email",
+      "topic": "artificial intelligence", 
+      "tone": "friendly",
+      "audience": "business professionals",
+      "length": "short"
+    },
+    "expected_outputs": [
+      "generated_content.content",
+      "refined_content.content"
+    ]
+  },
+  "variations": [
+    {
+      "name": "Multi-language Content",
+      "description": "Generate content in multiple languages",
+      "additional_variables": [
+        {
+          "name": "target_language",
+          "type": "string", 
+          "description": "Target language for content",
+          "default": "English"
+        }
+      ]
+    },
+    {
+      "name": "Brand-specific Content",
+      "description": "Generate content with specific brand guidelines",
+      "additional_variables": [
+        {
+          "name": "brand_guidelines",
+          "type": "string",
+          "description": "Brand voice and style guidelines"
+        }
+      ]
+    }
+  ]
+}

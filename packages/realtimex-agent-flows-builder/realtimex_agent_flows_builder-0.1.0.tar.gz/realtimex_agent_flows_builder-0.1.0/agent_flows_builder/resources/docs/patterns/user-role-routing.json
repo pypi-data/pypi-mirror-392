@@ -1,0 +1,207 @@
+{
+  "name": "User Role Routing", 
+  "description": "Route users to different experiences based on their role or subscription status",
+  "category": "conditional-logic",
+  "complexity": "intermediate",
+  "use_cases": [
+    "Premium vs basic user experiences",
+    "Admin vs user dashboards", 
+    "Role-based content delivery",
+    "Subscription tier routing"
+  ],
+  "required_variables": [
+    {
+      "name": "user_type",
+      "type": "string",
+      "description": "User role or subscription type",
+      "example": "premium"
+    },
+    {
+      "name": "user_id", 
+      "type": "string",
+      "description": "Unique user identifier",
+      "example": "user_12345"
+    }
+  ],
+  "optional_variables": [
+    {
+      "name": "api_base",
+      "type": "string", 
+      "description": "Base API URL",
+      "default": "https://api.example.com"
+    },
+    {
+      "name": "fallback_content",
+      "type": "string",
+      "description": "Default content for basic users", 
+      "default": "standard content"
+    }
+  ],
+  "steps": [
+    {
+      "type": "start",
+      "config": {
+        "variables": [
+          {
+            "name": "user_type",
+            "value": "{{ $user_type }}",
+            "type": "string",
+            "description": "User subscription or role type"
+          },
+          {
+            "name": "user_id",
+            "value": "{{ $user_id }}",
+            "type": "string", 
+            "description": "User identifier"
+          },
+          {
+            "name": "api_base",
+            "value": "{{ $api_base || 'https://api.example.com' }}",
+            "type": "string",
+            "description": "Base API URL"
+          }
+        ]
+      }
+    },
+    {
+      "type": "conditional",
+      "config": {
+        "condition": {
+          "combinator": "or",
+          "conditions": [
+            {
+              "variable": "user_type",
+              "operator": "equals", 
+              "value": "premium"
+            },
+            {
+              "variable": "user_type",
+              "operator": "equals",
+              "value": "enterprise"
+            },
+            {
+              "variable": "user_type", 
+              "operator": "equals",
+              "value": "admin"
+            }
+          ]
+        },
+        "truePath": [
+          {
+            "type": "apiCall",
+            "config": {
+              "url": "{{ $api_base }}/premium/users/{{ $user_id }}/profile",
+              "method": "GET",
+              "headers": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{ $auth_token }}"
+                }
+              ],
+              "responseVariable": "user_profile",
+              "maxRetries": 2
+            }
+          },
+          {
+            "type": "apiCall", 
+            "config": {
+              "url": "{{ $api_base }}/premium/features",
+              "method": "GET",
+              "responseVariable": "premium_features"
+            }
+          },
+          {
+            "type": "llmInstruction",
+            "config": {
+              "provider": "openai",
+              "model": "gpt-4",
+              "systemPrompt": "You are a premium customer service assistant. Provide personalized, high-quality responses with advanced features.",
+              "instruction": "Generate a personalized premium welcome message for {{ $user_type }} user. User profile: {{ $user_profile.data }}. Available features: {{ $premium_features.data }}",
+              "temperature": 0.6,
+              "resultVariable": "welcome_message"
+            }
+          }
+        ],
+        "falsePath": [
+          {
+            "type": "apiCall",
+            "config": {
+              "url": "{{ $api_base }}/basic/content/{{ $user_id }}",
+              "method": "GET", 
+              "responseVariable": "basic_content"
+            }
+          },
+          {
+            "type": "conditional",
+            "config": {
+              "condition": {
+                "variable": "basic_content.status_code",
+                "operator": "not_equals",
+                "value": 200
+              },
+              "truePath": [
+                {
+                  "type": "llmInstruction",
+                  "config": {
+                    "provider": "openai",
+                    "model": "gpt-3.5-turbo",
+                    "instruction": "Generate a standard welcome message for a basic user. Include upgrade prompts and highlight premium benefits.",
+                    "temperature": 0.7,
+                    "resultVariable": "welcome_message"
+                  }
+                }
+              ],
+              "falsePath": [
+                {
+                  "type": "llmInstruction",
+                  "config": {
+                    "provider": "openai",
+                    "model": "gpt-3.5-turbo", 
+                    "instruction": "Generate a personalized welcome message for basic user using this content: {{ $basic_content.data }}. Include subtle upgrade suggestions.",
+                    "temperature": 0.5,
+                    "resultVariable": "welcome_message"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "output_variables": [
+    "user_profile",
+    "premium_features",
+    "basic_content", 
+    "welcome_message"
+  ],
+  "testing": {
+    "sample_inputs": {
+      "user_type": "premium",
+      "user_id": "123",
+      "api_base": "https://jsonplaceholder.typicode.com"
+    },
+    "expected_outputs": [
+      "welcome_message.content"
+    ]
+  },
+  "variations": [
+    {
+      "name": "Admin Role Routing",
+      "description": "Route admin users to admin-specific features",
+      "condition_change": {
+        "variable": "user_type",
+        "operator": "equals", 
+        "value": "admin"
+      }
+    },
+    {
+      "name": "Multi-tier Subscription",
+      "description": "Handle basic, premium, and enterprise tiers",
+      "combinator": "or",
+      "additional_conditions": [
+        {"variable": "subscription_tier", "operator": "greater_than", "value": 1}
+      ]
+    }
+  ]
+}

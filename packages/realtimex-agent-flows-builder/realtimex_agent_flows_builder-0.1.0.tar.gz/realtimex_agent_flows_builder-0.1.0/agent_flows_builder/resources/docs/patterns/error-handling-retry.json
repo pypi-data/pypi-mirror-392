@@ -1,0 +1,293 @@
+{
+  "name": "Error Handling with Retry Logic",
+  "description": "Robust error handling pattern with automatic retries and fallback strategies",
+  "category": "error-handling",
+  "complexity": "intermediate",
+  "use_cases": [
+    "API reliability improvements",
+    "Network failure recovery", 
+    "Service unavailability handling",
+    "Rate limit management",
+    "Backup service routing"
+  ],
+  "required_variables": [
+    {
+      "name": "primary_url",
+      "type": "string",
+      "description": "Primary API endpoint URL",
+      "example": "https://api.primary.com/data"
+    },
+    {
+      "name": "backup_url", 
+      "type": "string",
+      "description": "Backup API endpoint URL",
+      "example": "https://api.backup.com/data"
+    }
+  ],
+  "optional_variables": [
+    {
+      "name": "max_retries",
+      "type": "integer",
+      "description": "Maximum retry attempts",
+      "default": 3
+    },
+    {
+      "name": "timeout_seconds",
+      "type": "integer",
+      "description": "Request timeout in seconds", 
+      "default": 30
+    },
+    {
+      "name": "auth_token",
+      "type": "string",
+      "description": "Authentication token",
+      "default": null
+    }
+  ],
+  "steps": [
+    {
+      "type": "start",
+      "config": {
+        "variables": [
+          {
+            "name": "primary_url",
+            "value": "{{ $primary_url }}",
+            "type": "string",
+            "description": "Primary API endpoint"
+          },
+          {
+            "name": "backup_url",
+            "value": "{{ $backup_url }}",
+            "type": "string",
+            "description": "Backup API endpoint"
+          },
+          {
+            "name": "max_retries", 
+            "value": "{{ $max_retries || 3 }}",
+            "type": "integer",
+            "description": "Maximum retry attempts"
+          },
+          {
+            "name": "timeout_seconds",
+            "value": "{{ $timeout_seconds || 30 }}",
+            "type": "integer",
+            "description": "Request timeout"
+          },
+          {
+            "name": "retry_count",
+            "value": 0,
+            "type": "integer",
+            "description": "Current retry attempt"
+          }
+        ]
+      }
+    },
+    {
+      "type": "apiCall",
+      "config": {
+        "url": "{{ $primary_url }}",
+        "method": "GET",
+        "headers": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{ $auth_token }}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "responseVariable": "primary_response",
+        "maxRetries": "{{ $max_retries }}",
+        "timeout": "{{ $timeout_seconds }}"
+      }
+    },
+    {
+      "type": "conditional",
+      "config": {
+        "condition": {
+          "combinator": "or",
+          "conditions": [
+            {
+              "variable": "primary_response.status_code",
+              "operator": "greater_than_or_equal", 
+              "value": 400
+            },
+            {
+              "variable": "primary_response.error",
+              "operator": "is_not_empty",
+              "value": null
+            }
+          ]
+        },
+        "truePath": [
+          {
+            "type": "conditional",
+            "config": {
+              "condition": {
+                "variable": "primary_response.status_code",
+                "operator": "equals",
+                "value": 429
+              },
+              "truePath": [
+                {
+                  "type": "llmInstruction",
+                  "config": {
+                    "provider": "openai",
+                    "model": "gpt-3.5-turbo",
+                    "instruction": "Generate a rate limit handling message. Current retry: {{ $retry_count }}, Max retries: {{ $max_retries }}. Suggest waiting before retry.",
+                    "temperature": 0.3,
+                    "resultVariable": "rate_limit_message"
+                  }
+                }
+              ],
+              "falsePath": [
+                {
+                  "type": "conditional",
+                  "config": {
+                    "condition": {
+                      "combinator": "and",
+                      "conditions": [
+                        {
+                          "variable": "primary_response.status_code",
+                          "operator": "greater_than_or_equal",
+                          "value": 500
+                        },
+                        {
+                          "variable": "backup_url",
+                          "operator": "is_not_empty",
+                          "value": null
+                        }
+                      ]
+                    },
+                    "truePath": [
+                      {
+                        "type": "apiCall",
+                        "config": {
+                          "url": "{{ $backup_url }}",
+                          "method": "GET",
+                          "headers": [
+                            {
+                              "key": "Authorization", 
+                              "value": "Bearer {{ $auth_token }}"
+                            },
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "responseVariable": "backup_response",
+                          "maxRetries": 1,
+                          "timeout": "{{ $timeout_seconds }}"
+                        }
+                      },
+                      {
+                        "type": "conditional",
+                        "config": {
+                          "condition": {
+                            "variable": "backup_response.status_code",
+                            "operator": "equals",
+                            "value": 200
+                          },
+                          "truePath": [
+                            {
+                              "type": "llmInstruction",
+                              "config": {
+                                "provider": "openai",
+                                "model": "gpt-3.5-turbo",
+                                "instruction": "Process backup API response: {{ $backup_response.data }}. Note: Primary service was unavailable, switched to backup.",
+                                "temperature": 0.2,
+                                "resultVariable": "processed_data"
+                              }
+                            }
+                          ],
+                          "falsePath": [
+                            {
+                              "type": "llmInstruction",
+                              "config": {
+                                "provider": "openai",
+                                "model": "gpt-3.5-turbo",
+                                "instruction": "Both primary and backup services failed. Primary error: {{ $primary_response.error }}, Backup error: {{ $backup_response.error }}. Generate comprehensive error report.",
+                                "temperature": 0.2,
+                                "resultVariable": "error_report"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "falsePath": [
+                      {
+                        "type": "llmInstruction",
+                        "config": {
+                          "provider": "openai", 
+                          "model": "gpt-3.5-turbo",
+                          "instruction": "Handle client error from primary API. Status: {{ $primary_response.status_code }}, Error: {{ $primary_response.error }}. Provide user-friendly error message and next steps.",
+                          "temperature": 0.3,
+                          "resultVariable": "client_error_message"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "falsePath": [
+          {
+            "type": "llmInstruction",
+            "config": {
+              "provider": "openai",
+              "model": "gpt-4o-mini",
+              "instruction": "Process successful API response: {{ $primary_response.data }}. Extract key information and format for user consumption.",
+              "temperature": 0.3,
+              "resultVariable": "processed_data"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "output_variables": [
+    "primary_response",
+    "backup_response", 
+    "processed_data",
+    "error_report",
+    "rate_limit_message",
+    "client_error_message"
+  ],
+  "testing": {
+    "sample_inputs": {
+      "primary_url": "https://jsonplaceholder.typicode.com/users/1",
+      "backup_url": "https://jsonplaceholder.typicode.com/posts/1",
+      "max_retries": 2,
+      "timeout_seconds": 15
+    },
+    "expected_outputs": [
+      "processed_data.content"
+    ]
+  },
+  "error_scenarios": [
+    {
+      "scenario": "Rate Limit (429)",
+      "response": "rate_limit_message",
+      "action": "Suggest retry with backoff"
+    },
+    {
+      "scenario": "Server Error (5xx)", 
+      "response": "backup_response or error_report",
+      "action": "Try backup service or report failure"
+    },
+    {
+      "scenario": "Client Error (4xx)",
+      "response": "client_error_message", 
+      "action": "Provide user guidance"
+    },
+    {
+      "scenario": "Network Timeout",
+      "response": "error_report",
+      "action": "Comprehensive error reporting"
+    }
+  ]
+}
