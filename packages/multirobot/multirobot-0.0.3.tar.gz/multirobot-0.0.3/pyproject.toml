@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "multirobot"
+version = "0.0.3"
+description = "An asyncio-based multi-robot (MAV for now) orchestration framework"
+readme = "README.md"
+authors = [{name = "Jonas Eschmann", email = "jonas.eschmann@gmail.com"}]
+license = {text = "MIT"}
+dependencies = [
+    "trigga",
+    "numpy",
+    "websockets",
+    "l2f==2.0.14",
+    "foundation-policy==0.0.13",
+    "muxify==0.0.5",
+    "ui-server==0.0.9"
+]
+
+[project.optional-dependencies]
+elrs = [
+    "elrs==0.0.6",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["multirobot"]
