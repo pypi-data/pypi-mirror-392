@@ -1,0 +1,474 @@
+Metadata-Version: 2.1
+Name: fba-finance
+Version: 0.2.2
+Summary: Multi-source financial data library with anti-rate-limiting strategies
+Home-page: https://github.com/faux62/fba_finance
+Author: Fausto Bandini
+License: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Financial and Insurance Industry
+Classifier: Topic :: Office/Business :: Financial :: Investment
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: requests>=2.31.0
+Requires-Dist: pandas>=2.0.0
+Requires-Dist: numpy>=1.24.0
+Requires-Dist: yfinance>=0.2.32
+Requires-Dist: yahooquery>=2.3.0
+Requires-Dist: beautifulsoup4>=4.12.0
+Requires-Dist: lxml>=4.9.0
+Requires-Dist: ratelimit>=2.2.1
+Requires-Dist: diskcache>=5.6.3
+Requires-Dist: aiohttp>=3.9.0
+Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: fake-useragent>=1.4.0
+Provides-Extra: full
+Requires-Dist: alpha-vantage>=2.3.1; extra == "full"
+Requires-Dist: twelvedata>=1.2.14; extra == "full"
+Requires-Dist: selenium>=4.15.0; extra == "full"
+Requires-Dist: playwright>=1.40.0; extra == "full"
+Requires-Dist: redis>=5.0.0; extra == "full"
+Requires-Dist: websockets>=12.0; extra == "full"
+
+# FBA Finance 📈
+
+[![PyPI version](https://badge.fury.io/py/fba-finance.svg)](https://badge.fury.io/py/fba-finance)
+[![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Downloads](https://pepy.tech/badge/fba-finance)](https://pepy.tech/project/fba-finance)
+
+**Libreria Python multi-source per acquisizione dati finanziari con strategie anti-rate-limiting**
+
+FBA Finance è una libreria completa che aggrega **multiple fonti di dati finanziari gratuite** con fallback automatico, caching intelligente e rate limiting distribuito, permettendoti di superare i limiti di utilizzo delle singole API.
+
+## 🎯 Caratteristiche Principali
+
+- ✅ **Multi-Provider con Fallback Automatico**: Se una fonte fallisce o è rate-limited, passa automaticamente alla successiva
+- ✅ **Dati Real-Time e Storici**: Quote in tempo quasi reale e dati storici OHLCV
+- ✅ **Tutti i Mercati Mondiali**: Azioni, ETF, Indici, Forex, Crypto, Futures
+- ✅ **Anti-Rate-Limiting**: Rate limiter intelligente per ogni provider
+- ✅ **Caching Multi-Backend**: Memory, Disk (DiskCache), Redis
+- ✅ **Web Scraping Resiliente**: Rotating user agents, proxy support
+- ✅ **100% Gratuito e Open Source**: Nessun costo, tutte fonti free tier
+
+## 🔌 Provider Supportati
+
+| Provider | Quote Real-Time | Dati Storici | Rate Limit (Free) | API Key Richiesta |
+|----------|----------------|--------------|-------------------|-------------------|
+| **yfinance** | ✅ | ✅ | ~60 req/min | ❌ No |
+| **yahooquery** | ✅ | ✅ | ~60 req/min | ❌ No |
+| **Yahoo Scraper** | ✅ | ⚠️ Limitato | ~30 req/min | ❌ No |
+| **Twelve Data** | ✅ | ✅ | 800 req/giorno | ✅ Sì (gratis) |
+| **Alpha Vantage** | ✅ | ✅ | 500 req/giorno | ✅ Sì (gratis) |
+
+**Capacità teorica combinata**: Migliaia di richieste al giorno senza pagare!
+
+## 📦 Installazione
+
+### Installazione da PyPI (Consigliata)
+
+```bash
+# Installazione base (Yahoo Finance + fallback)
+pip install fba-finance
+
+# Installazione completa (tutti i provider)
+pip install fba-finance[full]
+```
+
+### Installazione da Sorgente (per sviluppatori)
+
+```bash
+# Clona il repository
+git clone https://github.com/faux62/fba_finance.git
+cd fba_finance
+
+# Installazione base
+pip install -e .
+
+# Installazione completa
+pip install -e ".[full]"
+```
+
+## 🚀 Quick Start
+
+### Esempio Base - Quote in Real-Time
+
+```python
+from fba_finance import FinanceClient
+
+# Inizializza il client
+client = FinanceClient()
+
+# Ottieni una quote
+quote = client.get_quote("AAPL")
+print(f"{quote.symbol}: ${quote.price}")
+print(f"Change: {quote.change_percent:.2f}%")
+
+# Ottieni multiple quote (batch)
+quotes = client.get_quotes(["AAPL", "MSFT", "GOOGL", "TSLA"])
+for symbol, quote in quotes.items():
+    print(f"{symbol}: ${quote.price}")
+```
+
+### Dati Storici
+
+```python
+from fba_finance import FinanceClient
+from datetime import datetime, timedelta
+
+client = FinanceClient()
+
+# Ottieni 1 anno di dati giornalieri
+data = client.get_historical("AAPL", period="1y", interval="1d")
+print(data.data.head())
+
+# Ottieni dati per un periodo specifico
+end = datetime.now()
+start = end - timedelta(days=30)
+data = client.get_historical("AAPL", start=start, end=end, interval="1h")
+
+# Il DataFrame ha le colonne: date, open, high, low, close, volume
+df = data.data
+print(df[['date', 'close', 'volume']])
+```
+
+### Ticker Internazionali
+
+```python
+# Mercati globali
+stocks = [
+    "AAPL",           # USA - NASDAQ
+    "TSLA",           # USA - NASDAQ  
+    "0700.HK",        # Hong Kong - Tencent
+    "BMW.DE",         # Germania - BMW
+    "MC.PA",          # Francia - LVMH
+    "FTSEMIB.MI",     # Italia - FTSE MIB Index
+    "UCG.MI",         # Italia - UniCredit
+    "ENI.MI",         # Italia - ENI
+]
+
+quotes = client.get_quotes(stocks)
+for symbol, quote in quotes.items():
+    print(f"{symbol}: {quote.currency} {quote.price}")
+```
+
+### Forex e Crypto
+
+```python
+# Forex pairs
+forex = client.get_quote("EURUSD=X")
+print(f"EUR/USD: {forex.price}")
+
+# Cryptocurrencies
+btc = client.get_quote("BTC-USD")
+eth = client.get_quote("ETH-USD")
+print(f"Bitcoin: ${btc.price}")
+print(f"Ethereum: ${eth.price}")
+```
+
+## 🔧 Configurazione Avanzata
+
+### Setup API Keys (Opzionale ma Raccomandato)
+
+Crea un file `.env` nella root del progetto:
+
+```bash
+# Copia il template
+cp .env.example .env
+```
+
+Modifica `.env` con le tue API keys (tutte gratuite!):
+
+```env
+# Alpha Vantage - https://www.alphavantage.co/support/#api-key
+ALPHA_VANTAGE_API_KEY=your_key_here
+
+# Twelve Data - https://twelvedata.com/
+TWELVE_DATA_API_KEY=your_key_here
+
+# Cache settings
+CACHE_ENABLED=true
+CACHE_BACKEND=disk  # Options: disk, redis, memory
+CACHE_TTL_REALTIME=60
+CACHE_TTL_HISTORICAL=3600
+```
+
+### Personalizza Provider Priority
+
+```python
+from fba_finance import FinanceClient
+
+# Definisci l'ordine di fallback
+custom_priority = [
+    "twelvedata",      # Prova prima Twelve Data
+    "yahooquery",      # Poi yahooquery
+    "yfinance",        # Poi yfinance standard
+    "yahoo_scraper",   # Infine scraper
+]
+
+client = FinanceClient(provider_priority=custom_priority)
+quote = client.get_quote("AAPL")
+```
+
+### Forza Provider Specifico
+
+```python
+# Usa solo un provider specifico
+quote = client.get_quote("AAPL", provider="twelvedata")
+data = client.get_historical("AAPL", period="1mo", provider="yfinance")
+```
+
+### Gestione Cache
+
+```python
+# Disabilita cache
+client = FinanceClient(use_cache=False)
+
+# Cancella cache
+client.clear_cache()
+
+# Usa Redis invece di disk cache
+# Nel file .env:
+# CACHE_BACKEND=redis
+# REDIS_HOST=localhost
+# REDIS_PORT=6379
+```
+
+## 📊 Esempi Avanzati
+
+### Esempio 1: Portfolio Tracker
+
+```python
+from fba_finance import FinanceClient
+
+client = FinanceClient()
+
+portfolio = {
+    "AAPL": 10,   # 10 shares
+    "MSFT": 5,
+    "GOOGL": 3,
+    "TSLA": 2,
+}
+
+quotes = client.get_quotes(list(portfolio.keys()))
+
+total_value = 0
+for symbol, shares in portfolio.items():
+    if symbol in quotes:
+        price = quotes[symbol].price
+        value = price * shares
+        total_value += value
+        print(f"{symbol}: {shares} shares @ ${price} = ${value:.2f}")
+
+print(f"\nTotal Portfolio Value: ${total_value:.2f}")
+```
+
+### Esempio 2: Download Massivo Dati Storici
+
+```python
+from fba_finance import FinanceClient
+from datetime import datetime, timedelta
+import pandas as pd
+
+client = FinanceClient()
+
+# Lista di 100+ ticker
+tickers = ["AAPL", "MSFT", "GOOGL", "TSLA", "AMZN", ...]  # aggiungi più ticker
+
+all_data = {}
+
+for ticker in tickers:
+    print(f"Downloading {ticker}...")
+    data = client.get_historical(ticker, period="1y", interval="1d")
+    
+    if data:
+        all_data[ticker] = data.data
+        print(f"✓ {ticker}: {len(data.data)} rows")
+    else:
+        print(f"✗ {ticker}: failed")
+
+# Combina tutti in un singolo DataFrame
+combined = pd.concat(all_data, names=['ticker', 'idx'])
+combined.to_csv("all_stocks_1y.csv")
+```
+
+### Esempio 3: Real-Time Monitoring
+
+```python
+import time
+from fba_finance import FinanceClient
+
+client = FinanceClient(use_cache=False)  # No cache for real-time
+
+watchlist = ["AAPL", "TSLA", "BTC-USD"]
+
+while True:
+    quotes = client.get_quotes(watchlist)
+    
+    print("\n" + "="*50)
+    print(f"Update: {datetime.now().strftime('%H:%M:%S')}")
+    print("="*50)
+    
+    for symbol, quote in quotes.items():
+        change_symbol = "🔴" if quote.change < 0 else "🟢"
+        print(f"{change_symbol} {symbol}: ${quote.price:.2f} ({quote.change_percent:+.2f}%)")
+    
+    time.sleep(10)  # Aggiorna ogni 10 secondi
+```
+
+### Esempio 4: Analisi Tecnica
+
+```python
+import pandas as pd
+from fba_finance import FinanceClient
+
+client = FinanceClient()
+
+# Ottieni dati storici
+data = client.get_historical("AAPL", period="3mo", interval="1d")
+df = data.data
+
+# Calcola medie mobili
+df['SMA_20'] = df['close'].rolling(window=20).mean()
+df['SMA_50'] = df['close'].rolling(window=50).mean()
+
+# RSI (Relative Strength Index)
+delta = df['close'].diff()
+gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+rs = gain / loss
+df['RSI'] = 100 - (100 / (1 + rs))
+
+# Volatilità
+df['volatility'] = df['close'].pct_change().rolling(window=20).std()
+
+print(df[['date', 'close', 'SMA_20', 'SMA_50', 'RSI', 'volatility']].tail())
+```
+
+## 🛠️ Strategie Anti-Rate-Limiting
+
+La libreria implementa diverse strategie per massimizzare il throughput:
+
+### 1. **Fallback Multi-Provider**
+Se un provider è rate-limited, prova automaticamente il prossimo nella catena.
+
+### 2. **Rate Limiter Intelligente**
+Tiene traccia delle richieste per secondo/minuto/giorno per ogni provider.
+
+```python
+# Configurabile in .env
+MAX_REQUESTS_PER_SECOND=2
+MAX_REQUESTS_PER_MINUTE=50
+```
+
+### 3. **Caching Aggressivo**
+Cachea le risposte per ridurre richieste duplicate.
+
+```python
+# TTL configurabile per tipo di dato
+CACHE_TTL_REALTIME=60      # 1 minuto per quote
+CACHE_TTL_HISTORICAL=3600  # 1 ora per dati storici
+```
+
+### 4. **Batch Requests**
+Usa batch API quando disponibili (yahooquery, twelvedata).
+
+### 5. **Web Scraping di Fallback**
+Se le API falliscono, usa web scraping con:
+- Rotating User Agents
+- Request throttling
+- Error handling robusto
+
+## 📈 Performance Tips
+
+### Massimizza Throughput
+
+```python
+# 1. Usa batch requests quando possibile
+quotes = client.get_quotes(["AAPL", "MSFT", "GOOGL"])  # 1 request
+# invece di
+quote1 = client.get_quote("AAPL")  # 3 requests
+quote2 = client.get_quote("MSFT")
+quote3 = client.get_quote("GOOGL")
+
+# 2. Abilita cache per dati ripetuti
+client = FinanceClient(use_cache=True)
+
+# 3. Usa provider con limiti più alti per batch
+client = FinanceClient(provider_priority=["twelvedata", "yahooquery"])
+
+# 4. Per download massivi, distribuisci su più provider
+providers = ["yfinance", "twelvedata", "alphavantage"]
+for i, ticker in enumerate(large_ticker_list):
+    provider = providers[i % len(providers)]
+    data = client.get_historical(ticker, period="1y", provider=provider)
+```
+
+## 🐛 Debugging
+
+```python
+# Verifica provider disponibili
+statuses = client.get_provider_status()
+for status in statuses:
+    symbol = "✓" if status.available else "✗"
+    print(f"{symbol} {status.name}")
+    if not status.available:
+        print(f"  Error: {status.last_error}")
+
+# Verifica quali provider hanno funzionato
+client.get_available_providers()
+# Output: ['yfinance', 'yahooquery', 'yahoo_scraper']
+```
+
+## 🤝 Contribuire
+
+Contributi sono benvenuti! Per aggiungere nuovi provider:
+
+1. Crea una nuova classe in `fba_finance/providers/`
+2. Eredita da `BaseProvider`
+3. Implementa `get_quote()`, `get_historical()`, `get_multiple_quotes()`
+4. Aggiungi al `ProviderAggregator`
+
+## 📝 Limiti Noti
+
+- **Dati Intraday**: Alcuni provider free hanno limiti sui dati intraday (< 1d interval)
+- **Dati Storici**: Twelvedata free tier limita a 8 anni di storia
+- **Mercati Esotici**: Alcuni mercati minori potrebbero non essere disponibili su tutti i provider
+
+## ⚖️ Disclaimer
+
+Questa libreria è per scopi educativi e di ricerca. Rispetta sempre i termini di servizio dei provider:
+- Yahoo Finance: Solo uso personale, non commerciale
+- API Provider: Rispetta i rate limits dei tier gratuiti
+- Web Scraping: Usa responsabilmente
+
+**NON usare per trading automatico ad alta frequenza.**
+
+## 📜 License
+
+MIT License - Vedi `LICENSE` file
+
+## 🙏 Crediti
+
+Questa libreria si basa su:
+- [yfinance](https://github.com/ranaroussi/yfinance)
+- [yahooquery](https://github.com/dpguthrie/yahooquery)
+- [Alpha Vantage](https://www.alphavantage.co/)
+- [Twelve Data](https://twelvedata.com/)
+
+---
+
+**Made with ❤️ for the financial data community**
+
+Per domande o supporto, apri una issue su GitHub!
+
+
