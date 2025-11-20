@@ -1,0 +1,129 @@
+{
+  "name": "free_resource",
+  "description": "Clean free resource promo with large headline, website, and bottom image mockup. Ideal for promoting free guides, lead magnets, and downloadable resources on social media.",
+  "size": {
+    "width": 1080,
+    "height": 1080
+  },
+  "use_base_image": false,
+  "background_color": [255, 255, 255],
+  "validation": {
+    "small_heading": {
+      "field": "small_heading",
+      "type": "text",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "headline": {
+      "field": "headline",
+      "type": "text",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "website": {
+      "field": "website",
+      "type": "text",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "accent_primary_color": {
+      "field": "accent_primary_color",
+      "type": "text",
+      "minLength": 4,
+      "maxLength": 20
+    },
+    "accent_secondary_color": {
+      "field": "accent_secondary_color",
+      "type": "text",
+      "minLength": 4,
+      "maxLength": 20
+    },
+    "background_color": {
+      "field": "background_color",
+      "type": "text",
+      "minLength": 4,
+      "maxLength": 20
+    },
+    "text_color": {
+      "field": "text_color",
+      "type": "text",
+      "minLength": 4,
+      "maxLength": 20
+    },
+    "resource_container_background": {
+      "field": "resource_container_background",
+      "type": "text",
+      "minLength": 4,
+      "maxLength": 20
+    },
+    "logo_url": {
+      "field": "logo_url",
+      "type": "text",
+      "minLength": 0,
+      "maxLength": 500
+    },
+    "image_url": {
+      "field": "image_url",
+      "type": "text",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "custom_css": {
+      "field": "custom_css",
+      "type": "text",
+      "minLength": 0,
+      "maxLength": 4000
+    },
+    "custom_html": {
+      "field": "custom_html",
+      "type": "text",
+      "minLength": 0,
+      "maxLength": 4000
+    },
+    "samples": {
+      "small_heading": "Free Guide:",
+      "headline": "How to Grow Your Audience on Social Media",
+      "website": "REALLYGREATSITE.COM",
+      "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTpyqjYg3R7LdfImgyKZGkbNa498Dh6jg4qlw&s",
+      "accent_primary_color": "#000000",
+      "accent_secondary_color": "#555555",
+      "background_color": "#ffffff",
+      "text_color": "#555555",
+      "resource_container_background": "#e5e5e5",
+      "logo_url": "https://cdn.prod.website-files.com/65d0a7f29d4c760c3869e2a2/65ec89c76f839f619b94dc55_refyne-dark-logo.svg",
+      "custom_css": "",
+      "custom_html": ""
+    },
+    "fieldPrompt": {
+      "small_heading": "Enter the small heading (e.g., 'Free Guide:')",
+      "headline": "Enter the main headline (use \\n for line breaks if needed)",
+      "website": "Enter the website or URL label (e.g., 'REALLYGREATSITE.COM')",
+      "image_url": "Enter the URL for the resource image (16:9 recommended)",
+      "accent_primary_color": "Enter the primary accent color (hex, used for the main headline)",
+      "accent_secondary_color": "Enter the secondary accent color (hex, used for smaller text)",
+      "background_color": "Enter the background color (hex, used for body and post background)",
+      "text_color": "Enter the general text color (hex, used for default text)",
+      "resource_container_background": "Enter the resource container background color (hex)",
+      "logo_url": "Enter the logo image URL (optional, leave empty to hide logo)",
+      "custom_css": "Optional: Enter custom CSS to override/extend default styles",
+      "custom_html": "Optional: Enter custom HTML to replace or extend the default template structure"
+    }
+  },
+  "config": {
+    "isImageUploadPresent": true,
+    "sample_url": ""
+  },
+  "components": [
+    {
+      "type": "html",
+      "position": { "x": 0, "y": 0 },
+      "size": { "width": 1080, "height": 1080 },
+      "background_transparent": false,
+      "rendering_engine": "auto",
+      "html_content": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n  <title>Free Resource Template</title>\n  <style>\n    ${css_content}\n  </style>\n</head>\n<body>\n  <div class=\"post\">\n    ${logo_html}\n    <div class=\"heading-small\">${small_heading}</div>\n    <div class=\"heading-large\">${headline}</div>\n    <div class=\"website\">${website}</div>\n\n    <div class=\"resource-container\">\n      <img src=\"${image_url}\" alt=\"Resource Image\" />\n    </div>\n\n    ${custom_html}\n  </div>\n</body>\n</html>",
+      "css_content": "body {\n  margin: 0;\n  padding: 0;\n  background: ${background_color};\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  height: 100vh;\n}\n\n.post {\n  width: 1080px;\n  height: 1080px;\n  background: ${background_color};\n  padding: 80px;\n  box-sizing: border-box;\n  font-family: \"Georgia\", serif;\n  text-align: center;\n  color: ${text_color};\n}\n\n.logo {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  margin-bottom: 20px;\n}\n\n.logo img {\n  height: 30px;\n  width: auto;\n  object-fit: contain;\n}\n\n.heading-small {\n  font-style: italic;\n  font-size: 48px;\n  margin-top: 40px;\n  color: ${accent_secondary_color};\n}\n\n.heading-large {\n  font-size: 72px;\n  font-weight: 500;\n  line-height: 1.1;\n  margin: 20px 0;\n  color: ${accent_primary_color};\n}\n\n.website {\n  font-size: 28px;\n  letter-spacing: 2px;\n  margin-top: 10px;\n  margin-bottom: 80px;\n  color: ${accent_secondary_color};\n}\n\n.resource-container {\n  width: 100%;\n  max-width: 900px;\n  aspect-ratio: 16/9;\n  margin: 0 auto;\n  background: ${resource_container_background};\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  overflow: hidden;\n  border-radius: 4px;\n}\n\n.resource-container img {\n  width: 100%;\n  height: 100%;\n  object-fit: cover;\n}\n\n${custom_css}"
+    }
+  ]
+}
+
+
