@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "asabot"
+version = "0.1.4"
+description = "A napcat python sdk, easy for use"
+readme = "README.md"
+requires-python = ">=3.13"
+license = { text = "MIT" }
+authors = [
+  { name = "isyuah", email = "isyuah@outlook.com" }
+]
+
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+dependencies = [
+    "aiohttp>=3.13.2",
+    "loguru>=0.7.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.hatch.build.targets.wheel]
+packages = ['src/asa']
+[tool.hatch.build.targets.sdist]
+include = ["src/asa", "README.md", "LICENSE", "pyproject.toml"]
