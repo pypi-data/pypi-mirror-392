@@ -1,0 +1,1 @@
+from . widget_app import npath_widget
