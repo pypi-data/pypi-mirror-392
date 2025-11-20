@@ -1,0 +1,88 @@
+[build-system]
+requires = [
+    "hatchling",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "autoeq-py313"
+version = "1.4.2"
+authors = [
+  { name="Original author: Jaakko Pasanen", email="jaakko.o.pasanen@gmail.com" },
+  { name="Python 3.13/3.14 optimized: 115dkk", email="qjrzbasd@naver.com" },
+]
+description = "Automatic headphone equalizer config generator - Python 3.13/3.14 optimized with free-threaded support"
+readme = "README.md"
+requires-python = ">=3.13,<3.15"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    'Pillow>=10.1.0',
+    'matplotlib>=3.8.0',
+    'scipy>=1.12.0',
+    'numpy>=1.26.0',
+    'pandas>=2.0.0',
+    'tabulate>=0.9.0',
+    'soundfile>=0.12.1',
+    'pyyaml>=6.0.1',
+    'tqdm>=4.66.1',
+]
+
+[project.scripts]
+autoeq = "autoeq_cli:entry_point"
+
+[project.urls]
+"Homepage" = "https://github.com/jaakkopasanen/AutoEq"
+"Python 3.13.2 comfortable" = "https://github.com/115dkk/AutoEq-pip313"
+
+[tool.hatch.build]
+include = [
+    "/autoeq",
+    "*.py",
+    "LICENCE",
+    "pyproject.toml",
+]
+exclude = [
+    "/.github",
+    "/targets",
+    "/measurements",
+    "/results",
+    "/tests",
+    ".gitignore",
+    "/autoeq/README.md"
+]
+
+# Ruff linter configuration
+[tool.ruff]
+exclude = [
+    "*.ipynb",
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    "measurements",
+    "results",
+    "targets",
+]
+line-length = 120
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+]
+# Note: E203 and W503 are flake8-specific rules, not needed in Ruff
+# Ruff handles these cases automatically
+
+# Pytest configuration
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
