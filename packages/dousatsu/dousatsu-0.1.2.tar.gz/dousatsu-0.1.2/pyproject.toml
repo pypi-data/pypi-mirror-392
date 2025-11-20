@@ -1,0 +1,35 @@
+[project]
+name = 'dousatsu'
+version = '0.1.2'
+authors = [{name="Pedrioli Patrick", email="pedrioli@gmail.com"}]
+description = "Utility functions for proteomics data analysis"
+readme = "README.md"
+license = {text = "LICENSE"}
+
+# --- 'RUN' DEPENDENCIES ---
+# Things needed to *run* your project (e.g., pandas, flask)
+# These will be installed by your root Dockerfile.
+dependencies = [
+	        "numpy",
+		"pandas",
+		"scikit-learn",
+		"seaborn",
+        "pyteomics"
+]
+
+# --- 'DEV' DEPENDENCIES ---
+# All tools for development
+# These will be installed by your .dev/Dockerfile.dev
+[project.optional-dependencies]
+dev = [
+    "pre-commit",  
+    "build",
+    "twine"
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
