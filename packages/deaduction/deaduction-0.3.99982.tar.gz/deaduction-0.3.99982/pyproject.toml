@@ -1,0 +1,71 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs", "hatch-requirements-txt"]
+build-backend = "hatchling.build"
+
+[project]
+name = "deaduction"
+# version = "0.3.9997"  # Ajout temporaire
+description = "Graphical proof assistant for learning proofs"
+authors = [
+  {name = "Marguerite Bin", email = "bin.marguerite@gmail.com"},
+  {name = "Florian Dupeyron", email = "florian.dupeyron@mugcat.fr"},
+  {name = "Frédéric Le Roux", email = "frederic.le-roux@imj-prg.fr"},
+  {name = "Antoine Leudière", email = "hg4fpchw@anonaddy.me"},
+]
+maintainers = [
+  {name = "Frédéric Le Roux", email = "frederic.le-roux@imj-prg.fr"}
+]
+dynamic = ["version", "dependencies"]  # Uncomment
+# dynamic = ["dependencies"]
+readme = "README.md"
+license = {file = "LICENSE.md"}
+requires-python = ">=3.7"
+keywords = ["mathematics", "proofs", "logic"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: OS Independent",
+  ]
+
+[project.scripts]
+deaduction_app = "deaduction.dui.__main__:main"
+
+[project.gui-scripts]
+deaduction_gui = "deaduction.dui.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/dEAduction/dEAduction"
+Documentation = "https://github.com/dEAduction/dEAduction/wiki"
+Repository = "https://github.com/dEAduction/dEAduction"
+Issues = "https://github.com/dEAduction/dEAduction/issues"
+
+
+[tool.hatch]
+# Get version nb from config.toml, put this in version.py
+version.path = "src/deaduction/share/config.toml"
+build.hooks.vcs.version-file = "src/deaduction/version.py"
+# Alt: Get version nb from git. Should coincide with config.tom
+# version.source = "vcs"
+# build.hooks.vcs.version-file = "src/deaduction/version.py"
+# cf automatic versionning from git?
+
+[tool.hatch.build.targets.sdist]
+include = [
+#  "src/deaduction/share/*",
+#  "src/deaduction/lean_src/*",
+    "src/deaduction/*"
+]
+exclude = [
+    "snippets/",
+    "tools/",
+    "debian/",
+    "src/deaduction/make_hlist",
+    "src/deaduction/share/lean",
+    "src/deaduction/share/mathlib",
+    "src/deaduction/share/courses/Isabelle",
+    "src/deaduction/share/courses/snippets",
+    "src/deaduction/share/courses_not_distrib"
+]
+
+[tool.hatch.metadata.hooks.requirements_txt]
+files = ["requirements.txt"]
