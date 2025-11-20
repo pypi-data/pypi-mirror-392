@@ -1,0 +1,58 @@
+[project]
+name = "moexalgo"
+description = "Python lib for MOEX AlgoPack data"
+readme = "README.md"
+requires-python = ">=3.12"
+dynamic = ["version"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python",
+    "License :: OSI Approved :: Apache Software License",
+    "Intended Audience :: Financial and Insurance Industry"
+]
+
+dependencies = [
+    "httpx",
+    "orjson>=3.11.3",
+]
+
+[project.optional-dependencies]
+dataframe = [
+    "pandas",
+]
+issplus = [
+    "stomp-py",
+    "websockets",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-xdist",
+    "black",
+]
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+fallback-version = "0.0.0"
+
+[tool.hatch.build.targets.wheel]
+packages = ["moexalgo"]
+
+[tool.pytest.ini_options]
+log_cli = true
+log_cli_level = "ERROR"
+asyncio_default_fixture_loop_scope = "function"
+asyncio_mode = "auto"
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]
+
+[tool.black]
+line_length = 119
