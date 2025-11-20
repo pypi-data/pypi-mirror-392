@@ -1,0 +1,1621 @@
+Metadata-Version: 2.1
+Name: aiauto-client
+Version: 0.1.36
+Summary: AI Auto HPO (Hyperparameter Optimization) Client Library
+Author-email: AIAuto Team <ainode@zeroone.ai>
+Project-URL: Homepage, https://dashboard.common.aiauto.pangyo.ainode.ai
+Project-URL: Repository, https://dashboard.common.aiauto.pangyo.ainode.ai
+Project-URL: Documentation, https://dashboard.common.aiauto.pangyo.ainode.ai
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: optuna>=3.0.0
+Requires-Dist: optuna-dashboard>=0.18.0
+Requires-Dist: requests>=2.25.0
+Requires-Dist: grpcio>=1.48.0
+Requires-Dist: grpcio-status>=1.48.0
+
+# AIAuto Client
+
+> Kubernetes 기반 분산 하이퍼파라미터 최적화(HPO) 라이브러리
+
+AIAuto는 기존 Optuna API와 호환되는 Kubernetes 기반 분산 HPO 플랫폼입니다. 로컬 PC에서 코드를 작성하면 ZeroOneAI의 Kubernetes 클러스터에서 병렬 최적화가 자동으로 실행됩니다. GPU도 지원합니다.
+
+---
+
+## 설치
+- 요구사항**: Python 3.8 이상
+```bash
+pip install aiauto-client optuna
+```
+
+---
+
+## 주요 개념
+
+### [Optuna](https://optuna.org/) vs AIAuto 차이점
+#### AIAuto 를 사용하는 이유
+- 로컬 리소스 제약 해결: 로컬 PC 의 CPU/GPU/메모리 한계 없이 ZeroOneAI 클러스터의 자원을 활용한 대규모 하이퍼파라미터 탐색
+- 클라우드 GPU 활용: 로컬에서 돌아가는 것이 아닌 ZeroOneAI 클러스터의 GPU 사용
+- Optuna 호환: 기존 Optuna 코드와 Sampler/Pruner 객체를 그대로 사용 가능
+
+| 항목 | Optuna        | AIAuto                |
+|------|---------------|-----------------------|
+| **실행 위치** | 로컬 PC         | Kubernetes 클러스터       |
+| **병렬화** | 프로세스/스레드 기반   | Kubernetes Pod 기반     |
+| **GPU 사용** | 로컬 GPU 필요     | ZeroOneAI 클러스터 GPU 사용 |
+| **확장성** | 로컬 리소스 확장 제한  | 노드 기반 scale out 확장 가능 |
+| **API 호환성** | Optuna 기본 API | Optuna API 호환         |
+| **Sampler/Pruner** | 모든 Optuna 알고리즘 | Optuna API 호환          |
+
+### 아키텍처 구조
+```mermaid
+graph TB
+    subgraph Layer1["로컬 환경"]
+        User[사용자 로컬 PC]
+        AskTell["Ask/Tell trial"]
+        
+        User --> AskTell
+    end
+
+    subgraph Layer2["AIAuto 플랫폼"]
+        Workspace[Workspace]
+        Dashboard[Optuna Dashboard]
+        Storage[Journal gRPC Storage]
+        Store[Artifact Store]
+        
+        Study[Study]
+
+        Workspace --> Dashboard
+        Workspace --> Storage
+        Workspace --> Store
+        Workspace --> Study
+    end
+
+    subgraph Layer3["분산 실행"]
+        TB1[TrialBatch 1]
+        TB2[TrialBatch 2]
+        Pod1[Pod/Trial 1]
+        Pod2[Pod/Trial 2]
+
+        TB1 --> Pod1
+        TB1 --> Pod2
+    end
+
+    User --> Workspace
+    
+    Study --> TB1
+    Study --> TB2
+    
+    Pod1 -.report.-> Storage
+    Pod1 -.save.-> Store
+    AskTell -.report.-> Storage
+    AskTell -.save.-> User
+    Storage -.view.-> Dashboard
+```
+#### 구조 설명
+- OptunaWorkspace: 사용자당 1개, Journal gRPC Storage 와 Optuna Dashboard, Artifact Store 포함
+- Study: 하나의 maximize or minimize 최적화 실험 단위 (ex: "ResNet 하이퍼파라미터 탐색")
+- TrialBatch: Study 내에서 병렬 실행되는 trial 그룹 (한 번의 `optimize()` 호출당 1개)
+- Pod: Kubernetes 에서 실행되는 개별 trial (GPU/CPU 리소스 할당)
+
+---
+
+## 빠른시작 (5분)
+
+### 1. 토큰 발급
+- AIAuto Web 접속: [https://dashboard.common.aiauto.pangyo.ainode.ai](https://dashboard.common.aiauto.pangyo.ainode.ai)
+- "Generate New Token" 버튼 클릭
+![](img/5_aiauto_dashboard_token.png)
+- 생성된 Token 복사
+![](img/6_aiauto_dashboard_token_copy.png)
+
+### 2. 첫 최적화 실행
+- 아래 예시 코드에 `<your-token-here>` 에 복사한 토큰 붙여넣기 (주의!! 두 군데 있음에 주의)
+- Optuna 기본 개념 학습: 기존 Optuna 와 호환되므로 처음이라면 [Optuna 공식 튜토리얼](https://optuna.readthedocs.io/en/stable/tutorial/index.html)을 먼저 보길 권장
+  - AIAutoController 를 사용하여 study TODO
+```python
+import aiauto
+import optuna
+
+# AIAuto 초기화
+# 이 때 OptunaWorkspace 가 생성됨
+ac = aiauto.AIAutoController('<your-token-here>')
+# Study 생성
+study_wrapper = ac.create_study('my-first-study', direction='minimize')
+
+# Objective 함수 정의
+def objective(trial):
+    # objective 함수 안에서 import 하는 것 주의
+    import aiauto
+    from os.path import join
+    
+    # log 를 찍기 위한 TrialController 객체 생성 
+    tc = aiauto.TrialController(trial)
+
+    # 최적화 함수 작성
+    x = trial.suggest_float('x', -10, 10)
+    y = trial.suggest_float('y', -10, 10)
+    value = (x - 2) ** 2 + (y - 3) ** 2
+    
+    # log
+    tc.log(f'x={x:.2f}, y={y:.2f}, value={value:.4f}')
+    
+    # report
+    trial.report(value, step=1)   # 중간 성능 보고
+    
+    # artifact 저장 시작 (필수는 아님 코드에서 제외해도 됨)
+    # -------------------------------------------
+    
+    # 주의!!: artifact 저장을 위해 get_artifact_store 나 get_storage 를 사용하기 위해서
+    # AIAutoController 를 objective 함수 안에서 다시 선언해야 함
+    ac_local = aiauto.AIAutoController('<your-token-here>')
+    try:
+        # 파일명/내용에 trial 식별자 포함
+        trial_id = f'{trial.study.study_name}_{trial.number}'
+        filename = f'{trial_id}.txt'
+        file_path = join(ac_local.get_artifact_tmp_dir(), filename)
+      
+        with open(file_path, 'w') as f:
+          f.write(f'trial_id={trial_id}\n')
+          f.write(f'final_score={value}\n')
+          f.write(f'rand_value_x={x}\n')
+          f.write(f'rand_value_y={y}\n')
+      
+        artifact_id = optuna.artifacts.upload_artifact(
+          artifact_store=ac_local.get_artifact_store(),
+          storage=ac_local.get_storage(),
+          study_or_trial=trial,
+          file_path=file_path,
+        )
+        trial.set_user_attr('artifact_id', artifact_id)
+        tc.log(f'[artifact] saved {filename}, artifact_id={artifact_id}')
+    except Exception as e:
+        tc.log(f'[artifact] failed: {e}')
+        
+    # -------------------------------------------
+    # artifact 저장 종료 (필수는 아님 코드에서 제외해도 됨)
+
+    return value
+
+# 최적화 실행 (Kubernetes 클러스터에서 병렬 실행)
+# 동시에 2개씩 총 10개 trial 생성
+# 하나의 trial 당 1 cpu, 500Mi memory 의 pod 가 뜸
+study_wrapper.optimize(
+  objective, 
+  n_trials=10, 
+  parallelism=2,
+  resources_requests={
+    "cpu": "1",
+    "memory": "500Mi",
+  },
+)
+
+TODO
+# 반복문 돌면서 확인 시작 (필수는 아님 코드에서 제외해도 됨)
+# --------------------------------------------
+
+# --------------------------------------------
+# 반복문 돌면서 확인 종료 (필수는 아님 코드에서 제외해도 됨)
+```
+
+### 3. Dashboard 결과 확인
+- 최적화가 완료되면 Optuna Dashboard에서 Study 진행상황, 최적 파라미터, 시각화 그래프를 확인할 수 있습니다.
+  - [AIAuto Web OptunaWorkspace](https://dashboard.common.aiauto.pangyo.ainode.ai/workspace) tab 에 접속하여 `Open Dashboard` 링크를 클릭
+    ![](img/1_aiauto_dashboard_study.png)
+  - Optuna Dashboard 는 Study 단위로 진행상황과 그래프를 표시합니다
+  - 아래 처럼 여러 study 가 하나의 Optuna Dashboard 에 보이며, 하나의 Study에 여러 TrialBatch가 포함 됨
+    ![](img/2_optuna_dashboard_study.png)
+  - 생성된 Study 안에서 그래프, Hyperparameter Importance, Optimization History 등 진행 상황과 그래프 확인 가능
+    ![](img/3_optuna_dashboard_graph.png)
+  - 개별 trial 의 log 도 확인 가능
+    ![](img/4_optuna_dashbaord_study_trialbatch.png)
+  - 개별 trial 의 artifact 는 [AIAuto Web TrialBatch](https://dashboard.common.aiauto.pangyo.ainode.ai/trialbatch) 의 `Pod 상태` 버튼을 눌러 확인 가능
+  - 
+
+### 4. 지원 런타임 이미지 확인
+```python
+import aiauto
+
+# 사용 가능한 이미지 목록 확인
+for image in aiauto.RUNTIME_IMAGES:
+    print(image)
+```
+#### 기본 이미지 (use_gpu=False)
+- `ghcr.io/astral-sh/uv:python3.8-bookworm-slim`
+- `ghcr.io/astral-sh/uv:python3.9-bookworm-slim`
+- `ghcr.io/astral-sh/uv:python3.10-bookworm-slim`
+- `ghcr.io/astral-sh/uv:python3.11-bookworm-slim`
+- `ghcr.io/astral-sh/uv:python3.12-bookworm-slim`
+- `ghcr.io/astral-sh/uv:python3.13-bookworm-slim`
+#### GPU 이미지 (use_gpu=True)
+- `pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime`
+- `pytorch/pytorch:2.1.0-cuda11.8-cudnn8-runtime`
+- `pytorch/pytorch:2.2.0-cuda11.8-cudnn8-runtime`
+- `tensorflow/tensorflow:2.13.0-gpu`
+- `tensorflow/tensorflow:2.14.0-gpu`
+
+### 5. 리소스 설정
+#### CPU 사용
+```python
+study.optimize(
+    objective,
+    resources_requests={
+        "cpu": "1",
+        "memory": "500Mi",
+    },
+)
+```
+#### GPU 사용
+```python
+study.optimize(
+    objective,
+    use_gpu=True,
+    resources_requests={
+        "cpu": "8",
+        "memory": "16Gi",
+        "nvidia.com/gpu": "2",
+    },
+)
+```
+
+### 6. API 레퍼런스
+
+#### AIAutoController
+- token 인증을 통해 원격으로 zerooneai kubenetes cluster 서버와 통신하기 위한 객체 
+- 생성 시 OptunaWorkspace 를 초기화
+- create_study() 로 optuna [Study](https://optuna.readthedocs.io/en/stable/reference/generated/optuna.study.Study.html) 의 wrapper 인 [StudyWrapper](#studywrapper) 를 생성
+```python
+import aiauto
+
+ac = aiauto.AIAutoController('<your-token>')
+study_wrapper = ac.create_study('study-name', direction='minimize')
+```
+##### Parameters
+- `token` (str): [Front](#1-토큰-발급)에서 발급받은 API 토큰
+##### Methods
+- `create_study(study_name, direction, ...)`: optuna [Study](https://optuna.readthedocs.io/en/stable/reference/generated/optuna.study.Study.html) 의 wrapper 인 [StudyWrapper](#studywrapper) 를 생성
+  - `study_name` (str): Study 이름 (unique 해야 함)
+  - `direction` (str): Single-objective 인 경우 문자열 사용 "minimize" 또는 "maximize" (default: minimize), direction 과 directions 둘 중 하나만 지정해야 한다
+  - `directions` (List[str]): Multi-objective 인 경우 문자열의 리스트 사용, direction 과 directions 둘 중 하나만 지정해야 한다
+  - `sampler` (optuna.samplers.BaseSampler): Optuna Sampler 와 호환 (default: TPESampler)
+  - `pruner` (optuna.pruners.BasePruner): Optuna Pruner 와 호한 (default: MedianPruner)
+- `get_storage` (): Optuna study/trial 정보를 저장할 Storage 객체 반환 (OptunaWorkspace 와 연동되어야 하기 때문에 꼭 이 객체를 사용해야한다) [6-checkpoint-저장-artifact](#6-checkpoint-저장-artifact) 참고
+- `get_artifact_store` (): Artifact Store 객체 반환 (OptunaWorkspace 와 연동되어야 하기 때문에 꼭 이 객체를 사용해야한다) [6-checkpoint-저장-artifact](#6-checkpoint-저장-artifact) 참고
+- `get_artifact_tmp_dir` (): Artifact 임시 디렉토리 경로 (OptunaWorkspace 와 연동되어야 하기 때문에 꼭 이 경로에 파일을 저장한 후 upload_artifact 를 호출하야 한다) [6-checkpoint-저장-artifact](#6-checkpoint-저장-artifact) 참고
+
+#### StudyWrapper
+- [Study](https://optuna.readthedocs.io/en/stable/reference/generated/optuna.study.Study.html) 는 기존 Optuna 에서 사용하는 객체, StudyWrapper 는 이를 Wrapping 하여 aiauto 에서 사용하는 객체, get_study() 통하여 wrapper 에서 부터 진짜 객체를 가져올 수 있다
+```python
+study_wrapper.optimize(
+    objective,
+    n_trials=10,
+    parallelism=2,
+    resources_requests={
+        "cpu": "1",
+        "memory": "500Mi",
+    },
+)
+status = study_wrapper.get_status()  # 진행 상황 확인
+print(status)
+```
+##### Methods
+- `get_study` (): study_wrapper 가 아닌, optuna 의 [Study](https://optuna.readthedocs.io/en/stable/reference/generated/optuna.study.Study.html) 를 반환
+- `optimize` (): zerooneai 의 kubernetes cluster 에서 병렬 실행되는 최적화를 실행
+  - `objective` (Callable[oputna.trial, None]): optuna 에서 일반적으로 구현해서 사용하는 Objective 함수를 이 매개변수로 전달
+  - `n_trials` (int): 실행할 전체 trial 개수 (default: 10) (failed or pruned 갯수 포함)
+  - `parallelism` (int): 동시 실행 Pod 개수 (default: 2)
+  - `use_gpu` (bool): GPU 사용 여부 (default: False)
+  - `runtime_image` (str): Docker 이미지 (default: "ghcr.io/astral-sh/uv:python3.8-bookworm-slim" / "pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime"(use_gpu))
+  - `requirements_list` (List[str]): 추가 설치할 패키지 리스트 (default: list 가 비어있어도 optuna, grpcio, protobuf, aiauto-client, optuna-dashboard 는 자동 설치)
+  - `resources_requests` (dict): Pod 리소스 요청
+    - `"cpu"`: (str) CPU 코어 수 (default: "1" / "2"(use_gpu))
+    - `"memory"`: (str) 메모리 용량 (default: "1Gi" / "4Gi"(use_gpu))
+    - `"nvidia.com/gpu"`: (str) GPU 개수 (default: "1"(use_gpu)) (max: 4)
+- `get_status` (): 현재 optimize 로 생성한 마지막 trialBatch 만의 정보를 가져온다 TODO 수정해야함
+
+#### TrialController
+- Trial 실행 중 Optuna 의 save_note 기능을 활용하여 note (AIAuto Dashboard 에서 확인 가능) 에 로그를 출력하게 도와주는 객체
+```python
+import aiauto
+
+def objective(trial):
+    tc = aiauto.TrialController(trial)
+    tc.log('Training started')
+    # ... training code ...
+    tc.flush()  # 로그 즉시 저장
+```
+##### Parameters
+- `trial` (optuna.trial.Trial, optuna.trial.FrozenTrial): objective 함수의 매개변수로 넘어오는 trial 을 Wrapping 해서 trialController 를 만든다
+  - ask/tell 인 경우도 호황 되어야 하기 때문에 FrozenTrail 도 지원  
+##### Methods
+- `get_trial` (): TrialController 객체 생성 시 매개변수로 넣었던 trial 을 꺼낸다
+- `log` (str): Optuna 의 save_note 에 로그를 기록, 성능상 이슈로 버퍼에 저장해두고 5개로그마다/1분마다 저장한다
+- `flush` (): 5개/1분마다 조건을 무시하고 지금 당장 로그를 저장한다. Optuna Callback 기능으로 종료 시 자동으로 호출 됨
+
+---
+
+## 중요 주의사항
+
+### ⚠️ Objective 함수 작성 규칙
+
+**모든 import는 함수 내부에 작성하세요**:
+```python
+# ❌ 잘못된 예
+import torch
+
+def objective(trial):
+    model = torch.nn.Linear(10, 1)  # 실패: torch를 찾을 수 없음
+```
+
+```python
+# ✅ 올바른 예
+def objective(trial):
+    import torch  # 함수 내부에서 import
+    model = torch.nn.Linear(10, 1)
+```
+
+**이유**: Objective 함수는 Kubernetes Pod에서 실행되므로 로컬 PC의 import가 전달되지 않습니다.
+
+### ⚠️ 인자 지정 규칙 (XOR)
+
+**`direction` 또는 `directions` 중 하나만 지정하세요** (동시 지정 금지):
+
+```python
+# ✅ 올바른 ex: 단일 목적
+study = controller.create_study('exp1', direction='minimize')
+
+# ✅ 올바른 ex: 다중 목적
+study = controller.create_study('exp2', directions=['minimize', 'maximize'])
+
+# ❌ 잘못된 ex: 동시 지정
+study = controller.create_study('exp3', direction='minimize', directions=['minimize', 'maximize'])
+```
+
+**`requirements_file` 또는 `requirements_list` 중 하나만 지정하세요** (동시 지정 금지):
+
+```python
+# ✅ 올바른 ex: 파일로 지정
+study.optimize(objective, n_trials=10, requirements_file='requirements.txt')
+
+# ✅ 올바른 ex: 리스트로 지정
+study.optimize(objective, n_trials=10, requirements_list=['torch', 'numpy'])
+
+# ❌ 잘못된 ex: 동시 지정
+study.optimize(objective, n_trials=10,
+               requirements_file='requirements.txt',
+               requirements_list=['torch', 'numpy'])
+```
+
+### ⚠️ Jupyter Notebook 사용 시
+
+**Python REPL에서 정의한 함수는 Serialize할 수 없습니다.** `%%writefile` 매직 커맨드로 파일에 저장한 후 import하세요:
+
+```python
+%%writefile my_objective.py
+def objective(trial):
+    import aiauto
+    tc = aiauto.TrialController(trial)
+    x = trial.suggest_float('x', -10, 10)
+    return x ** 2
+```
+
+```python
+from my_objective import objective
+study.optimize(objective, n_trials=10)
+```
+
+### ⚠️ AIAutoController 재초기화
+
+Artifact 저장을 사용하려면 **objective 함수 내부**에서 `AIAutoController`를 재초기화하세요:
+
+```python
+def objective(trial):
+    import aiauto
+    import optuna
+
+    # Objective 내부에서 재초기화 (singleton이라 문제없음)
+    ac = aiauto.AIAutoController('your-token')
+
+    # Artifact 저장
+    artifact_id = optuna.artifacts.upload_artifact(
+        artifact_store=ac.get_artifact_store(),
+        storage=ac.get_storage(),
+        study_or_trial=trial,
+        file_path='model.pth',
+    )
+```
+
+### ⚠️ 로그 출력 방법
+
+**AIAuto Dashboard에서 로그를 확인하려면** `TrialController.log()`를 사용하세요:
+
+```python
+# ❌ 잘못된 ex: AIAuto Dashboard에서 확인 불가
+def objective(trial):
+    print('Loss: 0.5')  # Pod 로그에만 남음
+    logger.info('Epoch 1')  # Pod 로그에만 남음
+```
+
+```python
+# ✅ 올바른 ex: AIAuto Dashboard에서 확인 가능
+def objective(trial):
+    import aiauto
+    tc = aiauto.TrialController(trial)
+    tc.log('Loss: 0.5')  # AIAuto Dashboard에 표시됨
+    tc.log('Epoch 1')
+```
+
+**AIAuto Dashboard 로그 확인 방법**:
+1. https://dashboard.common.aiauto.pangyo.ainode.ai 접속
+2. Study → TrialBatch → Pod 클릭
+3. "Logs" 탭에서 실시간 로그 확인
+
+### ⚠️ Artifact 저장 제한
+
+- **자동 정리**: 상위 5개 trial의 artifact만 보존됩니다 (디스크 용량 절약)
+- **용량 제한**: Front Workspace 페이지에서 현재 사용량 확인 가능
+- **자동 적용**: `CallbackTopNArtifact`는 Runner가 자동으로 적용하므로 사용자가 신경 쓸 필요 없습니다
+
+### ⚠️ Ask/Tell 패턴 주의사항
+
+Ask/Tell 패턴으로 trial을 수동 제어하면:
+- **실행 위치**: 로컬 PC (Kubernetes Pod 생성 안 됨)
+- **TrialBatch 카운트**: `optimize()` 호출로 생긴 TrialBatch와 별도로 집계됨
+- **확인 방법**:
+  - **Optuna Dashboard**: Study 페이지에서 `user_attr.trialbatch_name='ask_tell_local'` 확인
+  - **AIAuto Dashboard**: Study 페이지의 "ask/tell trial 보기" 다이얼로그
+
+### ⚠️ 예약된 user_attr 키
+
+다음 키는 시스템이 사용하므로 **직접 설정하지 마세요**:
+- `pod_name`: Pod ↔ Trial 매칭용
+- `artifact_id`: Artifact 다운로드 링크
+- `artifact_removed`: Artifact 삭제 플래그
+- `trialbatch_name`: TrialBatch 식별자
+
+또한 **`study.set_user_attr('note', ...)`를 직접 호출하지 마세요**. `TrialController.log()`가 내부적으로 사용합니다.
+
+---
+
+## 기본 사용법
+
+### 1. 간단한 수학 함수 최적화
+
+**목표**: AIAuto 기본 흐름 이해 (Study 생성 → optimize 호출 → 결과 확인)
+
+
+
+- TODO maximize minimize direction 동시 안되는거, 동시에 하려면 [7-multi-objective-최적화](#7-multi-objective-최적화) 참조 
+
+```python
+import aiauto
+import optuna
+
+# AIAuto 초기화
+ac = aiauto.AIAutoController('your-token')
+
+# Study 생성
+study = ac.create_study(
+    study_name="simple_quadratic",
+    direction="minimize",
+    sampler=optuna.samplers.TPESampler(seed=42),
+)
+
+# Objective 함수 정의
+def objective(trial):
+    import aiauto
+
+    # 하이퍼파라미터 샘플링
+    x = trial.suggest_float('x', -10, 10)
+    y = trial.suggest_float('y', -10, 10)
+
+    # 목적 함수 계산: (x-2)^2 + (y-3)^2 최소화
+    value = (x - 2) ** 2 + (y - 3) ** 2
+    return value
+
+# 최적화 실행
+study.optimize(
+    objective,
+    n_trials=20,
+    parallelism=2,  # 동시 실행 Pod 수
+)
+
+# 결과 확인
+real_study = study.get_study()
+print(f'Best value: {real_study.best_value:.4f}')
+print(f'Best params: {real_study.best_params}')
+```
+
+**Optuna 공식 문서**: [Optuna Tutorial](https://optuna.readthedocs.io/en/stable/tutorial/index.html)
+
+---
+
+### 2. 로그 출력하기 (TrialController)
+
+**목표**: AIAuto Dashboard에서 Trial 실행 중 로그 확인
+
+```python
+def objective(trial):
+    import aiauto
+
+    # TrialController 생성
+    tc = aiauto.TrialController(trial)
+
+    x = trial.suggest_float('x', -10, 10)
+    y = trial.suggest_float('y', -10, 10)
+
+    # 로그 출력 (Dashboard에 표시됨)
+    tc.log(f'Trial {trial.number}: x={x:.2f}, y={y:.2f}')
+
+    value = (x - 2) ** 2 + (y - 3) ** 2
+    tc.log(f'Objective value: {value:.4f}')
+
+    # 로그 즉시 저장 (Trial 종료 시 자동 호출되지만 명시적으로 호출 가능)
+    tc.flush()
+
+    return value
+```
+
+**AIAuto Dashboard 로그 확인 방법**:
+1. https://dashboard.common.aiauto.pangyo.ainode.ai 접속
+2. Study → TrialBatch → Pod 클릭
+3. "Logs" 탭에서 실시간 로그 확인
+
+**로그 저장 주기**:
+- 5개 로그마다 자동 저장
+- 1분마다 자동 저장
+- `tc.flush()` 호출 시 즉시 저장
+
+---
+
+### 3. PyTorch 모델 학습 (Single Objective)
+
+**목표**: GPU 사용, 전체 학습 파이프라인 (Pruning 없음)
+
+```python
+import aiauto
+import optuna
+
+ac = aiauto.AIAutoController('your-token')
+
+study = ac.create_study(
+    study_name="pytorch_cifar10",
+    direction="maximize",  # accuracy 최대화
+)
+
+def objective(trial):
+    # ========== 모든 import는 함수 내부 ==========
+    import torch
+    from torch import nn, optim
+    from torch.utils.data import DataLoader, Subset
+    from torchvision import transforms, datasets
+    import aiauto
+
+    tc = aiauto.TrialController(trial)
+
+    # ========== 하이퍼파라미터 샘플링 ==========
+    lr = trial.suggest_float('lr', 1e-5, 1e-1, log=True)
+    batch_size = trial.suggest_categorical('batch_size', [32, 64, 128])
+    n_features = trial.suggest_int('n_features', 16, 128, step=16)
+
+    tc.log(f'Hyperparameters: lr={lr:.6f}, batch_size={batch_size}, n_features={n_features}')
+
+    # ========== 모델 정의 ==========
+    class SimpleCNN(nn.Module):
+        def __init__(self, n_features):
+            super().__init__()
+            self.features = nn.Sequential(
+                nn.Conv2d(3, n_features, 3, padding=1),
+                nn.ReLU(),
+                nn.MaxPool2d(2),
+                nn.Conv2d(n_features, n_features * 2, 3, padding=1),
+                nn.ReLU(),
+                nn.MaxPool2d(2),
+            )
+            self.classifier = nn.Sequential(
+                nn.Flatten(),
+                nn.Linear(n_features * 2 * 8 * 8, 128),
+                nn.ReLU(),
+                nn.Dropout(0.5),
+                nn.Linear(128, 10),
+            )
+
+        def forward(self, x):
+            x = self.features(x)
+            return self.classifier(x)
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = SimpleCNN(n_features).to(device)
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+    criterion = nn.CrossEntropyLoss()
+
+    tc.log(f'Device: {device}')
+
+    # ========== 데이터 로딩 (일부만 사용: HPO는 빠르게) ==========
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+    ])
+
+    train_dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
+    valid_dataset = datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
+
+    # HPO를 위해 일부 데이터만 사용
+    train_subset = Subset(train_dataset, range(5000))
+    valid_subset = Subset(valid_dataset, range(1000))
+
+    train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True)
+    valid_loader = DataLoader(valid_subset, batch_size=batch_size, shuffle=False)
+
+    # ========== 학습 ==========
+    n_epochs = 5
+    for epoch in range(n_epochs):
+        model.train()
+        train_loss = 0.0
+        for batch_idx, (data, target) in enumerate(train_loader):
+            data, target = data.to(device), target.to(device)
+            optimizer.zero_grad()
+            output = model(data)
+            loss = criterion(output, target)
+            loss.backward()
+            optimizer.step()
+            train_loss += loss.item()
+
+        train_loss /= len(train_loader)
+
+        # 검증
+        model.eval()
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for data, target in valid_loader:
+                data, target = data.to(device), target.to(device)
+                output = model(data)
+                _, predicted = torch.max(output.data, 1)
+                total += target.size(0)
+                correct += (predicted == target).sum().item()
+
+        accuracy = correct / total
+        tc.log(f'Epoch {epoch+1}/{n_epochs}: train_loss={train_loss:.4f}, accuracy={accuracy:.4f}')
+
+    return accuracy
+
+# 최적화 실행
+study.optimize(
+    objective,
+    n_trials=10,
+    parallelism=2,
+    use_gpu=True,  # GPU 사용
+    runtime_image='pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime',
+    requirements_list=['torchvision'],
+    resources_requests={
+        "cpu": "2",
+        "memory": "4Gi",
+        "nvidia.com/gpu": "1",
+    },
+)
+```
+
+**포인트**:
+- `use_gpu=True`: GPU가 할당된 Pod에서 실행
+- `runtime_image`: PyTorch가 설치된 Docker 이미지 지정
+- `requirements_list`: 추가로 설치할 패키지 (torchvision)
+- `resources_requests`: Pod에 할당할 리소스 (CPU, Memory, GPU)
+
+---
+
+### 4. PyTorch with Pruning (조기 종료)
+
+**목표**: 성능이 낮은 Trial을 조기 종료하여 리소스 절약
+
+**Pruning이란?**: 학습 중간에 성능이 좋지 않은 trial을 자동으로 중단하는 기능입니다. 예를 들어, 다른 trial들의 median 성능보다 낮으면 해당 trial을 중단합니다.
+
+```python
+import optuna
+import aiauto
+
+ac = aiauto.AIAutoController('your-token')
+
+# PatientPruner + MedianPruner 조합
+study = ac.create_study(
+    study_name="pytorch_with_pruning",
+    direction="maximize",
+    pruner=optuna.pruners.PatientPruner(
+        optuna.pruners.MedianPruner(),
+        patience=2,  # 2 epoch 동안 개선 없으면 중단
+    ),
+)
+
+def objective(trial):
+    import torch
+    from torch import nn, optim
+    import aiauto
+    import optuna
+
+    tc = aiauto.TrialController(trial)
+
+    # ... (이전 예제와 동일한 모델/데이터 설정) ...
+
+    min_epochs_for_pruning = 3  # 최소 3 epoch은 실행
+    n_epochs = 10
+
+    for epoch in range(n_epochs):
+        # ... 학습 코드 ...
+
+        # 검증 accuracy 계산
+        accuracy = correct / total
+        tc.log(f'Epoch {epoch+1}: accuracy={accuracy:.4f}')
+
+        # Pruning 체크
+        trial.report(accuracy, step=epoch)  # 중간 성능 보고
+
+        if epoch >= min_epochs_for_pruning:
+            if trial.should_prune():  # Pruner가 중단 판단
+                tc.log(f'Trial pruned at epoch {epoch+1}')
+                raise optuna.TrialPruned()  # Trial 중단
+
+    return accuracy
+
+study.optimize(
+    objective,
+    n_trials=20,
+    parallelism=4,
+    use_gpu=True,
+    runtime_image='pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime',
+    requirements_list=['torchvision'],
+)
+```
+
+**Optuna Dashboard에서 Pruning 확인 방법**:
+1. AIAuto Dashboard에서 Study 클릭 → "Open Optuna Dashboard"
+2. Optimization History 그래프에서 PRUNED trial 확인 (빨간색)
+3. Intermediate Values 탭에서 trial.report() 기록 확인
+
+**포인트**:
+- `trial.report(value, step)`: 중간 성능을 Pruner에게 보고
+- `trial.should_prune()`: Pruner가 중단 판단 (True면 중단 권장)
+- `raise optuna.TrialPruned()`: Trial 즉시 중단
+- `min_epochs_for_pruning`: 최소 epoch 수만큼은 실행 (너무 빨리 중단하지 않도록)
+
+---
+
+### 5. 간단한 다항식 + Pruning
+
+**목표**: 수학 함수로 Pruning 동작 원리 이해
+
+```python
+import aiauto
+import optuna
+
+ac = aiauto.AIAutoController('your-token')
+
+study = ac.create_study(
+    study_name="polynomial_pruning",
+    direction="maximize",
+    pruner=optuna.pruners.PatientPruner(
+        optuna.pruners.MedianPruner(),
+        patience=4,
+    ),
+)
+
+def objective(trial):
+    import aiauto
+    import optuna
+    import numpy as np
+    from numpy.polynomial.chebyshev import Chebyshev
+
+    tc = aiauto.TrialController(trial)
+
+    # 하이퍼파라미터: 0~1 사이의 혼합 비율
+    r = trial.suggest_float('rand_value', 0.0, 1.0)
+    tc.log(f'Trial {trial.number}: rand_value={r:.6f}')
+
+    # 복잡한 다항 함수 정의 (Chebyshev + Wilkinson)
+    Tc = Chebyshev.basis(35).convert(kind=np.polynomial.Polynomial)
+    coef_A = Tc.coef
+
+    roots = np.arange(1, 21, dtype=float)
+    xroots = (roots - 10.5) / 9.5
+    coef_B = np.poly(xroots)
+
+    X = np.linspace(-1.2, 1.2, 2048)
+    pA = np.polyval(coef_A[::-1], X)
+    pB = np.polyval(coef_B, X)
+    pA /= (np.std(pA) + 1e-12)
+    pB /= (np.std(pB) + 1e-12)
+
+    target = pA
+    pred = (1.0 - r) * pA + r * pB
+
+    rng = np.random.RandomState(trial.number + 12345)
+
+    # 50 step 동안 점진적으로 성능 측정
+    for step in range(1, 51):
+        m = 32 + step * 16
+        idx = rng.choice(len(X), size=min(m, len(X)), replace=False)
+
+        err = pred[idx] - target[idx]
+        mse = float(np.mean(err * err))
+        noise = 0.002 * np.sin(0.5 * step) + 0.002 * rng.randn()
+        score = -(mse + noise)  # maximize
+
+        if step == 1 or step % 10 == 0 or step == 50:
+            tc.log(f'Step {step}: mse={mse:.6e}, score={score:.6f}')
+
+        # Pruning 체크
+        trial.report(score, step=step)
+        if trial.should_prune():
+            tc.log(f'Pruned at step {step}, score={score:.6f}')
+            raise optuna.TrialPruned()
+
+    return score
+
+study.optimize(
+    objective,
+    n_trials=10,
+    parallelism=4,
+    use_gpu=False,
+    runtime_image='ghcr.io/astral-sh/uv:python3.8-bookworm-slim',
+    requirements_list=['numpy'],
+)
+```
+
+**이 예제의 의미**: 복잡한 다항식 최적화를 통해 Pruning이 어떻게 동작하는지 확인할 수 있습니다. 성능이 낮은 trial은 50 step을 다 실행하지 않고 중간에 중단됩니다.
+
+---
+
+### 6. Checkpoint 저장 (Artifact)
+
+**목표**: 모델 파일 저장 및 Dashboard에서 다운로드
+
+이전 PyTorch 예제에 Artifact 저장 기능을 추가합니다:
+
+
+
+
+- TODO ask/tell 은 로컬에서 실행되는 것이므로 artifact 저장 안 되므로 주의
+
+```python
+def objective(trial):
+    import torch
+    from torch import nn, optim
+    import aiauto
+    import optuna
+    from os.path import join
+
+    # Objective 내부에서 AIAutoController 재초기화 필수
+    ac = aiauto.AIAutoController('your-token')
+    tc = aiauto.TrialController(trial)
+
+    # ... (학습 코드) ...
+
+    # 학습 완료 후 모델 저장
+    model_filename = f'model_trial_{trial.number}.pth'
+    model_path = join(ac.get_artifact_tmp_dir(), model_filename)
+
+    # 파일 임시 저장시 get_artifact_tmp_dir() 로 얻은 경로에 저장
+    torch.save({
+        'epoch': n_epochs,
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'accuracy': accuracy,
+        'hyperparameters': trial.params,
+    }, model_path)
+
+    # Artifact 업로드
+    try:
+        artifact_id = optuna.artifacts.upload_artifact(
+            artifact_store=ac.get_artifact_store(),
+            storage=ac.get_storage(),
+            study_or_trial=trial,
+            file_path=model_path,
+        )
+        trial.set_user_attr('artifact_id', artifact_id)
+        tc.log(f'Artifact saved: {model_filename}, artifact_id={artifact_id}')
+    except Exception as e:
+        tc.log(f'Artifact upload failed: {e}')
+
+    return accuracy
+```
+
+**포인트**:
+- `ac.get_artifact_tmp_dir()`: 임시 디렉토리 경로 (Pod 내부)
+- `ac.get_artifact_store()`: Artifact 저장소 객체
+- `trial.set_user_attr('artifact_id', artifact_id)`: Dashboard에서 다운로드 링크 표시
+- **CallbackTopNArtifact 자동 정리**: 상위 5개 trial만 유지 (Runner가 자동 적용)
+- **artifact_removed 플래그**: 삭제된 artifact는 Dashboard에서 Download 버튼 숨김
+
+**Pruning과 조합 시 주의사항**:
+
+```python
+def objective(trial):
+    # ... 학습 코드 ...
+
+    for epoch in range(n_epochs):
+        # ... 학습 ...
+
+        # Pruning 체크
+        trial.report(accuracy, step=epoch)
+        if trial.should_prune():
+            tc.log(f'Pruned at epoch {epoch}')
+            # ❌ 여기서 artifact 저장하면 안 됨 (PRUNED trial은 저장 불필요)
+            raise optuna.TrialPruned()
+
+    # ✅ COMPLETE trial만 여기 도달 → artifact 저장
+    artifact_id = optuna.artifacts.upload_artifact(...)
+```
+
+**AIAuto Dashboard에서 Artifact 다운로드**:
+1. https://dashboard.common.aiauto.pangyo.ainode.ai 접속
+2. Study → Trial 클릭
+3. "Artifacts" 탭에서 `artifact_id` 확인
+4. "Download" 버튼 클릭 (artifact_removed=true인 경우 버튼 비활성화)
+
+**Artifact Store 용량 확인**:
+- Dashboard → Workspace 페이지 → "Artifact Store" 섹션에서 사용량/총량 확인
+
+---
+
+### 7. Multi-Objective 최적화
+
+**목표**: Accuracy와 FLOPS를 동시에 최적화 (Pareto front 탐색)
+
+
+
+
+- TODO 원래 maximize minimize direction 동시에 안 되지만 directions 리스트 사용 하면 된다
+
+```python
+import optuna
+import aiauto
+
+ac = aiauto.AIAutoController('your-token')
+
+# Multi-objective: accuracy 최대화 + FLOPS 최소화
+study = ac.create_study(
+    study_name="pytorch_multi_objective",
+    directions=["maximize", "minimize"],  # 2개의 목표
+)
+
+def objective(trial):
+    import torch
+    from torch import nn
+    from fvcore.nn import FlopCountAnalysis
+    import aiauto
+
+    ac = aiauto.AIAutoController('your-token')
+    tc = aiauto.TrialController(trial)
+
+    # 하이퍼파라미터
+    n_features = trial.suggest_int('n_features', 16, 128, step=16)
+    n_layers = trial.suggest_int('n_layers', 2, 5)
+
+    # 모델 정의
+    class SimpleCNN(nn.Module):
+        def __init__(self, n_features, n_layers):
+            super().__init__()
+            layers = []
+            in_channels = 3
+            for _ in range(n_layers):
+                layers.extend([
+                    nn.Conv2d(in_channels, n_features, 3, padding=1),
+                    nn.ReLU(),
+                    nn.MaxPool2d(2),
+                ])
+                in_channels = n_features
+            self.features = nn.Sequential(*layers)
+            # ... classifier ...
+
+        def forward(self, x):
+            return self.features(x)
+
+    model = SimpleCNN(n_features, n_layers)
+
+    # FLOPS 계산
+    dummy_input = torch.randn(1, 3, 32, 32)
+    flops = FlopCountAnalysis(model, dummy_input)
+    total_flops = flops.total()
+
+    tc.log(f'n_features={n_features}, n_layers={n_layers}, FLOPS={total_flops/1e6:.2f}M')
+
+    # ... 학습 코드 ...
+    accuracy = 0.85  # 학습 결과
+
+    # Multi-objective: 2개 값 반환
+    return accuracy, total_flops
+
+study.optimize(
+    objective,
+    n_trials=20,
+    parallelism=4,
+    use_gpu=True,
+    runtime_image='pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime',
+    requirements_list=['torchvision', 'fvcore'],
+)
+```
+
+**포인트**:
+- `directions=["maximize", "minimize"]`: 2개의 목표 방향 지정
+- `return accuracy, total_flops`: 2개 값 반환
+- **Pruning 미지원**: Multi-objective에서는 Pruning을 사용할 수 없습니다
+
+**Pareto front 확인**:
+Dashboard의 "Pareto Front" 그래프에서 Accuracy와 FLOPS의 trade-off를 확인할 수 있습니다.
+
+---
+
+### 8. PyTorch 모든 기능 통합
+
+**목표**: TrialController 로그 + Multi-objective + Pruning + Artifact
+
+```python
+import optuna
+import aiauto
+
+ac = aiauto.AIAutoController('your-token')
+
+study = ac.create_study(
+    study_name="pytorch_all_features",
+    directions=["maximize", "minimize"],  # accuracy + FLOPS
+    pruner=optuna.pruners.PatientPruner(
+        optuna.pruners.MedianPruner(),
+        patience=2,
+    ),
+)
+
+def objective(trial):
+    import torch
+    from torch import nn, optim
+    from fvcore.nn import FlopCountAnalysis
+    import optuna
+    import aiauto
+    from os.path import join
+
+    ac = aiauto.AIAutoController('your-token')
+    tc = aiauto.TrialController(trial)
+
+    # 하이퍼파라미터
+    n_features = trial.suggest_int('n_features', 16, 128, step=16)
+    lr = trial.suggest_float('lr', 1e-5, 1e-1, log=True)
+
+    tc.log(f'Hyperparameters: n_features={n_features}, lr={lr:.6f}')
+
+    # 모델 정의
+    # ... (이전 예제와 동일) ...
+
+    # FLOPS 계산
+    dummy_input = torch.randn(1, 3, 32, 32)
+    flops = FlopCountAnalysis(model, dummy_input).total()
+    tc.log(f'FLOPS: {flops/1e6:.2f}M')
+
+    # 학습
+    n_epochs = 10
+    for epoch in range(n_epochs):
+        # ... 학습 코드 ...
+
+        accuracy = correct / total
+        tc.log(f'Epoch {epoch+1}: accuracy={accuracy:.4f}')
+
+        # Pruning 체크 (Multi-objective에서는 첫 번째 목표로 pruning)
+        trial.report(accuracy, step=epoch)
+        if epoch >= 3 and trial.should_prune():
+            tc.log(f'Pruned at epoch {epoch+1}')
+            raise optuna.TrialPruned()
+
+    # Artifact 저장 (COMPLETE trial만)
+    model_filename = f'model_trial_{trial.number}.pth'
+    model_path = join(ac.get_artifact_tmp_dir(), model_filename)
+    torch.save(model.state_dict(), model_path)
+
+    artifact_id = optuna.artifacts.upload_artifact(
+        artifact_store=ac.get_artifact_store(),
+        storage=ac.get_storage(),
+        study_or_trial=trial,
+        file_path=model_path,
+    )
+    trial.set_user_attr('artifact_id', artifact_id)
+    tc.log(f'Artifact saved: artifact_id={artifact_id}')
+
+    return accuracy, flops
+
+study.optimize(
+    objective,
+    n_trials=20,
+    parallelism=4,
+    use_gpu=True,
+    runtime_image='pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime',
+    requirements_list=['torchvision', 'fvcore'],
+)
+```
+
+**통합된 기능**:
+- ✅ TrialController 로그
+- ✅ Multi-objective (accuracy + FLOPS)
+- ✅ Pruning (조기 종료)
+- ✅ Artifact 저장 (모델 체크포인트)
+
+---
+
+### 9. HPO → Best Trial로 전체 데이터 재학습
+
+**목표**: 일부 데이터로 빠르게 최적 하이퍼파라미터를 찾고, best trial의 설정으로 전체 데이터를 학습하여 최종 모델 저장
+
+**전략**:
+1. **HPO 단계**: 데이터 일부만 골고루 선택하여 빠르게 하이퍼파라미터 탐색 (artifact 저장 안 함)
+2. **재학습 단계**: Best trial의 파라미터로 전체 데이터 학습 (artifact 저장)
+
+```python
+import optuna
+import aiauto
+
+ac = aiauto.AIAutoController('your-token')
+
+study = ac.create_study(
+    study_name="hpo_then_full_training",
+    direction="maximize",
+    pruner=optuna.pruners.MedianPruner(),
+)
+
+# ==================== 1단계: 일부 데이터로 HPO ====================
+def objective(trial):
+    from typing import List
+    import torch
+    from torch import nn, optim
+    from torch.utils.data import DataLoader, Subset, random_split
+    from torchvision import datasets, transforms
+    import torch.nn.functional as F
+    from os.path import join
+    from optuna.artifacts import upload_artifact
+    import optuna
+    import aiauto
+
+    ac = aiauto.AIAutoController('your-token')  # artifact 접근용
+    tc = aiauto.TrialController(trial)
+
+    # ===================== Neural Network 모델 정의 ====================
+    class Net(nn.Module):
+        def __init__(self, features: List[int], dropout: float, dims: List[int]):
+            if len(features) != 3:
+                raise ValueError("Feature list must have three elements")
+            if len(dims) > 3:
+                raise ValueError("Dimension list must have less than three elements")
+
+            super().__init__()
+
+            layers = [
+                nn.Conv2d(3, features[0], 3, padding=1),
+                nn.ReLU(),
+                nn.MaxPool2d(2, 2),
+                nn.Conv2d(features[0], features[1], 3, padding=1),
+                nn.ReLU(),
+                nn.MaxPool2d(2, 2),
+                nn.Conv2d(features[1], features[2], 3, padding=1),
+                nn.ReLU(),
+                nn.MaxPool2d(2, 2),
+                nn.Flatten(),
+            ]
+
+            input_dim = features[2] * 4 * 4
+            for dim in dims:
+                layers.append(nn.Linear(input_dim, dim))
+                layers.append(nn.ReLU())
+                layers.append(nn.Dropout(dropout))
+                input_dim = dim
+
+            layers.append(nn.Linear(input_dim, 10))
+            self.layers = nn.Sequential(*layers)
+
+        def forward(self, x):
+            logits = self.layers(x)
+            return F.log_softmax(logits, dim=1)
+
+    # ================== 하이퍼파라미터 샘플링 ====================
+    batch_size = trial.suggest_categorical('batch_size', [16, 32, 64, 128])
+    lr = trial.suggest_float('learning_rate', 0.001, 0.3, log=True)
+    momentum = trial.suggest_float('momentum', 0.0, 1.0, step=0.05)
+    features = [trial.suggest_int(f'feature{i}', 4, 64, log=True) for i in range(3)]
+    dropout = trial.suggest_float('dropout', 0.2, 0.5)
+    n_layers = trial.suggest_int('n_layers', 1, 3)
+    dims = [trial.suggest_int(f'dims{i}', 4, 128, log=True) for i in range(n_layers)]
+    epochs = trial.suggest_int('epochs', 20, 300, step=10)
+
+    # 🔴 핵심: 데이터 골고루 선택 (여러 trial이 다른 구간 탐색)
+    data_fraction_number = trial.suggest_categorical('data_fraction_number', [4, 8])
+    data_subset_idx = trial.suggest_int('data_subset_idx', 0, data_fraction_number - 1)
+
+    tc.log(f'batch_size={batch_size}, lr={lr:.6f}, momentum={momentum}, features={features}, dropout={dropout}, dims={dims}, epochs={epochs}')
+    tc.log(f'data_fraction_number={data_fraction_number}, data_subset_idx={data_subset_idx}')
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    model = Net(features, dropout, dims).to(device)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum)
+
+    # ================== CIFAR-10 데이터 준비 ====================
+    dataset = datasets.CIFAR10(
+        root="/tmp/cifar10",
+        train=True,
+        download=True,
+        transform=transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+        ]),
+    )
+
+    # train/valid 분리 (70:30, seed 고정으로 재현성 보장)
+    n_total = len(dataset)
+    n_valid = int(n_total * 0.3)
+    n_train = n_total - n_valid
+    train_set, valid_set = random_split(
+        dataset,
+        [n_train, n_valid],
+        generator=torch.Generator().manual_seed(42),
+    )
+
+    # 🔴 핵심: 데이터를 골고루 선택하는 로직
+    if data_fraction_number > 1:
+        def get_data_subset(data_set, fraction_number, idx):
+            """데이터를 fraction_number개 구간으로 나누어 idx번째 구간 선택"""
+            subset_size = len(data_set) // fraction_number
+            start_idx = idx * subset_size
+            end_idx = start_idx + subset_size if idx < fraction_number - 1 else len(data_set)
+            indices = list(range(start_idx, end_idx))
+            return Subset(data_set, indices)
+
+        train_set = get_data_subset(train_set, data_fraction_number, data_subset_idx)
+        valid_set = get_data_subset(valid_set, data_fraction_number, data_subset_idx)
+        tc.log(f'Subset: train={len(train_set)}, valid={len(valid_set)}')
+
+    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=2)
+    valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=2)
+
+    # ================== 학습 및 검증 ====================
+    tc.log('Start subset dataset training...')
+    min_epochs_for_pruning = max(50, epochs // 5)
+
+    for epoch in range(epochs):
+        # 학습
+        model.train()
+        for batch_idx, (inputs, targets) in enumerate(train_loader):
+            inputs, targets = inputs.to(device), targets.to(device)
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, targets)
+            if batch_idx % (len(train_loader) // 4) == 0:
+                tc.log(f'epoch: {epoch}, batch: {batch_idx}, loss: {loss.item():.4f}')
+            loss.backward()
+            optimizer.step()
+
+        # 검증
+        model.eval()
+        correct, total = 0, 0
+        with torch.no_grad():
+            for inputs, targets in valid_loader:
+                inputs, targets = inputs.to(device), targets.to(device)
+                outputs = model(inputs)
+                _, pred = torch.max(outputs, 1)
+                total += targets.size(0)
+                correct += (pred == targets).sum().item()
+
+        accuracy = correct / total
+        tc.log(f'epoch: {epoch}, accuracy for valid: {accuracy:.4f}')
+
+        # Pruning (최소 epoch 후부터만)
+        trial.report(accuracy, epoch)
+        if epoch >= min_epochs_for_pruning and trial.should_prune():
+            tc.log(f'Trial pruned at epoch {epoch}')
+            raise optuna.TrialPruned()
+
+    # Artifact 저장 (COMPLETE trial만)
+    try:
+        filename = f'{trial.study.study_name}_{trial.number}.pt'
+        model_path = join(ac.get_artifact_tmp_dir(), filename)
+        torch.save(model.state_dict(), model_path)
+        artifact_id = upload_artifact(
+            artifact_store=ac.get_artifact_store(),
+            storage=ac.get_storage(),
+            study_or_trial=trial,
+            file_path=model_path,
+        )
+        trial.set_user_attr('artifact_id', artifact_id)
+    except Exception as e:
+        tc.log(f'Fail to save model: {e}')
+
+    return accuracy
+
+# HPO 실행
+study.optimize(
+    objective,
+    n_trials=20,
+    parallelism=4,
+    use_gpu=True,
+    requirements_list=['torch', 'torchvision'],
+)
+
+# ==================== 2단계: Best trial로 전체 데이터 학습 ====================
+def objective_detailed(trial):
+    """Best trial의 하이퍼파라미터로 전체 데이터 학습"""
+    from typing import List
+    import torch
+    from torch import nn, optim
+    from torch.utils.data import DataLoader
+    from torchvision import datasets, transforms
+    import torch.nn.functional as F
+    from os.path import join
+    from optuna.artifacts import upload_artifact
+    import optuna
+    import aiauto
+
+    ac = aiauto.AIAutoController('your-token')
+    tc = aiauto.TrialController(trial)
+
+    # ===================== Neural Network 모델 정의 (동일) ====================
+    class Net(nn.Module):
+        def __init__(self, features: List[int], dropout: float, dims: List[int]):
+            if len(features) != 3:
+                raise ValueError("Feature list must have three elements")
+            if len(dims) > 3:
+                raise ValueError("Dimension list must have less than three elements")
+
+            super().__init__()
+
+            layers = [
+                nn.Conv2d(3, features[0], 3, padding=1),
+                nn.ReLU(),
+                nn.MaxPool2d(2, 2),
+                nn.Conv2d(features[0], features[1], 3, padding=1),
+                nn.ReLU(),
+                nn.MaxPool2d(2, 2),
+                nn.Conv2d(features[1], features[2], 3, padding=1),
+                nn.ReLU(),
+                nn.MaxPool2d(2, 2),
+                nn.Flatten(),
+            ]
+
+            input_dim = features[2] * 4 * 4
+            for dim in dims:
+                layers.append(nn.Linear(input_dim, dim))
+                layers.append(nn.ReLU())
+                layers.append(nn.Dropout(dropout))
+                input_dim = dim
+
+            layers.append(nn.Linear(input_dim, 10))
+            self.layers = nn.Sequential(*layers)
+
+        def forward(self, x):
+            logits = self.layers(x)
+            return F.log_softmax(logits, dim=1)
+
+    # Best trial의 파라미터 사용
+    batch_size = trial.params['batch_size']
+    lr = trial.params['learning_rate']
+    momentum = trial.params['momentum']
+    features = [trial.params[f'feature{i}'] for i in range(3)]
+    dropout = trial.params['dropout']
+    n_layers = trial.params['n_layers']
+    dims = [trial.params[f'dims{i}'] for i in range(n_layers)]
+    epochs = trial.params['epochs']
+
+    tc.log(f'Full training with best params: lr={lr:.6f}, features={features}, dropout={dropout}, dims={dims}')
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    model = Net(features, dropout, dims).to(device)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum)
+
+    # 전체 데이터 로드
+    full_train = datasets.CIFAR10(
+        root="/tmp/cifar10",
+        train=True,
+        download=True,
+        transform=transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+        ]),
+    )
+    test_dataset = datasets.CIFAR10(
+        root="/tmp/cifar10",
+        train=False,
+        download=True,
+        transform=transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+        ]),
+    )
+
+    tc.log(f'Full dataset: train={len(full_train)}, test={len(test_dataset)}')
+
+    train_loader = DataLoader(full_train, batch_size=batch_size, shuffle=True, num_workers=2)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
+
+    # 전체 데이터 학습
+    tc.log('Start full dataset training...')
+    for epoch in range(epochs):
+        model.train()
+        for batch_idx, (inputs, targets) in enumerate(train_loader):
+            inputs, targets = inputs.to(device), targets.to(device)
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, targets)
+            if batch_idx % (len(train_loader) // 4) == 0:
+                tc.log(f'Epoch {epoch}, Batch {batch_idx}/{len(train_loader)}, Loss: {loss.item():.4f}')
+            loss.backward()
+            optimizer.step()
+
+    # 최종 모델 저장
+    try:
+        filename = f'{trial.study.study_name}_{trial.number}.pt'
+        model_path = join(ac.get_artifact_tmp_dir(), filename)
+        torch.save(model.state_dict(), model_path)
+        artifact_id = upload_artifact(
+            artifact_store=ac.get_artifact_store(),
+            storage=ac.get_storage(),
+            study_or_trial=trial,
+            file_path=model_path,
+        )
+        trial.set_user_attr('artifact_id', artifact_id)
+        tc.log(f'Model saved: artifact_id={artifact_id}')
+    except Exception as e:
+        tc.log(f'Fail to save model: {e}')
+
+    # 테스트 정확도 계산
+    model.eval()
+    correct, total = 0, 0
+    with torch.no_grad():
+        for inputs, targets in test_loader:
+            inputs, targets = inputs.to(device), targets.to(device)
+            outputs = model(inputs)
+            _, pred = torch.max(outputs, 1)
+            total += targets.size(0)
+            correct += (pred == targets).sum().item()
+
+    accuracy = correct / total
+    tc.log(f'Test accuracy: {accuracy:.4f}')
+
+    return accuracy
+
+# Best trial의 하이퍼파라미터로 전체 데이터 학습
+real_study = study.get_study()
+study.enqueue_trial(real_study.best_trial)
+
+study.optimize(
+    objective_detailed,
+    n_trials=1,
+    parallelism=1,
+    use_gpu=True,
+    requirements_list=['torch', 'torchvision'],
+)
+```
+
+**핵심 포인트**:
+- **데이터 골고루 탐색**: `data_fraction_number`(4 또는 8)와 `data_subset_idx`로 여러 trial이 서로 다른 데이터 부분을 학습
+  - **이유**: 모든 trial이 동일한 데이터 부분(ex: 앞 10%)만 학습하면 특정 패턴에 편향된 하이퍼파라미터를 찾을 수 있습니다. 전체 데이터 영역을 고르게 탐색하면 더 일반화된 최적 파라미터를 발견할 수 있습니다.
+  - ex: `data_fraction_number=4, idx=0` → 0~25% 데이터, `idx=1` → 25~50% 데이터
+  - 모든 trial이 앞 10%만 학습하는 것이 아니라 전체 데이터를 골고루 탐색
+- **풍부한 탐색 공간**: 3개 Conv + 가변 FC 구조, dropout, SGD+momentum 등 총 9개 하이퍼파라미터
+- **train/valid 분리**: random_split으로 70:30 분할, seed=42로 재현성 보장
+- **Best trial 재사용**: `study.enqueue_trial(real_study.best_trial)`로 최적 파라미터로 전체 데이터 재학습
+- **Artifact 저장**: 전체 데이터 학습 시에만 저장 (HPO에서는 저장 안 함)
+
+---
+
+### 10. Ask/Tell 패턴 (고급)
+
+**목표**: 로컬 PC에서 Trial을 수동으로 제어 (Kubernetes Pod 생성 안 됨)
+
+Ask/Tell 패턴은 다음과 같은 경우에 유용합니다:
+- 외부 시스템에서 학습 결과를 받아와야 할 때
+- Trial 실행 타이밍을 수동으로 제어하고 싶을 때
+- 로컬 PC에서 빠른 실험을 하고 싶을 때
+
+
+
+
+
+
+- TODO ask/tell 은 로컬에서 실행되는 것이므로 artifact 저장 안 되므로 주의
+
+```python
+import aiauto
+import optuna
+
+ac = aiauto.AIAutoController('your-token')
+
+# Study 생성
+study_wrapper = ac.create_study('ask_tell_example', direction='minimize')
+study = study_wrapper.get_study()  # Optuna Study 객체 가져오기
+
+# ⚠️ 경고: study.ask() 호출 시 로컬에서 실행됨 (Kubernetes Pod 생성 안 됨)
+# 로컬 PC에서 실행할 수 있는 가벼운 작업에만 사용하세요
+
+# Trial 요청 (ask)
+trial = study.ask()
+print(f'Trial {trial.number} started (locally)')
+
+# 하이퍼파라미터 샘플링
+x = trial.suggest_float('x', -10, 10)
+y = trial.suggest_float('y', -10, 10)
+
+# 목적 함수 계산 (로컬 PC에서 실행)
+value = (x - 2) ** 2 + (y - 3) ** 2
+
+# 결과 보고 (tell)
+study.tell(trial, value)
+print(f'Trial {trial.number} completed: value={value:.4f}')
+
+# 여러 trial 반복
+for _ in range(5):
+    trial = study.ask()
+    x = trial.suggest_float('x', -10, 10)
+    y = trial.suggest_float('y', -10, 10)
+    value = (x - 2) ** 2 + (y - 3) ** 2
+    study.tell(trial, value)
+```
+
+**포인트**:
+- **로컬 실행**: `study.ask()` 호출 시 Kubernetes Pod가 생성되지 않고 로컬 PC에서 실행됩니다
+- **trialbatch_name='ask_tell_local' 자동 설정**: Python client가 자동으로 user_attr에 설정합니다
+- **TrialBatch count와 별개**: `optimize()` 호출로 생긴 TrialBatch와 별도로 집계됩니다
+
+**ask/tell Trial 확인 방법**:
+1. **AIAuto Dashboard** (https://dashboard.common.aiauto.pangyo.ainode.ai):
+   - Study 페이지 → "Ask/Tell Trials" 다이얼로그에서 로컬 실행 trial 목록 확인
+2. **Optuna Dashboard**:
+   - Study 페이지에서 `user_attr.trialbatch_name='ask_tell_local'` 필터링하여 확인
+
+**주의**: ask/tell로 생성한 trial은 `optimize(n_trials=10)` 카운트에 포함되지 않습니다.
+
+## 문제 해결
+
+### Q: "ModuleNotFoundError: No module named 'xxx'" 에러
+- 원인: Objective 함수 내부에서 import하지 않았거나, `requirements_list`에 패키지를 추가하지 않음
+- 해결:
+  1. Import를 함수 내부로 이동
+  2. `requirements_list`에 패키지 추가
+```python
+study.optimize(
+    objective,
+    requirements_list=['torch', 'torchvision', 'numpy'],
+)
+```
+
+### Q: 로그가 Dashboard에 표시되지 않음
+- 원인: `print()` 또는 `logger`를 사용함
+- 해결: `TrialController.log()` 사용
+```python
+def objective(trial):
+    import aiauto
+    tc = aiauto.TrialController(trial)
+    tc.log('This will appear in Dashboard')
+```
+
+### Q: Artifact 저장이 실패함
+- 원인: Objective 내부에서 `AIAutoController`를 재초기화하지 않음
+- 해결:
+```python
+def objective(trial):
+    import aiauto
+    ac = aiauto.AIAutoController('your-token')  # objective 함수 안에서 재초기화 필수
+    # ... artifact 저장 ...
+```
+
+### Q: Pruning이 동작하지 않음
+- 원인: `trial.report()` 호출 누락 또는 Multi-objective에서 Pruning 사용
+- 해결:
+  - Single-objective에서만 Pruning 사용 가능
+  - 매 epoch마다 `trial.report(value, step)` 호출
+  - `trial.should_prune()` 체크 후 `raise optuna.TrialPruned()`
