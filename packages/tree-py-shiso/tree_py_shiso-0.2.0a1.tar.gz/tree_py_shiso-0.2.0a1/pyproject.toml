@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tree-py-shiso"
+version = "0.2.0a1"
+description = "A Python implementation of the tree command for Windows"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+  { name = "shiso", email = "shisoratsu@icloud.com" },
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: Microsoft :: Windows",
+]
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/tinnci/tree-py"
+
+[project.scripts]
+tree-py = "tree_py.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tree_py"]
