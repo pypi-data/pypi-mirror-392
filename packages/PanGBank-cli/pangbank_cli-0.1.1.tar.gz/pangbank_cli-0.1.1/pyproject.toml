@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=61.0.0"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "PanGBank-cli"
+description = "Command-line tool for retrieving pangenomes using the PanGBank API. "
+dynamic = ["version"]
+authors = [
+    {name = "Jean Mainguy"},
+]
+maintainers = [
+    {name = "Jean Mainguy"},
+]
+
+readme = "README.md"
+keywords = ["Bioinformatics", "Prokaryotes", "Genomics", "Pangenome", "comparative-genomics", "database", "API"]
+classifiers=[
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: POSIX :: Linux",   
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Typing :: Typed",
+    ]
+
+license = {file="LICENCE"}
+
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "typer>=0.15.1",
+    "requests>=2.32.3",
+    "rich>=10.0.0",
+    "pydantic>=2.10.0,<3.0.0",
+    "pandas>=2.0.0,<3.0.0",
+    "pangbank-api>=0.1.1",
+]
+
+
+[project.optional-dependencies]
+
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov",
+    "black>=8.0.0",
+    
+]
+#
+[project.urls]
+Repository = "https://github.com/labgem/PanGBank-cli"
+Changelog = "https://github.com/labgem/PanGBank-cli/CHANGELOG.md"
+
+
+[project.scripts]
+pangbank = "pangbank_cli.main:app"
+
+[tool.setuptools]
+packages = ["pangbank_cli"]
+
+
+[tool.setuptools.dynamic]
+version = {attr = "pangbank_cli.__version__"}
