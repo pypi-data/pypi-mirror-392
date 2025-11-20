@@ -1,0 +1,33 @@
+
+[project]
+name = "deprecated-params"
+dynamic = ["version"]
+description = "A Wrapper for functions, class objects and methods for deprecating keyword parameters"
+readme = "README.md"
+authors = [
+    { name = "Vizonex", email="VizonexBusiness@gmail.com"},
+]
+license = "MIT"
+requires-python = ">=3.10"
+dependencies = [
+    'typing-extensions; python_version<"3.13"' # warnings.deprecated
+]
+[tool.setuptools.dynamic]
+version = {attr = "deprecated_params.__version__"}
+
+[build-system]
+requires = [
+    "setuptools >= 47"
+]
+build-backend = "setuptools.build_meta"
+
+
+[project.urls]
+    homepage = "https://github.com/Vizonex/deprecated-params"
+    repository = "https://github.com/Vizonex/deprecated-params.git"
+
+[tool.ruff]
+line-length = 79
+indent-width = 4
+target-version = "py39"
+fix = true
