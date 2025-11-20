@@ -1,0 +1,55 @@
+POST http://10.0.0.13:8500/plugins/yolo11/run/
+Accept: application/json; indent=4
+Content-Type: application/json
+Synapse-Tenant: b3c7d61062b5c3d36137887ffac9484218797fb2
+Authorization: Token 40ad4de1fdd7e167b7b074866ad88dd56e6d99d2
+# Synapse-Access-Token: syn_Uu_F855lqQHAJTklPoj_1c9XXUir9iNg-Ahrv0cfBite0OL3
+
+{
+  "agent": 19,
+  "action": "train",
+  "version": "0.1.0",
+  "params": {
+    "num_cpus": 2,
+    "num_gpus": 1,
+    "name": "yolo11_train_with_tune_by_hyeonsoo_01",
+    "description": "Training with HPO using is_tune=true",
+    "checkpoint": 46,
+    "dataset": 56,
+    "experiment": 56,
+    "is_tune": true,
+    "tune_config": {
+      "metric": "metrics/mAP50-95(B)",
+      "mode": "max",
+      "num_samples": 2,
+      "max_concurrent_trials": 1,
+      "search_alg": {
+        "name": "hyperoptsearch"
+      },
+      "scheduler": {
+        "name": "asha"
+      }
+    },
+    "hyperparameters": [
+      {
+        "name": "learning_rate",
+        "type": "uniform",
+        "min": 0.0001,
+        "max": 0.01
+      },
+      {
+        "name": "batch_size",
+        "type": "choice",
+        "options": [4, 8, 16]
+      },
+      {
+        "name": "epochs",
+        "type": "randint",
+        "min": 5,
+        "max": 15
+      }
+    ]
+  },
+  "debug": true
+}
+
