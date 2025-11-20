@@ -1,0 +1,237 @@
+# Lists are accepted (cf preset_courses)
+
+[icons]
+path        = "$DEADUCTION_SHARE/graphical_resources/icons"
+letter_type = "letters/trials"
+context     = "letters/blue"
+
+
+[display]
+display_success_messages = true
+text_mode_in_chooser_window = true
+target_display_on_top = false
+depth_of_unfold_statements = 0
+show_lean_name_for_statements = false
+
+# Fonts sizes:
+chooser_math_font_size = "16pt"
+main_font_size = "16pt"
+target_font_size = "20pt"
+statements_font_size = "13pt"
+tooltips_font_size = "12pt"
+proof_tree_font_size = "14pt"
+font_size_for_symbol_buttons = "14pt"
+
+math_font_file = "latinmodern-math.otf"  # "" or "System fonts" for system fonts
+
+selection_color = "limegreen"
+symbols_AND_OR_NOT_IMPLIES_IFF_FORALL_EXISTS_EQUAL_MAP_SUM = "∧, ∨, ¬, ⇒, ⇔, ∀, ∃, =, ↦, +"
+use_symbols_for_logic_button = true
+short_buttons_line = true
+
+display_detailed_errors_on_wui = true
+
+allow_primes_for_names = true
+allow_seconds_for_names = true
+use_primes_over_indices = true
+exclude_free_vars_for_sequence_indices = true
+use_set_name_as_hint_for_naming_elements = true
+
+color_for_applied_properties = "Grey"
+color_for_variables = "Blue"
+color_for_dummy_variables = "Purple"  # 33cccc #00cc99
+color_for_selection = "LimeGreen"  #ffff99
+color_for_props = "Fuchsia"
+color_for_operator_props = "Red"
+color_for_highlight_in_proof_tree = "Yellow"
+
+show_saved_exercises = true
+max_nb_of_saved_versions = 1
+# Any modification of the following must be echoed
+# in the replace_dubious_characters function in math_display.utils
+dubious_characters = "ℕ, ℤ, ℚ, ℝ, 𝒫, ↦"
+
+[windows.display]
+math_font_file = ""
+
+
+[logic]
+# "display_unified", "display_both", "display_switch"
+button_use_or_prove_mode = "display_both"
+# use_demo_mode_affect_line_1 = true
+# use_demo_mode_affect_line_2 = false
+do_not_name_dummy_vars_as_global_vars = true
+do_not_name_dummy_vars_as_dummy_vars = false
+do_not_name_dummy_vars_as_dummy_vars_in_one_prop = false
+force_indices_for_dummy_vars = false
+use_color_for_variables = true
+use_color_for_dummy_variables = true
+use_color_for_applied_properties = false
+use_bounded_quantification_notation = true
+usr_name_new_vars = false
+usr_jokers_available = false
+
+
+[functionality]
+# Beginner, Intermediata, Advanced, Expert, Free settings
+default_functionality_level = "Beginner"
+# Proof methods available default list:
+#proof_methods = ["case_based", "contraposition", "contradiction", "induction", "sorry"]
+allow_case_based = true
+allow_contraposition = true
+allow_contradiction = true
+allow_induction = true
+allow_sorry = true
+automatic_use_of_exists = true
+automatic_use_of_and = true
+target_selected_by_default = false
+allow_implicit_use_of_definitions = false
+auto_solve_inequalities_in_bounded_quantification = false
+drag_and_drop_in_context = false
+drag_context_to_statements = false
+drag_statements_to_context = false
+drag_several_items = false
+ask_to_prove_premises_of_implications = true
+automatic_intro_of_variables_and_hypotheses = false
+save_history_of_solved_exercises = true
+max_recent_courses = 10
+show_recent_courses_only = false
+calculator_available = true
+choose_order_to_prove_conjunction = false
+choose_order_to_use_disjunction = false
+
+[course]
+# Absolute path or relative to a Deaduction reference dir
+# (home, .deaduction, or lean_exercises_dir)
+preset_courses = ["TUTORIELS/Tutoriel.lean",
+                  "TUTORIELS/Tutoriel_decouverte_deaduction_1.lean",
+                  "TUTORIELS/Tutoriel_decouverte_deaduction_2.lean",
+                  "TUTORIELS/Tutoriel_decouverte_deaduction_3.lean",
+                  "TUTORIELS/Tutoriel_decouverte_deaduction_4.lean",
+                  "Arithmetique.lean",
+                  "LOGIQUE/Recurrence.lean",
+                  "LOGIQUE/Logique_et_inegalites.lean",
+                  "ENSEMBLES/Ensembles_et_applications.lean",
+                  "Limite_et_continuite.lean"]
+#    "Logique_propositionnelle.lean",
+#    "Quantificateurs_et_nombres.lean",
+
+recent_courses = []  # Absolute paths
+recent_courses_titles = []
+exercises_numbers = []
+save_all_statements_to_text_file = true
+text_file_format = "latex"  # utf8
+
+[dialogs]
+calculator_intro = true
+chooser_intro = true
+chooser_intro_2 = true
+used_in_proof_intro = true
+new_object_intro = true
+
+[i18n]
+available_languages = ["en", "fr_FR"]
+select_language = "no_language"
+
+
+[logs]
+save_journal = false
+display_level = "info"
+domains = [""]
+log_to_file = true
+
+
+[others]
+# 'automatic', 'normal', 'from_previous_proof_state':
+# Put 'automatic' or 'from_previous_proof_state'
+# for efficiency in metadata of exercises with heavy computations
+Lean_request_method = "normal"
+copy_autotests_dir = false
+desirable_lean_rqst_fpps_method = false  # For internal use
+usr_version_nb = "-1"  # Do not modify!
+## The Python package builder read the version nb from here: ##
+version = "0.3.9998"
+os = ""  # Let this to "" except for debugging
+
+#########################
+# All Plateform packages
+#########################
+# NB: path can be modified, but
+# Under Windows Lean will not find its files if they are not relative to its cwd
+# ( which is supposed to be $DEADUCTION_HOME ).
+# Path will be tried first (e.g. adequate for multi-user network install),
+# and then alt_path if Deaduction cannot write on path.
+
+#########################
+# Linux packages
+#########################
+[package.linux.mathlib]
+type="archive"
+path="$DEADUCTION_SHARE/mathlib"
+alt_path="$DEADUCTION_HOME/mathlib"
+
+archive_url="https://oleanstorage.azureedge.net/mathlib/158e84ae35cbed47282545f318fb33c0ed483761.tar.xz"
+archive_checksum="a6dcc73a42db7340dcf47c1050c1d9803a279b51"
+archive_hlist="$DEADUCTION_SHARE/hlists/mathlib.hlist"
+archive_root=""
+archive_type="tar"
+
+[package.linux.lean]
+type="archive"
+path="$DEADUCTION_SHARE/lean"
+alt_path="$DEADUCTION_HOME/lean"
+
+archive_url="https://github.com/leanprover-community/lean/releases/download/v3.16.5/lean-3.16.5-linux.tar.gz"
+archive_checksum="cab50923b2ee48190cebf2f7aa55007a9b8b4f69"
+archive_hlist="$DEADUCTION_SHARE/hlists/lean-3.16.5-linux.hlist"
+archive_root="lean-3.16.5-linux"
+archive_type="tar"
+
+#########################
+# Windows packages
+#########################
+[package.windows.mathlib]
+type="archive"
+# Lean on Windows is unable to reach $DEADUCTION_SHARE (use relative paths)
+path="$DEADUCTION_HOME/mathlib"
+
+archive_url="https://oleanstorage.azureedge.net/mathlib/158e84ae35cbed47282545f318fb33c0ed483761.tar.xz"
+archive_checksum="a6dcc73a42db7340dcf47c1050c1d9803a279b51"
+archive_hlist="$DEADUCTION_SHARE/hlists/mathlib.hlist"
+archive_root=""
+archive_type="tar"
+
+[package.windows.lean]
+type="archive"
+path="$DEADUCTION_HOME/lean"
+
+archive_url="https://github.com/leanprover-community/lean/releases/download/v3.16.5/lean-3.16.5-windows.zip"
+archive_checksum="a606dd675d5fa88faa7931dd38ad682d0bca6181"
+archive_hlist="$DEADUCTION_SHARE/hlists/lean-3.16.5-windows.hlist"
+archive_root="lean-3.16.5-windows"
+archive_type="zip"
+
+#########################
+# OSX Packages
+#########################
+[package.darwin.mathlib]
+type="archive"
+path="$DEADUCTION_SHARE/mathlib"
+alt_path="$DEADUCTION_HOME/mathlib"
+
+archive_url="https://oleanstorage.azureedge.net/mathlib/158e84ae35cbed47282545f318fb33c0ed483761.tar.xz"
+archive_checksum="a6dcc73a42db7340dcf47c1050c1d9803a279b51"
+archive_hlist="$DEADUCTION_SHARE/hlists/mathlib.hlist"
+archive_root=""
+archive_type="tar"
+
+[package.darwin.lean]
+type="archive"
+path="$DEADUCTION_SHARE/lean"
+alt_path="$DEADUCTION_HOME/lean"
+
+archive_url="https://github.com/leanprover-community/lean/releases/download/v3.16.5/lean-3.16.5-darwin.zip"
+archive_checksum="cb2ca352e6f03ea944174618326fe21fe7ba6607"
+archive_hlist="$DEADUCTION_SHARE/hlists/lean-3.16.5-darwin.hlist"
+archive_root="lean-3.16.5-darwin"
+archive_type="zip"
