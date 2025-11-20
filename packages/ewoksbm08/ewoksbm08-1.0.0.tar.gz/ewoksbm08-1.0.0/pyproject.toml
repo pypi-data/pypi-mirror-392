@@ -1,0 +1,82 @@
+[build-system]
+requires = [
+    "setuptools>=61",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ewoksbm08"
+version = "1.0.0"
+keywords = [
+    "ewoks"
+]
+
+authors = [{name = "ESRF", email = "dau-pydev@esrf.fr"}]
+description = "Data processing workflows for BM08"
+readme = {file = "README.md", content-type = "text/markdown"}
+license = {file = "LICENSE.md"}
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "ewokscore",
+    "pydantic",
+    "blissdata",
+]
+
+[project.urls]
+Homepage = "https://gitlab.esrf.fr/workflow/ewoksapps/ewoksbm08/"
+Documentation = "https://ewoksbm08.readthedocs.io/"
+Repository = "https://gitlab.esrf.fr/workflow/ewoksapps/ewoksbm08/"
+Issues = "https://gitlab.esrf.fr/workflow/ewoksapps/ewoksbm08/issues"
+Changelog = "https://gitlab.esrf.fr/workflow/ewoksapps/ewoksbm08/-/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+test = [
+    "pytest >=7",
+]
+dev = [
+    "ewoksbm08[test]",
+    "black >=25",
+    "flake8 >=4",
+    "isort",
+    "ruff",
+    "bandit",
+]
+doc = [
+    "ewoksbm08[test]",
+    "sphinx >=4.5",
+    "sphinx-autodoc-typehints >=1.16",
+    "pydata-sphinx-theme",
+    "sphinx-copybutton",
+    "ewokssphinx",
+]
+
+[tool.setuptools]
+package-dir = {""= "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = false
+
+[tool.setuptools.package-data]
+"ewoksbm08.tests.data"= ["*.h5"]
+
+[project.entry-points."ewoks.tasks.class"]
+"ewoksbm08.tasks.*" = "ewoksbm08"
+
+[tool.coverage.run]
+omit = [
+    "*/tests/*"
+]
+
+[tool.bandit.assert_used]
+skips = ["*/test_*.py"]
+
+[tool.isort]
+profile = "black"
+force_single_line = "True"
+
