@@ -1,0 +1,190 @@
+# GRAX
+
+![PyPI version](https://img.shields.io/pypi/v/grax.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+[![Downloads](https://static.pepy.tech/personalized-badge/grax?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/grax)
+
+**GRAX** is a lightweight Python library for transforming geospatial shapefiles into **machine-learning-ready graph networks** using NetworkX.
+
+It automates the full pipeline from **raw GIS data → graph structure → ML-ready inputs**, enabling seamless integration with:
+
+- Graph Neural Networks (GNNs)  
+- Complex Network Analytics (CNA)  
+- Spatial ML models  
+- Routing and navigation algorithms  
+- Digital twin simulations  
+- Infrastructure ML pipelines  
+
+Whether you are building a road network classifier, a pipeline failure predictor, a mobility model, or a full city-scale digital twin, **GRAX converts raw line data into a structured graph with accurate topology and geometry**.
+
+---
+
+## 📦 Installation
+
+Install from PyPI
+
+```bash
+pip install grax
+```
+
+---
+
+## 🔥 Why GRAX?
+Most ML/AI models require **structured graph data**, not shapefile polylines.
+
+GRAX bridges this gap by:
+
+- Converting shapefile line geometries into **numerical matrices**
+- Automatically detecting intersections using **Shapely**
+- Building a **topologically correct NetworkX graph**
+- Embedding node attributes (x, y)
+- Producing a graph that is directly usable for:
+  - PyTorch Geometric  
+  - DGL  
+  - StellarGraph  
+  - NetworkX-based ML  
+  - Custom GNN pipelines  
+
+The goal:  
+> **Turn raw geospatial networks into graph datasets that you can directly feed into ML models.**
+
+---
+
+## ⚙️ Features
+
+- ✅ Converts shapefiles into clean numerical tensors (NumPy matrices)
+- ✅ Builds graphs for graph theory and ML tasks
+- ✅ Automatic node creation at all intersections (crucial for routing & GNNs)
+- ✅ Each node stores geometry → perfect for spatial embeddings
+- ✅ Produces NetworkX graphs ready for: node classification/link prediction/graph embeddings/centrality-based ML features
+- ✅ Ideal preprocessing step before feeding data into PyTorch Geometric or DGL
+- ✅ Designed for digital twins & infrastructure ML (roads, utilities, pipelines)
+
+---
+
+## 📚 API Reference
+
+### Class `grax`
+
+```python
+grax(
+      verbose=0      # prints intersection detection logs
+)
+```
+
+### Function `digitize_shape()`
+Converts a list of LineString geometries into ML-friendly numerical matrices.
+```python
+digitize_shape(shapefile)
+```
+
+### Function `create_network()`
+Takes digitized matrices and constructs a full-resolution graph with:
+- Accurate topology
+- Intersection nodes (is_i_j_k)
+- Node attributes (x, y)
+- Edges representing real connectivity
+```python
+create_network(L)
+```
+
+---
+
+## 🚀 Quickstart: From Shapefile to ML-Ready Graph
+
+```python
+from grax import grax
+
+# Initialize GRAX
+g = grax(verbose=1)
+
+# Step 1 — Digitize the shapefile
+L = g.digitize_shape("city_roads.shp")
+
+# Step 2 — Build the full network graph
+G = g.create_network(L)
+
+print("Nodes:", len(G.nodes()))
+print("Edges:", len(G.edges()))
+```
+
+---
+
+## 🧠 How GRAX Enables ML
+
+### 1. ML-Ready Node Features
+Every node comes with spatial features:
+```python
+{x: longitude, y: latitude}
+```
+You can extend this with:
+- elevation
+- traffic flows
+- utility capacity
+- population density
+- environmental layers
+
+### 2. Topologically Correct Graphs
+Many ML tasks require correct topology:
+- shortest paths
+- flow simulation
+- infrastructure interdependency models
+- GNNs using neighborhood aggregation
+- GRAX ensures that all intersections become actual nodes, which is critical for ML accuracy.
+
+### 3. Perfect for Graph Neural Networks
+GNN performance depends on:
+- Proper graph structure
+- Correct adjacency
+- Meaningful node features
+- GRAX creates exactly that from raw spatial data.
+
+---
+## 🗺️ Real-World ML Applications
+GRAX is used in:
+
+🚗 Traffic prediction models
+
+💧 Water or gas pipeline monitoring
+
+🌆 Urban digital twin systems
+
+🚉 Transit network optimization
+
+🛣️ Road network risk modeling
+
+🌪️ Disaster response routing ML
+
+🧠 CNA (Complex Network Analytics) models
+
+🛰️ Spatial graph embeddings
+
+> It is engineered for modern AI workflows in civil engineering, infrastructure, and geospatial ML.
+
+---
+
+## 📜 License
+
+This project is licensed under the **MIT License**.  
+© 2025 **Dr. Ahmed Moussa**
+
+---
+
+## 🤝 Contributing
+
+Pull requests are welcome.  
+For major changes, please open an issue first to discuss what you would like to change.
+
+---
+
+## 📫 Contact
+
+For feedback, bugs, or collaboration ideas:
+
+- **GitHub**: [@real-ahmed-moussa](https://github.com/real-ahmed-moussa)  
+
+---
+
+## ⭐️ Show Your Support
+
+If you find this project useful, consider giving it a ⭐️ on [GitHub](https://github.com/real-ahmed-moussa/grax)!
