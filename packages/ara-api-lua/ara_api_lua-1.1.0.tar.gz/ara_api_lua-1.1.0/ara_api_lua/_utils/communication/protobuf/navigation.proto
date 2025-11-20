@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package protobuf.navigation;
+
+import "messages/base_msg.proto";
+import "messages/msp_msg.proto";
+
+service NavigationManager {
+    // COMMAND FOR TAKE OFF DRONE
+    rpc cmd_takeoff_rpc (messages.msp_msg.altitude_data) returns (messages.base_msg.status);
+
+    // COMMAND FOR LANDING DRONE
+    rpc cmd_land_rpc (messages.base_msg.get_request) returns (messages.base_msg.status);
+
+    // COMMAND FOR MOVE DRONE BY POINT
+    rpc cmd_move_rpc (messages.base_msg.vector3) returns (messages.base_msg.status);
+
+    // COMMAND FOR SET VELOCITY 
+    rpc cmd_velocity_rpc (messages.base_msg.vector2) returns (messages.base_msg.status);
+
+    // COMMAND FOR SET ALTITUDE
+    rpc cmd_altitude_rpc (messages.msp_msg.altitude_data) returns (messages.base_msg.status);
+
+    // COMMAND FOR SET NAVIGATION SETTINGS
+    // rpc cmd_setting_rpc (messages.base_msg.) returns (messages.base_msg.status);
+}
