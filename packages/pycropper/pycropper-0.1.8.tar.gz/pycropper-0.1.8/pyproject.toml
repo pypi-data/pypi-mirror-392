@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pycropper"
+version = "0.1.8"
+description = "Auto-crop images"
+authors = [
+    {name = "Shoji SZGZ", email = "mr.szgz@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "Pillow",
+    "typer"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "bump2version"
+]
+
+[project.scripts]
+cropper = "cropper:main"
+
+[project.urls]
+Homepage = "https://github.com/mr-szgz/py-cropper"
+Repository = "https://github.com/mr-szgz/py-cropper"
+
+[tool.setuptools]
+py-modules = ["cropper"]
+
+# TODO: add any idomatic or canonical configuration here for build steps or quality of life. minimalist as possible
