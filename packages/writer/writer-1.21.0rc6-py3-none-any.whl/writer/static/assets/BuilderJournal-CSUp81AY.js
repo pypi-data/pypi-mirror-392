@@ -1,0 +1,1 @@
+import{_ as e,o as c,f as o}from"./index-B8ywYOXy.js";const r={},s={class:"BuilderJournal"};function t(a,n){return c(),o("div",s)}const d=e(r,[["render",t],["__scopeId","data-v-00e9e2fc"]]);export{d as default};
