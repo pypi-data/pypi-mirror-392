@@ -1,0 +1,136 @@
+<configure
+  xmlns="http://namespaces.zope.org/zope"
+  xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+  i18n_domain="eea">
+
+  <genericsetup:upgradeSteps
+    source="*"
+    destination="1.0"
+    profile="eea.kitkat:default">
+
+    <genericsetup:upgradeDepends
+       title="Import all steps from eea.kitkat default profile"
+       import_profile="eea.kitkat:default"
+      />
+
+  </genericsetup:upgradeSteps>
+
+  <genericsetup:upgradeSteps
+    source="1.0"
+    destination="1.6"
+    profile="eea.kitkat:default">
+
+    <genericsetup:upgradeDepends
+       title="Install eea.banner"
+       import_profile="eea.banner:default"
+      />
+
+  </genericsetup:upgradeSteps>
+
+  <genericsetup:upgradeSteps
+    source="1.6"
+    destination="3.0"
+    profile="eea.kitkat:default">
+
+    <genericsetup:upgradeDepends
+      title="Add registry records for backend/frontend versions"
+      import_steps="plone.app.registry"
+      />
+
+  </genericsetup:upgradeSteps>
+
+  <genericsetup:upgradeSteps
+    source="3.0"
+    destination="4.0"
+    profile="eea.kitkat:default">
+
+    <genericsetup:upgradeDepends
+      title="Add footer, social, copyright and contact actions"
+      import_steps="actions"
+      />
+
+  </genericsetup:upgradeSteps>
+
+  <genericsetup:upgradeSteps
+    source="4.0"
+    destination="4.2"
+    profile="eea.kitkat:default">
+
+    <genericsetup:upgradeDepends
+      title="Register captcha interface"
+      import_steps="plone.app.registry"
+      />
+
+  </genericsetup:upgradeSteps>
+
+  <genericsetup:upgradeSteps
+    source="4.2"
+    destination="5.0"
+    profile="eea.kitkat:default">
+
+    <genericsetup:upgradeDepends
+      title="Remove eea.cache"
+      import_profile="eea.kitkat:kitkat_50"
+      />
+
+  </genericsetup:upgradeSteps>
+
+  <genericsetup:upgradeSteps
+    source="5.0"
+    destination="6.0"
+    profile="eea.kitkat:default">
+
+    <genericsetup:upgradeDepends
+      title="Remove eea.api.taxonomy"
+      import_profile="eea.kitkat:kitkat_60"
+      />
+  </genericsetup:upgradeSteps>
+
+  <genericsetup:upgradeSteps
+    source="6.0"
+    destination="6.2"
+    profile="eea.kitkat:default">
+
+    <genericsetup:upgradeDepends
+      title="Update permissions for comments"
+      import_profile="eea.kitkat:kitkat_62"
+      />
+  </genericsetup:upgradeSteps>
+
+  <genericsetup:upgradeSteps
+    source="6.2"
+    destination="7.0"
+    profile="eea.kitkat:default">
+
+    <genericsetup:upgradeDepends
+      title="Import eea.api.controlpanel"
+      import_profile="eea.api.controlpanel:default"
+      />
+  </genericsetup:upgradeSteps>
+
+  <genericsetup:upgradeSteps
+    source="7.0"
+    destination="7.9"
+    profile="eea.kitkat:default">
+
+    <genericsetup:upgradeStep
+      title="Migrate registry keys eea.kitkat to eea.api.controlpanel"
+      handler="eea.kitkat.upgrades.evolve80.cleanup"
+      />
+
+  </genericsetup:upgradeSteps>
+
+  <genericsetup:upgradeSteps
+    source="7.9"
+    destination="8.0"
+    profile="eea.kitkat:default">
+
+    <genericsetup:upgradeDepends
+      title="Cleanup eea.kitkat version registry"
+      import_steps="plone.app.registry"
+      />
+
+  </genericsetup:upgradeSteps>
+
+</configure>
+

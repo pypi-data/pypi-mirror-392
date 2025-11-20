@@ -1,0 +1,447 @@
+Metadata-Version: 2.4
+Name: eea.kitkat
+Version: 8.3
+Summary: An add-on for Plone
+Home-page: https://github.com/eea/eea.kitkat
+Author: European Environment Agency: IDM2 A-Team
+Author-email: eea-edw-a-team-alerts@googlegroups.com
+License: GPL version 2
+Keywords: EEA Add-ons Plone Zope
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Plone
+Classifier: Framework :: Plone :: Addon
+Classifier: Framework :: Plone :: 5.2
+Classifier: Framework :: Plone :: 6.0
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Operating System :: OS Independent
+Classifier: License :: OSI Approved :: GNU General Public License v2 (GPLv2)
+Description-Content-Type: text/x-rst
+Requires-Dist: eea.banner
+Requires-Dist: eea.zotero
+Requires-Dist: eea.api.controlpanel
+Requires-Dist: eea.api.layout
+Requires-Dist: eea.geolocation
+Requires-Dist: eea.coremetadata
+Requires-Dist: eea.schema.slate
+Requires-Dist: eea.sentry
+Requires-Dist: eea.volto.policy
+Requires-Dist: collective.taxonomy
+Requires-Dist: plone.volto
+Requires-Dist: plone.restapi
+Requires-Dist: setuptools
+Provides-Extra: test
+Requires-Dist: plone.app.testing[test]; extra == "test"
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: keywords
+Dynamic: license
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: summary
+
+==========================
+eea.kitkat
+==========================
+.. image:: https://ci.eionet.europa.eu/buildStatus/icon?job=eea/eea.kitkat/develop
+  :target: https://ci.eionet.europa.eu/job/eea/job/eea.kitkat/job/develop/display/redirect
+  :alt: Develop
+.. image:: https://ci.eionet.europa.eu/buildStatus/icon?job=eea/eea.kitkat/master
+  :target: https://ci.eionet.europa.eu/job/eea/job/eea.kitkat/job/master/display/redirect
+  :alt: Master
+
+The eea.kitkat Plone add-on is a backend support for `volto-eea-kitkat <https://github.com/eea/volto-eea-kitkat>`_.
+
+.. contents::
+
+Included Plone Add-ons
+======================
+
+`eea.cache <https://github.com/eea/eea.cache>`_
+
+.. image:: https://img.shields.io/github/v/release/eea/eea.cache
+  :target: https://github.com/eea/eea.cache/releases
+  :alt: Release
+.. image:: https://ci.eionet.europa.eu/buildStatus/icon?job=eea/eea.cache/master
+  :target: https://ci.eionet.europa.eu/job/eea/job/eea.cache/job/master/display/redirect
+  :alt: Master
+.. image:: https://ci.eionet.europa.eu/buildStatus/icon?job=eea/eea.cache/develop
+  :target: https://ci.eionet.europa.eu/job/eea/job/eea.cache/job/develop/display/redirect
+  :alt: Develop
+
+`eea.banner <https://github.com/eea/eea.banner>`_
+
+.. image:: https://img.shields.io/github/v/release/eea/eea.banner
+  :target: https://github.com/eea/eea.banner/releases
+  :alt: Release
+.. image:: https://ci.eionet.europa.eu/buildStatus/icon?job=eea/eea.banner/master
+  :target: https://ci.eionet.europa.eu/job/eea/job/eea.banner/job/master/display/redirect
+  :alt: Master
+.. image:: https://ci.eionet.europa.eu/buildStatus/icon?job=eea/eea.banner/develop
+  :target: https://ci.eionet.europa.eu/job/eea/job/eea.banner/job/develop/display/redirect
+  :alt: Develop
+  
+`eea.zotero <https://github.com/eea/eea.zotero>`_
+
+.. image:: https://img.shields.io/github/v/release/eea/eea.zotero
+  :target: https://github.com/eea/eea.zotero/releases
+  :alt: Release
+.. image:: https://ci.eionet.europa.eu/buildStatus/icon?job=eea/eea.zotero/master
+  :target: https://ci.eionet.europa.eu/job/eea/job/eea.zotero/job/master/display/redirect
+  :alt: Master
+.. image:: https://ci.eionet.europa.eu/buildStatus/icon?job=eea/eea.zotero/develop
+  :target: https://ci.eionet.europa.eu/job/eea/job/eea.zotero/job/develop/display/redirect
+  :alt: Develop
+
+`eea.api.layout <https://github.com/eea/eea.api.layout>`_
+
+.. image:: https://img.shields.io/github/v/release/eea/eea.api.layout
+  :target: https://github.com/eea/eea.api.layout/releases
+  :alt: Release
+.. image:: https://ci.eionet.europa.eu/buildStatus/icon?job=eea/eea.api.layout/master
+  :target: https://ci.eionet.europa.eu/job/eea/job/eea.api.layout/job/master/display/redirect
+  :alt: Master
+.. image:: https://ci.eionet.europa.eu/buildStatus/icon?job=eea/eea.api.layout/develop
+  :target: https://ci.eionet.europa.eu/job/eea/job/eea.api.layout/job/develop/display/redirect
+  :alt: Develop
+
+`eea.geolocation <https://github.com/eea/eea.geolocation>`_
+
+.. image:: https://img.shields.io/github/v/release/eea/eea.geolocation
+  :target: https://github.com/eea/eea.geolocation/releases
+  :alt: Release
+.. image:: https://ci.eionet.europa.eu/buildStatus/icon?job=eea/eea.geolocation/master
+  :target: https://ci.eionet.europa.eu/job/eea/job/eea.geolocation/job/master/display/redirect
+  :alt: Master
+.. image:: https://ci.eionet.europa.eu/buildStatus/icon?job=eea/eea.geolocation/develop
+  :target: https://ci.eionet.europa.eu/job/eea/job/eea.geolocation/job/develop/display/redirect
+  :alt: Develop
+  
+`eea.coremetadata <https://github.com/eea/eea.coremetadata>`_
+
+.. image:: https://img.shields.io/github/v/release/eea/eea.coremetadata
+  :target: https://github.com/eea/eea.coremetadata/releases
+  :alt: Release
+.. image:: https://ci.eionet.europa.eu/buildStatus/icon?job=eea/eea.coremetadata/master
+  :target: https://ci.eionet.europa.eu/job/eea/job/eea.coremetadata/job/master/display/redirect
+  :alt: Master
+.. image:: https://ci.eionet.europa.eu/buildStatus/icon?job=eea/eea.coremetadata/develop
+  :target: https://ci.eionet.europa.eu/job/eea/job/eea.coremetadata/job/develop/display/redirect
+  :alt: Develop
+
+`eea.schema.slate <https://github.com/eea/eea.schema.slate>`_
+
+.. image:: https://img.shields.io/github/v/release/eea/eea.schema.slate
+  :target: https://github.com/eea/eea.schema.slate/releases
+  :alt: Release
+.. image:: https://ci.eionet.europa.eu/buildStatus/icon?job=eea/eea.schema.slate/master
+  :target: https://ci.eionet.europa.eu/job/eea/job/eea.schema.slate/job/master/display/redirect
+  :alt: Master
+.. image:: https://ci.eionet.europa.eu/buildStatus/icon?job=eea/eea.schema.slate/develop
+  :target: https://ci.eionet.europa.eu/job/eea/job/eea.schema.slate/job/develop/display/redirect
+  :alt: Develop
+
+`eea.sentry <https://github.com/eea/eea.sentry>`_
+
+.. image:: https://img.shields.io/github/v/release/eea/eea.sentry
+  :target: https://github.com/eea/eea.sentry/releases
+  :alt: Release
+.. image:: https://ci.eionet.europa.eu/buildStatus/icon?job=eea/eea.sentry/master
+  :target: https://ci.eionet.europa.eu/job/eea/job/eea.sentry/job/master/display/redirect
+  :alt: Master
+.. image:: https://ci.eionet.europa.eu/buildStatus/icon?job=eea/eea.sentry/develop
+  :target: https://ci.eionet.europa.eu/job/eea/job/eea.sentry/job/develop/display/redirect
+  :alt: Develop
+
+`eea.volto.policy <https://github.com/eea/eea.volto.policy>`_
+
+.. image:: https://img.shields.io/github/v/release/eea/eea.volto.policy
+  :target: https://github.com/eea/eea.volto.policy/releases
+  :alt: Release
+.. image:: https://ci.eionet.europa.eu/buildStatus/icon?job=eea/eea.volto.policy/master
+  :target: https://ci.eionet.europa.eu/job/eea/job/eea.volto.policy/job/master/display/redirect
+  :alt: Master
+.. image:: https://ci.eionet.europa.eu/buildStatus/icon?job=eea/eea.volto.policy/develop
+  :target: https://ci.eionet.europa.eu/job/eea/job/eea.volto.policy/job/develop/display/redirect
+  :alt: Develop
+
+`plone.volto <https://github.com/plone/plone.volto>`_
+
+.. image:: https://img.shields.io/pypi/v/plone.volto.svg
+  :target: https://pypi.python.org/pypi/plone.volto
+  :alt: Release
+.. image:: https://github.com/plone/plone.volto/actions/workflows/tests.yml/badge.svg
+  :target: https://github.com/plone/plone.volto/actions/workflows/tests.yml
+  :alt: Tests
+
+`plone.restapi <https://github.com/eea/plone.restapi>`_
+
+.. image:: https://img.shields.io/pypi/v/plone.restapi.svg
+  :target: https://pypi.python.org/pypi/plone.restapi
+  :alt: Release
+.. image:: https://github.com/plone/plone.restapi/workflows/Plone%20RESTAPI%20CI/badge.svg
+  :target: https://github.com/plone/plone.restapi/actions?query=workflow%3A%22Plone+RESTAPI+CI%22
+  :alt: CI
+.. image:: https://coveralls.io/repos/github/plone/plone.restapi/badge.svg?branch=master
+  :target: https://coveralls.io/github/plone/plone.restapi?branch=master
+  :alt: Coverage
+.. image:: https://readthedocs.org/projects/pip/badge
+  :target: https://plonerestapi.readthedocs.org
+  :alt: Docs
+
+`collective.taxonomy <https://github.com/collective/collective.taxonomy>`_
+
+.. image:: https://github.com/collective/collective.taxonomy/actions/workflows/main.yml/badge.svg
+  :target: https://github.com/collective/collective.taxonomy/actions
+
+Main features
+=============
+
+1. Easy to install/uninstall via Site Setup > Add-ons.
+2. Will install a bundle of add-ons all together.
+3. Will guarantee the integration between all the included add-ons.
+
+Install
+=======
+
+* Add eea.kitkat to your eggs section in your buildout and
+  re-run buildout::
+
+    [buildout]
+    eggs +=
+      eea.kitkat
+
+* You can download a sample buildout from:
+
+  - https://github.com/eea/eea.kitkat/tree/master/buildouts/plone4
+  - https://github.com/eea/eea.kitkat/tree/master/buildouts/plone5
+
+* Or via docker::
+
+    $ docker run --rm -p 8080:8080 -e ADDONS="eea.kitkat" plone
+
+* Install *eea.kitkat* within Site Setup > Add-ons
+
+
+Buildout installation
+=====================
+
+- `Plone 4+ <https://github.com/eea/eea.kitkat/tree/master/buildouts/plone4>`_
+- `Plone 5+ <https://github.com/eea/eea.kitkat/tree/master/buildouts/plone5>`_
+
+
+Source code
+===========
+
+- `Plone 4+ on github <https://github.com/eea/eea.kitkat>`_
+- `Plone 5+ on github <https://github.com/eea/eea.kitkat>`_
+
+
+Eggs repository
+===============
+
+- https://pypi.python.org/pypi/eea.kitkat
+- http://eggrepo.eea.europa.eu/simple
+
+
+Plone versions
+==============
+It has been developed and tested for Plone 4 and 5. See buildouts section above.
+
+
+How to contribute
+=================
+See the `contribution guidelines (CONTRIBUTING.md) <https://github.com/eea/eea.kitkat/blob/master/CONTRIBUTING.md>`_.
+
+Copyright and license
+=====================
+
+eea.kitkat (the Original Code) is free software; you can
+redistribute it and/or modify it under the terms of the
+GNU General Public License as published by the Free Software Foundation;
+either version 2 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc., 59
+Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+
+The Initial Owner of the Original Code is European Environment Agency (EEA).
+Portions created by Eau de Web are Copyright (C) 2009 by
+European Environment Agency. All Rights Reserved.
+
+
+Funding
+=======
+
+EEA_ - European Environment Agency (EU)
+
+.. _EEA: https://www.eea.europa.eu/
+.. _`EEA Web Systems Training`: http://www.youtube.com/user/eeacms/videos?view=1
+
+Changelog
+=========
+
+8.3 - (2025-11-18)
+---------------------------
+* Change: Replace Python linting to ruff
+  [mihaidobrescu1111 = refs #286821]
+* Change: Add plone6 tests
+  [mihaidobrescu1111 = refs #293593]
+
+8.2 - (2025-09-19)
+---------------------------
+* Change: Fix: use plone.volto:default profile instead of default-homepage
+  [nileshgulia1]
+
+8.1 - (2024-05-09)
+---------------------------
+* Change: Develop
+  [alecghica]
+
+8.0 - (2024-03-15)
+---------------------------
+* Refactor: Move Version overview related code to eea.api.controlpanel
+  [avoinea - refs #264531]
+
+7.0 - (2023-10-18)
+---------------------------
+* Breaking: Remove pas.plugin.oidc dependency
+  [avoinea - refs #258877]
+
+6.2 - (2023-06-06)
+---------------------------
+* Change: View comments permission only for authenticated
+  [dobri1408 - refs #251360]
+
+6.1 - (2023-06-01)
+---------------------------
+* Bug fix: Hide Footer Login action if user is logged-in
+  [avoinea - refs #253198]
+
+6.0 - (2023-05-31)
+---------------------------
+* Refactor: Remove eea.api.taxonomy dependency
+  [nileshgulia1 - refs #145360]
+
+5.0 - (2023-05-05)
+---------------------------
+* Task: Remove eea.cache dependency
+  [iulianpetchesi - refs #251471]
+
+4.7 - (2023-01-31)
+---------------------------
+* Task: Add endpoint in order to get the captcha key from registry
+  [iulianpetchesi - refs #157143]
+
+4.6 - (2023-01-30)
+---------------------------
+* Change: Modify endpoint permission
+  [iulianpetchesi - refs #157143]
+
+4.5 - (2023-01-30)
+---------------------------
+* Task: Return true/false for captcha post
+  [iulianpetchesi refs #157143]
+
+4.4 - (2023-01-27)
+---------------------------
+* Task: Add missing IEeaKitkatLayer for captcha restapi
+  [iulianpetchesi refs #157143]
+
+4.3 - (2023-01-20)
+---------------------------
+* Feature: Send captcha data as bytes, add @captchaverify endpoints
+  [iulianpetchesi refs #157143]
+
+4.2 - (2023-01-12)
+---------------------------
+* Feature: Added friendlycaptcha settings + verify to be used with redmine
+  helpdesk block
+  [iulianpetchesi refs #157143]
+
+4.1 - (2022-11-25)
+---------------------------
+* Feature: Add contact_extra_actions: faqs and careers
+  [avoinea refs #151856]
+
+4.0 - (2022-11-18)
+---------------------------
+* Feature: New category actions: footer, social, copyright and contact
+  [avoinea refs #151856]
+
+3.1 - (2022-08-25)
+---------------------------
+* Feature: Add PATCH support for `@system` endpoint in order to be able to update frontend version
+  [avoinea refs #153334]
+
+3.0 - (2022-08-23)
+---------------------------
+* Feature: Added backend/frontend version registry records + automatically update the version on zope startup
+  [iulianpetchesi refs #153334]
+
+2.0 - (2022-06-13)
+---------------------------
+* Change: Release eea.coremetadata
+  [nileshgulia1]
+
+1.9 - (2022-06-13)
+---------------------------
+* Change: add eea.coremetadata dependency
+  [nileshgulia1]
+
+1.8 - (2022-03-18)
+---------------------------
+* Feature: added pas.plugins.oidc as dependency
+  [alecghica refs #137187]
+
+1.7 - (2022-02-17)
+---------------------------
+* Change: Add testing profile for cypress testing
+  [avoinea refs #146058]
+
+1.6 - (2022-02-15)
+---------------------------
+* Change: Add eea.banner dependency
+  [avoinea]
+
+1.5 - (2021-12-16)
+---------------------------
+* Change: Add eea.cache
+  [avoinea refs #139888]
+
+1.4 - (2021-11-23)
+---------------------------
+* Change: Removed eea.restapi from kitkat
+  [iulianpetchesi refs #139888]
+
+1.3 - (2021-11-22)
+---------------------------
+* Change: Added missing dependencies
+  [iulianpetchesi refs #139888]
+
+1.2 - (2021-11-11)
+---------------------------
+* Change: Fix python version requirement
+  [avoinea]
+
+1.1 - (2021-11-11)
+---------------------------
+* Change: Added plonesaas jenkins test
+  [iulianpetchesi refs #139888]
+
+1.0 - (2021-11-09)
+-----------------------
+
+* Initial release.
+  [eea]
