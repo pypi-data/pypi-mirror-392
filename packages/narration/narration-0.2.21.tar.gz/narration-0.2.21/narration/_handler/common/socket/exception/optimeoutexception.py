@@ -1,0 +1,2 @@
+class OpTimeoutException(BaseException):
+    pass
