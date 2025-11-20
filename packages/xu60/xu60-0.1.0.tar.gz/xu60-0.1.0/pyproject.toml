@@ -1,0 +1,34 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "xu60"
+dynamic = ["version"]
+dependencies = [
+  "starlette~=0.50.0",
+  "pygit2~=1.19.0"
+]
+requires-python = ">=3.11"
+authors = [
+  {name = "Raymond Finzel", email = "github@rfinz.mozmail.com"},
+]
+description = "an ideal backend"
+readme = "README.md"
+keywords = ["versioning", "hypertext", "web", "api", "content addressing"]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Programming Language :: Python :: 3",
+  "Topic :: Internet",
+  "Topic :: Software Development :: Version Control",
+  "Topic :: Artistic Software"
+]
+
+[project.optional-dependences]
+server = ["uvicorn"]
+
+[project.urls]
+Repository = "https://github.com/rfinz/xu60.git"
+
+[tool.hatch.version]
+path = "xu60/__init__.py"
