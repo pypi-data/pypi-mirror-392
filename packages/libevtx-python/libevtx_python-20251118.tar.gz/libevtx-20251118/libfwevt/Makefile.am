@@ -1,0 +1,66 @@
+if HAVE_LOCAL_LIBFWEVT
+AM_CPPFLAGS = \
+	-I../include -I$(top_srcdir)/include \
+	-I../common -I$(top_srcdir)/common \
+	@LIBCERROR_CPPFLAGS@ \
+	@LIBCTHREADS_CPPFLAGS@ \
+	@LIBCDATA_CPPFLAGS@ \
+	@LIBCNOTIFY_CPPFLAGS@ \
+	@LIBFDATETIME_CPPFLAGS@ \
+	@LIBFGUID_CPPFLAGS@ \
+	@LIBFWNT_CPPFLAGS@ \
+	@LIBUNA_CPPFLAGS@ \
+	@PTHREAD_CPPFLAGS@ 
+
+noinst_LTLIBRARIES = libfwevt.la
+
+libfwevt_la_SOURCES = \
+	fwevt_template.h \
+	libfwevt_channel.c libfwevt_channel.h \
+	libfwevt_data_segment.c libfwevt_data_segment.h \
+	libfwevt_date_time.c libfwevt_date_time.h \
+	libfwevt_debug.c libfwevt_debug.h \
+	libfwevt_definitions.h \
+	libfwevt_extern.h \
+	libfwevt_error.c libfwevt_error.h \
+	libfwevt_event.c libfwevt_event.h \
+	libfwevt_floating_point.c libfwevt_floating_point.h \
+	libfwevt_integer.c libfwevt_integer.h \
+	libfwevt_libcdata.h \
+	libfwevt_libcerror.h \
+	libfwevt_libcnotify.h \
+	libfwevt_libfdatetime.h \
+	libfwevt_libfguid.h \
+	libfwevt_libfwnt.h \
+	libfwevt_libuna.h \
+	libfwevt_keyword.c libfwevt_keyword.h \
+	libfwevt_level.c libfwevt_level.h \
+	libfwevt_manifest.c libfwevt_manifest.h \
+	libfwevt_map.c libfwevt_map.h \
+	libfwevt_notify.c libfwevt_notify.h \
+	libfwevt_opcode.c libfwevt_opcode.h \
+	libfwevt_provider.c libfwevt_provider.h \
+	libfwevt_support.c libfwevt_support.h \
+	libfwevt_task.c libfwevt_task.h \
+	libfwevt_template.c libfwevt_template.h \
+	libfwevt_template_item.c libfwevt_template_item.h \
+	libfwevt_types.h \
+	libfwevt_unused.h \
+	libfwevt_xml_document.c libfwevt_xml_document.h \
+	libfwevt_xml_string.c libfwevt_xml_string.h \
+	libfwevt_xml_tag.c libfwevt_xml_tag.h \
+	libfwevt_xml_template_value.c libfwevt_xml_template_value.h \
+	libfwevt_xml_token.c libfwevt_xml_token.h \
+	libfwevt_xml_value.c libfwevt_xml_value.h
+endif
+
+DISTCLEANFILES = \
+	Makefile \
+	Makefile.in
+
+sources-local: $(BUILT_SOURCES)
+
+splint-local:
+	@echo "Running splint on libfwevt ..."
+	-splint -preproc -redef $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(libfwevt_la_SOURCES)
+
