@@ -1,0 +1,115 @@
+Metadata-Version: 2.4
+Name: nonebot-plugin-paocha
+Version: 1.0.13
+Summary: 这是一个用于群内泡茶，签到的nonebot插件
+Author-email: mmxd12 <2529464880@qq.com>
+License: MIT
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: nonebot2>=2.0.0
+Requires-Dist: nonebot-adapter-qq>=1.6.5
+Requires-Dist: httpx>=0.28.1
+Dynamic: license-file
+
+### 一个基于 NoneBot2 的泡茶签到插件，支持好感度等级系统和图片上传功能。
+
+## ✨ 功能介绍
+
+- 🍵 每日泡茶签到，获得随机好感度
+- 📊 好感度等级系统（1段到传奇9段）
+- 🖼️ 支持上传和删除图片，签到随机显示
+- 💬 骚话系统，自定义重复泡茶回复内容
+- 👥 用户映射管理，支持QQ适配器
+- 📈 详细的统计和查询功能
+
+
+## 📦 安装方式
+
+    pip install nonebot-plugin-paocha
+
+## 🔧 配置方法
+
+    在 NoneBot2 的pyproject.toml文件中添加以下配置：
+
+    在dependencies = [...] 中添加：
+    "nonebot-plugin-paocha>=x.x.x" # 请替换为最新版本号
+    然后在[tool.nonebot.plugins] 添加：
+    "nonebot-plugin-paocha" = ["nonebot_plugin_paocha"]
+
+## 📞📞 使用命令
+
+### 基础命令
+- **泡茶签到**: `泡茶`、`喝水`、`/泡茶`、`/喝水`
+- **查询信息**: `泡茶表`、`泡茶查询`、`/泡茶表`
+- **等级查看**: `等级`、`等级表`、`/等级`
+
+### 用户管理
+- **用户映射**: `映射用户`、`绑定用户`
+- **用户列表**: `用户列表`、`绑定列表`
+- **搜索用户**: `搜索用户`、`查找用户`
+- **删除用户**: `删除用户`、`移除用户`
+- **清除映射**: `清除映射`、`清空映射`
+
+### 图片管理
+- **上传图片**: `上传图片`、`添加图片`
+- **删除图片**: `删除图片`、`移除图片`
+- **图片统计**: `图片统计`、`图库统计`
+
+### 骚话系统
+- **添加骚话**: `添加骚话`、`添加回复` - 添加重复泡茶时的回复内容
+- **删除骚话**: `删除骚话`、`移除骚话` - 删除指定骚话
+- **骚话列表**: `骚话列表`、`回复列表` - 查看所有骚话
+- **骚话统计**: `骚话统计`、`回复统计` - 骚话系统统计信息
+
+### 帮助命令
+- **使用帮助**: `帮助`、`help`、`/帮助`、`/help`
+
+## 📝📝 配置说明
+
+插件会自动在数据目录下创建 `data/paocha` 文件夹，包含：
+- `sign.ini`: 签到数据
+- `data.ini`: 用户映射数据  
+- `images/`: 图片库目录
+- `chat_lines.txt`: 骚话系统数据文件
+
+## 🌟🌟 具体路径
+
+    bot/
+    └── data/
+        └── paoch/ # 插件数据目录（运行时自动创建）
+            ├── sign.ini # 签到数据（运行时自动创建）
+            ├── data.ini # 用户映射数据（运行时自动创建）
+            ├── chat_lines.txt # 骚话系统数据（运行时自动创建）
+            └── images/ # 图片库目录（运行时自动创建）
+                ├── image1.jpg
+                ├── image2.png
+                └── ...
+
+## 🎯🎯 快速开始
+
+ 1. **首次使用**：
+    - 运行 `泡茶` 命令进行首次签到，会获得原id，插件也会自动创建所需数据文件和目录。
+    - 然后，使用 `映射用户` 命令绑定QQ账号与插件用户。(/映射用户 原id QQ号) 
+
+## ✅ 依赖要求
+
+- Python 3.9+
+- httpx 0.28.1+
+- NoneBot2 2.0.0+
+- nonebot-adapter-qq 1.6.5+
+
+## 📜 许可证
+
+MIT License
+
+## 项目地址
+
+- GitHub: [点击前往](https://github.com/mmxd12/nonebot-plugin-paocha)
+- pypi: [点击前往](https://pypi.org/project/nonebot-plugin-paocha/)
