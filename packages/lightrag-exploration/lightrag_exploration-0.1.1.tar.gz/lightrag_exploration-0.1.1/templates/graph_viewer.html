@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GraphML Visualization with Fetch</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.23.0/cytoscape.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+        #cy {
+            flex: 1 1 auto;
+            width: 100vw;
+            height: 100%;
+            min-height: 0;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col bg-gray-50">
+    <header class="bg-gradient-to-r from-blue-600 to-green-400 shadow-md p-6 flex items-center justify-between relative">
+        <a href="/" class="absolute left-4 top-1/2 -translate-y-1/2 flex items-center text-white hover:text-gray-200 font-semibold text-lg">
+            &#8592; Back
+        </a>
+        <h1 class="text-2xl font-bold text-white tracking-wide ml-20">GraphML Visualization</h1>
+        <span class="text-white text-sm opacity-80">with Cytoscape.js &amp; Tailwind</span>
+    </header>
+    <main class="flex-1 flex flex-col p-4">
+        <div id="cy" class="rounded-lg shadow border border-gray-300 bg-white"></div>
+    </main>
+
+    <script>
+        // Use a variable to define the filename
+        const graphmlFilename = '/frontend/graphml?file=research output/graph_chunk_entity_relation.graphml';
+
+        // Function to parse the GraphML string
+        function parseGraphML(xmlString) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+            const graphElement = xmlDoc.querySelector('graph');
+            const elements = [];
+
+            // Parse nodes
+            graphElement.querySelectorAll('node').forEach(nodeElem => {
+                elements.push({ data: { id: nodeElem.getAttribute('id') } });
+            });
+
+            // Parse edges
+            graphElement.querySelectorAll('edge').forEach(edgeElem => {
+                elements.push({
+                    data: {
+                        id: edgeElem.getAttribute('id'),
+                        source: edgeElem.getAttribute('source'),
+                        target: edgeElem.getAttribute('target')
+                    }
+                });
+            });
+
+            return elements;
+        }
+
+        // Fetch the file and initialize the graph
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch(graphmlFilename)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(xmlString => {
+                    const elements = parseGraphML(xmlString);
+                    const cy = cytoscape({
+                        container: document.getElementById('cy'),
+                        elements: elements,
+                        layout: { name: 'circle' },
+                        style: [
+                            {
+                                selector: 'node',
+                                style: {
+                                    'background-color': '#4CAF50',
+                                    'label': 'data(id)',
+                                    'font-size': '12px'
+                                }
+                            },
+                            {
+                                selector: 'edge',
+                                style: {
+                                    'width': 2,
+                                    'line-color': '#BDBDBD',
+                                    'target-arrow-shape': 'triangle',
+                                    'target-arrow-color': '#BDBDBD',
+                                    'curve-style': 'bezier'
+                                }
+                            }
+                        ]
+                    });
+                })
+                .catch(e => console.error('Error fetching the GraphML file:', e));
+        });
+    </script>
+</body>
+</html>

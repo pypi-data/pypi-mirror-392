@@ -1,0 +1,30 @@
+[project]
+name = "lightrag-exploration"
+version = "0.1.1"
+description = "A lightweight RAG exploration tool."
+authors = [
+  { name = "James Twose" }
+]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "fastapi",
+  "uvicorn[standard]",
+  "jinja2",
+  "httpx",
+  "python-multipart",
+  "pydantic-settings",
+  "lightrag-hku",
+]
+
+[project.scripts]
+lightrag-exploration = "main:run_api"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["main", "api", "utils", "schemas", "rag_utils", "settings"]
+packages = ["routers", "templates"]
+include-package-data = true
