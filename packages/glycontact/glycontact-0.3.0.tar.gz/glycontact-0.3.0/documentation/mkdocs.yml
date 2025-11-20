@@ -1,0 +1,53 @@
+site_name: GlyContact documentation
+site_url: https://lthomes.github.io/glycontact/
+
+theme:
+  name: material
+  palette:
+    scheme: default
+    primary: teal
+    accent: indigo
+
+nav:
+  - GlyContact: index.md
+  - Overview: overview.md
+  - process: process.md
+  - visualize: visualize.md
+  - learning: learning.md
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - admonition
+  - codehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.arithmatex
+  - pymdownx.betterem
+  - pymdownx.caret
+  - pymdownx.emoji
+  - pymdownx.tasklist
+  - pymdownx.tilde
+  - pymdownx.details
+
+
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/lthomes/glycontact
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: ["."]
+          options:
+              docstring_style: google  # or "numpy"
+              show_source: false
+              show_root_heading: true
+              show_signature_annotations: true
+              merge_init_into_class: true
+              heading_level: 2
