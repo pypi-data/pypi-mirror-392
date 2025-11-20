@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dc-workflow xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+             description=""
+             initial_state="initial"
+             state_variable="review_state"
+             title="Workflow for non-ascii characters"
+             workflow_id="non-ascii-workflow"
+             i18n:attributes="title"
+             i18n:domain="plone.app.content.tests"
+>
+
+  <permission>View</permission>
+
+  <state state_id="initial"
+         title="Ïnitial"
+         i18n:attributes="title"
+  >
+    <exit-transition transition_id="to_after" />
+    <permission-map acquired="False"
+                    name="View permission for testing non-ascii title"
+    >
+      <permission-role>Manager</permission-role>
+    </permission-map>
+  </state>
+
+  <state state_id="after"
+         title="Äfter"
+         i18n:attributes="title"
+  >
+    <exit-transition transition_id="to_initial" />
+    <permission-map acquired="False"
+                    name="View permission for testing non-ascii title"
+    >
+      <permission-role>Manager</permission-role>
+    </permission-map>
+  </state>
+
+  <transition after_script=""
+              before_script=""
+              new_state="after"
+              title="To Äfter!"
+              transition_id="to_after"
+              trigger="USER"
+              i18n:attributes="title"
+  >
+    <action category="workflow"
+            url="%(content_url)s/content_status_modify?workflow_action=to_after"
+            i18n:translate=""
+    >To Äfter!</action>
+    <guard>
+      <guard-permission>Modify portal content</guard-permission>
+    </guard>
+  </transition>
+
+  <transition after_script=""
+              before_script=""
+              new_state="initial"
+              title="To Ïnitial!"
+              transition_id="to_initial"
+              trigger="USER"
+              i18n:attributes="title"
+  >
+    <action category="workflow"
+            url="%(content_url)s/content_status_modify?workflow_action=to_initial"
+            i18n:translate=""
+    >To Ïnitial!</action>
+    <guard>
+      <guard-permission>Modify portal content</guard-permission>
+    </guard>
+  </transition>
+
+</dc-workflow>
