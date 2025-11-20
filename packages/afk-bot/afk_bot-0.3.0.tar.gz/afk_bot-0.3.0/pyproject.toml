@@ -1,0 +1,138 @@
+[project]
+name = "afk-bot"
+version = "0.3.0"
+description = "A bot for the away from keyboard times"
+authors = [
+    { name = "Amirhessam Tahmassebi", email = "admin@slickml.com" },
+]
+requires-python = ">=3.8,<3.13"
+readme = "README.md"
+license = "MIT"
+maintainers = [
+    { name = "Amirhessam Tahmassebi", email = "admin@slickml.com" },
+]
+keywords = ["afk", "afk-bot"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Natural Language :: English",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+dependencies = [
+    "PyAutoGUI>=0.9",
+    "typer>=0.7",
+]
+
+[project.urls]
+Homepage = "https://www.slickml.com"
+Repository = "https://github.com/slickml/afk-bot"
+Documentation = "https://github.com/slickml/afk-bot"
+
+[project.scripts]
+afk-bot = "afk_bot.cli:main"
+
+[dependency-groups]
+dev = [
+    "pip>=22.3",
+    "poethepoet>=0.16",
+    "add-trailing-comma>=2.2",
+    "isort>=5.10",
+    "black>=22.10",
+    "flake8>=5.0",
+    "flake8-commas>=2.1",
+    "flake8-annotations>=2.9",
+    "flake8-comprehensions>=3.10",
+    "flake8-eradicate>=1.2",
+    "flake8-simplify>=0.19",
+    "flake8-tidy-imports>=4.8",
+    "flake8-type-checking>=2.1",
+    "flake8-typing-imports>=1.12",
+    "flake8-use-fstring>=1.4",
+    "pep8-naming>=0.13",
+    "mypy>=0.990",
+    "pytest>=7.2",
+    "pytest-cov>=4.0",
+    "pytest-mock>=3.10",
+    "mock>=4.0",
+    "coverage>=6.5",
+    "assertpy>=1.1",
+    "sphinx>=5.3",
+    "sphinx-autoapi>=1.9",
+    "sphinx_design>=0.3",
+    "myst-parser>=0.18",
+    "furo>=2022.9",
+]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/afk_bot"]
+exclude = ["assets", "tests"]
+
+[tool.hatch.build.targets.sdist.force-include]
+"src/afk_bot" = "src/afk_bot"
+"README.md" = "README.md"
+
+[tool.hatch.build.targets.wheel]
+include = ["src/afk_bot"]
+exclude = ["assets", "tests"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src/afk_bot" = "afk_bot"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.poe.tasks.add-trailing-comma]
+help = "Format code style via add-trailing-comma"
+cmd = "uv run add-trailing-comma --exit-zero-even-if-changed src/**/*.py tests/**/*.py"
+
+[tool.poe.tasks.black]
+help = "Format code style via black"
+cmd = "uv run black --line-length 100 ."
+
+[tool.poe.tasks.isort]
+help = "Sort imported libraries via isort"
+cmd = "uv run isort --profile black ."
+
+[tool.poe.tasks.flake8]
+help = "Lint code via flake8"
+cmd = "uv run flake8 --verbose --benchmark --color always --config .flake8 ."
+
+[tool.poe.tasks.mypy]
+help = "Lint types via mypy"
+cmd = "uv run mypy --config-file mypy.ini ."
+
+[tool.poe.tasks.test]
+help = "Run unit-tests via pytest"
+cmd = "uv run python -m pytest --cov=src --cov-report=term --cov-report=html --cov-report=xml --cov-config=.coveragerc --tb=short -ra -v"
+
+[tool.poe.tasks.tox]
+help = "Test environments via tox"
+cmd = "uv run tox -c tox.ini"
+
+[tool.poe.tasks.format]
+help = "Apply all formatting steps"
+sequence = [
+    "add-trailing-comma",
+    "isort",
+    "black",
+]
+
+[tool.poe.tasks.check]
+help = "Check all linting steps"
+sequence = [
+    { cmd = "poe black --check" },
+    { cmd = "poe isort --check-only" },
+    "flake8",
+    "mypy",
+]
