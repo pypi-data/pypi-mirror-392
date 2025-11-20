@@ -1,0 +1,539 @@
+Metadata-Version: 2.4
+Name: bach-meteostat
+Version: 1.0.0
+Summary: RapidAPI: meteostat/meteostat
+Project-URL: Homepage, https://github.com/bachstudio/bach-meteostat
+Project-URL: Repository, https://github.com/bachstudio/bach-meteostat
+Project-URL: Documentation, https://github.com/bachstudio/bach-meteostat#readme
+Requires-Python: >=3.10
+Requires-Dist: fastmcp>=2.0.0
+Requires-Dist: httpx>=0.25.0
+Provides-Extra: dev
+Requires-Dist: black>=23.0.0; extra == 'dev'
+Requires-Dist: pytest>=7.0.0; extra == 'dev'
+Description-Content-Type: text/markdown
+
+# Meteostat MCP Server
+
+[English](./README_EN.md) | 简体中文 | [繁體中文](./README_ZH-TW.md)
+
+## 🚀 使用 EMCP 平台快速体验
+
+**[EMCP](https://sit-emcp.kaleido.guru)** 是一个强大的 MCP 服务器管理平台，让您无需手动配置即可快速使用各种 MCP 服务器！
+
+### 快速开始：
+
+1. 🌐 访问 **[EMCP 平台](https://sit-emcp.kaleido.guru)**
+2. 📝 注册并登录账号
+3. 🎯 进入 **MCP 广场**，浏览所有可用的 MCP 服务器
+4. 🔍 搜索或找到本服务器（`bach-meteostat`）
+5. 🎉 点击 **"安装 MCP"** 按钮
+6. ✅ 完成！即可在您的应用中使用
+
+### EMCP 平台优势：
+
+- ✨ **零配置**：无需手动编辑配置文件
+- 🎨 **可视化管理**：图形界面轻松管理所有 MCP 服务器
+- 🔐 **安全可靠**：统一管理 API 密钥和认证信息
+- 🚀 **一键安装**：MCP 广场提供丰富的服务器选择
+- 📊 **使用统计**：实时查看服务调用情况
+
+立即访问 **[EMCP 平台](https://sit-emcp.kaleido.guru)** 开始您的 MCP 之旅！
+
+
+---
+
+## 简介
+
+这是一个使用 [FastMCP](https://fastmcp.wiki) 自动生成的 MCP 服务器，用于访问 Meteostat API。
+
+- **PyPI 包名**: `bach-meteostat`
+- **版本**: 1.0.0
+- **传输协议**: stdio
+
+
+## 安装
+
+### 从 PyPI 安装:
+
+```bash
+pip install bach-meteostat
+```
+
+### 从源码安装:
+
+```bash
+pip install -e .
+```
+
+## 运行
+
+### 方式 1: 使用 uvx（推荐，无需安装）
+
+```bash
+# 运行（uvx 会自动安装并运行）
+uvx --from bach-meteostat bach_meteostat
+
+# 或指定版本
+uvx --from bach-meteostat@latest bach_meteostat
+```
+
+### 方式 2: 直接运行（开发模式）
+
+```bash
+python server.py
+```
+
+### 方式 3: 安装后作为命令运行
+
+```bash
+# 安装
+pip install bach-meteostat
+
+# 运行（命令名使用下划线）
+bach_meteostat
+```
+
+## 配置
+
+### API 认证
+
+此 API 需要认证。请设置环境变量:
+
+```bash
+export API_KEY="your_api_key_here"
+```
+
+### 环境变量
+
+| 变量名 | 说明 | 必需 |
+|--------|------|------|
+| `API_KEY` | API 密钥 | 是 |
+| `PORT` | 不适用 | 否 |
+| `HOST` | 不适用 | 否 |
+
+
+
+### 在 Claude Desktop 中使用
+
+编辑 Claude Desktop 配置文件 `claude_desktop_config.json`:
+
+
+```json
+{
+  "mcpServers": {
+    "meteostat": {
+      "command": "python",
+      "args": ["E:\path\to\meteostat\server.py"],
+      "env": {
+        "API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+**注意**: 请将 `E:\path\to\meteostat\server.py` 替换为实际的服务器文件路径。
+
+
+## 可用工具
+
+此服务器提供以下工具:
+
+
+### `monthly_point_data`
+
+This endpoint provides historical monthly statistics for a geographic location. The data provided through this endpoint is aggregated from multiple governmental interfaces.
+
+**端点**: `GET /point/monthly`
+
+
+**参数**:
+
+- `lat` (number) *必需*: The point's latitude.
+
+- `lon` (number) *必需*: The point's longitude.
+
+- `alt` (number): The point's elevation.
+
+- `start` (string) *必需*: The start date of the period (YYYY-MM-DD).
+
+- `end` (string) *必需*: The end date of the period (YYYY-MM-DD).
+
+- `model` (string): Example value: 
+
+- `freq` (string): The time frequency of the records. Can be used for custom aggregation. Default is null.
+
+- `units` (string): The unit system of the meteorological parameters. Default is metric.
+
+- `lat` (string) *必需*: Example value: 52.5244
+
+- `lon` (string) *必需*: Example value: 13.4105
+
+- `alt` (string): Example value: 43
+
+- `start` (string) *必需*: Example value: 2020-01-01
+
+- `end` (string) *必需*: Example value: 2020-12-31
+
+- `model` (string): Example value: 
+
+- `freq` (string): Example value: 
+
+- `units` (string): Example value: 
+
+
+
+---
+
+
+### `monthly_station_data`
+
+This endpoint provides historical monthly statistics for a particular weather station. The data provided through this endpoint is aggregated from multiple governmental interfaces.
+
+**端点**: `GET /stations/monthly`
+
+
+**参数**:
+
+- `station` (string) *必需*: The Meteostat weather station identifier.
+
+- `start` (string) *必需*: The start date of the period (YYYY-MM-DD).
+
+- `end` (string) *必需*: The end date of the period (YYYY-MM-DD).
+
+- `model` (string): Example value: 
+
+- `freq` (string): The time frequency of the records. Can be used for custom aggregation. Default is null.
+
+- `units` (string): The unit system of the meteorological parameters. Default is metric.
+
+- `station` (string) *必需*: Example value: 10637
+
+- `start` (string) *必需*: Example value: 2020-01-01
+
+- `end` (string) *必需*: Example value: 2020-12-31
+
+- `model` (string): Example value: 
+
+- `freq` (string): Example value: 
+
+- `units` (string): Example value: 
+
+
+
+---
+
+
+### `station_meta_data`
+
+This endpoint provides meta data for a particular weather station.
+
+**端点**: `GET /stations/meta`
+
+
+**参数**:
+
+- `id` (string): The Meteostat identifier of a weather station.
+
+- `wmo` (string): The WMO identifier of a weather station.
+
+- `icao` (string): The ICAO identifier of a weather station.
+
+- `id` (string): Example value: 10637
+
+- `wmo` (string): Example value: 
+
+- `icao` (string): Example value: 
+
+
+
+---
+
+
+### `daily_point_data`
+
+This endpoint provides historical daily statistics for a geographic location. The data provided through this endpoint is aggregated from multiple governmental interfaces.
+
+**端点**: `GET /point/daily`
+
+
+**参数**:
+
+- `lat` (number) *必需*: The point's latitude.
+
+- `lon` (number) *必需*: The point's longitude.
+
+- `alt` (number): The point's elevation.
+
+- `start` (string) *必需*: The start date of the period (YYYY-MM-DD).
+
+- `end` (string) *必需*: The end date of the period (YYYY-MM-DD).
+
+- `model` (string): Example value: 
+
+- `freq` (string): The time frequency of the records. Can be used for custom aggregation. Default is null.
+
+- `units` (string): The unit system of the meteorological parameters. Default is metric.
+
+- `lat` (string) *必需*: Example value: 43.6667
+
+- `lon` (string) *必需*: Example value: -79.4
+
+- `alt` (string): Example value: 184
+
+- `start` (string) *必需*: Example value: 2020-01-01
+
+- `end` (string) *必需*: Example value: 2020-01-31
+
+- `model` (string): Example value: 
+
+- `freq` (string): Example value: 
+
+- `units` (string): Example value: 
+
+
+
+---
+
+
+### `hourly_point_data`
+
+This endpoint provides historical hourly observations for a geographic location. The data provided through this endpoint is aggregated from multiple governmental interfaces.
+
+**端点**: `GET /point/hourly`
+
+
+**参数**:
+
+- `lat` (number) *必需*: The point's latitude.
+
+- `lon` (number) *必需*: The point's longitude.
+
+- `alt` (number): The point's elevation.
+
+- `start` (string) *必需*: The start date of the period (YYYY-MM-DD).
+
+- `end` (string) *必需*: The end date of the period (YYYY-MM-DD).
+
+- `tz` (string): The time zone according to the tz database. Default is UTC.
+
+- `model` (string): Example value: 
+
+- `freq` (string): The time frequency of the records. Can be used for custom aggregation. Default is null.
+
+- `units` (string): The unit system of the meteorological parameters. Default is metric.
+
+- `lat` (string) *必需*: Example value: 43.6667
+
+- `lon` (string) *必需*: Example value: -79.4
+
+- `alt` (string): Example value: 113
+
+- `start` (string) *必需*: Example value: 2020-01-01
+
+- `end` (string) *必需*: Example value: 2020-01-01
+
+- `tz` (string): Example value: America/Toronto
+
+- `model` (string): Example value: 
+
+- `freq` (string): Example value: 
+
+- `units` (string): Example value: 
+
+
+
+---
+
+
+### `station_climate_data`
+
+This endpoint provides climate normals for a particular weather station.
+
+**端点**: `GET /stations/normals`
+
+
+**参数**:
+
+- `station` (string) *必需*: The Meteostat weather station identifier.
+
+- `start` (number): The start year of the reference period.
+
+- `end` (number): The end year of the reference period.
+
+- `units` (string): The unit system of the meteorological parameters. Default is metric.
+
+- `station` (string) *必需*: Example value: 10637
+
+- `start` (string): Example value: 1961
+
+- `end` (string): Example value: 1990
+
+- `units` (string): Example value: 
+
+
+
+---
+
+
+### `point_climate_data`
+
+This endpoint provides climate normals for any geo location.
+
+**端点**: `GET /point/normals`
+
+
+**参数**:
+
+- `lat` (number) *必需*: The point's latitude.
+
+- `lon` (number) *必需*: The point's longitude.
+
+- `alt` (number): The point's elevation.
+
+- `start` (number): The start year of the reference period.
+
+- `end` (number): The end year of the reference period.
+
+- `units` (string): The unit system of the meteorological parameters. Default is metric.
+
+- `lat` (string) *必需*: Example value: 59.9127
+
+- `lon` (string) *必需*: Example value: 10.7461
+
+- `alt` (string): Example value: 26
+
+- `start` (string): Example value: 1961
+
+- `end` (string): Example value: 1990
+
+- `units` (string): Example value: 
+
+
+
+---
+
+
+### `nearby_stations`
+
+This endpoint provides a list of nearby weather stations for a given geographical location.
+
+**端点**: `GET /stations/nearby`
+
+
+**参数**:
+
+- `lat` (number) *必需*: The location's latitude.
+
+- `lon` (number) *必需*: The location's longitude.
+
+- `limit` (number): The maximum number of weather stations. Default is 10.
+
+- `radius` (number): The meter radius to search in. Default is 100000.
+
+- `lat` (string) *必需*: Example value: 51.5085
+
+- `lon` (string) *必需*: Example value: -0.1257
+
+- `limit` (string): Example value: 
+
+- `radius` (string): Example value: 
+
+
+
+---
+
+
+### `hourly_station_data`
+
+This endpoint provides historical hourly observations for a particular weather station. The data provided through this endpoint is aggregated from multiple governmental interfaces.
+
+**端点**: `GET /stations/hourly`
+
+
+**参数**:
+
+- `station` (string) *必需*: The Meteostat weather station identifier.
+
+- `start` (string) *必需*: The start date of the period (YYYY-MM-DD).
+
+- `end` (string) *必需*: The end date of the period (YYYY-MM-DD).
+
+- `tz` (string): The time zone according to the tz database. Default is UTC.
+
+- `model` (string): Example value: 
+
+- `freq` (string): The time frequency of the records. Can be used for custom aggregation. Default is null.
+
+- `units` (string): The unit system of the meteorological parameters. Default is metric.
+
+- `station` (string) *必需*: Example value: 10637
+
+- `start` (string) *必需*: Example value: 2020-01-01
+
+- `end` (string) *必需*: Example value: 2020-01-01
+
+- `tz` (string): Example value: Europe/Berlin
+
+- `model` (string): Example value: 
+
+- `freq` (string): Example value: 
+
+- `units` (string): Example value: 
+
+
+
+---
+
+
+### `daily_station_data`
+
+This endpoint provides historical daily statistics for a particular weather station. The data provided through this endpoint is aggregated from multiple governmental interfaces.
+
+**端点**: `GET /stations/daily`
+
+
+**参数**:
+
+- `station` (string) *必需*: The Meteostat weather station identifier.
+
+- `start` (string) *必需*: The start date of the period (YYYY-MM-DD).
+
+- `end` (string) *必需*: The end date of the period (YYYY-MM-DD).
+
+- `model` (string): Example value: 
+
+- `freq` (string): The time frequency of the records. Can be used for custom aggregation. Default is null.
+
+- `units` (string): The unit system of the meteorological parameters. Default is metric.
+
+- `station` (string) *必需*: Example value: 10637
+
+- `start` (string) *必需*: Example value: 2020-01-01
+
+- `end` (string) *必需*: Example value: 2020-01-31
+
+- `model` (string): Example value: 
+
+- `freq` (string): Example value: 
+
+- `units` (string): Example value: 
+
+
+
+---
+
+
+
+## 技术栈
+
+- **FastMCP**: 快速、Pythonic 的 MCP 服务器框架
+- **传输协议**: stdio
+- **HTTP 客户端**: httpx
+
+## 开发
+
+此服务器由 [API-to-MCP](https://github.com/BACH-AI-Tools/api-to-mcp) 工具自动生成。
+
+版本: 1.0.0
