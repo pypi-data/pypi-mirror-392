@@ -1,0 +1,97 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fastclash"
+version = "1.3.1"
+description = "Linux命令行使用Clash代理"
+readme = "README.md"
+license = "MIT"
+authors = [
+    {name = "whillhill", email = "ooooofish@126.com"}
+]
+maintainers = [
+    {name = "whillhill", email = "ooooofish@126.com"}
+]
+keywords = ["clash", "proxy", "vpn", "linux", "systemd", "mihomo", "installer"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: Proxy Servers",
+    "Topic :: System :: Networking",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "click>=8.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "black>=22.0",
+    "flake8>=5.0",
+    "mypy>=1.0",
+    "pre-commit>=2.20",
+    "build>=0.10.0",
+    "twine>=4.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/whillhill/fastclash"
+Repository = "https://github.com/whillhill/fastclash"
+Documentation = "https://github.com/whillhill/fastclash/wiki"
+"Bug Tracker" = "https://github.com/whillhill/fastclash/issues"
+
+[project.scripts]
+fastclash = "fastclash.main:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["fastclash*"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.setuptools.package-data]
+fastclash = [
+    "resources/*.sh",
+    "resources/script/*.sh",
+    # 移除大文件，改为在线下载
+    # "resources/resources/mixin.yaml",  # 178B - 可选保留
+    # "resources/resources/Country.mmdb", # 3.8MB - 在线下载
+    # "resources/resources/zip/*",        # 19MB - 在线下载
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+addopts = [
+    "--strict-markers",
+    "--verbose",
+]
