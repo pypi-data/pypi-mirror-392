@@ -1,0 +1,70 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 24.8.0
+    hooks:
+      - id: black
+        language_version: python3.12
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ["--profile", "black"]
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+        additional_dependencies: [flake8-docstrings]
+
+  - repo: local
+    hooks:
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: python
+        types: [python]
+        args:
+          - "--disable=line-too-long"
+          - "--disable=unused-variable"
+          - "--disable=redefined-outer-name"
+          - "--disable=consider-using-assignment-expr"
+          - "--disable=logging-fstring-interpolation"
+          - "--disable=protected-access"
+          - "--disable=broad-exception-caught"
+          - "--disable=unused-argument"
+          - "--disable=no-else-return"
+          - "--disable=no-else-raise"
+          - "--disable=no-else-break"
+          - "--disable=use-set-for-membership"
+          - "--disable=import-outside-toplevel"
+          - "--disable=reimported"
+          - "--disable=use-implicit-booleaness-not-comparison"
+          - "--disable=inconsistent-return-statements"
+          - "--disable=too-many-nested-blocks"
+          - "--disable=raise-missing-from"
+          - "--disable=broad-exception-raised"
+          - "--disable=too-many-positional-arguments"
+        require_serial: true
+        additional_dependencies: [pylint, httpx]
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: bash -c 'cd src && mypy --config-file=../mypy.toml .'
+        language: python
+        types: [python]
+        additional_dependencies: [mypy, types-requests, httpx]
+        pass_filenames: false
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: check-toml

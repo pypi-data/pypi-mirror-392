@@ -1,0 +1,46 @@
+name: ci-cd
+
+on:
+  push:
+    tags:
+      - "release-v*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Set up uv with Python 3.12
+        uses: astral-sh/setup-uv@v2
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync --group dev
+
+      - name: Verify tag matches project version
+        env:
+          TAG_VERSION: ${{ github.ref_name }}
+        run: |
+          EXPECTED="${TAG_VERSION#release-v}"
+          ACTUAL=$(python -c "import pathlib, tomllib;path=pathlib.Path('pyproject.toml');data=tomllib.loads(path.read_text(encoding='utf-8'));print(data['project']['version'])")
+          if [ "$EXPECTED" != "$ACTUAL" ]; then
+            echo "Tag version $EXPECTED does not match pyproject version $ACTUAL"
+            exit 1
+          fi
+
+      - name: Run tests
+        run: uv run pytest
+
+      - name: Build distributions
+        run: uv build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
