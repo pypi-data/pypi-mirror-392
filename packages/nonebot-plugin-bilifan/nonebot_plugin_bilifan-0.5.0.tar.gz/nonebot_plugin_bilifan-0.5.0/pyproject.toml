@@ -1,0 +1,65 @@
+[project]
+name = "nonebot_plugin_bilifan"
+dynamic = ["version"]
+description = "刷站粉丝牌子的机器人插件"
+authors = [{ name = "Agnes_Digital", email = "Z735803792@163.com"}]
+requires-python = ">=3.9,<4.0"
+dependencies = [
+    "nonebot-adapter-onebot>=2.2.5",
+    "nonebot2>=2.1.0",
+    "nonebot_plugin_apscheduler>=0.3.0",
+    "nonebot_plugin_alconna>=0.50.0",
+    "pillow>=10.0.0",
+    "aiohttp-socks>=0.8.0",
+    "pyyaml>=6.0",
+    "qrcode>=7.4.2",
+    "anyio>=4.6.2"
+]
+readme = "README.md"
+license = { text = "GPLv3" }
+repository = "https://github.com/Agnes4m/nonebot_plugin_bilifan"
+keywords = ["bilibili", "nonebot2", "plugin"]
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+include = [
+    "LICENSE","README.md"
+]
+
+[project.urls]
+homepage = "https://github.com/Agnes4m/nonebot_plugin_bilifan"
+
+[tool.black]
+line-length = 89
+target-version = ["py310", "py311", "py312"]
+include = '\.pyi?$'
+# skip-string-normalization = true
+
+[tool.ruff.format]
+docstring-code-format = true
+line-ending = "lf"
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+detect-same-package = true
+extra-standard-library = ["typing_extensions"]
+split-on-trailing-comma = true
+
+[project.entry-points.nb]
+bootstrap = "nonebot_plugin_bilifan.plugin:install"
+
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "nonebot_plugin_bilifan/__init__.py"
