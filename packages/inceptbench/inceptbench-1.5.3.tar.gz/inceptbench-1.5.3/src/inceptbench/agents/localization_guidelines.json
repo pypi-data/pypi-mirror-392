@@ -1,0 +1,101 @@
+{
+  "sections": [
+    {
+      "title": "Neutral Scenario Policy",
+      "rules": [
+        {
+          "id": "neutral.generic_contexts",
+          "description": "**Generic contexts**: Contexts should be generic and universal: classroom, homework, simple shopping, basic measurements.",
+          "prompt": "Confirm the scenario uses neutral, universal contexts. PASS if nothing relies on niche regional specifics."
+        },
+        {
+          "id": "neutral.no_cultural_specifics",
+          "description": "**No cultural specifics**: No festivals, landmarks, public figures, or culturally specific props unless explicitly requested.",
+          "prompt": "Scan for cultural-specific props or references. PASS only if absent (unless the user explicitly requested them)."
+        },
+        {
+          "id": "neutral.universal_solvability",
+          "description": "**Universal solvability**: Problems should be solvable without requiring local cultural knowledge.",
+          "prompt": "Evaluate whether solving the task requires culture-specific knowledge. PASS if any student could solve it without such context."
+        },
+        {
+          "id": "neutral.neutral_settings",
+          "description": "**Neutral settings**: Avoid scenarios that assume specific cultural background knowledge.",
+          "prompt": "Determine whether the setting presumes insider cultural knowledge. PASS if setting is neutral."
+        }
+      ]
+    },
+    {
+      "title": "Sensitivity Guardrails",
+      "critical": true,
+      "rules": [
+        {
+          "id": "safety.zero_sensitive",
+          "description": "**Zero sensitive content**: No references to religion, politics, dating, alcohol, gambling, or adult topics.",
+          "prompt": "PASS only if the text contains zero sensitive or adult themes."
+        },
+        {
+          "id": "safety.gender_balance",
+          "description": "**Gender balance**: Gender balance or gender-neutral phrasing where people appear in scenarios.",
+          "prompt": "Review mentions of people. PASS if representation is gender-balanced or gender-neutral."
+        },
+        {
+          "id": "safety.no_stereotypes",
+          "description": "**No stereotyping**: No stereotyping of emirates, regional groups, or any demographic groups.",
+          "prompt": "Check for stereotypes or caricatures. PASS only if absent."
+        },
+        {
+          "id": "safety.inclusive_content",
+          "description": "**Inclusive content**: Content should be inclusive and respectful of all backgrounds.",
+          "prompt": "Assess tone and references for inclusivity. PASS if respectful and inclusive."
+        }
+      ]
+    },
+    {
+      "title": "Localization Guardrail Coverage",
+      "rules": [
+        {
+          "id": "guardrails.reflection",
+          "description": "**Guardrail reflection**: All localization guardrails should be reflected in the output.",
+          "prompt": "PASS if every requested guardrail appears to have been respected in the localized text."
+        },
+        {
+          "id": "guardrails.neutral_fallback",
+          "description": "**Neutral fallback**: If a guardrail can't be satisfied, the output should pick the neutral fallback instead of improvising.",
+          "prompt": "Look for cases where guardrails couldn't be met. PASS only if the text defaults to safe, neutral wording instead of risky improvisations."
+        },
+        {
+          "id": "guardrails.consistent_application",
+          "description": "**Consistent application**: All guardrails should be consistently applied across all content.",
+          "prompt": "Assess consistency across the entire item. PASS if no guardrail was applied only partially."
+        }
+      ]
+    },
+    {
+      "title": "Rule-Based Regionalization (ITD Guidance)",
+      "rules": [
+        {
+          "id": "itd.familiarity_relevance",
+          "description": "**Familiarity & Relevance**: Question context must only reference concepts, practices, or objects that students in the target region and grade can reasonably understand. Avoid adult-only topics (e.g., \"filing taxes\" for Grade 3) or hyper-local foods/events that would confuse the audience.",
+          "prompt": "Evaluate whether every reference is age-appropriate and familiar to students in the locale."
+        },
+        {
+          "id": "itd.single_reference",
+          "description": "**Regional Reference Limit**: Use at most one explicit, region-specific object or concept. More than one localized prop often turns into caricature (e.g., \"Muhammad rides a camel while eating dates\"); keep scenarios grounded and neutral.",
+          "prompt": "Count explicit regional props. PASS only if there is zero or one, unless instructions asked for more."
+        },
+        {
+          "id": "itd.instruction_language",
+          "description": "**Instruction-Aligned Language**: Only switch to the student's regional/native language if instruction for that student actually uses that language. International/bilingual programs may request English—do not override unless told to.",
+          "prompt": "Verify the language choice matches the instruction language provided in metadata."
+        },
+        {
+          "id": "itd.respectful_tone",
+          "description": "**Respectful Tone & Content**: Cultural references must never mock, stereotype, or oversimplify communities. When in doubt, prefer neutral global contexts rather than risky local flavor.",
+          "prompt": "Assess respectfulness of any cultural references. PASS only if fully respectful."
+        }
+      ]
+    }
+  ]
+}
+
