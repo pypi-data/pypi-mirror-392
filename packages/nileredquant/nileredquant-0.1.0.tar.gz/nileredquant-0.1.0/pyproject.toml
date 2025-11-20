@@ -1,0 +1,68 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "nileredquant"
+version = "0.1.0"
+description = "Tool for automated quantification of lipid accumulation in yeasts based on the Nile Red plate assay"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [
+  {name = "Mia Žganjar", email = "zganjar.mia@gmail.com"}
+]
+maintainers = [
+  {name = "Mia Žganjar", email = "zganjar.mia@gmail.com"}
+]
+keywords = ["yeast", "lipid", "Nile Red", "plate assay","plate reader", "fluorescence", "HTS"]
+
+dependencies = [
+"pandas",
+"matplotlib",
+"scipy",
+"pingouin"
+]
+
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: OS Independent",
+  "Natural Language :: English",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Information Analysis",
+  "Topic :: Scientific/Engineering :: Chemistry",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov", "ruff", "black", "mypy", "build", "twine"]
+docs = ["sphinx>=7", "myst-parser", "sphinx-autobuild"]
+excel = ["openpyxl>=3.1"]
+
+[project.urls]
+Homepage = "https://github.com/zganjarmia/NileRedQuant"
+Repository = "https://github.com/zganjarmia/NileRedQuant"
+Issues = "https://github.com/zganjarmia/NileRedQuant/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nileredquant"]
+
+[tool.mypy]
+files = "."
+strict = true
+warn_unreachable = true
+warn_no_return = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+allow_untyped_defs = true
+disable_error_code = "attr-defined"
+
