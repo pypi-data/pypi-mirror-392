@@ -1,0 +1,133 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "constellate"
+authors = [{ name = "David Andreoletti", email = "none@provided.yet" }]
+requires-python = ">=3.10, <3.15"
+description = "A bunch of utilities aggregated over time"
+keywords = ["constellate"]
+dynamic = ["version", "readme"]
+license = "LicenseRef-Proprietary"
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+
+dependencies = [
+    "decorator>=5.1.0",
+    "aioitertools>=0.8.0",
+    "psutil>=5.7.0",
+    "pendulum>=3.0.0",
+    "requests>=2.25.0",
+    "memory-tempfile>=2.2.3",
+    "bidict>=0.21.4",
+    "attrs>=20.3.0",
+    "jsonmerge>=1.8.0",
+    "jsonschema>=4.7.2",
+    "Deprecated>=1.2.12",
+    "importlib-resources>=5.1.4",
+    "typing-extensions>=4.3.0",
+    "tqdm>=4.62.3",
+    "regex>=2021.11.10",
+    "blake3>=0.3.1",
+    "sqlparse>=0.4.2",
+    "stackeddag>=0.3.3",
+]
+
+[project.optional-dependencies]
+# Required by
+# - constellate.cli.arg package
+cliargs = [
+    "argunparse>=0.2.0;python_version>='3.11'",
+]
+# Required by
+# - constellate.database.migration package
+# - constellate.database.sqlalchemy package
+sqlalchemy = [
+    "SQLAlchemy<=2.0.43", # FIXME Bum to 2.0.44 or better once this is fixed: https://github.com/sqlalchemy/sqlalchemy/discussions/12992
+    "sqlalchemy-utils>=0.37.9",
+    "sqlalchemy-json>=0.4.0",
+    "sqlalchemy_mixins>=2.0",
+    "aiosqlite>=0.21.0",
+    "asyncpg>=0.30.0",
+    "networkx>=2.8.5",
+]
+# Required by
+# - constellate.thirdparty.pandas package
+# - constellate.datetime.timeinterval package
+pandas = [
+    "pandas>=2.0.0",
+    "pandas-log>=0.1.7",
+    "pandera>=0.20.1,!=0.13.4",
+    "hypothesis>=6.54.4",
+]
+# - constellate.datetime.timeinterval package
+numpy = ["numpy>=1.21.4"]
+# - constellate.thirdparty.numba package
+"numba"= ["numba-progress>=0.0.3"]
+# - constellate.database.sparql package
+sparql = ["rdflib>=6.3.0", "SPARQL-Burger>=1.0.2"]
+# - constellate.compression.zstd package
+zstd = ["pyzstd>=0.15.10"]
+# - constellate.logger package
+logging = [
+     "narration>=0.2.20",
+     "colorlog>=6.8.2"
+ ]
+# - constellate.concurrency.pebble
+concurrencypebble = [
+     "Pebble>=4.6.3"
+]
+# - constellate.datetime.timeinterval
+timeinterval = [
+     "portion>=2.2.0",
+]
+# - constellate.runtime.stackframe
+stackframesampler = [
+     "austin-tui>=1.2.3",
+     "austin-dist>=3.6.0",
+]
+# - constellate.runtime.debugger.vscode
+debuggevscode = [
+     "debugpy>=1.8.2",
+]
+# - constellate.runtime.debugger.pycharm
+#  WARN: pycharm's pydev is incompatible with debugpy's pydev: https://youtrack.jetbrains.com/issue/PY-59020
+#        import either pycharm's or vscode's but not both to prevent the conflict
+debuggerpycharm = [
+     "pydevd-pycharm>=231.0.0; sys.platform=='linux'"
+]
+all = ["constellate[cliargs,sqlalchemy,pandas,numpy,numba,sparql,zstd,logging,concurrencypebble,timeinterval]"]
+
+[project.urls]
+repository = "https://github.com/davidandreoletti/constellate"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = [ "constellate*"]
+
+[tool.setuptools.package-data]
+constellate = ["py.typed"]
+
+[tool.distutils.bdist_wheel]
+universal = true
+
+[tool.setuptools.dynamic]
+version = { attr = "constellate.__version__.__version__" }
+readme = { file = "README.rst", content-type = "text/x-rst" }
