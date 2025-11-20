@@ -1,0 +1,739 @@
+Metadata-Version: 2.4
+Name: ikalogic-sp1000g
+Version: 0.1.9
+Summary: Python bindings for SP1000G Logic Analyzer API
+Home-page: https://ikalogic.com
+Author: Ikalogic
+Author-email: Ikalogic <support@ikalogic.com>
+License: MIT
+Keywords: logic analyzer,hardware,sp1000g,ikalogic
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: System :: Hardware
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Environment :: Console
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+Requires-Dist: pybind11>=2.10.0
+Dynamic: author
+Dynamic: home-page
+Dynamic: requires-python
+
+# Ikalogic SP1000G Python Bindings
+
+Python bindings for the Ikalogic SP1000G series logic analyzers.
+
+## Installation
+
+```bash
+pip install ikalogic-sp1000g
+```
+
+## Supported Devices
+
+- **SP1018G**: 18 channels
+- **SP1036G**: 36 channels  
+- **SP1054G**: 54 channels
+
+## Quick Start
+
+```python
+from ikalogic import sp1000g
+
+# Create API instance for your device model
+api = sp1000g.SP1000G(sp1000g.Model.SP1054G)
+
+# Find and open device
+api.create_device_list()
+count = api.get_devices_count()
+print(f"Found {count} device(s)")
+
+if count > 0:
+    api.device_open_first()
+    
+    # Get firmware version
+    fpga_major = api.get_fpga_version_major()
+    fpga_minor = api.get_fpga_version_minor()
+    print(f"FPGA Firmware: {fpga_major}.{fpga_minor}")
+    
+    api.device_close()
+```
+
+## API Reference
+
+### Main Class: SP1000G
+
+#### Constructor
+```python
+api = sp1000g.SP1000G(model)
+```
+- **model**: One of `sp1000g.Model.SP1018G`, `sp1000g.Model.SP1036G`, or `sp1000g.Model.SP1054G`
+
+---
+
+### Device Management Methods
+
+#### `create_device_list()`
+Create or update the list of SP1000G devices connected via USB.
+
+```python
+api.create_device_list()
+```
+
+#### `free_device_list()`
+Free memory used to store the device list.
+
+```python
+api.free_device_list()
+```
+
+#### `get_devices_count() -> int`
+Get the number of devices in the list.
+
+```python
+count = api.get_devices_count()
+```
+
+#### `get_device_descriptor(device_number) -> DeviceDescriptor`
+Get device information by index (0-based).
+
+```python
+desc = api.get_device_descriptor(0)
+print(f"Serial: {desc.serial_number}")
+print(f"Description: {desc.description}")
+```
+
+#### `device_open(descriptor)`
+Open a specific device using its descriptor.
+
+```python
+desc = api.get_device_descriptor(0)
+api.device_open(desc)
+```
+
+#### `device_open_first()`
+Open the first available device in the list.
+
+```python
+api.device_open_first()
+```
+
+#### `device_close()`
+Close the currently open device.
+
+```python
+api.device_close()
+```
+
+#### `get_device_open_flag() -> bool`
+Check if a device is currently open.
+
+```python
+is_open = api.get_device_open_flag()
+```
+
+---
+
+### Version Information Methods
+
+#### `get_fpga_version_major() -> int`
+Get FPGA firmware major version number.
+
+```python
+major = api.get_fpga_version_major()
+```
+
+#### `get_fpga_version_minor() -> int`
+Get FPGA firmware minor version number.
+
+```python
+minor = api.get_fpga_version_minor()
+```
+
+#### `get_mcu_version_major() -> int`
+Get MCU firmware major version number.
+
+```python
+major = api.get_mcu_version_major()
+```
+
+#### `get_mcu_version_minor() -> int`
+Get MCU firmware minor version number.
+
+```python
+minor = api.get_mcu_version_minor()
+```
+
+---
+
+### Capture Methods
+
+#### `launch_new_capture_simple_trigger(trigger, trigger_b, settings)`
+Launch a new capture with simple trigger configuration.
+
+```python
+# Create trigger configurations
+trigger_a = sp1000g.TriggerDescription()
+trigger_a.type = sp1000g.TriggerType.TRG_RISING
+trigger_a.channel = 0
+
+trigger_b = sp1000g.TriggerDescription()
+trigger_b.type = sp1000g.TriggerType.TRG_NOTRIG
+trigger_b.channel = 0
+
+# Create settings
+settings = sp1000g.Settings()
+settings.sampling_depth = 10000000
+settings.post_trig_depth = 9000000
+settings.s_clk = 250000000  # 250 MHz
+
+# Set thresholds (one per threshold input, not per channel)
+settings.thresh_capture_mv = [1650, 1650]  # 2 thresholds for SP1018G
+
+# Launch capture
+api.launch_new_capture_simple_trigger(trigger_a, trigger_b, settings)
+```
+
+#### `get_config_done_flag() -> bool`
+Check if device configuration is complete.
+
+```python
+while not api.get_config_done_flag():
+    time.sleep(0.01)
+```
+
+#### `get_triggered_flag() -> bool`
+Check if the device has triggered.
+
+```python
+while not api.get_triggered_flag():
+    time.sleep(0.01)
+```
+
+#### `get_trigger_position() -> int`
+Get the trigger position in samples.
+
+```python
+trig_pos = api.get_trigger_position()
+```
+
+#### `get_available_samples() -> tuple[int, int]`
+Get available samples count.
+
+Returns a tuple: `(total_samples, post_trigger_samples)`
+
+```python
+total, post_trig = api.get_available_samples()
+print(f"Total: {total}, Post-trigger: {post_trig}")
+```
+
+#### `get_capture_done_flag() -> bool`
+Check if capture is complete and all data has been retrieved.
+
+```python
+while not api.get_capture_done_flag():
+    time.sleep(0.01)
+```
+
+#### `get_ready_flag() -> bool`
+Check if device is ready (no operation in progress).
+
+```python
+is_ready = api.get_ready_flag()
+```
+
+#### `request_abort()`
+Request any pending operation to abort.
+
+```python
+api.request_abort()
+```
+
+---
+
+### Transition Iterator Methods
+
+These methods allow you to iterate through signal transitions on each channel.
+
+#### `trs_reset(channel_index)`
+Reset the transitions iterator for a specific channel to the beginning.
+
+```python
+api.trs_reset(0)  # Reset iterator for channel 0
+```
+
+#### `trs_before(channel_index, target_sample)`
+Position the transitions iterator before a specific sample number.
+
+```python
+api.trs_before(0, 1000)  # Position before sample 1000 on channel 0
+```
+
+#### `trs_get_next(channel_index) -> Transition`
+Get the next transition for a channel.
+
+```python
+transition = api.trs_get_next(0)
+print(f"Value: {transition.value}, Sample: {transition.sample_index}")
+```
+
+#### `trs_get_previous(channel_index) -> Transition`
+Get the previous transition for a channel.
+
+```python
+transition = api.trs_get_previous(0)
+```
+
+#### `trs_is_not_last(channel_index) -> bool`
+Check if the current transition is not the last one.
+
+```python
+while api.trs_is_not_last(0):
+    trs = api.trs_get_next(0)
+    # Process transition
+```
+
+---
+
+### Error Handling
+
+#### `get_last_error() -> ErrorCode`
+Get the last error code from internal threads.
+
+```python
+err = api.get_last_error()
+if err != sp1000g.ErrorCode.OK:
+    print(f"Error: {err}")
+```
+
+---
+
+## Data Structures
+
+### DeviceDescriptor
+
+Represents device information.
+
+```python
+desc = sp1000g.DeviceDescriptor()
+desc.serial_number = "SN12345"
+desc.description = "My Device"
+```
+
+**Attributes:**
+- `serial_number` (str): Device serial number
+- `description` (str): Device description
+
+---
+
+### TriggerDescription
+
+Defines a trigger condition.
+
+```python
+trigger = sp1000g.TriggerDescription()
+trigger.type = sp1000g.TriggerType.TRG_RISING
+trigger.channel = 0
+```
+
+**Attributes:**
+- `type` (TriggerType): Type of trigger
+- `channel` (int): Channel number for the trigger
+
+---
+
+### Settings
+
+Capture and device configuration.
+
+```python
+settings = sp1000g.Settings()
+```
+
+**Attributes:**
+
+**Basic Capture Settings:**
+- `sampling_depth` (int): Total number of samples to capture
+- `post_trig_depth` (int): Number of samples to capture after trigger
+- `s_clk` (int): State clock frequency in Hz
+- `state_clk_mode` (StateClkMode): State clock mode
+- `state_clk_src` (StateClkSource): State clock source
+- `timebase_src` (TimebaseClk): Timebase clock source
+
+**Trigger Settings:**
+- `trig_order` (int): Trigger order
+- `t_clk` (list[int]): Trigger clock frequencies (length = TRIG_ENGINES_COUNT = 2)
+
+**Threshold and Power Settings:**
+- `thresh_capture_mv` (list[int]): Capture thresholds in millivolts (length = THRESHOLDS_COUNT = 3)
+- `vcc_gen_mv` (list[int]): Generated VCC in millivolts (length = THRESHOLDS_COUNT = 3)
+
+**I/O Configuration:**
+- `io_type` (list[IOType]): I/O type for each channel (length = CHANNELS_COUNT)
+- `io_pull` (list[Pull]): Pull resistor for each channel (length = CHANNELS_COUNT)
+
+**External Trigger:**
+- `ext_trig_50r` (bool): Enable 50Ω termination on external trigger input
+- `ext_in_threshold_mv` (int): External input threshold in millivolts
+- `ext_trig_out_polarity` (int): External trigger output polarity
+
+**On-Chip Instrumentation (OCI) Clock:**
+- `oci_clk_out_enable` (list[list[bool]]): Enable OCI clocks (GROUPS_COUNT x OCI_CLOCK_COUNT)
+- `oci_clk_out_freq` (list[list[int]]): OCI clock frequencies (GROUPS_COUNT x OCI_CLOCK_COUNT)
+
+**Example:**
+```python
+settings = sp1000g.Settings()
+settings.sampling_depth = 10000000
+settings.post_trig_depth = 5000000
+settings.s_clk = 100000000
+
+# Set trigger clocks
+settings.t_clk = [100000000, 100000000]
+
+# Set thresholds
+settings.thresh_capture_mv = [1650, 1650, 1650]
+settings.vcc_gen_mv = [3300, 3300, 3300]
+
+# Configure I/O (example for first 3 channels)
+settings.io_type = [sp1000g.IOType.IO_IN] * sp1000g.CHANNELS_COUNT
+settings.io_pull = [sp1000g.Pull.PULL_DOWN] * sp1000g.CHANNELS_COUNT
+```
+
+---
+
+### Transition
+
+Represents a signal transition.
+
+```python
+transition = sp1000g.Transition()
+```
+
+**Attributes:**
+- `value` (int): Signal value (0 or 1)
+- `sample_index` (int): Sample number where transition occurred
+
+---
+
+## Enumerations
+
+### Model
+Device models.
+- `SP1018G` - 18 channels
+- `SP1036G` - 36 channels
+- `SP1054G` - 54 channels
+
+### TriggerType
+Trigger types.
+- `TRG_NOTRIG` - No trigger
+- `TRG_RISING` - Rising edge
+- `TRG_FALLING` - Falling edge
+- `TRG_CHANGE` - Any edge (rising or falling)
+- `TRG_EXT_RISING` - External trigger rising edge
+- `TRG_EXT_FALLING` - External trigger falling edge
+
+### ErrorCode
+Error codes.
+- `OK` - Success
+- `HW_ERRORS` - Hardware error
+- `NOT_SUPPORTED` - Unsupported command
+- `DEVICE_NOT_OPEN` - Device not open
+- `DEVICE_NOT_FOUND` - Device not found
+- `INVALID_SERIAL` - Invalid serial number
+- `INVALID_CONFIG` - Invalid configuration
+- `INVALID_ARGUMENT` - Invalid argument
+- `BUSY` - Device busy
+- `ABORTED` - Operation aborted
+- `POWER_FAILURE` - Power failure
+- `PLL_FAILURE` - PLL failure
+- `FLUSH_TIMEOUT` - Flush timeout
+- `NOT_RESPONDING` - Device not responding
+- `NO_DATA` - No data available
+- `FIRMWARE_ERROR` - Firmware error
+- `FIRM_UPDT_FAILED` - Firmware update failed
+- `DATA_NOT_ALIGNED` - Data not aligned
+- `DEVICE_FORGED` - Device forged
+- `HARDWARE_FAULT` - Hardware fault
+- `UNKNOWN_ERROR` - Unknown error
+- `USB_ERRORS` - USB error
+- `USB3_ERRORS` - USB3 error
+- `NOT_IMPLEMENTED` - Not implemented
+
+### Pull
+Pull resistor configuration.
+- `PULL_DOWN` - Pull-down resistor
+- `PULL_UP` - Pull-up resistor
+
+### IOType
+I/O type configuration.
+- `IO_IN` - Input
+- `IO_PP` - Push-Pull output
+- `IO_OD` - Open-Drain output
+
+### StateClkMode
+State clock mode.
+- `SCLK_DISABLE` - Disabled
+- `SCLK_RISING` - Rising edge
+- `SCLK_FALLING` - Falling edge
+- `SCLK_DUAL` - Dual edge
+
+### StateClkSource
+State clock source.
+- `SCLK_CH9` - Channel 9
+- `SCLK_CH18` - Channel 18
+
+### TimebaseClk
+Timebase clock source.
+- `TIMEBASE_INTERNAL` - Internal timebase
+- `TIMEBASE_EXTERNAL` - External timebase
+
+---
+
+## Constants
+
+These constants are available as module attributes:
+
+```python
+sp1000g.GROUPS_COUNT         # Number of channel groups
+sp1000g.CHANNELS_COUNT       # Total number of channels (model-dependent)
+sp1000g.TRIG_ENGINES_COUNT   # Number of trigger engines (2)
+sp1000g.THRESHOLDS_COUNT     # Number of threshold inputs (3)
+sp1000g.MAX_TRIG_STEPS_COUNT # Maximum trigger steps
+sp1000g.OCI_CLOCK_COUNT      # Number of OCI clocks per group
+```
+
+---
+
+## Complete Example
+
+```python
+import time
+from ikalogic import sp1000g
+
+# Create API instance
+api = sp1000g.SP1000G(sp1000g.Model.SP1054G)
+
+try:
+    # Find and open device
+    api.create_device_list()
+    count = api.get_devices_count()
+    print(f"Found {count} device(s)")
+    
+    if count == 0:
+        print("No devices found!")
+        exit(1)
+    
+    # Open first device
+    api.device_open_first()
+    print("Device opened")
+    
+    # Get version info
+    fpga_ver = f"{api.get_fpga_version_major()}.{api.get_fpga_version_minor()}"
+    mcu_ver = f"{api.get_mcu_version_major()}.{api.get_mcu_version_minor()}"
+    print(f"FPGA: {fpga_ver}, MCU: {mcu_ver}")
+    
+    # Configure capture
+    settings = sp1000g.Settings()
+    settings.sampling_depth = 1000000
+    settings.post_trig_depth = 500000
+    settings.s_clk = 100000000  # 100 MHz
+    settings.t_clk = [100000000, 100000000]
+    settings.thresh_capture_mv = [1650, 1650, 1650]
+    settings.vcc_gen_mv = [3300, 3300, 3300]
+    settings.io_type = [sp1000g.IOType.IO_IN] * sp1000g.CHANNELS_COUNT
+    settings.io_pull = [sp1000g.Pull.PULL_DOWN] * sp1000g.CHANNELS_COUNT
+    
+    # Configure trigger - rising edge on channel 0
+    trigger_a = sp1000g.TriggerDescription()
+    trigger_a.type = sp1000g.TriggerType.TRG_RISING
+    trigger_a.channel = 0
+    
+    trigger_b = sp1000g.TriggerDescription()
+    trigger_b.type = sp1000g.TriggerType.TRG_NOTRIG
+    trigger_b.channel = 0
+    
+    # Launch capture
+    print("Launching capture...")
+    api.launch_new_capture_simple_trigger(trigger_a, trigger_b, settings)
+    
+    # Wait for configuration
+    while not api.get_config_done_flag():
+        time.sleep(0.01)
+    print("Configuration done")
+    
+    # Wait for trigger
+    print("Waiting for trigger...")
+    while not api.get_triggered_flag():
+        time.sleep(0.01)
+    print("Triggered!")
+    
+    # Wait for capture complete
+    while not api.get_capture_done_flag():
+        time.sleep(0.01)
+    print("Capture complete")
+    
+    # Get trigger info
+    trig_pos = api.get_trigger_position()
+    total, post = api.get_available_samples()
+    print(f"Trigger at sample {trig_pos}")
+    print(f"Captured {total} samples ({post} post-trigger)")
+    
+    # Read transitions on channel 0
+    print("\nFirst 10 transitions on channel 0:")
+    api.trs_reset(0)
+    count = 0
+    while api.trs_is_not_last(0) and count < 10:
+        trs = api.trs_get_next(0)
+        print(f"  Sample {trs.sample_index}: {trs.value}")
+        count += 1
+    
+finally:
+    # Clean up
+    if api.get_device_open_flag():
+        api.device_close()
+        print("\nDevice closed")
+```
+
+---
+
+## Requirements
+
+- Python 3.7+
+- Supported platforms:
+  - Linux x86_64 (manylinux2014)
+  - Windows x64
+  - macOS (Intel and Apple Silicon)
+
+### Linux Dependencies
+Usually pre-installed, but if needed:
+```bash
+sudo apt-get install libusb-1.0-0 libudev1
+```
+
+---
+
+## License
+
+Copyright (c) 2023-2025 IKALOGIC SAS
+
+See LICENSE file for details.
+
+---
+
+## Support
+
+For support, please visit [ikalogic.com](https://ikalogic.com) or contact support@ikalogic.com.
+
+## Supported Devices
+
+- **SP1018G**: 18 channels, 1 GHz sampling
+- **SP1036G**: 36 channels, 1 GHz sampling
+- **SP1054G**: 54 channels, 1 GHz sampling 
+
+## Basic Usage
+
+### Device Management
+
+```python
+# Create device list
+api.create_device_list()
+
+# Get number of devices
+count = api.get_devices_count()
+
+# Get device info
+for i in range(count):
+    desc = api.get_device_descriptor(i)
+    print(f"Device {i}: {desc.serial_number}")
+
+# Open device
+api.device_open_first()  # or api.device_open(index)
+
+# Check if open
+if api.get_device_open_flag():
+    print("Device is open")
+
+# Close device
+api.device_close()
+```
+
+### Capture Configuration
+
+```python
+# Create settings
+settings = sp1000g.Settings()
+settings.sampling_depth = 1000000      # Total samples
+settings.post_trig_depth = 900000      # Samples after trigger
+settings.s_clk = 250000000             # 250 MHz sampling
+
+# Set thresholds (mV) - one per channel
+settings.thresh_capture_mv = [1650] * 18  # For SP1018G
+
+# Apply settings
+api.apply_settings(settings)
+```
+
+### Triggering
+
+```python
+# Simple trigger
+trigger = sp1000g.TriggerDescription()
+trigger.type = sp1000g.TriggerType.TRG_RISING
+trigger.channel = 0
+
+api.launch_new_capture_simple_trigger(trigger, settings, 0, True, 0, 0, 0)
+
+# Wait for capture
+while not api.is_capture_complete():
+    time.sleep(0.1)
+```
+
+### Reading Data
+
+```python
+# Reset transition iterator
+api.trs_reset(0)
+
+# Read transitions
+while api.trs_is_not_last(0):
+    trs = api.trs_get_next(0)
+    print(f"Sample {trs.sample_index}: Channel {trs.channel} = {trs.value}")
+```
+
+## API Reference
+
+### Classes
+
+- `SP1000G(model)` - Main API class
+- `Settings` - Capture configuration
+- `TriggerDescription` - Trigger configuration
+- `DeviceDescriptor` - Device information
+- `Transition` - Signal transition data
+
+### Enums
+
+- `Model` - Device models (SP1018G, SP1054G, SP1108G)
+- `TriggerType` - Trigger types (RISING, FALLING, ANY_EDGE, etc.)
+- `DeviceState` - Device states
+
+## Requirements
+
+- Python 3.7+
+- Linux x86_64
+- libusb-1.0 (usually pre-installed)
+- libudev (usually pre-installed)
+
+
+## License
+
+See LICENSE file for details.
