@@ -1,0 +1,396 @@
+Metadata-Version: 2.4
+Name: gaussbio3d
+Version: 0.1.0
+Summary: Multiscale Gauss Linking Integral Library for Biomolecular 3D Topology
+Home-page: https://github.com/yourusername/GaussBio3D
+Author: Your Name
+Author-email: Your Name <your.email@example.com>
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy>=1.20.0
+Requires-Dist: biopython>=1.79
+Requires-Dist: rdkit-pypi>=2021.9.1
+Dynamic: author
+Dynamic: home-page
+Dynamic: license-file
+Dynamic: requires-python
+
+# GaussBio3D: Multiscale Gauss Linking Integral Library
+# GaussBio3D: 多尺度高斯链接积分库
+
+A Python library for **multiscale Gauss linking integral (mGLI)**–based 3D topological descriptors for **small molecules, proteins and nucleic acids**.
+
+一个基于**多尺度高斯链接积分(mGLI)**的Python库，用于**小分子、蛋白质和核酸**的3D拓扑描述符计算。
+
+It is designed to be a **unified 3D representation framework** for biomolecular interaction tasks such as:
+
+本库旨在为生物分子交互任务提供**统一的3D表示框架**，支持以下任务：
+
+- Drug–Target Interaction (DTI) / 药物-靶点交互
+- Protein–Protein Interaction (PPI) / 蛋白质-蛋白质交互
+- Drug–Drug Interaction (DDI) / 药物-药物交互
+- miRNA/Nucleic acid–Target Interaction (MTI) / miRNA/核酸-靶点交互
+- Protein–DNA/RNA complexes / 蛋白质-DNA/RNA复合物等
+
+---
+
+## 1. Mathematical Background / 数学背景
+
+### 1.1 Gauss Linking Integral (Continuous) / 高斯链接积分（连续形式）
+
+Given two smooth space curves C₁ and C₂, the **Gauss linking integral** is
+
+给定两条光滑空间曲线 C₁ 和 C₂，**高斯链接积分**定义为：
+
+```
+GLI(C₁, C₂) = (1/4π) ∫∫ [(dr₁ × dr₂) · (r₁ - r₂)] / ||r₁ - r₂||³
+              C₁ C₂
+```
+
+It measures the **topological linking / winding** between two curves. For closed curves it is an integer (linking number), but for open curves (e.g. biomolecular fragments) it is a real-valued "linking strength".
+
+它度量两条曲线之间的**拓扑缠绕/缠结**关系。对于闭合曲线，它是一个整数（链接数），但对于开放曲线（如生物分子片段），它是一个实值的"链接强度"。
+
+### 1.2 Discrete Segment Approximation / 离散线段近似
+
+We approximate each curve by a set of straight segments:
+
+我们用一组直线段来近似每条曲线：
+
+- C₁ = {Lᵢ}, where Lᵢ = [a₀, a₁]
+- C₂ = {Mⱼ}, where Mⱼ = [b₀, b₁]
+
+Then: / 则有：
+
+```
+GLI(C₁, C₂) ≈ Σᵢⱼ GLI(Lᵢ, Mⱼ)
+```
+
+For line segments L=[a₀,a₁] and M=[b₀,b₁], we use a **standard spherical geometry–based approximation** (the same as in your scripts):
+
+对于线段 L=[a₀,a₁] 和 M=[b₀,b₁]，我们使用基于**球面几何的标准近似方法**：
+
+1. Define / 定义：
+
+```
+r₀₀ = b₀ - a₀,  r₀₁ = b₁ - a₀
+r₁₀ = b₀ - a₁,  r₁₁ = b₁ - a₁
+```
+
+2. Normalize these vectors to get four unit vectors on the unit sphere
+   将这些向量归一化得到单位球面上的四个单位向量
+
+3. Construct four oriented spherical triangles and sum their signed areas using `arcsin` of dot products between successive cross products
+   构造四个定向球面三角形，使用连续叉积的点积的 `arcsin` 求和它们的有向面积
+
+4. Multiply by a sign determined by the orientation of the two segments
+   乘以由两个线段方向确定的符号
+
+The library exposes `gli_segment(seg1, seg2, signed=True/False)` which computes this value. With `signed=False`, we use the absolute value |GLI| to measure **linking strength** independent of chirality.
+
+本库提供 `gli_segment(seg1, seg2, signed=True/False)` 函数来计算此值。当 `signed=False` 时，我们使用绝对值 |GLI| 来度量与手性无关的**链接强度**。
+
+---
+
+## 2. Multiscale & Grouped mGLI Features / 多尺度与分组mGLI特征
+
+We want features that capture **how strongly and at what distance scales** parts of molecule A and B are topologically linked.
+
+我们希望捕获分子A和B的各部分在**何种强度和何种距离尺度**下的拓扑链接特征。
+
+### 2.1 Node Pair Quantities / 节点对量
+
+For nodes (atoms / residues / bases) i ∈ A, j ∈ B:
+
+对于节点（原子/残基/碱基）i ∈ A, j ∈ B：
+
+- Position / 位置: xᵢ, xⱼ
+- Distance / 距离: rᵢⱼ = ||xᵢ - xⱼ||
+- Local GLI / 局部GLI: gᵢⱼ = aggregated GLI between segments incident to node i and node j
+  (sum or median over the node's local segments, as in your original code)
+  节点i和节点j相关联线段之间的聚合GLI（对节点的局部线段求和或取中位数）
+
+### 2.2 Radial Weighting (Multi-scale) / 径向加权（多尺度）
+
+We define radial basis functions φₖ(r) (either **hard bins** or **RBF**):
+
+我们定义径向基函数 φₖ(r)（**硬分箱**或**RBF**）：
+
+- Hard bins / 硬分箱:
+
+```
+φₖ(r) = 𝟙[r ∈ [Rₖ, Rₖ₊₁)], k=1..K
+```
+
+- RBF / 径向基函数:
+
+```
+φₖ(r) = exp(-(r-μₖ)²/(2σₖ²))
+```
+
+Then multi-scale aggregated features / 则多尺度聚合特征为：
+
+```
+hₖ = Σᵢⱼ φₖ(rᵢⱼ) · f(gᵢⱼ)
+```
+
+where f can be gᵢⱼ, |gᵢⱼ| or different statistics (sum/mean/max/min/median over node pairs in that scale).
+
+其中 f 可以是 gᵢⱼ、|gᵢⱼ| 或不同的统计量（该尺度下节点对的求和/均值/最大值/最小值/中位数）。
+
+### 2.3 Grouping: Elements / Residues / Bases / 分组：元素/残基/碱基
+
+We further group nodes by discrete categories:
+
+我们进一步按离散类别对节点分组：
+
+- small molecule / 小分子: element / functional group / 元素/官能团
+- protein / 蛋白质: residue type or residue class (hydrophobic/aromatic/etc.) / 残基类型或残基类别（疏水/芳香等）
+- nucleic acid / 核酸: base type (A/C/G/T/U) or backbone vs base / 碱基类型(A/C/G/T/U)或主链vs碱基
+
+Define / 定义：
+
+```
+cₐ(i) ∈ {1,...,Cₐ},  c_B(j) ∈ {1,...,C_B}
+```
+
+Then / 则：
+
+```
+h_{cₐ,c_b,k} = Σ_{i,j: cₐ(i)=cₐ, c_B(j)=c_b} φₖ(rᵢⱼ) · f(gᵢⱼ)
+```
+
+Stacking these h_{cₐ,c_b,k} (and possibly their min/max/mean/median) gives a **global mGLI descriptor** for a structure pair.
+
+堆叠这些 h_{cₐ,c_b,k}（以及可能的最小/最大/均值/中位数）可以得到结构对的**全局mGLI描述符**。
+
+---
+
+## 3. Unified Geometry Representation / 统一几何表示
+
+We represent each biomolecule as / 我们将每个生物分子表示为：
+
+- `Node` / 节点: atom / residue / base / 原子/残基/碱基
+- `Segment` / 线段: oriented segment between two 3D points, optionally attached to nodes / 两个3D点之间的有向线段，可选地附着到节点
+- `Curve` / 曲线: a polyline made of segments, e.g. backbone, side-chain, ring / 由线段组成的折线，如主链、侧链、环
+- `Structure` / 结构: collection of nodes + curves + mapping from nodes to their local segments / 节点+曲线的集合+节点到其局部线段的映射
+
+This supports / 这支持：
+
+- small molecule / 小分子:
+  - backbone curves (bond chains) / 主链曲线（键链）
+  - ring curves (aromatic / aliphatic rings) / 环曲线（芳香环/脂肪环）
+- protein / 蛋白质:
+  - backbone curve (Cα trace) / 主链曲线（Cα追踪）
+  - sidechain curves per residue / 每个残基的侧链曲线
+- nucleic acid / 核酸:
+  - backbone curve (phosphate or sugar-phosphate) / 主链曲线（磷酸或糖-磷酸）
+  - base ring curves / 碱基环曲线
+
+---
+
+## 4. Installation & Dependencies / 安装和依赖
+
+GaussBio3D **requires RDKit** for small-molecule I/O (SDF/MOL2/SMILES) and **requires Biopython** for PDB/mmCIF parsing.
+GaussBio3D **强制依赖 RDKit**（用于小分子 I/O：SDF/MOL2/SMILES）以及 **Biopython**（用于 PDB/mmCIF 解析）。
+
+Required / 必需：
+
+- Python 3.9+
+- `numpy`
+- `rdkit`
+- `biopython`
+
+Recommended installation on Windows/macOS/Linux via Conda（推荐方式）：
+
+```bash
+conda install -c conda-forge rdkit
+pip install gaussbio3d
+```
+
+If you prefer pip-only and have an RDKit wheel available for your platform:
+若仅使用 pip 并且你的平台可用 RDKit 轮子：
+
+```bash
+pip install rdkit-pypi
+pip install gaussbio3d
+```
+
+From source / 从源码安装：
+
+```bash
+git clone https://github.com/yourusername/GaussBio3D
+cd GaussBio3D
+pip install -e .
+```
+
+---
+
+## 5. Basic Usage / 基本用法
+
+### 5.1 Compute a Protein–Ligand Global mGLI Descriptor / 计算蛋白质-配体全局mGLI描述符
+
+```python
+from gaussbio3d.molecules import Protein, Ligand
+from gaussbio3d.config import MgliConfig
+from gaussbio3d.features.descriptor import global_mgli_descriptor
+
+# Load protein and ligand / 加载蛋白质和配体
+prot = Protein.from_pdb("examples/target.pdb", chain_id="A")
+lig = Ligand.from_sdf("examples/drug.sdf")
+
+# Configure mGLI parameters / 配置mGLI参数
+config = MgliConfig(
+    distance_bins=[0.0, 3.0, 6.0, 10.0, 20.0],
+    use_rbf=False,
+    signed=False,
+    group_mode_A="residue_class",
+    group_mode_B="element",
+)
+
+# Compute global descriptor / 计算全局描述符
+feat = global_mgli_descriptor(prot, lig, config)
+print("Feature shape:", feat.shape)
+```
+
+Quick DTI example / 快速 DTI 示例：
+
+```python
+from gaussbio3d.tasks.dti import compute_dti_features
+from gaussbio3d.config import MgliConfig
+
+cfg = MgliConfig()
+feats = compute_dti_features(
+    pdb_path="examples/target.pdb",  # supports .pdb or .cif
+    sdf_path="examples/drug.sdf",
+    chain_id="A",
+    config=cfg,
+)
+print({k: v.shape for k, v in feats.items()})
+```
+
+### 5.2 Node-level mGLI Features for a DTI Model / DTI模型的节点级mGLI特征
+
+```python
+from gaussbio3d.features.node_features import node_mgli_features
+
+# Compute node-level features / 计算节点级特征
+node_feat_prot = node_mgli_features(prot, lig, config)
+node_feat_lig  = node_mgli_features(lig, prot, config)
+```
+
+These can be concatenated with PLM embeddings / GeoGNN embeddings as 3D topological channels.
+
+这些可以与PLM嵌入/GeoGNN嵌入连接作为3D拓扑通道。
+
+### 5.3 Pairwise mGLI Matrix for Cross-attention / 用于交叉注意力的成对mGLI矩阵
+
+```python
+from gaussbio3d.features.pairwise import pairwise_mgli_matrix
+
+# Compute pairwise matrix / 计算成对矩阵
+M = pairwise_mgli_matrix(prot, lig, config)
+# M.shape = (N_prot_nodes, N_lig_nodes)
+```
+
+Use M as a bias term or edge feature in a DTI cross-attention GNN.
+
+在DTI交叉注意力GNN中将M用作偏置项或边特征。
+
+---
+
+## 6. Tasks Helpers (DTI / PPI / MTI) / 任务辅助工具
+
+We provide thin convenience wrappers in `gaussbio3d.tasks` to integrate easily with your existing pipelines.
+
+我们在 `gaussbio3d.tasks` 中提供了简便的包装器，以便轻松集成到您现有的流程中。
+
+Example / 示例:
+
+```python
+from gaussbio3d.tasks.dti import compute_dti_features
+
+# Compute all DTI features at once / 一次性计算所有DTI特征
+dti_feats = compute_dti_features(
+    pdb_path="examples/target.pdb",
+    sdf_path="examples/drug.sdf",
+)
+```
+
+---
+
+## 7. Caveats & TODO / 注意事项和待办
+
+* This library is intended as a **research prototype** / 本库旨在作为**研究原型**:
+
+  * efficiency is not highly optimized yet (GLI is O(#segments²) in the worst case)
+    效率尚未高度优化（GLI在最坏情况下是O(#segments²)）
+  * some geometric heuristics (ring detection, nucleic acid parsing) are simplified and should be refined for production use
+    一些几何启发式方法（环检测、核酸解析）被简化，应在生产使用中进一步优化
+
+* You are encouraged to / 建议您：
+
+  * adjust distance bins / RBF parameters to your task
+    根据您的任务调整距离分箱/RBF参数
+  * design more nuanced groupings (e.g. binding pocket residues vs non-pocket)
+    设计更细致的分组（如结合口袋残基vs非口袋残基）
+  * integrate with your causal / adversarial training pipeline to debias abundance
+    与您的因果/对抗训练流程集成以消除丰度偏差
+
+---
+
+## 8. Project Structure / 项目结构
+
+```
+GaussBio3D/
+├── gaussbio3d/
+│   ├── __init__.py
+│   ├── config.py              # Configuration / 配置
+│   ├── core/                  # Core algorithms / 核心算法
+│   │   ├── geometry.py        # Geometric primitives / 几何基元
+│   │   └── gli.py             # GLI computation / GLI计算
+│   ├── features/              # Feature extraction / 特征提取
+│   │   ├── descriptor.py      # Global descriptors / 全局描述符
+│   │   ├── node_features.py   # Node-level features / 节点级特征
+│   │   └── pairwise.py        # Pairwise features / 成对特征
+│   ├── io/                    # Input/Output / 输入输出
+│   │   ├── mol.py             # Molecule file I/O / 分子文件I/O
+│   │   └── pdb.py             # PDB file I/O / PDB文件I/O
+│   ├── molecules/             # Molecule representations / 分子表示
+│   │   ├── ligand.py          # Small molecules / 小分子
+│   │   ├── protein.py         # Proteins / 蛋白质
+│   │   └── nucleic_acid.py    # Nucleic acids / 核酸
+│   └── tasks/                 # Task-specific helpers / 特定任务辅助
+│       ├── dti.py             # Drug-Target Interaction / 药物-靶点交互
+│       ├── ppi.py             # Protein-Protein Interaction / 蛋白质-蛋白质交互
+│       └── mti.py             # Molecule-Target Interaction / 分子-靶点交互
+├── examples/                  # Example scripts / 示例脚本
+├── tests/                     # Unit tests / 单元测试
+├── README.md
+├── setup.py
+└── requirements.txt
+```
+
+---
+
+## License / 许可证
+
+MIT License
+
+---
+
+## Citation / 引用
+
+If you use GaussBio3D in your research, please cite:
+
+如果您在研究中使用了GaussBio3D，请引用：
+
+```bibtex
+@software{gaussbio3d,
+  title={GaussBio3D: Multiscale Gauss Linking Integral Library for Biomolecular 3D Topology},
+  author={Your Name},
+  year={2025},
+  url={https://github.com/yourusername/GaussBio3D}
+}
+```
