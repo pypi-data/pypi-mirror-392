@@ -1,0 +1,3 @@
+"""Screenshot Cleaner - A CLI tool for cleaning up old macOS screenshots."""
+
+__version__ = "1.1.0"
