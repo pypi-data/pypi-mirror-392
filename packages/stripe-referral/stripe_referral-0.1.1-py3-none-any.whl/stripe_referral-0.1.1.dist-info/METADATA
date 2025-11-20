@@ -1,0 +1,162 @@
+Metadata-Version: 2.4
+Name: stripe-referral
+Version: 0.1.1
+Summary: Framework agnostic referral program package with Stripe Connect integration
+Author-email: CarterPerez-dev <carterperez@certgames.com>
+License: MIT
+Project-URL: Homepage, https://github.com/CarterPerez-dev/stripe-referral
+Project-URL: Documentation, https://github.com/CarterPerez-dev/stripe-referral#readme
+Project-URL: Repository, https://github.com/CarterPerez-dev/stripe-referral
+Project-URL: Issues, https://github.com/CarterPerez-dev/stripe-referral/issues
+Project-URL: Website, https://certgames.com
+Keywords: referral,affiliate,code,stripe-code,stripe,stripe-connect,wise,payout,invite-code,saas,subscription,marketing
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Office/Business :: Financial
+Classifier: Typing :: Typed
+Requires-Python: >=3.11
+Description-Content-Type: text/x-rst
+License-File: LICENSE
+Requires-Dist: alembic>=1.17.0
+Requires-Dist: pydantic>=2.10.0
+Requires-Dist: pydantic-settings>=2.10.0
+Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: sqlalchemy>=2.0.0
+Requires-Dist: stripe>=12.0.0
+Requires-Dist: psycopg2-binary>=2.9.0
+Provides-Extra: dev
+Requires-Dist: bandit[toml]==1.8.6; extra == "dev"
+Requires-Dist: deptry==0.24.0; extra == "dev"
+Requires-Dist: factory-boy==3.3.3; extra == "dev"
+Requires-Dist: faker==38.0.0; extra == "dev"
+Requires-Dist: freezegun==1.5.5; extra == "dev"
+Requires-Dist: ipython==9.7.0; extra == "dev"
+Requires-Dist: mypy==1.18.2; extra == "dev"
+Requires-Dist: pip-audit==2.9.0; extra == "dev"
+Requires-Dist: pip-tools==7.5.0; extra == "dev"
+Requires-Dist: pre-commit==4.3.0; extra == "dev"
+Requires-Dist: pytest==8.4.1; extra == "dev"
+Requires-Dist: pytest-asyncio==1.3.0; extra == "dev"
+Requires-Dist: pytest-cov==6.2.1; extra == "dev"
+Requires-Dist: pytest-dotenv==0.5.2; extra == "dev"
+Requires-Dist: pytest-env==1.1.5; extra == "dev"
+Requires-Dist: pytest-mock==3.14.1; extra == "dev"
+Requires-Dist: pylint==3.3.8; extra == "dev"
+Requires-Dist: pylint-per-file-ignores==1.4.0; extra == "dev"
+Requires-Dist: pylint-plugin-utils==0.9.0; extra == "dev"
+Requires-Dist: pylint-pydantic==0.3.5; extra == "dev"
+Requires-Dist: ruff==0.14.5; extra == "dev"
+Requires-Dist: types-stripe==3.5.2.20240106; extra == "dev"
+Requires-Dist: yapf==0.43.0; extra == "dev"
+Provides-Extra: mysql
+Requires-Dist: pymysql==1.1.2; extra == "mysql"
+Requires-Dist: cryptography==46.0.3; extra == "mysql"
+Dynamic: license-file
+
+==================
+stripe-referral
+==================
+
+**Framework Agnostic Referral Program Package with Stripe Connect Integration**
+
+.. image:: https://img.shields.io/pypi/v/stripe-referral.svg
+   :target: https://pypi.org/project/stripe-referral/
+   :alt: PyPI Version
+
+.. image:: https://img.shields.io/pypi/pyversions/stripe-referral.svg
+   :target: https://pypi.org/project/stripe-referral/
+   :alt: Python Versions
+
+.. image:: https://img.shields.io/badge/license-MIT-blue.svg
+   :target: https://github.com/CarterPerez-dev/stripe-referral/blob/main/LICENSE
+   :alt: License
+
+**CertGames.com | ©AngelaMos | 2025**
+
+----
+
+Overview
+========
+
+``stripe-referral`` is a production-ready, framework-agnostic Python package for building 
+referral programs with automated payout processing.
+
+Features
+========
+
+- **Framework Agnostic**: Works with Flask, FastAPI, Django, or standalone
+- **Multiple Payout Methods**: Stripe Connect, Wise API, Manual bank transfers
+- **Type Safe**: Full TypedDict returns and modern type hints
+- **Database Agnostic**: SQLAlchemy-based (PostgreSQL, MySQL, SQLite)
+- **Production Ready**: Alembic migrations, error handling, validation
+- **Clean Architecture**: Repository pattern, service layer, adapter pattern
+
+----
+
+Quick Start
+===========
+
+Installation
+------------
+
+::
+
+    pip install stripe-referral
+
+Basic Usage
+-----------
+
+::
+
+    from stripe_referral import ReferralService, get_db
+
+    # Generate referral code
+    with get_db() as db:
+        result = ReferralService.create_code(
+            db=db,
+            user_id="user_123",
+            program_key="certgames"
+        )
+        print(f"Your code: {result['code']}")
+
+    # Track referral conversion
+    with get_db() as db:
+        tracking = ReferralService.track_referral(
+            db=db,
+            code="REF_ABC123",
+            referred_user_id="user_456"
+        )
+        print(f"Earned: ${tracking['amount_earned']}")
+
+----
+
+Documentation
+=============
+
+Coming soon...
+
+----
+
+Contributing
+============
+
+See `CONTRIBUTING.rst <CONTRIBUTING.rst>`_ for development setup and guidelines.
+
+----
+
+License
+=======
+
+MIT License - see `LICENSE <LICENSE>`_ for details.
+
+----
+
+Security
+========
+
+See `SECURITY.rst <SECURITY.rst>`_ for our security policy and how to report vulnerabilities.
