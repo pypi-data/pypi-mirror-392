@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trends - Code Metrics Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="images/logo.svg" sizes="any" type="image/svg+xml">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f9fafb;
+  margin: 0;
+  padding: 0;
+}
+
+.metrics-section {
+  padding: 10px;
+}
+
+.metrics-section h1 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.metric-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.metric-card h2 {
+  font-size: 1.4rem;
+  color: #0078d4;
+  margin-bottom: 10px;
+}
+
+.metric-card p {
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.4;
+}
+
+.reference-link {
+  margin-top: auto;
+  text-decoration: none;
+  color: #0078d4;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.reference-link:hover {
+  color: #005a9e;
+}
+    
+</style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <img src="images/logo.svg" alt="Metripy Logo" class="logo-icon">
+                    <h2>Metripy</h2>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item">
+                        <a href="index.html" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Overview</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="files.html" class="nav-link">
+                            <i class="fas fa-file-code"></i>
+                            <span>Files</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="top_offenders.html" class="nav-link">
+                            <i class="fa-solid fa-stethoscope"></i>
+                            <span>Top Offenders</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="git_analysis.html" class="nav-link">
+                            <i class="fab fa-git-alt"></i>
+                            <span>Git Analysis</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="coupling.html" class="nav-link">
+                            <i class="fas fa-project-diagram"></i>
+                            <span>Coupling</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="dependencies.html" class="nav-link">
+                            <i class="fas fa-cubes"></i>
+                            <span>Dependencies</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="trends.html" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Trends</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="code_smells.html" class="nav-link">
+                            <i class="fas fa-bug"></i>
+                            <span>Code Smells</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="metrics.html" class="nav-link">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Explanations</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="project-info">
+                    <h4>Project: {{project_name}}</h4>
+                    <p>Last updated: {{last_updated}}</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <div class="header-content">
+                    <h1>Metrics</h1>
+                    <p class="subtitle">Explanation of metrics. What do we show and what does it tell us</p>
+                </div>
+            </header>
+
+            <section class="metrics-section">
+                <div class="metrics-container">
+                    <div class="metric-card">
+                        <h2>Lines of Code (LOC)</h2>
+                        <p class="description"><strong>What is it?</strong> The total number of lines in your source code, including comments and blank lines.</p>
+                        <p class="impact"><strong>Impact of high value:</strong> A very high LOC can indicate complexity, making the code harder to maintain and test.</p>
+                        <a href="https://en.wikipedia.org/wiki/Source_lines_of_code" target="_blank">Learn more</a>
+                    </div>
+                </div>
+            </section>
+            <section class="metrics-section">
+                <div class="metrics-container">
+                    <div class="metric-card">
+                        <h2>Cyclomatic Complexity</h2>
+                        <p class="description"><strong>What is it?</strong> A measure of the number of independent paths through your code.</p>
+                        <p class="impact"><strong>Impact of high value:</strong> High complexity often means harder testing and increased risk of bugs.</p>
+                        <a href="https://en.wikipedia.org/wiki/Cyclomatic_complexity" target="_blank">Learn more</a>
+                    </div>
+                </div>
+            </section>
+            <section class="metrics-section">
+                <div class="metrics-container">
+                    <div class="metric-card">
+                        <h2>Cognitive Complexity</h2>
+                        <p class="description"><strong>What is it?</strong> A measure of how difficult code is to understand based on its control flow and nesting.</p>
+                        <p class="impact"><strong>Impact of high value:</strong> High cognitive complexity makes code harder to read and maintain, increasing the risk of bugs.</p>
+                        <a href="https://medium.com/@himanshuganglani/clean-code-cognitive-complexity-by-sonarqube-659d49a6837d" target="_blank">Learn more</a>
+                    </div>
+                </div>
+            </section>
+            <section class="metrics-section">
+                <div class="metrics-container">
+                    <div class="metric-card">
+                        <h2>Maintainability Index</h2>
+                        <p class="description"><strong>What is it?</strong> A composite metric that estimates how easy it is to maintain code, based on LOC, complexity, and comments.</p>
+                        <p class="impact"><strong>Impact of low value:</strong> A low maintainability index suggests the code is difficult to modify and prone to errors.</p>
+                        <a href="https://learn.microsoft.com/en-us/visualstudio/code-quality/code-metrics-maintainability-index-range-and-meaning?view=visualstudio" target="_blank">Learn more</a>
+                    </div>
+                </div>
+            </section>
+            <section class="metrics-section">
+                <div class="metrics-container">
+                    <div class="metric-card">
+                        <h2>Average Method Size</h2>
+                        <p class="description"><strong>What is it?</strong> The average number of lines per method or function in your codebase.</p>
+                        <p class="impact"><strong>Impact of high value:</strong> Large methods often indicate poor modularity, making code harder to test and reuse.</p>
+                        <a href="https://martinfowler.com/bliki/FunctionLength.html" target="_blank">Learn more</a>
+                    </div>
+                </div>
+            </section>
+            <section class="metrics-section">
+                <div class="metrics-container">
+                    <div class="metric-card">
+                        <h2>Instability</h2>
+                        <p class="description"><strong>What is it?</strong> A metric that measures how likely a module is to change based on its dependencies (ratio of efferent to afferent couplings).</p>
+                        <p class="impact"><strong>Impact of high value:</strong> High instability means the module depends heavily on others, making it fragile and harder to maintain.</p>
+                        <a href="https://en.wikipedia.org/wiki/Software_package_metrics" target="_blank">Learn more</a>
+                    </div>
+                </div>
+            </section>
+
+        
+
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Embed data directly from template engine
+    </script>
+</body>
+</html>
+
