@@ -1,0 +1,57 @@
+{# Main InnerLoop prompt template - handles all scenarios #}
+{# User's prompt #}
+{{ ctx.user_prompt }}
+
+{# ================================================================ #}
+{# Permission Statement (if non-default) #}
+{# ================================================================ #}
+{% if not ctx.is_default_permissions %}
+
+## Permissions
+
+{% if ctx.allowed_tools %}
+✓ Allowed tools:
+{% for tool in ctx.allowed_tools %}
+- {{ tool }}: {{ ctx.TOOL_DESCRIPTIONS[tool] }}
+{% endfor %}
+
+{% endif %}
+{% if ctx.denied_tools %}
+✗ Denied tools:
+{% for tool in ctx.denied_tools %}
+- {{ tool }}: {{ ctx.TOOL_AVOID_TEXT[tool] }}
+{% endfor %}
+
+{% endif %}
+{% if ctx.has_allowed_tools %}
+Use only allowed tools. Denied tools will fail.
+{% else %}
+All tools denied and will fail.
+{% endif %}
+{% endif %}
+
+{# ================================================================ #}
+{# Structured Output Instructions (if has_schema) #}
+{# ================================================================ #}
+{% if ctx.has_schema %}
+
+{# --- Retry Feedback (if retry) --- #}
+{% if ctx.is_retry %}
+Your previous JSON failed validation.
+
+Errors:
+{{ ctx.error_list }}
+
+Use the validation error as the source of truth.
+{% endif %}
+
+{# --- Mode-Specific Instructions --- #}
+Return ONLY JSON inside <json>...</json> tags matching the schema.
+No extra text.
+
+{# --- Schema Block --- #}
+```yaml
+{{ ctx.schema_yaml }}
+```
+
+{% endif %}
