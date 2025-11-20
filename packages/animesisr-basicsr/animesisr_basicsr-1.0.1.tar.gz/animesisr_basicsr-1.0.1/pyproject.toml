@@ -1,0 +1,58 @@
+[build-system]
+requires = [
+    "setuptools>=61.0",
+    "cython",
+    "numpy",
+    "torch",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "animesisr-basicsr"
+
+dynamic = ["version"]
+description = "Open Source Image and Video Super-Resolution Toolbox"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [
+    {name = "Xintao Wang", email = "xintao.wang@outlook.com"},
+]
+keywords = [
+    "computer vision",
+    "restoration",
+    "super resolution",
+    "image processing",
+    "video processing"
+]
+classifiers = [
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Multimedia :: Graphics",
+]
+requires-python = ">=3.7"
+
+dependencies = [
+  "addict", "future", "lmdb", "numpy", "opencv-python", "Pillow",
+  "pyyaml", "requests", "scikit-image", "scipy", "tb-nightly",
+  "torch", "torchvision", "tqdm", "yapf", "cython"
+]
+
+[project.urls]
+Homepage = "https://github.com/TianZerL/BasicSR"
+Repository = "https://github.com/TianZerL/BasicSR"
+
+
+[tool.setuptools.packages.find]
+exclude = [
+    "options",
+    "datasets",
+    "experiments",
+    "results",
+    "tb_logger",
+    "wandb"
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "basicsr.version.__version__"}
