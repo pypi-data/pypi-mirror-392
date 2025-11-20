@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling>=1.4.0", "jupyterlab~=4.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "jupyter_ai_wekeo"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.8"
+classifiers = [
+    "Framework :: Jupyter",
+    "Framework :: Jupyter :: JupyterLab",
+    "Framework :: Jupyter :: JupyterLab :: 4",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+version = "0.1.4"
+description = "A Jupyter AI extension."
+authors = [
+    { name = "test", email = "test@mail.org" },
+]
+dependencies = ["jupyter_ai>=2.23,<2.29","langserve[client]<=0.2.3","fastapi","langchain-openai","httpx<0.28"]
+
+[project.entry-points."jupyter_ai.model_providers"]
+my-provider = "jupyter_ai_wekeo.provider:WekeoProvider"
+
+[project.entry-points."jupyter_ai.chat_handlers"]
+
+[tool.hatch.build.hooks.version]
+path = "jupyter_ai_wekeo/_version.py"
+
+[tool.check-wheel-contents]
+ignore = ["W002"]
+
+[tool.isort]
+profile = "black"
