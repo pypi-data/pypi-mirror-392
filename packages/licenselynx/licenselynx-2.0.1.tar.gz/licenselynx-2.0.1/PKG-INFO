@@ -1,0 +1,51 @@
+Metadata-Version: 2.4
+Name: licenselynx
+Version: 2.0.1
+Summary: Unified License Mapper
+License-Expression: BSD-3-Clause
+License-File: LICENSE
+Author: Leo Reinmann
+Author-email: leo.reinmann@siemens.com
+Requires-Python: >=3.11
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Description-Content-Type: text/markdown
+
+# LicenseLynx for Python
+
+To use LicenseLynx in Python, you can call the ``map`` method from the ``LicenseLynx`` module to map a license name to its canonical form.
+The return value is an object with the canonical name and the source of the license.
+
+## Installation
+
+To install the library, run following command:
+
+```shell
+pip install licenselynx 
+```
+
+## Usage
+
+```python
+from licenselynx.licenselynx import LicenseLynx
+
+# Map the license name
+license_object = LicenseLynx.map("licenseName")
+
+print(license_object.id)
+print(license_object.src)
+
+# Map the license name with risky mappings enabled
+license_object = LicenseLynx.map("licenseName", risky=True)
+
+```
+
+## License
+
+This project is licensed under the [BSD 3-Clause "New" or "Revised" License](../LICENSE) (SPDX-License-Identifier: BSD-3-Clause).
+
+Copyright (c) Siemens AG 2025 ALL RIGHTS RESERVED
+
