@@ -1,0 +1,86 @@
+Metadata-Version: 2.3
+Name: nonebot-plugin-ipinfo
+Version: 1.0.1
+Summary: NoneBot IP 信息查询插件
+Author: lyqgzbl
+Author-email: lyqgzbl <122811297+lyqgzbl@users.noreply.github.com>
+Requires-Dist: ipinfo>=5.1.0,<6.0.0
+Requires-Dist: nonebot2>=2.2.1,<3.0.0
+Requires-Dist: nonebot-plugin-argot>=0.2.2
+Requires-Dist: ip2location-io>=1.0.0,<2.0.0
+Requires-Dist: nonebot-plugin-alconna>=0.57.1,<1.0.0
+Requires-Python: >=3.10, <4.0
+Project-URL: Documentation, https://github.com/lyqgzbl/nonebot-plugin-ipinfo#readme
+Project-URL: Homepage, https://github.com/lyqgzbl/nonebot-plugin-ipinfo
+Project-URL: Repository, https://github.com/lyqgzbl/nonebot-plugin-ipinfo
+Description-Content-Type: text/markdown
+
+<!-- markdownlint-disable MD033 MD036 MD041 -->
+
+<div align="center">
+
+<a href="https://v2.nonebot.dev/store">
+  <img src="https://raw.githubusercontent.com/A-kirami/nonebot-plugin-template/resources/nbp_logo.png" width="180" height="180" alt="NoneBotPluginLogo">
+</a>
+
+<p>
+  <img src="https://raw.githubusercontent.com/lgc-NB2Dev/readme/main/template/plugin.svg" alt="NoneBotPluginText">
+</p>
+
+# nonebot-plugin-ipinfo
+
+_✨ 查询 IP 地址的信息 ✨_
+
+![License](https://img.shields.io/pypi/l/nonebot-plugin-ipinfo)
+![PyPI](https://img.shields.io/pypi/v/nonebot-plugin-ipinfo.svg)
+![Python](https://img.shields.io/badge/python-3.10+-blue.svg)  
+[![NoneBot Registry](https://img.shields.io/endpoint?url=https%3A%2F%2Fnbbdg.lgc2333.top%2Fplugin%2Fnonebot-plugin-ipinfo)](https://registry.nonebot.dev/plugin/nonebot-plugin-apod:ipinfo)
+[![Supported Adapters](https://img.shields.io/endpoint?url=https%3A%2F%2Fnbbdg.lgc2333.top%2Fplugin-adapters%2Fnonebot-plugin-alconna)](https://registry.nonebot.dev/plugin/nonebot-plugin-alconna:nonebot_plugin_alconna)
+
+</div>
+
+## 安装
+使用nb-cli [推荐]
+```shell
+nb plugin install nonebot-plugin-ipinfo
+```
+使用pip
+```shell
+pip install nonebot-plugin-ipinfo
+```
+
+## 使用
+命令需要加 [NoneBot 命令前缀](https://nonebot.dev/docs/appendices/config#command-start-和-command-separator) (默认为`/`)  
+命令 `ipinfo` / `ip` 查询 IP 地址的信息  
+命令 `domaininfo` 查询域名的 WHOIS 信息  
+命令 `getdomain` 查询 IP 地址的托管域名  
+以上命令均支持使用 `-v` 命令选项输出详细的信息  
+
+
+## 配置项
+
+配置方式：直接在 NoneBot 全局配置文件中添加以下配置项即可
+
+### ipinfo_access_token [必填]
+
+- 类型：`str`
+- 默认值：`None`
+- 说明：[iPinfo](https://ipinfo.io/) 的 access_token 
+
+### ipinfo_use_ip2location [选填]
+
+- 类型：`bool`
+- 默认值：`False`
+- 说明：是否使用 ip2location 作为数据源
+
+### ipinfo_ip2location_api_key [选填]
+
+- 类型：`str`
+- 默认值：`None`
+- 说明：[ip2location](https://www.ip2location.io/) 的 api_key
+
+### ipinfo_verbose_use_reference [选填]
+
+- 类型：`bool`
+- 默认值：`False`
+- 说明：`-v` 模式是否使用合并转发消息发送
