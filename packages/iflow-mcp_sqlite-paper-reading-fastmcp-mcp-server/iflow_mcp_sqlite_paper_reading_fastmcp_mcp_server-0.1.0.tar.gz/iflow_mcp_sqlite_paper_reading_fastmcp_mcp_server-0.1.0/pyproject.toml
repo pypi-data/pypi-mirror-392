@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "iflow-mcp_sqlite-paper-reading-fastmcp-mcp-server"
+version = "0.1.0"
+description = "A flexible system for managing various types of sources (papers, books, webpages, etc.) and integrating them with knowledge graphs"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastmcp>=0.1.0",
+]
+
+[project.scripts]
+sqlite-paper-reading-fastmcp-mcp-server = "sqlite_paper_fastmcp_server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
