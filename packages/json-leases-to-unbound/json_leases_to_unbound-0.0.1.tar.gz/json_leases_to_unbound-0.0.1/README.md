@@ -1,0 +1,372 @@
+# json-leases-to-unbound
+
+[![CI](https://github.com/cjuniorfox/json-leases-to-unbound/actions/workflows/run-tests.yml/badge.svg)](https://github.com/cjuniorfox/json-leases-to-unbound/actions/workflows/run-tests.yml)
+[![codecov](https://codecov.io/gh/cjuniorfox/json-leases-to-unbound/branch/main/graph/badge.svg)](https://codecov.io/gh/cjuniorfox/json-leases-to-unbound)
+
+A Python service that monitors JSON lease files and automatically synchronizes them to an Unbound DNS server in real-time. This tool bridges the gap between DHCP/SLAAC lease management systems and local DNS resolution.
+
+## Features
+
+- 🔄 **Real-time Monitoring** - Watches lease directories for changes using filesystem events
+- 🌐 **IPv4 & IPv6 Support** - Handles both A and AAAA DNS records with automatic PTR record generation
+- 🎯 **Smart Lease Management** - Automatically adds, updates, and removes DNS entries based on lease state
+- 🔌 **Flexible Unbound Integration** - Supports local and remote Unbound servers with custom config files
+- 📝 **Comprehensive Logging** - Configurable log levels for debugging and monitoring
+- ✅ **Well Tested** - 91% code coverage with 33 passing tests
+  - Coverage badge above powered by Codecov (uploaded from GitHub Actions)
+
+## How It Works
+
+1. **Monitors** a directory containing JSON lease files (typically from SLAAC or DHCP services)
+2. **Extracts** hostname and IP address information from lease files
+3. **Generates** DNS records (AAAA/A and PTR) for each active lease
+4. **Synchronizes** with Unbound DNS server using `unbound-control`
+5. **Updates** DNS records when leases change or expire
+
+### DNS Record Generation
+
+For each lease, the service creates:
+- **AAAA record** (or A for IPv4): Maps hostname to IP address
+  - Example: `test-host.lan IN AAAA 2001:db8::1`
+- **PTR record**: Maps IP address back to hostname
+  - Example: `1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa PTR test-host.lan`
+
+## Installation
+
+### From Source
+
+```sh
+git clone https://github.com/junior/json-leases-to-unbound.git
+cd json-leases-to-unbound
+pip install -e .
+```
+
+### Using pip (when published)
+
+```sh
+pip install json-leases-to-unbound
+```
+
+## Usage
+
+### Command Line
+
+```sh
+json-leases-to-unbound [OPTIONS]
+```
+
+### Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--log-level` | `INFO` | Logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL |
+| `--source` | `/run/slaac-resolver/` | Source directory containing JSON lease files |
+| `--domain` | `lan` | Default domain suffix for hostnames |
+| `--unbound-server` | `None` | Remote Unbound server (IP:port) |
+| `--config-file` | `None` | Path to Unbound config file |
+
+### Examples
+
+**Monitor default directory with INFO logging:**
+```sh
+json-leases-to-unbound
+```
+
+**Monitor custom directory with debug logging:**
+```sh
+json-leases-to-unbound --source /var/lib/dhcp/leases --log-level DEBUG
+```
+
+**Use custom domain:**
+```sh
+json-leases-to-unbound --domain home.local
+```
+
+**Connect to remote Unbound server:**
+```sh
+json-leases-to-unbound --unbound-server 192.168.1.1:8953
+```
+
+**Use custom Unbound config:**
+```sh
+json-leases-to-unbound --config-file /etc/unbound/unbound.conf
+```
+
+### As a Python Module
+
+```python
+from json_leases_to_unbound import main
+
+main(
+    log_level='INFO',
+    source='/run/slaac-resolver/',
+    domain='lan',
+    unbound_server=None,
+    config_file=None
+)
+```
+
+## JSON Lease File Format
+
+The service expects JSON files with the following structure:
+
+```json
+[
+  {
+    "Address": [8193, 3512, 0, 0, 0, 0, 0, 1],
+    "AddressType": "IPv6",
+    "Hostname": "test-host",
+    "Expire": "2025-12-31T23:59:59Z"
+  },
+  {
+    "Address": [192, 168, 1, 100],
+    "AddressType": "IPv4",
+    "Hostname": "another-host",
+    "Expire": "2025-12-31T23:59:59Z"
+  }
+]
+```
+
+### Field Descriptions
+
+- **Address**: Array of integers representing the IP address
+  - IPv6: 8 elements (e.g., `[8193, 3512, 0, 0, 0, 0, 0, 1]` → `2001:db8::1`)
+  - IPv4: 4 elements (e.g., `[192, 168, 1, 100]` → `192.168.1.100`)
+- **AddressType**: String indicating address type (`"IPv4"` or `"IPv6"`)
+- **Hostname**: String hostname for DNS entry
+- **Expire**: ISO 8601 timestamp for lease expiration
+
+## Requirements
+
+### System Requirements
+
+- Python 3.8 or higher
+- `unbound-control` binary (part of Unbound DNS server)
+- Appropriate permissions to execute `unbound-control`
+
+### Python Dependencies
+
+- `watchdog>=2.1.9,<3.0` - Filesystem monitoring
+
+### Development/Testing Dependencies
+
+- `pytest>=7.0.0`
+- `pytest-mock>=3.10.0`
+- `pytest-cov>=4.0.0`
+
+## Development
+
+### Setting Up Development Environment
+
+```sh
+# Clone the repository
+git clone https://github.com/junior/json-leases-to-unbound.git
+cd json-leases-to-unbound
+
+# Create virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install in editable mode with test dependencies
+pip install -e ".[test]"
+```
+
+### Running Tests
+
+```sh
+# Run all tests
+pytest
+
+# Run with coverage report
+pytest --cov=json_leases_to_unbound --cov-report=html
+
+# Run specific test file
+pytest tests/test_core.py
+
+# Run with verbose output
+pytest -v
+```
+
+See [TESTING.md](TESTING.md) for detailed testing documentation.
+
+### Project Structure
+
+```
+json-leases-to-unbound/
+├── json_leases_to_unbound/
+│   ├── __init__.py          # Package initialization
+│   ├── __main__.py          # Entry point for python -m
+│   ├── cli.py               # Command-line interface
+│   └── core.py              # Core functionality
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py          # Pytest fixtures
+│   ├── test_cli.py          # CLI tests
+│   ├── test_core.py         # Core functionality tests
+│   └── README.md            # Testing documentation
+├── pyproject.toml           # Project metadata and build config
+├── requirements.txt         # Dependencies
+├── README.md                # This file
+└── TESTING.md              # Testing guide
+```
+
+## How It Works Internally
+
+### Monitoring Process
+
+1. **Initial Scan**: Processes all existing lease files in the source directory
+2. **Event Loop**: Watches for filesystem events (create, modify, delete)
+3. **Change Detection**: Compares new lease data with active leases in memory
+4. **DNS Updates**: Generates and applies appropriate `unbound-control` commands
+
+### Lease State Management
+
+The service maintains an in-memory cache of active leases keyed by filename and hostname. When changes are detected:
+
+- **New Lease**: Adds DNS records to Unbound
+- **Modified Lease**: Removes old records and adds new ones
+- **Deleted File**: Removes all DNS records associated with that file
+- **Expired/Missing Lease**: Removes DNS records for leases no longer in file
+
+### Unbound Control Integration
+
+The service discovers the `unbound-control` binary automatically in common locations:
+- `/usr/sbin/unbound-control`
+- `/usr/bin/unbound-control`
+- `/usr/local/sbin/unbound-control`
+- Any location in `PATH`
+
+Commands used:
+- `unbound-control local_datas` - Add DNS records
+- `unbound-control local_datas_remove` - Remove DNS records
+
+## Use Cases
+
+### SLAAC (Stateless Address Autoconfiguration)
+
+Monitor IPv6 SLAAC leases and provide DNS resolution for auto-configured addresses:
+
+```sh
+json-leases-to-unbound --source /run/slaac-resolver/ --domain lan
+```
+
+### DHCPv4/DHCPv6 Integration
+
+Integrate with DHCP servers that export lease information as JSON:
+
+```sh
+json-leases-to-unbound --source /var/lib/dhcp/leases/ --domain home.local
+```
+
+### Multi-Site DNS Management
+
+Connect to remote Unbound servers for centralized DNS management:
+
+```sh
+json-leases-to-unbound \
+  --source /var/lib/leases/ \
+  --unbound-server 10.0.0.1:8953 \
+  --domain site1.internal
+```
+
+## Troubleshooting
+
+### Service Not Finding unbound-control
+
+Ensure `unbound-control` is installed and in PATH:
+
+```sh
+which unbound-control
+```
+
+If not found, install Unbound:
+
+```sh
+# Debian/Ubuntu
+sudo apt-get install unbound
+
+# Fedora/RHEL
+sudo dnf install unbound
+
+# macOS
+brew install unbound
+```
+
+### Permission Denied Errors
+
+Ensure the user running the service has permissions to:
+- Read the source lease directory
+- Execute `unbound-control`
+- Access Unbound's control socket (typically `/var/run/unbound/unbound.ctl`)
+
+You may need to add the user to the appropriate group:
+
+```sh
+sudo usermod -a -G unbound your-username
+```
+
+### Lease Files Not Being Processed
+
+Check log output with DEBUG level:
+
+```sh
+json-leases-to-unbound --log-level DEBUG --source /your/path
+```
+
+Verify JSON file format matches the expected structure.
+
+### DNS Records Not Appearing
+
+Test `unbound-control` manually:
+
+```sh
+# Add a test record
+echo "test.lan IN A 192.168.1.100" | sudo unbound-control local_datas
+
+# Query the record
+dig @localhost test.lan
+
+# Remove the record
+echo "test.lan IN A 192.168.1.100" | sudo unbound-control local_datas_remove
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Run tests (`pytest`)
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+### Code Style
+
+- Follow PEP 8 guidelines
+- Add tests for new functionality
+- Update documentation as needed
+- Maintain or improve code coverage
+
+## License
+
+MIT License - see LICENSE file for details
+
+## Author
+
+Junior - cjuniorfox@gmail.com
+
+## Links
+
+- **Repository**: https://github.com/junior/json-leases-to-unbound
+- **Issues**: https://github.com/junior/json-leases-to-unbound/issues
+- **Testing Guide**: [TESTING.md](TESTING.md)
+- **Test Documentation**: [tests/README.md](tests/README.md)
+
+## Acknowledgments
+
+- Built with [watchdog](https://github.com/gorakhargosh/watchdog) for filesystem monitoring
+- Integrates with [Unbound DNS](https://nlnetlabs.nl/projects/unbound/about/)
