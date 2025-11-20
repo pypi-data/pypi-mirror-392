@@ -1,0 +1,43 @@
+# Include important metadata files
+include README.md
+include LICENSE
+include CHANGELOG.md
+include RELEASE.md
+include API_SUMMARY.md
+include pyproject.toml
+
+# Include documentation
+recursive-include docs *.md
+
+# Include type information
+include src/pycomptox/py.typed
+
+# Include tests (optional, but useful for users who want to run tests)
+recursive-include tests *.py
+
+# Include example notebooks
+recursive-include notebooks *.ipynb
+
+# Exclude development/temporary files
+exclude create_chemlist.py
+exclude test_*.py
+exclude .flake8
+exclude .pre-commit-config.yaml
+
+# Exclude directories
+prune .github
+prune htmlcov
+prune site
+prune .pytest_cache
+prune .mypy_cache
+prune *.egg-info
+
+# Global exclusions
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude *$py.class
+global-exclude .DS_Store
+global-exclude *.so
+global-exclude .coverage
+global-exclude *~
+global-exclude *.swp
