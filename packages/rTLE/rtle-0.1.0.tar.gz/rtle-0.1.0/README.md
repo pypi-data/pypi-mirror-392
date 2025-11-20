@@ -1,0 +1,86 @@
+# rTLE
+
+**rTLE** is a lightweight Python package designed to quickly fetch **Two-Line Element (TLE)** data for one or more NORAD IDs from public sources. The goal is to provide a simple, fast way to retrieve satellite orbital data without dealing with complex APIs or parsing.
+
+---
+
+## ⚡ Features
+
+- Fetch TLE data for a single NORAD ID or multiple IDs at once.
+- Automatically parse TLE lines into a usable format `(line1, line2)`.
+- Simple configuration to set the TLE source URL.
+- Raises clear errors if no NORAD is provided or TLE cannot be fetched.
+- Ideal for rapid prototyping, simulations, or orbital calculations.
+
+---
+
+## 🛠 Installation
+
+```sh
+pip install rTLE
+```
+
+## 📖 Usage
+
+### Basic Example
+```sh
+from rtle import fetch_tle
+
+# NORAD ID for ISS
+norads = [25544]
+
+tle_data = fetch_tle(norads)
+
+for norad, (line1, line2) in tle_data.items():
+    print(f"NORAD {norad}:")
+    print(line1)
+    print(line2)
+```
+
+### Configuring a custom TLE source
+```sh
+from rtle import set_data_source_url
+
+# Example: use CelesTrak public source
+set_data_source_url("https://celestrak.org/NORAD/elements/gp.php?CATNR=")
+```
+
+## ⚠️ Errors
+
+- `NoNoradProvidedError`: Raised if you provide an empty list of NORAD IDs.
+
+- `TLEFetchError`: Raised if the TLE cannot be retrieved or parsed.
+
+- `RTLEError`: Base exception class for all rTLE errors.
+
+## 📦 Supported Sources
+
+By default, rTLE uses CelesTrak for TLE data:
+```sh
+https://celestrak.org/NORAD/elements/gp.php?CATNR=<NORAD>&FORMAT=TLE
+```
+
+## 🔧 Contributing
+
+Contributions are welcome! Please open issues or pull requests for:
+
+- Adding support for more TLE sources
+
+- Improving error handling
+
+- Adding tests or documentation improvements
+
+## 📄 License
+
+MIT License
+© 2025 Edilson Filho
+
+## 🔗 References
+
+CelesTrak
+ – Public satellite tracking and TLE data.
+
+NORAD
+ – North American Aerospace Defense Command satellite catalog.
+
+
