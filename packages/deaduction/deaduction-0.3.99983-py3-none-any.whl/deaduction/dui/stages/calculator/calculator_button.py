@@ -1,0 +1,298 @@
+"""
+calculator.py : provide the CalculatorButton class, whose main feature is
+that the text displayed is in html. There is also a sophisticated system of (
+automatically computed) shortcuts.
+
+Author(s)     : Frédéric Le Roux frederic.le-roux@imj-prg.fr
+Maintainer(s) : Frédéric Le Roux frederic.le-roux@imj-prg.fr
+Created       : 06 2023 (creation)
+Repo          : https://github.com/dEAduction/dEAduction
+
+Copyright (c) 2023 the d∃∀duction team
+
+This file is part of d∃∀duction.
+
+    d∃∀duction is free software: you can redistribute it and/or modify it under
+    the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version.
+
+    d∃∀duction is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+    more details.
+
+    You should have received a copy of the GNU General Public License along
+    with dEAduction.  If not, see <https://www.gnu.org/licenses/>.
+"""
+
+from functools import partial
+from deaduction.pylib.math_display.display_utils import shorten
+
+if __name__ == '__main__':
+    from deaduction.dui.__main__ import language_check
+    language_check()
+
+import logging
+
+from PySide2.QtCore import Signal, Slot, Qt
+from PySide2.QtGui     import  QTextDocument
+from PySide2.QtWidgets import (QToolButton, QMenu, QAction)
+
+from deaduction.pylib.marked_pattern_math_object import (MarkedPatternMathObject,
+                                                         calc_shortcuts_macro)
+from deaduction.pylib.marked_pattern_math_object.calculator_pattern_strings import CalculatorAbstractButton
+
+from deaduction.dui.primitives          import (deaduction_fonts,
+                                                MathLabel, RichTextToolButton)
+
+global _
+log = logging.getLogger(__name__)
+
+if __name__ == "__main__":
+    from deaduction.pylib import logger
+    logger.configure(domains="deaduction",
+                     display_level="debug",
+                     filename=None)
+
+
+class CalculatorButton(RichTextToolButton, CalculatorAbstractButton):
+    """
+    A class to display a button associated to a (list of)
+    MarkedPatternMathObjects. Pressing the button insert (one of) the pattern
+    at the current cursor position in the MarkedPatternMathObject under
+    construction.
+
+    shortcut_dic is a dictionary with
+        keys = shortcuts (strings typed by usr)
+        values = list of CalculatorButton whose shortcut startswith the key,
+                ordered by length
+    A given button appear in the dic for all keys that are starting sub-words
+    of self.shortcut.
+    """
+
+    btn_send_pattern = Signal(list, str)
+
+    # Dict of whole (original) shortcuts, e.g. as provided by Nodes:
+    original_shortcuts_dic: dict
+    # Dict of all operating shortcuts, including sub-words of original:
+    shortcuts_dic: dict  # Set by CalculatorButtonsGroup.__init__()
+
+    calculator_window = None  # Set by CalculatorWindow
+
+    def __init__(self, latex_symbol, button_symbol=None,
+                 tooltip=None, patterns=None, menu=False, shortcut=None):
+        super().__init__()
+        CalculatorAbstractButton.__init__(self,
+                                          latex_symbol=latex_symbol,
+                                          button_symbol=button_symbol,
+                                          tooltip=tooltip,
+                                          patterns=patterns,
+                                          menu=menu,
+                                          shortcut=shortcut)
+
+        self.clicked.connect(self.btn_process_click)
+        self.setText(self.button_symbol)
+        # self.shortcut = ''
+        self.add_shortcut()
+        self.set_tooltip()
+        symbol_size = deaduction_fonts.symbol_button_font_size
+        self.set_font(deaduction_fonts.math_fonts(size=symbol_size))
+
+        self.set_menu()
+
+    def set_tooltip(self):
+        tooltip = ""
+        if self.shortcut:
+            tooltip = _("(type  {})").format(self.shortcut)
+        if self.tooltip:
+            tooltip = self.tooltip + "\n" + "\n" + tooltip if tooltip \
+                else self.tooltip
+        if tooltip:
+            self.setToolTip(tooltip)
+
+        symbol_size = deaduction_fonts.symbol_button_font_size
+        self.setFont(deaduction_fonts.math_fonts(size=symbol_size))
+
+    def set_menu(self):
+        """
+        Set a pop-up menu if self has more than one pattern.
+        """
+        if len(self.patterns) ==1:
+            return
+        menu = QMenu(self)
+        if self.menu:
+            menu_items = self.menu
+        else:
+            menu_items = [pattern.to_display(format_='utf8') for pattern in
+                          self.patterns]
+
+        for pattern, menu_item in zip(self.patterns, menu_items):
+            action = QAction(menu_item, self)
+            action.triggered.connect(partial(self.btn_process_click,
+                                             [pattern]))
+            menu.addAction(action)
+
+        self.setMenu(menu)
+        self.setPopupMode(QToolButton.MenuButtonPopup)
+        # menu.setToolTipsVisible FIXME: add tooltips
+
+    def insert_by_length(self, calc_buttons: list):
+        """
+        Insert self in list calc_buttons, ordered by length of text.
+        """
+
+        if not calc_buttons:
+            calc_buttons.append(self)
+
+        idx = None  # Note that calc_buttons is not the trivial list
+        broken = False
+        for idx in range(len(calc_buttons)):
+            button = calc_buttons[idx]
+            if len(self.text()) < len(button.text()):
+                broken = True
+                break
+            elif self is button:
+                return
+
+        if broken:
+            calc_buttons.insert(idx, self)
+        else:  # self is the longest
+            calc_buttons.append(self)
+
+    def reset_text(self, text):
+        self.setText(text)
+        self.shortcut = ''
+        self.add_shortcut()
+
+    def add_shortcut(self):
+        """
+        Add a pertinent beginning of self.text() as a shortcut for self.
+
+        If the text of some button is a beginning word of one or more others,
+        its shortcut will be a tuple containing all these buttons, sorted by
+        text length (the first is supposed to be called).
+
+        If two buttons have the same text, only one will have a shortcut.
+        """
+
+        text = self.shortcut if self.shortcut else self.text()
+
+        # (0) Macros
+        # Case of calc_shortcuts_macro, mainly latex-like patterns, e.g. \implies
+        for key, value in calc_shortcuts_macro.items():
+            if text.startswith(value):
+                text = text.replace(value, key)
+
+        # Replace spaces (space is used to end shortcut)
+        shortcut_text = text
+        for pair in (' ', '_'), ('·', ''), ('⁻¹', 'inv'):
+            shortcut_text = shortcut_text.replace(*pair)
+
+        CalculatorButton.original_shortcuts_dic[shortcut_text] = self
+
+        sdic = CalculatorButton.shortcuts_dic
+
+        conflicting_buttons = sdic.get(shortcut_text, [])
+        if self.text() in [btn.text() for btn in conflicting_buttons]:
+            # There is another copy of this button, no shortcut for this one!
+            return
+
+        shortcut = ''
+        for car in shortcut_text:
+            shortcut += car
+            conflicting_buttons = sdic.get(shortcut, [])
+            self.insert_by_length(conflicting_buttons)
+            sdic[shortcut] = conflicting_buttons
+
+        if shortcut in sdic and sdic[shortcut][0] == self:
+            self.shortcut = shortcut
+
+        # # Debug
+        # if text.startswith("="):
+        #     print(f"Processing button with text {text}")
+        #     print(f"Shortcut: {self.shortcut}")
+        #     print(f"--> {sdic[shortcut]}")
+
+    @classmethod
+    def find_shortcut(cls, text_buffer, timeout=False, text_is_macro=False):
+        """
+        If timeout is False, and one and only one shortcut match text_buffer,
+        return the corresponding button.
+
+        If timeout is True:
+        return the first button matching shortcut, which is supposed to be
+        the one with smallest length.
+        """
+        MAX_LENGTH = 50
+
+        msg = ""
+        buttons = cls.shortcuts_dic.get(text_buffer)
+
+        #Debug
+        # btns_sc = [btn.shortcut for btn in buttons] if buttons else None
+        # print(f"Shortcut {text_buffer} --> {btns_sc}")
+        # if buttons:
+        #     print(buttons[0].shortcut == text_buffer)
+        if buttons:
+            if timeout:  # Search for first button whose shortcut is text_buffer
+                for btn in buttons:
+                    if btn.shortcut == text_buffer:
+                        buttons = [btn]
+                        break
+            if len(buttons) == 1:
+                return buttons[0], ""
+
+        # Try to find text in calc_shortcuts_macro
+        if not text_is_macro:
+            macro = calc_shortcuts_macro.get(text_buffer)
+            if macro:
+                button = cls.find_shortcut(text_buffer=macro, timeout=timeout,
+                                           text_is_macro=True)
+                return button, ""
+
+        if buttons:
+            msg = ", ".join([btn.shortcut for btn in buttons])
+        if len(msg) > MAX_LENGTH:
+            msg = msg[:MAX_LENGTH] + " (...)"
+        return None, msg
+
+
+    @Slot()
+    def btn_process_click(self, patterns=None):
+        """
+        Send a signal so that Calculator process the click.
+        """
+
+        if not patterns:
+            patterns = self.patterns
+        self.btn_send_pattern.emit(patterns, self.latex_symbol)
+
+    @classmethod
+    def process_key_events(cls, key_event_buffer, timeout=False):
+        button, msg = cls.find_shortcut(key_event_buffer, timeout)
+
+        shortcut_msg = ""
+        if not button:
+            if not msg:
+                msg = _("no match")
+            shortcut_msg = key_event_buffer + " --> " + msg
+
+        if button:
+            button.animateClick(100)
+            return True, shortcut_msg
+        else:
+            return False, shortcut_msg
+
+    def remove_shortcut(self):
+        bad_keys = [key for key, btns in CalculatorButton.shortcuts_dic.items()
+                    if self in btns]
+        # log.debug(f"Try to rm btn from shortcuts: {bad_keys}...")
+        for key in bad_keys:
+            # log.debug(f"Removing btn from key {key}")
+            btns = CalculatorButton.shortcuts_dic[key]
+            btns.remove(self)
+            if not btns:
+                # log.debug(f"Removing key {key}")
+                CalculatorButton.shortcuts_dic.pop(key)
+
