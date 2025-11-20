@@ -1,0 +1,49 @@
+[project]
+name = "ara-api-web"
+version = "1.1.0"
+description = "Web interface for ARA API"
+authors = [{name = "Alexander Kleimenov", email = "nequamy@gmail.com"}]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "grpcio==1.69.0",
+    "grpcio-tools==1.66.2",
+    # Uvicorn: older versions for 3.8, 0.30+ for 3.9+
+    "uvicorn (>=0.20.0,<0.28.0); python_version == '3.8'",
+    "uvicorn (>=0.30.0,<0.40.0); python_version >= '3.9'",
+    # FastAPI: works across all versions
+    "fastapi (>=0.100.0,<0.122.0); python_version < '3.9'",
+    "fastapi (>=0.121.1,<0.122.0); python_version >= '3.9'",
+    "rich>=14.2.0",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development",
+    'Topic :: Scientific/Engineering',
+    'Operating System :: Unix',
+    'Operating System :: MacOS',
+    'Operating System :: Microsoft :: Windows',
+]
+keywords = ["robotics", "drones", "API", "ARA"]
+
+[project.scripts]
+ara-api-web = "ara_api_web.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+include = [
+    "ara_api_web/**/*.py",
+    "ara_api_web/static/**/*",
+]
