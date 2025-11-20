@@ -1,0 +1,85 @@
+---
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "PyTennisScorer"
+  description: "Interactive Python Tennis Match Scoring Library"
+  site-url: "https://talktennisdata.github.io/pytennisscorer/"
+  repo-url: "https://github.com/talktennisdata/pytennisscorer"
+  repo-actions: [edit, issue]
+
+  navbar:
+    background: "#2e7d32"
+    foreground: light
+    left:
+      - text: "Home"
+        href: index.qmd
+      - text: "Tutorial"
+        href: tutorial.qmd
+      - text: "API Reference"
+        href: api-reference.qmd
+      - text: "Match Types"
+        href: match-types.qmd
+      - text: "Examples"
+        href: examples.qmd
+    right:
+      - icon: github
+        href: https://github.com/talktennisdata/pytennisscorer
+        aria-label: GitHub
+
+  sidebar:
+    - title: "Getting Started"
+      contents:
+        - index.qmd
+        - installation.qmd
+        - tutorial.qmd
+    - title: "Documentation"
+      contents:
+        - api-reference.qmd
+        - match-types.qmd
+        - examples.qmd
+    - title: "Advanced"
+      contents:
+        - contributing.qmd
+        - changelog.qmd
+
+  page-footer:
+    center: |
+      Copyright © 2025 TalkTennisData
+      Built with [Quarto](https://quarto.org/) and
+      [Quarto-live](https://r-wasm.github.io/quarto-live/)
+
+format:
+  html:
+    theme:
+      light: [cosmo, custom.scss]
+      dark: [darkly, custom-dark.scss]
+    css: styles.css
+    toc: true
+    toc-depth: 3
+    toc-location: right
+    code-copy: true
+    code-overflow: wrap
+    link-external-newwindow: true
+
+# Disable server-side code execution - all code runs client-side via Pyodide
+execute:
+  enabled: false
+
+filters:
+  - live
+
+# Quarto-live configuration for Python/Pyodide
+live:
+  engine: pyodide
+  pyodide:
+    packages: []
+    setup: setup-pyodide.js
+  show-startup-message: false
+  show-header-message: true
+
+resources:
+  - "wheels/*.whl"
+  - "assets/*"

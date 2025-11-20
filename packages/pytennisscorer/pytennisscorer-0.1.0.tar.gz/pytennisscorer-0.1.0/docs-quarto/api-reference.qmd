@@ -1,0 +1,482 @@
+---
+title: "API Reference"
+subtitle: "Complete documentation with interactive examples"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+---
+
+## Overview
+
+PyTennisScorer provides a simple, intuitive API for tennis match scoring. All examples below are interactive - modify and run them to see how the API works!
+
+## Core Classes
+
+### TennisScorer
+
+The main class for scoring tennis matches.
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+# Create a tennis scorer
+scorer = TennisScorer(MatchType.SINGLES_GRAND_SLAM)
+
+# Display the class and its attributes
+print(f"Class: {scorer.__class__.__name__}")
+print(f"Initial score: {scorer.get_score()}")
+print(f"Has winner: {scorer.get_winner() is not None}")
+```
+
+#### Constructor
+
+**`TennisScorer(match_type: MatchType) -> None`**
+
+Creates a new tennis scorer for the specified match type.
+
+**Parameters:**
+- `match_type` (MatchType): The type of tennis match to score
+
+**Example:**
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+# Create different types of scorers
+grand_slam = TennisScorer(MatchType.SINGLES_GRAND_SLAM)
+atp_tour = TennisScorer(MatchType.SINGLES_ATP_TOUR)
+davis_cup = TennisScorer(MatchType.DOUBLES_DAVIS_CUP)
+
+print("Grand Slam scorer:", grand_slam.get_score())
+print("ATP Tour scorer:", atp_tour.get_score())
+print("Davis Cup scorer:", davis_cup.get_score())
+```
+
+#### Methods
+
+##### `increase_score(is_home: bool) -> None`
+
+Awards a point to the specified player.
+
+**Parameters:**
+- `is_home` (bool): True to score for home player, False for away player
+
+**Example:**
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+scorer = TennisScorer(MatchType.SINGLES_ATP_TOUR)
+
+# Score points for both players
+scorer.increase_score(is_home=True)   # Home scores
+print("After home scores:", scorer.get_score())
+
+scorer.increase_score(is_home=False)  # Away scores
+print("After away scores:", scorer.get_score())
+
+# Score multiple points
+for _ in range(3):
+    scorer.increase_score(is_home=True)
+print("After home scores 3 more:", scorer.get_score())
+```
+
+##### `undo() -> bool`
+
+Reverts the last scored point.
+
+**Returns:**
+- `bool`: True if undo was successful, False if no history to undo
+
+**Example:**
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+scorer = TennisScorer(MatchType.SINGLES_ATP_TOUR)
+
+# Score some points
+scorer.increase_score(is_home=True)
+scorer.increase_score(is_home=True)
+print("Before undo:", scorer.get_score())
+
+# Undo last point
+success = scorer.undo()
+print(f"Undo successful: {success}")
+print("After undo:", scorer.get_score())
+
+# Try to undo when no history
+new_scorer = TennisScorer(MatchType.SINGLES_ATP_TOUR)
+success = new_scorer.undo()
+print(f"Undo on new scorer: {success}")
+```
+
+##### `get_score() -> str`
+
+Returns the current match score in tennis notation.
+
+**Returns:**
+- `str`: Score string (e.g., "6:4;3:6;2:2-30:15")
+
+**Score Format:**
+- Sets are separated by semicolons (`;`)
+- Games within sets use colons (`:`)
+- Current game score follows a dash (`-`)
+
+**Example:**
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+scorer = TennisScorer(MatchType.SINGLES_GRAND_SLAM)
+
+# Score different amounts of points and observe format
+examples = [
+    (0, "Empty match"),
+    (1, "First point"),
+    (4, "First game won"),
+    (28, "Multiple games")
+]
+
+for points, description in examples:
+    scorer = TennisScorer(MatchType.SINGLES_GRAND_SLAM)
+    for _ in range(points):
+        scorer.increase_score(is_home=_ % 3 != 0)  # Mix of points
+    print(f"{description} ({points} points): {scorer.get_score()}")
+```
+
+##### `get_winner() -> Optional[Literal["home", "away"]]`
+
+Returns the winner of the match.
+
+**Returns:**
+- `"home"`: Home player won
+- `"away"`: Away player won
+- `None`: Match is still in progress
+
+**Example:**
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+def quick_win(scorer, is_home=True):
+    """Helper to quickly win games."""
+    for _ in range(48):  # Enough to win 2 sets 6-0
+        scorer.increase_score(is_home=is_home)
+
+# Check winner at different stages
+scorer = TennisScorer(MatchType.SINGLES_ATP_TOUR)
+print(f"Start of match - Winner: {scorer.get_winner()}")
+
+# Win first set
+for _ in range(24):  # 6 games × 4 points
+    scorer.increase_score(is_home=True)
+print(f"After first set - Winner: {scorer.get_winner()}")
+
+# Win second set to win match
+for _ in range(24):
+    scorer.increase_score(is_home=True)
+print(f"After second set - Winner: {scorer.get_winner()}")
+print(f"Final score: {scorer.get_score()}")
+```
+
+## Enums
+
+### MatchType
+
+Enumeration of supported tennis match formats.
+
+```{python}
+#| live: true
+
+from pytennisscorer import MatchType
+
+# List all available match types
+print("Available match types:")
+for match_type in MatchType:
+    print(f"  - {match_type.name}: {match_type.value}")
+```
+
+**Values:**
+- `SINGLES_GRAND_SLAM`: Best of 5 sets, deciding point at deuce
+- `SINGLES_ATP_TOUR`: Best of 3 sets, deciding point
+- `SINGLES_ATP_FINALS`: Best of 3 sets, regular deuce
+- `DOUBLES_DAVIS_CUP`: Best of 5 sets, deciding point
+- `DOUBLES_ATP_TOUR`: Best of 3 sets, deciding point
+- `DOUBLES_GRAND_SLAM`: Best of 5, match tiebreak in final set
+
+## Configuration Functions
+
+### `create_match_config(match_type: MatchType)`
+
+Creates a match configuration for the specified match type.
+
+**Parameters:**
+- `match_type` (MatchType): The type of match
+
+**Returns:**
+- `MatchConfig`: Configuration object with rules and initial state
+
+**Example:**
+
+```{python}
+#| live: true
+
+from pytennisscorer import MatchType
+from pytennisscorer.configs import create_match_config
+
+# Get configuration for different match types
+for match_type in [MatchType.SINGLES_GRAND_SLAM, MatchType.SINGLES_ATP_TOUR]:
+    config = create_match_config(match_type)
+    rules = config.initial_state.rules
+
+    print(f"\n{match_type.name} Configuration:")
+    print(f"  Sets to win: {rules.sets_to_win}")
+    print(f"  Games to win set: {rules.games_to_win_set}")
+    print(f"  Deciding point: {rules.deciding_point}")
+    print(f"  Tiebreak at: {rules.games_for_tiebreak}-{rules.games_for_tiebreak}")
+```
+
+## Data Classes
+
+### MatchState
+
+Represents the complete state of a tennis match.
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+scorer = TennisScorer(MatchType.SINGLES_ATP_TOUR)
+
+# Score some points to create interesting state
+for i in range(10):
+    scorer.increase_score(is_home=i % 3 != 0)
+
+# Access the internal state (normally handled internally)
+# Note: _state is private, shown here for educational purposes
+state = scorer._state
+
+print("MatchState attributes:")
+print(f"  Home score: {state.home_score}")
+print(f"  Away score: {state.away_score}")
+print(f"  Current set index: {state.current_set_index}")
+print(f"  Is finished: {state.is_finished}")
+print(f"  Number of sets: {len(state.sets)}")
+```
+
+### SetState
+
+Represents the state of a single set.
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+scorer = TennisScorer(MatchType.SINGLES_GRAND_SLAM)
+
+# Play some games
+for _ in range(8):  # 2 games
+    scorer.increase_score(is_home=True)
+
+# Get current set state
+current_set = scorer._state.sets[scorer._state.current_set_index]
+
+print("SetState attributes:")
+print(f"  Home games: {current_set.home_score}")
+print(f"  Away games: {current_set.away_score}")
+print(f"  Game history length: {len(current_set.games_history)}")
+print(f"  Is finished: {current_set.is_finished}")
+```
+
+### GameState
+
+Represents the state of a single game.
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+scorer = TennisScorer(MatchType.SINGLES_ATP_TOUR)
+
+# Score some points in current game
+scorer.increase_score(is_home=True)
+scorer.increase_score(is_home=False)
+scorer.increase_score(is_home=True)
+
+# Get current game state
+current_set = scorer._state.sets[scorer._state.current_set_index]
+current_game = current_set.current_game
+
+print("GameState attributes:")
+print(f"  Home points: {current_game.home_score}")
+print(f"  Away points: {current_game.away_score}")
+print(f"  Is tiebreak: {current_game.is_tiebreak}")
+print(f"  Server: {current_game.server}")
+print(f"  Points history: {current_game.points_history}")
+```
+
+## Scoring Functions
+
+### Point Scoring
+
+```{python}
+#| live: true
+
+from pytennisscorer.scoring import score_game_point
+from pytennisscorer.models import GameState
+
+# Create a game state
+game = GameState(
+    home_score=2,  # 30
+    away_score=1,  # 15
+    server="home",
+    is_tiebreak=False,
+    points_history=["home", "home", "away"]
+)
+
+print(f"Before: {game.home_score}-{game.away_score}")
+
+# Score a point
+new_game = score_game_point(game, is_home=True, deciding_point=False)
+print(f"After home scores: {new_game.home_score}-{new_game.away_score}")
+```
+
+### Tiebreak Scoring
+
+```{python}
+#| live: true
+
+from pytennisscorer.scoring import score_tiebreak_point
+from pytennisscorer.models import GameState
+
+# Create a tiebreak game
+tiebreak = GameState(
+    home_score=5,
+    away_score=4,
+    server="home",
+    is_tiebreak=True,
+    points_history=[]
+)
+
+print(f"Tiebreak before: {tiebreak.home_score}-{tiebreak.away_score}")
+
+# Score a tiebreak point
+new_tiebreak = score_tiebreak_point(tiebreak, is_home=True, tiebreak_points=7)
+print(f"Tiebreak after: {new_tiebreak.home_score}-{new_tiebreak.away_score}")
+```
+
+## Formatting Functions
+
+### format_match_score
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+from pytennisscorer.formatter import format_match_score
+
+scorer = TennisScorer(MatchType.SINGLES_GRAND_SLAM)
+
+# Create various score situations
+situations = [
+    (5, "Early game"),
+    (25, "Mid-set"),
+    (50, "Multiple games")
+]
+
+for points, description in situations:
+    scorer = TennisScorer(MatchType.SINGLES_GRAND_SLAM)
+    for i in range(points):
+        scorer.increase_score(is_home=(i % 5) < 3)
+
+    score = format_match_score(scorer._state)
+    print(f"{description}: {score}")
+```
+
+## Error Handling
+
+PyTennisScorer is designed to handle edge cases gracefully:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+scorer = TennisScorer(MatchType.SINGLES_ATP_TOUR)
+
+# Try to score after match is finished
+for _ in range(48):  # Win 2 sets 6-0
+    scorer.increase_score(is_home=True)
+
+print(f"Match finished: {scorer.get_winner()}")
+print(f"Score: {scorer.get_score()}")
+
+# Try to score more points (will be ignored)
+scorer.increase_score(is_home=False)
+print(f"Score after trying to add point: {scorer.get_score()}")
+
+# Undo still works
+scorer.undo()
+print(f"After undo: {scorer.get_score()}")
+```
+
+## Best Practices
+
+1. **Always check for a winner** before continuing to score points
+2. **Use the appropriate match type** for your tournament
+3. **Store scorer instances** if you need to track multiple matches
+4. **Use undo sparingly** - it's meant for correcting mistakes, not for exploring alternatives
+
+## Complete Example
+
+Here's a complete example showing typical usage:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+def play_match_demo():
+    """Demonstrate a complete match workflow."""
+    # Create scorer
+    scorer = TennisScorer(MatchType.SINGLES_ATP_TOUR)
+    point_number = 0
+
+    # Simulate some points
+    points_sequence = [True, True, False, True, True,  # First game
+                      False, False, False, True, False, False,  # Second game
+                      True, True, True, True]  # Third game
+
+    for is_home in points_sequence:
+        point_number += 1
+        scorer.increase_score(is_home=is_home)
+
+        # Show score after every 5 points
+        if point_number % 5 == 0:
+            print(f"After point {point_number}: {scorer.get_score()}")
+
+    # Final status
+    print(f"\nFinal score: {scorer.get_score()}")
+    print(f"Winner: {scorer.get_winner() or 'Match in progress'}")
+
+    return scorer
+
+scorer = play_match_demo()
+```

@@ -1,0 +1,121 @@
+/*-- scss:defaults --*/
+// Dark theme color palette
+$primary: #4caf50;
+$secondary: #66bb6a;
+$success: #81c784;
+$info: #9ccc65;
+$warning: #ffb74d;
+$danger: #ef5350;
+
+// Dark backgrounds
+$body-bg: #121212;
+$body-color: #e0e0e0;
+$card-bg: #1e1e1e;
+
+// Code colors
+$code-bg: #1e1e1e;
+$code-color: #a6e22e;
+
+/*-- scss:rules --*/
+// Dark theme specific rules
+
+body {
+  background-color: $body-bg;
+  color: $body-color;
+}
+
+// Code blocks in dark mode
+pre {
+  background-color: #1a1a1a;
+  border-left: 3px solid $primary;
+  color: #f8f8f2;
+}
+
+code {
+  background-color: rgba($primary, 0.1);
+  color: $code-color;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+}
+
+// Tables in dark mode
+table {
+  th {
+    background-color: darken($primary, 20%);
+    color: white;
+  }
+
+  td {
+    border-bottom: 1px solid #333;
+  }
+
+  tr:hover {
+    background-color: rgba($primary, 0.1);
+  }
+}
+
+// Links in dark mode
+a {
+  color: $primary;
+
+  &:hover {
+    color: $secondary;
+  }
+}
+
+// Cards and panels
+.card, .panel {
+  background-color: $card-bg;
+  border-color: #333;
+}
+
+// Quarto-live elements in dark mode
+.cell-live {
+  background-color: rgba($primary, 0.05);
+  border-color: rgba($primary, 0.3);
+}
+
+.cell-live-editor {
+  background-color: #1a1a1a;
+  border-color: #333;
+  color: $body-color;
+
+  &:focus-within {
+    border-color: $primary;
+    box-shadow: 0 0 0 0.2rem rgba($primary, 0.25);
+  }
+}
+
+.cell-live-output {
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  color: #a6e22e;
+}
+
+// Buttons in dark mode
+.btn-primary {
+  background-color: $primary;
+  border-color: $primary;
+
+  &:hover {
+    background-color: darken($primary, 10%);
+    border-color: darken($primary, 10%);
+  }
+}
+
+// Navigation in dark mode
+.navbar {
+  background-color: darken($primary, 30%) !important;
+}
+
+.sidebar {
+  background-color: $card-bg;
+  border-right: 1px solid #333;
+}
+
+// Alerts in dark mode
+.callout {
+  background-color: rgba($primary, 0.1);
+  border-left-color: $primary;
+  color: $body-color;
+}

@@ -1,0 +1,396 @@
+---
+title: "Interactive Tutorial"
+subtitle: "Learn PyTennisScorer step by step"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+---
+
+## Introduction
+
+Welcome to the PyTennisScorer interactive tutorial! This guide will teach you how to use the library through hands-on exercises. All code examples are editable and runnable in your browser.
+
+## Lesson 1: Creating Your First Scorer
+
+Let's start by creating a tennis scorer. Click "Run Code" to execute the example, then try modifying it!
+
+```{python}
+#| live: true
+
+# Import the necessary classes
+from pytennisscorer import TennisScorer, MatchType
+
+# Create a scorer for a Grand Slam singles match
+scorer = TennisScorer(MatchType.SINGLES_GRAND_SLAM)
+
+# Display the initial score
+print("Match started!")
+print("Score:", scorer.get_score())
+print("Match type: SINGLES_GRAND_SLAM")
+```
+
+### Exercise 1.1
+
+Try creating scorers with different match types. Edit the code below:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+# TODO: Create a scorer for an ATP Tour match
+# Hint: Use MatchType.SINGLES_ATP_TOUR
+scorer = None  # Replace this line
+
+if scorer:
+    print(f"Created scorer with score: {scorer.get_score()}")
+else:
+    print("Please create a scorer!")
+```
+
+## Lesson 2: Scoring Points
+
+Now let's learn how to score points in a tennis match.
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+scorer = TennisScorer(MatchType.SINGLES_ATP_TOUR)
+
+# Score a point for the home player
+scorer.increase_score(is_home=True)
+print("After home scores:", scorer.get_score())
+
+# Score a point for the away player
+scorer.increase_score(is_home=False)
+print("After away scores:", scorer.get_score())
+
+# Score two more points for home
+scorer.increase_score(is_home=True)
+scorer.increase_score(is_home=True)
+print("After home scores twice more:", scorer.get_score())
+```
+
+### Exercise 2.1: Complete a Game
+
+Complete the code below to finish a game with the home player winning:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+scorer = TennisScorer(MatchType.SINGLES_ATP_TOUR)
+
+# Home player has 3 points (40), away has 2 points (30)
+for _ in range(3):
+    scorer.increase_score(is_home=True)
+for _ in range(2):
+    scorer.increase_score(is_home=False)
+
+print("Current score:", scorer.get_score())
+
+# TODO: Add one more point for home to win the game
+# Your code here:
+
+print("Final score:", scorer.get_score())
+```
+
+## Lesson 3: Understanding Tennis Scoring
+
+Tennis has unique scoring rules. Let's explore them:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+scorer = TennisScorer(MatchType.SINGLES_GRAND_SLAM)
+
+# Demonstrate point progression: 0, 15, 30, 40
+points = []
+for i in range(4):
+    points.append(scorer.get_score())
+    scorer.increase_score(is_home=True)
+
+print("Point progression for home player:")
+for i, score in enumerate(points):
+    print(f"  After {i} points: {score}")
+print(f"  After 4 points (game won): {scorer.get_score()}")
+```
+
+### Exercise 3.1: Deuce Situations
+
+Create a deuce situation and resolve it:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+# Using ATP Finals which has regular deuce (no deciding point)
+scorer = TennisScorer(MatchType.SINGLES_ATP_FINALS)
+
+# Create a deuce (both players at 40)
+for _ in range(3):
+    scorer.increase_score(is_home=True)
+    scorer.increase_score(is_home=False)
+
+print("Deuce:", scorer.get_score())
+
+# TODO: Complete the sequence below
+# 1. Give advantage to home
+# 2. Away equalizes (back to deuce)
+# 3. Home gets advantage again
+# 4. Home wins the game
+
+# Your code here:
+
+print("Final score:", scorer.get_score())
+```
+
+## Lesson 4: Using the Undo Feature
+
+Made a mistake? The undo feature lets you revert the last point:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+scorer = TennisScorer(MatchType.SINGLES_ATP_TOUR)
+
+# Score some points
+scorer.increase_score(is_home=True)
+print("After home scores:", scorer.get_score())
+
+scorer.increase_score(is_home=False)
+print("After away scores:", scorer.get_score())
+
+# Oops! That was a mistake - let's undo it
+if scorer.undo():
+    print("After undo:", scorer.get_score())
+else:
+    print("Cannot undo (no history)")
+
+# Score the correct point
+scorer.increase_score(is_home=True)
+print("Correct score:", scorer.get_score())
+```
+
+### Exercise 4.1: Practice with Undo
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+scorer = TennisScorer(MatchType.SINGLES_GRAND_SLAM)
+
+# Simulate a scoring mistake
+for _ in range(5):
+    scorer.increase_score(is_home=True)
+
+print("Oops! Scored too many points:", scorer.get_score())
+
+# TODO: Use undo to revert the last 2 points
+# Hint: Call scorer.undo() twice
+# Your code here:
+
+print("Corrected score:", scorer.get_score())
+```
+
+## Lesson 5: Winning Sets and Matches
+
+Let's explore how sets and matches are won:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+def simulate_games(scorer, home_games, away_games):
+    """Helper to quickly simulate multiple games."""
+    for _ in range(home_games):
+        for _ in range(4):  # 4 points to win a game
+            scorer.increase_score(is_home=True)
+    for _ in range(away_games):
+        for _ in range(4):
+            scorer.increase_score(is_home=False)
+    return scorer.get_score()
+
+scorer = TennisScorer(MatchType.SINGLES_ATP_TOUR)
+
+# Simulate winning a set 6-4
+simulate_games(scorer, 6, 4)
+print("After first set (6-4):", scorer.get_score())
+
+# Check if there's a winner
+winner = scorer.get_winner()
+print(f"Winner: {winner if winner else 'Match continues'}")
+```
+
+### Exercise 5.1: Win a Match
+
+Complete a best-of-3 match:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+scorer = TennisScorer(MatchType.SINGLES_ATP_TOUR)
+
+def win_game_for(scorer, is_home):
+    """Helper to win a game quickly."""
+    for _ in range(4):
+        scorer.increase_score(is_home=is_home)
+
+# Win first set 6-0 for home
+for _ in range(6):
+    win_game_for(scorer, is_home=True)
+
+print("After first set:", scorer.get_score())
+
+# TODO: Win the second set 6-0 to win the match
+# Your code here:
+
+print("Final score:", scorer.get_score())
+winner = scorer.get_winner()
+print(f"Match winner: {winner if winner else 'Still playing'}")
+```
+
+## Lesson 6: Tiebreaks
+
+Tiebreaks occur when a set reaches 6-6. Let's see how they work:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+scorer = TennisScorer(MatchType.SINGLES_GRAND_SLAM)
+
+# Helper to quickly reach 6-6
+def reach_tiebreak(scorer):
+    # Each player wins 6 games
+    for _ in range(6):
+        for _ in range(4):
+            scorer.increase_score(is_home=True)
+        for _ in range(4):
+            scorer.increase_score(is_home=False)
+    return scorer
+
+scorer = reach_tiebreak(scorer)
+print("At 6-6, entering tiebreak:", scorer.get_score())
+
+# Score tiebreak points
+for i in range(7):
+    scorer.increase_score(is_home=True)
+    print(f"Tiebreak point {i+1}:", scorer.get_score())
+```
+
+## Lesson 7: Different Match Formats
+
+Let's explore the differences between match formats:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+from pytennisscorer.configs import create_match_config
+
+# Compare different match configurations
+formats = [
+    MatchType.SINGLES_GRAND_SLAM,
+    MatchType.SINGLES_ATP_TOUR,
+    MatchType.DOUBLES_DAVIS_CUP,
+]
+
+for match_type in formats:
+    config = create_match_config(match_type)
+    rules = config.initial_state.rules
+
+    print(f"\n{match_type.name}:")
+    print(f"  Sets to win: {rules.sets_to_win}")
+    print(f"  Deciding point: {rules.deciding_point}")
+    print(f"  Final set tiebreak: {rules.final_set_tiebreak_points or 'Regular'}")
+```
+
+## Lesson 8: Complete Match Simulation
+
+Let's put it all together with a complete match simulation:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+import random
+
+def simulate_random_match(match_type, max_points=200):
+    """Simulate a random tennis match."""
+    scorer = TennisScorer(match_type)
+    points_played = 0
+
+    while not scorer.get_winner() and points_played < max_points:
+        # Random point winner (60% chance for home)
+        is_home_point = random.random() < 0.6
+        scorer.increase_score(is_home=is_home_point)
+        points_played += 1
+
+    return scorer, points_played
+
+# Set random seed for reproducibility
+random.seed(42)
+
+scorer, points = simulate_random_match(MatchType.SINGLES_ATP_TOUR)
+print(f"Match finished after {points} points")
+print(f"Final score: {scorer.get_score()}")
+print(f"Winner: {scorer.get_winner() or 'No winner (max points reached)'}")
+```
+
+### Final Exercise: Create Your Own Match
+
+Now it's your turn! Create and simulate your own tennis match:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+# TODO: Create your own match simulation
+# 1. Choose a match type
+# 2. Score some points
+# 3. Use undo if needed
+# 4. Check the winner
+
+# Your code here:
+scorer = TennisScorer(MatchType.SINGLES_GRAND_SLAM)
+
+# Add your match simulation below...
+
+print("Your match score:", scorer.get_score())
+```
+
+## Congratulations! 🎾
+
+You've completed the PyTennisScorer tutorial! You now know how to:
+
+- Create tennis scorers for different match formats
+- Score points and games
+- Handle deuce situations
+- Use the undo feature
+- Understand tiebreaks
+- Simulate complete matches
+
+### Next Steps
+
+- Explore the [API Reference](api-reference.qmd) for detailed documentation
+- Try different [Match Types](match-types.qmd)
+- Check out more [Examples](examples.qmd)
+- Build your own tennis scoring application!
+
+Happy coding! 🎾

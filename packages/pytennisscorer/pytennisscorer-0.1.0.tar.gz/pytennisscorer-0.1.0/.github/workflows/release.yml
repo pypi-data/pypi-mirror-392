@@ -1,0 +1,230 @@
+---
+# Release and PyPI publishing workflow
+name: Release
+
+'on':
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      test_pypi:
+        description: 'Publish to TestPyPI instead of PyPI'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build Distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: 'latest'
+
+      - name: Build package
+        run: |
+          uv build
+          ls -la dist/
+
+      - name: Check distribution
+        run: |
+          uv pip install --system twine
+          uv run twine check --strict dist/*
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 5
+
+  test-install:
+    name: Test Installation
+    needs: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.9', '3.12']
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: 'latest'
+
+      - name: Test wheel installation
+        run: |
+          uv pip install --system dist/*.whl
+          python -c "from pytennisscorer import TennisScorer"
+          python -c "print('Package installed successfully')"
+
+      - name: Test basic functionality
+        continue-on-error: ${{ matrix.os == 'windows-latest' }}
+        run: >-
+          python -c "from pytennisscorer import TennisScorer, MatchType;
+          scorer = TennisScorer(MatchType.SINGLES_GRANDSLAM);
+          scorer.increase_score(0);
+          print('Basic functionality test passed')"
+
+  publish-testpypi:
+    name: Publish to TestPyPI
+    needs: [build, test-install]
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.test_pypi == 'true'
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/pytennisscorer
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+          verbose: true
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: [build, test-install]
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'release' ||
+      (github.event_name == 'workflow_dispatch' &&
+       github.event.inputs.test_pypi == 'false')
+    environment:
+      name: pypi
+      url: https://pypi.org/p/pytennisscorer
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
+
+  create-git-tag:
+    name: Create Git Tag
+    needs: publish-pypi
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from release
+        id: get_version
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          # Remove 'v' prefix if present
+          VERSION="${VERSION#v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create and push tag
+        run: |
+          VERSION="${{ steps.get_version.outputs.version }}"
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+          # Check if tag already exists
+          if git tag -l "v$VERSION" | grep -q .; then
+            echo "Tag v$VERSION already exists"
+          else
+            git tag -a "v$VERSION" -m "Release v$VERSION"
+            git push origin "v$VERSION"
+            echo "Created and pushed tag v$VERSION"
+          fi
+
+  update-changelog:
+    name: Update Changelog
+    needs: publish-pypi
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelog entry
+        run: |
+          cat > changelog_entry.md << EOF
+          ## [${{ github.event.release.tag_name }}] - $(date +%Y-%m-%d)
+
+          ${{ github.event.release.body }}
+
+          **Full Changelog**: ${{ github.event.release.html_url }}
+          EOF
+
+      - name: Update CHANGELOG.md
+        run: |
+          if [ -f CHANGELOG.md ]; then
+            # Insert new entry after the title
+            sed -i '/^# Changelog/r changelog_entry.md' CHANGELOG.md
+          else
+            # Create new changelog
+            cat > CHANGELOG.md << EOF
+          # Changelog
+
+          All notable changes to pytennisscorer will be documented here.
+
+          EOF
+            cat changelog_entry.md >> CHANGELOG.md
+          fi
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: >-
+            docs: update changelog for
+            ${{ github.event.release.tag_name }}
+          title: >-
+            Update Changelog for
+            ${{ github.event.release.tag_name }}
+          body: |
+            Automated changelog update for release
+            ${{ github.event.release.tag_name }}.
+
+            This PR was automatically created by GitHub Actions.
+          branch: changelog-${{ github.event.release.tag_name }}
+          delete-branch: true

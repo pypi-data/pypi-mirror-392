@@ -1,0 +1,431 @@
+---
+title: "Match Types Explorer"
+subtitle: "Interactive comparison of tennis match formats"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+---
+
+## Overview
+
+PyTennisScorer supports 6 different tennis match formats, each with unique rules and characteristics. Explore them interactively below!
+
+## Match Type Comparison
+
+```{python}
+#| live: true
+
+from pytennisscorer import MatchType
+from pytennisscorer.configs import create_match_config
+import pandas as pd
+
+# Create comparison table
+data = []
+for match_type in MatchType:
+    config = create_match_config(match_type)
+    rules = config.initial_state.rules
+
+    data.append({
+        'Match Type': match_type.name,
+        'Sets to Win': rules.sets_to_win,
+        'Games per Set': rules.games_to_win_set,
+        'Deciding Point': '✓' if rules.deciding_point else '✗',
+        'Tiebreak at': f"{rules.games_for_tiebreak}-{rules.games_for_tiebreak}",
+        'Final Set': 'Match TB' if rules.final_set_tiebreak_points else 'Regular'
+    })
+
+df = pd.DataFrame(data)
+print(df.to_string(index=False))
+```
+
+## Singles Matches
+
+### Grand Slam Singles
+
+The most prestigious format used in Grand Slam tournaments (Australian Open, French Open, Wimbledon, US Open).
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+from pytennisscorer.configs import create_match_config
+
+# Explore Grand Slam configuration
+config = create_match_config(MatchType.SINGLES_GRAND_SLAM)
+rules = config.initial_state.rules
+
+print("GRAND SLAM SINGLES RULES")
+print("=" * 30)
+print(f"Format: Best of {rules.sets_to_win * 2 - 1} sets")
+print(f"Sets needed to win: {rules.sets_to_win}")
+print(f"Games needed to win set: {rules.games_to_win_set}")
+print(f"Tiebreak at: {rules.games_for_tiebreak}-{rules.games_for_tiebreak}")
+print(f"Deciding point (no deuce): {rules.deciding_point}")
+print(f"Final set special rules: {rules.final_set_tiebreak_points or 'None'}")
+
+# Create a scorer and demonstrate
+scorer = TennisScorer(MatchType.SINGLES_GRAND_SLAM)
+print(f"\nInitial score: {scorer.get_score()}")
+```
+
+### ATP Tour Singles
+
+Standard format for most professional tennis tournaments.
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+# Compare ATP Tour with Grand Slam
+scorer_atp = TennisScorer(MatchType.SINGLES_ATP_TOUR)
+scorer_gs = TennisScorer(MatchType.SINGLES_GRAND_SLAM)
+
+print("ATP TOUR vs GRAND SLAM")
+print("-" * 30)
+
+# Simulate winning 2 sets in each
+def win_sets(scorer, num_sets):
+    for _ in range(num_sets):
+        for _ in range(24):  # 6 games × 4 points
+            scorer.increase_score(is_home=True)
+    return scorer.get_winner()
+
+# Win 2 sets in ATP Tour (should win match)
+win_sets(scorer_atp, 2)
+print(f"ATP Tour after 2 sets: Winner = {scorer_atp.get_winner()}")
+print(f"Score: {scorer_atp.get_score()}")
+
+# Win 2 sets in Grand Slam (not enough to win)
+win_sets(scorer_gs, 2)
+print(f"\nGrand Slam after 2 sets: Winner = {scorer_gs.get_winner()}")
+print(f"Score: {scorer_gs.get_score()}")
+```
+
+### ATP Finals Singles
+
+Special format for the year-end championship, featuring traditional deuce rules.
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+# Demonstrate the difference in deuce handling
+def play_deuce_game(match_type):
+    scorer = TennisScorer(match_type)
+
+    # Reach deuce (40-40)
+    for _ in range(3):
+        scorer.increase_score(is_home=True)
+        scorer.increase_score(is_home=False)
+
+    print(f"\n{match_type.name}")
+    print(f"At deuce: {scorer.get_score()}")
+
+    # Next point
+    scorer.increase_score(is_home=True)
+    print(f"After home scores: {scorer.get_score()}")
+
+    return scorer
+
+# ATP Finals has traditional deuce (advantage)
+finals_scorer = play_deuce_game(MatchType.SINGLES_ATP_FINALS)
+
+# ATP Tour has deciding point (no deuce)
+tour_scorer = play_deuce_game(MatchType.SINGLES_ATP_TOUR)
+```
+
+## Doubles Matches
+
+### Davis Cup Doubles
+
+Team competition format with extended matches.
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+from pytennisscorer.configs import create_match_config
+
+# Davis Cup configuration
+config = create_match_config(MatchType.DOUBLES_DAVIS_CUP)
+rules = config.initial_state.rules
+
+print("DAVIS CUP DOUBLES RULES")
+print("=" * 30)
+print(f"Format: Best of {rules.sets_to_win * 2 - 1} sets")
+print(f"Deciding point: {rules.deciding_point}")
+print(f"Special characteristics for doubles play")
+
+scorer = TennisScorer(MatchType.DOUBLES_DAVIS_CUP)
+print(f"\nStarting Davis Cup match: {scorer.get_score()}")
+```
+
+### ATP Tour Doubles
+
+Standard doubles format for tour events.
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+# Create ATP Tour doubles match
+scorer = TennisScorer(MatchType.DOUBLES_ATP_TOUR)
+
+print("ATP TOUR DOUBLES")
+print("-" * 20)
+
+# Simulate a few games
+for game in range(3):
+    print(f"\nGame {game + 1}:")
+    for point in range(4):
+        scorer.increase_score(is_home=(game % 2 == 0))
+    print(f"Score: {scorer.get_score()}")
+```
+
+### Grand Slam Doubles
+
+Special format with match tiebreak in the final set.
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+from pytennisscorer.configs import create_match_config
+
+config = create_match_config(MatchType.DOUBLES_GRAND_SLAM)
+rules = config.initial_state.rules
+
+print("GRAND SLAM DOUBLES - SPECIAL FINAL SET RULES")
+print("=" * 45)
+print(f"Regular sets: First to {rules.games_to_win_set} games")
+print(f"Final set: Match tiebreak to {rules.final_set_tiebreak_points} points")
+print(f"This means the final set is a single extended tiebreak!")
+
+# Demonstrate by simulating to the final set
+scorer = TennisScorer(MatchType.DOUBLES_GRAND_SLAM)
+print(f"\nStarting score: {scorer.get_score()}")
+```
+
+## Interactive Match Comparison
+
+Compare different match types side by side:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+def simulate_points(scorer, n_points, pattern):
+    """Simulate n points with given pattern."""
+    for i in range(n_points):
+        is_home = pattern[i % len(pattern)]
+        scorer.increase_score(is_home=is_home)
+    return scorer.get_score()
+
+# Create scorers for different formats
+scorers = {
+    'Grand Slam': TennisScorer(MatchType.SINGLES_GRAND_SLAM),
+    'ATP Tour': TennisScorer(MatchType.SINGLES_ATP_TOUR),
+    'ATP Finals': TennisScorer(MatchType.SINGLES_ATP_FINALS),
+}
+
+# Simulate same point pattern
+pattern = [True, True, False, True, False, True, True, True]
+points_to_play = 16
+
+print("SAME POINTS, DIFFERENT FORMATS")
+print("=" * 35)
+print(f"Playing {points_to_play} points with pattern: {pattern}")
+print()
+
+for name, scorer in scorers.items():
+    score = simulate_points(scorer, points_to_play, pattern)
+    print(f"{name:12} -> {score}")
+```
+
+## Tiebreak Variations
+
+Different formats handle tiebreaks differently:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+def reach_tiebreak(match_type):
+    """Helper to reach 6-6 in current set."""
+    scorer = TennisScorer(match_type)
+
+    # Each player wins 6 games alternately
+    for i in range(12):
+        for _ in range(4):
+            scorer.increase_score(is_home=(i % 2 == 0))
+
+    return scorer
+
+# Demonstrate tiebreak in different formats
+formats = [
+    MatchType.SINGLES_GRAND_SLAM,
+    MatchType.SINGLES_ATP_TOUR,
+    MatchType.DOUBLES_GRAND_SLAM
+]
+
+for match_type in formats:
+    scorer = reach_tiebreak(match_type)
+    print(f"\n{match_type.name} at tiebreak:")
+    print(f"Score: {scorer.get_score()}")
+
+    # Play first tiebreak point
+    scorer.increase_score(is_home=True)
+    print(f"After 1st TB point: {scorer.get_score()}")
+```
+
+## Deciding Point vs Traditional Deuce
+
+Explore the difference between deciding point and traditional deuce:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+def demonstrate_deuce_rules(match_type, has_deciding_point):
+    """Show how deuce is handled."""
+    scorer = TennisScorer(match_type)
+
+    # Reach 40-40
+    for _ in range(3):
+        scorer.increase_score(is_home=True)
+        scorer.increase_score(is_home=False)
+
+    print(f"\n{match_type.name}")
+    print(f"Deciding point: {'YES' if has_deciding_point else 'NO'}")
+    print(f"At 40-40: {scorer.get_score()}")
+
+    # Play out the deuce
+    if has_deciding_point:
+        # Deciding point - next point wins
+        scorer.increase_score(is_home=True)
+        print(f"Home wins deciding point: {scorer.get_score()}")
+    else:
+        # Traditional deuce - need 2 point advantage
+        scorer.increase_score(is_home=True)
+        print(f"Advantage home: {scorer.get_score()}")
+        scorer.increase_score(is_home=False)
+        print(f"Back to deuce: {scorer.get_score()}")
+        scorer.increase_score(is_home=True)
+        scorer.increase_score(is_home=True)
+        print(f"Home wins with 2-point lead: {scorer.get_score()}")
+
+# Formats with deciding point
+demonstrate_deuce_rules(MatchType.SINGLES_ATP_TOUR, True)
+demonstrate_deuce_rules(MatchType.SINGLES_GRAND_SLAM, True)
+
+# Format without deciding point
+demonstrate_deuce_rules(MatchType.SINGLES_ATP_FINALS, False)
+```
+
+## Match Duration Estimation
+
+Different formats result in different match lengths:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+import random
+
+def estimate_match_length(match_type, simulations=10):
+    """Estimate average points needed to complete a match."""
+    total_points = []
+
+    for _ in range(simulations):
+        scorer = TennisScorer(match_type)
+        points = 0
+
+        # Simulate with 55% win rate for home
+        while not scorer.get_winner() and points < 500:
+            scorer.increase_score(is_home=random.random() < 0.55)
+            points += 1
+
+        if scorer.get_winner():
+            total_points.append(points)
+
+    if total_points:
+        avg_points = sum(total_points) / len(total_points)
+        min_points = min(total_points)
+        max_points = max(total_points)
+        return avg_points, min_points, max_points
+    return 0, 0, 0
+
+# Set seed for reproducibility
+random.seed(42)
+
+print("ESTIMATED MATCH LENGTH (in points)")
+print("=" * 40)
+print("Based on 10 simulations with 55% win rate for home\n")
+
+for match_type in [
+    MatchType.SINGLES_ATP_TOUR,
+    MatchType.SINGLES_GRAND_SLAM,
+    MatchType.DOUBLES_ATP_TOUR
+]:
+    avg, min_p, max_p = estimate_match_length(match_type)
+    print(f"{match_type.name}:")
+    print(f"  Average: {avg:.0f} points")
+    print(f"  Range: {min_p:.0f} - {max_p:.0f} points")
+    print()
+```
+
+## Custom Match Configuration
+
+You can explore specific match scenarios:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+# Choose your configuration
+print("CREATE YOUR OWN MATCH SCENARIO")
+print("=" * 35)
+print("\nModify the code below to explore different scenarios!\n")
+
+# MODIFY THESE VARIABLES
+match_type = MatchType.SINGLES_GRAND_SLAM  # Change match type
+home_strength = 0.6  # Probability home wins each point (0.0 to 1.0)
+max_points = 100  # Maximum points to simulate
+
+# Simulation
+scorer = TennisScorer(match_type)
+import random
+random.seed(123)  # Change seed for different outcomes
+
+points_played = 0
+while not scorer.get_winner() and points_played < max_points:
+    scorer.increase_score(is_home=random.random() < home_strength)
+    points_played += 1
+
+print(f"Match type: {match_type.name}")
+print(f"Home win probability: {home_strength:.0%}")
+print(f"Points played: {points_played}")
+print(f"Final score: {scorer.get_score()}")
+print(f"Winner: {scorer.get_winner() or 'Not finished'}")
+```
+
+## Summary
+
+Each match type is designed for specific competitions and contexts:
+
+- **Grand Slam Singles**: Long, grueling matches for the sport's biggest stages
+- **ATP Tour Singles**: Standard professional format with deciding points for faster play
+- **ATP Finals Singles**: Elite competition with traditional deuce rules
+- **Davis Cup Doubles**: Team competition with extended format
+- **ATP Tour Doubles**: Fast-paced doubles with deciding points
+- **Grand Slam Doubles**: Unique final set tiebreak for dramatic finishes
+
+Choose the right format for your application based on your needs!

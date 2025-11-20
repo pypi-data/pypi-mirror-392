@@ -1,0 +1,199 @@
+/* PyTennisScorer Custom Styles */
+
+/* Hero Banner */
+.hero-banner {
+  background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+  color: white;
+  padding: 3rem 2rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.hero-banner h1 {
+  margin-top: 0;
+  font-size: 2.5rem;
+  color: white;
+}
+
+.hero-banner p {
+  font-size: 1.2rem;
+  opacity: 0.95;
+}
+
+/* Features Grid */
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.feature {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #2e7d32;
+}
+
+.feature h3 {
+  margin-top: 0;
+  color: #2e7d32;
+}
+
+/* Code Cells */
+.cell-code {
+  margin: 1.5rem 0;
+}
+
+.cell-output {
+  background: #f8f9fa;
+  border-left: 3px solid #2e7d32;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* Interactive Code Editor */
+.cm-editor {
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+}
+
+.cm-editor.cm-focused {
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 0.2rem rgba(46, 125, 50, 0.25);
+}
+
+/* Buttons */
+.btn-run-code {
+  background-color: #2e7d32;
+  border-color: #2e7d32;
+}
+
+.btn-run-code:hover {
+  background-color: #1b5e20;
+  border-color: #1b5e20;
+}
+
+/* Tennis Court Visualization (for future use) */
+.tennis-court {
+  width: 100%;
+  max-width: 600px;
+  margin: 2rem auto;
+  aspect-ratio: 2/1;
+  background: #8b7355;
+  border: 4px solid white;
+  position: relative;
+}
+
+.tennis-court::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: white;
+}
+
+.tennis-court::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: white;
+}
+
+/* Score Display */
+.score-display {
+  font-family: 'Courier New', monospace;
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding: 1rem;
+  background: #333;
+  color: #7cfc00;
+  border-radius: 4px;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+/* Match Type Cards */
+.match-type-card {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  transition: transform 0.2s;
+}
+
+.match-type-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Footer Note */
+.footer-note {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Loading Indicator for Pyodide */
+.pyodide-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #2e7d32;
+}
+
+.pyodide-loading::before {
+  content: "🎾";
+  font-size: 2rem;
+  animation: bounce 1s infinite;
+  margin-right: 1rem;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Dark Theme Support */
+@media (prefers-color-scheme: dark) {
+  .feature {
+    background: #1a1a1a;
+    border-left-color: #4caf50;
+  }
+
+  .feature h3 {
+    color: #4caf50;
+  }
+
+  .cell-output {
+    background: #1a1a1a;
+    border-left-color: #4caf50;
+  }
+
+  .hero-banner {
+    background: linear-gradient(135deg, #1b5e20 0%, #0d3e10 100%);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-banner h1 {
+    font-size: 2rem;
+  }
+
+  .features {
+    grid-template-columns: 1fr;
+  }
+}

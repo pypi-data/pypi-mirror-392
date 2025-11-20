@@ -1,0 +1,418 @@
+---
+title: "Examples"
+subtitle: "Real-world usage scenarios"
+format:
+  html:
+    toc: true
+---
+
+## Basic Match Scoring
+
+Score a complete tennis match from start to finish:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+# Create a scorer for an ATP Tour match
+scorer = TennisScorer(MatchType.SINGLES_ATP_TOUR)
+
+# Simulate a realistic match with momentum swings
+def play_game(scorer, server_advantage=0.65):
+    """Play a single game with server advantage."""
+    import random
+    points = 0
+    while points < 4 or abs(points) < 2:  # Simplified game logic
+        if random.random() < server_advantage:
+            scorer.increase_score(is_home=True)
+        else:
+            scorer.increase_score(is_home=False)
+        points += 1
+        if points > 10:  # Safety limit
+            break
+
+# Play several games
+import random
+random.seed(42)
+
+for game in range(8):
+    # Alternate server advantage
+    server_adv = 0.65 if game % 2 == 0 else 0.35
+    initial_score = scorer.get_score()
+
+    # Play points until game is won
+    for _ in range(10):  # Max points per game
+        if random.random() < server_adv:
+            scorer.increase_score(is_home=True)
+        else:
+            scorer.increase_score(is_home=False)
+
+        # Check if game changed
+        if scorer.get_score() != initial_score and "-" not in scorer.get_score():
+            break
+
+    print(f"After game {game + 1}: {scorer.get_score()}")
+```
+
+## Tournament Bracket Simulation
+
+Simulate multiple matches in a tournament:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+import random
+
+def simulate_match(player1_strength=0.5, match_type=MatchType.SINGLES_ATP_TOUR):
+    """Simulate a match between two players."""
+    scorer = TennisScorer(match_type)
+    points = 0
+    max_points = 300
+
+    while not scorer.get_winner() and points < max_points:
+        scorer.increase_score(is_home=random.random() < player1_strength)
+        points += 1
+
+    return scorer.get_winner(), scorer.get_score(), points
+
+# Simulate a mini tournament
+random.seed(123)
+
+players = [
+    ("Novak", 0.58),
+    ("Carlos", 0.56),
+    ("Jannik", 0.54),
+    ("Daniil", 0.52),
+]
+
+print("TOURNAMENT SIMULATION")
+print("=" * 40)
+
+# Round 1
+print("\n--- SEMIFINALS ---")
+winners = []
+
+for i in range(0, len(players), 2):
+    p1_name, p1_strength = players[i]
+    p2_name, p2_strength = players[i+1]
+
+    # Adjust strength for head-to-head
+    relative_strength = p1_strength / (p1_strength + p2_strength)
+
+    winner, score, points = simulate_match(relative_strength)
+    winner_name = p1_name if winner == "home" else p2_name
+
+    print(f"{p1_name} vs {p2_name}")
+    print(f"  Winner: {winner_name}")
+    print(f"  Score: {score}")
+    print(f"  Points played: {points}")
+
+    winners.append((winner_name, p1_strength if winner == "home" else p2_strength))
+
+# Final
+print("\n--- FINAL ---")
+p1_name, p1_strength = winners[0]
+p2_name, p2_strength = winners[1]
+relative_strength = p1_strength / (p1_strength + p2_strength)
+
+winner, score, points = simulate_match(relative_strength, MatchType.SINGLES_GRAND_SLAM)
+champion = p1_name if winner == "home" else p2_name
+
+print(f"{p1_name} vs {p2_name}")
+print(f"  CHAMPION: {champion} 🏆")
+print(f"  Score: {score}")
+print(f"  Points played: {points}")
+```
+
+## Live Score Tracker
+
+Build a live score tracking system:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+from datetime import datetime
+
+class LiveScoreTracker:
+    def __init__(self, match_type, player1, player2):
+        self.scorer = TennisScorer(match_type)
+        self.player1 = player1
+        self.player2 = player2
+        self.history = []
+        self.start_time = datetime.now()
+
+    def add_point(self, winner):
+        """Add a point and track history."""
+        is_home = winner == self.player1
+        old_score = self.scorer.get_score()
+        self.scorer.increase_score(is_home=is_home)
+        new_score = self.scorer.get_score()
+
+        self.history.append({
+            'time': datetime.now(),
+            'winner': winner,
+            'score': new_score,
+            'point_num': len(self.history) + 1
+        })
+
+        return old_score != new_score  # True if game/set changed
+
+    def get_stats(self):
+        """Get match statistics."""
+        if not self.history:
+            return "No points played yet"
+
+        p1_points = sum(1 for h in self.history if h['winner'] == self.player1)
+        p2_points = len(self.history) - p1_points
+
+        return {
+            'total_points': len(self.history),
+            f'{self.player1}_points': p1_points,
+            f'{self.player2}_points': p2_points,
+            'current_score': self.scorer.get_score(),
+            'winner': self.scorer.get_winner()
+        }
+
+# Demo the live tracker
+tracker = LiveScoreTracker(
+    MatchType.SINGLES_ATP_TOUR,
+    "Federer",
+    "Nadal"
+)
+
+# Simulate some live points
+import random
+random.seed(7)
+
+print("LIVE MATCH: Federer vs Nadal")
+print("=" * 40)
+
+for point in range(20):
+    winner = "Federer" if random.random() < 0.48 else "Nadal"
+    game_changed = tracker.add_point(winner)
+
+    if game_changed or point % 5 == 4:
+        stats = tracker.get_stats()
+        print(f"\nPoint {stats['total_points']}: {winner} wins")
+        print(f"Score: {stats['current_score']}")
+        print(f"Points won - Federer: {stats['Federer_points']}, "
+              f"Nadal: {stats['Nadal_points']}")
+
+# Final stats
+print("\n" + "=" * 40)
+stats = tracker.get_stats()
+print("MATCH STATISTICS")
+for key, value in stats.items():
+    print(f"  {key}: {value}")
+```
+
+## Tiebreak Scenarios
+
+Explore different tiebreak situations:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+def create_tiebreak_scenario(home_points, away_points):
+    """Create a specific tiebreak scenario."""
+    scorer = TennisScorer(MatchType.SINGLES_GRAND_SLAM)
+
+    # Reach 6-6 quickly
+    for _ in range(12):  # 12 games alternating
+        for _ in range(4):
+            scorer.increase_score(is_home=(_ % 2 == 0))
+
+    print(f"Starting tiebreak at: {scorer.get_score()}")
+
+    # Play specific tiebreak points
+    for _ in range(home_points):
+        scorer.increase_score(is_home=True)
+    for _ in range(away_points):
+        scorer.increase_score(is_home=False)
+
+    return scorer
+
+# Different tiebreak scenarios
+scenarios = [
+    (6, 4, "Close to winning"),
+    (5, 5, "Even tiebreak"),
+    (8, 8, "Extended tiebreak"),
+    (12, 10, "Marathon tiebreak")
+]
+
+print("TIEBREAK SCENARIOS")
+print("=" * 30)
+
+for home_pts, away_pts, description in scenarios:
+    print(f"\n{description} ({home_pts}-{away_pts}):")
+    scorer = create_tiebreak_scenario(home_pts, away_pts)
+    print(f"  Current: {scorer.get_score()}")
+
+    # What happens next?
+    scorer.increase_score(is_home=True)
+    print(f"  If home scores: {scorer.get_score()}")
+
+    scorer.undo()
+    scorer.increase_score(is_home=False)
+    print(f"  If away scores: {scorer.get_score()}")
+```
+
+## Comeback Scenarios
+
+Simulate dramatic comeback situations:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+import random
+
+def simulate_comeback():
+    """Simulate a match with a dramatic comeback."""
+    scorer = TennisScorer(MatchType.SINGLES_GRAND_SLAM)
+    random.seed(99)
+
+    print("DRAMATIC COMEBACK SIMULATION")
+    print("=" * 35)
+    print("Player A dominates early, Player B fights back!\n")
+
+    # Phase 1: Player A dominance (70% win rate)
+    print("--- First Set: A Dominates ---")
+    for game in range(8):
+        for _ in range(6):
+            is_home = random.random() < 0.70
+            scorer.increase_score(is_home=is_home)
+    print(f"After first set: {scorer.get_score()}")
+
+    # Phase 2: Momentum shift (50-50)
+    print("\n--- Second Set: Even Match ---")
+    for game in range(10):
+        for _ in range(5):
+            is_home = random.random() < 0.50
+            scorer.increase_score(is_home=is_home)
+    print(f"After second set: {scorer.get_score()}")
+
+    # Phase 3: Player B takes control (30% for A)
+    print("\n--- Third Set: B's Comeback ---")
+    for game in range(10):
+        for _ in range(5):
+            is_home = random.random() < 0.30
+            scorer.increase_score(is_home=is_home)
+    print(f"After third set: {scorer.get_score()}")
+
+    # Continue until winner
+    print("\n--- Battle Continues ---")
+    points = 0
+    while not scorer.get_winner() and points < 100:
+        is_home = random.random() < 0.45  # Slight edge to B
+        scorer.increase_score(is_home=is_home)
+        points += 1
+
+    print(f"\nFinal Score: {scorer.get_score()}")
+    winner = scorer.get_winner()
+    print(f"Winner: Player {'A' if winner == 'home' else 'B' if winner else 'None'}")
+
+simulate_comeback()
+```
+
+## Statistics Tracker
+
+Track detailed match statistics:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+class MatchStatistics:
+    def __init__(self, scorer):
+        self.scorer = scorer
+        self.serves = {'home': 0, 'away': 0}
+        self.aces = {'home': 0, 'away': 0}
+        self.break_points = {'home': 0, 'away': 0}
+        self.games_won = {'home': 0, 'away': 0}
+
+    def simulate_point(self):
+        """Simulate a point with statistics."""
+        import random
+
+        # Determine server (simplified)
+        server = 'home' if random.random() < 0.5 else 'away'
+        self.serves[server] += 1
+
+        # Ace probability (10%)
+        if random.random() < 0.10:
+            self.aces[server] += 1
+
+        # Point winner (server has 65% advantage)
+        if server == 'home':
+            winner_is_home = random.random() < 0.65
+        else:
+            winner_is_home = random.random() < 0.35
+
+        old_score = self.scorer.get_score()
+        self.scorer.increase_score(is_home=winner_is_home)
+        new_score = self.scorer.get_score()
+
+        # Track game wins
+        if old_score != new_score and '-' not in new_score:
+            if winner_is_home:
+                self.games_won['home'] += 1
+            else:
+                self.games_won['away'] += 1
+
+    def get_report(self):
+        """Generate statistics report."""
+        total_serves = self.serves['home'] + self.serves['away']
+        if total_serves == 0:
+            return "No statistics yet"
+
+        return f"""
+MATCH STATISTICS
+================
+Score: {self.scorer.get_score()}
+
+Service Statistics:
+  Home: {self.serves['home']} serves, {self.aces['home']} aces
+  Away: {self.serves['away']} serves, {self.aces['away']} aces
+
+Games Won:
+  Home: {self.games_won['home']}
+  Away: {self.games_won['away']}
+
+Ace Percentage:
+  Home: {self.aces['home']/max(1, self.serves['home'])*100:.1f}%
+  Away: {self.aces['away']/max(1, self.serves['away'])*100:.1f}%
+"""
+
+# Run match with statistics
+import random
+random.seed(55)
+
+scorer = TennisScorer(MatchType.SINGLES_ATP_TOUR)
+stats = MatchStatistics(scorer)
+
+# Simulate 50 points
+for _ in range(50):
+    stats.simulate_point()
+
+print(stats.get_report())
+```
+
+## Next Steps
+
+These examples demonstrate various ways to use PyTennisScorer:
+
+1. **Basic scoring** - Simple match tracking
+2. **Tournament simulations** - Multiple matches with different players
+3. **Live tracking** - Real-time score updates with history
+4. **Tiebreak scenarios** - Special game situations
+5. **Comeback simulations** - Dramatic match progressions
+6. **Statistics tracking** - Detailed match analytics
+
+Feel free to modify and expand these examples for your specific needs!

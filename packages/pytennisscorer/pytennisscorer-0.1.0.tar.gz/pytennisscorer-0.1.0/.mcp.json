@@ -1,0 +1,49 @@
+{
+  "mcpServers": {
+    "Ref": {
+      "type": "http",
+      "url": "https://api.ref.tools/mcp?apiKey=${REF_API_KEY}"
+    },
+    "claude-context": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@zilliz/claude-context-mcp"
+      ]
+    },
+    "cipher": {
+      "command": "cipher",
+      "args": [
+        "--mode",
+        "mcp",
+        "--agent",
+        ".cipher/config.yml"
+      ]
+    },
+    "mcp-funnel": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-funnel"
+      ]
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp",
+        "--api-key",
+        "${CONTEXT7_API_KEY}"
+      ]
+    },
+    "nano-banana": {
+      "command": "npx",
+      "args": [
+        "nano-banana-mcp"
+      ],
+      "env": {
+        "GEMINI_API_KEY": "AIzaSyA3laEDccoA5w3wlFmDUcTUspmYtCDU6m0"
+      }
+    }
+  }
+}

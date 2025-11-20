@@ -1,0 +1,204 @@
+Metadata-Version: 2.4
+Name: pytennisscorer
+Version: 0.1.0
+Summary: A Python package for tennis match scoring with support for various match formats
+Author: Robert Seidl
+License: MIT
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.9
+Provides-Extra: dev
+Requires-Dist: hypothesis>=6.88.0; extra == 'dev'
+Requires-Dist: mypy>=1.5.0; extra == 'dev'
+Requires-Dist: pytest-cov>=4.1.0; extra == 'dev'
+Requires-Dist: pytest>=7.4.0; extra == 'dev'
+Requires-Dist: ruff>=0.1.0; extra == 'dev'
+Provides-Extra: docs
+Requires-Dist: doc8>=1.1.0; extra == 'docs'
+Requires-Dist: myst-parser>=2.0.0; extra == 'docs'
+Requires-Dist: sphinx-autodoc-typehints>=1.24.0; extra == 'docs'
+Requires-Dist: sphinx-copybutton>=0.5.2; extra == 'docs'
+Requires-Dist: sphinx-rtd-theme>=1.3.0; extra == 'docs'
+Requires-Dist: sphinx>=7.0.0; extra == 'docs'
+Provides-Extra: notebook
+Requires-Dist: ipykernel>=6.25.0; extra == 'notebook'
+Requires-Dist: jupyter>=1.0.0; extra == 'notebook'
+Description-Content-Type: text/markdown
+
+# Python Tennis Scorer 🎾
+
+[![CI](https://github.com/talktennisdata/pytennisscorer/workflows/CI/badge.svg)](https://github.com/talktennisdata/pytennisscorer/actions/workflows/ci.yml)
+[![PyPI version](https://img.shields.io/pypi/v/pytennisscorer.svg)](https://pypi.org/project/pytennisscorer/)
+[![Python versions](https://img.shields.io/pypi/pyversions/pytennisscorer.svg)](https://pypi.org/project/pytennisscorer/)
+[![Documentation](https://img.shields.io/badge/docs-Interactive-brightgreen)](https://talktennisdata.github.io/pytennisscorer/)
+[![codecov](https://codecov.io/gh/talktennisdata/pytennisscorer/branch/master/graph/badge.svg)](https://codecov.io/gh/talktennisdata/pytennisscorer)
+
+A Python package for tennis match scoring with support for various match formats.
+
+**[Try it live in your browser!](https://talktennisdata.github.io/pytennisscorer/)** No installation needed - our interactive documentation lets you experiment with PyTennisScorer directly in your browser using Pyodide.
+
+## Features
+
+- Support for multiple match formats:
+  - Singles Grand Slam (Best of 5 sets)
+  - Singles ATP Finals (Best of 3 sets)
+  - Doubles Davis Cup (Best of 3 sets)
+  - Doubles ATP Tour (Best of 3 with match tiebreak)
+  - Doubles Grand Slam (Best of 3 with match tiebreak at 6-6 in final set)
+- Standard tennis scoring (0, 15, 30, 40, Advantage)
+- Tiebreak support (regular 7-point and match 10-point)
+- Score parsing and formatting
+- Undo functionality
+- Immutable state management
+
+## Installation
+
+```bash
+pip install pytennisscorer
+```
+
+For development:
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd pytennisscorer
+
+# Install with development dependencies
+uv pip install -e ".[dev,notebook]"
+```
+
+## Quick Start
+
+```python
+from pytennisscorer import TennisScorer, MatchType
+
+# Create a new scorer for a Grand Slam singles match
+scorer = TennisScorer(MatchType.SINGLES_GRANDSLAM)
+
+# Score points
+scorer.increase_score(is_home=True)  # Home player scores
+scorer.increase_score(is_home=False)  # Away player scores
+
+# Get current score
+print(scorer.get_score())  # Output: "0:0-15:15"
+
+# Complete a game (home wins 4 points)
+for _ in range(3):
+    scorer.increase_score(is_home=True)
+print(scorer.get_score())  # Output: "1:0-0:0"
+
+# Undo last point
+scorer.undo()
+print(scorer.get_score())  # Output: "0:0-40:15"
+
+# Get winner (returns None while match is ongoing)
+winner = scorer.get_winner()  # Returns 'home', 'away', or None
+```
+
+## Match Types
+
+The package supports five different match formats:
+
+- `MatchType.SINGLES_GRANDSLAM` - Best of 5 sets (e.g., Wimbledon, US Open)
+- `MatchType.SINGLES_ATP_FINALS` - Best of 3 sets with regular tiebreaks
+- `MatchType.DOUBLES_DAVISCUP` - Best of 3 sets
+- `MatchType.DOUBLES_ATPTOUR` - Best of 3 with match tiebreak and deciding point
+- `MatchType.DOUBLES_GRANDSLAM` - Best of 3 with match tiebreak at 6-6 in final set
+
+## Score Format
+
+Scores are displayed in standard tennis notation:
+
+- Game scores: `0`, `15`, `30`, `40`, `Ad` (advantage)
+- Set and match: `6:4;3:6;2:2-30:15` means:
+  - First set: 6-4
+  - Second set: 3-6
+  - Third set: 2-2, current game 30-15
+
+## Examples
+
+### Complete Match Example
+
+```python
+from pytennisscorer import TennisScorer, MatchType
+
+# Start a doubles match
+scorer = TennisScorer(MatchType.DOUBLES_DAVISCUP)
+
+# Play a complete first set (6-4)
+# Home wins 6 games, away wins 4 games
+for game in range(10):
+    winner = game % 5 < 3  # Home wins 6, away wins 4
+    for _ in range(4):
+        scorer.increase_score(is_home=winner)
+
+print(scorer.get_score())  # Output: "6:4;0:0-0:0"
+
+# Check if match is finished
+print(scorer.get_winner())  # Output: None (still playing)
+```
+
+### Tiebreak Example
+
+```python
+from pytennisscorer import TennisScorer, MatchType
+
+scorer = TennisScorer(MatchType.DOUBLES_DAVISCUP)
+
+# Create a scenario leading to tiebreak (6-6)
+# ... score to 6-6 in games ...
+
+# In tiebreak, scoring is numerical
+scorer.increase_score(is_home=True)
+print(scorer.get_score())  # Output: "6:6-1:0"
+```
+
+## Development
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=src/pytennisscorer --cov-report=term-missing
+
+# Run only unit tests
+pytest -m unit
+
+# Run only integration tests
+pytest -m integration
+```
+
+### Code Quality
+
+```bash
+# Format code
+ruff format .
+
+# Lint code
+ruff check .
+
+# Type checking
+mypy src/pytennisscorer
+```
+
+## Examples
+
+See the Jupyter notebook in `notebooks/tennis_scorer_examples.ipynb` for interactive examples.
+
+## License
+
+MIT License
+
+## Requirements
+
+- Python 3.9+

@@ -1,0 +1,178 @@
+---
+title: "PyTennisScorer"
+subtitle: "Interactive Tennis Match Scoring in Python"
+format:
+  html:
+    toc: false
+---
+
+::: {.hero-banner}
+# Welcome to PyTennisScorer 🎾
+
+A pure Python library for tennis match scoring with support for multiple match formats.
+
+Try it live in your browser - no installation required!
+:::
+
+## Quick Demo
+
+Experience PyTennisScorer in action! Click "Run Code" to start scoring a tennis match:
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+# Create a Grand Slam singles match scorer
+scorer = TennisScorer(MatchType.SINGLES_GRAND_SLAM)
+
+# Score some points
+print("Initial score:", scorer.get_score())
+
+# Home player wins 4 points (wins first game)
+for _ in range(4):
+    scorer.increase_score(is_home=True)
+    print(f"After point: {scorer.get_score()}")
+
+print("\n--- Second Game ---")
+# Away player wins some points
+scorer.increase_score(is_home=False)
+scorer.increase_score(is_home=False)
+print(f"Current score: {scorer.get_score()}")
+```
+
+## Interactive Match Simulation
+
+Try scoring your own match! Modify the code below to simulate different scenarios:
+
+```{python}
+#| live: true
+
+# Create your own match simulation!
+from pytennisscorer import TennisScorer, MatchType
+
+# Choose your match type
+match_type = MatchType.SINGLES_GRAND_SLAM  # Try other types!
+scorer = TennisScorer(match_type)
+
+# Simulate a close game
+def play_points(scorer, home_points, away_points):
+    """Helper to score multiple points."""
+    for _ in range(home_points):
+        scorer.increase_score(is_home=True)
+    for _ in range(away_points):
+        scorer.increase_score(is_home=False)
+    return scorer.get_score()
+
+# Play a deuce game
+play_points(scorer, 3, 3)  # Both at 40
+print(f"Deuce situation: {scorer.get_score()}")
+
+scorer.increase_score(is_home=True)  # Advantage home
+print(f"Advantage: {scorer.get_score()}")
+
+scorer.increase_score(is_home=False)  # Back to deuce
+print(f"Back to deuce: {scorer.get_score()}")
+
+# Win the game
+scorer.increase_score(is_home=True)  # Advantage home again
+scorer.increase_score(is_home=True)  # Home wins!
+print(f"Game won: {scorer.get_score()}")
+```
+
+## Key Features
+
+::::: {.features}
+:::: {.feature}
+### 🏆 Multiple Match Formats
+Support for Grand Slam, ATP Tour, ATP Finals, and Davis Cup formats
+::::
+
+:::: {.feature}
+### ↩️ Undo Support
+Made a mistake? Use `scorer.undo()` to revert the last point
+::::
+
+:::: {.feature}
+### 📊 Tennis Notation
+Get scores in standard tennis format like "6:4;2:1-30:15"
+::::
+
+:::: {.feature}
+### 🎯 Pure Python
+No dependencies, works everywhere Python runs - including your browser!
+::::
+:::::
+
+## Getting Started
+
+### Install from PyPI
+
+```bash
+pip install pytennisscorer
+```
+
+### Basic Usage
+
+```{python}
+#| live: true
+
+from pytennisscorer import TennisScorer, MatchType
+
+# Create a scorer for different match types
+scorer = TennisScorer(MatchType.SINGLES_ATP_TOUR)
+
+# Score points
+scorer.increase_score(is_home=True)  # Home player scores
+scorer.increase_score(is_home=False) # Away player scores
+
+# Get the current score
+print(scorer.get_score())
+
+# Check if there's a winner
+winner = scorer.get_winner()
+print(f"Winner: {winner if winner else 'Match in progress'}")
+
+# Undo last point if needed
+scorer.undo()
+print(f"After undo: {scorer.get_score()}")
+```
+
+## Match Types
+
+PyTennisScorer supports 5 different match formats:
+
+```{python}
+#| live: true
+
+from pytennisscorer import MatchType
+
+# Display all available match types
+match_types = [
+    ("SINGLES_GRAND_SLAM", "Best of 5 sets, deciding point at deuce"),
+    ("SINGLES_ATP_TOUR", "Best of 3 sets, deciding point"),
+    ("SINGLES_ATP_FINALS", "Best of 3 sets, regular deuce"),
+    ("DOUBLES_DAVIS_CUP", "Best of 5 sets, deciding point"),
+    ("DOUBLES_GRAND_SLAM", "Best of 5 sets, match tiebreak in final set")
+]
+
+for match_type, description in match_types:
+    print(f"• {match_type}: {description}")
+```
+
+## Next Steps
+
+- 📖 Follow the [Tutorial](tutorial.qmd) for a step-by-step guide
+- 🔍 Explore the [API Reference](api-reference.qmd) for detailed documentation
+- 🎮 Try different [Match Types](match-types.qmd) interactively
+- 💡 Check out more [Examples](examples.qmd)
+
+## License
+
+PyTennisScorer is open source and available under the MIT License.
+
+---
+
+::: {.footer-note}
+Built with ❤️ for tennis enthusiasts and developers
+:::
