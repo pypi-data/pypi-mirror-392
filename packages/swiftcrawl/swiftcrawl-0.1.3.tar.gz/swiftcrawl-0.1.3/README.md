@@ -1,0 +1,921 @@
+# SwiftCrawl
+
+A powerful, flexible web scraping abstraction layer that seamlessly handles both lightweight HTTP requests and full browser automation with anti-detection capabilities.
+
+## Highlights
+
+- **Dual-mode sessions** – `SwiftCrawl` seamlessly switches between BrowserForge-powered HTTP requests and Camoufox browser automation.
+- **Async-first architecture** – every client, crawler component, and CLI workflow is `asyncio` friendly for massive concurrency.
+- **Crawler engine** – Scrapy-inspired scheduler, downloader, and CLI (`swiftcrawl crawl`) with retries, priorities, and Playwright warmup support.
+- **Items & Fields** – define strongly-typed `Item` objects with `.Field(serializer=...)` hooks for clean output serialization.
+- **Project bootstrapper** – `swiftcrawl init <project>` scaffolds spiders, settings, and sample items in seconds.
+- **Unified response parsing** – `Response.json()/soup()/tree()` keep parsing ergonomic across HTTP and browser modes.
+
+## Installation
+
+### Using pip/uv (Local Development)
+
+```bash
+# Initialize with UV (recommended)
+uv init --name myproject
+cd myproject
+
+# Add SwiftCrawl
+uv add swiftcrawl
+
+# Install Camoufox browser (for browser mode)
+camoufox fetch
+```
+
+### Using Docker (Production Ready)
+
+SwiftCrawl provides pre-built Docker images for easy deployment:
+
+```bash
+# Pull the latest full image (with browser support)
+docker pull maxilr/swiftcrawl-runner:latest
+
+# Or pull the lite image (HTTP-only, smaller size)
+docker pull maxilr/swiftcrawl-runner:lite
+```
+
+**Image Variants:**
+- **`latest`** / **`<version>`** - Full image with browser support (~800MB)
+- **`lite`** / **`lite-<version>`** - HTTP-only image (~200MB)
+
+**Quick Docker Usage:**
+
+```bash
+# Run a spider project (mount your project directory)
+docker run --rm -v ./my-spider:/app maxilr/swiftcrawl-runner:latest crawl example
+
+# Use HTTP-only mode (lighter image)
+docker run --rm -v ./my-spider:/app maxilr/swiftcrawl-runner:lite crawl example
+
+# Export results to host
+docker run --rm \
+  -v ./my-spider:/app \
+  -v ./output:/data \
+  maxilr/swiftcrawl-runner crawl example -o /data/results.json
+
+# Interactive development shell
+docker run -it --rm -v ./my-spider:/app maxilr/swiftcrawl-runner bash
+```
+
+See the [Docker Usage](#docker-usage) section for more examples.
+
+## Quick Start
+
+### HTTP Mode (Fast & Stealthy)
+
+```python
+import asyncio
+from swiftcrawl import SwiftCrawl
+
+async def main():
+    async with SwiftCrawl(method='http') as session:
+        response = await session.get('https://api.example.com/data')
+        data = response.json()
+        print(data)
+
+asyncio.run(main())
+```
+
+### Browser Mode (Full JS Support)
+
+```python
+import asyncio
+from swiftcrawl import SwiftCrawl
+
+async def main():
+    async with SwiftCrawl(method='browser', headless=True) as session:
+        response = await session.get('https://spa-website.com')
+
+        # Parse with BeautifulSoup
+        soup = response.soup()
+        title = soup.find('title').string
+
+        # Or use XPath
+        tree = response.tree()
+        links = tree.xpath('//a/@href')
+
+        print(f"Title: {title}")
+        print(f"Links: {links}")
+
+asyncio.run(main())
+```
+
+## Usage Examples
+
+### HTTP GET with Custom Headers
+
+```python
+async with SwiftCrawl(method='http') as session:
+    response = await session.get(
+        'https://api.example.com',
+        headers={'Authorization': 'Bearer token123'}
+    )
+    print(response.json())
+```
+
+### HTTP POST
+
+```python
+async with SwiftCrawl(method='http') as session:
+    response = await session.post(
+        'https://api.example.com/submit',
+        json={'key': 'value'}
+    )
+    print(response.status_code)
+```
+
+### Browser GET with Initial URL (Cookie Gathering)
+
+```python
+# Visit initial_url first to gather session cookies
+async with SwiftCrawl(
+    method='browser',
+    initial_url='https://example.com/login',
+    headless=True
+) as session:
+    # Subsequent requests will have cookies from initial_url
+    response = await session.get('https://example.com/protected')
+    print(response.text)
+```
+
+### Browser POST via fetch()
+
+```python
+# Uses page.evaluate() with fetch() for fast POST requests
+async with SwiftCrawl(method='browser', headless=True) as session:
+    response = await session.post(
+        'https://api.example.com/endpoint',
+        data={'username': 'test', 'password': 'secret'}
+    )
+    print(response.json())
+```
+
+### With Proxy
+
+```python
+# HTTP mode
+async with SwiftCrawl(
+    method='http',
+    proxy='http://proxy.example.com:8080'
+) as session:
+    response = await session.get('https://example.com')
+
+# Browser mode
+async with SwiftCrawl(
+    method='browser',
+    proxy={'server': 'http://proxy.example.com:8080',
+           'username': 'user',
+           'password': 'pass'},
+    geoip=True  # Auto-detect location from proxy
+) as session:
+    response = await session.get('https://example.com')
+```
+
+### Browser Warmup Function
+
+The `warmup` parameter allows you to run a function after the browser initializes but before your main requests. This is perfect for login flows, gathering tokens, or setting up sessions.
+
+```python
+async def my_warmup(page):
+    """
+    Warmup function receives the Playwright page object.
+    Use it to login, set cookies, gather tokens, etc.
+    """
+    await page.goto('https://example.com/login')
+
+    # Set authentication cookies
+    await page.evaluate('''() => {
+        document.cookie = "auth_token=xyz123; path=/";
+        document.cookie = "session_id=abc789; path=/";
+    }''')
+
+    print("Logged in and ready!")
+
+# Use warmup with browser mode
+async with SwiftCrawl(
+    method='browser',
+    warmup=my_warmup  # Executes before main requests
+) as session:
+    # Warmup already executed - we have auth cookies now
+    response = await session.get('https://example.com/protected')
+    print(response.text)
+```
+
+**Key Benefits:**
+- Automatic login before scraping
+- Gather CSRF tokens or API keys
+- Set cookies and session data
+- Execute complex multi-step setup
+- Access full Playwright page object
+
+## Scrapy-like Crawler & CLI
+
+SwiftCrawl now ships with a Scrapy-inspired crawler stack and command-line interface.
+
+### Defining a Spider
+
+```python
+from urllib.parse import urljoin
+
+from swiftcrawl import Request, Spider
+
+
+class QuotesSpider(Spider):
+    name = "quotes"
+    start_urls = ["https://quotes.toscrape.com"]
+    method = "http"  # default, but you can override per domain/URL
+
+    async def parse(self, response):
+        soup = response.soup()
+        for quote in soup.select(".quote"):
+            yield {
+                "text": quote.select_one(".text").text,
+                "author": quote.select_one(".author").text,
+            }
+
+        next_link = soup.select_one(".next a")
+        if next_link:
+            yield Request(
+                url=urljoin(response.url, next_link["href"]),
+                callback=self.parse,
+            )
+```
+
+### Running from Python
+
+```python
+import asyncio
+from swiftcrawl import run_spider
+
+
+items = run_spider(QuotesSpider)
+print(items)
+```
+
+### Running from the CLI
+
+Create `spiders/quotes_spider.py` containing your spider, then run:
+
+```bash
+# Print stats only
+swiftcrawl crawl quotes
+
+# Persist results
+swiftcrawl crawl quotes -o output.jsonl
+
+# Enable verbose logging / stack traces
+swiftcrawl crawl quotes -o output.jsonl -v
+```
+
+The CLI automatically loads `settings.py` (if present), discovers spiders from the `spiders/` package, prints crawl statistics, and—when `-o/--output` is provided—writes scraped items to the specified `.json` or `.jsonl` file. `.json` outputs are standard JSON arrays (each item on a single line for easy diffs), while `.jsonl` outputs remain newline-delimited for streaming. Use `-v/--verbose` to see detailed request processing, item writes, and full error traces.
+
+### Bootstrapping a Project
+
+Need a fresh workspace? Use the built-in initializer:
+
+```bash
+swiftcrawl init my_scraper
+cd my_scraper
+swiftcrawl crawl example
+```
+
+`init` creates `spiders/`, a sample spider with Items, and a starter `settings.py` so you can begin crawling immediately.
+
+### Item & Field API
+
+Scraped data can be represented as structured Items with optional serialization hooks.
+
+```python
+from swiftcrawl import Item, Field
+
+
+class QuoteItem(Item):
+    text = Field()
+    author = Field()
+    tags = Field(default_factory=list, serializer=lambda values: ",".join(values))
+
+
+class QuotesSpider(Spider):
+    ...
+
+    async def parse(self, response):
+        for quote in response.soup().select('.quote'):
+            yield QuoteItem(
+                text=quote.select_one('.text').text,
+                author=quote.select_one('.author').text,
+                tags=[t.text for t in quote.select('.tag')],
+            )
+```
+
+Items automatically convert to dictionaries (using field serializers) before the crawler writes them to disk.
+
+### Response Parsing Methods
+
+```python
+async with SwiftCrawl(method='http') as session:
+    response = await session.get('https://example.com')
+
+    # Raw text
+    html = response.text
+
+    # JSON parsing
+    data = response.json()
+
+    # BeautifulSoup
+    soup = response.soup()
+    title = soup.find('title').string
+
+    # lxml XPath
+    tree = response.tree()
+    paragraphs = tree.xpath('//p/text()')
+
+    # Metadata
+    print(response.status_code)
+    print(response.headers)
+    print(response.cookies)
+    print(response.url)
+
+    # When used in crawler context
+    print(response.meta)      # Access request metadata
+    print(response.request)   # Access original Request object
+```
+
+### Advanced Request Options
+
+The `Request` class supports many advanced options for fine-grained control:
+
+```python
+from swiftcrawl import Request, Spider
+
+class AdvancedSpider(Spider):
+    name = "advanced"
+    start_urls = ["https://example.com"]
+
+    async def parse(self, response):
+        # Priority requests (higher = processed first)
+        yield Request(
+            url="https://example.com/important",
+            callback=self.parse,
+            priority=10
+        )
+
+        # Skip deduplication (crawl same URL multiple times)
+        yield Request(
+            url="https://example.com/api",
+            callback=self.parse,
+            dont_filter=True
+        )
+
+        # Error handling with errback
+        yield Request(
+            url="https://example.com/fragile",
+            callback=self.parse,
+            errback=self.handle_error
+        )
+
+        # Force full browser navigation (instead of fetch)
+        yield Request(
+            url="https://spa.example.com",
+            callback=self.parse,
+            use_goto=True,
+            wait_for_selector=".content-loaded",
+            wait_for_timeout=5000  # milliseconds
+        )
+
+        # Pass metadata through request lifecycle
+        yield Request(
+            url="https://example.com/product/123",
+            callback=self.parse_product,
+            meta={"product_id": 123, "category": "electronics"}
+        )
+
+    async def parse_product(self, response):
+        # Access metadata
+        product_id = response.meta["product_id"]
+        category = response.meta["category"]
+
+        yield {
+            "id": product_id,
+            "category": category,
+            "title": response.soup().find("h1").text
+        }
+
+    async def handle_error(self, request, exception):
+        self.logger.error(f"Failed to fetch {request.url}: {exception}")
+```
+
+### Advanced Spider Features
+
+#### Method Selection Per Domain/URL
+
+Control which scraping method (http/browser) to use based on domain or URL pattern:
+
+```python
+class MixedSpider(Spider):
+    name = "mixed"
+    start_urls = ["https://example.com"]
+
+    # Use different methods for different domains
+    domain_methods = {
+        "api.example.com": "http",      # Fast HTTP for APIs
+        "spa.example.com": "browser",   # Browser for SPAs
+    }
+
+    # Use patterns for URL-based selection
+    url_methods = {
+        "*.json": "http",                    # HTTP for JSON endpoints
+        "regex:.*dashboard.*": "browser",    # Browser for dashboard pages
+    }
+
+    async def parse(self, response):
+        # Method is automatically selected based on URL
+        yield {"data": response.json()}
+```
+
+#### Custom Settings Per Spider
+
+Override global settings for specific spiders:
+
+```python
+class SlowSpider(Spider):
+    name = "slow"
+    start_urls = ["https://rate-limited-site.com"]
+
+    # Spider-specific settings
+    custom_settings = {
+        "MAX_CONCURRENT": 2,           # Limit concurrency
+        "REQUESTS_PER_SECOND": 0.5,    # One request every 2 seconds
+        "RETRY_TIMES": 5,              # More retries
+    }
+
+    async def parse(self, response):
+        yield {"title": response.soup().title.string}
+```
+
+#### Lifecycle Hooks
+
+Spiders support lifecycle hooks for setup and teardown:
+
+```python
+class LifecycleSpider(Spider):
+    name = "lifecycle"
+    start_urls = ["https://example.com"]
+
+    async def warmup(self, page):
+        """Called before crawling starts (browser mode only)."""
+        await page.goto("https://example.com/login")
+        await page.fill("#username", "user")
+        await page.fill("#password", "pass")
+        await page.click("#login")
+        self.logger.info("Logged in successfully")
+
+    async def closed(self):
+        """Called after crawling completes."""
+        self.logger.info(f"Crawl finished. Scraped {len(self.items)} items")
+
+    async def start_requests(self):
+        """Override to customize initial requests."""
+        for url in self.start_urls:
+            yield Request(url, callback=self.parse, priority=5)
+
+    async def parse(self, response):
+        yield {"title": response.soup().title.string}
+```
+
+#### Access Browser Page in Spider
+
+In browser mode, you can access the underlying Playwright page:
+
+```python
+class BrowserSpider(Spider):
+    name = "browser"
+    method = "browser"
+    start_urls = ["https://example.com"]
+
+    async def parse(self, response):
+        # Access browser page directly
+        page = self.page
+
+        # Perform browser actions
+        await page.click("button.load-more")
+        await page.wait_for_selector(".new-content")
+
+        # Get updated content
+        new_response = await self.get(response.url)
+        yield {"items": len(new_response.soup().find_all(".item"))}
+```
+
+## Configuration Options
+
+### SwiftCrawl Constructor
+
+```python
+SwiftCrawl(
+    method='http',           # 'http', 'browser', or 'auto' (future)
+    proxy=None,              # Proxy URL or config dict
+    headless=True,           # Browser headless mode
+    block_images=True,       # Block images in browser
+    humanize=None,           # Human-like behavior (0.0-2.0)
+    initial_url=None,        # URL to visit first (browser only)
+    warmup=None,             # Async function(page) for browser setup
+    locale='en-US',          # Browser locale
+    os=['windows', 'macos'], # OS fingerprint options
+    geoip=False,             # Auto-geolocate from proxy
+    timeout=30.0,            # Request timeout (HTTP)
+    max_concurrent=10,       # Queue concurrency limit
+)
+```
+
+### Crawler Settings (settings.py)
+
+When using the Scrapy-inspired crawler framework, configure via `settings.py`:
+
+```python
+SETTINGS = {
+    # Core Settings
+    "METHOD": "http",                    # Default method: 'http', 'browser', 'auto'
+    "SPIDERS_MODULE": "spiders",         # Directory containing spider files
+
+    # Concurrency Control
+    "MAX_CONCURRENT": 16,                # Global max concurrent requests
+    "MAX_CONCURRENT_PER_DOMAIN": {},     # Per-domain limits: {"example.com": 2}
+
+    # Rate Limiting
+    "REQUESTS_PER_SECOND": None,         # Global rate limit (None = unlimited)
+    "DOMAIN_DELAYS": {},                 # Per-domain delays: {"example.com": 1.0}
+
+    # Auto-Throttle (Adaptive Rate Limiting)
+    "AUTO_THROTTLE": False,              # Enable adaptive throttling
+    "AUTO_THROTTLE_START": 1.0,          # Initial delay between requests
+    "AUTO_THROTTLE_MAX": 60.0,           # Maximum delay
+    "AUTO_THROTTLE_TARGET": 1.0,         # Target concurrency factor
+
+    # Retry Logic
+    "RETRY_ENABLED": True,               # Enable retry on failure
+    "RETRY_TIMES": 2,                    # Max retry attempts per request
+
+    # Deduplication
+    "DEDUPLICATE": True,                 # Filter duplicate requests
+
+    # Browser Settings (when METHOD='browser')
+    "HEADLESS": True,                    # Run browser in headless mode
+    "BLOCK_IMAGES": True,                # Block image loading for speed
+
+    # Advanced Options
+    "HTTP_OPTIONS": {},                  # Additional options for HTTP client
+    "BROWSER_OPTIONS": {},               # Additional options for browser client
+}
+```
+
+**Example: Rate-Limited Spider**
+
+```python
+# settings.py
+SETTINGS = {
+    "METHOD": "http",
+    "MAX_CONCURRENT": 5,
+    "REQUESTS_PER_SECOND": 2.0,          # 2 requests per second globally
+    "DOMAIN_DELAYS": {
+        "rate-limited-api.com": 2.0,     # 2 second delay for this domain
+        "slow-site.com": 5.0,            # 5 second delay for this domain
+    },
+    "MAX_CONCURRENT_PER_DOMAIN": {
+        "fragile-api.com": 1,            # Only 1 concurrent request
+    },
+    "RETRY_TIMES": 3,                    # Retry failed requests 3 times
+}
+```
+
+**Example: Auto-Throttle Configuration**
+
+Auto-throttle automatically adjusts request rate based on response times and server load:
+
+```python
+# settings.py
+SETTINGS = {
+    "METHOD": "http",
+    "AUTO_THROTTLE": True,               # Enable adaptive throttling
+    "AUTO_THROTTLE_START": 1.0,          # Start with 1 second between requests
+    "AUTO_THROTTLE_MAX": 10.0,           # Max delay of 10 seconds
+    "AUTO_THROTTLE_TARGET": 1.0,         # Aim for 1 concurrent request per target
+    "MAX_CONCURRENT": 32,                # Overall concurrency limit
+}
+```
+
+### HTTP Mode Options (BrowserForge + httpx)
+- Generates realistic browser headers automatically
+- Rotates fingerprints between requests
+- Supports all standard httpx parameters
+
+### Browser Mode Options (Camoufox)
+- **headless**: Run in headless mode (default: True)
+- **block_images**: Block image loading for speed (default: True)
+- **humanize**: Enable human-like cursor movement (0.0-2.0)
+- **initial_url**: Navigate here first to collect cookies/session
+- **warmup**: Async function that receives the page object for setup (login, cookies, etc.)
+- **geoip**: Auto-detect geolocation from proxy IP
+- **locale**: Browser locale (default: 'en-US')
+- **os**: List of OS to randomly choose from
+
+## Parameter Validation
+
+SwiftCrawl validates parameter compatibility and warns you about configuration mistakes:
+
+### Errors (ValueError)
+Raised when parameters are fundamentally incompatible:
+
+```python
+# ERROR: warmup requires browser mode
+session = SwiftCrawl(method='http', warmup=my_warmup)
+# ValueError: warmup parameter is only supported for 'browser' and 'auto' methods.
+```
+
+### Warnings (UserWarning)
+Issued when parameters will be ignored:
+
+```python
+# WARNING: browser params with HTTP mode
+session = SwiftCrawl(
+    method='http',
+    headless=False,  # Ignored in HTTP mode
+    humanize=1.5     # Ignored in HTTP mode
+)
+# UserWarning: Browser-only parameters ['headless', 'humanize'] are ignored in HTTP mode.
+
+# WARNING: timeout with browser mode
+session = SwiftCrawl(method='browser', timeout=10.0)
+# UserWarning: HTTP timeout parameter is ignored in browser mode.
+```
+
+This helps catch configuration mistakes early and ensures you understand which parameters are being used.
+
+## Architecture
+
+### Session API (SwiftCrawl)
+
+```
+SwiftCrawl (Core Session Manager)
+├── method='http' ──> AsyncHTTPClient
+│   ├── httpx (async HTTP/2 client)
+│   └── BrowserForge (realistic headers & fingerprints)
+│
+├── method='browser' ──> AsyncBrowserClient
+│   ├── Camoufox (anti-detection wrapper)
+│   ├── Playwright (browser automation)
+│   └── Chromium (headless browser)
+│
+└── method='auto' ──> Smart detection (coming soon)
+```
+
+### Crawler Framework
+
+```
+Spider (User-defined crawl logic)
+  ├── start_urls / start_requests()
+  ├── parse() callbacks
+  ├── domain_methods (per-domain method selection)
+  └── custom_settings
+          ↓
+Crawler (Orchestrator)
+  ├── Spider instantiation
+  ├── Statistics tracking
+  └── Item collection
+          ↓
+Scheduler (Queue Manager)
+  ├── Priority queue (heapq)
+  ├── Request deduplication (set)
+  ├── Rate limiting (REQUESTS_PER_SECOND)
+  ├── Per-domain delays (DOMAIN_DELAYS)
+  ├── Auto-throttle (adaptive rate limiting)
+  └── Concurrency control (MAX_CONCURRENT)
+          ↓
+DownloaderManager (Method Dispatcher)
+  ├── URL/domain-based method selection
+  ├── Retry logic (RETRY_ENABLED, RETRY_TIMES)
+  ├── AsyncHTTPClient (http mode)
+  └── AsyncBrowserClient (browser mode)
+          ↓
+Response (Unified Response Object)
+  ├── .text / .html → Raw content
+  ├── .json() → JSON parsing
+  ├── .soup() → BeautifulSoup (CSS selectors)
+  ├── .tree() → lxml (XPath)
+  ├── .status_code, .headers, .cookies → HTTP metadata
+  ├── .meta → Request metadata
+  └── .request → Original Request object
+```
+
+### Key Design Patterns
+
+- **Async-first**: All I/O operations use asyncio for high concurrency
+- **Dual-mode**: Seamlessly switch between HTTP and browser automation
+- **Queue-based**: Priority queue with deduplication and rate limiting
+- **Scrapy-inspired**: Familiar API for Scrapy users (Spider, Request, Item)
+- **Anti-detection**: BrowserForge for HTTP, Camoufox for browser mode
+
+## Roadmap
+
+- [x] HTTP mode with BrowserForge headers
+- [x] Browser mode with Camoufox
+- [x] Browser POST via page.evaluate(fetch())
+- [x] Session/cookie management with initial_url
+- [x] Warmup function for browser initialization
+- [x] HTML-wrapped JSON parsing fix
+- [x] Parameter validation and warnings
+- [x] Unified Response object
+- [x] Scrapy-inspired crawler framework
+- [x] AsyncIO request queue with priority scheduling
+- [x] Rate limiting and retry logic (with auto-throttle)
+- [x] Request deduplication
+- [x] Per-domain concurrency and delays
+- [ ] Auto mode (intelligent method selection)
+- [ ] Middleware system
+- [ ] Built-in proxy rotation
+
+## Dependencies
+
+| Package | Version | Purpose |
+|---------|---------|---------|
+| **httpx** | ≥0.28.1 | Async HTTP client for fast requests |
+| **browserforge** | ≥1.2.3 | Browser fingerprint generation |
+| **camoufox** | ≥0.4.11 | Anti-detection browser automation |
+| **playwright** | ≥1.56.0 | Browser automation engine (used by Camoufox) |
+| **beautifulsoup4** | ≥4.14.2 | HTML parsing with CSS selectors |
+| **lxml** | ≥6.0.2 | Fast XPath parsing |
+
+**Python Version Required:** ≥3.12
+
+## Docker Usage
+
+SwiftCrawl provides production-ready Docker images with two variants:
+
+### Image Variants
+
+| Variant | Size | Use Case | Includes |
+|---------|------|----------|----------|
+| **`latest`** / **`<version>`** | ~800MB | Full browser automation | Camoufox, Playwright, Chromium |
+| **`lite`** / **`lite-<version>`** | ~200MB | HTTP-only scraping | httpx, BrowserForge |
+
+### Running Spiders with Docker
+
+**Basic spider execution:**
+
+```bash
+# Create a spider project locally
+swiftcrawl init my-spider
+cd my-spider
+
+# Run the spider in a container (full browser support)
+docker run --rm -v "$(pwd):/app" maxilr/swiftcrawl-runner:latest crawl example
+
+# Use lite version for HTTP-only spiders (faster, smaller)
+docker run --rm -v "$(pwd):/app" maxilr/swiftcrawl-runner:lite crawl example
+```
+
+**Export results to host:**
+
+```bash
+# Create output directory
+mkdir output
+
+# Run spider and save results
+docker run --rm \
+  -v "$(pwd):/app" \
+  -v "$(pwd)/output:/data" \
+  maxilr/swiftcrawl-runner:latest \
+  crawl example -o /data/results.jsonl
+```
+
+**Interactive development:**
+
+```bash
+# Start a bash shell in the container
+docker run -it --rm -v "$(pwd):/app" maxilr/swiftcrawl-runner bash
+
+# Inside container, you can:
+# - Edit files with vi/nano
+# - Run swiftcrawl commands
+# - Test individual scripts
+```
+
+**With proxy:**
+
+```bash
+# HTTP mode with proxy (environment variable)
+docker run --rm \
+  -v "$(pwd):/app" \
+  -e HTTP_PROXY=http://proxy.example.com:8080 \
+  maxilr/swiftcrawl-runner:lite crawl example
+
+# Browser mode needs proxy in settings.py or spider code
+```
+
+**Pin specific version:**
+
+```bash
+# Use a specific version tag
+docker run --rm -v "$(pwd):/app" maxilr/swiftcrawl-runner:0.1 crawl example
+
+# Or lite variant with version
+docker run --rm -v "$(pwd):/app" maxilr/swiftcrawl-runner:lite-0.1 crawl example
+```
+
+### Building Custom Images
+
+If you need to extend the base image with additional dependencies:
+
+```dockerfile
+# docker/Dockerfile.custom
+FROM maxilr/swiftcrawl-runner:latest
+
+# Install additional Python packages
+RUN uv pip install pandas numpy
+
+# Or install system packages
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
+# Copy your project
+COPY . /app
+WORKDIR /app
+
+# Run your spider
+CMD ["crawl", "myspider"]
+```
+
+Build and run:
+
+```bash
+docker build -t my-custom-scraper -f docker/Dockerfile.custom .
+docker run --rm my-custom-scraper
+```
+
+### Docker Compose Example
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+
+services:
+  scraper:
+    image: maxilr/swiftcrawl-runner:latest
+    volumes:
+      - ./my-spider:/app
+      - ./output:/data
+    command: crawl example -o /data/results.jsonl
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  # HTTP-only scraper (lighter)
+  scraper-lite:
+    image: maxilr/swiftcrawl-runner:lite
+    volumes:
+      - ./my-spider:/app
+      - ./output:/data
+    command: crawl api-spider -o /data/api-results.json
+```
+
+Run with:
+
+```bash
+docker-compose up scraper
+# or
+docker-compose up scraper-lite
+```
+
+## Testing
+
+```bash
+# Run fast, offline-safe suite
+uv run pytest
+
+# Include network + browser integration tests (needs internet & Playwright)
+SWIFTCRAWL_RUN_NETWORK_TESTS=1 uv run pytest
+```
+
+## License
+
+MIT
+
+## Third-Party Licenses
+
+SwiftCrawl depends on the following open-source libraries. We are grateful to their maintainers and contributors:
+
+| Library | License | Repository |
+|---------|---------|------------|
+| **beautifulsoup4** | MIT | [https://www.crummy.com/software/BeautifulSoup/](https://www.crummy.com/software/BeautifulSoup/) |
+| **browserforge** | Apache-2.0 | [https://github.com/daijro/browserforge](https://github.com/daijro/browserforge) |
+| **camoufox** | MPL-2.0 | [https://github.com/daijro/camoufox](https://github.com/daijro/camoufox) |
+| **httpx** | BSD-3-Clause | [https://github.com/encode/httpx](https://github.com/encode/httpx) |
+| **lxml** | BSD-3-Clause | [https://github.com/lxml/lxml](https://github.com/lxml/lxml) |
+| **playwright** | Apache-2.0 | [https://github.com/microsoft/playwright-python](https://github.com/microsoft/playwright-python) |
+
+All licenses require attribution. Please review each library's license for specific terms.
+
+## Contributing
+
+Contributions are welcome! This is an early-stage project designed for flexible web scraping with anti-detection capabilities.
