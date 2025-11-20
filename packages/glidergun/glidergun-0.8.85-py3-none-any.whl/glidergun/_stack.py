@@ -1,0 +1,409 @@
+import contextlib
+import dataclasses
+from base64 import b64encode
+from collections.abc import Callable, Iterable, Iterator
+from dataclasses import dataclass
+from functools import cached_property
+from io import BytesIO
+from typing import Any, Union
+
+import numpy as np
+import rasterio
+from matplotlib import pyplot as plt
+from rasterio import DatasetReader
+from rasterio.crs import CRS
+from rasterio.io import MemoryFile
+from rasterio.warp import Resampling
+
+from glidergun._grid import (
+    Extent,
+    Grid,
+    _metadata,
+    con,
+    from_dataset,
+    grid,
+    pca,
+    standardize,
+)
+from glidergun._literals import BaseMap, DataType
+from glidergun._types import Scaler
+from glidergun._utils import create_directory, get_crs, get_driver, get_nodata_value
+
+Operand = Union["Stack", Grid, float, int]
+
+
+@dataclass(frozen=True)
+class Stack:
+    grids: tuple[Grid, ...]
+    display: tuple[int, int, int] = (1, 2, 3)
+
+    def __repr__(self):
+        g = self.grids[0]
+        return (
+            f"image: {g.width}x{g.height} | "
+            + f"crs: {self.crs} | "
+            + f"count: {len(self.grids)} | "
+            + f"rgb: {self.display}"
+        )
+
+    def _thumbnail(self, figsize: tuple[float, float] | None = None):
+        with BytesIO() as buffer:
+            figure = plt.figure(figsize=figsize, frameon=False)
+            axes = figure.add_axes((0, 0, 1, 1))
+            axes.axis("off")
+            obj = self.to_uint8_range()
+            rgb = [obj.grids[i - 1].data for i in (self.display if self.display else (1, 2, 3))]
+            alpha = np.where(np.isfinite(rgb[0] + rgb[1] + rgb[2]), 255, 0)
+            plt.imshow(np.dstack([*[np.asanyarray(g, "uint8") for g in rgb], alpha]))
+            plt.savefig(buffer, bbox_inches="tight", pad_inches=0)
+            plt.close(figure)
+            return buffer.getvalue()
+
+    @cached_property
+    def img(self) -> str:
+        image = b64encode(self._thumbnail()).decode()
+        return f"data:image/png;base64, {image}"
+
+    @property
+    def crs(self) -> CRS:
+        return self.grids[0].crs
+
+    @property
+    def xmin(self) -> float:
+        return self.grids[0].xmin
+
+    @property
+    def ymin(self) -> float:
+        return self.grids[0].ymin
+
+    @property
+    def xmax(self) -> float:
+        return self.grids[0].xmax
+
+    @property
+    def ymax(self) -> float:
+        return self.grids[0].ymax
+
+    @property
+    def extent(self) -> Extent:
+        return self.grids[0].extent
+
+    @property
+    def md5s(self) -> tuple[str, ...]:
+        return tuple(g.md5 for g in self.grids)
+
+    def __add__(self, n: Operand):
+        return self._apply(n, lambda g, n: g.__add__(n))
+
+    __radd__ = __add__
+
+    def __sub__(self, n: Operand):
+        return self._apply(n, lambda g, n: g.__sub__(n))
+
+    def __rsub__(self, n: Operand):
+        return self._apply(n, lambda g, n: g.__rsub__(n))
+
+    def __mul__(self, n: Operand):
+        return self._apply(n, lambda g, n: g.__mul__(n))
+
+    __rmul__ = __mul__
+
+    def __pow__(self, n: Operand):
+        return self._apply(n, lambda g, n: g.__pow__(n))
+
+    def __rpow__(self, n: Operand):
+        return self._apply(n, lambda g, n: g.__rpow__(n))
+
+    def __truediv__(self, n: Operand):
+        return self._apply(n, lambda g, n: g.__truediv__(n))
+
+    def __rtruediv__(self, n: Operand):
+        return self._apply(n, lambda g, n: g.__rtruediv__(n))
+
+    def __floordiv__(self, n: Operand):
+        return self._apply(n, lambda g, n: g.__floordiv__(n))
+
+    def __rfloordiv__(self, n: Operand):
+        return self._apply(n, lambda g, n: g.__rfloordiv__(n))
+
+    def __mod__(self, n: Operand):
+        return self._apply(n, lambda g, n: g.__mod__(n))
+
+    def __rmod__(self, n: Operand):
+        return self._apply(n, lambda g, n: g.__rmod__(n))
+
+    def __lt__(self, n: Operand):
+        return self._apply(n, lambda g, n: g.__lt__(n))
+
+    def __gt__(self, n: Operand):
+        return self._apply(n, lambda g, n: g.__gt__(n))
+
+    __rlt__ = __gt__
+
+    __rgt__ = __lt__
+
+    def __le__(self, n: Operand):
+        return self._apply(n, lambda g, n: g.__le__(n))
+
+    def __ge__(self, n: Operand):
+        return self._apply(n, lambda g, n: g.__ge__(n))
+
+    __rle__ = __ge__
+
+    __rge__ = __le__
+
+    def __eq__(self, n: object):
+        if not isinstance(n, (Grid | float | int)):
+            return NotImplemented
+        return self._apply(n, lambda g, n: g.__eq__(n))
+
+    __req__ = __eq__
+
+    def __ne__(self, n: object):
+        if not isinstance(n, (Grid | float | int)):
+            return NotImplemented
+        return self._apply(n, lambda g, n: g.__ne__(n))
+
+    __rne__ = __ne__
+
+    def __and__(self, n: Operand):
+        return self._apply(n, lambda g, n: g.__and__(n))
+
+    __rand__ = __and__
+
+    def __or__(self, n: Operand):
+        return self._apply(n, lambda g, n: g.__or__(n))
+
+    __ror__ = __or__
+
+    def __xor__(self, n: Operand):
+        return self._apply(n, lambda g, n: g.__xor__(n))
+
+    __rxor__ = __xor__
+
+    def __rshift__(self, n: Operand):
+        return self._apply(n, lambda g, n: g.__rshift__(n))
+
+    def __lshift__(self, n: Operand):
+        return self._apply(n, lambda g, n: g.__lshift__(n))
+
+    __rrshift__ = __lshift__
+
+    __rlshift__ = __rshift__
+
+    def __neg__(self):
+        return self.each(lambda g: g.__neg__())
+
+    def __pos__(self):
+        return self.each(lambda g: g.__pos__())
+
+    def __invert__(self):
+        return self.each(lambda g: g.__invert__())
+
+    def _apply(self, n: Operand, op: Callable):
+        if isinstance(n, Stack):
+            return self.zip_with(n, lambda g1, g2: op(g1, g2))
+        return self.each(lambda g: op(g, n))
+
+    def scale(self, scaler: Scaler, **fit_params):
+        return self.each(lambda g: g.scale(scaler, **fit_params))
+
+    def percent_clip(self, min_percent: float, max_percent: float):
+        return self.each(lambda g: g.percent_clip(min_percent, max_percent))
+
+    def to_uint8_range(self):
+        return self.each(lambda g: g.to_uint8_range())
+
+    def color(self, rgb: tuple[int, int, int]):
+        valid = set(range(1, len(self.grids) + 1))
+        if set(rgb) - valid:
+            raise ValueError("Invalid bands specified.")
+        return dataclasses.replace(self, display=rgb)
+
+    def map(
+        self,
+        opacity: float = 1.0,
+        basemap: BaseMap | Any | None = None,
+        width: int = 800,
+        height: int = 600,
+        attribution: str | None = None,
+        grayscale: bool = True,
+        **kwargs,
+    ):
+        from glidergun._display import get_folium_map
+
+        return get_folium_map(self, opacity, basemap, width, height, attribution, grayscale, **kwargs)
+
+    def each(self, func: Callable[[Grid], Grid]):
+        return stack(*map(func, self.grids))
+
+    def georeference(
+        self,
+        xmin: float,
+        ymin: float,
+        xmax: float,
+        ymax: float,
+        crs: int | CRS = 4326,
+    ):
+        return self.each(lambda g: g.georeference(xmin, ymin, xmax, ymax, crs))
+
+    def tiles(self, width: float, height: float):
+        return (stack(*grids) for grids in zip(*(g.tiles(width, height) for g in self.grids), strict=False))
+
+    def clip(self, xmin: float, ymin: float, xmax: float, ymax: float):
+        return self.each(lambda g: g.clip(xmin, ymin, xmax, ymax))
+
+    def clip_at(self, x: float, y: float, width: int = 8, height: int = 8):
+        return self.each(lambda g: g.clip_at(x, y, width, height))
+
+    def extract_bands(self, *bands: int):
+        return stack(*(self.grids[i - 1] for i in bands))
+
+    def pca(self, n_components: int = 3):
+        return stack(*pca(n_components, *self.grids))
+
+    def project(self, crs: int | CRS, resampling: Resampling = Resampling.nearest):
+        if get_crs(crs).wkt == self.crs.wkt:
+            return self
+        return self.each(lambda g: g.project(crs, resampling))
+
+    def resample(
+        self,
+        cell_size: tuple[float, float] | float,
+        resampling: Resampling = Resampling.nearest,
+    ):
+        return self.each(lambda g: g.resample(cell_size, resampling))
+
+    def sam(self, mask_generator) -> Iterable[Grid]:
+        data = np.stack([g.stretch(0, 255).type("uint8").data for g in self.grids[:3]], axis=-1)
+        masks = mask_generator.generate(data)
+        return (grid(m["segmentation"], extent=self.extent, crs=self.crs) for m in masks)
+
+    def sam_clip(
+        self, mask_generator, labels: list[str], min_score: float = 0.5
+    ) -> Iterable[tuple["Stack", Any, str, float]]:
+        import clip  # type: ignore
+        import torch  # type: ignore
+        from PIL import Image
+
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        model, preprocess = clip.load("ViT-B/32", device=device)
+        text_tokens = clip.tokenize(labels).to(device)
+
+        for mask in self.sam(mask_generator):
+            mask = mask.set_nan(0)
+            polygon = mask.to_polygons()[0][0]
+            clipped = self.clip(*mask.buffer(1, 10).data_extent)
+            rgb = np.stack([g.stretch(0, 255).type("uint8").data for g in clipped.grids[:3]], axis=-1)
+            image = Image.fromarray(rgb)
+            image_input = preprocess(image).unsqueeze(0).to(device)
+
+            with torch.no_grad():
+                image_emb = model.encode_image(image_input)
+                text_emb = model.encode_text(text_tokens)
+                scores = (image_emb @ text_emb.T).softmax(dim=-1)
+                index = scores.argmax().item()
+                if score := scores[0][index].item() < min_score:
+                    continue
+                yield clipped, polygon, labels[index], score
+
+    def zip_with(self, other_stack: "Stack", func: Callable[[Grid, Grid], Grid]):
+        grids = []
+        for grid1, grid2 in zip(self.grids, other_stack.grids, strict=False):
+            grid1, grid2 = standardize(grid1, grid2)
+            grids.append(func(grid1, grid2))
+        return stack(*grids)
+
+    def value_at(self, x: float, y: float):
+        return tuple(grid.value_at(x, y) for grid in self.grids)
+
+    def type(self, dtype: DataType):
+        return self.each(lambda g: g.type(dtype))
+
+    def to_bytes(self, dtype: DataType | None = None, driver: str = "") -> bytes:
+        with MemoryFile() as memory_file:
+            self.save(memory_file, dtype, driver)
+            return memory_file.read()
+
+    def save(self, file: str | MemoryFile, dtype: DataType | None = None, driver: str = ""):
+        if isinstance(file, str) and (
+            file.lower().endswith(".jpg")
+            or file.lower().endswith(".kml")
+            or file.lower().endswith(".kmz")
+            or file.lower().endswith(".png")
+        ):
+            grids = self.extract_bands(*self.display).to_uint8_range().grids
+            dtype = "uint8"
+        else:
+            grids = self.grids
+            if dtype is None:
+                dtype = grids[0].dtype
+
+        nodata = get_nodata_value(dtype)
+
+        if nodata is not None:
+            grids = tuple(con(g.is_nan(), float(nodata), g) for g in grids)
+
+        if isinstance(file, str):
+            create_directory(file)
+            with rasterio.open(
+                file,
+                "w",
+                driver=driver or get_driver(file),
+                count=len(grids),
+                dtype=dtype,
+                nodata=nodata,
+                **_metadata(self.grids[0]),
+            ) as dataset:
+                for index, grid in enumerate(grids):
+                    dataset.write(grid.data, index + 1)
+        elif isinstance(file, MemoryFile):
+            with file.open(
+                driver=driver or "COG",
+                count=len(grids),
+                dtype=dtype,
+                nodata=nodata,
+                **_metadata(self.grids[0]),
+            ) as dataset:
+                for index, grid in enumerate(grids):
+                    dataset.write(grid.data, index + 1)
+
+
+def stack(*grids: Grid | str | DatasetReader | bytes | MemoryFile) -> Stack:
+    bands: list[Grid] = []
+
+    for g in grids:
+        if isinstance(g, str):
+            with rasterio.open(g) as dataset:
+                bands.extend(_read_grids(dataset))
+        elif isinstance(g, DatasetReader):
+            bands.extend(_read_grids(g))
+        elif isinstance(g, bytes):
+            with MemoryFile(g) as memory_file, memory_file.open() as dataset:
+                bands.extend(_read_grids(dataset))
+        elif isinstance(g, MemoryFile):
+            with g.open() as dataset:
+                bands.extend(_read_grids(dataset))
+        elif isinstance(g, Grid):
+            bands.append(g)
+
+    crs = {g.crs for g in bands}
+    if len(crs) > 1:
+        raise ValueError("All grids must have the same CRS.")
+
+    extent = {g.extent for g in bands}
+    if len(extent) > 1:
+        raise ValueError("All grids must have the same extent.")
+
+    return Stack(tuple(bands))
+
+
+def _read_grids(dataset) -> Iterator[Grid]:
+    if dataset.subdatasets:
+        for index, _ in enumerate(dataset.subdatasets):
+            with rasterio.open(dataset.subdatasets[index]) as subdataset:
+                yield from _read_grids(subdataset)
+    elif dataset.indexes:
+        for index in dataset.indexes:
+            with contextlib.suppress(Exception):
+                yield from_dataset(dataset, None, None, None, index)
