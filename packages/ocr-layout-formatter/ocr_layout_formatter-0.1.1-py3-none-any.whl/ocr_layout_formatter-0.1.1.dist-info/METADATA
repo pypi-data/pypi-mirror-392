@@ -1,0 +1,68 @@
+Metadata-Version: 2.4
+Name: ocr-layout-formatter
+Version: 0.1.1
+Summary: Convert OCR JSON to spatial text preserving document layout
+Author-email: datasci_tree3 <datasci@promes.co.th>
+Project-URL: Homepage, https://gitlab.com/promes-in-th/products/fuse/ocr-layout
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+
+# OCR Layout
+
+Convert OCR JSON to spatial text preserving document layout.
+
+## Installation
+
+```bash
+pip install ocr-layout-formatter
+```
+
+## Usage
+
+```python
+from ocr_layout import Formatter
+
+formatter = Formatter(gap_threshold=40, y_threshold=15)
+result = formatter.format(ocr_data)
+print(result)
+```
+
+### Parameters
+
+- `gap_threshold` (int): Minimum horizontal gap to split text into segments (default: 40)
+- `y_threshold` (int): Maximum vertical distance to group texts on same line (default: 15)
+
+### Input Format
+
+```python
+ocr_data = [
+    {
+        "result": [{
+            "text_lines": [
+                {"text": "Hello", "bbox": [10, 10, 50, 30]},
+                {"text": "World", "bbox": [60, 10, 100, 30]}
+            ],
+            "image_bbox": [0, 0, 200, 300]
+        }]
+    }
+]
+```
+
+### Output
+
+```
+--- Page 1 ---
+Hello World
+```
+
+## Logging
+
+Enable logging to see processing details:
+
+```python
+import logging
+logging.basicConfig(level=logging.DEBUG)
+```
