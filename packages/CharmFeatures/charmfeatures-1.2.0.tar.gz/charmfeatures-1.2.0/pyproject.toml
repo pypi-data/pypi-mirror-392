@@ -1,0 +1,51 @@
+[build-system]
+# pylibtiff is included in the build requirements in order to check and potentially fix the tiff.h problem (see setup.py)
+# numpy has to come along for the ride to satisfy pylibtiff requirements.
+# specific versions are needed here, for reasons.
+# Other pylibtiff versions to check:
+#   0.6.0 (2023-09-15), 0.5.1 (2022-12-29), 0.5.0 (2022-12-12), 0.4.4 (2021-10-03)
+# libtiff versions to check:
+#   v4.7.0 (2024-09-18)
+#   v4.6.0 (2023-09013)
+#   v4.5.1 (2023-06-14)
+requires = ["setuptools>=40.6.0", "pylibtiff==0.6.1", "numpy<2"]
+build-backend = "setuptools.build_meta" #  specify build backend
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project]
+name         = "CharmFeatures"
+version      = "1.2.0" # Specify your project's version
+description  = "An image feature extraction library for python based on WND-CHARM"
+authors = [
+    { name = "Ilya Goldberg"},
+    { name = "Nikita Orlov"},
+    { name = "Josiah Johnston"},
+    { name = "Lior Shamir"},
+    { name = "Chris Coletta"},
+]
+license = {text = "LGPLv2"}
+readme       = "README.md"
+requires-python = ">=3.9" # Specify the minimum required Python version
+dependencies = [
+	"numpy<2",
+	"scipy",
+	"tables",
+	"pylibtiff==0.6.1",
+	"fasteners",
+	"bitarray",
+]
+
+# Optional dependencies for testing, documentation, etc.
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "boto3",
+    "botocore",
+]
+# docs = [
+# ]
+
+[project.scripts]
+charm-image-features = 'CharmFeatures.ProcessImages:main'
