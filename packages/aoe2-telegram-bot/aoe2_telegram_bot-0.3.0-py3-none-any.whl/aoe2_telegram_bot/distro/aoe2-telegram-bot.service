@@ -1,0 +1,17 @@
+[Unit]
+Description=Age Of Empires 2 Telegram Bot
+After=network.target
+
+[Service]
+Type=simple
+User=%i
+Group=%i
+
+EnvironmentFile=%h/.config/aoe2-telegram-bot/env
+ExecStart=/usr/bin/python3 -m aoe2_telegram_bot
+
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
