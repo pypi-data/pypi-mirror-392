@@ -1,0 +1,20 @@
+TOKEN "prometheus" READ
+
+NODE prometheus_0
+SQL >
+
+    SELECT * FROM api_count_errors
+    union all
+    SELECT * FROM api_count_requests
+    union all
+    SELECT * FROM api_count_uniq_sessions
+    union all
+    SELECT * FROM api_count_errors_5m
+    union all
+    SELECT * FROM api_count_requests_5m
+    union all
+    SELECT * FROM api_count_uniq_sessions_5m
+
+
+
+

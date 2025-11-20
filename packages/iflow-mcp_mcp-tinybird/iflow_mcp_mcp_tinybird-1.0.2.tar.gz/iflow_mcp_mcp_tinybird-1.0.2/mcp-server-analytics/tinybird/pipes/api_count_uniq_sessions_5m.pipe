@@ -1,0 +1,48 @@
+TOKEN "prometheus" READ
+
+NODE count_uniq_total_sessions
+SQL >
+
+    SELECT app_name, ifNull(version, '') as version, 'all' as tool, uniq(session) total_sessions
+    FROM mcp_monitoring
+    where datetime > now() - interval 5 minute
+    group by app_name, version, tool
+
+
+
+NODE count_uniq_total_sessions_metrics
+SQL >
+
+    SELECT
+        *,
+        arrayJoin(
+            [
+                map(
+                    'name',
+                    'mcp_uniq_total_sessions_5m',
+                    'type',
+                    'gauge',
+                    'help',
+                    'total of uniq sessions last 5 minutes',
+                    'value',
+                    toString(total_sessions)
+                )
+            ]
+        ) as metrics_uniq_total_sessions
+    FROM count_uniq_total_sessions
+
+
+
+NODE count_uniq_total_sessions_metrics_prom
+SQL >
+
+    SELECT
+        app_name,
+        metrics_uniq_total_sessions['name'] as name,
+        metrics_uniq_total_sessions['type'] as type,
+        metrics_uniq_total_sessions['help'] as help,
+        toFloat64(metrics_uniq_total_sessions['value']) as value,
+        map('app_name', app_name, 'version', version, 'tool', tool) as labels
+    FROM count_uniq_total_sessions_metrics
+
+
