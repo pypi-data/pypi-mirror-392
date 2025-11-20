@@ -1,0 +1,5 @@
+"""Module to support aiohomematic testing with a local client."""
+
+from __future__ import annotations
+
+__version__ = "2025.11.20"
