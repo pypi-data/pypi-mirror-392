@@ -1,0 +1,2 @@
+from simplified_scrapy.core.spider import Spider
+from simplified_scrapy.simplified_doc import SimplifiedDoc
