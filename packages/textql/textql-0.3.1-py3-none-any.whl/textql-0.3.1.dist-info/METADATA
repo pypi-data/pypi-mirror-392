@@ -1,0 +1,423 @@
+Metadata-Version: 2.4
+Name: textql
+Version: 0.3.1
+Summary: Python client library for TextQL
+Author: TextQL Labs
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: grpcio>=1.68.0
+Requires-Dist: protobuf>=5.28.0
+Provides-Extra: dev
+Requires-Dist: grpcio-tools>=1.68.0; extra == "dev"
+Requires-Dist: black; extra == "dev"
+Requires-Dist: mypy; extra == "dev"
+Requires-Dist: mypy-protobuf; extra == "dev"
+Requires-Dist: ruff>=0.1.0; extra == "dev"
+Requires-Dist: types-protobuf>=4.0.0; extra == "dev"
+Dynamic: author
+Dynamic: requires-python
+
+# TextQL Python SDK
+
+Python client library for TextQL with a clean, intuitive API.
+
+## Installation
+
+```bash
+pip install textql
+```
+
+## Quick Start
+
+```python
+from textql import TextQLClient, ChatTools
+
+# Initialize client
+client = TextQLClient(
+    api_key='your-api-key'
+)
+```
+
+## Tooling Configuration
+
+```python
+# Configure which capabilities are enabled for your chat:
+# NOTE: Once a chat is created, it will assume the paradigms that is created with. Sending chats different paradigm configurations will lead to issues.
+
+tools = ChatTools(
+    connector_ids=[513, 514],       # Database connectors to use
+    web_search_enabled=True,        # Enable web search
+    sql_enabled=True,               # Enable SQL queries
+    python_enabled=True,            # Enable Python execution
+    ontology_enabled=False,         # Enable ontology queries
+    tableau_enabled=False,          # Enable Tableau integration
+    powerbi_enabled=False,          # Enable PowerBI integration
+    google_drive_enabled=False,     # Enable Google Drive access
+)
+```
+
+## Chat Endpoints
+
+### Streaming Endpoint
+
+```python
+# Stream a chat conversation
+stream = client.chat.stream(
+    question="Tell me about the connected datasource",
+    chat_id="existing-chat-id",  # Optional: continue existing chat
+    tools=tools
+)
+
+for response in stream:
+    if response.HasField('text'):
+        print(response.text, end='', flush=True)
+    elif response.HasField('metadata'):
+        print(f"\nChat ID: {response.metadata.chat_id}")
+    elif response.HasField('preview'):
+        print(f"\nPreview: {response.preview}") # <- Hosted S3 image
+```
+
+**Example Output:**
+
+```text
+Chat ID: b032dfb5-8f24-4740-8244-ad4e1546bdfb
+Hello! I'm Ana, your data analyst assistant. I'm here to help you analyze data, create visualizations, build reports, and answer questions about your Citibike dataset.
+
+I can help you with things like:
+- Analyzing trip patterns and trends
+- Creating visualizations of bike usage
+- Comparing member vs casual rider behavior
+- Examining station popularity and geographic patterns
+- Setting up automated reports (playbooks) that run on a schedule
+
+What would you like to explore today?
+Chat ID: b032dfb5-8f24-4740-8244-ad4e1546bdfb
+```
+
+### Chat endpoint - non streaming
+
+```python
+# Non-streaming (get complete response at once)
+response = client.chat.chat(
+    question="What's the total revenue?",
+    tools=tools,
+    chat_id="existing-chat-id",  # Optional: continue existing chat
+)
+print(response.response)
+```
+
+**Expected Response:**
+
+```text
+id: "d42b3ed2-3182-4796-857b-8f5593f39d3a"
+created_at {
+  seconds: 1763499921
+  nanos: 446668568
+}
+model: "MODEL_SONNET_4_5"
+response: "Hello! I\'m Ana, your data analyst assistant. I\'m here to help you analyze data, create visualizations, build reports, and answer questions about your Citibike dataset.\n\nI can help you with things like:\n- Analyzing trip patterns and trends\n- Creating visualizations of bike usage\n- Comparing member vs casual rider behavior\n- Examining station popularity and geographic patterns\n- Setting up automated reports (playbooks) that run on a schedule\n\nWhat would you like to explore today?"
+chat_id: "43880af0-5267-4e11-93e8-66fcdca91ce5"
+```
+
+**Note:** `chat_id` is the correct field to use when referencing a chat (e.g. continuation/get/cancel).  
+DO NOT use `id` to reference a chat.
+
+### Get Chat
+
+```python
+history = client.chat.get(chat_id="77fdc628-5bc7-4a60-b0cf-fed6b89f2878")
+print(history)
+```
+
+**Expected Response:**
+
+```text
+chat {
+  id: "77fdc628-5bc7-4a60-b0cf-fed6b89f2878"
+  paradigm {
+    type: TYPE_UNIVERSAL
+    options {
+      universal {
+        connector_ids: 44
+        web_search_enabled: true
+        ontology_enabled: true
+        python_enabled: true
+      }
+    }
+  }
+  model: MODEL_SONNET_4_5
+  summary: "Create Simple Smiley Face"
+}
+messages {
+  role: "user"
+  content: "draw me a picture"
+  created_at { seconds: 1763500426 nanos: 875203000 }
+}
+messages {
+  role: "assistant"
+  content: "I'll create a simple smiley face for you!"
+  created_at { seconds: 1763500644 nanos: 286802000 }
+}
+assets {
+  target: "smiley_face.png"
+  preview_type: "image"
+  name: "smiley_face.png"
+  url: "https://staging.textql.com/asset/proxy/.../smiley_face.png"
+}
+```
+
+## Connectors API
+
+### List Connectors
+
+List and manage data connectors:
+
+```python
+connectors = client.connectors.list()
+print(connectors)
+```
+
+**Expected Response:**
+
+```text
+connectors {
+  id: 2
+  name: "Ticket Selling Business"
+  connector_type: REDSHIFT
+  member_id: "member-test-7a8e991e-74b2-458d-a3d2-db97fa12f941"
+  created_at {
+    seconds: 1727297306
+    nanos: 121768000
+  }
+  last_synced {
+    seconds: 1755643111
+    nanos: 990895000
+  }
+  redshift_metadata {
+    host: "<host>"
+    port: <port>
+    user: "<user>"
+    database: "<database>"
+    schemas: "<schema>"
+    dialect: "Redshift"
+    ssl_mode: true
+  }
+}
+```
+
+## Playbooks API
+
+### Create playbook
+
+```python
+pb = client.playbooks.create()
+print(pb)
+```
+
+**Expected Response:**
+
+```text
+playbook {
+  id: "7f232107-bf1d-4d3b-ab29-24d6173c86c6"
+  org_id: "organization-test-1526533d-fc7e-4b44-9ec9-5f40ba8ee0d2"
+  member_id: "0106c059-33de-4145-a010-d012604aba66"
+  connector_id: 1
+  name: "Untitled playbook"
+  created_at {
+    seconds: 1763504471
+    nanos: 727166000
+  }
+  updated_at {
+    seconds: 1763504471
+    nanos: 727166000
+  }
+  status: STATUS_EMPTY
+  trigger_type: TRIGGER_TYPE_CRON
+  cron_string: "0 13 * * *"
+  paradigm_options {
+    universal {
+      connector_ids: 1
+      web_search_enabled: true
+      python_enabled: true
+    }
+  }
+  paradigm_type: TYPE_UNIVERSAL
+  owner {
+    member_id: "0106c059-33de-4145-a010-d012604aba66"
+    member_email: "rodney@textql.com"
+    member_name: ""
+  }
+  has_write_permission: true
+  report_output_style: EXECUTIVE_REPORT
+  max_concurrent_templates: 2
+  auto_optimize_concurrency: true
+  connector_ids: 1
+}
+created_at {
+  seconds: 1763504471
+  nanos: 727166000
+}
+```
+
+`id` field above is how you reference this playbook (get, update, delete)
+
+### Playbooks List
+
+List and execute playbooks:
+
+```python
+playbooks = client.playbooks.list()
+for playbook in playbooks.playbooks:
+    print(f"{playbook.id}: {playbook.name}")
+```
+
+### Playbooks Get
+
+```python
+pb = client.playbooks.get(
+    playbook_id="19f46117-bebc-48d3-aeeb-11c792c72155"
+)
+print(pb)
+```
+
+**Expected Response:**
+
+```text
+playbook {
+  id: "19f46117-bebc-48d3-aeeb-11c792c72155"
+  org_id: "organization-test-1526533d-fc7e-4b44-9ec9-5f40ba8ee0d2"
+  member_id: "member-test-d670dbd3-3861-4d0c-b60b-d45014e9397c"
+  name: "My Sinx Boy"
+  prompt: "plot sinx and then cosx have tanx as the hero image"
+  created_at {
+    seconds: 1748468778
+    nanos: 260770000
+  }
+  updated_at {
+    seconds: 1761844687
+    nanos: 36299000
+  }
+  status: STATUS_ACTIVE
+  trigger_type: TRIGGER_TYPE_CRON
+  cron_string: "55 23 * * *"
+  latest_chat_id: "4d454a91-25f5-4ff1-890c-3a5b822b86fd"
+  email_addresses: "rodney@textql.com"
+  slack_channel_id: "C08646B7LAG"
+  paradigm_options {
+    sql {
+      connector_ids: 32
+    }
+  }
+  paradigm_type: TYPE_SQL
+  owner {
+    member_id: "member-test-d670dbd3-3861-4d0c-b60b-d45014e9397c"
+    member_email: "rodney@textql.com"
+    member_name: "Rodney Shen"
+  }
+  has_write_permission: true
+  report_output_style: EXECUTIVE_REPORT
+  max_concurrent_templates: 2
+  auto_optimize_concurrency: true
+  connector_ids: 32
+}
+```
+
+### Playbooks Update
+
+```python
+pb = client.playbooks.update(
+    playbook_id="7f232107-bf1d-4d3b-ab29-24d6173c86c6",
+    name="Test Playbook",
+    prompt="TEST PLAYBOOK",
+    status="STATUS_ACTIVE",
+    cron_string="0 7 * * *",
+    email_addresses=["rodne@textql.com"], # Must be in organization
+    max_concurrent_templates=5,
+    auto_optimize_concurrency=True,
+    paradigm_options={
+        "universal": {
+            "connector_ids": [2],
+            "web_search_enabled": True,
+            "python_enabled": True,
+            "sql_enabled": True # sql must be turned on if you are using connector
+        }
+    },
+)
+print(pb)
+```
+
+**Expected Response:**
+
+```text
+playbook {
+  id: "7f232107-bf1d-4d3b-ab29-24d6173c86c6"
+  org_id: "organization-test-1526533d-fc7e-4b44-9ec9-5f40ba8ee0d2"
+  member_id: "0106c059-33de-4145-a010-d012604aba66"
+  connector_id: 2
+  name: "Test Playbook"
+  prompt: "TEST PLAYBOOK"
+  created_at {
+    seconds: 1763504471
+    nanos: 727166000
+  }
+  updated_at {
+    seconds: 1763504976
+    nanos: 967037000
+  }
+  status: STATUS_ACTIVE
+  trigger_type: TRIGGER_TYPE_WEBHOOK
+  cron_string: "0 7 * * *"
+  paradigm_options {
+    universal {
+      connector_ids: 2
+      web_search_enabled: true
+      sql_enabled: true
+      python_enabled: true
+    }
+  }
+  paradigm_type: TYPE_UNIVERSAL
+  owner {
+    member_id: "0106c059-33de-4145-a010-d012604aba66"
+    member_email: "rodney@textql.com"
+    member_name: ""
+  }
+  has_write_permission: true
+  report_output_style: EXECUTIVE_REPORT
+  max_concurrent_templates: 5
+  auto_optimize_concurrency: true
+  connector_ids: 2
+}
+updated_at {
+  seconds: 1763504976
+  nanos: 967037000
+}
+```
+
+### Playbook Delete
+
+```python
+pb = client.playbooks.delete(
+    playbook_id="7f232107-bf1d-4d3b-ab29-24d6173c86c6"
+)
+print(pb)
+```
+
+**Expected Response:**
+
+```text
+playbook_id: "7f232107-bf1d-4d3b-ab29-24d6173c86c6"
+deleted_at {
+  seconds: 1763505132
+  nanos: 206457486
+}
+```
+
+## Requirements
+
+- Python >= 3.8
+- grpcio >= 1.68.0
+- protobuf >= 5.28.0
+
+## License
+
+MIT
