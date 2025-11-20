@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dbinpect"
+version = "0.1.2"
+description = "Outil d'inspection et d'analyse de bases de données"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Herolde GUIELLE", email = "ashguiell@gmail.com"}
+]
+keywords = ["database", "inspection", "sqlalchemy", "analysis"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Database",
+]
+dependencies = [
+    "SQLAlchemy>=2.0",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "python-dotenv>=1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/AshBrud/dbinpect"
+Documentation = "https://github.com/AshBrud/dbinpect#readme"
+Repository = "https://github.com/AshBrud/dbinpect"
+Issues = "https://github.com/AshBrud/dbinpect/issues"
+
+[project.scripts]
+analyze-db = "scripts.db_inspector:main"
+
+[tool.setuptools]
+# Les packages sont automatiquement détectés, mais on peut les spécifier
+packages = {find = {}}
+
+[tool.setuptools.package-data]
+"*" = ["README.md", "LICENSE", "requirements.txt", "env.example"]
+
+# Inclure le dossier scripts dans la distribution
+[tool.setuptools.package-dir]
+"" = "."
+
