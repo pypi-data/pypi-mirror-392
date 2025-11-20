@@ -1,0 +1,37 @@
+[build-system]
+requires = [
+    "hatchling>=1.26",
+    "hatch-vcs"
+]
+build-backend = "hatchling.build"
+
+
+[project]
+name = "dynamodelx"
+
+dynamic = ["version"]
+
+description = "Dynamic Models for ML with Uncertainty"
+readme = "README.md"
+
+authors = [
+    { name="Mohith Gundimeda", email="mohithgundemeda@gmail.com" }
+]
+requires-python = ">=3.12"
+
+dependencies = [
+    "torch>=1.10.0",
+    "numpy>=1.20",
+    "scikit-learn>=0.24",
+    "typing-extensions>=4.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/mohithgundimeda/dynamodelx.git"
+
+[project.optional-dependencies]
+plot = ["matplotlib"]
+
+[tool.hatch.version]
+source = "vcs"
+
