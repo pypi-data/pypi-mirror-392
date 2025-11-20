@@ -1,0 +1,51 @@
+[project]
+name = "tai-sql"
+version = "0.3.53"
+description = "SQL database management and code generation tool"
+license = {text = "MIT"}
+authors = [
+    {name = "MateoSaezMata", email = "msaez@triplealpha.in"}
+]
+readme = "README.md"
+requires-python = ">=3.10,<4.0"
+keywords = ["sql", "database", "code-generation", "orm", "sqlalchemy"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Database",
+    "Topic :: Software Development :: Code Generators",
+]
+dependencies = [
+    "sqlalchemy>=2.0.42,<3.0",
+    "psycopg2-binary>=2.9.10,<3.0",
+    "click>=8.2.1,<9.0",
+    "jinja2>=3.1.6,<4.0",
+    "sqlparse>=0.5.3,<1.0",
+    "graphviz>=0.20.3,<1.0",
+    "cryptography>=45.0.4,<46.0",
+    "requests>=2.32.4,<3.0",
+    "pynacl>=1.5.0,<2.0",
+    "pydantic>=2.11.7,<3.0",
+    "tai-alphi>=2.0.1,<3.0",
+    "rich>=14.2.0,<15.0",
+]
+
+[project.urls]
+Homepage = "https://www.triplealpha.in/es/"
+Repository = "https://github.com/triplealpha-innovation/tai-sql"
+Issues = "https://github.com/triplealpha-innovation/tai-sql/issues"
+
+[project.optional-dependencies]
+optional = ["pandas>=2.2.3,<3.0"]
+
+[project.scripts]
+tai-sql = "tai_sql.cli.main:cli"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
