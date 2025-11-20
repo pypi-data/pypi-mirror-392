@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scrape2md"
+version = "0.1.0"
+description = "Scrape websites and convert them to clean markdown format"
+readme = "README.md"
+authors = [
+    {name = "Anand Taralika", email = "hello@anand.id"}
+]
+license = "MIT"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: Markup :: Markdown",
+]
+keywords = ["scraper", "markdown", "web-scraping", "html-to-markdown", "crawler"]
+requires-python = ">=3.8"
+dependencies = [
+    "playwright>=1.48.0",
+    "beautifulsoup4>=4.12.3",
+    "html2text>=2020.1.16",
+    "requests>=2.31.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "black>=23.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/taralika/scrape2md"
+Repository = "https://github.com/taralika/scrape2md"
+Issues = "https://github.com/taralika/scrape2md/issues"
+
+[project.scripts]
+scrape2md = "scrape2md.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+scrape2md = ["py.typed"]
+
