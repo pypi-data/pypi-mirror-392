@@ -1,0 +1,63 @@
+[tool.poetry]
+name = "literate_python"
+version = "0.0.6"
+description = "Develop Python modules in Org files."
+authors = ["Jingtao Xu <jingtaozf@gmail.com>"]
+license = "MIT"
+readme = "README.org"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+flask = "^3.0.3"
+orgparse = "^0.4.20231004"
+multimethod = "^2.0"
+sentence-transformers = "^3.4.1"
+scikit-learn = "^1.6.1"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.8.0"
+flake8 = "^7.1.1"
+marimo = "^0.8.7"
+openai = "^1.43.0"
+ipykernel = "^6.29.5"
+ipython = "^8.27.0"
+jupyterlab = "^4.2.5"
+bumpver = "^2023.1129"
+build = "^1.2.2"
+twine = "^5.1.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+[project]
+name = "literate_python"
+description = "Develop Python modules in Org files."
+dynamic = ["version"]
+# We try to keep dependencies to a minimum, to avoid conflicts with
+# user environments;we need a very compelling reason for each dependency added.
+# Dependencies should have lower bounds, which should be as loose as possible.
+dependencies = [
+    "flask",
+    "orgparse",
+    "multimethod",
+    # for packaging.version; not sure what the lower bound is.
+    "packaging",
+]
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.8"
+classifiers = [
+    "Operating System :: OS Independent",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3 :: Only",
+]
+
+[project.urls]
+Homepage = "https://github.com/jingtaozf/literate-org"
