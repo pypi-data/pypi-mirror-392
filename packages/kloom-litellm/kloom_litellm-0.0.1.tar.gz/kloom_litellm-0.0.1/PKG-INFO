@@ -1,0 +1,85 @@
+Metadata-Version: 2.1
+Name: kloom-litellm
+Version: 0.0.1
+Summary: A LiteLLM plugin for intelligent model routing and request tracking with Kloom
+Author-email: Kloom <support@kloom.ai>
+Maintainer-email: Kloom <support@kloom.ai>
+License: Apache License 2.0
+Project-URL: Homepage, https://kloom.ai
+Project-URL: Documentation, https://docs.kloom.ai/quickstart/litellm
+Project-URL: Repository, https://github.com/kloom-ai/kloom-litellm-plugin
+Project-URL: Issues, https://github.com/kloom-ai/kloom-litellm-plugin/issues
+Keywords: litellm,llm,ai,kloom,model-routing,observability,logging,openai,anthropic
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+License-File: NOTICE
+Requires-Dist: litellm>=1.79.3
+Requires-Dist: httpx>=0.27.0
+
+# kloom-litellm
+
+A LiteLLM plugin for intelligent model routing and request tracking with [Kloom](https://kloom.ai).
+
+## Features
+
+- **Intelligent Model Routing** (LiteLLM Proxy): Automatically select the best model based on cost, performance, and availability
+- **Request Tracking** (SDK & Proxy): Log all LLM requests and responses for analytics and monitoring
+- **Seamless Integration**: Works with any LiteLLM-supported model provider
+
+## Quick Start
+
+### Installation
+
+```bash
+pip install kloom-litellm
+```
+
+### Basic Usage (Request Tracking)
+
+```python
+import litellm
+from kloom_litellm import KloomPlugin
+
+# Initialize the plugin
+kloom_logger = KloomPlugin()
+litellm.callbacks = [kloom_logger]
+
+# Use LiteLLM as normal - requests will automatically be tracked
+response = litellm.completion(
+    model="gpt-3.5-turbo",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+```
+
+## Documentation
+
+For complete documentation, including:
+- LiteLLM Proxy setup for model routing
+- Configuration options
+- Advanced usage examples
+- Troubleshooting
+
+Visit: **[https://docs.kloom.ai/quickstart/litellm](https://docs.kloom.ai/quickstart/litellm)**
+
+## Development
+
+### From Source
+
+```bash
+uv sync
+```
+
+## License
+
+See [LICENSE](LICENSE) file.
