@@ -1,0 +1,209 @@
+# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+
+[project]
+name = "qpdk"
+version = "0.1.3"
+description = "Quantum-RF generic PDK"
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+license = { file = "LICENSE" }
+authors = [{ name = "gdsfactory", email = "contact@gdsfactory.com" }]
+keywords = ["python"]
+classifiers = [
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+]
+dependencies = ["doroutes>=0.2.0", "gdsfactory>=9.15.0,<9.21.7"]
+
+[project.optional-dependencies]
+models = [
+  "gplugins[meshwell]>=2.0.0",
+  "jaxellip",
+  "optuna",
+  "ray[tune]",
+  "sax",
+  "scikit-rf",
+  "scqubits",
+  "sympy",
+  "polars",
+]
+
+[dependency-groups]
+dev = [{ include-group = "lint" }, { include-group = "test" }]
+docs = [
+  "jinja2",
+  "jupyter-book>=1.0.4,<2",
+  "jupytext",
+  "matplotlib",
+  "pydata-sphinx-theme",
+  "sphinxcontrib-katex",
+  "sphinxcontrib-svgbob",
+]
+lint = ["prek"]
+test = [
+  "hypothesis",
+  "jsondiff",
+  "pytest>=9.0.0",
+  "pytest-cov",
+  "pytest-github-actions-annotate-failures",
+  "pytest_regressions",
+  "pytest-xdist",
+]
+
+[build-system]
+requires = ["flit_core >=3.12.0,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.codespell]
+ignore-words-list = "te, te/tm, te, ba, fpr, fpr_spacing, ro, nd, donot, scheme, Commun, Ue, inout"
+skip = "bibliography.bib"
+
+[tool.flit.sdist]
+exclude = ["tests", "docs"]
+
+[tool.gdsfactoryplus.drc]
+timeout = 300
+
+[tool.gdsfactoryplus.sim.wls]
+# units = "frequency"
+min = 30000
+max = 3000000
+num = 3000
+
+[tool.gdsfactoryplus.pdk]
+name = "qpdk"
+
+[tool.interrogate]
+docstring-style = "google"
+exclude = [
+  "docs/_build/**/*",
+  "qpdk/**/__init__.py",
+  "notebooks/**",
+  "docs/notebooks/*",
+  "qpdk/samples/*.py",
+  "tests/**",
+]
+ext = []
+fail-under = 100
+ignore-nested-classes = true
+ignore-nested-functions = true
+ignore-regex = ["^test_.*"]
+omit-covered-files = true
+verbose = 2
+
+[tool.pylsp-mypy]
+enabled = true
+live_mode = true
+strict = true
+
+[tool.pyrefly]
+project-excludes = [
+  "**/__pycache__",
+  "**/.*",
+  "docs/**",
+  "build/**",
+  "dist/**",
+  "*.egg-info/**",
+  ".venv/**",
+  # Exclude samples that may have experimental code
+  "qpdk/samples/*.py",
+  "qpdk/samples/**/*.py",
+  "notebooks/src/*.py",
+  "notebooks/src/**/*.py",
+]
+project-includes = ["**/*.py"]
+
+[tool.pyrefly.errors]
+bad-argument-type = "ignore"
+# Configure specific error types - start permissive and tighten over time
+missing-argument = "ignore"
+missing-module-attribute = "ignore"
+# Not all gdsfactory overloads are seem to be properly typed
+no-matching-overload = "ignore"
+not-a-type = "warn"
+read-only = "ignore"
+
+[tool.pytest]
+addopts = ["--tb=short"]
+norecursedirs = ["extra/*.py"]
+python_files = ["qpdk/*.py", "notebooks/*.ipynb", "tests/*.py"]
+testpaths = ["qpdk/", "tests"]
+
+[tool.ruff]
+fix = true
+
+[tool.ruff.format]
+exclude = ["*.ipynb"]
+
+[tool.ruff.lint]
+exclude = ["*.ipynb"]
+ignore = [
+  "E501",  # line too long, handled by black
+  "B008",  # do not perform function calls in argument defaults
+  "C901",  # too complex
+  "B905",  # `zip()` without an explicit `strict=` parameter
+  "C408",  # C408 Unnecessary `dict` call (rewrite as a literal)
+  "RUF001",  # ambiguous unicode characters (incl. lots of math)
+  "RUF003",  # -||- but for comments
+]
+select = [
+  "E",  # pycodestyle errors
+  "W",  # pycodestyle warnings
+  "F",  # pyflakes
+  "I",  # isort
+  "C",  # flake8-comprehensions
+  "B",  # flake8-bugbear
+  "D",  # pydocstyle
+  "UP",  # pyupgrade
+  "T10",  # flake8-debugger
+  "S",  # flake8-bandit
+  "PT",  # flake8-pytest-style
+  "SIM",  # flake8-simplify
+  "RET",  # flake8-return
+  "RSE",  # flake8-raise
+  "Q",  # flake8-quotes
+  "SLOT",  # flake8-slots
+  "ARG",  # flake8-unused-arguments
+  "PTH",  # flake8-use-pathlib
+  "PD",  # pandas-vet
+  "FLY",  # flynt
+  "NPY",  # numpy
+  "PERF",  # perflint
+  "RUF",  # ruff
+]
+
+[tool.ruff.lint.per-file-ignores]
+".github/write_cells.py" = [
+  "S701",
+]  # Jinja2 autoescape not needed for RST templates
+"notebooks/**/*.py" = ["D100"]
+"qpdk/**/__init__.py" = ["F403"]  # allowing star imports to aggregate cells
+"qpdk/samples/**/*.py" = [
+  "D100",
+]  # no public module docstring for sample scripts
+"tests/**" = ["S101", "D102", "D103"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.setuptools.package-data]
+"*" = [
+  "*.csv",
+  "*.yaml",
+  "*.yml",
+  "*.gds",
+  "*.lyp",
+  "*.oas",
+  "*.lyt",
+  "*.dat",
+  "*.nc",
+  "*.svg",
+]
+
+[tool.setuptools.packages]
+find = {  }
+
+[tool.tombi.schema]
+strict = false
