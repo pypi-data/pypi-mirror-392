@@ -1,0 +1,94 @@
+Metadata-Version: 2.4
+Name: bma-opendata
+Version: 0.1.0
+Summary: Typed SDK for the Bangkok Open Data CKAN Action API
+Author: Sirin Puenggun
+License: MIT License
+        
+        Copyright (c) 2025 Sirin Puenggun
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+Project-URL: Homepage, https://github.com/Sosokker/bma-opendata-python-sdk
+Project-URL: Documentation, https://github.com/Sosokker/bma-opendata-python-sdk#readme
+Project-URL: Repository, https://github.com/Sosokker/bma-opendata-python-sdk
+Project-URL: Issues, https://github.com/Sosokker/bma-opendata-python-sdk/issues
+Keywords: ckan,bangkok,open data,sdk,api
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Software Development :: Libraries
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.13
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pydantic<3.0,>=2.5
+Requires-Dist: requests<3.0,>=2.31
+Dynamic: license-file
+
+# Bangkok Open Data Python SDK
+
+[ไทย](README.th.md).
+
+---
+
+Lightweight wrapper around the Bangkok CKAN Action API with typed models, caching, and friendly error handling.
+
+## Installation
+
+```bash
+pip install bma-opendata
+
+# or install from a local checkout for development
+pip install -e .
+```
+
+## Usage
+
+```python
+import logging
+from bma_opendata import BangkokOpenDataClient
+
+logging.basicConfig(level=logging.INFO)
+
+with BangkokOpenDataClient() as client:
+    ids = client.list_datasets().result
+    if ids:
+        dataset = client.get_dataset(name=ids[0]).result
+        logging.info("Dataset %s has %s resources", dataset.title, len(dataset.resources))
+```
+
+## Examples
+
+Additional runnable examples live under [`examples/`](examples/) and cover listing datasets and searching with filters.
+Run them with your preferred tool, e.g.:
+
+```bash
+uv run python -m examples.list_datasets
+uv run python -m examples.search_by_format --query water --format JSON
+```
+
+## Headers & authentication
+
+The portal occasionally blocks default `python-requests` clients.  
+The SDK now sends a browser-like `User-Agent` automatically; override it with the `BMA_OPENDATA_USER_AGENT`
+environment variable or by passing `headers={"User-Agent": "..."}`.  
+If you have a CKAN API token, either set `BMA_OPENDATA_API_KEY` or pass `api_key=` to the client to authorize requests.
