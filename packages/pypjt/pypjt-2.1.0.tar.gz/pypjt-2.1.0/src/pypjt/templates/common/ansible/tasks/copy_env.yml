@@ -1,0 +1,84 @@
+---
+- name: Validate env_files structure
+  ansible.builtin.assert:
+    that:
+      - env_files is defined
+      - env_files | type_debug == "list"
+    fail_msg: "env_files must be a list, got type={{ env_files | type_debug }}, value={{ env_files | to_nice_json }}"
+  when: (env_files | default([])) | length > 0
+
+- name: Validate each env_files item
+  ansible.builtin.assert:
+    that:
+      - env_item is mapping
+      - env_item.srcs is defined
+      - env_item.dst is defined
+      - env_item.srcs is sequence
+      - env_item.srcs | length > 0
+      - env_item.dst is string
+    fail_msg: "Invalid env_files item: {{ env_item | to_nice_json }}"
+  loop: "{{ env_files | default([]) }}"
+  loop_control:
+    loop_var: env_item
+    label: "{{ env_item.dst | default('NO_DST') }}"
+  when: (env_files | default([])) | length > 0
+
+- name: Debug env_files configuration
+  ansible.builtin.debug:
+    msg: "env_files={{ env_files | to_nice_json }}"
+  when: (env_files | default([])) | length > 0
+
+- name: Create temporary merged env files
+  ansible.builtin.tempfile:
+    state: file
+    suffix: _merged.env
+  register: merged_env_files
+  delegate_to: localhost
+  loop: "{{ env_files | default([]) }}"
+  loop_control:
+    loop_var: env_item
+    label: "{{ env_item.dst }}"
+  when: (env_files | default([])) | length > 0
+
+- name: Debug resolved env src paths for each item
+  ansible.builtin.debug:
+    msg: >-
+      Merging to {{ item.env_item.dst }} from relative srcs={{ item.env_item.srcs }}
+      using base_dir={{ project_src }} into temp file {{ item.path }}
+  loop: "{{ merged_env_files.results | default([]) }}"
+  loop_control:
+    label: "{{ item.env_item.dst }}"
+  when: merged_env_files is defined
+
+- name: Merge env files using Python script
+  ansible.builtin.command:
+    cmd: >-
+      python3 {{ playbook_dir }}/tasks/merge_env.py
+      {{ item.path }}
+      {{ item.env_item.srcs | join(' ') }}
+    chdir: "{{ project_src }}"
+  delegate_to: localhost
+  loop: "{{ merged_env_files.results | default([]) }}"
+  loop_control:
+    label: "{{ item.env_item.dst }}"
+  when: merged_env_files is defined
+
+- name: Copy merged env files to remote server
+  ansible.builtin.copy:
+    src: "{{ item.path }}"
+    dest: "{{ deploy_dir }}/{{ item.env_item.dst }}"
+    mode: "0644"
+  loop: "{{ merged_env_files.results | default([]) }}"
+  loop_control:
+    label: "{{ item.env_item.dst }}"
+  when: merged_env_files is defined
+
+- name: Remove temporary merged env files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  delegate_to: localhost
+  loop: "{{ merged_env_files.results | default([]) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: merged_env_files is defined
