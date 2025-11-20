@@ -1,0 +1,111 @@
+# glampy
+
+This project intends to allow building useful, reliable and beautiful python CLIs with ease.
+
+## Installation
+
+Stable release version:
+
+```bash
+pip install glampy
+```
+
+Latest development version:
+
+```bash
+pip install git+https://github.com/snaeil/glampy
+```
+
+## Usage
+
+### Logging
+
+The customized logger can be used in it's default optionated way or can be customized.  
+It is fully compatible with the standard python logging module.
+
+The default style logs the following format, using dynamic colors for different log levels:
+`[2024-01-01 12:00:00] [LEVEL] [LOGGER_NAME] Messages`
+
+
+```python
+# Example using the Logger class to log to stdout and a file:
+from glampy.logging import Logger
+logger = Logger("my_logger", log_file="my_log.log", log_level=logging.DEBUG)
+logger.debug("This is a debug message that will be logged to stdout and the file.")
+
+# Example using the Logger class to log to a file only:
+from glampy.logging import Logger
+logger = Logger("my_logger", console_handler=None, log_level=logging.DEBUG)
+logger.debug("This is a debug message that will be logged to a file only.")
+
+# Example using the Logger class to log to stdout only:
+from glampy.logging import Logger
+logger = Logger("my_logger", log_level=logging.WARNING)
+logger.warning("This is a warning message that will be logged to stdout only.")
+logger.info("This is an info message that will not be logged.")
+
+# Example using custom log format:
+from glampy.logging import Logger
+custom_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+logger = Logger("my_logger", log_file="my_log.log", log_level=logging.INFO, log_format=custom_format)
+
+# Example using advanced custom log format:
+import logging
+from glampy.logging import Logger
+from glampy.style import Foreground_Colour, Style
+class Formatter(logging.Formatter):
+    def format(self, record: logging.LogRecord):
+        # Do whatever you want with the record here, e.g. add colors based on level
+        color = {
+            logging.WARNING: Foreground_Colour.YELLOW,
+            logging.ERROR: Foreground_Colour.RED,
+            logging.FATAL: Foreground_Colour.RED,
+            logging.INFO: Foreground_Colour.GREEN,
+            logging.DEBUG: Foreground_Colour.CYAN,
+        }.get(record.levelno, 0)
+        self._style._fmt = f"[%(asctime)s] [{color}%(levelname)7s{Style.RESET_ALL}] [{Foreground_Colour.MAGENTA}%(name){Style.RESET_ALL}] %(message)s"
+        return super().format(record)
+advanced_format = Formatter()
+logger = Logger("my_logger", log_file="my_log.log", log_level=logging.INFO, log_format=advanced_format)
+```
+
+### Style
+
+The style module provides a simple way to style text in the terminal.  
+See [the source code](https://github.com/snaeil/glampy/blob/main/glampy/style.py) for all available styles.
+
+```python
+from glampy.style import Style, Sign, Foreground_Colour, Background_Colour
+
+# Example using the Style class to style text:
+print(f"{Sign.WARNING} The word {Style.bold}bold{Style.RESET_ALL} is not {style.italic}italic{Style.RESET_ALL}.")
+```
+
+## Contributing
+
+Contributions are welcome!
+For feature requests, bug reports or questions, please open an issue.
+For code contributions, please open a pull request.
+
+The development environment can be set up using `nix` and `devenv`:
+
+1. Install nix package manager: `bash <(curl -L https://nixos.org/nix/install) --no-daemon`
+2. Make sure, your `~/.config/nix/nix.conf` contains the following lines:
+   ```nix
+   experimental-features = nix-command flakes
+   ```
+3. Install [`devenv`](https://devenv.sh) by running:
+   ```shell
+   nix profile install --accept-flake-config 'nixpkgs#devenv'
+   ```
+4. Install [nix-direnv](https://github.com/nix-community/nix-direnv) by running:
+   ```shell
+   nix profile install 'nixpkgs#nix-direnv'
+   ```
+   Then add nix-direnv to `$HOME/.config/direnv/direnvrc`:
+   ```bash
+   source $HOME/.nix-profile/share/nix-direnv/direnvrc
+   ```
+5. Hook direnv into your shell by adding a line to your shell's configuration file (e.g. `~/.bashrc`),
+   as described in the [direnv documentation](https://direnv.net/docs/hook.html):
+6. You might have to open a new shell to make the changes take effect.
