@@ -1,0 +1,23 @@
+"""Init."""
+
+try:
+    import napari
+except ImportError:
+    raise ImportError("please install napari using 'pip install napari'") from None
+
+try:
+    import napari_plot
+except (ImportError, TypeError):
+    pass
+    # raise ImportError("please install napari using 'pip install napari-plot'") from None
+
+
+# Monkey patch icons
+import napari.resources._icons
+
+import qtextraplot._napari._register
+from qtextraplot.assets import ICONS
+
+# overwrite napari list of icons
+# This is required because we've added several new layer types that have custom icons associated with them.
+napari.resources._icons.ICONS.update(ICONS)
