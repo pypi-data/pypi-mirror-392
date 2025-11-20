@@ -1,0 +1,204 @@
+Metadata-Version: 2.4
+Name: freegrad
+Version: 1.0.0
+Summary: A PyTorch extension for experimenting with alternative gradient flows.
+Author-email: Luigi Troiano <ltroiano@unisa.it>, Gioele Ciaparrone <gioele.ciaparrone@kebula.it>, Genny Tortora <gtortora@unisa.it>
+License: MIT License
+        
+        Copyright 2025 University of Salerno, Kebula
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Keywords: pytorch,autograd,gradients
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: torch>=2.0.0
+Requires-Dist: torchvision>=0.15
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0; extra == "dev"
+Requires-Dist: ruff>=0.4; extra == "dev"
+Requires-Dist: black>=24.0; extra == "dev"
+Requires-Dist: mypy>=1.8; extra == "dev"
+Requires-Dist: build>=1.2.1; extra == "dev"
+Requires-Dist: twine>=5.0.0; extra == "dev"
+Requires-Dist: numpy>=1.24; extra == "dev"
+Requires-Dist: scipy>=1.10; extra == "dev"
+Requires-Dist: scikit-learn>=1.2.0; extra == "dev"
+Requires-Dist: pre-commit>=4.3.0; extra == "dev"
+Requires-Dist: pandoc>=2.4; extra == "dev"
+Dynamic: license-file
+
+# FreeGrad
+
+Alternative backward rules and gradient transforms alongside PyTorch **autograd**.
+
+[![CI](https://github.com/tbox98/FreeGrad/actions/workflows/ci.yml/badge.svg)](https://github.com/tbox98/FreeGrad/actions/workflows/ci.yml)
+[![Tests](https://github.com/tbox98/FreeGrad/actions/workflows/tests.yml/badge.svg)](https://github.com/tbox98/FreeGrad/actions/workflows/tests.yml)
+[![PyPI](https://img.shields.io/pypi/v/freegrad.svg)](https://pypi.org/project/freegrad/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Docs](https://img.shields.io/badge/docs-gh--pages-blue)](https://tbox98.github.io/FreeGrad/)
+
+---
+
+## 🚀 Features
+- Register and compose custom **gradient rules** (backward transforms)
+- Apply rules via a **context manager** to activations and/or params
+- Lightweight wrappers for **activation layers**
+- Works *alongside* standard **autograd** without patching PyTorch
+
+---
+
+## 📦 Installation
+
+```bash
+# Core package only (from PyPI)
+pip install freegrad
+
+# Development install (with testing, linting, docs, examples, etc.)
+pip install -e '.[dev]'
+```
+
+> 💡 Note: If you’re using **zsh** (default on macOS), don’t forget the quotes around `.[dev]`.
+
+---
+
+## 🧪 Running Tests
+
+After installing in development mode:
+
+```bash
+pip install -e '.[dev]'
+```
+
+Run the full test suite with:
+
+```bash
+pytest
+```
+
+Run with coverage reporting:
+
+```bash
+pytest --cov=freegrad --cov-report=term-missing
+```
+
+Run a specific test file or test:
+
+```bash
+pytest tests/test_wrappers.py -v
+pytest tests/test_wrappers.py::test_activation_forward_relu -v
+```
+
+---
+
+## 🎓 Running Examples
+
+The repository includes runnable scripts under [`examples/`](examples/) that replicate experiments from the paper.
+
+Install dev dependencies:
+
+```bash
+pip install -e '.[dev]'
+```
+
+Run an example:
+
+```bash
+python examples/suc_logistic_vs_constant.py
+python examples/mlp_digits_constant_vs_tied.py
+python examples/lenet_mnist_rectangular.py
+python examples/cnn_gradient_jamming.py
+python examples/bnn_step_activation.py
+```
+
+> 💡 Some examples require datasets (e.g. MNIST via `torchvision`, DIGITS via `scikit-learn`). They will be downloaded automatically the first time you run them.
+
+---
+
+## ⚡ Quickstart
+
+```python
+import torch
+import freegrad as fg
+from freegrad.wrappers import Activation
+
+x = torch.randn(8, requires_grad=True)
+act = Activation(forward="ReLU")
+
+with fg.use(rule="rectangular_jam", params={"a": -1.0, "b": 1.0}, scope="activations"):
+    y = act(x).sum()
+    y.backward()
+
+print(x.grad)
+```
+
+---
+
+## 🛠️ Makefile Shortcuts
+
+This project includes a `Makefile` with useful commands:
+
+```bash
+# Run everything (install deps, build paper, tests, and examples)
+make
+
+# Build the JOSS-style paper PDF only
+# Requires pandoc >= 2.11 and xelatex installed on your system
+make pdf
+
+# Run the test suite with coverage
+make test
+
+# Run all examples sequentially
+make examples
+
+# Run a specific example
+make suc     # Single-Unit Classifier (SUC)
+make mlp     # MLP on DIGITS
+make lenet   # LeNet on MNIST with Rectangular gradient
+make cnn     # CNN with Gradient Jamming
+make bnn     # BNN with Step activation
+```
+
+> 💡 The `install` step (`pip install -e '.[dev]'`) is included automatically when running `make`, `make test`, or `make examples`.
+
+---
+
+## 📖 Documentation
+
+👉 Full docs available here: [https://tbox98.github.io/FreeGrad/](https://tbox98.github.io/FreeGrad/)
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome!
+Please read [CONTRIBUTING.md](CONTRIBUTING.md).
+
+---
+
+## 📄 License
+
+Distributed under the [MIT License](LICENSE).

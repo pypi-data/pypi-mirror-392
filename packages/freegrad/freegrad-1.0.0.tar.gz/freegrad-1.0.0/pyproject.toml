@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "freegrad"
+version = "1.0.0"
+description = "A PyTorch extension for experimenting with alternative gradient flows."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [{ name = "Luigi Troiano", email = "ltroiano@unisa.it" }, { name = "Gioele Ciaparrone", email = "gioele.ciaparrone@kebula.it" }, { name = "Genny Tortora", email = "gtortora@unisa.it" }]
+keywords = ["pytorch", "autograd", "gradients"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "torch>=2.0.0",
+    "torchvision>=0.15"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.4",
+    "black>=24.0",
+    "mypy>=1.8",
+    "build>=1.2.1",
+    "twine>=5.0.0",
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "scikit-learn>=1.2.0",
+    "pre-commit>=4.3.0",
+    "pandoc>=2.4"
+]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["freegrad*"]
+
+[tool.ruff]
+target-version = "py39"  # good baseline for 3.9–3.12
+src = ["src"]
