@@ -1,0 +1,182 @@
+Metadata-Version: 2.4
+Name: django-headless-cms
+Version: 1.3.0
+Summary: A simple django-based headless CMS.
+Project-URL: Documentation, https://django-headless-cms.readthedocs.io/
+Project-URL: Homepage, https://github.com/huynguyengl99/django-headless-cms
+Project-URL: Repository, https://github.com/huynguyengl99/django-headless-cms
+Author-email: Huy Nguyen <danghuy1999@gmail.com>
+License: Copyright © 2024-present, Huy Nguyen <danghuy1999@gmail.com>.
+        
+        All rights reserved.
+        
+        Redistribution and use in source and binary forms, with or without
+        modification, are permitted provided that the following conditions are met:
+        
+        * Redistributions of source code must retain the above copyright notice, this
+          list of conditions and the following disclaimer.
+        
+        * Redistributions in binary form must reproduce the above copyright notice,
+          this list of conditions and the following disclaimer in the documentation
+          and/or other materials provided with the distribution.
+        
+        * Neither the name of the copyright holder nor the names of its
+          contributors may be used to endorse or promote products derived from
+          this software without specific prior written permission.
+        
+        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+        ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+        WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+        DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+        FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+        DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+        SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+        CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+        OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+        OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+License-File: LICENSE
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Django
+Classifier: Framework :: Django :: 4.0
+Classifier: Framework :: Django :: 4.1
+Classifier: Framework :: Django :: 4.2
+Classifier: Framework :: Django :: 5.0
+Classifier: Framework :: Django :: 5.1
+Classifier: Framework :: Django :: 5.2
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Information Technology
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Internet :: WWW/HTTP :: Dynamic Content
+Classifier: Topic :: Software Development
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: Software Development :: Libraries :: Application Frameworks
+Requires-Python: <4.0,>=3.10
+Requires-Dist: django-admin-interface
+Requires-Dist: django-admin-sortable2>=2.2.8
+Requires-Dist: django-filter
+Requires-Dist: django-import-export
+Requires-Dist: django-localized-fields
+Requires-Dist: django-reversion
+Requires-Dist: django-solo
+Requires-Dist: django<6,>=4
+Requires-Dist: djangorestframework>=3
+Requires-Dist: drf-spectacular
+Requires-Dist: martor
+Requires-Dist: psycopg
+Requires-Dist: unidecode
+Provides-Extra: openai
+Requires-Dist: openai>=1; extra == 'openai'
+Description-Content-Type: text/markdown
+
+# Django Headless CMS
+
+**Django Headless CMS** is your tool for effortless headless CMS creation.
+Based on Django, it simplifies dashboard and API development, allowing
+you to focus on content creation for any device. Enjoy the flexibility
+of headless architecture and the efficiency of Django, reshaping your
+CMS workflow.
+## Requirements
+
+* Python 3.10 or greater.
+* Django 4.0+ (supports up to Django 5.2+).
+* Django knowledge.
+
+## Installation
+
+The module can be installed from [PyPI](https://pypi.org/project/django-headless-cms/):
+
+```bash
+pip install django-headless-cms
+```
+
+<details>
+<summary>Other installation methods (click to expand)</summary>
+
+### Install the latest dev version from github (or replace `@master` with a [@release_version]
+
+```bash
+pip install git+https://github.com/huynguyengl99/django-headless-cms@master
+```
+
+</details>
+
+## Document
+Please visit [Django headless CMS doc](https://django-headless-cms.readthedocs.io/) for
+documentation.
+
+## Introduction
+
+### Why Choose Django-headless-cms?
+
+Why choose Django-headless-cms over alternatives like [Wagtail](https://wagtail.org/), [Django-CMS](https://www.django-cms.org/), [Strapi](https://strapi.io/), or [Contentful](https://www.contentful.com/)?
+
+- **Headless CMS with minimal configuration**: Unlike Wagtail and Django-CMS, which are primarily headed CMS solutions.
+- **Responsive UI**: Preferred over Strapi for its user interface.
+- **Python & Django-based**: Built on a robust framework with numerous extensions.
+- **Open Source**: Unlike Contentful and other paid services, it allows you to self-host your CMS.
+- **Integration**: Easily integrates with many existing Python and Django libraries.
+- **Centralized multi-language support**: Reduces redundancy and allows different content across multiple languages.
+
+### Features
+
+- **Schema Migrations**: Manage content schema as database migrations, making it easier to sync from development to
+production environments.
+- **Versioning Content**: Revert to any previously saved version.
+- **Publish/Draft Content**: Manage published and draft content.
+- **Markdown Editor Support**: Enhanced content editing experience, useful for Posts/Articles.
+- **Multi-language Support**: Even for Markdown fields.
+- **Auto Translate/Force Re-translate**: Use ChatGPT or build your own translation interface.
+- **Recursive Actions**: Apply actions like Publish, Translate, and Force Re-translate to referenced objects.
+- **Optimized Queries**: Auto prefetch and select related queries for optimization.
+- **Filter Published Objects**: Easily filter to show only published content.
+- **Auto Admin**: Simplify admin page setup with features like:
+  - Sortable inline Many-to-Many (M2M) relationships.
+  - Sortable generic inlines.
+  - Display publish status of child objects.
+- **Auto Serializer**: Simplify serializer creation, including nested relations. Override specific serializers as needed.
+- **Rapid API Development**: Build APIs (Views/Viewsets) quickly and easily with auto serializers and optimized queries.
+- **Easy Data Import/Export**: Use the admin interface or management commands.
+- **Auto-generated API Documentation & Playground**: Automatically generate API documentation and an interactive playground.
+
+### Dependencies
+
+Special thanks to these outstanding packages that have been used as supporting components within Django-headless-cms:
+
+- **[Django-localized-fields](https://github.com/SectorLabs/django-localized-fields)**: Supports multi-language fields.
+- **[django-markdown-editor (Martor)](https://github.com/agusmakmun/django-markdown-editor)**: Provides a markdown editor.
+- **[Django-reversion](https://github.com/etianen/django-reversion)**: Offers versioning and publish/draft content support.
+- **[Django-admin-interface](https://github.com/fabiocaccamo/django-admin-interface)**: Enhances the Django admin
+interface and supports language switching.
+- **[Django-solo](https://github.com/lazybird/django-solo)**: Supports singleton admin models.
+- **[Django-import-export](https://github.com/django-import-export/django-import-export)**: Facilitates data import and
+export.
+- **[Django-filter](https://github.com/carltongibson/django-filter)**: Assists in building API query filters.
+- **[Unidecode](https://pypi.org/project/Unidecode/)**: Helps create readable slug URLs.
+- **[OpenAI](https://github.com/openai/openai-python)**: Enables auto-translation with ChatGPT.
+- **[Django](https://www.djangoproject.com/)** & **[Django REST framework](https://www.django-rest-framework.org/)**:
+The foundational frameworks.
+
+### [Extra] My Story
+
+After experimenting with various CMS frameworks, I couldn't find a suitable one for my needs:
+
+- **Strapi**: Node.js-based and synchronizing schema between development and production can be challenging.
+Additionally, it lacks a responsive UI, making minor updates on mobile devices difficult.
+- **Wagtail and Django-CMS**: These are headed CMS solutions, great if you need a WYSIWYG CMS. However, they felt
+overly complex for my use case and have a steep learning curve.
+- **Contentful & other paid services**: While these services are excellent, their costs can be prohibitive. Why pay
+for additional slots when you can add them for free in Django?
+
+After further research into Django-based (and Node.js-based) frameworks, I found none that met my expectations. Given
+Django's popularity and extensive ecosystem of extensions, I decided to build Django-headless-cms. I also noticed that
+some Reddit users faced similar issues, which motivated me to create this package.
+
+If you appreciate this package, please give it a star. If you'd like to see more features, consider contributing. If
+you encounter any issues, don't hesitate to open a GitHub issue (and help fix it if you're willing to contribute).
