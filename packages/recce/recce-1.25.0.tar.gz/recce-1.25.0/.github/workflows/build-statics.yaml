@@ -1,0 +1,65 @@
+name: Node.js - Build & Auto-Commit to CLI data/report/**
+
+on:
+  pull_request:
+    types:
+      - closed
+      # Trigger when PR is closed
+    paths:
+      - "js/**"
+      # Trigger when diffs detected in js sources
+    branches:
+      - main
+      - release/**
+      # Only PR target are `main` or `release/**` branches
+  # Trigger manually
+  workflow_dispatch:
+
+jobs:
+  if_merged_build:
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the changed files back to the repository.
+      contents: write
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./js
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.AUTOCOMMIT_PERSONAL_TOKEN }}
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: 24
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        working-directory: ./js
+        run: |
+          pnpm install --frozen-lockfile
+          pip install pre-commit
+
+
+      - name: Build Apps
+        run: pnpm run build
+
+      - name: Pull Remote Changes (before AC)
+        run: git pull origin ${{ github.base_ref || github.ref_name }}
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: AUTO-COMMIT - build js statics to recce data/
+          branch: ${{ github.base_ref || github.ref_name }}
+          token: ${{ secrets.AUTOCOMMIT_PERSONAL_TOKEN }}
+          #          push_options: --force
+          # Auto-commits to target merge branch
