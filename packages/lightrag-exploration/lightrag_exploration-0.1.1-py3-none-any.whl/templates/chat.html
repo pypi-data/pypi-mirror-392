@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <div id="appRoot" class="flex flex-col h-screen">
+    <header class="flex items-center justify-between bg-white shadow px-4 py-3 relative">
+      <div class="flex items-center gap-4">
+        <a href="/" class="absolute left-4 top-1/2 -translate-y-1/2 flex items-center text-indigo-600 hover:text-indigo-800 font-semibold text-base">
+          &#8592; Back
+        </a>
+        <h1 class="text-lg font-semibold ml-16">Chat</h1>
+        <label for="chatModelSelect" class="ml-8 text-sm font-medium text-gray-700">Model:</label>
+        <select id="chatModelSelect" class="border rounded px-2 py-1 text-sm focus:ring-blue-500 focus:border-blue-500 min-w-[120px]">
+          <option value="default">Loading...</option>
+        </select>
+      </div>
+    </header>
+    <main class="flex-1 flex p-4 gap-4">
+      <section class="flex-1 flex flex-col bg-white rounded shadow overflow-hidden">
+        <div id="chatBox" class="flex-1 p-4 overflow-auto">
+          <!-- messages will appear here -->
+        </div>
+        <div class="p-3 border-t bg-gray-50">
+          <form id="queryForm" class="flex gap-2">
+            <input id="question" type="text" placeholder="Type your message..." class="flex-1 border rounded px-3 py-2" />
+            <button type="submit" class="bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700">Send</button>
+            <button id="clearCacheBtn" type="button" class="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-700 ml-2">Clear Cache</button>
+          </form>
+          <div id="error" class="text-red-600 mt-2"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script>
+    const chatBox = document.getElementById('chatBox');
+    const queryForm = document.getElementById('queryForm');
+    const questionInput = document.getElementById('question');
+    const errorDiv = document.getElementById('error');
+    const chatModelSelect = document.getElementById('chatModelSelect');
+
+    function appendMessage(text, sender) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = sender === 'user' ? 'text-right mb-2' : 'text-left mb-2';
+      msgDiv.innerHTML = `<span class="inline-block px-3 py-2 rounded ${sender === 'user' ? 'bg-blue-100 text-blue-900' : 'bg-gray-200 text-gray-800'}">${text}</span>`;
+      chatBox.appendChild(msgDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function populateChatModelDropdown() {
+      try {
+        const res = await fetch('/text/models');
+        if (!res.ok) throw new Error('Failed to fetch models');
+        const data = await res.json();
+        if (data && Array.isArray(data.models)) {
+          chatModelSelect.innerHTML = '';
+          data.models.forEach(model => {
+            const opt = document.createElement('option');
+            opt.value = model;
+            opt.textContent = model;
+            chatModelSelect.appendChild(opt);
+          });
+        } else {
+          chatModelSelect.innerHTML = '<option value="default">No models found</option>';
+        }
+      } catch (err) {
+        chatModelSelect.innerHTML = '<option value="default">Error loading models</option>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', populateChatModelDropdown);
+
+    // Helper to get and set summary in localStorage
+    function getSummary() {
+      return localStorage.getItem('chat_summary') || '';
+    }
+    function setSummary(summary) {
+      localStorage.setItem('chat_summary', summary);
+    }
+
+
+    queryForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const question = questionInput.value.trim();
+      if (!question) return;
+      appendMessage(question, 'user');
+      questionInput.value = '';
+      errorDiv.textContent = '';
+      const selectedModel = chatModelSelect.value || 'default';
+      const prevSummary = getSummary();
+      try {
+        // Pass previous summary as context
+        const response = await fetch('/text/summarize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: question, chat_model: selectedModel, context: prevSummary })
+        });
+        if (!response.ok) throw new Error('Error from server');
+        const data = await response.json();
+        appendMessage(data.summary, 'bot');
+        // Summarize the bot response before saving to localStorage
+        const summaryPrompt = `give a three bullet point summary of this text\n${data.summary}`;
+        const summaryResponse = await fetch('/text/summarize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: summaryPrompt, chat_model: selectedModel })
+        });
+        if (!summaryResponse.ok) throw new Error('Error summarizing response');
+        const summaryData = await summaryResponse.json();
+        setSummary(summaryData.summary);
+      } catch (err) {
+        errorDiv.textContent = err.message || 'An error occurred.';
+      }
+    });
+
+    // Clear cache button logic
+    document.getElementById('clearCacheBtn').addEventListener('click', () => {
+      localStorage.clear();
+      location.reload();
+    });
+  </script>
+</body>
+</html>
