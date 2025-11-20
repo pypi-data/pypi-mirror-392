@@ -1,0 +1,311 @@
+Metadata-Version: 2.4
+Name: pyautomatic
+Version: 1.0.3
+Summary: A comprehensive Python automation toolkit for Windows
+Author: xiaotbl
+Author-email: monios114514@outlook.com
+Project-URL: Bug Reports, https://github.com/cpumsconfig/pyautomatic/issues
+Project-URL: Source, https://github.com/cpumsconfig/pyautomatic
+Keywords: automation,windows,system-administration,win32,process-management,audio-control,encryption
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: License :: Other/Proprietary License
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: Microsoft :: Windows :: Windows 10
+Classifier: Operating System :: Microsoft :: Windows :: Windows 11
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: System :: Systems Administration
+Classifier: Topic :: Utilities
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pywin32>=300
+Requires-Dist: psutil>=5.9.0
+Requires-Dist: comtypes>=1.1.14
+Requires-Dist: pycaw>=20181226
+Requires-Dist: pycryptodome>=3.17.0
+Requires-Dist: requests>=2.28.0
+Requires-Dist: tqdm>=4.64.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: black>=22.0.0; extra == "dev"
+Requires-Dist: flake8>=5.0.0; extra == "dev"
+Provides-Extra: gui
+Requires-Dist: PyQt5>=5.15.0; extra == "gui"
+Requires-Dist: wxPython>=4.2.0; extra == "gui"
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: keywords
+Dynamic: license-file
+Dynamic: project-url
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+# pyautomatic
+python模块
+
+## 模块列表
+- [x] windows
+- [x] rs1
+- [x] pt (print的彩色输出)
+- [x] math
+- [x] download
+- [] mail
+- [] image
+
+## 安装
+```shell
+pip install pyautomatic
+```
+
+## 使用
+```python
+import pyautomatic
+```
+
+## 功能
+
+### 1. windows
+
+#### 1.系统信息获取
+
+```python
+# windows.windows
+from pyautomatic.windows.windows import Windows
+
+# 获取系统信息
+sys_info = Windows.get_system_info()
+print("计算机名:", sys_info.get('computer_name'))
+print("总内存:", sys_info.get('total_ram'))
+print("内存使用率:", sys_info.get('ram_usage_percent'), "%")
+
+# 获取进程列表
+# 按内存使用率排序（默认）
+processes = Windows.get_process_list()
+# 按CPU使用率排序
+# processes = Windows.get_process_list(sort_by_memory=False)
+
+for proc in processes[:5]:  # 显示前5个进程
+    print(f"PID: {proc['pid']}, 名称: {proc['name']}, 内存占用: {proc['memory_mb']}MB")
+
+# 获取系统运行时间
+uptime = Windows.get_system_uptime()
+print("系统启动时间:", uptime['boot_time'])
+print("运行时长:", uptime['uptime_formatted'])
+```
+#### 2.系统操作
+
+```python
+# windows.windows
+from pyautomatic.windows.windows import Windows
+
+# 锁定工作站
+Windows.lock_workstation()  # 锁定电脑
+
+# 关机/重启
+# 立即关机（force=True强制关闭所有程序）
+Windows.system_shutdown(force=True)
+
+# 5分钟后重启
+Windows.system_shutdown(reboot=True, timer=300, reason="系统更新") #timer以秒为单位
+
+# 取消关机计划
+Windows.cancel_shutdown()
+
+# 设置壁纸
+
+success = Windows.set_wallpaper("C:/images/wallpaper.jpg")
+print("壁纸设置成功" if success else "壁纸设置失败")
+
+```
+#### 3.文件与注册表操作
+
+```python
+# windows.windows or windows.reg
+from pyautomatic.windows.windows import Windows
+from pyautomatic.windows.reg import RegistryManager
+import os
+
+# 获取文件属性
+file_props = Windows.get_file_properties("C:/Program Files/python.exe")
+print("文件大小:", file_props['size_formatted'])
+print("修改时间:", file_props['modified_formatted'])
+print("版本号:", file_props['file_version'])
+
+# 创建快捷方式
+# 在桌面创建Python的快捷方式
+Windows.create_shortcut(
+    target="C:/Python39/python.exe",
+    shortcut_path="C:/Users/用户名/Desktop/Python.lnk",
+    description="Python解释器"
+)
+
+# 注册表读写
+# 读取注册表值（例如获取IE版本）
+ie_version = Windows.get_registry_value(
+    key="HKEY_LOCAL_MACHINE",
+    subkey="Software\\Microsoft\\Internet Explorer",
+    value_name="Version"
+)
+print("IE版本:", ie_version)
+
+reg = Registry()
+# 读取启动程序列表（用户级）
+startup_programs = reg.get_startup_programs(user_scope=True)
+for name, path in startup_programs:
+    print(f"启动项: {name}, 路径: {path}")
+
+# 列出注册表键下所有值
+with reg.open_key(reg.HKEY_CURRENT_USER, "Software\\Microsoft\\Windows") as key:
+    values = key.list_values()
+    for name, type_, value in values:
+        print(f"值名称: {name}, 类型: {type_}, 内容: {value}")
+
+```
+#### 4.媒体播放类
+
+```python
+# windows.media
+from pyautomatic.windows.media import MediaController
+
+# 必须先初始化
+media = MediaController()
+# 音量管理
+media.volume_up()  # 增加音量
+media.volume_down()  # 降低音量
+current_vol = media.get_volume()  # 获取当前音量（0-100）
+print("当前音量:", current_vol)
+# 播放控制
+media.next_track()  # 下一首
+media.previous_track()  # 上一首
+# 获取播放信息
+# 获取Windows Media Player播放信息
+wmp_info = media._get_wmp_info()
+if wmp_info:
+    print(f"正在播放: {wmp_info['artist']} - {wmp_info['title']}")
+    print(f"进度: {wmp_info['current_time_str']}/{wmp_info['duration_str']}")
+
+# 获取AIMP播放信息
+aimp_info = media._get_aimp_info()
+# 获取foobar2000播放信息
+foobar_info = media._get_foobar2000_info()
+
+```
+
+#### 5.ui控件与样式
+
+```python
+# windows.ui
+from pyautomatic.windows.ui import *
+
+# 样式管理（Style类）
+# 获取颜色值（返回RGB整数）
+white = ui.Style.get_color('white')
+blue = ui.Style.get_color('blue')
+
+# 获取字体信息（返回字体名、大小等元组）
+title_font = ui.Style.get_font('title')  # ('Microsoft YaHei', 14, True)
+
+# 获取预定义样式
+success_style = ui.Style.get_style('success')  # {'bg_color': 'green', 'text_color': 'white', ...}
+
+# 自定义信息存储（CustomInfo类）
+info = ui.CustomInfo()
+info.set('user_id', 123)  # 设置值
+user_id = info.get('user_id')  # 获取值
+info.remove('user_id')  # 删除值
+
+# 基础控件（Control类）
+# 创建控件（需传入父窗口等参数）
+btn = ui.Control(
+    parent=parent_hwnd,
+    x=10, y=10,
+    width=100, height=30
+)
+btn.create()  # 创建控件（子类需重写）
+
+# 绑定事件
+def on_click():
+    print("按钮被点击")
+btn.bind_event('click', on_click)
+
+# 设置控件属性
+btn.set_text("点击我")
+btn.set_enabled(True)  # 启用控件
+btn.set_visible(True)  # 显示控件
+
+# 文件选择对话框
+# 选择图片文件
+file_path = ui.select_file(
+    title="选择图片",
+    filetypes=[("图片文件", "*.jpg;*.png;*.bmp")],
+    initial_dir="C:/Pictures"
+)
+if file_path:
+    print("选中文件:", file_path)
+```
+### 2.rs1
+
+#### 1.加密
+```python
+# rs1
+from pyautomatic.rs1 import encrypt, decrypt
+original = "Hello, World!"
+password = "my_secret_password"
+# 加密
+encrypted = encrypt(original, password)
+print("加密结果:", encrypted)
+```
+#### 2.解密
+
+```python
+# rs1
+from pyautomatic.rs1 import encrypt, decrypt
+encrypted = "wCbDTl8XOQV4ND6MHiC3pvCC6ToEtwH1zAhxRW0ORtYEKjlDbkm1PKOHmllEnUMz:dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f"
+password = "my_secret_password"
+# 解密
+decrypted = decrypt(encrypted, password)
+print("解密结果:", decrypted)
+```
+### 3.pt
+
+```python
+# pt
+import pyautomatic.pt
+
+print(pt.colors.red + "Hello, World!" + pt.colors.reset) # 输出红色文本,颜色根据源码来搞
+```
+
+## 更新日志
+
+0.1.1 - 2023/1/5
+
+初次创建
+
+1.0.0 - 2024/11/12
+
+完善一些模块
+
+1.0.1 - 2025/11/18
+
+正式发到pypi平台
+
+1.0.2 - 2025/11/18
+
+完善功能
+
+1.0.3 - 2025/11/19
+
+修复bug
