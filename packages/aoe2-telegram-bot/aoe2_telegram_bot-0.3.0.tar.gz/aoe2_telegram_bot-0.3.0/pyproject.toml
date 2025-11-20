@@ -1,0 +1,53 @@
+[build-system]
+requires = ["flit_core>=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "aoe2_telegram_bot"
+version = "0.3.0"
+dependencies = ["python-telegram-bot>=v20.0", "requests>=2.31.0"]
+requires-python = ">=3.9"
+authors = [{ name = "Perceval ARENOU", email = "perceval.arenou@gmail.com" }]
+description = "A Telegram Bot that gives a random quote of Age of Empires 2 original edition"
+readme = "README.md"
+license = { file = "LICENSE" }
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: End Users/Desktop",
+  "Intended Audience :: Developers",
+  "Topic :: Communications :: Chat",
+  "Topic :: Games/Entertainment",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: OS Independent",
+  "Environment :: No Input/Output (Daemon)",
+  "Natural Language :: English",
+  "Natural Language :: French",
+]
+
+[project.urls]
+Homepage = "https://github.com/PercevalSA/aoe2-telegram-bot"
+Issues = "https://github.com/PercevalSA/aoe2-telegram-bot/issues"
+
+[project.scripts]
+aoe2-telegram-bot = "aoe2_telegram_bot._bot:main"
+aoe2-telegram-bot-bootstrap = "aoe2_telegram_bot.bootstrap:create_systemd_service_file"
+
+[project.optional-dependencies]
+test = [
+  "pytest>=7.4.0",
+  "pytest-asyncio>=0.21.0",
+  "pytest-cov>=4.1.0",
+  "pytest-mock>=3.11.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "--cov=aoe2_telegram_bot --cov-report=term-missing --cov-report=html"
+pythonpath = ["src"]
