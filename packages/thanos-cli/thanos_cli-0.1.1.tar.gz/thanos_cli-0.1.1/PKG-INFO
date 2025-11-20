@@ -1,0 +1,164 @@
+Metadata-Version: 2.4
+Name: thanos-cli
+Version: 0.1.1
+Summary: 🫰 Thanos - Eliminate half of all files with a snap. Perfectly balanced, as all things should be.
+Project-URL: homepage, https://github.com/soldatov-ss/thanos
+Project-URL: bugs, https://github.com/soldatov-ss/thanos/issues
+Project-URL: changelog, https://github.com/soldatov-ss/thanos/blob/master/CHANGELOG.md
+Project-URL: documentation, https://github.com/soldatov-ss/thanos/blob/master/docs/usage.md
+Author-email: Soldatov Serhii <soldatov.own@gmail.com>
+Maintainer-email: Soldatov Serhii <soldatov.own@gmail.com>
+License: MIT
+License-File: LICENSE
+Keywords: cleanup,cli,files,thanos,utility
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: System Administrators
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: System :: Filesystems
+Classifier: Topic :: Utilities
+Classifier: Typing :: Typed
+Requires-Python: >=3.9
+Requires-Dist: typer
+Provides-Extra: test
+Requires-Dist: coverage; extra == 'test'
+Requires-Dist: ipdb; extra == 'test'
+Requires-Dist: pytest; extra == 'test'
+Requires-Dist: ruff; extra == 'test'
+Requires-Dist: ty; extra == 'test'
+Description-Content-Type: text/markdown
+
+# 🫰 Thanos
+
+> *"Perfectly balanced, as all things should be."*
+
+<p align="center">
+  <img src="docs/glove.png" width="120" alt="A glove"/>
+</p>
+
+A Python CLI tool that randomly eliminates half of the files in a directory with a snap. Inspired by Marvel's Thanos and his infamous snap.
+
+[![Test Python application](https://github.com/soldatov-ss/thanos/actions/workflows/test.yml/badge.svg)](https://github.com/soldatov-ss/thanos/actions/workflows/test.yml)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Coverage Status](https://coveralls.io/repos/github/soldatov-ss/thanos/badge.svg?branch=master)](https://coveralls.io/github/soldatov-ss/thanos?branch=master)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## ⚠️ Warning
+
+**This tool permanently deletes files!** Use `--dry-run` first to preview what would be deleted. Deleted files cannot be recovered. Use at your own risk!
+
+## ✨ Features
+
+- 🎲 **Random Selection**: Eliminates exactly half of all files randomly
+- 🔒 **Safety First**: Requires confirmation before deletion
+- 👁️ **Dry Run Mode**: Preview what would be deleted without actually deleting
+- 📁 **Recursive Support**: Optionally include files in subdirectories
+
+## 📦 Installation
+
+### Using uv (recommended)
+
+```bash
+uv add thanos-cli
+uv pip install thanos-cli   # <- if you don't have pyproject.toml
+```
+
+### Using pip
+
+```bash
+pip install thanos-cli
+```
+
+
+## 🚀 Quick Start
+
+```bash
+# Always start with a dry run to see what would be deleted
+thanos --dry-run
+
+# Snap the current directory (requires confirmation)
+thanos
+
+# Snap a specific directory
+thanos /path/to/directory
+
+# Include subdirectories recursively
+thanos --recursive
+
+# Dry run on a specific directory with subdirectories
+thanos /path/to/directory --recursive --dry-run
+
+# Dry run with deterministic output
+thanos --dry-run --seed 42
+```
+
+## 📖 Usage
+
+```bash
+thanos [OPTIONS] [DIRECTORY]
+```
+
+### Arguments
+
+- `DIRECTORY` - Target directory to snap (default: current directory)
+
+### Options
+
+- `-r, --recursive` - Include files in subdirectories recursively
+- `-d, --dry-run` - Preview what would be deleted without actually deleting
+- `-s, --seed <INTEGER>` - Use a random seed for reproducible file selection
+- `--help` - Show help message and exit
+
+### Examples
+
+```bash
+# See what would happen in current directory
+thanos --dry-run
+
+# Snap current directory
+thanos
+
+# Snap specific directory
+thanos /tmp/test-files
+
+# Snap with subdirectories
+thanos ~/old-projects --recursive
+```
+
+For detailed usage instructions, see [USAGE.md](docs/usage.md).
+
+
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🤔 FAQ
+
+**Q: Can I recover deleted files?**
+A: No, files are permanently deleted. Always use `--dry-run` first!
+
+**Q: How are files selected?**
+A: Files are selected completely randomly using Python's `random.sample()`.
+
+**Q: Does it delete directories?**
+A: No, only files are affected. Empty directories may remain.
+
+**Q: What if I have an odd number of files?**
+A: If you have 11 files, 5 will be deleted (11 // 2 = 5) and 6 will remain.
+
+## 🙏 Acknowledgments
+
+- Built with [Typer](https://typer.tiangolo.com/) for the beautiful CLI
+- Tested with [pytest](https://pytest.org/)
+- Inspired by the Marvel Cinematic Universe
+
+---
+
+**Remember**: With great power comes great responsibility. Use Thanos wisely! 🫰
