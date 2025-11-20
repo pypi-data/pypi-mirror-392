@@ -1,0 +1,138 @@
+Metadata-Version: 2.4
+Name: flamepy
+Version: 0.5.0
+Summary: Python SDK for Flame, a distributed system for Agentic AI
+Author-email: XFLOPS Authors <support@xflops.io>
+Project-URL: Homepage, https://xflops.io
+Project-URL: Repository, https://github.com/xflops/flame
+Project-URL: Issues, https://github.com/xflops/flame/issues
+Keywords: distributed system,agentic ai,flame,sdk
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: grpcio>=1.50.0
+Requires-Dist: grpcio-tools>=1.50.0
+Requires-Dist: protobuf>=4.21.0
+Requires-Dist: pydantic>=2.11.0
+Requires-Dist: fastapi>=0.115.0
+Requires-Dist: uvicorn>=0.35.0
+Requires-Dist: pyyaml>=6.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.21.0; extra == "dev"
+Requires-Dist: black>=22.0.0; extra == "dev"
+Requires-Dist: isort>=5.0.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Dynamic: license-file
+
+# Flame Python SDK
+
+Python SDK for the Flame, a distributed system for Agentic AI.
+
+## Installation
+
+```bash
+pip install flamepy
+```
+
+## Quick Start
+
+```python
+import asyncio
+import flamepy
+
+async def main():
+    # Create a session with the application, e.g. Agent
+    session = await flamepy.create_session("flmping")
+    
+    # Create and run a task
+    resp = await session.invoke(b"task input data")
+
+    # Handle the output of task
+    print(resp.output)
+
+    # Close session
+    await session.close()
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+## API Reference
+
+### Session
+
+Represents a computing session with application, e.g. Agent, Tools.
+
+```python
+# Create a session
+session = await flamepy.create_session("my-app")
+
+# Close a session
+await session.close()
+```
+
+### Task
+
+Represents individual computing tasks within a session.
+
+```python
+# Create a task
+task = await session.invoke(b"input data")
+
+# Get task status
+task = await session.get_task(task.id)
+
+# Watch task progress
+async for update in session.watch_task(task.id):
+    print(f"Task state: {update.state}")
+    if update.is_completed():
+        break
+```
+
+## Error Handling
+
+The SDK provides custom exception types for different error scenarios:
+
+```python
+from flamepy import FlameError, FlameErrorCode
+
+try:
+    session = await flamepy.create_session("flmping")
+except FlameError as e:
+    if e.code == FlameErrorCode.INVALID_CONFIG:
+        print("Configuration error:", e.message)
+    elif e.code == FlameErrorCode.INVALID_STATE:
+        print("State error:", e.message)
+```
+
+## Development
+
+To set up the development environment:
+
+```bash
+# Clone the repository
+git clone https://github.com/xflops/flame.git
+cd flame/sdk/python
+
+# Install in development mode
+pip install -e .[dev]
+
+# Run tests
+pytest
+
+# Format code
+black flamepy/
+isort flamepy/
+
+# Type checking
+mypy flamepy/
+``` 
