@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "comopy"
+version = "0.6.0"
+description = "Co-modeling tools for hardware generation with Python"
+readme = "README.md"
+# Use Python 3.13 by default because prebuilt CIRCT wheels on PyPI target 3.13.
+# ComoPy itself is implemented to work on Python 3.10+, but users on <3.13
+# may need to build CIRCT from source before installing from PyPI.
+requires-python = ">=3.13"
+license = {text = "MIT"}
+authors = [
+    {name = "Microprocessor R&D Center (MPRC), Peking University"},
+]
+maintainers = [
+    {name = "Chun Yang"},
+]
+keywords = ["hardware", "hdl", "simulation", "rtl", "verilog"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+    "Topic :: Software Development :: Code Generators",
+    "Topic :: Software Development :: Testing",
+]
+
+dependencies = [
+    "circt~=1.125.0",
+    "jinja2>=3.1",
+    "pybind11>=2.13.0",
+    "setuptools>=59.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4",
+    "pytest-cov>=6.2",
+    "types-setuptools>=80.9",
+]
+
+[project.urls]
+Homepage = "https://github.com/mprcpku/comopy"
+Repository = "https://github.com/mprcpku/comopy"
+Issues = "https://github.com/mprcpku/comopy/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["comopy*"]
+exclude = ["tests*", "docs*", "examples*"]
+
+[tool.isort]
+profile = "black"
+line_length = 79
+multi_line_output = 3
+
+[[tool.mypy.overrides]]
+module = ["circt.*"]
+ignore_missing_imports = true
