@@ -1,0 +1,126 @@
+[build-system]
+requires = [
+    "hatchling",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "impulcifer-py313"
+version = "2.1.5"
+authors = [
+  { name="원본 저자: Jaakko Pasanen", email="" },
+  { name="Python 3.13/3.14 호환 버전: 115dkk", email="" },
+]
+description = "HRIR 측정 및 헤드폰 바이노럴 헤드트래킹 HRTF 시스템 (Python 3.14 Free-Threaded 지원)"
+readme = "README.md"
+requires-python = ">=3.9,<3.15"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Multimedia :: Sound/Audio",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    'matplotlib>=3.8.0',
+    'numpy>=1.26.0',
+    'scipy>=1.12.0',
+    'soundfile>=0.12.1',
+    'sounddevice>=0.4.6',
+    'nnresample>=0.2.4',
+    'tabulate>=0.9.0',
+    'autoeq-py313>=1.2.0',
+    'seaborn',
+    'bokeh>=3.0.0',
+    'customtkinter>=5.2.0',
+    'packaging>=23.0',
+]
+
+[project.scripts]
+impulcifer = "impulcifer_cli:entry_point"
+impulcifer_gui = "modern_gui:main_gui"
+impulcifer_gui_legacy = "gui:main_gui"
+
+[project.urls]
+"Homepage" = "https://github.com/jaakkopasanen/impulcifer"
+"Python 3.13.2 호환 버전" = "https://github.com/115dkk/Impulcifer-pip313"
+
+[tool.hatch.build]
+include = [
+    "*.py",
+    "parallel_processing.py",
+    "data/sweep-seg-FR-stereo-6.15s-48000Hz-32bit-2.93Hz-24000Hz.wav",
+    "data/sweep-seg-FL-stereo-6.15s-48000Hz-32bit-2.93Hz-24000Hz.wav",
+    "data/sweep-seg-FL-mono-6.15s-48000Hz-32bit-2.93Hz-24000Hz.wav",
+    "data/sweep-seg-FL,FR-stereo-6.15s-48000Hz-32bit-2.93Hz-24000Hz.wav",
+    "data/sweep-6.15s-48000Hz-32bit-2.93Hz-24000Hz.wav",
+    "data/sweep-6.15s-48000Hz-32bit-2.93Hz-24000Hz.pkl",
+    "data/harman-in-room-headphone-target.csv",
+    "data/harman-in-room-loudspeaker-target-wo-bass.csv",
+    "data/harman-in-room-loudspeaker-target.csv",
+    "data/harman-in-room-headphone-target-wo-bass.csv",
+    "data/11cmaster.mlp",
+    "data/13cmaster.mlp",
+    "data/demo/README.md",
+    "data/demo/headphones.wav",
+    "data/demo/room-mic-calibration.txt",
+    "data/demo/room-responses.wav",
+    "data/demo/room-target.csv",
+    "data/demo/FC.wav",
+    "data/demo/FL,FR.wav",
+    "data/demo/BL,SL.wav",
+    "data/demo/SR,BR.wav",
+    "img/**/*",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md",
+    "pyproject.toml",
+    "font/Pretendard-Regular.otf",
+]
+exclude = [
+    "research/**/*",
+    ".gitignore",
+]
+
+# data 폴더를 패키지 데이터로 포함
+[tool.hatch.build.targets.wheel.shared-data]
+"data" = "impulcifer_py313/data"
+"font" = "impulcifer_py313/font"
+
+# pytest 설정
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]
+testpaths = ["test_suite.py"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+# Ruff linter 설정
+[tool.ruff]
+exclude = [
+    "research/**/*",
+    "*.ipynb",
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+]
+
+# Flake8 대체 설정 (ruff가 없는 경우를 위해)
+[tool.flake8]
+exclude = [
+    "research",
+    "*.ipynb",
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+] 
