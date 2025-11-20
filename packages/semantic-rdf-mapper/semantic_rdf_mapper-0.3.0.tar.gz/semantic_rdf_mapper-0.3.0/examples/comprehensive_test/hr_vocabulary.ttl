@@ -1,0 +1,241 @@
+@prefix : <http://example.org/hr#> .
+@prefix ex: <http://example.org/hr#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# ========================================
+# SKOS VOCABULARY FOR HR ONTOLOGY
+# Purpose: Demonstrate SKOS label matching
+# ========================================
+
+# Employee ID - Test ExactPrefLabelMatcher
+ex:employeeID
+    skos:prefLabel "Employee ID"@en ;
+    skos:altLabel "Emp ID"@en, "Employee Identifier"@en ;
+    skos:hiddenLabel "employee_id"@en, "emp_id"@en ;
+    skos:definition "A unique identifier assigned to each employee in the system"@en ;
+    skos:example "E1001, E1002, etc."@en .
+
+# Employee Number - Test ExactHiddenLabelMatcher
+ex:employeeNumber
+    skos:prefLabel "Employee Number"@en ;
+    skos:altLabel "Staff Number"@en, "Personnel Number"@en ;
+    skos:hiddenLabel "emp_num"@en, "employee_num"@en, "empnum"@en ;
+    skos:definition "Internal reference number for employee records"@en ;
+    skos:scopeNote "Often used in legacy database systems with abbreviated column names"@en .
+
+# Full Name
+ex:fullName
+    skos:prefLabel "Full Name"@en ;
+    skos:altLabel "Complete Name"@en, "Name"@en ;
+    skos:hiddenLabel "fullname"@en, "full_name"@en, "name"@en ;
+    skos:definition "The complete legal name of the employee"@en .
+
+# Date of Birth - Test ExactAltLabelMatcher
+ex:dateOfBirth
+    skos:prefLabel "Date of Birth"@en ;
+    skos:altLabel "Birth Date"@en, "DOB"@en, "Birthday"@en ;
+    skos:hiddenLabel "dob"@en, "birth_date"@en, "birthdate"@en ;
+    skos:definition "The date on which the employee was born"@en .
+
+# Hire Date - Test ExactHiddenLabelMatcher
+ex:hireDate
+    skos:prefLabel "Hire Date"@en ;
+    skos:altLabel "Date Hired"@en, "Employment Start"@en ;
+    skos:hiddenLabel "hire_dt"@en, "hiredate"@en, "hire_date"@en, "date_hired"@en ;
+    skos:definition "The date when the employee was first hired by the organization"@en ;
+    skos:scopeNote "Common database abbreviation: hire_dt"@en .
+
+# Start Date
+ex:startDate
+    skos:prefLabel "Start Date"@en ;
+    skos:altLabel "Begin Date"@en, "Commencement Date"@en ;
+    skos:hiddenLabel "start_date"@en, "startdate"@en ;
+    skos:definition "The date when employee began current role or position"@en .
+
+# Annual Salary
+ex:annualSalary
+    skos:prefLabel "Annual Salary"@en ;
+    skos:altLabel "Yearly Salary"@en, "Salary"@en, "Compensation"@en ;
+    skos:hiddenLabel "salary"@en, "annual_salary"@en, "compensation"@en ;
+    skos:definition "The employee's base salary per year"@en .
+
+# Annual Compensation - Test LexicalMatcher (substring)
+ex:annualCompensation
+    skos:prefLabel "Annual Compensation"@en ;
+    skos:altLabel "Total Compensation"@en, "Yearly Pay"@en ;
+    skos:hiddenLabel "annual_comp"@en, "total_comp"@en, "compensation"@en ;
+    skos:definition "Total yearly compensation including salary, bonuses, and benefits"@en ;
+    skos:scopeNote "Legacy databases often use 'annual_comp' abbreviation"@en .
+
+# Work Location
+ex:workLocation
+    skos:prefLabel "Work Location"@en ;
+    skos:altLabel "Office Location"@en, "Workplace"@en, "Office"@en ;
+    # Commented to force fuzzy matcher: skos:hiddenLabel "work_location"@en, "office_location"@en, "location"@en ;
+    skos:definition "The physical location where the employee performs their work"@en .
+
+# Email - Test PropertyHierarchyMatcher
+ex:email
+    skos:prefLabel "Email"@en ;
+    skos:altLabel "Email Address"@en, "E-mail"@en, "Contact Email"@en ;
+    skos:hiddenLabel "email_address"@en, "contact_email"@en, "mail"@en ;
+    skos:definition "Electronic mail address for contacting the employee"@en ;
+    skos:broader ex:contactInformation .
+
+# Phone Number - Test LexicalMatcher (partial)
+ex:phoneNumber
+    skos:prefLabel "Phone Number"@en ;
+    skos:altLabel "Telephone"@en, "Phone"@en, "Contact Number"@en ;
+    # Commented to force partial matcher: skos:hiddenLabel "phone"@en, "phone_number"@en, "tel"@en, "telephone"@en ;
+    skos:definition "Telephone number for contacting the employee"@en ;
+    skos:broader ex:contactInformation .
+
+# Social Security Number - Test OWLCharacteristicsMatcher (InverseFunctionalProperty)
+ex:socialSecurityNumber
+    skos:prefLabel "Social Security Number"@en ;
+    skos:altLabel "SSN"@en, "Social Security No."@en ;
+    skos:hiddenLabel "ssn"@en, "ss_number"@en, "social_security_number"@en ;
+    skos:definition "US Social Security Number uniquely identifying the employee"@en ;
+    skos:scopeNote "This is an InverseFunctionalProperty - each SSN uniquely identifies one person"@en .
+
+# Position Title - Test FuzzyStringMatcher
+ex:positionTitle
+    skos:prefLabel "Position Title"@en ;
+    skos:altLabel "Job Title"@en, "Title"@en, "Position"@en, "Role"@en ;
+    skos:hiddenLabel "pos"@en, "position"@en, "job_title"@en, "title"@en ;
+    skos:definition "The official title of the employee's position or role"@en .
+
+# Team Name - Test StructuralMatcher
+ex:teamName
+    skos:prefLabel "Team Name"@en ;
+    skos:altLabel "Team"@en, "Group"@en, "Unit"@en ;
+    skos:hiddenLabel "team"@en, "team_name"@en, "group_name"@en ;
+    skos:definition "The name of the team or group the employee belongs to"@en .
+
+# Address - Test FuzzyStringMatcher (typo)
+ex:address
+    skos:prefLabel "Address"@en ;
+    skos:altLabel "Mailing Address"@en, "Street Address"@en ;
+    skos:hiddenLabel "address"@en, "addr"@en, "adrs"@en ;
+    skos:definition "Physical mailing address of the employee"@en ;
+    skos:scopeNote "Common typo/abbreviation: 'adrs'"@en .
+
+# Department ID - Test GraphReasoningMatcher (Foreign Key)
+ex:departmentID
+    skos:prefLabel "Department ID"@en ;
+    skos:altLabel "Department Identifier"@en, "Dept ID"@en ;
+    skos:hiddenLabel "dept_id"@en, "department_id"@en, "deptid"@en ;
+    skos:definition "Unique identifier for a department"@en ;
+    skos:scopeNote "Foreign key column in employee table linking to department"@en .
+
+# Manager ID - Test GraphReasoningMatcher (Foreign Key)
+ex:managerID a skos:Concept ;
+    skos:prefLabel "Manager ID"@en ;
+    skos:altLabel "Manager Identifier"@en, "Supervisor ID"@en ;
+    skos:hiddenLabel "mgr"@en, "mgr_id"@en, "manager_id"@en, "supervisor_id"@en ;
+    skos:definition "Identifier of the manager this employee reports to"@en ;
+    skos:scopeNote "Foreign key referencing another employee who is a manager. Common abbreviation: 'mgr'"@en .
+
+# ========================================
+# SKOS CONCEPT HIERARCHIES (Tests SKOSRelationsMatcher)
+# ========================================
+
+# Position/Role Hierarchy
+ex:EmployeePosition a skos:Concept ;
+    skos:prefLabel "Employee Position"@en ;
+    skos:definition "A role or position within the organization"@en ;
+    skos:topConceptOf <http://example.org/hr/positions> .
+
+ex:JuniorPosition skos:broader ex:EmployeePosition ;
+    skos:prefLabel "Junior Position"@en ;
+    skos:altLabel "Entry Level"@en ;
+    skos:definition "Entry-level positions requiring less experience"@en .
+
+ex:SeniorPosition skos:broader ex:EmployeePosition ;
+    skos:prefLabel "Senior Position"@en ;
+    skos:altLabel "Senior Level"@en ;
+    skos:definition "Senior-level positions requiring extensive experience"@en .
+
+ex:ManagementPosition skos:broader ex:SeniorPosition ;
+    skos:prefLabel "Management Position"@en ;
+    skos:altLabel "Leadership Role"@en ;
+    skos:definition "Positions with management responsibilities"@en .
+
+# Specific role examples
+ex:EngineerRole skos:broader ex:EmployeePosition ;
+    skos:prefLabel "Engineer"@en ;
+    skos:altLabel "Engineering Role"@en .
+
+ex:SeniorEngineerRole skos:broader ex:SeniorPosition ;
+    skos:broader ex:EngineerRole ;
+    skos:prefLabel "Senior Engineer"@en .
+
+# ========================================
+# SKOS EXACT MATCH & CLOSE MATCH (Tests SKOSRelationsMatcher)
+# ========================================
+
+# Position Title and Job Title are exact matches
+ex:positionTitle skos:exactMatch ex:jobTitle ;
+    skos:prefLabel "Position Title"@en ;
+    skos:definition "The official title of an employee's position"@en .
+
+ex:jobTitle skos:exactMatch ex:positionTitle ;
+    skos:prefLabel "Job Title"@en ;
+    skos:definition "The title of an employee's job"@en .
+
+# Role and Position are close matches (similar but not identical)
+ex:role skos:closeMatch ex:positionTitle ;
+    skos:prefLabel "Role"@en ;
+    skos:definition "The function or part played by someone"@en .
+
+# ========================================
+# SKOS RELATED CONCEPTS (Tests SKOSRelationsMatcher)
+# ========================================
+
+# Team and Department are related (work together but different)
+ex:team skos:related ex:department ;
+    skos:prefLabel "Team"@en ;
+    skos:definition "A small group working together within a department"@en .
+
+ex:department skos:related ex:team ;
+    skos:prefLabel "Department"@en ;
+    skos:definition "A major organizational division containing multiple teams"@en .
+
+# Salary and Compensation are related
+ex:salary skos:related ex:compensation ;
+    skos:prefLabel "Salary"@en ;
+    skos:definition "Fixed regular payment for work"@en .
+
+ex:compensation skos:related ex:salary ;
+    skos:prefLabel "Compensation"@en ;
+    skos:definition "Total payment including salary and benefits"@en .
+
+# ========================================
+# PROPERTY HIERARCHY LABELS (For PropertyHierarchyMatcher)
+# ========================================
+
+# Generic "identifier" should match top of hierarchy
+ex:hasIdentifier
+    skos:prefLabel "Identifier"@en ;
+    skos:altLabel "ID"@en, "Reference"@en ;
+    skos:definition "Any kind of identifying value"@en .
+
+# Generic "name" should match middle of hierarchy
+ex:hasName
+    skos:prefLabel "Name"@en ;
+    skos:altLabel "Person Name"@en ;
+    skos:definition "A name identifier"@en .
+
+# Generic "contact" should match top of contact hierarchy
+ex:contactInformation
+    skos:prefLabel "Contact"@en ;
+    skos:altLabel "Contact Info"@en, "Contact Details"@en ;
+    skos:definition "Information for contacting someone"@en .
+
+# Generic "amount" should match top of amount hierarchy
+ex:hasAmount
+    skos:prefLabel "Amount"@en ;
+    skos:altLabel "Value"@en, "Quantity"@en ;
+    skos:definition "A monetary amount"@en .
+

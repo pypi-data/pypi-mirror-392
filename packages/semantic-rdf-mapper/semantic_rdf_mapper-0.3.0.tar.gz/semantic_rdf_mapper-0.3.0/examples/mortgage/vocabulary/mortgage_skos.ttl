@@ -1,0 +1,110 @@
+@prefix ex:   <https://example.com/mortgage#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# SKOS vocabulary for Mortgage ontology terms
+# This file adds prefLabel/altLabel/hiddenLabel variants commonly seen in
+# CSV/DB column names to improve matching and UX. It is designed to be modular
+# and used alongside the core ontology (mortgage.ttl) and optional SHACL shapes.
+
+# -----------------------------
+# Classes
+# -----------------------------
+ex:MortgageLoan
+    skos:prefLabel  "Mortgage Loan"@en ;
+    skos:altLabel   "Loan"@en , "Home Loan"@en , "Mortgage"@en ;
+    skos:hiddenLabel "mortgageloan"@en , "mtg_loan"@en .
+
+ex:Borrower
+    skos:prefLabel  "Borrower"@en ;
+    skos:altLabel   "Debtor"@en , "Applicant"@en , "Customer"@en ;
+    skos:hiddenLabel "borrowerid"@en , "borrower_name"@en , "brwr_name"@en .
+
+ex:Property
+    skos:prefLabel  "Property"@en ;
+    skos:altLabel   "Real Property"@en , "Collateral"@en ;
+    skos:hiddenLabel "propertyid"@en , "prop_addr"@en , "propertyaddress"@en .
+
+# -----------------------------
+# Object Properties
+# -----------------------------
+ex:hasBorrower
+    skos:prefLabel  "has borrower"@en ;
+    skos:altLabel   "borrower"@en , "with borrower"@en ;
+    skos:hiddenLabel "has_borrower"@en .
+
+ex:collateralProperty
+    skos:prefLabel  "collateral property"@en ;
+    skos:altLabel   "collateral"@en , "secured by"@en ;
+    skos:hiddenLabel "collateral_property"@en .
+
+# -----------------------------
+# Data Properties - Mortgage Loan
+# -----------------------------
+ex:loanNumber
+    skos:prefLabel  "Loan Number"@en ;
+    skos:altLabel   "Loan ID"@en , "Loan Identifier"@en ;
+    skos:hiddenLabel "loanid"@en , "loan_no"@en , "loan_num"@en , "loan_number"@en .
+
+ex:principalAmount
+    skos:prefLabel  "Principal Amount"@en ;
+    skos:altLabel   "Original Amount"@en , "Loan Amount"@en , "Principal"@en ;
+    skos:hiddenLabel "principal"@en , "orig_amt"@en , "loan_amt"@en , "principalamount"@en .
+
+ex:interestRate
+    skos:prefLabel  "Interest Rate"@en ;
+    skos:altLabel   "Rate"@en , "APR"@en ;
+    skos:hiddenLabel "int_rate"@en , "rate_pct"@en , "apr"@en , "interestrate"@en .
+
+ex:originationDate
+    skos:prefLabel  "Origination Date"@en ;
+    skos:altLabel   "Start Date"@en , "Origination"@en ;
+    skos:hiddenLabel "orig_date"@en , "start_dt"@en , "orig_dt"@en , "originationdate"@en .
+
+ex:loanTerm
+    skos:prefLabel  "Loan Term"@en ;
+    skos:altLabel   "Term (Months)"@en , "Amortization Term"@en ;
+    skos:hiddenLabel "term"@en , "loan_term"@en , "amort_term"@en , "loanterm"@en .
+
+ex:loanStatus
+    skos:prefLabel  "Loan Status"@en ;
+    skos:altLabel   "Status"@en ;
+    skos:hiddenLabel "status"@en , "loan_status"@en , "loanstatus"@en .
+
+# -----------------------------
+# Data Properties - Borrower
+# -----------------------------
+ex:borrowerName
+    skos:prefLabel  "Borrower Name"@en ;
+    skos:altLabel   "Customer Name"@en , "Applicant Name"@en , "Name"@en ;
+    skos:hiddenLabel "brwr_name"@en , "borrowername"@en .
+
+ex:borrowerEmail
+    skos:prefLabel  "Borrower Email"@en ;
+    skos:altLabel   "Email"@en , "Email Address"@en ;
+    skos:hiddenLabel "email"@en , "borroweremail"@en , "email_addr"@en .
+
+ex:creditScore
+    skos:prefLabel  "Credit Score"@en ;
+    skos:altLabel   "FICO"@en , "Score"@en ;
+    skos:hiddenLabel "fico"@en , "creditscore"@en .
+
+# -----------------------------
+# Data Properties - Property
+# -----------------------------
+ex:propertyAddress
+    skos:prefLabel  "Property Address"@en ;
+    skos:altLabel   "Address"@en ;
+    skos:hiddenLabel "prop_addr"@en , "propertyaddress"@en , "address"@en .
+
+ex:propertyValue
+    skos:prefLabel  "Property Value"@en ;
+    skos:altLabel   "Appraised Value"@en , "Valuation"@en ;
+    skos:hiddenLabel "prop_val"@en , "propertyvalue"@en .
+
+ex:propertyType
+    skos:prefLabel  "Property Type"@en ;
+    skos:altLabel   "Type of Property"@en , "Home Type"@en ;
+    skos:hiddenLabel "prop_type"@en , "propertytype"@en .
+

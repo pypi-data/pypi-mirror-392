@@ -1,0 +1,299 @@
+@prefix : <http://example.org/hr#> .
+@prefix ex: <http://example.org/hr#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Ontology Declaration
+<http://example.org/hr> a owl:Ontology ;
+    rdfs:label "HR Management Ontology - Enhanced"@en ;
+    rdfs:comment "Comprehensive test ontology demonstrating all 17 matcher types"@en ;
+    rdfs:comment "Includes: property hierarchies, class hierarchies, OWL characteristics, restrictions, and semantic relations"@en .
+
+# ========================================
+# CLASS HIERARCHY (Tests PropertyHierarchyMatcher & Class Inheritance)
+# ========================================
+
+# Top-level class
+ex:Person a owl:Class ;
+    rdfs:label "Person"@en ;
+    rdfs:comment "A human being"@en .
+
+# Employee inherits from Person
+ex:Employee a owl:Class ;
+    rdfs:subClassOf ex:Person ;
+    rdfs:label "Employee"@en ;
+    rdfs:comment "A person employed by the organization"@en .
+
+# Manager inherits from Employee (3-level hierarchy)
+ex:Manager a owl:Class ;
+    rdfs:subClassOf ex:Employee ;
+    rdfs:label "Manager"@en ;
+    rdfs:comment "An employee with management responsibilities"@en .
+
+# Department class
+ex:Department a owl:Class ;
+    rdfs:label "Department"@en ;
+    rdfs:comment "An organizational unit"@en .
+
+# ========================================
+# PROPERTY HIERARCHIES (Tests PropertyHierarchyMatcher)
+# ========================================
+
+# Hierarchy 1: Identifier Properties (3 levels)
+ex:hasIdentifier a owl:DatatypeProperty ;
+    rdfs:label "identifier"@en ;
+    rdfs:comment "Any kind of identifier (top-level)"@en ;
+    rdfs:domain ex:Person ;
+    rdfs:range xsd:string .
+
+ex:hasName a owl:DatatypeProperty ;
+    rdfs:subPropertyOf ex:hasIdentifier ;
+    rdfs:label "name"@en ;
+    rdfs:comment "A name is a specific kind of identifier"@en ;
+    rdfs:domain ex:Person ;
+    rdfs:range xsd:string .
+
+ex:fullName a owl:DatatypeProperty ;
+    rdfs:subPropertyOf ex:hasName ;
+    rdfs:label "full name"@en ;
+    rdfs:comment "Complete name of a person"@en ;
+    rdfs:domain ex:Person ;
+    rdfs:range xsd:string .
+
+ex:firstName a owl:DatatypeProperty ;
+    rdfs:subPropertyOf ex:hasName ;
+    rdfs:label "first name"@en ;
+    rdfs:comment "Given name"@en ;
+    rdfs:domain ex:Person ;
+    rdfs:range xsd:string .
+
+ex:lastName a owl:DatatypeProperty ;
+    rdfs:subPropertyOf ex:hasName ;
+    rdfs:label "last name"@en ;
+    rdfs:comment "Family name"@en ;
+    rdfs:domain ex:Person ;
+    rdfs:range xsd:string .
+
+ex:middleName a owl:DatatypeProperty ;
+    rdfs:subPropertyOf ex:hasName ;
+    rdfs:label "middle name"@en ;
+    rdfs:comment "Middle name or initial"@en ;
+    rdfs:domain ex:Person ;
+    rdfs:range xsd:string .
+
+# Hierarchy 2: Contact Information (2 levels)
+ex:contactInformation a owl:DatatypeProperty ;
+    rdfs:label "contact information"@en ;
+    rdfs:comment "General contact details (parent property)"@en ;
+    rdfs:domain ex:Person ;
+    rdfs:range xsd:string .
+
+ex:email a owl:DatatypeProperty, owl:FunctionalProperty, owl:InverseFunctionalProperty ;
+    rdfs:subPropertyOf ex:contactInformation ;
+    rdfs:label "email"@en ;
+    rdfs:comment "Email address"@en ;
+    rdfs:domain ex:Person ;
+    rdfs:range xsd:string .
+
+ex:phoneNumber a owl:DatatypeProperty ;
+    rdfs:subPropertyOf ex:contactInformation ;
+    rdfs:label "phone number"@en ;
+    rdfs:comment "Telephone contact number"@en ;
+    rdfs:domain ex:Person ;
+    rdfs:range xsd:string .
+
+# Hierarchy 3: Amount/Compensation (3 levels)
+ex:hasAmount a owl:DatatypeProperty ;
+    rdfs:label "amount"@en ;
+    rdfs:comment "Any monetary amount (top-level)"@en ;
+    rdfs:domain ex:Person ;
+    rdfs:range xsd:integer .
+
+ex:hasSalary a owl:DatatypeProperty ;
+    rdfs:subPropertyOf ex:hasAmount ;
+    rdfs:label "salary"@en ;
+    rdfs:comment "A salary is a specific type of amount"@en ;
+    rdfs:domain ex:Employee ;
+    rdfs:range xsd:integer .
+
+ex:annualSalary a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:subPropertyOf ex:hasSalary ;
+    rdfs:label "annual salary"@en ;
+    rdfs:comment "Yearly salary"@en ;
+    rdfs:domain ex:Employee ;
+    rdfs:range xsd:integer .
+
+ex:annualCompensation a owl:DatatypeProperty ;
+    rdfs:subPropertyOf ex:hasSalary ;
+    rdfs:label "annual compensation"@en ;
+    rdfs:comment "Total annual compensation including benefits"@en ;
+    rdfs:domain ex:Employee ;
+    rdfs:range xsd:integer .
+
+# ========================================
+# IDENTITY PROPERTIES WITH OWL CHARACTERISTICS
+# ========================================
+
+ex:employeeID a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "employee ID"@en ;
+    rdfs:comment "Unique identifier for an employee (Functional: each employee has exactly one)"@en ;
+    rdfs:domain ex:Employee ;
+    rdfs:range xsd:string .
+
+ex:employeeNumber a owl:DatatypeProperty, owl:InverseFunctionalProperty ;
+    rdfs:label "employee number"@en ;
+    rdfs:comment "Internal employee reference number (IFP: uniquely identifies employee)"@en ;
+    rdfs:domain ex:Employee ;
+    rdfs:range xsd:string .
+
+ex:socialSecurityNumber a owl:DatatypeProperty, owl:InverseFunctionalProperty, owl:FunctionalProperty ;
+    rdfs:label "social security number"@en ;
+    rdfs:comment "US Social Security Number (Both Functional and IFP: unique identifier)"@en ;
+    rdfs:domain ex:Person ;
+    rdfs:range xsd:string .
+
+# ========================================
+# PERSONAL INFORMATION PROPERTIES
+# ========================================
+
+ex:dateOfBirth a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "date of birth"@en ;
+    rdfs:comment "Person's birth date (Functional: one per person)"@en ;
+    rdfs:domain ex:Person ;
+    rdfs:range xsd:date .
+
+ex:age a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "age"@en ;
+    rdfs:comment "Person's age in years"@en ;
+    rdfs:domain ex:Person ;
+    rdfs:range xsd:integer .
+
+# ========================================
+# EMPLOYMENT PROPERTIES
+# ========================================
+
+ex:hireDate a owl:DatatypeProperty ;
+    rdfs:label "hire date"@en ;
+    rdfs:comment "Date when employee was hired"@en ;
+    rdfs:domain ex:Employee ;
+    rdfs:range xsd:date .
+
+ex:startDate a owl:DatatypeProperty ;
+    rdfs:label "start date"@en ;
+    rdfs:comment "Date when employee started in current position"@en ;
+    rdfs:domain ex:Employee ;
+    rdfs:range xsd:date .
+
+ex:positionTitle a owl:DatatypeProperty ;
+    rdfs:label "position title"@en ;
+    rdfs:comment "Job title or position name"@en ;
+    rdfs:domain ex:Employee ;
+    rdfs:range xsd:string .
+
+ex:jobTitle a owl:DatatypeProperty ;
+    rdfs:label "job title"@en ;
+    rdfs:comment "Alternative term for position title"@en ;
+    rdfs:domain ex:Employee ;
+    rdfs:range xsd:string .
+
+ex:teamName a owl:DatatypeProperty ;
+    rdfs:label "team name"@en ;
+    rdfs:comment "Name of the team the employee belongs to"@en ;
+    rdfs:domain ex:Employee ;
+    rdfs:range xsd:string .
+
+# ========================================
+# LOCATION PROPERTIES
+# ========================================
+
+ex:workLocation a owl:DatatypeProperty ;
+    rdfs:label "work location"@en ;
+    rdfs:comment "Physical location where employee works"@en ;
+    rdfs:domain ex:Employee ;
+    rdfs:range xsd:string .
+
+ex:address a owl:DatatypeProperty ;
+    rdfs:label "address"@en ;
+    rdfs:comment "Physical mailing address"@en ;
+    rdfs:domain ex:Person ;
+    rdfs:range xsd:string .
+
+# ========================================
+# OBJECT PROPERTIES (Tests GraphReasoningMatcher)
+# ========================================
+
+ex:worksInDepartment a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "works in department"@en ;
+    rdfs:comment "The department where the employee works"@en ;
+    rdfs:domain ex:Employee ;
+    rdfs:range ex:Department .
+
+ex:reportsTo a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "reports to"@en ;
+    rdfs:comment "The manager this employee reports to"@en ;
+    rdfs:domain ex:Employee ;
+    rdfs:range ex:Manager .
+
+# ========================================
+# DEPARTMENT PROPERTIES
+# ========================================
+
+ex:departmentID a owl:DatatypeProperty, owl:InverseFunctionalProperty ;
+    rdfs:label "department ID"@en ;
+    rdfs:comment "Unique identifier for a department"@en ;
+    rdfs:domain ex:Department ;
+    rdfs:range xsd:string .
+
+ex:departmentName a owl:DatatypeProperty ;
+    rdfs:label "department name"@en ;
+    rdfs:comment "Name of the department"@en ;
+    rdfs:domain ex:Department ;
+    rdfs:range xsd:string .
+
+# ========================================
+# OWL RESTRICTIONS (Tests RestrictionBasedMatcher)
+# ========================================
+
+# Employee must be 18-100 years old
+ex:Employee rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty ex:age ;
+    owl:allValuesFrom [
+        a rdfs:Datatype ;
+        owl:onDatatype xsd:integer ;
+        owl:withRestrictions (
+            [ xsd:minInclusive 18 ]
+            [ xsd:maxInclusive 100 ]
+        )
+    ]
+] .
+
+# Employee salary must be positive
+ex:Employee rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty ex:annualSalary ;
+    owl:allValuesFrom [
+        a rdfs:Datatype ;
+        owl:onDatatype xsd:integer ;
+        owl:withRestrictions (
+            [ xsd:minInclusive 0 ]
+        )
+    ]
+] .
+
+# Employee must have exactly one email
+ex:Employee rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty ex:email ;
+    owl:cardinality 1
+] .
+
+# Employee must have exactly one SSN
+ex:Person rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty ex:socialSecurityNumber ;
+    owl:maxCardinality 1
+] .
+
