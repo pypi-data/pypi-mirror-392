@@ -1,0 +1,44 @@
+# Fanvue MCP Server
+
+A Model Context Protocol (MCP) server for the Fanvue API.
+
+## Installation
+
+```bash
+pip install fanvue-mcp
+```
+
+## Usage
+
+To run the server, you need to provide your Fanvue OAuth credentials. You can obtain these by creating an application in the [Fanvue Developer Portal](https://www.fanvue.com/developers/apps).
+
+```bash
+export FANVUE_CLIENT_ID="your_client_id"
+export FANVUE_CLIENT_SECRET="your_client_secret"
+export MCP_SERVER_PORT=8080
+
+# Run the server
+fanvue-mcp
+```
+
+Then configure your MCP client (e.g., Cursor, Claude Desktop) to connect to the server URL (default: `http://localhost:8080/sse`).
+
+### Environment Variables
+
+- `FANVUE_CLIENT_ID`: Your Fanvue OAuth Client ID (Required for Auth)
+- `FANVUE_CLIENT_SECRET`: Your Fanvue OAuth Client Secret (Required for Auth)
+- `MCP_SERVER_PORT`: Port to run the server on (Default: 8080)
+- `MCP_SERVER_HOST`: Host to bind to (Default: 0.0.0.0)
+- `MCP_SERVER_URL`: Public URL of the server (Default: http://localhost:8080) - used for OAuth redirects
+- `FANVUE_API_URL`: Fanvue API URL (Default: https://api.fanvue.com)
+- `FANVUE_AUTH_URL`: Fanvue Auth URL (Default: https://auth.fanvue.com)
+- `DEBUG`: Enable debug logging (Default: false)
+
+## Development
+
+To develop locally:
+
+1. Clone the repository
+2. Install dependencies: `uv sync`
+3. Run the server: `uv run fanvue-mcp`
+
