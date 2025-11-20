@@ -1,0 +1,47 @@
+[package]
+name = "competency_api"
+version = "0.1.0"
+edition = "2021"
+readme = "README.md"
+
+[dependencies]
+#bevy_reflect = "0.14.2"
+#bon = "3.1.1"
+fastembed = "5.0.0"
+#ort-sys = "=2.0.0-rc.8"
+itertools = "0.13.0"
+#ndarray = "0.16.1"
+serde = { version = "1.0.215", features = ["derive"] }
+simsimd = "6.2.0"
+soa-rs = "0.7.2"
+rayon = "1.10.0"
+statrs = "0.17.1"
+serde_json = "1.0.133"
+thiserror = "2.0.3"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Optional memory profiling dependencies
+dhat = { version = "0.3", optional = true }
+peak_alloc = { version = "0.2", optional = true }
+jemallocator = { version = "0.5", optional = true }
+
+[dev-dependencies]
+approx = "0.5.1"
+pretty_assertions = "1.4.1"
+tracing-test = "0.2.5"
+ctor = "0.2"
+#struct_iterable = "0.1.1"
+
+# Benchmarking dependencies
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[features]
+default = []
+memory-profiling = ["dhat"]
+dhat = ["dep:dhat"]
+jemalloc = ["jemallocator"]
+
+[[bench]]
+name = "memory_benchmark"
+harness = false
