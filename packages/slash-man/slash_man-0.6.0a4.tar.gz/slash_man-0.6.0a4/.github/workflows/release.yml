@@ -1,0 +1,110 @@
+name: Semantic Release
+
+on:
+  workflow_run:
+    workflows: ["Run tests and linting"]
+    branches: [main]
+    types: [completed]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  semantic-release:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      issues: write
+      pull-requests: write
+    concurrency:
+      group: semantic-release-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - uses: octo-sts/action@6177b4481c00308b3839969c3eca88c96a91775f # v1.0.0
+        id: octo-sts
+        with:
+          scope: ${{ github.repository }}
+          identity: main-semantic-release
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          persist-credentials: false
+
+
+      - name: Get GitHub App User ID
+        id: get-user-id
+        run: echo "user-id=$(gh api "/users/octo-sts[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
+
+      - name: Configure git author
+        run: |
+          set -eox pipefail
+          git config --global user.name 'octo-sts[bot]'
+          git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+octo-sts[bot]@users.noreply.github.com'
+
+      - name: Use PAT for pushes to origin
+        run: |
+          git remote set-url origin \
+            https://x-access-token:${{ steps.octo-sts.outputs.token }}@github.com/${{ github.repository }}.git
+          # sanity check
+          git ls-remote --heads origin >/dev/null
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv (with cache)
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: |
+            **/pyproject.toml
+            **/uv.lock
+
+      - name: Update uv.lock and build package
+        run: |
+          set -euo pipefail
+          # Update lock file to ensure it's in sync with current dependencies
+          uv lock
+          # Stage uv.lock so semantic-release can commit it as an asset
+          # Note: semantic-release will automatically commit:
+          #   - pyproject.toml (version update via version_variables)
+          #   - CHANGELOG.md (generated via changelog.default_templates)
+          #   - uv.lock (listed in assets, so we stage it here)
+          git add uv.lock
+          # Only rebuild if uv.lock changed (CI already verified build works)
+          if ! git diff --cached --quiet uv.lock; then
+            echo "⚠️  uv.lock was updated, verifying build still works..."
+            if ! uv run python -m build --wheel --sdist; then
+              echo "❌ Package build failed after uv.lock update!"
+              echo ""
+              echo "The build step failed after updating uv.lock, which means"
+              echo "semantic-release cannot proceed."
+              echo ""
+              echo "Common causes:"
+              echo "  - Dependency version conflicts in updated lock file"
+              echo "  - Build hooks failing (check hatch_build.py)"
+              echo "  - Missing required files (e.g., server.py)"
+              echo ""
+              echo "Check the build output above for specific errors."
+              exit 1
+            fi
+            echo "✅ Package built successfully with updated uv.lock"
+          else
+            echo "✅ uv.lock unchanged, skipping build (already verified in CI)"
+          fi
+
+      - name: Install python-semantic-release
+        run: uv pip install --system "python-semantic-release>=10.0.0,<11.0.0"
+
+      - name: Semantic Release
+        run: semantic-release -c .releaserc.toml version
+        env:
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
