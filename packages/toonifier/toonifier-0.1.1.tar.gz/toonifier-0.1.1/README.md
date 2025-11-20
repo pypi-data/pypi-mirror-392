@@ -1,0 +1,104 @@
+# Toonifier
+
+Toonifier is a Python library for parsing and encoding Toon format files.
+It provides a simple and clean interface for working with Toon files, both from files and strings.
+
+---
+
+## Features
+
+- Parse Toon files into Python objects
+- Convert Python objects back to Toon format
+- Supports both **file-based** and **string-based** APIs
+- Lightweight and easy to use
+
+---
+
+## Installation
+
+Install Toonifier via pip:
+
+```bash
+pip install toonifier
+```
+
+---
+
+## Usage
+
+### File-based API
+
+The file-based API allows you to load and save Toon files directly:
+
+```python
+import toonifier
+
+# Load a Toon file
+data = toonifier.load("example.toon")
+print(data)
+
+# Modify or inspect the data
+data["age"] = 31
+
+# Save the Python object back to a Toon file
+toonifier.dump(data, "output.toon")
+```
+
+### String-based API
+
+The string-based API allows you to parse Toon content from strings instead of files.
+This is useful for dynamically generated data or when working with Toon content from the web.
+
+```python
+import toonifier
+
+# Toon string
+text = '''name,Alice
+age,30
+active,true'''
+
+# Parse Toon string into a Python object
+data = toonifier.loads(text)
+print(data)
+
+# Convert Python object back to Toon string
+toon_text = toonifier.dumps(data)
+print(toon_text)
+```
+
+---
+
+## API Reference
+
+### File-based
+
+- `toonifier.load(filename)` – Load a Toon file into a Python object
+- `toonifier.dump(obj, filename)` – Write a Python object to a Toon file
+
+### String-based
+
+- `toonifier.loads(text)` – Parse a Toon string into a Python object
+- `toonifier.dumps(obj)` – Convert a Python object into Toon text
+
+---
+
+## Example
+
+```python
+import toonifier
+
+# Load existing Toon file
+data = toonifier.load("characters.toon")
+
+# Add a new character
+data["new_character"] = {"name": "Bob", "age": 25, "active": True}
+
+# Save back to Toon file
+toonifier.dump(data, "updated_characters.toon")
+```
+
+---
+
+## License
+
+MIT License © Krishna Mishra

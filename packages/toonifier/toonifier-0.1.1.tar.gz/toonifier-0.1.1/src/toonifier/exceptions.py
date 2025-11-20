@@ -1,0 +1,1 @@
+class ToonError(Exception): pass
