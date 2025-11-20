@@ -1,0 +1,166 @@
+Metadata-Version: 2.4
+Name: ikalogic-sp1000g
+Version: 0.1.4
+Summary: Python bindings for SP1000G Logic Analyzer API
+Home-page: https://ikalogic.com
+Author: Ikalogic
+Author-email: Ikalogic <support@ikalogic.com>
+License: MIT
+Keywords: logic analyzer,hardware,sp1000g,ikalogic
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: System :: Hardware
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Environment :: Console
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+Requires-Dist: pybind11>=2.10.0
+Dynamic: author
+Dynamic: home-page
+Dynamic: requires-python
+
+# Ikalogic SP1000G Python Bindings
+
+Python bindings for the Ikalogic SP1000G series logic analyzers (SP1018G, SP1054G, SP1108G).
+
+## Installation
+
+```bash
+pip install ikalogic-sp1000g
+```
+
+## Quick Start
+
+```python
+from ikalogic import sp1000g
+
+# Create API instance
+api = sp1000g.SP1000G(sp1000g.Model.SP1054G)
+
+# Find and open device
+api.create_device_list()
+count = api.get_devices_count()
+print(f"Found {count} device(s)")
+
+if count > 0:
+    api.device_open_first()
+    
+    # Get firmware version
+    fpga_ver = f"{api.get_fpga_version_major()}.{api.get_fpga_version_minor()}"
+    print(f"FPGA version: {fpga_ver}")
+    
+    api.device_close()
+```
+
+## Supported Devices
+
+- **SP1018G**: 18 channels, 1 GHz sampling
+- **SP1036G**: 36 channels, 1 GHz sampling
+- **SP1054G**: 54 channels, 1 GHz sampling 
+
+## Basic Usage
+
+### Device Management
+
+```python
+# Create device list
+api.create_device_list()
+
+# Get number of devices
+count = api.get_devices_count()
+
+# Get device info
+for i in range(count):
+    desc = api.get_device_descriptor(i)
+    print(f"Device {i}: {desc.serial_number}")
+
+# Open device
+api.device_open_first()  # or api.device_open(index)
+
+# Check if open
+if api.get_device_open_flag():
+    print("Device is open")
+
+# Close device
+api.device_close()
+```
+
+### Capture Configuration
+
+```python
+# Create settings
+settings = sp1000g.Settings()
+settings.sampling_depth = 1000000      # Total samples
+settings.post_trig_depth = 900000      # Samples after trigger
+settings.s_clk = 250000000             # 250 MHz sampling
+
+# Set thresholds (mV) - one per channel
+settings.thresh_capture_mv = [1650] * 18  # For SP1018G
+
+# Apply settings
+api.apply_settings(settings)
+```
+
+### Triggering
+
+```python
+# Simple trigger
+trigger = sp1000g.TriggerDescription()
+trigger.type = sp1000g.TriggerType.TRG_RISING
+trigger.channel = 0
+
+api.launch_new_capture_simple_trigger(trigger, settings, 0, True, 0, 0, 0)
+
+# Wait for capture
+while not api.is_capture_complete():
+    time.sleep(0.1)
+```
+
+### Reading Data
+
+```python
+# Reset transition iterator
+api.trs_reset(0)
+
+# Read transitions
+while api.trs_is_not_last(0):
+    trs = api.trs_get_next(0)
+    print(f"Sample {trs.sample_index}: Channel {trs.channel} = {trs.value}")
+```
+
+## API Reference
+
+### Classes
+
+- `SP1000G(model)` - Main API class
+- `Settings` - Capture configuration
+- `TriggerDescription` - Trigger configuration
+- `DeviceDescriptor` - Device information
+- `Transition` - Signal transition data
+
+### Enums
+
+- `Model` - Device models (SP1018G, SP1054G, SP1108G)
+- `TriggerType` - Trigger types (RISING, FALLING, ANY_EDGE, etc.)
+- `DeviceState` - Device states
+
+## Requirements
+
+- Python 3.7+
+- Linux x86_64
+- libusb-1.0 (usually pre-installed)
+- libudev (usually pre-installed)
+
+
+## License
+
+See LICENSE file for details.
