@@ -1,0 +1,322 @@
+PyFCach - High-Performance Python Caching Library
+
+A comprehensive, multi-strategy caching solution for Python applications with enterprise-grade performance and flexibility.
+
+Features
+
+Performance Optimized
+
+· Optimized cache operations with minimal overhead
+· Thread-safe implementations with fine-grained locking
+· Batch operations for improved throughput
+· Memory-efficient storage with configurable limits
+
+Multiple Eviction Strategies
+
+· LRU (Least Recently Used) - Classic LRU implementation
+· MRU (Most Recently Used) - For temporal locality patterns
+· LFU (Least Frequently Used) - Frequency-based eviction
+· TTL (Time-to-Live) - Automatic expiration with background cleanup
+· ARC (Adaptive Replacement Cache) - Self-tuning adaptive algorithm
+
+Advanced Capabilities
+
+· Synchronous and asynchronous API support
+· Memory usage tracking and limits
+· Performance monitoring and statistics
+· Decorator-based caching for functions
+· Cached properties with TTL support
+· Global cache management and statistics
+
+Performance Benchmarks
+
+Based on comprehensive testing, PyFCach demonstrates exceptional performance:
+
+Core Operations Performance
+
+```
+BASIC TEST — HighPerformanceCache strategy=lru
+set() 20,000 items    | 195,501 ops/sec
+get() 20,000 items    | 265,736 ops/sec  
+delete() 10,000 items | 499,259 ops/sec
+
+BASIC TEST — HighPerformanceCache strategy=mru
+set() 20,000 items    | 195,587 ops/sec
+get() 20,000 items    | 242,919 ops/sec
+delete() 10,000 items | 521,393 ops/sec
+
+BASIC TEST — HighPerformanceCache strategy=lfu  
+set() 20,000 items    | 180,350 ops/sec
+get() 20,000 items    | 275,304 ops/sec
+delete() 10,000 items | 490,736 ops/sec
+```
+
+Advanced Features Performance
+
+```
+BATCH OPERATIONS TEST
+batch_set 10,000 items | 59,774 concurrent ops/sec
+batch_get 10,000 items | 166,465 concurrent ops/sec
+
+CONCURRENCY STRESS TEST (5 Threads)
+concurrent_operations 30,000 items | 28,747 concurrent ops/sec
+
+CACHE DECORATOR PERFORMANCE
+First run (CACHE MISSES) 1,000 calls | 17 ops/sec
+Second run (CACHE HITS) 1,000 calls  | 155 ops/sec
+
+CACHED PROPERTY TEST
+cached_property access (50 gets) | 661 ops/sec
+```
+
+Installation
+
+```bash
+pip install pyfcach
+```
+
+Quick Start
+
+Basic Usage
+
+```python
+from pyfcach import cache, CacheStrategy, get_global_stats
+
+@cache(maxsize=1000, strategy=CacheStrategy.LRU)
+def expensive_operation(x: int, y: int) -> int:
+    return x * y + expensive_calculation(x, y)
+
+# The result is automatically cached
+result1 = expensive_operation(10, 20)  # Computed
+result2 = expensive_operation(10, 20)  # From cache
+```
+
+Async Support
+
+```python
+from pyfcach import async_cache
+
+@async_cache(maxsize=500, ttl=3600)  # 1 hour TTL
+async def fetch_user_data(user_id: int):
+    return await database.fetch_user(user_id)
+
+# Usage in async context
+user_data = await fetch_user_data(123)
+```
+
+Advanced Configuration
+
+```python
+from pyfcach import cache, CacheStrategy
+
+@cache(
+    maxsize=1000,
+    strategy=CacheStrategy.ARC,  # Adaptive replacement
+    memory_limit=100*1024*1024,  # 100MB memory limit
+    ttl=300  # 5 minute expiration
+)
+def memory_intensive_operation(data: bytes):
+    return process_large_data(data)
+```
+
+Cache Strategies
+
+LRU (Least Recently Used)
+
+```python
+@cache(strategy="lru", maxsize=1000)
+def lru_cached_function():
+    pass
+```
+
+LFU (Least Frequently Used)
+
+```python
+@cache(strategy="lfu", maxsize=1000)
+def lfu_cached_function():
+    pass
+```
+
+TTL (Time-to-Live)
+
+```python
+@cache(strategy="ttl", ttl=60)  # 60 seconds
+def ttl_cached_function():
+    pass
+```
+
+ARC (Adaptive Replacement)
+
+```python
+@cache(strategy="arc", maxsize=1000)
+def arc_cached_function():
+    pass
+```
+
+Advanced Features
+
+Cached Properties
+
+```python
+from pyfcach import cached_property, AsyncCachedProperty
+
+class DataProcessor:
+    @cached_property(ttl=300)  # 5 minute cache
+    def processed_data(self):
+        return expensive_processing()
+    
+    @AsyncCachedProperty(ttl=600)  # 10 minute cache
+    async def async_data(self):
+        return await async_expensive_processing()
+```
+
+Batch Operations
+
+```python
+from pyfcach import batch_set_operations, batch_get_operations
+
+# Batch setting
+keys_values = [("key1", "value1"), ("key2", "value2"), ...]
+batch_set_operations(cache_instance, keys_values)
+
+# Batch getting
+keys = ["key1", "key2", "key3"]
+results = batch_get_operations(cache_instance, keys)
+```
+
+Memory Management
+
+```python
+# Set memory limits
+@cache(memory_limit=50*1024*1024)  # 50MB limit
+def memory_aware_function(data):
+    return process_data(data)
+```
+
+Performance Monitoring
+
+```python
+# Get cache statistics
+cache_info = expensive_operation.cache_info()
+print(f"Hit rate: {cache_info.hits / (cache_info.hits + cache_info.misses):.2%}")
+
+# Global statistics
+stats = get_global_stats()
+print(f"Total caches: {stats['total_caches']}")
+print(f"Global hit rate: {stats['global_hit_rate']:.2%}")
+```
+
+API Reference
+
+Core Classes
+
+· CacheBase: Base class for all cache implementations
+· HighPerformanceCache: General-purpose cache supporting LRU and MRU strategies
+· TTLCache: Time-based expiration cache with background cleanup
+· OptimizedLFUCache: Frequency-based eviction cache
+· ARCCache: Adaptive Replacement Cache - self-tuning between LRU and LFU
+· AsyncCache: Asynchronous wrapper for all cache strategies
+
+Decorators
+
+@cache
+
+Main caching decorator for synchronous functions.
+
+Parameters:
+
+· maxsize: Maximum number of entries
+· ttl: Time-to-live in seconds
+· strategy: Eviction strategy (LRU, LFU, MRU, TTL, ARC)
+· memory_limit: Maximum memory usage in bytes
+· typed: Type-aware key generation
+
+@async_cache
+
+Caching decorator for asynchronous functions.
+
+Properties
+
+· cached_property: Cached property descriptor for synchronous methods
+· AsyncCachedProperty: Cached property descriptor for asynchronous methods
+
+Utility Functions
+
+· cache_clear_all(): Clear all registered caches
+· get_cache_info(): Get info for all caches
+· get_global_stats(): Get aggregated statistics
+· shutdown_all_executors(): Cleanup background executors
+
+Examples
+
+Web Application Caching
+
+```python
+from pyfcach import cache, async_cache
+from flask import Flask
+
+app = Flask(__name__)
+
+@cache(maxsize=1000, ttl=300)
+def get_template_data(template_id):
+    return database.get_template(template_id)
+
+@async_cache(maxsize=500, strategy="lfu")
+async def get_user_session(user_id):
+    return await redis.get(f"session:{user_id}")
+```
+
+Data Processing Pipeline
+
+```python
+from pyfcach import cache, cached_property
+
+class DataAnalyzer:
+    def __init__(self, dataset):
+        self.dataset = dataset
+    
+    @cached_property(ttl=3600)
+    def statistical_summary(self):
+        return self._compute_summary()
+    
+    @cache(maxsize=100, strategy="arc")
+    def correlation_matrix(self, columns):
+        return self._compute_correlation(columns)
+```
+
+Real-time Analytics
+
+```python
+from pyfcach import async_cache, AsyncCachedProperty
+
+class AnalyticsService:
+    @AsyncCachedProperty(ttl=60)
+    async def real_time_metrics(self):
+        return await self.fetch_live_metrics()
+    
+    @async_cache(maxsize=1000, strategy="ttl", ttl=30)
+    async def get_user_analytics(self, user_id, time_range):
+        return await self.compute_analytics(user_id, time_range)
+```
+
+Performance Characteristics
+
+Based on benchmark results:
+
+· High Throughput: Up to 500,000+ operations per second for basic operations
+· Excellent Concurrency: 18,000+ concurrent operations with 5 threads
+· Efficient Batching: 166,000+ operations per second for batch gets
+· Low Latency: Sub-millisecond response times for cache hits
+· Memory Efficient: Configurable memory limits and efficient storage
+
+Performance Tips
+
+1. Strategy Selection: Use ARC for mixed access patterns, TTL for time-sensitive data
+2. Size Configuration: Balance memory usage and hit rates with appropriate maxsize
+3. Batch Operations: Use batch methods for bulk operations to maximize throughput
+4. Memory Management: Set memory limits when caching large objects
+5. Monitoring: Regularly check cache statistics to optimize configuration
+
+License
+
+Apache-2.0
