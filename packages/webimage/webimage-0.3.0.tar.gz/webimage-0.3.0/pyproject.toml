@@ -1,0 +1,93 @@
+[project]
+name = "webimage"
+version = "0.3.0"
+description = "Webify your images"
+readme = "README.md"
+authors = [
+    { name = "Mario Munoz", email = "pythonbynight@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "attrs>=25.4.0",
+    "pillow>=12.0.0",
+]
+
+license-file = ["LICENSE"]
+
+keywords = ["images", "web"]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development",
+    "Typing :: Typed",
+]
+
+[project.urls]
+"Homepage" = "https://codeberg.org/pythonbynight/webimage"
+"Source" = "https://codeberg.org/pythonbynight/webimage"
+"Issue" = "https://codeberg.org/pythonbynight/webimage/issues"
+"Changelog" = "https://codeberg.org/pythonbynight/webimage/releases"
+
+[build-system]
+requires = ["uv_build>=0.9.5,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".github",
+    ".hg",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "build",
+    "dist",
+    "migrations",
+    "node_modules",
+    "static",
+]
+
+line-length = 120
+target-version = "py314"
+
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = 80
+
+[tool.ruff.lint]
+
+# Enable flake8-bugbear (`B`) rules.
+select = ["B", "E", "F", "Q", "W"]
+
+ignore = [
+    "E501",    # Ignore line length violations
+    "F401"     # Ignore unused imports
+]
+
+# Disable autofix for unused imports
+unfixable = ["F401"]
+
+# Ignore `E402` (import violations) in all `__init__.py` files.
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.1",
+]
+
