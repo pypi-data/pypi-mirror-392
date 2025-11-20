@@ -1,0 +1,46 @@
+Metadata-Version: 2.4
+Name: pillar-tool
+Version: 0.2.0
+Summary: Tool to manage Salt pillars via cli
+Keywords: saltstack
+Author: Paul Traylor
+Author-email: Paul Traylor <kungfudiscomonkey@gmail.com>
+License-Expression: MIT
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Classifier: Programming Language :: Python :: 3.15
+Classifier: Programming Language :: Python :: 3.9
+Requires-Dist: click>=8.1.8
+Requires-Dist: pyyaml>=6.0.2
+Requires-Python: >=3.9
+Project-URL: download, https://pypi.org/project/pillar-tool/
+Project-URL: issues, https://codeberg.org/kfdm/pillar-tool/issues
+Project-URL: source, https://codeberg.org/kfdm/pillar-tool
+Description-Content-Type: text/markdown
+
+# Tool to manage Salt pillars via cli
+
+By default, manages `/srv/pillar/defaults.sls` providing a CLI to manage pillars similar ot the `grains.set` module on Salt servers.
+
+
+```bash
+pillar 
+Usage: pillar [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  -v, --verbose
+  --file PATH                    Path to pillar file  [default:
+                                 /opt/pillar/defaults.sls]
+  --output [yaml|expand|pprint]  How to format output  [default: yaml]
+  --help                         Show this message and exit.
+
+Commands:
+  config
+  get
+  list
+  rotate
+  set
+```
