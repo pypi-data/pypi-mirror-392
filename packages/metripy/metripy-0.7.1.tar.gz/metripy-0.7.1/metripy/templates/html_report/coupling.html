@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coupling Analysis - Code Metrics Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="images/logo.svg" sizes="any" type="image/svg+xml">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        .coupling-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        @media (max-width: 1400px) {
+            .coupling-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .coupling-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+        }
+
+        .coupling-card h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .coupling-card h2 i {
+            color: var(--primary);
+        }
+
+        #dependency-graph {
+            width: 100%;
+            height: 700px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            overflow: hidden;
+        }
+
+        .graph-controls {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+        }
+
+        .control-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .control-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            background: white;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+        }
+
+        .control-btn:hover {
+            background: var(--bg-secondary);
+            border-color: var(--primary);
+        }
+
+        .control-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .metrics-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .metrics-table thead {
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--border-light);
+        }
+
+        .metrics-table th {
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.8125rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metrics-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-secondary);
+        }
+
+        .metrics-table tbody tr {
+            transition: background var(--transition-fast);
+        }
+
+        .metrics-table tbody tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        .module-name {
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.8125rem;
+        }
+
+        .coupling-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .coupling-badge.low {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .coupling-badge.medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .coupling-badge.high {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .instability-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .instability-bar-fill {
+            flex: 1;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .instability-bar-fill-inner {
+            height: 100%;
+            transition: width var(--transition-normal);
+        }
+
+        .instability-value {
+            font-weight: 600;
+            font-size: 0.75rem;
+            min-width: 3rem;
+            text-align: right;
+        }
+
+        .legend {
+            display: flex;
+            gap: var(--spacing-lg);
+            padding: var(--spacing-md);
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            font-size: 0.875rem;
+        }
+
+        .legend-symbol {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .node {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .node:hover {
+            stroke-width: 3px;
+        }
+
+        .node-label {
+            font-size: 11px;
+            font-family: 'Inter', sans-serif;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .link {
+            stroke: #94a3b8;
+            stroke-opacity: 0.6;
+            fill: none;
+        }
+
+        .link-arrow {
+            fill: #94a3b8;
+            opacity: 0.6;
+        }
+
+        .node.selected {
+            stroke-width: 3px;
+            stroke: #3b82f6;
+        }
+
+        .link.highlighted {
+            stroke: #3b82f6;
+            stroke-opacity: 1;
+            stroke-width: 2px;
+        }
+
+        .link-arrow.highlighted {
+            fill: #3b82f6;
+            opacity: 1;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            font-size: 0.8125rem;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 300px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .tooltip-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+        }
+
+        .tooltip-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 0.25rem 0;
+            font-size: 0.75rem;
+        }
+
+        .tooltip-label {
+            color: #94a3b8;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.625rem 0.875rem 0.625rem 2.5rem;
+            border: 1.5px solid var(--border-light);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            background: white;
+            transition: all var(--transition-fast);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 0.875rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <img src="images/logo.svg" alt="Metripy Logo" class="logo-icon">
+                    <h2>Metripy</h2>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item">
+                        <a href="index.html" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Overview</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="files.html" class="nav-link">
+                            <i class="fas fa-file-code"></i>
+                            <span>Files</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="top_offenders.html" class="nav-link">
+                            <i class="fa-solid fa-stethoscope"></i>
+                            <span>Top Offenders</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="git_analysis.html" class="nav-link">
+                            <i class="fab fa-git-alt"></i>
+                            <span>Git Analysis</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="coupling.html" class="nav-link">
+                            <i class="fas fa-project-diagram"></i>
+                            <span>Coupling</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="dependencies.html" class="nav-link">
+                            <i class="fas fa-cubes"></i>
+                            <span>Dependencies</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="trends.html" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Trends</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="code_smells.html" class="nav-link">
+                            <i class="fas fa-bug"></i>
+                            <span>Code Smells</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="project-info">
+                    <h4>Project: {{ project_name }}</h4>
+                    <p>Last updated: {{ last_updated }}</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <div class="header-content">
+                    <h1>Coupling Analysis</h1>
+                    <p class="subtitle">Visualize and analyze module dependencies and coupling metrics</p>
+                </div>
+            </header>
+
+            <!-- Statistics Overview -->
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-modules">0</div>
+                    <div class="stat-label">Total Modules</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-dependencies">0</div>
+                    <div class="stat-label">Dependencies</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avg-instability">0.00</div>
+                    <div class="stat-label">Avg Instability</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="max-coupling">0</div>
+                    <div class="stat-label">Max Coupling</div>
+                </div>
+            </section>
+
+            <!-- Dependency Graph -->
+            <div class="coupling-card" style="grid-column: 1 / -1;">
+                <h2>
+                    <i class="fas fa-project-diagram"></i>
+                    Dependency Graph
+                </h2>
+
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-symbol" style="background: #22c55e;"></div>
+                        <span>Stable (I ≤ 0.3)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-symbol" style="background: #eab308;"></div>
+                        <span>Neutral (0.3 < I ≤ 0.7)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-symbol" style="background: #ef4444;"></div>
+                        <span>Unstable (I > 0.7)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-symbol" style="background: #94a3b8; border-radius: 0;"></div>
+                        <span>Dependency Link</span>
+                    </div>
+                </div>
+
+                <div class="graph-controls">
+                    <div class="control-group">
+                        <label>Layout:</label>
+                        <button class="control-btn active" onclick="setLayout('force')">Force</button>
+                        <button class="control-btn" onclick="setLayout('circular')">Circular</button>
+                        <button class="control-btn" onclick="setLayout('hierarchical')">Hierarchical</button>
+                    </div>
+                    <div class="control-group">
+                        <button class="control-btn" onclick="resetGraph()">
+                            <i class="fas fa-sync-alt"></i> Reset View
+                        </button>
+                    </div>
+                </div>
+
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="module-search" placeholder="Search modules..." onkeyup="searchModules()">
+                </div>
+
+                <div id="dependency-graph"></div>
+            </div>
+
+            <!-- Coupling Metrics Table -->
+            <div class="coupling-card" style="grid-column: 1 / -1;">
+                <h2>
+                    <i class="fas fa-table"></i>
+                    Coupling Metrics
+                </h2>
+
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="table-search" placeholder="Filter modules..." onkeyup="filterTable()">
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="metrics-table" id="coupling-table">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable(0)">Module <i class="fas fa-sort"></i></th>
+                                <th onclick="sortTable(1)">Afferent (Ca) <i class="fas fa-sort"></i></th>
+                                <th onclick="sortTable(2)">Efferent (Ce) <i class="fas fa-sort"></i></th>
+                                <th onclick="sortTable(3)">Instability (I) <i class="fas fa-sort"></i></th>
+                                <th>Imports</th>
+                                <th>Imported By</th>
+                            </tr>
+                        </thead>
+                        <tbody id="coupling-table-body">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Data from template
+        const metricsData = {{ metrics_json }};
+
+        // Process data for visualization
+        const modules = metricsData.filter(m => m.import_name && m.imports);
+        
+        // Calculate statistics
+        const totalDependencies = modules.reduce((sum, m) => sum + (m.imports ? m.imports.length : 0), 0);
+        const avgInstability = modules.length > 0 
+            ? (modules.reduce((sum, m) => sum + m.instability, 0) / modules.length).toFixed(2)
+            : 0;
+        const maxCoupling = Math.max(...modules.map(m => m.afferent_coupling + m.efferent_coupling), 0);
+
+        // Update statistics
+        document.getElementById('total-modules').textContent = modules.length;
+        document.getElementById('total-dependencies').textContent = totalDependencies;
+        document.getElementById('avg-instability').textContent = avgInstability;
+        document.getElementById('max-coupling').textContent = maxCoupling;
+
+        // Initialize table
+        function initializeTable() {
+            const tbody = document.getElementById('coupling-table-body');
+            tbody.innerHTML = '';
+
+            modules.forEach(module => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><span class="module-name">${module.import_name}</span></td>
+                    <td>
+                        <span class="coupling-badge ${getCouplingClass(module.afferent_coupling)}">
+                            ${module.afferent_coupling}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="coupling-badge ${getCouplingClass(module.efferent_coupling)}">
+                            ${module.efferent_coupling}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="instability-bar">
+                            <div class="instability-bar-fill">
+                                <div class="instability-bar-fill-inner" style="width: ${module.instability * 100}%; background: ${getInstabilityColor(module.instability)};"></div>
+                            </div>
+                            <span class="instability-value">${module.instability.toFixed(2)}</span>
+                        </div>
+                    </td>
+                    <td>${module.imports ? module.imports.join(', ') : '-'}</td>
+                    <td>${module.imported_by && module.imported_by.length > 0 ? module.imported_by.join(', ') : '-'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function getCouplingClass(value) {
+            if (value <= 2) return 'low';
+            if (value <= 5) return 'medium';
+            return 'high';
+        }
+
+        function getInstabilityColor(value) {
+            if (value <= 0.3) return '#22c55e';
+            if (value <= 0.7) return '#eab308';
+            return '#ef4444';
+        }
+
+        function getNodeColor(instability) {
+            if (instability <= 0.3) return '#22c55e';
+            if (instability <= 0.7) return '#eab308';
+            return '#ef4444';
+        }
+
+        function filterTable() {
+            const searchValue = document.getElementById('table-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#coupling-table-body tr');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchValue) ? '' : 'none';
+            });
+        }
+
+        let sortDirection = {};
+        function sortTable(columnIndex) {
+            const tbody = document.getElementById('coupling-table-body');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            sortDirection[columnIndex] = !sortDirection[columnIndex];
+            const direction = sortDirection[columnIndex] ? 1 : -1;
+
+            rows.sort((a, b) => {
+                let aValue = a.cells[columnIndex].textContent.trim();
+                let bValue = b.cells[columnIndex].textContent.trim();
+
+                // Try to parse as numbers
+                const aNum = parseFloat(aValue);
+                const bNum = parseFloat(bValue);
+
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return direction * (aNum - bNum);
+                }
+
+                return direction * aValue.localeCompare(bValue);
+            });
+
+            tbody.innerHTML = '';
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        // D3.js Dependency Graph
+        let svg, simulation, currentLayout = 'force';
+        
+        function initializeGraph() {
+            const container = document.getElementById('dependency-graph');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // Clear existing
+            d3.select('#dependency-graph').selectAll('*').remove();
+
+            svg = d3.select('#dependency-graph')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            // Add zoom behavior
+            const g = svg.append('g');
+            
+            const zoom = d3.zoom()
+                .scaleExtent([0.1, 4])
+                .on('zoom', (event) => {
+                    g.attr('transform', event.transform);
+                });
+            
+            svg.call(zoom);
+
+            // Create nodes and links
+            const nodes = modules.map(m => ({
+                id: m.import_name,
+                name: m.import_name.split('.').pop(),
+                fullName: m.import_name,
+                instability: m.instability,
+                afferent: m.afferent_coupling,
+                efferent: m.efferent_coupling,
+                imports: m.imports || [],
+                importedBy: m.imported_by || []
+            }));
+
+            const links = [];
+            modules.forEach(m => {
+                if (m.imports) {
+                    m.imports.forEach(imp => {
+                        const target = nodes.find(n => n.id === imp);
+                        if (target) {
+                            links.push({
+                                source: m.import_name,
+                                target: imp
+                            });
+                        }
+                    });
+                }
+            });
+
+            // Define arrow marker
+            svg.append('defs').append('marker')
+                .attr('id', 'arrowhead')
+                .attr('viewBox', '-0 -5 10 10')
+                .attr('refX', 20)
+                .attr('refY', 0)
+                .attr('orient', 'auto')
+                .attr('markerWidth', 6)
+                .attr('markerHeight', 6)
+                .append('path')
+                .attr('d', 'M 0,-5 L 10,0 L 0,5')
+                .attr('class', 'link-arrow');
+
+            // Create links
+            const link = g.append('g')
+                .selectAll('line')
+                .data(links)
+                .enter()
+                .append('line')
+                .attr('class', 'link')
+                .attr('marker-end', 'url(#arrowhead)');
+
+            // Create nodes
+            const node = g.append('g')
+                .selectAll('circle')
+                .data(nodes)
+                .enter()
+                .append('circle')
+                .attr('class', 'node')
+                .attr('r', d => 8 + (d.afferent + d.efferent))
+                .attr('fill', d => getNodeColor(d.instability))
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 2)
+                .call(d3.drag()
+                    .on('start', dragStarted)
+                    .on('drag', dragged)
+                    .on('end', dragEnded))
+                .on('click', showNodeDetails)
+                .on('mouseover', highlightNode)
+                .on('mouseout', unhighlightNode);
+
+            // Add labels
+            const labels = g.append('g')
+                .selectAll('text')
+                .data(nodes)
+                .enter()
+                .append('text')
+                .attr('class', 'node-label')
+                .attr('text-anchor', 'middle')
+                .attr('dy', -15)
+                .text(d => d.name);
+
+            // Create force simulation
+            simulation = d3.forceSimulation(nodes)
+                .force('link', d3.forceLink(links).id(d => d.id).distance(100))
+                .force('charge', d3.forceManyBody().strength(-300))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(d => 15 + (d.afferent + d.efferent)))
+                .on('tick', () => {
+                    link
+                        .attr('x1', d => d.source.x)
+                        .attr('y1', d => d.source.y)
+                        .attr('x2', d => d.target.x)
+                        .attr('y2', d => d.target.y);
+
+                    node
+                        .attr('cx', d => d.x)
+                        .attr('cy', d => d.y);
+
+                    labels
+                        .attr('x', d => d.x)
+                        .attr('y', d => d.y);
+                });
+
+            // Store references for later use
+            window.graphElements = { g, nodes, links, link, node, labels, width, height };
+        }
+
+        function dragStarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+
+        function dragEnded(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+
+        function highlightNode(event, d) {
+            const { link, node } = window.graphElements;
+            
+            // Highlight connected links
+            link.classed('highlighted', l => l.source.id === d.id || l.target.id === d.id);
+            
+            // Dim unconnected nodes
+            node.style('opacity', n => {
+                if (n.id === d.id) return 1;
+                const connected = window.graphElements.links.some(l => 
+                    (l.source.id === d.id && l.target.id === n.id) ||
+                    (l.target.id === d.id && l.source.id === n.id)
+                );
+                return connected ? 1 : 0.3;
+            });
+
+            // Show tooltip
+            showTooltip(event, d);
+        }
+
+        function unhighlightNode() {
+            const { link, node } = window.graphElements;
+            link.classed('highlighted', false);
+            node.style('opacity', 1);
+            hideTooltip();
+        }
+
+        function showNodeDetails(event, d) {
+            alert(`Module: ${d.fullName}\nInstability: ${d.instability.toFixed(2)}\nAfferent Coupling: ${d.afferent}\nEfferent Coupling: ${d.efferent}`);
+        }
+
+        let tooltip;
+        function showTooltip(event, d) {
+            if (!tooltip) {
+                tooltip = d3.select('body')
+                    .append('div')
+                    .attr('class', 'tooltip')
+                    .style('opacity', 0);
+            }
+
+            tooltip.transition()
+                .duration(200)
+                .style('opacity', 1);
+
+            tooltip.html(`
+                <div class="tooltip-title">${d.fullName}</div>
+                <div class="tooltip-row">
+                    <span class="tooltip-label">Instability:</span>
+                    <span>${d.instability.toFixed(2)}</span>
+                </div>
+                <div class="tooltip-row">
+                    <span class="tooltip-label">Afferent (Ca):</span>
+                    <span>${d.afferent}</span>
+                </div>
+                <div class="tooltip-row">
+                    <span class="tooltip-label">Efferent (Ce):</span>
+                    <span>${d.efferent}</span>
+                </div>
+                <div class="tooltip-row">
+                    <span class="tooltip-label">Imports:</span>
+                    <span>${d.imports.length}</span>
+                </div>
+                <div class="tooltip-row">
+                    <span class="tooltip-label">Imported By:</span>
+                    <span>${d.importedBy.length}</span>
+                </div>
+            `)
+            .style('left', (event.pageX + 10) + 'px')
+            .style('top', (event.pageY - 10) + 'px');
+        }
+
+        function hideTooltip() {
+            if (tooltip) {
+                tooltip.transition()
+                    .duration(200)
+                    .style('opacity', 0);
+            }
+        }
+
+        function setLayout(layout) {
+            currentLayout = layout;
+            
+            // Update button states
+            document.querySelectorAll('.control-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Apply layout
+            const { nodes, width, height } = window.graphElements;
+
+            if (layout === 'circular') {
+                const radius = Math.min(width, height) / 3;
+                nodes.forEach((d, i) => {
+                    const angle = (i / nodes.length) * 2 * Math.PI;
+                    d.fx = width / 2 + radius * Math.cos(angle);
+                    d.fy = height / 2 + radius * Math.sin(angle);
+                });
+                simulation.alpha(1).restart();
+            } else if (layout === 'hierarchical') {
+                // Simple hierarchical layout based on efferent coupling
+                nodes.sort((a, b) => a.efferent - b.efferent);
+                const layers = Math.ceil(Math.sqrt(nodes.length));
+                const nodesPerLayer = Math.ceil(nodes.length / layers);
+                
+                nodes.forEach((d, i) => {
+                    const layer = Math.floor(i / nodesPerLayer);
+                    const posInLayer = i % nodesPerLayer;
+                    d.fx = (width / (nodesPerLayer + 1)) * (posInLayer + 1);
+                    d.fy = (height / (layers + 1)) * (layer + 1);
+                });
+                simulation.alpha(1).restart();
+            } else {
+                // Force layout
+                nodes.forEach(d => {
+                    d.fx = null;
+                    d.fy = null;
+                });
+                simulation.alpha(1).restart();
+            }
+        }
+
+        function resetGraph() {
+            const { nodes } = window.graphElements;
+            nodes.forEach(d => {
+                d.fx = null;
+                d.fy = null;
+            });
+            simulation.alpha(1).restart();
+            currentLayout = 'force';
+            
+            // Reset button states
+            document.querySelectorAll('.control-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i === 0);
+            });
+        }
+
+        function searchModules() {
+            const searchValue = document.getElementById('module-search').value.toLowerCase();
+            const { node, labels } = window.graphElements;
+
+            if (!searchValue) {
+                node.style('opacity', 1).classed('selected', false);
+                labels.style('font-weight', 'normal').style('font-size', '11px');
+                return;
+            }
+
+            node.style('opacity', d => d.fullName.toLowerCase().includes(searchValue) ? 1 : 0.2)
+                .classed('selected', d => d.fullName.toLowerCase().includes(searchValue));
+
+            labels.style('font-weight', d => d.fullName.toLowerCase().includes(searchValue) ? 'bold' : 'normal')
+                .style('font-size', d => d.fullName.toLowerCase().includes(searchValue) ? '14px' : '11px');
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            initializeTable();
+            initializeGraph();
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            initializeGraph();
+        });
+    </script>
+</body>
+</html>
+
