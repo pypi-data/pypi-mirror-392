@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools","wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "unveil-python"
+authors = [
+    {name = "Nicolas Delinte", email = "nicolas.delinte@uclouvain.be"},
+]
+readme="README.md"
+description = "Implementation of UNVEIL"
+license = "GPL-3.0-only"
+keywords = ["tractography", "viewer"]
+classifiers = ['Intended Audience :: Science/Research',
+                'Natural Language :: English',
+                'Programming Language :: Python',
+]
+dependencies = ['dipy',
+                'pyvista',
+                'pyvistaqt',
+                'PyQt6'
+]
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = {attr = "unveil.__version__"}
+
+[project.urls]
+"GitHub" = "https://github.com/DelinteNicolas/UNVEIL"
+
+[tool.setuptools.packages.find]
+where = ["src"] 
