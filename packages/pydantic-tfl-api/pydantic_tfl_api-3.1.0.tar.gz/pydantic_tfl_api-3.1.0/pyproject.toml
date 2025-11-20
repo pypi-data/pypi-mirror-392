@@ -1,0 +1,226 @@
+[project]
+name = "pydantic-tfl-api"
+version = "3.1.0"
+description = "A Pydantic-based wrapper for the TfL Unified API https://api-portal.tfl.gov.uk/. Not associated with or endorsed by TfL."
+authors = [
+    {name = "Rob Aleck", email = "mnbf9rca@users.noreply.github.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.11"
+keywords = ["pydantic", "tfl", "tfl-api", "transport-for-london", "unified-api"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "pydantic>=2.8.2,<3.0",
+    "httpx>=0.27.0,<1.0",
+]
+
+[project.optional-dependencies]
+requests = ["requests>=2.32.3,<3.0"]
+
+[project.urls]
+Homepage = "https://github.com/mnbf9rca/pydantic_tfl_api"
+Repository = "https://github.com/mnbf9rca/pydantic_tfl_api"
+Issues = "https://github.com/mnbf9rca/pydantic_tfl_api/issues"
+
+[dependency-groups]
+dev = [
+    "black>=25.9.0",
+    "pytest>=8.4.0",
+    "pytest-asyncio>=1.2.0",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+    "types-requests>=2.32.0.20240914",
+    "coverage[toml]>=7.10.0",
+    "pre-commit>=4.3.0",
+    "jsonschema>=4.25.1",
+    "types-jsonschema>=4.25.1.20250822",
+    "httpx>=0.27.0,<1.0",
+]
+release = [
+    "packaging>=24.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["pydantic_tfl_api"]
+
+[tool.hatch.build.targets.wheel.shared-data]
+"pydantic_tfl_api/py.typed" = "pydantic_tfl_api/py.typed"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/pydantic_tfl_api",
+    "/tests",
+    "/pyproject.toml",
+    "/README.md",
+    "/LICENSE",
+]
+
+[tool.coverage.run]
+source = ["pydantic_tfl_api", "scripts/build_system"]
+omit = [
+    "*/test/*",
+    "*/tests/*",
+    "*/venv/*",
+    "*/.venv/*",
+    "*/.tox/*",
+    "*/.eggs/*",
+    "*/.vscode-remote/*",
+    # Exclude generated output (focus on source code)
+    "*/endpoints/*Client.py",
+    "*/endpoints/*_config.py",
+    "*/models/*.py",
+]
+relative_files = true
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+show_missing = true
+skip_covered = false
+precision = 2
+
+[tool.coverage.xml]
+output = "coverage.xml"
+
+[tool.pytest.ini_options]
+addopts = [
+    "--cov=pydantic_tfl_api",
+    "--cov-branch",
+    "--cov-report=term-missing",
+    "--cov-report=xml:coverage.xml",
+    "--cov-fail-under=85",
+    "-v",
+    "--strict-markers",
+    "-rfE"
+]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests that require network access",
+    "unit: marks tests as unit tests that don't require network access",
+]
+filterwarnings = [
+    "error",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+]
+
+
+
+[tool.ruff]
+line-length = 120
+exclude = [
+    ".git",
+    "__pycache__",
+    "docs",
+    "old",
+    "build",
+    "dist",
+    "venv",
+    ".venv",
+    "scripts/LEGACY_DO_NOT_USE_build_models.py",
+]
+
+[tool.ruff.lint]
+# Enable similar checks to flake8 plus additional modern Python checks
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "N",    # pep8-naming
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "SIM",  # flake8-simplify
+    "PYI",  # flake8-pyi (for .pyi files)
+]
+ignore = [
+    "E501",  # line too long (handled by line-length)
+    "N806",  # variable name should be lowercase (conflicts with TfL API naming)
+    "N815",  # mixedCase variable in class scope (TfL API uses camelCase)
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Test files can use assert statements and non-standard naming
+"tests/*.py" = ["S101", "N801", "N999", "N802", "N803"]
+# Scripts can be more lenient
+"scripts/*.py" = ["N803", "N999"]
+# classes, models and fields match TfL API name
+"pydantic_tfl_api/models/*.py" = ["N802", "N803", "N999"]
+"pydantic_tfl_api/endpoints/*.py" = ["N802", "N803", "N999"]
+# import in topological sort order
+"pydantic_tfl_api/__init__.py" = ["I001"]
+"pydantic_tfl_api/endpoints/__init__.py" = ["I001"]
+"pydantic_tfl_api/models/__init__.py" = ["I001"]
+
+[tool.mypy]
+# Progressive typing - start with basic checks, can be made stricter over time
+# Note: python_version not set - mypy validates against the running Python version
+# This allows CI matrix to validate each version's type system properly
+warn_unused_configs = true
+show_error_codes = true
+pretty = true
+
+# Enable Pydantic plugin for proper Field default handling
+plugins = ["pydantic.mypy"]
+
+# Core safety checks (but not fully strict)
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+# Allow some flexibility for complex Pydantic usage
+disable_error_code = ["operator", "arg-type"]
+
+# Target specific directories for type checking
+files = [
+    "scripts/",
+    "tests/",
+    "pydantic_tfl_api/",
+    "infrastructure/",
+]
+
+# Exclude auto-generated models and endpoints
+exclude = [
+ "scripts/LEGACY_DO_NOT_USE_build_models.py"
+]
+
+[[tool.mypy.overrides]]
+# Allow untyped calls for external libraries without stubs
+module = [
+    "requests.*",
+    "jsonschema.*",
+    "httpx.*",
+]
+ignore_missing_imports = true
