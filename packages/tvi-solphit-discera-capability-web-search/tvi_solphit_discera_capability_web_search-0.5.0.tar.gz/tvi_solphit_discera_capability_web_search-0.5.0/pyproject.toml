@@ -1,0 +1,44 @@
+[project]
+name = "tvi-solphit-discera-capability-web-search"
+version = "0.5.0"
+description = "Web search for a current event."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [{ name = "Tobias Hagenbeek" }]
+keywords = ["logging", "argparse", "utilities", "jsonl", "filesystem"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+dependencies = [
+  "tvi-solphit-base>=0.2.0",
+  "ddgs>=9.9.1",
+  "httpx>=0.28.1",
+  "trafilatura>=2.0.0",
+  "tldextract>=5.3.0",
+]
+[project.urls]
+Homepage = "https://github.com/SolphIT/tvi-solphit-discera-capability-web-search"
+Changelog = "https://github.com/SolphIT/tvi-solphit-discera-capability-web-search/blob/main/CHANGELOG.md"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = true
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+# pyproject.toml in an external package
+[project.entry-points."discera.capabilities"]
+web_search = "tvi.solphit.discera.capability.web_search:register"
