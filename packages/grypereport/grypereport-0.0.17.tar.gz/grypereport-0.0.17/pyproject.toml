@@ -1,0 +1,99 @@
+[build-system]
+# hatchling -> uv
+# requires = ["hatchling >= 1.27"]
+# build-backend = "hatchling.build"
+requires = ["uv_build>=0.9.8,<0.10.0"]
+build-backend = "uv_build"
+
+[project]
+name = "grypereport"
+version = "0.0.17"
+authors = [
+  { name="Alex Marienko", email="alexey.maryenko@gmail.com" },
+]
+description = "Grype vulnerability scanner report builder and CSV exporter."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3 :: Only",
+    "Environment :: Console",
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Operating System :: POSIX",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: POSIX :: Other",
+    "Operating System :: POSIX :: BSD",
+    "Operating System :: Unix",
+    "Operating System :: MacOS",
+    "Operating System :: MacOS :: MacOS X"
+]
+keywords = [
+    "grype",
+    "report",
+    "builder",
+    "csv",
+    "csv-export",
+    "ci",
+]
+dependencies = [
+    "click>=8.3.0,<9",
+]
+
+[project.optional-dependencies]
+encoding = [
+    "ftfy>=6.3",
+]
+
+[dependency-groups]
+dev = [
+    "docutils>=0.22.2",
+    {include-group = "build"},
+    {include-group = "test"},
+    {include-group = "linter"},
+]
+test = [
+    "pytest>=8.4.2",
+    "pytest-plugins>=1.0.8",
+]
+build = [
+    "build>=1.3.0",
+    "twine>=6.2.0",
+]
+linter = ["ruff>=0.14.4",]
+
+[project.scripts]
+grypereport = "grypereport.__main__:main"
+
+[project.urls]
+homepage = "https://github.com/amarienko/GrypeReport"
+github = "https://github.com/amarienko/GrypeReport"
+issues = "https://github.com/amarienko/GrypeReport/issues"
+
+[tool.uv.dependency-groups]
+dev = {requires-python = ">=3.11"}
+
+[tool.uv.build-backend]
+module-name = "grypereport"
+
+[tool.pip-tools]
+generate_hashes = false
+
+[tool.mypy]
+files = [
+    "src/**/*.py"
+]
+
+[tool.pytest.ini_options]
+minversion = "8.4"
+addopts = "-ra -vv --full-trace --collect-in-virtualenv"
+testpaths = [
+    "src",
+]
