@@ -1,0 +1,47 @@
+[project]
+name = "deptry-auto"
+version = "0.3.9"
+description = "Automatically add missing dependencies found by deptry using uv."
+readme = "README.md"
+authors = [
+    { name = "Matthew Muller", email = "matthew.muller@uon.edu.au" },
+]
+requires-python = ">=3.14"
+dependencies = [
+    "deptry>=0.24.0",
+]
+
+[project.scripts]
+deptry-auto = "deptry_auto:main"
+
+[dependency-groups]
+dev = [
+    "pre-commit",
+    "tomli",
+]
+
+[build-system]
+requires = [
+    "uv_build>=0.9.9,<0.10.0",
+]
+build-backend = "uv_build"
+
+[tool.uv]
+index-strategy = "unsafe-best-match"
+
+[[tool.uv.index]]
+url = "https://pypi.anaconda.org/conda-forge/simple"
+
+[[tool.uv.index]]
+url = "https://pypi.anaconda.org/"
+
+[[tool.uv.index]]
+url = "https://pypi.anaconda.org/scientific-python-nightly-wheels/simple"
+
+[[tool.uv.index]]
+url = "https://pypi.org/simple"
+
+[tool.uv.workspace]
+members = [
+    "tests",
+]
