@@ -1,0 +1,102 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gitlabber"
+version = "2.1.0"
+description = "A Gitlab clone/pull utility for backing up or cloning Gitlab groups"
+readme = "README.rst"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Erez Mazor", email = "erezmazor@gmail.com"},
+]
+keywords = ["gitlab", "python", "cli"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Utilities",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+    "anytree",
+    "globre",
+    "pyyaml",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.7",
+    "typer>=0.12",
+    "rich",
+    "GitPython",
+    "python-gitlab",
+]
+
+[project.optional-dependencies]
+test = [
+    "coverage",
+    "pytest",
+    "pytest-cov",
+    "pytest-integration",
+]
+keyring = [
+    "keyring>=24.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/ezbz/gitlabber"
+Download = "https://github.com/ezbz/gitlabber/archive/main.zip"
+
+[project.scripts]
+gitlabber = "gitlabber.cli:main"
+
+[tool.setuptools]
+packages = ["gitlabber"]
+include-package-data = true
+
+[tool.pytest.ini_options]
+addopts = [
+    "-vv",
+    "--import-mode=importlib",
+    "--cov=gitlabber",
+    "--no-cov-on-fail",
+    "--cov-append",
+    "--cov-report=term-missing",
+    "--cov-report=xml",
+    "--verbose",
+    "--capture=sys",
+    "--without-slow-integration",
+    "--integration-cover"
+]
+norecursedirs = [
+    "dist",
+    "build"
+]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+parallel = true
+source = ["gitlabber"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+    "*/playground/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
