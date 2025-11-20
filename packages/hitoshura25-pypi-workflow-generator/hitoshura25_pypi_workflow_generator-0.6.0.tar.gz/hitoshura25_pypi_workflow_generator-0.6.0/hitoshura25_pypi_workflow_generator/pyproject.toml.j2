@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+version_scheme = "post-release"
+
+[project]
+# Main metadata is in setup.py (hybrid approach)
+# This minimal [project] section is required for [project.optional-dependencies]
+name = "{{ final_package_name }}"
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+    "twine",
+    "wheel",
+    "setuptools_scm",
+    "build",
+    "ruff",
+]
+
+[tool.ruff]
+# Exclude common directories
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "*.egg-info",
+]
+
+# Line length to match Black default
+line-length = 88
+
+# Target Python version
+target-version = "py38"
+
+[tool.ruff.lint]
+# Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "C4", "DTZ", "T10", "EM", "ISC", "ICN", "PIE", "PT", "Q", "RET", "SIM", "TID", "ARG", "PTH", "PD", "PL", "NPY", "PERF", "RUF"]
+ignore = []
+
+# Allow fix for all enabled rules (when `--fix` is used)
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.format]
+# Use Black-compatible formatting
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
