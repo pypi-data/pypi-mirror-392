@@ -1,0 +1,51 @@
+{% if page_obj and page_obj.has_other_pages %}
+<div class="pagination-nav">
+    <!-- Results count -->
+    <div class="text-admin-sm text-gray-600">
+        Showing {{ page_obj.start_index }} - {{ page_obj.end_index }} of {{ page_obj.paginator.count }} {{ object_verbose_name_plural }}
+    </div>
+
+    <!-- Pagination controls -->
+    <nav class="flex items-center gap-1 sm:gap-2 flex-wrap justify-center">
+        {% if page_obj.has_previous %}
+            <a href="?{% if filter_querystring %}{{ filter_querystring }}&{% endif %}page=1"
+               class="btn-pagination">
+                First
+            </a>
+            <a href="?{% if filter_querystring %}{{ filter_querystring }}&{% endif %}page={{ page_obj.previous_page_number }}"
+               class="btn-pagination">
+                Previous
+            </a>
+        {% else %}
+            <span class="btn-pagination-disabled">
+                First
+            </span>
+            <span class="btn-pagination-disabled">
+                Previous
+            </span>
+        {% endif %}
+
+        <span class="pagination-current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?{% if filter_querystring %}{{ filter_querystring }}&{% endif %}page={{ page_obj.next_page_number }}"
+               class="btn-pagination">
+                Next
+            </a>
+            <a href="?{% if filter_querystring %}{{ filter_querystring }}&{% endif %}page={{ page_obj.paginator.num_pages }}"
+               class="btn-pagination">
+                Last
+            </a>
+        {% else %}
+            <span class="btn-pagination-disabled">
+                Next
+            </span>
+            <span class="btn-pagination-disabled">
+                Last
+            </span>
+        {% endif %}
+    </nav>
+</div>
+{% endif %}

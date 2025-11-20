@@ -1,0 +1,60 @@
+{% extends "sundae/base.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto mt-8">
+  <div class="bg-white shadow-sm rounded-lg border border-gray-200">
+    <div class="px-4 py-5 sm:p-6">
+      <h3 class="text-lg font-medium leading-6 text-gray-900">
+        Confirm {{ action_display_name }}
+      </h3>
+      <div class="mt-2 max-w-xl text-sm text-gray-500">
+        <p>
+          Are you sure you want to {{ action_display_name|lower }} the following {{ count }} {{ verbose_name_plural }}?
+        </p>
+      </div>
+
+      {% if objects %}
+      <div class="mt-4">
+        <ul class="divide-y divide-gray-200 rounded-md border border-gray-200 max-h-60 overflow-y-auto">
+          {% for obj in objects %}
+          <li class="flex items-center justify-between py-3 pl-3 pr-4 text-sm">
+            <div class="flex w-0 flex-1 items-center">
+              <span class="ml-2 w-0 flex-1 truncate">{{ obj }}</span>
+            </div>
+          </li>
+          {% endfor %}
+          {% if count > 10 %}
+          <li class="py-3 pl-3 pr-4 text-sm text-gray-500 italic">
+            ...and {{ count|add:"-10" }} more items
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <form method="post" class="mt-5 sm:flex sm:items-center gap-3">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="{{ action_name }}">
+        <input type="hidden" name="confirm" value="1">
+        {% for id in selected_ids %}
+        <input type="hidden" name="selected" value="{{ id }}">
+        {% endfor %}
+
+        <button
+          type="submit"
+          class="inline-flex items-center btn-danger-admin focus:outline-hidden focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+        >
+          Confirm {{ action_display_name }}
+        </button>
+
+        <a
+          href="{% url object_verbose_name|lower|add:'-list' %}"
+          class="inline-flex items-center btn-secondary-admin focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        >
+          Cancel
+        </a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

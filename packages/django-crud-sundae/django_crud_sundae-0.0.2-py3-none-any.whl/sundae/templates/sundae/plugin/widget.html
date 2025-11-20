@@ -1,0 +1,12 @@
+{% comment %}
+Template for rendering plugin widgets.
+This is used by the plugin_widget template tag.
+{% endcomment %}
+
+<div class="plugin-widget plugin-widget-{{ widget_name }}">
+    {% for data in widget_data %}
+        {% if data %}
+            {{ data|safe }}
+        {% endif %}
+    {% endfor %}
+</div>
