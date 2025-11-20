@@ -1,0 +1,1 @@
+# Bu oddiy dastur
