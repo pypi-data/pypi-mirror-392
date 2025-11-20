@@ -1,0 +1,174 @@
+syntax = "proto3";
+
+service DriverManager {
+    rpc GetImuDataRPC (GetRequest) returns (IMUData);
+    rpc GetSonarDataRPC (GetRequest) returns (SonarData);
+    rpc GetAnalogDataRPC (GetRequest) returns (AnalogData);
+    rpc GetAttitudeDataRPC (GetRequest) returns (AttitudeData);
+    rpc GetOdometryDataRPC (GetRequest) returns (OdometryData);
+    rpc GetOpticalFlowDataRPC (GetRequest) returns (OpticalFlowData);
+    rpc GetFlagsDataRPC (GetRequest) returns (FlagsData);
+    rpc GetMotorDataRPC (GetRequest) returns (MotorData);
+
+    rpc SendRcDataRPC (RcDataData) returns (StatusData);
+}
+
+service NavigationManager {
+    rpc TakeOFF (AltitudeSetData) returns (StatusData);
+    rpc Land (AltitudeSetData) returns (StatusData);
+    rpc Move (PointData) returns (StatusData);
+
+    rpc SetVelocity (VelocityData) returns (StatusData);
+    rpc SetAltitude (AltitudeSetData) returns (StatusData);
+
+    rpc SetSettings (SettingsData) returns (StatusData);
+    rpc SetZeroOdom (CommandData) returns (StatusData);
+}
+
+service VisionManager {
+    rpc GetImageData (GetRequest) returns (ImageData);
+    rpc GetImageStreamData (GetRequest) returns (stream ImageDataStream);
+    rpc GetArucoData (GetRequest) returns (ArucoData);
+    rpc GetQRData (GetRequest) returns (QRData);
+    rpc GetBlobData (GetRequest) returns (BlobData);
+
+    rpc SetSettings (SettingsData) returns (StatusData);
+}
+
+// Status Flags
+message StatusData          {
+    string status = 1;
+}
+
+message CommandData         {
+    string cmd = 1;
+}
+
+message GetRequest          {
+    string req = 1;
+}
+
+// Sensor Data
+message MotorData           {
+    int32 motor_1 = 1;
+    int32 motor_2 = 2;
+    int32 motor_3 = 3;
+    int32 motor_4 = 4;
+}
+
+message IMUData             {
+    Vector3 gyro = 1;
+    Vector3 acc = 2; 
+}
+
+message AltitudeSetData     {
+    float altitude = 1;
+}
+
+message RcDataData          {
+    uint32 ail = 1; // roll
+    uint32 ele = 2; // pitch
+    uint32 thr = 3; // throttle
+    uint32 rud = 4; // yaw
+    uint32 aux_1 = 5;
+    uint32 aux_2 = 6;
+    uint32 aux_3 = 7;
+    uint32 aux_4 = 8;
+}
+
+message AttitudeData        {
+    Vector3 orient = 1;
+}
+
+message AltitudeData        {
+    float altitude = 1;
+}
+
+message SonarData           {
+    float sonar = 1;
+}
+
+message OpticalFlowData     {
+    int32 quality = 1;
+    float flow_rate_x = 2;
+    float flow_rate_y = 3;
+    float body_rate_x = 4;
+    float body_rate_y = 5;
+}
+
+message OdometryData        {
+    Vector3 pos = 1;
+}
+
+message AnalogData          {
+    float voltage = 1;
+    int32 mAhdrawn = 2;
+    int32 rssi = 3;
+    float amperage = 4;
+}
+
+// Sub msg types
+message PointData           {
+    Vector3 point = 1;
+}
+
+message VelocityData        {
+    Vector3 velocity = 1;
+}
+
+message SettingsData        {
+    string settings = 1;
+}
+
+message Vector3             {
+    float x = 1;
+    float y = 2;
+    float z = 3;
+}
+
+message FlagsData           {
+    string activeSensors = 1;
+    string armingDisableFlags = 2;
+    string mode = 3;
+}
+
+// Image data
+message ImageData {
+    uint32 height = 1;
+    uint32 weight = 2;
+    bytes data = 3;
+    float noise = 4;
+}
+
+message ImageDataStream {
+    bytes data = 1;
+}
+
+message ArucoMarker {
+    int32 id = 1;
+    Vector3 position = 2;
+    Vector3 orientation = 3;
+}
+
+message QRCode {
+    string data = 1;
+    Vector3 position = 2;
+}
+
+message Blob {
+    int32 id = 1;
+    Vector3 position = 2;
+    float size = 3;
+}
+
+message BlobData {
+    repeated Blob blobs = 1;
+}
+
+message QRData {
+    repeated QRCode codes = 1;
+}
+
+message ArucoData {
+    repeated ArucoMarker markers = 1;
+}
