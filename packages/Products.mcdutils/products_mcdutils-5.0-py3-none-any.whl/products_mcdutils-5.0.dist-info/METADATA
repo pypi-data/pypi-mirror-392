@@ -1,0 +1,71 @@
+Metadata-Version: 2.4
+Name: Products.mcdutils
+Version: 5.0
+Summary: A Zope product with memcached-backed ZCache and Zope session implementations.
+Author-email: Tres Seaver and contributors <tseaver@palladion.com>
+Maintainer-email: Jens Vagelpohl <jens@dataflake.org>
+License-Expression: ZPL-2.1
+Project-URL: Documentation, https://mcdutils.readthedocs.io
+Project-URL: Issues, https://github.com/dataflake/Products.mcdutils/issues
+Project-URL: Source, https://github.com/dataflake/Products.mcdutils
+Project-URL: Changelog, https://mcdutils.readthedocs.io/en/latest/changes.html
+Keywords: Zope,session,memcache,memcached
+Classifier: Development Status :: 6 - Mature
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Zope
+Classifier: Framework :: Zope :: 5
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Classifier: Topic :: Internet :: WWW/HTTP :: Session
+Requires-Python: >=3.10
+Description-Content-Type: text/x-rst
+License-File: LICENSE.txt
+Requires-Dist: python-memcached
+Requires-Dist: Zope>=5
+Provides-Extra: docs
+Requires-Dist: Sphinx; extra == "docs"
+Requires-Dist: repoze.sphinx.autointerface; extra == "docs"
+Requires-Dist: furo; extra == "docs"
+Dynamic: license-file
+
+.. image:: https://github.com/dataflake/Products.mcdutils/actions/workflows/tests.yml/badge.svg
+   :target: https://github.com/dataflake/Products.mcdutils/actions/workflows/tests.yml
+
+.. image:: https://coveralls.io/repos/github/dataflake/Products.mcdutils/badge.svg
+   :target: https://coveralls.io/github/dataflake/Products.mcdutils
+
+.. image:: https://readthedocs.org/projects/mcdutils/badge/?version=latest
+   :target: https://mcdutils.readthedocs.io
+   :alt: Documentation Status
+
+.. image:: https://img.shields.io/pypi/v/Products.mcdutils.svg
+   :target: https://pypi.python.org/pypi/Products.mcdutils
+   :alt: Current version on PyPI
+
+.. image:: https://img.shields.io/pypi/pyversions/Products.mcdutils.svg
+   :target: https://pypi.python.org/pypi/Products.mcdutils
+   :alt: Supported Python versions
+
+
+===================
+ Products.mcdutils
+===================
+
+The `Products.mcdutils` product supplies a replacement for the ZODB-based
+session data container from the `Transience` product, shipped with
+the Zope core prior to Zope 4 and available as a separate package after that.
+Rather than using a ZODB storage as the backing store for session data, as
+`Transience` does, `Products.mcdutils` stores session data in a cluster of
+one or more `memcached` servers.
+
+This approach is a bit of a cheat, as it uses the daemons as primary stores,
+rather than as caches for results of an expensive query.  Nevertheless, the
+semantics are not a bad match for typical session usage.
