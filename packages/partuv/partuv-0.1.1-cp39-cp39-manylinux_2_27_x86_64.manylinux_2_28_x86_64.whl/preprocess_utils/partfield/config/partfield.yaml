@@ -1,0 +1,35 @@
+name: test_without_mv_feat
+lr: 1e-5
+
+test: True
+inference_save_pred_sdf_to_mesh: False
+inference_save_feat_pca: True
+training_epochs: 100000000
+continue_training: True 
+continue_ckpt: /ariesdv0/zhaoning/workspace/IUV/IUV/PF_main/results/train_without_mv_feat/241118-144955/last.ckpt #./results/mix-all/240917-021101//epoch=151.ckpt
+save_every_epoch: 1
+triplane_channels_low: 128
+triplane_channels_high: 512
+triplane_resolution: 128
+
+
+dataset:
+  type: "Mix"
+  list_dir: "list/mix-all"
+  data_path: "/ariesdv0/zhaoning/datasets/PF"
+  train_list: test_result.txt
+  val_list: test.txt
+  train_batch_size: 1
+  val_batch_size: 2
+  train_num_workers: 64
+
+loss:
+  triplet: 1.0
+
+use_pvcnn: True
+use_2d_feat: False
+pvcnn:
+  point_encoder_type: 'pvcnn'
+  z_triplane_channels: 128
+  z_triplane_resolution: 128
+no_wandb: True
