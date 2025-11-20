@@ -1,0 +1,120 @@
+[project]
+name = "sheppy"
+dynamic = ["version"]
+description = "A modern, fast, and easy to use task queue system for async Python"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "Martin", email = "malvex@sheppy.org" }
+]
+license = {text = "MIT"}
+keywords = ["task", "queue", "async", "distributed", "job", "fastapi", "pydantic"]
+classifiers = [
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Clustering",
+    "Topic :: System :: Distributed Computing",
+    "Topic :: System :: Monitoring",
+    "Topic :: System :: Systems Administration",
+    "Typing :: Typed",
+    "Framework :: FastAPI",
+    "Framework :: AsyncIO",
+    "Framework :: AnyIO",
+    "Framework :: Pydantic",
+    "Framework :: Pydantic :: 2",
+    "Environment :: Console",
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+]
+
+dependencies = [
+    "anyio>=3.0.1",
+    "croniter>=6.0.0",
+    "pydantic>=2.1.1",
+    "redis>=6.0.0",
+    "typer>=0.16.1",
+    "watchfiles>=1.1.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.12.7",
+    "mypy>=1.17.1",
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.1.0",
+    "pytest-cov>=6.2.1",
+    "types-croniter>=6.0.0.20250809",
+]
+
+[project.urls]
+# Homepage = "https://sheppy.org/"
+Documentation = "https://docs.sheppy.org/"
+Repository = "https://github.com/malvex/sheppy"
+Issues = "https://github.com/malvex/sheppy/issues"
+Changelog = "https://docs.sheppy.org/changelog/"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/sheppy/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sheppy"]
+
+[tool.hatch.build.targets.sdist]
+only-include = ["src/sheppy"]
+
+[project.scripts]
+sheppy = "sheppy.cli.cli:app"
+
+[tool.mypy]
+strict = true
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "SIM",    # flake8-simplify
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+    "ARG001", # unused arguments in functions
+    "T201",   # print statements are not allowed
+    "PLC0415" # `import` should be at the top-level of a file
+]
+ignore = [
+    "E501",  # line too long
+    "B008",  # do not perform function calls in argument defaults
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/contract/test_input_validation*.py" = [
+    "ARG001", # Unused function argument: `y`
+    "UP006",  # Use `type` instead of `Type` for type annotation
+    "UP007",  # Use `X | Y` for type annotations
+    "UP035",  # `typing.Type` is deprecated, use `type` instead
+    "UP045",  # Use `X | None` for type annotations
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = "-rXs --strict-config --strict-markers"
+xfail_strict = true
