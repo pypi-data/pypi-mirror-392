@@ -1,0 +1,75 @@
+Metadata-Version: 2.3
+Name: dinohash-onnx
+Version: 0.1.0
+Summary:  Generate perceptual hashes for images using DinoHash
+Keywords: cryptography,machine-learning,phash,computer-vision,onnx
+Author: Muhammad Mominul Huque
+Author-email: Muhammad Mominul Huque <mominul2082@gmail.com>
+License: MIT
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Dist: onnxruntime>=1.21.0
+Requires-Dist: pillow>=9.0.0
+Requires-Dist: numpy>=1.20.0
+Requires-Dist: requests>=2.25.0
+Requires-Dist: tqdm>=4.60.0
+Requires-Dist: pytest>=7.0.0 ; extra == 'dev'
+Requires-Dist: black>=22.0.0 ; extra == 'dev'
+Requires-Dist: flake8>=4.0.0 ; extra == 'dev'
+Requires-Dist: onnxruntime-gpu>=1.21.0 ; extra == 'gpu'
+Requires-Python: >=3.10
+Project-URL: Issues, https://github.com/mominul/dinohash-onnx/issues
+Project-URL: Repository, https://github.com/mominul/dinohash-onnx
+Provides-Extra: dev
+Provides-Extra: gpu
+Description-Content-Type: text/markdown
+
+# DINOHash ONNX
+
+Python implementation of DINOHash using ONNX Runtime, from https://www.arxiv.org/abs/2503.11195
+
+This is a Python port of the Node.js implementation, providing perceptual image hashing using ONNX models.
+
+## Installation
+
+```bash
+uv add dinohash-onnx
+```
+
+## Usage
+
+```python
+from dinohash_onnx import DINOHash
+import os
+
+hash = DINOHash()
+hash_hex = hash.hash(image_path)
+print(f"Hex: {hash_hex}")
+```
+
+## Example
+
+See `examples/example.py` for a complete working example.
+
+## License
+
+MIT
+
+## Citation
+
+If you use this library in your research, please cite:
+
+```bibtex
+@article{dinohash2025,
+  title={DINOHash: Perceptual Image Hashing with Vision Transformers},
+  journal={arXiv preprint arXiv:2503.11195},
+  year={2025}
+}
+```
