@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling>=1.18", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "extract2md"
+description = "Fetch a web page and convert it into cleaned Markdown."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "beautifulsoup4>=4.12",
+    "httpx>=0.25",
+    "markdownify>=0.13",
+    "protego>=0.3",
+    "readabilipy>=0.2",
+    "trafilatura>=1.6",
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/Wuodan/extract2md"
+Repository = "https://github.com/Wuodan/extract2md"
+Issues = "https://github.com/Wuodan/extract2md/issues"
+
+[project.scripts]
+extract2md = "extract2md.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/extract2md"]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/extract2md/_version.py"
+
+[tool.pytest.ini_options]
+addopts = "--maxfail=1 --disable-warnings"
+testpaths = ["tests"]
+pythonpath = ["src"]
