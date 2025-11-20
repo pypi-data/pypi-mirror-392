@@ -1,0 +1,2 @@
+class ConnectFailedException(BaseException):
+    pass

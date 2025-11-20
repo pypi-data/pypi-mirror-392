@@ -1,0 +1,2 @@
+class BindFailedException(BaseException):
+    pass
