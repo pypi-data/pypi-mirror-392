@@ -1,0 +1,85 @@
+Metadata-Version: 2.4
+Name: loopresources
+Version: 0.0.1
+Summary: Open source 3D geological resource modelling
+Author-email: Lachlan Grose <lachlan.grose@monash.edu>
+License: MIT
+Keywords: 3-D modelling,earth sciences,geology,structural geology,uncertainty
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Other Audience
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: Free for non-commercial use
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Classifier: Topic :: Multimedia :: Graphics :: 3D Modeling
+Classifier: Topic :: Scientific/Engineering
+Classifier: Topic :: Scientific/Engineering :: GIS
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: numpy>=1.18
+Requires-Dist: pandas
+Requires-Dist: scipy
+Requires-Dist: tqdm
+Provides-Extra: all
+Requires-Dist: loop; extra == "all"
+Requires-Dist: vtk; extra == "all"
+Provides-Extra: dev
+Requires-Dist: black; extra == "dev"
+Requires-Dist: codespell; extra == "dev"
+Requires-Dist: isort; extra == "dev"
+Requires-Dist: pre-commit; extra == "dev"
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: pytest-cov; extra == "dev"
+Requires-Dist: ruff; extra == "dev"
+Requires-Dist: sphinx; extra == "dev"
+Requires-Dist: sphinx-rtd-theme; extra == "dev"
+Provides-Extra: loop
+Requires-Dist: loopstructural>=1.6.21; extra == "loop"
+Provides-Extra: vtk
+Requires-Dist: pyvista; extra == "vtk"
+
+# Loop.Resources
+
+A module for resource estimation and associated utility functions
+
+## Installation
+```bash
+pip install loopresources
+```
+## Features
+- Drillhole database management
+- Desurveying and 3D visualization
+- Interval resampling and analysis
+- File-based database backend with project support
+
+## Usage
+```python
+from loopresources import DrillholeDatabase
+import pyvista as pv
+
+db = DrillholeDatabase.from_csv("path_to_collar.csv", "path_to_survey.csv")
+db.add_interval_table("lithology", lithology_data)
+desurveyed_lithology = db.desurvey_intervals("lithology")
+p = pv.Plotter()
+for h in db:
+    p.add_mesh(h.vtk(radius=2.0))
+p.show()
+```
+
+## Command Line Interface
+LoopResources also provides a CLI for common tasks. Use `loopresources --help` to see available commands.
+
+## Contributing
+Contributions are welcome! Please submit issues and pull requests on the GitHub repository. 
+## License
+This project is licensed under the MIT License. See the LICENSE file for details.

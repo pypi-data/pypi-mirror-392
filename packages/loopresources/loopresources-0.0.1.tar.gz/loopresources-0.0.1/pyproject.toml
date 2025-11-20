@@ -1,0 +1,110 @@
+[build-system]
+build-backend = 'setuptools.build_meta'
+
+requires = [ "setuptools" ]
+
+[project]
+name = "loopresources"
+version = "0.0.1"
+description = "Open source 3D geological resource modelling"
+readme = "README.md"
+keywords = [
+  "3-D modelling",
+  "earth sciences",
+  "geology",
+  "structural geology",
+  "uncertainty",
+]
+license = { text = 'MIT' }
+authors = [ { name = 'Lachlan Grose', email = 'lachlan.grose@monash.edu' } ]
+requires-python = ">=3.8"
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Other Audience",
+  "Intended Audience :: Science/Research",
+  "License :: Free for non-commercial use",
+  "License :: OSI Approved :: MIT License",
+  "Natural Language :: English",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Multimedia :: Graphics :: 3D Modeling",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: GIS",
+]
+dependencies = [
+  "numpy>=1.18",
+  "pandas",
+  "scipy",
+  "tqdm",
+]
+optional-dependencies.all = [ "loop", "vtk" ]
+optional-dependencies.dev = [
+  "black",
+  "codespell",
+  "isort",
+  "pre-commit",
+  "pytest",
+  "pytest-cov",
+  "ruff",
+  "sphinx",
+  "sphinx-rtd-theme",
+]
+optional-dependencies.loop = [ "loopstructural>=1.6.21" ]
+optional-dependencies.vtk = [ "pyvista" ]
+
+[tool.setuptools.packages.find]
+include = [ 'loopresources', 'loopresources.*' ]
+
+[tool.black]
+line-length = 100
+skip-string-normalization = true
+target-version = [ 'py38' ]
+exclude = '\.eggs|\.git|\.mypy_cache|\.tox|\.venv|_build|buck-out|build|dist|node_modules'
+
+[tool.ruff]
+target-version = "py38"
+
+line-length = 100
+indent-width = 4
+exclude = [ ".git", "build", "dist", "docs/_build", "pycache__" ]
+lint.ignore = [
+  "E203", # whitespace before ':'
+  "E266", # too many leading '#' for block comment
+  "E402", # module level import not at top of file
+  "E501", # line length too long
+  "E722", # bare except
+  "E731", # do not assign a lambda expression, use a def
+  "E741", # ambiguous variable name
+  "F403", # 'from module import *' used; unable to detect undefined names
+]
+lint.per-file-ignores."__init__.py" = [ "F401" ]
+lint.fixable = [ "ALL" ]
+lint.unfixable = [  ]
+
+[tool.isort]
+profile = 'black'
+line_length = 100
+# Sort by name, don't cluster "from" vs "import"
+force_sort_within_sections = true
+# Combines "as" imports on the same line
+combine_as_imports = true
+
+[tool.codespell]
+skip = '*.pyc,*.txt,*.gif,*.png,*.jpg,*.js,*.html,*.doctree,*.ttf,*.woff,*.woff2,*.eot,*.mp4,*.inv,*.pickle,*.ipynb,flycheck*,./.git/*,./.hypothesis/*,*.yml,docs/_build/*,./docs/build/*,./dist/*,*~,.hypothesis*,*.mypy_cache/*,*cover,*/_autosummary/*'
+quiet-level = 3
+
+[tool.build_sphinx]
+source-dir = 'docs'
+build-dir = 'docs/build'
+all_files = 1
+
+[tool.pydocstyle]
+select = [ "D100", "D101", "D102", "D103", "D104" ]
