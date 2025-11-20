@@ -1,0 +1,104 @@
+# Classic Scenarios
+
+Предоставляет примитивы для написания простых сценариев с бизнес-логикой.
+
+## Установка
+
+```shell
+pip install classic-scenarios
+```
+
+## Использование
+
+```python
+from classic.components import component, no_init
+from classic.scenarios import scenario, Return
+
+import pydantic
+
+
+class SomeEntity(pydantic.BaseModel):
+    """Это как будто очень полезный класс,
+    представляющий собой какое-то понятие из предметной области
+    """
+    id: int
+    
+
+class SomeParams(pydantic.BaseModel):
+    """Модель для проверки ввода"""
+    some_obj_id: int
+    some_prop: str
+
+    
+class Database:
+    """Интерфейс для объекта, работающего с БД"""
+    
+    def get(self, id):
+        raise NotImplemented
+    
+    def save(self, obj):
+        raise NotImplemented
+
+    
+# Использование component не обязательно, 
+# но с ним выглядит более идиоматично
+@component
+class SomeUseCase:
+    db: Database
+    
+    params: SomeParams = no_init(None)
+    some_obj: SomeEntity = no_init(None)
+    
+    @scenario
+    def run(self):
+        """
+        Это сценарий транзакции,
+        в котором последовательно,
+        шаг за шагом прописаны шаги.
+        """
+        self._do_something()
+        self._do_anything()
+        self._and_something_yet()
+    
+    def _do_something(self):
+        """Здесь можно сделать что-то полезное, например, взять объект из БД"""
+        self.some_obj = self.db.get(self.params.some_obj_id)
+    
+    def _do_anything(self):
+        if self.some_obj is None:
+            # Это приведет к остановке сценария, 
+            # но сценарий не упадет, а вернет 'No obj'
+            raise Return('No obj')
+        
+        self.some_prop = 'Some value'
+
+    def _and_something_yet(self):
+        self.db.save(self.some_obj)
+
+
+use_case = SomeUseCase(Database())
+use_case.run(params=SomeParams(123))
+```
+
+При вызове run декоратор scenario сделает 2 вещи:
+- скопирует полученный в self инстанс SomeUseCase, чтобы продолжить исполнение
+  уже с копией. Это нужно для потокобезопасности.
+- разложит все полученные kwargs в self. В примере выше объект SomeParams,
+  переданный в ключе params, будет доступен в сценарии в атрибуте self.params.
+
+Копирование объекта имеет один побочный эффект. Из-за того, что при вызове run 
+снимается поверхностная копия объекта, копия получит ссылки на те же объекты.
+Если в свойствах класса-сценария будут инстансы изменяемых типов, то при 
+повторном вызове сценария мы увидим состояние из предыдущего!
+
+Это похоже на эффект, получаемый при использовании инстансов сложных типов 
+в качестве аргументов функции по умолчанию:
+```python
+def func(arg=[]):
+    arg.append('1')
+```
+Здесь так же между вызовами будет сохраняться состояние arg. В целом, если 
+такое свойство исползьуется только для чтения, в этом нет проблем. Кроме того,
+сложно представить себе такое свойство, которое имело бы свойство по умолчанию,
+то есть инициализировалось бы конструктором, и при этом было бы изменяемо, 
+потому такое поведение не кажется проблемой.
