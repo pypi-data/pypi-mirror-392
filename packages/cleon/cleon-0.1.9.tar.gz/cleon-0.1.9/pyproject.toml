@@ -1,0 +1,24 @@
+[build-system]
+requires = ["maturin>=1.5,<2"]
+build-backend = "maturin"
+
+[project]
+name = "cleon"
+version = "0.1.9"
+description = "A Genetic Dynasty of Agentic Clones for Jupyter Notebooks"
+requires-python = ">=3.9"
+dependencies = ["ipython>=8.0"]
+authors = [{ name = "Madhava Jay", email = "me@madhavajay.com" }]
+keywords = ["codex", "cleon", "ipython"]
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+manifest-path = "cleon/Cargo.toml"
+module-name = "cleon._cleon"
+python-source = "src"
+python-packages = ["cleon"]
+include = [
+    "src/cleon/py.typed",
+    "src/cleon/_cleon.pyi",
+    "src/cleon/bin/*",
+]
