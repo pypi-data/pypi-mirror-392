@@ -1,0 +1,35 @@
+[build-system]
+build-backend = "flit_scm:buildapi"
+requires = ["flit_core>=3.2", "flit_scm", "wheel"]
+
+[project]
+name = "signalstats1090"
+dynamic = ["version"]
+authors = [
+    { name = "Clemens Vasters", email = "clemensv@microsoft.com"}
+]
+description = "Signal statistics dashboard for Mode-S/ADS-B signals from dump1090"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "websockets >= 14.2",
+    "fastapi >=  0.115.6",
+    "uvicorn[standard] >= 0.34.0",
+    "pyModeS >= 2.19",
+    "psutil >= 6.1.0"
+]
+
+[project.scripts]
+signalstats1090 = "signalstats1090.signalstats1090:main"
+
+[tool.setuptools_scm]
+write_to = "signalstats1090/_version.py"
+
+[tool.poetry.dev-dependencies]
+pytest-cov = "^7.0.0"
+
