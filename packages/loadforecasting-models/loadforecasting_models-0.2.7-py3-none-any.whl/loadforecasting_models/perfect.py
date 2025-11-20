@@ -1,0 +1,84 @@
+from typing import Optional, Callable, Union
+import torch
+from .normalizer import Normalizer
+
+class Perfect():
+    """
+    Trivial 'model': Just gets and returns the perfect profile (used for reference).
+    """
+
+    def __init__(self,
+            normalizer: Optional[Normalizer] = None,
+            ) -> None:
+        """
+        Args:
+            normalizer (Normalizer): Used for X and Y normalization and denormalization.
+        """
+        self.normalizer = normalizer
+
+    def predict(self,
+                y_real: torch.Tensor
+                ) -> torch.Tensor:
+        """Gets and return the perfect profile."""
+
+        y_pred = y_real
+
+        return y_pred
+
+    def train_model(self) -> dict:
+        """No training necessary for the perfect model."""
+
+        history = {}
+        history['loss'] = [0.0]
+
+        return history
+
+    def evaluate(
+        self,
+        y_test: torch.Tensor,
+        results: Union[dict, None] = None,
+        de_normalize: bool = False,
+        eval_fn: Callable[..., torch.Tensor] = torch.nn.L1Loss(),
+        loss_relative_to: str = "mean",
+        ) -> dict:
+        """
+        Evaluate the model on the given x_test and y_test.
+        """
+
+        if results is None:
+            results = {}
+
+        output = self.predict(y_test)   # pass Y to get perfect prediction
+
+        assert output.shape == y_test.shape, \
+            f"Shape mismatch: got {output.shape}, expected {y_test.shape})"
+
+        # Unnormalize the target variable, if wished.
+        if de_normalize:
+            assert self.normalizer is not None, "No normalizer given."
+            y_test = self.normalizer.de_normalize_y(y_test)
+            output = self.normalizer.de_normalize_y(output)
+
+        # Compute Loss
+        if loss_relative_to == "mean":
+            reference = float(torch.abs(torch.mean(y_test)))
+        elif loss_relative_to == "max":
+            reference = float(torch.abs(torch.max(y_test)))
+        elif loss_relative_to == "range":
+            reference = float(torch.max(y_test) - torch.min(y_test))
+        else:
+            raise ValueError(f"Unexpected parameter: loss_relative_to = {loss_relative_to}")
+        loss = eval_fn(output, y_test)
+        results['test_loss'] = [loss.item()]
+        results['test_loss_relative'] = [100.0*loss.item()/reference]            
+        results['predicted_profile'] = output
+
+        return results
+
+    def state_dict(self) -> dict:
+        """No persistent parameter needed for this trivial model."""
+        state_dict = {}
+        return state_dict
+
+    def load_state_dict(self, state_dict) -> None:
+        """No persistent parameter needed for this trivial model."""
