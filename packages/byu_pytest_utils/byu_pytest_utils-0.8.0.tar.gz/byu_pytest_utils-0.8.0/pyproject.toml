@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "byu_pytest_utils"
+version = "0.8.0"
+description = "A few utilities for pytest to help with integration into gradescope"
+authors = ["Gordon Bean <gbean@cs.byu.edu>", "Daniel Zappala <daniel.zappala@gmail.com>"]
+license = "MIT"
+classifiers = [
+    "Framework :: Pytest"
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pytest = "^9.0.1"
+jinja2 = "^3.1.6"
+beautifulsoup4 = "^4.14.2"
+
+[tool.poetry.plugins.pytest11]
+byu_pytest_utils = "byu_pytest_utils.pytest_plugin"
+
+[tool.poetry.group.dev.dependencies]
+pytest-asyncio = "^1.3.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
