@@ -1,0 +1,69 @@
+{#- Help page template -#}
+<svg width="800" height="750" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <style>
+            @font-face {
+                font-family: 'CustomFont';
+                src: url('{{ font }}');
+            }
+            .title { font: bold 36px CustomFont; fill: #1a1a1a; }
+            .subtitle { font: bold 26px CustomFont; fill: #2d2d2d; }
+            .content { font: 22px CustomFont; fill: #4a4a4a; }
+            .example { font: 20px CustomFont; fill: #5a5a5a; }
+            .footer { font: 18px CustomFont; fill: #6a6a6a; }
+            .divider { stroke: #e0e0e0; stroke-width: 1; }
+        </style>
+    </defs>
+    <rect width="100%" height="100%" fill="#fafafa"/>
+    
+    <!-- 顶部边框 -->
+    <rect x="0" y="0" width="800" height="5" fill="#2d2d2d"/>
+    
+    <!-- 标题 -->
+    <text x="400" y="55" class="title" text-anchor="middle">Arcaea 表情包生成器</text>
+    
+    <!-- 基础指令 -->
+    <text x="50" y="105" class="subtitle">基础指令</text>
+    <line x1="50" y1="115" x2="750" y2="115" class="divider"/>
+    <text x="70" y="145" class="content">arc &lt;角色&gt; &lt;文字&gt;</text>
+    <text x="480" y="145" class="content">快速生成表情包</text>
+    <text x="70" y="175" class="content">arc -h</text>
+    <text x="480" y="175" class="content">查看文本帮助</text>
+    <text x="70" y="205" class="content">arc</text>
+    <text x="480" y="205" class="content">进入交互模式</text>
+    
+    <!-- 自定义参数 -->
+    <text x="50" y="250" class="subtitle">自定义参数</text>
+    <line x1="50" y1="260" x2="750" y2="260" class="divider"/>
+    <text x="70" y="290" class="content">-s, --size &lt;大小&gt;</text>
+    <text x="500" y="290" class="content">文字大小 (10-100, 默认 35)</text>
+    
+    <text x="70" y="325" class="content">-x &lt;位置&gt;</text>
+    <text x="500" y="325" class="content">横向位置 (0-296, 默认 148)</text>
+    
+    <text x="70" y="360" class="content">-y &lt;位置&gt;</text>
+    <text x="500" y="360" class="content">纵向位置 (0-256, 默认 128)</text>
+    
+    <text x="70" y="395" class="content">-r, --rotate &lt;角度&gt;</text>
+    <text x="480" y="395" class="content">旋转角度 (默认 -12)</text>
+    
+    <text x="70" y="430" class="content">-c, --color &lt;颜色&gt;</text>
+    <text x="500" y="430" class="content">文字颜色 (十六进制)</text>
+    
+    <text x="70" y="465" class="content">-w, --stroke-width &lt;宽度&gt;</text>
+    <text x="500" y="465" class="content">描边宽度 (0-20, 默认 8)</text>
+    
+    <text x="70" y="500" class="content">-C, --stroke-color &lt;颜色&gt;</text>
+    <text x="500" y="500" class="content">描边颜色 (十六进制)</text>
+    
+    <!-- 使用示例 -->
+    <text x="50" y="545" class="subtitle">使用示例</text>
+    <line x1="50" y1="555" x2="750" y2="555" class="divider"/>
+    <text x="70" y="585" class="example">arc luna 好耶！</text>
+    <text x="70" y="615" class="example">arc hikari "多行\n文字" -s 40</text>
+    <text x="70" y="645" class="example">arc tairitsu 开心 -x 150 -y 100 -r -20</text>
+    <text x="70" y="675" class="example">arc nami "龙笔!" -c ff0000 -s 45</text>
+    
+    <!-- 页脚 -->
+    <text x="400" y="720" class="footer" text-anchor="middle">nonebot-plugin-arcaea-sticker By JQ-28</text>
+</svg> 
