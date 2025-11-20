@@ -1,0 +1,169 @@
+# A Package for Posterior Mean Estimation of the Covariance Matrix *(psd-covariance)*
+
+### Introduction
+This package provides fast and reliable tools for estimating covariance and precision matrices. It is designed for users who routinely work
+with covariance matrices that may be inaccurate, ill-conditioned, or not
+positive definite. The methods address these challenges in fields such as finance, machine learning, and signal processing.
+
+### Authors
+This package is based on the paper *'Well-Conditioned Covariance Estimation via Bayesian
+Eigenvalue Regularization'*, by Kris Boudt, Jesper Cremers, Kirill Dragun & Steven Vanduffel. The *psd-covariance* package is developed and maintained by Jesper Cremers.
+
+### Contents
+
+The package provides the following:
+
+- **Posterior Mean (PM)** and **Fixed-Trace (PM-FT)** covariance estimators  
+  Implements the Bayesian eigenvalue-regularization approach of `Boudt et al. (2025)`, producing PSD and well-conditioned covariance matrices for any input.
+
+- **Fast likelihood-based cross-validation for regularization tuning**  
+  Efficient K-fold predictive-likelihood selection for both PM and PM-FT.
+
+- **Eigenvalue cleaning methods**  
+  Ad hoc procedures for correcting non-positive eigenvalues, following `Rousseeuw & Molenberghs (1993)`.
+
+- **Shrinkage estimators**  
+  Implements `Ledoit & Wolf's (2004)` linear shrinkage and `QIS (2022)` nonlinear shrinkage.  
+  Includes adapted code from Michael Wolf's reference implementation:  
+  `https://github.com/pald22/covShrinkage`.
+
+
+### Available Classes and Functions
+
+#### PosteriorMeanEstimator
+
+- `PosteriorMeanEstimator(fixed_trace=False)`: constructor  
+- `fit(Sigma_tilde, sigma)`: computes the PM/PM-FT estimate.
+- `cross_validate_sigma(X, sigma_range, n_splits=10, n_jobs=-1)`: selects `sigma` via predictive likelihood CV.
+
+*Attributes:*
+
+- `Sigma_`: estimated covariance matrix.
+- `Sigma_inv_`: estimated precision matrix.  
+- `sigma`: regularization parameter used.
+- `fixed_trace`: whether PM-FT is applied. 
+
+
+#### EigenvalueCleaning
+
+- `threshold_negative(cov, fixed_trace=False)`: sets negative eigenvalues to zero.
+- `replace_negative(cov, epsilon=1e-4, fixed_trace=False, PD=False)`: replaces negatives with `epsilon`.
+- `absolute_negative(cov, fixed_trace=False, PD=False)`: uses absolute eigenvalues.
+
+Each function returns the cleaned covariance matrix and its precision matrix.
+
+
+#### ShrinkageEstimator
+
+- `linear_shrinkage(X, CV=False)`: Ledoit & Wolf linear shrinkage. Returns covariance, precision, and shrinkage intensity `alpha`.
+
+- `QIS(X)`: Quadratic Inverse Shrinkage. Returns covariance and precision matrices.
+
+
+### Installation
+```python
+pip install psd-covariance
+```
+### Imports
+```python
+import pandas as pd
+import numpy as np
+from numpy.linalg import norm, cond
+import matplotlib.pyplot as plt
+```
+
+## Quick Start
+```python
+from psd_covariance.eigenvalue_cleaning import EigenvalueCleaning
+from psd_covariance.shrinkage_methods import ShrinkageMethods
+from psd_covariance.posterior_mean import PosteriorMeanEstimator
+```
+
+### Example 1: Transforming non-PSD matrices
+We construct a non-PSD estimated covariance matrix with d=10, such that the smallest two eigenvalues are negative.
+```python
+d = 10
+A = np.random.randn(d, d)
+Q, _ = np.linalg.qr(A)
+eigvals = np.random.uniform(0.5, 2.0, size = d)
+eigvals[:2] *= -0.5
+Sigma_tilde = Q @ np.diag(eigvals) @ Q.T
+eigvals = np.sort(eigvals)
+print(eigvals)
+# [-0.50014538 -0.47905291  0.59185356  0.69919373  0.8262933   0.89063562 1.005641    1.39291291  1.66503103  1.95878406]
+```
+To transform the non-PSD matrix to a PSD matrix to obtain improved estimates, we compute the available estimators discussed above.
+```python
+cleaned_thresh, _ = EigenvalueCleaning.threshold_negative(Sigma_tilde)
+eigvals_thresh = np.linalg.eigvalsh(cleaned_thresh)
+
+# consider PD matrix
+cleaned_replace, _ = EigenvalueCleaning.replace_negative(Sigma_tilde, 
+                                                            epsilon=1e-1, PD=True)
+eigvals_replace = np.linalg.eigvalsh(cleaned_replace)
+
+# consider PD matrix
+cleaned_abs, _ = EigenvalueCleaning.absolute_negative(Sigma_tilde, PD=True)
+eigvals_abs = np.linalg.eigvalsh(cleaned_abs)
+
+pm = PosteriorMeanEstimator(fixed_trace=False)
+pm.fit(Sigma_tilde, sigma=0.5) # arbitrary choice
+eigvals_pm = np.linalg.eigvalsh(pm.Sigma_)
+
+ft = PosteriorMeanEstimator(fixed_trace=True)
+ft.fit(Sigma_tilde, sigma=0.5) # arbitrary choice
+eigvals_ft = np.linalg.eigvalsh(ft.Sigma_)
+```
+
+``` python
+print("\nEigenvalues of cleaned matrices:")
+print("Threshold Negative      :", np.round(eigvals_thresh, decimals=12))
+print("Replace Negative        :", eigvals_replace)
+print("Absolute Value          :", eigvals_abs)
+print("PM Estimator            :", eigvals_pm)
+print("PM Estimator (Fixed Tr.):", eigvals_ft)
+# Eigenvalues of cleaned matrices:
+# Threshold Negative      : [0.         0.         0.59185356 0.69919373 0.8262933  0.89063562 1.005641   1.39291291 1.66503103 1.95878406]
+# Replace Negative        : [0.1        0.1        0.59185356 0.69919373 0.8262933  0.89063562 1.005641   1.39291291 1.66503103 1.95878406]
+# Absolute Value          : [0.47905291 0.50014538 0.59185356 0.69919373 0.8262933  0.89063562 1.005641   1.39291291 1.66503103 1.95878406]
+# PM Estimator            : [0.2625387  0.26678995 0.70412859 0.78083976 0.87984287 0.93304454 1.03263025 1.39704147 1.66581096 1.9588768 ]
+# PM Estimator (Fixed Tr.): [0.21390763 0.21737141 0.5737001  0.63620176 0.71686614 0.76021306 0.84135212 1.13826203 1.35724629 1.5960264 ]
+```
+
+## Example 2: PM and PM-FT Estimation using Cross-Validation
+We generate a covariance matrix with a Toeplitz structure with d=10 and we draw n=20 observations from a Normal distribution with mean 0.
+``` python
+# Generate data
+np.random.seed(0)
+d = 10
+n = 20
+rho = 0.8
+cov_matrix = np.fromfunction(lambda i, j: rho ** np.abs(i - j), (d, d))
+X = np.random.multivariate_normal(np.zeros(d), cov_matrix, size=n)
+> S = sample_cov(X)
+
+> X = X.to_numpy()
+> sigma_range = np.linspace(0.01, 2.0, 150)
+
+# PM cross validation
+> pm = PosteriorMeanEstimator(fixed_trace=False)
+> sigma_pm = pm.cross_validate_sigma(X, sigma_range)
+> print(sigma_pm)
+# 0.2504026845637584
+> Sigma_pm, Sigma_pm_inv = pm.fit(S, sigma_pm)
+
+# FT cross validation
+> ft = PosteriorMeanEstimator(fixed_trace=True)
+> sigma_ft = ft.cross_validate_sigma(X, sigma_range)
+> print(sigma_ft)
+# 0.2771140939597316
+> Sigma_ft, Sigma_ft_inv = ft.fit(S, sigma_ft)
+```
+
+## References
+- Boudt, K., J. Cremers, K. Dragun, and S. Vanduffel (2025). Well-conditioned covariance estimation via bayesian eigenvalue regularization. *Working paper.*
+- Ledoit, O. and M. Wolf (2004). Honey, I shrunk the sample covariance matrix. *The Journal of Portfolio Management 30 (4), 110-119.*
+- Ledoit, O. and M. Wolf (2022). Quadratic shrinkage for large covariance matrices. *Bernoulli 28 (3), 1519-1547.*
+- Rousseeuw, P. J. and G. Molenberghs (1993). Transformation of non positive semidefinite correlation matrices. *Communications in Statistics - Theory and Methods 22 (4), 965-984.*
+
+
