@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iflow-mcp_burpsuite-mcp-server"
+version = "1.0.0"
+description = "A powerful Model Context Protocol (MCP) server implementation for BurpSuite, providing programmatic access to Burp's core functionalities."
+authors = [
+    {name = "X3r0K", email = "x3r0k@example.com"}
+]
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "fastapi==0.104.1",
+    "uvicorn==0.24.0",
+    "python-multipart==0.0.6",
+    "requests==2.31.0",
+    "python-jose==3.3.0",
+    "python-dotenv==1.0.0",
+    "pydantic==2.4.2",
+    "aiohttp==3.9.1",
+    "websockets==12.0"
+]
+
+[project.scripts]
+burpsuite-mcp-server = "mcp_server:main"
+
+[project.urls]
+Homepage = "https://github.com/X3r0K/BurpSuite-MCP-Server"
+Repository = "https://github.com/X3r0K/BurpSuite-MCP-Server"
+Issues = "https://github.com/X3r0K/BurpSuite-MCP-Server/issues"
+
+[tool.setuptools]
+py-modules = ["mcp_server", "main"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"*" = ["*.py", "*.md", "*.txt", "*.example"]
