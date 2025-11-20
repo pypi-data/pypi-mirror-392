@@ -1,0 +1,149 @@
+Metadata-Version: 2.4
+Name: pytermtalk-ref
+Version: 1.1.1
+Summary: My reference implementation of a terminal-based chat program using sockets; supports both client and server modes.
+Keywords: chat,terminal,cli,client & server,reference
+Author: Rik Roos
+Author-email: Rik Roos <28710055+GuzziRik@users.noreply.github.com>
+License-Expression: MIT
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development
+Classifier: Topic :: Communications :: Chat
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.10
+Project-URL: Documentation, https://github.com/RikRoos/pytermtalk-ref/blob/master/README.md
+Project-URL: Homepage, https://github.com/RikRoos/pytermtalk-ref
+Project-URL: Source, https://github.com/RikRoos/pytermtalk-ref/tree/master/src/pytermtalk_ref
+Description-Content-Type: text/markdown
+
+# PyTermTalk-Ref 🖥️💬
+
+![Python](https://img.shields.io/badge/Python-3.10-blue?logo=python\&logoColor=white) ![License](https://img.shields.io/badge/License-MIT-green)
+
+A Python **reference implementation** of a terminal-based chat program using sockets. Supports **both server and client modes**.
+This project serves as a **starting point** for building a production-ready terminal chat application.
+
+> ⚠️ **Warning:** This script does **not** provide authentication. Do **not** use it for production or sensitive purposes.
+
+The original script by Andrea Ciarrocchi was published in *Linux Magazine*, October 2025.
+
+---
+
+## Features
+
+* Terminal-based chat via sockets
+* Non-blocking communication using **threads**
+* Supports multiple clients simultaneously
+* Easy to extend and modify for educational purposes
+
+---
+
+## Installation & running from PyPi 
+
+```bash
+mkdir testing && cd testing
+python -m venv .venv
+source .venv/bin/activate
+pip install pytermtalk-ref
+
+# and now run the script ...
+
+python pytermtall-ref
+
+# when finished, deactivate the venv:
+
+deactivate
+```
+
+## Installation & running from PyPi with uv
+
+When using the uv tool:
+
+```bash
+mkdir testing && cd testing
+uv init
+uv add pytermtalk-ref
+
+# and now run the script ...
+
+uv run pytermtalk-ref
+```
+
+## Installation & running from github
+
+When using the uv tool:
+
+```bash
+git clone https://github.com/rikroos/pytermtalk-ref.git
+cd pytermtalk-ref
+uv run pytermtalk-ref
+```
+
+Otherwise, if not using the uv tool:
+
+```bash
+git clone https://github.com/rikroos/pytermtalk-ref.git
+cd pytermtalk-ref
+python src/pytermtalk_ref/chat.py
+```
+
+---
+
+## Usage
+
+On startup, choose between **server** or **client** mode.
+
+### Server Mode
+
+* Initializes a socket (`127.0.0.1:5555`)
+* Starts listening for client connections
+* Launches a thread for non-blocking broadcasting to all connected clients
+* For each new client, a separate thread is created to handle communication
+
+### Client Mode
+
+* Initializes a socket (`127.0.0.1:5555`)
+* Launches a thread to receive messages from the server non-blocking
+* Messages may come from other clients or the server operator
+* Client can send messages to other clients via the server
+
+---
+
+## Future Work
+
+* None, the project serves as a reference implementation for other projects
+
+---
+
+## Example
+
+```bash
+# Start server
+$ uv run pytermtalk-ref
+
+Warning: do not use in production environments or for exchanging sensitive information!
+
+Start server or client? (s/c): s
+[LISTENING] Server is listening on 127.0.0.1:5555
+[NEW CONNECTION] ('127.0.0.1', 33076) connected.
+('127.0.0.1', 33076): Hi there. Anybody home?
+
+# Start client
+$ uv run pytermtalk-ref
+
+Warning: do not use in production environments or for exchanging sensitive information!
+
+Start server or client? (s/c): c
+Hi there. Anybody home?
+
+```
+
+---
+
+## License
+
+MIT License
+
