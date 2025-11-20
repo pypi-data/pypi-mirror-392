@@ -1,0 +1,396 @@
+# Datastore SDK
+
+一个用于通过 URN 访问各种数据源的 Python SDK。
+
+## 功能特性
+
+- 🔗 通过 URN 自动获取资产连接信息
+- 📊 支持多种数据源：MinIO、Cassandra、Redis、Kafka、HTTP
+- ✅ 自动 Schema 验证（写入时）
+- 🚀 简单易用的 API
+- 📦 可发布到 PyPI
+
+## 安装
+
+```bash
+pip install datastore==1.0.0
+```
+
+## 快速开始
+
+> 📖 **详细使用指南**: 查看 [QUICKSTART.md](QUICKSTART.md) 获取完整的快速入门手册，包含所有数据源的详细使用说明、常见场景和最佳实践。
+
+### 基本使用
+
+```python
+from datastore import DataStoreClient
+
+# 创建客户端实例
+client = DataStoreClient(api_base_url="http://192.168.2.123:8067")
+
+# 连接到资产
+client.connect("urn:store:os.iot.rotary_wheel_image")
+
+# 读取数据
+data = client.read(key="some_key")  # 根据数据源类型使用不同的参数
+
+# 写入数据（自动验证 schema）
+client.write({
+    "thingid": "device_001",
+    "filepath": "/path/to/file.jpg",
+    "time": "2025-01-18T10:00:00Z"
+})
+
+# 断开连接
+client.disconnect()
+```
+
+### 使用上下文管理器
+
+```python
+from datastore import DataStoreClient
+
+with DataStoreClient() as client:
+    client.connect("urn:store:os.iot.rotary_wheel_image")
+    
+    # 读取数据
+    data = client.read()
+    
+    # 写入数据
+    client.write({"key": "value"})
+    # 自动断开连接
+```
+
+## 支持的数据源
+
+### MinIO（对象存储）
+
+```python
+client.connect("urn:store:example.minio")
+
+# URL 格式: minio://192.168.2.123:9006/file?username=admin&password=Minio_Rozh123srv
+# 其中: file 是 bucket 名称
+
+# 读取对象（默认包含 metadata）
+result = client.read(object_name="path/to/object.json")
+# 返回: {"data": ..., "metadata": {...}}
+
+# 只读取数据（不包含 metadata）
+data = client.read(object_name="path/to/object.json", include_metadata=False)
+
+# 写入对象（带 metadata，metadata 会被 Schema 校验）
+client.write(
+    file_data=binary_data,  # 实际文件数据（字节）
+    metadata={  # metadata（会被 Schema 校验）
+        "thingid": "device_001",
+        "filepath": "/path/to/file.jpg",
+        "time": "2025-01-18T10:00:00Z"
+    },
+    object_name="path/to/file.jpg",
+    content_type="image/jpeg"
+)
+
+# 写入 JSON 对象（不带 metadata）
+client.write(
+    data={"key": "value"},
+    object_name="path/to/object.json"
+)
+```
+
+**重要说明：**
+- 读取时默认返回 `{"data": ..., "metadata": {...}}` 格式
+- 写入时如果提供了 `metadata`，Schema 校验会校验 `metadata` 而不是文件数据本身
+- `metadata` 会以 `x-amz-meta-` 前缀存储在 MinIO 中
+
+### Cassandra（NoSQL 数据库）
+
+```python
+client.connect("urn:store:example.cassandra")
+
+# 读取数据
+rows = client.read(
+    table="my_table",
+    where_clause="id = '123'",
+    limit=100
+)
+
+# 写入数据
+client.write(
+    data={"id": "123", "name": "test"},
+    table="my_table"
+)
+```
+
+### Redis（缓存）
+
+```python
+client.connect("urn:store:example.redis")
+
+# 读取数据
+data = client.read(key="my_key")
+
+# 写入数据
+client.write(
+    data={"key": "value"},
+    key="my_key",
+    ttl=3600  # 过期时间（秒）
+)
+```
+
+### Kafka（消息队列）
+
+```python
+client.connect("urn:store:example.kafka")
+
+# 读取历史消息（如果没有保存的 offset，从 earliest 开始）
+messages = client.read(
+    timeout_ms=3000,
+    max_records=10,
+    group_id="my_consumer_group",
+    auto_offset_reset="earliest"  # 如果没有保存的 offset，从 earliest 开始
+)
+# 手动提交偏移量
+client.commit_offset()
+
+# 读取新消息（如果没有保存的 offset，从 latest 开始）
+new_messages = client.read(
+    timeout_ms=2000,
+    max_records=5,
+    group_id="my_consumer_group_new",
+    auto_offset_reset="latest"  # 如果没有保存的 offset，从 latest 开始
+)
+client.commit_offset()
+
+# 使用已存在的 consumer group（会从保存的 offset 开始消费）
+existing_messages = client.read(
+    timeout_ms=2000,
+    max_records=5,
+    group_id="my_consumer_group",  # 使用之前用过的 group_id
+    auto_offset_reset="latest"  # 只有在没有保存的 offset 时才使用
+)
+client.commit_offset()
+
+# 持续流式读取消息（一旦有新数据就会读取）
+message_count = 0
+for message in client.readstream(
+    poll_timeout_ms=1000,
+    group_id="my_stream_consumer_group",
+    auto_offset_reset="latest"  # 如果没有保存的 offset，从 latest 开始
+):
+    message_count += 1
+    print(f"收到消息: {message}")
+    # 每处理 10 条消息提交一次偏移量
+    if message_count % 10 == 0:
+        client.commit_offset()
+    # 按 Ctrl+C 停止
+
+# 写入消息
+client.write(
+    data={"message": "hello"},
+    key="message_key"  # 可选
+)
+```
+
+**重要说明：**
+- 默认情况下，偏移量不会自动提交，需要手动调用 `commit_offset()` 方法
+- 如果有 consumer group 且有保存的 offset，会从保存的 offset 开始消费
+- 如果没有保存的 offset，则根据 `auto_offset_reset` 参数决定从 `earliest` 或 `latest` 开始
+- `auto_offset_reset` 参数只在没有保存的 offset 时生效
+
+### HTTP（只读 API）
+
+```python
+client.connect("urn:store:example.http")
+
+# 读取数据
+data = client.read(
+    path="/api/data",
+    params={"id": "123"},
+    headers={"Authorization": "Bearer token"}
+)
+
+# HTTP 不支持写入操作
+# client.write(...)  # 会抛出 NotImplementedError
+```
+
+## Schema 验证
+
+SDK 支持灵活的 Schema 验证配置，可以在多个层级控制验证行为。
+
+### 初始化时配置（全局默认）
+
+```python
+# 默认启用 Schema 校验（推荐）
+client = DataStoreClient(api_base_url="http://192.168.2.123:8067")
+
+# 禁用 Schema 校验
+client = DataStoreClient(
+    api_base_url="http://192.168.2.123:8067",
+    enable_schema_validation=False
+)
+```
+
+### 连接时配置（针对特定资产）
+
+```python
+client = DataStoreClient()
+
+# 连接时启用 Schema 校验（覆盖默认设置）
+client.connect("urn:store:example", enable_schema_validation=True)
+
+# 连接时禁用 Schema 校验
+client.connect("urn:store:example", enable_schema_validation=False)
+```
+
+### 运行时动态控制
+
+```python
+client = DataStoreClient()
+client.connect("urn:store:example")
+
+# 检查当前是否启用校验
+if client.is_schema_validation_enabled():
+    print("Schema 校验已启用")
+
+# 动态启用校验
+client.enable_schema_validation()
+
+# 动态禁用校验
+client.disable_schema_validation()
+```
+
+### 写入时控制（单次操作）
+
+```python
+client.connect("urn:store:example")
+
+# 使用默认设置（根据初始化或连接时的配置）
+client.write({"thingid": "device_001", "filepath": "/path/to/file.jpg", "time": "2025-01-18T10:00:00Z"})
+
+# 强制验证（即使默认禁用）
+client.write(
+    data={"thingid": "device_001", "filepath": "/path/to/file.jpg", "time": "2025-01-18T10:00:00Z"},
+    validate_schema=True
+)
+
+# 跳过验证（即使默认启用）
+client.write(
+    data={"thingid": "device_001", "filepath": "/path/to/file.jpg", "time": "2025-01-18T10:00:00Z"},
+    validate_schema=False
+)
+```
+
+### 验证数据（不写入）
+
+```python
+client.connect("urn:store:example")
+
+# 验证数据（不写入）
+is_valid, error = client.validate_data({
+    "thingid": "device_001",
+    "filepath": "/path/to/file.jpg",
+    "time": "2025-01-18T10:00:00Z"
+})
+
+if not is_valid:
+    print(f"验证失败: {error}")
+```
+
+### 验证优先级
+
+验证行为的优先级（从高到低）：
+1. `write()` 方法的 `validate_schema` 参数（单次操作）
+2. `connect()` 方法的 `enable_schema_validation` 参数（针对特定资产）
+3. `DataStoreClient()` 初始化时的 `enable_schema_validation` 参数（全局默认）
+
+## API 参考
+
+### DataStoreClient
+
+#### `__init__(api_base_url: str = "http://192.168.2.123:8067")`
+
+创建客户端实例。
+
+**参数：**
+- `api_base_url`: API 基础 URL
+
+#### `connect(urn: str) -> None`
+
+连接到指定的资产。
+
+**参数：**
+- `urn`: 资产 URN，例如：`urn:store:os.iot.rotary_wheel_image`
+
+#### `disconnect() -> None`
+
+断开连接。
+
+#### `read(**kwargs) -> Any`
+
+读取数据。参数根据数据源类型而异。
+
+#### `write(data: Dict[str, Any], validate_schema: bool = True, **kwargs) -> bool`
+
+写入数据。
+
+**参数：**
+- `data`: 要写入的数据字典
+- `validate_schema`: 是否验证 schema（默认 True）
+- `**kwargs`: 传递给连接器的写入参数
+
+**返回：**
+- `True` 如果写入成功
+
+**异常：**
+- `ValueError`: 如果数据不符合 schema
+- `NotImplementedError`: 如果数据源不支持写入（如 HTTP）
+
+#### `get_asset_info() -> Optional[Dict[str, Any]]`
+
+获取当前资产的详细信息。
+
+#### `get_schema() -> Optional[Dict[str, Any]]`
+
+获取当前资产的 Schema。
+
+#### `validate_data(data: Dict[str, Any]) -> Tuple[bool, Optional[str]]`
+
+验证数据是否符合 schema（不写入）。
+
+**返回：**
+- `(is_valid, error_message)` 元组
+
+## 开发
+
+### 安装开发依赖
+
+```bash
+pip install -e ".[dev]"
+```
+
+### 运行测试
+
+```bash
+pytest
+```
+
+### 构建包
+
+```bash
+python setup.py sdist bdist_wheel
+```
+
+### 发布到 PyPI
+
+```bash
+pip install twine
+twine upload dist/*
+```
+
+## 许可证
+
+MIT License
+
+## 贡献
+
+欢迎提交 Issue 和 Pull Request！
