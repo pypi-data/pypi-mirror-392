@@ -1,0 +1,101 @@
+{% load sundae_tags %}
+<div class="card-table">
+  <form method="post" action="{{ bulk_update_proxy_url }}" class="flow-root">
+    {% csrf_token %}
+    {% if bulk_editable %}
+    <div x-data="{bulk_url: false}" class="flex items-center gap-3 p-4 border-b border-gray-200">
+      <select
+        x-model="bulk_url"
+        name="action"
+        class="form-select block w-auto"
+      >
+        <option value="">Bulk actions...</option>
+        {% for action in bulk_actions %}
+        <option value="{{ action.id }}">
+          {{ action.display_name|capfirst }}
+        </option>
+        {% endfor %}
+      </select>
+      <button
+        x-show="bulk_url"
+        type="submit"
+        class="btn-danger-admin"
+      >
+        Apply
+      </button>
+    </div>
+    {% endif %}
+    <div class="overflow-x-auto">
+      <table
+        x-data="{selected_all: false}"
+        class="table-admin"
+      >
+        <thead class="table-head-admin">
+          <tr>
+            {% if bulk_editable %}
+            <th scope="col" class="relative">
+              <script>
+                function toggleAll(e) {
+                  let checkboxes = document.getElementsByName("selected");
+                  for (let i = 0; i < checkboxes.length; i++) {
+                    checkboxes[i].checked = e.target.checked;
+                  }
+                }
+              </script>
+              <input
+                x-on:click="toggleAll"
+                name="select_all"
+                type="checkbox"
+                class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+
+              <span class="">All</span>
+            </th>
+            {% endif %} {% for header in headers %}
+            <th scope="col" class="table-th-admin">
+              {{ header|capfirst }}
+            </th>
+            {% endfor %}
+            <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
+              <span class="sr-only">Actions</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for object in object_list %}
+          <tr>
+            {% if bulk_editable %}
+            <td class="whitespace-nowrap py-3.5 pl-3 pr-4 sm:pr-0">
+              <input
+                x-ref="select_item"
+                name="selected"
+                value="{{ object.instance.pk }}"
+                type="checkbox"
+                class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+            </td>
+            {% endif %} {% for field in object.fields %}
+            <td
+              class="{% if forloop.first %} {% else %} {% endif %} px-3 py-3.5 font-medium text-gray-500"
+            >
+              {% display_field field view %}
+            </td>
+            {% endfor %}
+            <td
+              class="table-td-admin text-right font-medium [&_a:hover]:text-blue-900 [&_a]:text-blue-600"
+            >
+              {% for action in object.actions %}
+              <a
+                href="{{ action.url }}"
+                class="px-1 text-blue-600 hover:text-blue-900"
+                >{{ action.display_name|capfirst }}</a
+              >
+              {% endfor %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </form>
+</div>

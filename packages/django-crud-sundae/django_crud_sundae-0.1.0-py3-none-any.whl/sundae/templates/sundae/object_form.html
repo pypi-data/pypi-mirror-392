@@ -1,0 +1,120 @@
+{% extends "sundae/base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}{% if object %}Edit{% else %}Create{% endif %} {{ object_verbose_name|capfirst }}{% endblock %}
+
+{% block extra_css %}
+    {{ form.media.css }}
+{% endblock %}
+
+{% block topnav %}
+{% endblock %}
+
+{% block content %}
+<div class="container-admin">
+    <div class="max-w-3xl mx-auto">
+
+        <!-- Form Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">
+                    {% if object %}Edit {{ object_verbose_name|capfirst }}{% else %}New {{ object_verbose_name|capfirst }}{% endif %}
+                </h2>
+                <p class="text-sm text-gray-600 mt-1">
+                    {% if object %}
+                        Update the {{ object_verbose_name }} information below
+                    {% else %}
+                        Enter the {{ object_verbose_name }} information below
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- Form Content -->
+            <form method="POST"
+                  {% if form.is_multipart %}enctype="multipart/form-data"{% endif %}
+                  action="{% if object %}{{ update_view_url }}{% else %}{{ create_view_url }}{% endif %}"
+                  class="px-6 py-6">
+                {% csrf_token %}
+
+                <!-- Display non-field errors -->
+                {% if form.non_field_errors %}
+                <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-red-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                        <div class="text-sm text-red-700">
+                            {{ form.non_field_errors }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="space-y-6">
+                    {% for field in form %}
+                    <div>
+                        {% if field.field.widget.input_type == 'checkbox' %}
+                            <!-- Checkbox Field -->
+                            <div class="flex items-center">
+                                {% render_field field class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" %}
+                                <label for="{{ field.id_for_label }}" class="ml-2 block text-sm text-gray-700">
+                                    {{ field.label }}
+                                    {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                </label>
+                            </div>
+                            {% if field.help_text %}
+                            <p class="ml-6 mt-1 text-sm text-gray-500">{{ field.help_text }}</p>
+                            {% endif %}
+                        {% else %}
+                            <!-- Regular Field -->
+                            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ field.label }}
+                                {% if field.field.required %}
+                                <span class="text-red-500">*</span>
+                                {% endif %}
+                            </label>
+                            {{ field|add_class:"block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" }}
+                            {% if field.help_text %}
+                            <p class="mt-1 text-sm text-gray-500">{{ field.help_text }}</p>
+                            {% endif %}
+                        {% endif %}
+
+                        <!-- Field Errors -->
+                        {% if field.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ field.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Form Actions -->
+                <div class="mt-8 pt-6 border-t border-gray-200 flex justify-between items-center">
+                    <a href="{{ list_view_url }}" class="btn-secondary-admin">
+                        Cancel
+                    </a>
+
+                    <button type="submit" class="btn-primary-admin">
+                        <svg class="w-4 h-4 mr-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        {% if object %}Update {{ object_verbose_name|capfirst }}{% else %}Create {{ object_verbose_name|capfirst }}{% endif %}
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- Helper Text -->
+        <div class="mt-4 text-sm text-gray-500 text-center">
+            <span class="text-red-500">*</span> Required fields
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_body %}
+<!-- Form media JS (jQuery loaded globally in base template) -->
+{{ form.media.js }}
+{% endblock %}

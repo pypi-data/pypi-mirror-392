@@ -1,0 +1,57 @@
+{% extends "sundae/base.html" %}
+{% load sundae_tags %}
+
+{% block title %}{{ object_verbose_name_plural|capfirst }}{% endblock %}
+
+{% block topnav %}
+{% endblock %}
+
+{% block content %}
+<div class="container-admin">
+    <!-- Page Header -->
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">{{ object_verbose_name_plural|capfirst }}</h1>
+            {% if page_obj %}
+            <p class="mt-1 text-sm text-gray-600">
+                Showing {{ page_obj.start_index }} - {{ page_obj.end_index }} of {{ paginator.count }} {{ object_verbose_name_plural }}
+            </p>
+            {% endif %}
+        </div>
+        {% if create_view_url %}
+        <a href="{{ create_view_url }}" class="btn-primary-admin">
+            <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Create {{ object_verbose_name|capfirst }}
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Include filter panel if search or filters are configured -->
+    {% if view.search_fields or filterset %}
+        {% include "sundae/partial/filters.html" %}
+    {% endif %}
+
+    <!-- Show active filter badges -->
+    {% include "sundae/partial/active_filters.html" %}
+
+    <!-- Object list or empty state -->
+    {% if object_list %}
+        {% object_list %}
+    {% else %}
+        <div class="card-table">
+            <div class="empty-state">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                </svg>
+                <p>There are no {{ object_verbose_name_plural }}.</p>
+                <a href="{{ create_view_url }}" class="text-blue-600 hover:text-blue-900 font-medium">Create one</a>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Pagination -->
+    {% include 'sundae/partial/pagination.html' %}
+</div>
+{% endblock %}

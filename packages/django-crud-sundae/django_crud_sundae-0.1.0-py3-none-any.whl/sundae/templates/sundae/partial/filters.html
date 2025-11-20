@@ -1,0 +1,98 @@
+{% load widget_tweaks %}
+{# Filter panel for CRUDSundaeView with search and django-filter integration #}
+{# This template can be overridden by creating {app_label}/{model_name}_filters.html #}
+
+{% if search_term or filterset or active_filters %}
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+    <div class="px-5 py-4">
+        <!-- Filter Header -->
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-sm font-semibold text-gray-900">Search & Filter</h2>
+            {% if active_filters or search_term %}
+            <a href="{{ request.path }}" class="text-sm text-blue-600 hover:text-blue-900">
+                Clear all
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- Filter Form -->
+        <form
+            method="get"
+            action="{{ request.path }}"
+            {% if request.htmx %}
+            hx-get="{{ request.path }}"
+            hx-trigger="change, submit"
+            hx-target="body"
+            hx-swap="outerHTML"
+            hx-push-url="true"
+            hx-indicator="#filter-loading"
+            {% endif %}
+            class="space-y-4"
+        >
+            <!-- Search Bar (if search_fields configured) -->
+            {% if view.search_fields %}
+            <div>
+                <label for="q" class="block text-sm font-medium text-gray-700 mb-1">
+                    Search
+                </label>
+                <div class="relative">
+                    <input
+                        type="search"
+                        id="q"
+                        name="q"
+                        value="{{ search_term|default:'' }}"
+                        placeholder="Search {{ object_verbose_name_plural }}..."
+                        class="block w-full rounded-md border-2 border-gray-200/70 shadow-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-sm"
+                    />
+                    <!-- Loading indicator -->
+                    <div id="filter-loading" class="htmx-indicator absolute right-2 top-2">
+                        <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- FilterSet Fields (if filterset configured) -->
+            {% if filterset %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for field in filterset.form %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ field.label }}
+                    </label>
+                    {% render_field field class="block w-full rounded-md border-2 border-gray-200/70 shadow-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:ring-opacity-50 text-sm" %}
+                    {% if field.help_text %}
+                    <p class="mt-1 text-xs text-gray-500">{{ field.help_text }}</p>
+                    {% endif %}
+                    {% if field.errors %}
+                    <div class="mt-1 text-xs text-red-600">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-2 pt-2">
+                <button
+                    type="submit"
+                    class="btn-primary-admin"
+                >
+                    Apply Filters
+                </button>
+                {% if active_filters or search_term %}
+                <a
+                    href="{{ request.path }}"
+                    class="btn-secondary-admin bg-gray-100 hover:bg-gray-200"
+                >
+                    Clear
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}

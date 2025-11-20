@@ -1,0 +1,48 @@
+{# Active filter badges for CRUDSundaeView #}
+{# Displays currently active filters as removable badges #}
+
+{% if active_filters or search_term %}
+<div class="mb-4 flex flex-wrap items-center gap-2">
+    <span class="text-admin-sm font-medium text-gray-700">Active filters:</span>
+
+    <!-- Search term badge -->
+    {% if search_term %}
+    <span class="badge-filter-active">
+        <span>Search: "{{ search_term }}"</span>
+        <a
+            href="?{% for key, value in request.GET.items %}{% if key != 'q' and key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}"
+            class="ml-1 inline-flex items-center hover:text-blue-900"
+            aria-label="Remove search filter"
+        >
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </a>
+    </span>
+    {% endif %}
+
+    <!-- Filter badges -->
+    {% for filter in active_filters %}
+    <span class="badge-filter">
+        <span>{{ filter.label }}: {{ filter.display_value }}</span>
+        <a
+            href="?{% for key, value in request.GET.items %}{% if key != filter.name and key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}"
+            class="ml-1 inline-flex items-center hover:text-gray-900"
+            aria-label="Remove {{ filter.label }} filter"
+        >
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </a>
+    </span>
+    {% endfor %}
+
+    <!-- Clear all link -->
+    <a
+        href="{{ request.path }}"
+        class="text-admin-sm text-blue-600 hover:text-blue-900 ml-2"
+    >
+        Clear all
+    </a>
+</div>
+{% endif %}

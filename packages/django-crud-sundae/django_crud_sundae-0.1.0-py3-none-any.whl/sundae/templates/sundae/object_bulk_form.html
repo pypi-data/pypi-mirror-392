@@ -1,0 +1,30 @@
+{% extends "sundae/base.html" %}
+
+{% block content %}
+
+<h1>Bulk Edit</h1>
+<script>
+  function cancel_bulk() {
+    document.getElementById("id_action").value = "cancel";
+    document.getElementById("bulk_confirm_form").submit();
+  }
+
+  function submit_bulk() {
+    document.getElementById("id_confirm").value = true;
+    document.getElementById("bulk_confirm_form").submit();
+  }
+</script>
+<div>
+  <form method="POST" {% if form.is_multipart %}enctype="multipart/form-data" {% endif %}
+    action="" class="dl-form" id="bulk_confirm_form" name="bulk_confirm_form">
+    {% csrf_token %}
+    {% for field in form %}
+        {{ field }}
+    {% endfor %}
+    <button onclick="submit_bulk()" type="submit"
+      class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Save</button>
+    <button onclick="cancel_bulk()" type="submit"
+      class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Cancel</button>
+  </form>
+</div>
+{% endblock %}
