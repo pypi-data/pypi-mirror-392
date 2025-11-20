@@ -1,0 +1,445 @@
+# SwiftCrawl
+
+A powerful, flexible web scraping abstraction layer that seamlessly handles both lightweight HTTP requests and full browser automation with anti-detection capabilities.
+
+## Highlights
+
+- **Dual-mode sessions** – `SwiftCrawl` seamlessly switches between BrowserForge-powered HTTP requests and Camoufox browser automation.
+- **Async-first architecture** – every client, crawler component, and CLI workflow is `asyncio` friendly for massive concurrency.
+- **Crawler engine** – Scrapy-inspired scheduler, downloader, and CLI (`swiftcrawl crawl`) with retries, priorities, and Playwright warmup support.
+- **Items & Fields** – define strongly-typed `Item` objects with `.Field(serializer=...)` hooks for clean output serialization.
+- **Project bootstrapper** – `swiftcrawl init <project>` scaffolds spiders, settings, and sample items in seconds.
+- **Unified response parsing** – `Response.json()/soup()/tree()` keep parsing ergonomic across HTTP and browser modes.
+
+## Installation
+
+```bash
+# Initialize with UV (recommended)
+uv init --name myproject
+cd myproject
+
+# Add SwiftCrawl
+uv add swiftcrawl
+
+# Install Camoufox browser
+camoufox fetch
+```
+
+## Quick Start
+
+### HTTP Mode (Fast & Stealthy)
+
+```python
+import asyncio
+from swiftcrawl import SwiftCrawl
+
+async def main():
+    async with SwiftCrawl(method='http') as session:
+        response = await session.get('https://api.example.com/data')
+        data = response.json()
+        print(data)
+
+asyncio.run(main())
+```
+
+### Browser Mode (Full JS Support)
+
+```python
+import asyncio
+from swiftcrawl import SwiftCrawl
+
+async def main():
+    async with SwiftCrawl(method='browser', headless=True) as session:
+        response = await session.get('https://spa-website.com')
+
+        # Parse with BeautifulSoup
+        soup = response.soup()
+        title = soup.find('title').string
+
+        # Or use XPath
+        tree = response.tree()
+        links = tree.xpath('//a/@href')
+
+        print(f"Title: {title}")
+        print(f"Links: {links}")
+
+asyncio.run(main())
+```
+
+## Usage Examples
+
+### HTTP GET with Custom Headers
+
+```python
+async with SwiftCrawl(method='http') as session:
+    response = await session.get(
+        'https://api.example.com',
+        headers={'Authorization': 'Bearer token123'}
+    )
+    print(response.json())
+```
+
+### HTTP POST
+
+```python
+async with SwiftCrawl(method='http') as session:
+    response = await session.post(
+        'https://api.example.com/submit',
+        json={'key': 'value'}
+    )
+    print(response.status_code)
+```
+
+### Browser GET with Initial URL (Cookie Gathering)
+
+```python
+# Visit initial_url first to gather session cookies
+async with SwiftCrawl(
+    method='browser',
+    initial_url='https://example.com/login',
+    headless=True
+) as session:
+    # Subsequent requests will have cookies from initial_url
+    response = await session.get('https://example.com/protected')
+    print(response.text)
+```
+
+### Browser POST via fetch()
+
+```python
+# Uses page.evaluate() with fetch() for fast POST requests
+async with SwiftCrawl(method='browser', headless=True) as session:
+    response = await session.post(
+        'https://api.example.com/endpoint',
+        data={'username': 'test', 'password': 'secret'}
+    )
+    print(response.json())
+```
+
+### With Proxy
+
+```python
+# HTTP mode
+async with SwiftCrawl(
+    method='http',
+    proxy='http://proxy.example.com:8080'
+) as session:
+    response = await session.get('https://example.com')
+
+# Browser mode
+async with SwiftCrawl(
+    method='browser',
+    proxy={'server': 'http://proxy.example.com:8080',
+           'username': 'user',
+           'password': 'pass'},
+    geoip=True  # Auto-detect location from proxy
+) as session:
+    response = await session.get('https://example.com')
+```
+
+### Browser Warmup Function
+
+The `warmup` parameter allows you to run a function after the browser initializes but before your main requests. This is perfect for login flows, gathering tokens, or setting up sessions.
+
+```python
+async def my_warmup(page):
+    """
+    Warmup function receives the Playwright page object.
+    Use it to login, set cookies, gather tokens, etc.
+    """
+    await page.goto('https://example.com/login')
+
+    # Set authentication cookies
+    await page.evaluate('''() => {
+        document.cookie = "auth_token=xyz123; path=/";
+        document.cookie = "session_id=abc789; path=/";
+    }''')
+
+    print("Logged in and ready!")
+
+# Use warmup with browser mode
+async with SwiftCrawl(
+    method='browser',
+    warmup=my_warmup  # Executes before main requests
+) as session:
+    # Warmup already executed - we have auth cookies now
+    response = await session.get('https://example.com/protected')
+    print(response.text)
+```
+
+**Key Benefits:**
+- Automatic login before scraping
+- Gather CSRF tokens or API keys
+- Set cookies and session data
+- Execute complex multi-step setup
+- Access full Playwright page object
+
+## Scrapy-like Crawler & CLI
+
+SwiftCrawl now ships with a Scrapy-inspired crawler stack and command-line interface.
+
+### Defining a Spider
+
+```python
+from urllib.parse import urljoin
+
+from swiftcrawl import Request, Spider
+
+
+class QuotesSpider(Spider):
+    name = "quotes"
+    start_urls = ["https://quotes.toscrape.com"]
+    method = "http"  # default, but you can override per domain/URL
+
+    async def parse(self, response):
+        soup = response.soup()
+        for quote in soup.select(".quote"):
+            yield {
+                "text": quote.select_one(".text").text,
+                "author": quote.select_one(".author").text,
+            }
+
+        next_link = soup.select_one(".next a")
+        if next_link:
+            yield Request(
+                url=urljoin(response.url, next_link["href"]),
+                callback=self.parse,
+            )
+```
+
+### Running from Python
+
+```python
+import asyncio
+from swiftcrawl import run_spider
+
+
+items = run_spider(QuotesSpider)
+print(items)
+```
+
+### Running from the CLI
+
+Create `spiders/quotes_spider.py` containing your spider, then run:
+
+```bash
+# Print stats only
+swiftcrawl crawl quotes
+
+# Persist results
+swiftcrawl crawl quotes -o output.jsonl
+
+# Enable verbose logging / stack traces
+swiftcrawl crawl quotes -o output.jsonl -v
+```
+
+The CLI automatically loads `settings.py` (if present), discovers spiders from the `spiders/` package, prints crawl statistics, and—when `-o/--output` is provided—writes scraped items to the specified `.json` or `.jsonl` file. `.json` outputs are standard JSON arrays (each item on a single line for easy diffs), while `.jsonl` outputs remain newline-delimited for streaming. Use `-v/--verbose` to see detailed request processing, item writes, and full error traces.
+
+### Bootstrapping a Project
+
+Need a fresh workspace? Use the built-in initializer:
+
+```bash
+swiftcrawl init my_scraper
+cd my_scraper
+swiftcrawl crawl example
+```
+
+`init` creates `spiders/`, a sample spider with Items, and a starter `settings.py` so you can begin crawling immediately.
+
+### Item & Field API
+
+Scraped data can be represented as structured Items with optional serialization hooks.
+
+```python
+from swiftcrawl import Item, Field
+
+
+class QuoteItem(Item):
+    text = Field()
+    author = Field()
+    tags = Field(default_factory=list, serializer=lambda values: ",".join(values))
+
+
+class QuotesSpider(Spider):
+    ...
+
+    async def parse(self, response):
+        for quote in response.soup().select('.quote'):
+            yield QuoteItem(
+                text=quote.select_one('.text').text,
+                author=quote.select_one('.author').text,
+                tags=[t.text for t in quote.select('.tag')],
+            )
+```
+
+Items automatically convert to dictionaries (using field serializers) before the crawler writes them to disk.
+
+### Response Parsing Methods
+
+```python
+async with SwiftCrawl(method='http') as session:
+    response = await session.get('https://example.com')
+
+    # Raw text
+    html = response.text
+
+    # JSON parsing
+    data = response.json()
+
+    # BeautifulSoup
+    soup = response.soup()
+    title = soup.find('title').string
+
+    # lxml XPath
+    tree = response.tree()
+    paragraphs = tree.xpath('//p/text()')
+
+    # Metadata
+    print(response.status_code)
+    print(response.headers)
+    print(response.cookies)
+    print(response.url)
+```
+
+## Configuration Options
+
+### SwiftCrawl Constructor
+
+```python
+SwiftCrawl(
+    method='http',           # 'http', 'browser', or 'auto' (future)
+    proxy=None,              # Proxy URL or config dict
+    headless=True,           # Browser headless mode
+    block_images=True,       # Block images in browser
+    humanize=None,           # Human-like behavior (0.0-2.0)
+    initial_url=None,        # URL to visit first (browser only)
+    warmup=None,             # Async function(page) for browser setup
+    locale='en-US',          # Browser locale
+    os=['windows', 'macos'], # OS fingerprint options
+    geoip=False,             # Auto-geolocate from proxy
+    timeout=30.0,            # Request timeout (HTTP)
+    max_concurrent=10,       # Queue concurrency limit
+)
+```
+
+### HTTP Mode Options (BrowserForge + httpx)
+- Generates realistic browser headers automatically
+- Rotates fingerprints between requests
+- Supports all standard httpx parameters
+
+### Browser Mode Options (Camoufox)
+- **headless**: Run in headless mode (default: True)
+- **block_images**: Block image loading for speed (default: True)
+- **humanize**: Enable human-like cursor movement (0.0-2.0)
+- **initial_url**: Navigate here first to collect cookies/session
+- **warmup**: Async function that receives the page object for setup (login, cookies, etc.)
+- **geoip**: Auto-detect geolocation from proxy IP
+- **locale**: Browser locale (default: 'en-US')
+- **os**: List of OS to randomly choose from
+
+## Parameter Validation
+
+SwiftCrawl validates parameter compatibility and warns you about configuration mistakes:
+
+### Errors (ValueError)
+Raised when parameters are fundamentally incompatible:
+
+```python
+# ERROR: warmup requires browser mode
+session = SwiftCrawl(method='http', warmup=my_warmup)
+# ValueError: warmup parameter is only supported for 'browser' and 'auto' methods.
+```
+
+### Warnings (UserWarning)
+Issued when parameters will be ignored:
+
+```python
+# WARNING: browser params with HTTP mode
+session = SwiftCrawl(
+    method='http',
+    headless=False,  # Ignored in HTTP mode
+    humanize=1.5     # Ignored in HTTP mode
+)
+# UserWarning: Browser-only parameters ['headless', 'humanize'] are ignored in HTTP mode.
+
+# WARNING: timeout with browser mode
+session = SwiftCrawl(method='browser', timeout=10.0)
+# UserWarning: HTTP timeout parameter is ignored in browser mode.
+```
+
+This helps catch configuration mistakes early and ensures you understand which parameters are being used.
+
+## Architecture
+
+```
+SwiftCrawl
+   method='http' -> AsyncHTTPClient (httpx + BrowserForge)
+   method='browser' -> AsyncBrowserClient (Camoufox + Playwright)
+   method='auto' -> Smart detection (coming soon)
+
+Response Object
+   .text / .html -> Raw content
+   .json() -> JSON parsing
+   .soup() -> BeautifulSoup (html.parser)
+   .tree() -> lxml tree (XPath)
+   .headers, .cookies, .status_code -> Metadata
+```
+
+## Roadmap
+
+- [x] HTTP mode with BrowserForge headers
+- [x] Browser mode with Camoufox
+- [x] Browser POST via page.evaluate(fetch())
+- [x] Session/cookie management with initial_url
+- [x] Warmup function for browser initialization
+- [x] HTML-wrapped JSON parsing fix
+- [x] Parameter validation and warnings
+- [x] Unified Response object
+- [ ] Auto mode (intelligent method selection)
+- [ ] AsyncIO request queue for bulk processing
+- [ ] Rate limiting and retry logic
+- [ ] Middleware system
+- [ ] Built-in proxy rotation
+
+## Dependencies
+
+- **httpx** - Async HTTP client
+- **browserforge** - Browser fingerprint generation
+- **camoufox** - Anti-detection browser
+- **playwright** - Browser automation (via camoufox)
+- **beautifulsoup4** - HTML parsing
+- **lxml** - XPath support
+
+## Testing
+
+```bash
+# Run fast, offline-safe suite
+uv run pytest
+
+# Include network + browser integration tests (needs internet & Playwright)
+EASYSCRAPER_RUN_NETWORK_TESTS=1 uv run pytest
+```
+
+## License
+
+MIT
+
+## Third-Party Licenses
+
+SwiftCrawl depends on the following open-source libraries. We are grateful to their maintainers and contributors:
+
+| Library | License | Repository |
+|---------|---------|------------|
+| **beautifulsoup4** | MIT | [https://www.crummy.com/software/BeautifulSoup/](https://www.crummy.com/software/BeautifulSoup/) |
+| **browserforge** | Apache-2.0 | [https://github.com/daijro/browserforge](https://github.com/daijro/browserforge) |
+| **camoufox** | MPL-2.0 | [https://github.com/daijro/camoufox](https://github.com/daijro/camoufox) |
+| **httpx** | BSD-3-Clause | [https://github.com/encode/httpx](https://github.com/encode/httpx) |
+| **lxml** | BSD-3-Clause | [https://github.com/lxml/lxml](https://github.com/lxml/lxml) |
+| **playwright** | Apache-2.0 | [https://github.com/microsoft/playwright-python](https://github.com/microsoft/playwright-python) |
+
+All licenses require attribution. Please review each library's license for specific terms.
+
+## Contributing
+
+Contributions are welcome! This is an early-stage project designed for flexible web scraping with anti-detection capabilities.
