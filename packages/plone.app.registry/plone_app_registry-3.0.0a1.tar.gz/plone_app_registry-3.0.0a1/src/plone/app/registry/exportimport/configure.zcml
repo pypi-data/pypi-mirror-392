@@ -1,0 +1,29 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:gs="http://namespaces.zope.org/genericsetup"
+    i18n_domain="plone"
+    >
+
+  <include package="plone.supermodel" />
+  <include file="handlers.zcml" />
+
+  <!-- export/import steps -->
+  <gs:importStep
+      name="plone.app.registry"
+      title="Configuration Registry (Plone)"
+      description="Import into plone.app.registry records/settings, the central configuration key-value store, from registry.xml or a registry folder."
+      handler=".handler.importRegistry"
+      >
+    <depends name="componentregistry" />
+    <depends name="toolset" />
+    <depends name="typeinfo" />
+  </gs:importStep>
+
+  <gs:exportStep
+      name="plone.app.registry"
+      title="Configuration Registry (Plone)"
+      description="Export plone.app.registry, the central configuration key-value store, into a XML file."
+      handler=".handler.exportRegistry"
+      />
+
+</configure>
