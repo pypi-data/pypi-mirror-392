@@ -1,0 +1,43 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cwm-cli"
+version = "0.1.0"
+description = "Command Watch Manager - Track, save, and retrieve your shell commands."
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+
+authors = [
+  {name = "Ismail", email = "ismailisims1@gmail.com"},
+]
+
+keywords = ["cli", "terminal", "history", "productivity", "manager"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Utilities",
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "click",
+    "colorama",
+    "prompt_toolkit",
+    "rich",
+    "pyperclip"
+]
+
+[project.scripts]
+cwm = "cwm.cli:cli"
+
+[project.urls]
+"Homepage" = "https://github.com/Isu-Ismail/cwm"
+"Bug Tracker" = "https://github.com/Isu-Ismail/cwm/issues"
+
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cwm"]
