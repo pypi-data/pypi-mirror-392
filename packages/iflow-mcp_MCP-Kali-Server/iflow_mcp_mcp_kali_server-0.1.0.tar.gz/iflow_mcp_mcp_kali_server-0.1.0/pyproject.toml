@@ -1,0 +1,24 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "iflow-mcp_MCP-Kali-Server"
+version = "0.1.0"
+description = "MCP server for Kali Linux security tools integration"
+authors = [
+    {name = "IFLOW", email = "iflow@example.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "requests>=2.31.0",
+    "mcp>=1.0.0"
+]
+
+[project.scripts]
+mcp-kali-server = "mcp_server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
