@@ -1,0 +1,202 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  docker-build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Get the current date
+      id: get-date
+      run: |
+        echo "date=$(/bin/date -u "+%Y%m%d")" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: false
+        load: true
+        tags: llacie:test
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Create a cache directory for HuggingFace data
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/huggingface
+        key: huggingface-${{ steps.get-date.outputs.date }}
+
+    - name: Setup permissions for the HuggingFace cache directory
+      run: |
+        mkdir -p ~/.cache/huggingface
+        chmod -R 777 ~/.cache/huggingface
+
+    - name: Start services with docker compose
+      run: |
+        docker compose up -d
+        # Wait for services to be ready
+        sleep 10
+        docker compose ps
+
+    - name: Run fast tests in container
+      run: |
+        docker compose exec -T llacie bash -c "
+          echo '=== Installing test dependencies ==='
+          pip install -e '.[test]'
+
+          echo '=== Running fast test suite ==='
+          pytest -m 'not slow' -v -p no:cacheprovider --tb=short
+        "
+
+    - name: Clean up
+      if: always()
+      run: docker compose down -v
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install ruff
+
+    - name: Lint with ruff
+      run: |
+        # Check for syntax errors and undefined names
+        ruff check llacie/ --select=E9,F63,F7,F82 --statistics
+        # Check for common issues (non-blocking)
+        ruff check llacie/ --exit-zero --statistics
+
+  python-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12', '3.13', '3.14']
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: llacie
+          POSTGRES_PASSWORD: llacie_password
+          POSTGRES_DB: llacie
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[test]"
+
+    - name: Set up database
+      env:
+        PG_HOST: localhost
+        PGPASSWORD: llacie_password
+      run: |
+        # Wait for PostgreSQL to be ready
+        until pg_isready -h localhost -p 5432 -U llacie; do
+          echo "Waiting for PostgreSQL..."
+          sleep 2
+        done
+        echo "PostgreSQL is ready"
+
+    - name: Run fast tests
+      env:
+        PG_HOST: localhost
+      run: |
+        pytest -m "not slow" -v --tb=short --junit-xml=test-results-${{ matrix.python-version }}.xml
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-${{ matrix.python-version }}
+        path: test-results-${{ matrix.python-version }}.xml
+
+  # Optional: Full test suite (including slow LLM tests) - only on main branch
+  full-tests:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Get the current date
+      id: get-date
+      run: |
+        echo "date=$(/bin/date -u "+%Y%m%d")" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Create a cache directory for HuggingFace data
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/huggingface
+        key: huggingface-${{ steps.get-date.outputs.date }}
+
+    - name: Setup permissions for the HuggingFace cache directory
+      run: |
+        mkdir -p ~/.cache/huggingface
+        chmod -R 777 ~/.cache/huggingface
+
+    - name: Start services with docker compose
+      run: |
+        docker compose up -d
+        sleep 10
+
+    - name: Run full test suite
+      timeout-minutes: 30
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      run: |
+        docker compose exec -T -e HF_TOKEN llacie bash -c "
+          pip install -e '.[test]'
+          pytest -v -p no:cacheprovider --tb=short --timeout=600
+        "
+
+    - name: Clean up
+      if: always()
+      run: docker compose down -v
