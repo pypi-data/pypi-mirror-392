@@ -1,0 +1,133 @@
+loopflow: arrange llms to code in harmony
+
+## Installation
+
+```bash
+pip install loopflow
+```
+
+Or install from source:
+
+```bash
+git clone https://github.com/loopflowstudio/loopflow.git
+cd loopflow
+uv venv
+uv pip install -e .
+```
+
+## lfcp
+
+lfcp gathers files into context for LLM queries, building on e.g. `files-to-prompt`.
+
+### Features
+
+- **Smart Context Gathering**: Automatically includes parent README files up to git root
+- **Gitignore Integration**: Respects `.gitignore` and `.cpignore` patterns
+- **Extension Filtering**: Focus on specific file types with `-e` flags
+- **Token Profiling**: Analyze token usage with detailed breakdowns and interactive flamegraphs
+
+## Usage
+
+### Basic Usage
+
+Copy the current directory to clipboard:
+
+```bash
+lfcp .
+```
+
+### Common Workflows
+
+Copy specific directories:
+```bash
+lfcp src/ tests/
+```
+
+Copy only Python files:
+```bash
+lfcp . -e py
+```
+
+Copy multiple file types:
+```bash
+lfcp . -e py -e js -e tsx
+```
+
+Output to stdout instead of clipboard:
+```bash
+lfcp . -s
+```
+
+Copy only README files (great for project overview):
+```bash
+lfcp . -r
+```
+
+Ignore specific directories:
+```bash
+lfcp . -i build -i dist
+```
+
+### Token Profiling
+
+Analyze token usage across your codebase:
+
+```bash
+lfcp . --profile
+```
+
+Generate an interactive flamegraph visualization:
+
+```bash
+lfcp . --flamegraph
+```
+
+The flamegraph will be saved as `token_flamegraph.html` and can be opened in any browser.
+
+### Advanced Options
+
+```
+Options:
+  -e, --extensions TEXT        Filter by file extension (e.g., -e py -e js)
+  -r, --readmes               Only include README files
+  -s, --stdout                Output to stdout instead of clipboard
+  -i, --ignore TEXT           Additional ignore patterns (can be used multiple times)
+  --profile                   Show detailed token usage statistics
+  --flamegraph               Generate interactive HTML flamegraph visualization
+  --help                      Show help message
+```
+
+## How It Works
+
+1. **Discovery**: Walks through specified directories, respecting gitignore rules
+2. **Context Addition**: Automatically includes parent README files for better context
+3. **Filtering**: Applies extension filters and ignore patterns
+4. **Formatting**: Structures files in XML format with clear source attribution
+5. **Output**: Copies to clipboard or outputs to stdout based on your preference
+
+## File Format
+
+```xml
+<documents>
+<document index="1">
+<source>path/to/file.py</source>
+<document_content>
+# Your file content here
+</document_content>
+</document>
+</documents>
+```
+
+## Gitignore Support
+
+lf respects both `.gitignore` and `.cpignore` files. You can create a `.cpignore` in your project root to specify additional patterns to ignore when gathering code context:
+
+```
+# Example .cpignore
+*.pyc
+__pycache__/
+node_modules/
+*.egg-info
+build/
+dist/
+```
