@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iss-mcp-yapi"
+version = "0.1.1"
+description = "MCP server integration for YApi."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+
+authors = [
+  { name = "Your Name", email = "you@example.com" },
+]
+
+# 这里填你真实用到的第三方依赖；只做示例
+dependencies = [
+    "mcp==1.13.1",
+    "requests==2.32.5"
+]
+
+# 安装后生成一个命令：yapi-mcp
+[project.scripts]
+iss-yapi = "yapi_mcp.__main__:main"
+
+# 告诉 setuptools：代码在 src 目录下，自动查找包
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
