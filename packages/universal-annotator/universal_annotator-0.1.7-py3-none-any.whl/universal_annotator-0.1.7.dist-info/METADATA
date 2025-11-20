@@ -1,0 +1,222 @@
+Metadata-Version: 2.3
+Name: universal-annotator
+Version: 0.1.7
+Summary: Universal Annotation Tool for images
+Author: Madan Mohan
+Author-email: Madan Mohan <madanmmj3@gmail.com>
+License:                                   LICENSE
+                                      Version  18 Nov 2025
+         
+         THIS SOFTWARE LICENSE IS PROVIDED "ALL CAPS" SO THAT YOU KNOW IT IS SUPER
+         SERIOUS AND YOU DON'T MESS AROUND WITH COPYRIGHT LAW BECAUSE YOU WILL GET IN
+         TROUBLE HERE ARE SOME OTHER BUZZWORDS COMMONLY IN THESE THINGS WARRANTIES
+         LIABILITY CONTRACT TORT LIABLE CLAIMS RESTRICTION MERCHANTABILITY. NOW HERE'S
+         THE REAL LICENSE:
+         
+         0. It's a public domain.
+         1. Do whatever you want with it.
+Requires-Dist: pyqt5>=5.15
+Requires-Dist: pyqt5-sip>=12.11
+Requires-Dist: pillow>=9.0
+Requires-Dist: opencv-python>=4.5
+Requires-Dist: numpy>=1.20
+Requires-Dist: tqdm>=4.60
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: jsonschema>=4.0
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+
+# 📦 Universal Annotator
+
+**A modern, high-performance image annotation tool for computer vision datasets.**
+
+[![PyPI Version](https://img.shields.io/pypi/v/universal-annotator?style=for-the-badge&label=PyPI%20v0.1.4&color=2196F3)](https://pypi.org/project/universal-annotator/)
+[![Python Version](https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](./LICENSE)
+
+Universal Annotator is a powerful, desktop-grade, and user-friendly tool engineered for creating **high-quality bounding box annotations** with exceptional speed. It's built for computer vision practitioners who demand a fast, flexible, and reliable annotation workflow.
+
+## 🔥 Key Features
+
+### 🧰 Core Annotation & Data
+
+* **Format Flexibility:** Supports **TXT (YOLO), JSON, and COCO formats** with auto-detection.
+* **Bounding Boxes:** Create, edit, move, and resize annotations efficiently.
+* **Nested Annotations:** The ability to draw boxes **inside** existing boxes.
+* **Smart Data Handling:**
+    * Intelligent natural sorting (e.g., `image_2.jpg` before `image_10.jpg`).
+    * Smart JSON class discovery.
+    * Automatic label file creation prompt for new datasets.
+* **Reliable Workflow:** **Auto-save** when navigating, **selection memory** (restores selection per image).
+* **Image Support:** Supports common formats: **JPG, PNG, BMP, TIFF, WebP**.
+
+### 🎨 User Experience (UI/UX)
+
+* **Professional Dark Theme:** Advanced, high-contrast dark UI for reduced eye strain.
+* **Optimized Navigation:** Mouse-wheel image zoom, full menu bar, and rich status bar.
+* **Speed-Focused Shortcuts:** Descriptive tooltips and a comprehensive help dialog (**F1**) with optimized keyboard shortcuts.
+* **Modes:** Dedicated **Edit Mode** (`E`) and **View Mode** (`V`) for focused work.
+
+---
+
+## 🚀 Installation
+
+Universal Annotator is available directly on PyPI.
+
+### Install from PyPI
+
+```bash
+pip install universal-annotator
+````
+
+### Run the Application
+
+```bash
+universal-annotator
+```
+
+### Optional: Use a Virtual Environment
+
+It is highly recommended to use a virtual environment to manage dependencies:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate       # On Linux/macOS
+# venv\Scripts\activate        # On Windows
+pip install universal-annotator
+universal-annotator
+```
+
+-----
+
+## 🧭 Basic Usage Guide
+
+### 1\. Load Dataset
+
+  * Select your **Image Folder** and your **Label Folder**.
+  * The annotation format is **auto-detected**.
+  * If the label folder is empty, the app will offer to create label files in your chosen format (**TXT, JSON, or COCO**).
+
+### 2\. Draw Bounding Boxes
+
+  * Press **`E`** to switch to **Edit Mode**.
+  * Press **`M`** to switch to **Draw Mode**.
+  * **Click & drag** to draw a new box.
+  * Select a class from the popup dialog.
+  * Navigate between images with **`A` (Previous)** / **`D` (Next)** keys or the navigation buttons.
+
+### 3\. Edit Annotations
+
+  * Select an existing box to **move or resize** it.
+  * Drag the box handles to resize.
+  * Press **`Delete`** to remove the selected box.
+  * Draw **nested boxes** inside existing annotations.
+
+### 4\. Save
+
+  * Press **`S`** to save manually.
+  * Alternatively, enable **Auto Save** in the UI settings.
+  * The status bar will confirm all save actions.
+
+-----
+
+## 📁 Supported Annotation Formats
+
+| Format | Structure | Notes |
+| :--- | :--- | :--- |
+| **TXT** | `<class_id> <x_center> <y_center> <width> <height>` | Standard YOLO format. |
+| **JSON** | `{"annotations": [{"bbox": [x, y, w, h], "category_id": 0}]}` | Custom simple JSON structure. |
+| **COCO** | Fully supported | Reads and writes `_annotations.coco.json`. |
+
+## 🗂 Exporters & Converters
+
+The tool includes powerful conversion utilities. All conversion tools are non-destructive and **avoid overwriting your root labels**.
+
+Outputs are placed into dedicated folders, such as `converted_txt/`, `converted_json/`, etc.
+
+**Supported Conversions:**
+
+  * `TXT` → `JSON`
+  * `JSON` → `TXT`
+  * `TXT` → `COCO JSON`
+  * `COCO` → `JSON`
+  * `COCO` → `TXT`
+  * `JSON Folder` → `COCO merge`
+
+-----
+
+## 🎮 Keyboard Shortcuts
+
+| Key | Action |
+| :--- | :--- |
+| **`A`** | Previous Image |
+| **`D`** | Next Image |
+| **`S`** | Save |
+| **`E`** | Edit Mode |
+| **`V`** | View Mode |
+| **`M`** | Draw Bounding Box |
+| **`X`** | Exit Draw Mode |
+| **`Delete`** | Remove selected box |
+| **`F1`** | Help dialog / View shortcuts |
+
+-----
+
+## ⚙ Configuration
+
+You can easily customize the tool's behavior and class definitions:
+
+  * **Classes:** Edit `sample_classes/classes.txt` to define your class names:
+    ```
+    person
+    car
+    bicycle
+    dog
+    cat
+    ```
+  * **App Settings:** Edit `utils/config.py` to change default settings like colors, line widths, app name, and version.
+
+-----
+
+## 🛠 Troubleshooting
+
+| Issue | Solution |
+| :--- | :--- |
+| **Images not loading** | Ensure file formats are supported (JPG, PNG, etc.) and check folder permissions. |
+| **Labels not found** | Verify that label filenames match image filenames and the correct label folder is selected. |
+| **Shortcuts not working** | Make sure the application window is focused. |
+
+## 🚧 Known Limitations & Future Enhancements
+
+### Known Limitations (v0.1.4)
+
+  * No in-place label editing (must delete and recreate a box to change its class).
+  * Only rectangular bounding boxes are supported.
+
+### 🛠️ Future Enhancements
+
+  * Polygon and segmentation support (High Priority)
+  * Change class label of existing box
+  * Customizable keyboard shortcuts
+  * Analytics dashboard
+  * Undo/Redo functionality
+  * Plugin system
+
+-----
+
+## 🤝 Contributing
+
+Pull requests are welcome\! If you have a feature idea or a bug fix, please check out the contribution guide:
+
+📄 See the `CONTRIBUTING_UI.md` file for details.
+
+## 📄 License
+
+This project is licensed under the [LICENSE] - see the [LICENSE.md](LICENSE.md) file for details.
+
+
+## 👨‍💻 Author & Version
+
+  * **Author:** Madan Mohan Jha
+  * **Current Version:** v0.1.7
+  * **Updated:** November 2025
+
