@@ -1,0 +1,34 @@
+name: Cyclic Imports
+on:
+  workflow_call:
+  workflow_dispatch:  # to trigger manually
+
+permissions:
+  contents: read
+
+jobs:
+  cyclic-import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup python environment
+        uses: ./.github/actions/setup-env
+
+      - name: check minrecord
+        run: |
+          python -c "import minrecord"
+
+      - name: check records
+        run: |
+          python -c "from minrecord import BaseRecord"
+          python -c "from minrecord import ComparableRecord"
+          python -c "from minrecord import MaxScalarRecord"
+          python -c "from minrecord import MinScalarRecord"
+          python -c "from minrecord import Record"
+
+      - name: check minrecord.utils
+        run: |
+          python -c "from minrecord import utils"

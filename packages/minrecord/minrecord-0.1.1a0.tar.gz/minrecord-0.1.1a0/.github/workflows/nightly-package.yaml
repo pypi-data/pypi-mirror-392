@@ -1,0 +1,66 @@
+name: Nightly Package Tests
+on:
+  schedule:
+    - cron: '40 8 * * *' # run at 8:40 AM UTC
+  workflow_dispatch:  # to trigger manually
+
+permissions:
+  contents: read
+
+jobs:
+  get-versions:
+    uses: ./.github/workflows/get-versions.yaml
+
+  stable:
+    uses: ./.github/workflows/test-package.yaml
+    with:
+      install-cmd: 'uv pip install minrecord'
+
+  stable-all:
+    uses: ./.github/workflows/test-package.yaml
+    with:
+      install-cmd: 'uv pip install "minrecord[all]"'
+
+  stable-objectory:
+    uses: ./.github/workflows/test-package.yaml
+    with:
+      install-cmd: 'uv pip install "minrecord[objectory]"'
+
+  latest:
+    uses: ./.github/workflows/test-package.yaml
+    with:
+      install-cmd: 'uv pip install --pre minrecord'
+
+  latest-all:
+    uses: ./.github/workflows/test-package.yaml
+    with:
+      install-cmd: 'uv pip install --pre "minrecord[all]"'
+
+  latest-objectory:
+    uses: ./.github/workflows/test-package.yaml
+    with:
+      install-cmd: 'uv pip install --pre "minrecord[objectory]"'
+
+
+  ########################
+  #     Dependencies     #
+  ########################
+
+  coola:
+    needs: get-versions
+    uses: ./.github/workflows/test-package-dep.yaml
+    with:
+      package-name: coola
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).coola) }}
+
+
+  #################################
+  #     Optional dependencies     #
+  #################################
+
+  objectory:
+    needs: get-versions
+    uses: ./.github/workflows/test-package-dep.yaml
+    with:
+      package-name: objectory
+      package-versions: ${{ toJson(fromJson(needs.get-versions.outputs.package_versions).objectory) }}
