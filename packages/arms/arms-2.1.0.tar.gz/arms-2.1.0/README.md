@@ -1,0 +1,274 @@
+# ARMS - Archive and Replacement Management System
+
+ARMS is a command-line utility for creating and extracting markdown-based file archives with intelligent text replacement capabilities. It enables efficient file packaging, distribution, and template-based project initialization through a human-readable markdown format.
+
+## Installation
+
+```bash
+pip install arms
+```
+
+## Quick Start
+
+Create a markdown archive from a ZIP file:
+
+```bash
+arms -c -i source.zip -f archive.md
+```
+
+Extract files from a markdown archive:
+
+```bash
+arms -x -f archive.md -o ./output
+```
+
+## Usage
+
+ARMS operates in two modes: create and extract.
+
+### Create Mode
+
+Generate a markdown archive from a ZIP file with optional text replacement.
+
+**Basic creation:**
+```bash
+arms --create --input source.zip --file archive.md
+```
+
+**With text replacement:**
+```bash
+arms -c -i template.zip -f output.md NewProject:OldProject mycompany:democorp
+```
+
+**Lock files from replacement:**
+```bash
+arms -c -i source.zip -f archive.md --locked "*.json,*.yml" NewName:OldName
+```
+
+**Output to stdout:**
+```bash
+arms -c -i source.zip > archive.md
+```
+
+### Extract Mode
+
+Extract files from a markdown archive to a target directory.
+
+**Basic extraction:**
+```bash
+arms --extract --file archive.md --output ./destination
+```
+
+**Preserve existing files (add .patch suffix):**
+```bash
+arms -x -f archive.md -o ./dest --patch
+```
+
+**Extract from stdin:**
+```bash
+cat archive.md | arms -x -o ./destination
+```
+
+**Extract to current directory:**
+```bash
+arms -x -f archive.md
+```
+
+## Command-Line Options
+
+### Mode Selection (Required)
+
+- `-c`, `--create` - Create markdown archive from a ZIP file
+- `-x`, `--extract` - Extract files from a markdown archive
+
+### Input/Output Options
+
+- `-i INPUT_FILE`, `--input INPUT_FILE` - Input ZIP file path (required for create mode)
+- `-o OUTPUT_DIR`, `--output OUTPUT_DIR` - Output directory for extraction (defaults to current directory)
+- `-f FILE_NAME`, `--file FILE_NAME` - Markdown archive file path (uses stdin/stdout if omitted)
+
+### Processing Options
+
+- `-l LOCKED`, `--locked LOCKED` - Comma-separated file patterns to exclude from text replacement
+- `-p`, `--patch` - Add .patch suffix to duplicate files during extraction (default: overwrite existing files)
+
+### Replacement Rules
+
+- `rules` - Space-separated replacement rules in format `new:old`
+
+## Features
+
+### Intelligent Text Replacement
+
+ARMS performs full-style text replacement, automatically handling multiple naming conventions:
+
+- **camelCase** - `myVariableName`
+- **PascalCase** - `MyClassName`
+- **snake_case** - `my_variable_name`
+- **kebab-case** - `my-variable-name`
+- **SCREAMING_SNAKE_CASE** - `MY_CONSTANT_NAME`
+
+Example:
+```bash
+arms -c -i template.zip MyProject:DemoProject
+```
+
+This replaces:
+- `DemoProject` → `MyProject`
+- `demoProject` → `myProject`
+- `demo_project` → `my_project`
+- `demo-project` → `my-project`
+- `DEMO_PROJECT` → `MY_PROJECT`
+
+### File Pattern Locking
+
+Prevent specific files from undergoing text replacement using glob patterns:
+
+```bash
+arms -c -i source.zip --locked "package.json,*.lock,config/*" NewName:OldName
+```
+
+Patterns match against both full paths and basenames.
+
+### Binary File Support
+
+ARMS automatically detects and handles binary files:
+- Text files are preserved as-is in the markdown archive
+- Binary files are Base64-encoded with a `base64` language tag
+- Detection uses UTF-8 decoding with NUL byte checking
+
+### Conflict Resolution
+
+During extraction, ARMS handles existing files based on the `--patch` flag:
+
+- **Default behavior** (`--patch` not set): Overwrite existing files directly
+- **With `--patch`**: Append `.patch` suffix to avoid overwriting
+
+Example:
+```bash
+# Overwrites file.txt if it exists
+arms -x -f archive.md -o ./output
+
+# Creates file.txt.patch if file.txt exists
+arms -x -f archive.md -o ./output --patch
+```
+
+## Use Cases
+
+### Project Template Distribution
+
+Create reusable project templates with customizable names and identifiers:
+
+```bash
+# Package template
+arms -c -i spring-boot-template.zip -f template.md \
+  YourProject:DemoApp yourcompany:example
+
+# Initialize new project
+arms -x -f template.md -o ./my-new-project
+```
+
+### LLM Context Generation
+
+Package codebases into markdown format for use as LLM context:
+
+```bash
+# Create archive
+arms -c -i codebase.zip -f context.md
+
+# Use with LLM
+cat context.md  # Copy to LLM prompt
+```
+
+### Configuration Management
+
+Distribute configuration files with environment-specific replacements:
+
+```bash
+# Prepare production configs
+arms -c -i configs.zip -f prod-config.md \
+  prod-db.example.com:dev-db.localhost \
+  production:development
+
+# Deploy configurations
+arms -x -f prod-config.md -o /etc/myapp
+```
+
+### Documentation Bundling
+
+Archive documentation and code samples together:
+
+```bash
+arms -c -i docs.zip -f documentation.md
+```
+
+## Archive Format
+
+ARMS uses a structured markdown format:
+
+**Text files:**
+```markdown
+**path/to/file.txt**:
+```
+File content with
+multiple lines
+```
+```
+
+**Binary files:**
+```markdown
+**path/to/image.png**:
+```base64
+iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==
+```
+```
+
+This format provides:
+- Human readability for text files
+- Safe encoding for binary files
+- Version control compatibility
+- LLM-friendly structure
+
+## Technical Details
+
+### File Type Detection
+
+Text files are identified by:
+1. Successful UTF-8 decoding
+2. Absence of NUL bytes (`\x00`)
+
+If either condition fails, the file is treated as binary and Base64-encoded.
+
+### Directory Handling
+
+- ZIP entries marked as directories are skipped
+- Parent directories are created automatically during extraction
+- Empty directories are not preserved in archives
+
+### Fence Detection
+
+ARMS uses dynamic backtick fence detection:
+- Scans file content for existing backtick sequences
+- Uses one more backtick than the maximum found
+- Minimum of 3 backticks per CommonMark specification
+
+## Requirements
+
+- Python 3.7 or higher
+- lesscli >= 0.2.0
+
+## Version
+
+2.0.0
+
+## License
+
+MIT License
+
+## Author
+
+qorzj
+
+## Repository
+
+https://pypi.python.org/pypi/arms
