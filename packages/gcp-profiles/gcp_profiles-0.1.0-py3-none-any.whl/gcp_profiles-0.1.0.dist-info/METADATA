@@ -1,0 +1,98 @@
+Metadata-Version: 2.3
+Name: gcp-profiles
+Version: 0.1.0
+Summary: A simple gcloud auth and adc manager.
+Author: Manel Caireta
+Author-email: Manel Caireta <manelkireta@gmail.com>
+License: MIT License
+         
+         Copyright (c) 2025 Manel Caireta
+         
+         Permission is hereby granted, free of charge, to any person obtaining a copy
+         of this software and associated documentation files (the "Software"), to deal
+         in the Software without restriction, including without limitation the rights
+         to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+         copies of the Software, and to permit persons to whom the Software is
+         furnished to do so, subject to the following conditions:
+         
+         The above copyright notice and this permission notice shall be included in all
+         copies or substantial portions of the Software.
+         
+         THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+         IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+         FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+         AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+         LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+         OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+         SOFTWARE.
+Requires-Dist: rich>=14.2.0
+Requires-Dist: typer>=0.20.0
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+
+# gcp-profiles
+
+A simple command-line interface (CLI) tool for managing and switching between multiple **Google Cloud Platform (GCP)** authentication profiles via a central vault. `gcp-profiles` manages google cloud's application default credentials and gcloud credentials and keeps them in sync.
+
+---
+
+## Features
+
+- **Create** new GCP authentication profiles.
+- **List** all existing profiles in the vault.
+- **Activate** a specific profile to change the active GCP configuration.
+- **Delete** profiles when they are no longer needed.
+
+---
+
+## Installation
+
+You can install `gcp-profiles` using `pip`.
+
+```bash
+pip install gcp-profiles
+```
+
+---
+
+## Prerequisites
+
+Google Cloud CLI (`gcloud`): The `gcloud` command-line tool must be installed and accessible in your system's `PATH`. This tool is essential as `gcp-profiles` relies on it for profile management and authentication.
+
+---
+
+## Usage
+
+The main command is gcp-profiles. Below are the available subcommands and their usage.
+
+### 1. Creating a Profile
+
+Registers a new authentication profile in the vault. If the profile already exists, you must use the `--force` option to overwrite it.
+
+```bash
+gcp-profiles create my-new-profile --force
+```
+
+Now a new `gcloud` configuration and new application default credentials have been stored as the `my-new-profile` profile.
+
+### 2. Listing Profiles
+
+Displays the names of all profiles currently stored in the vault.
+
+```bash
+gcp-profiles list
+```
+
+### 3. Activating a Profile
+Sets the specified profile as the active GCP configuration, making it the one used by subsequent `gcloud` commands and application authentication.
+
+```bash
+gcp-profiles activate my-new-profile
+```
+
+### 4. Deleting a Profile
+Permanently removes a profile from the vault.
+
+```Bash
+gcp-profiles delete my-new-profile
+```
